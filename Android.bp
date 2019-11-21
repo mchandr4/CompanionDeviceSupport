@@ -65,6 +65,7 @@ android_app {
         "androidx.legacy_legacy-support-v4",
         "car-messenger-common-bp",
         "com.google.android.material_material",
+        "companion-feature-calendarsync-protos",
         "connected-device-lib",
     ],
 
