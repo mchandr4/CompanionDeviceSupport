@@ -211,7 +211,7 @@ public class AssociationActivity extends FragmentActivity {
             }
             mAssociatedDeviceManager.acceptVerification();
         } catch (RemoteException e) {
-            loge(TAG, "AcceptVerification", e);
+            loge(TAG, "Error while accepting verification.", e);
         }
     }
 
@@ -223,7 +223,7 @@ public class AssociationActivity extends FragmentActivity {
             }
             mAssociatedDeviceManager.stopAssociation(mAssociationCallback);
         } catch (RemoteException e) {
-            loge(TAG, "StopAssociation", e);
+            loge(TAG, "Error while stopping association process.", e);
         }
     }
 
