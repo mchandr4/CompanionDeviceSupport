@@ -19,8 +19,12 @@ package com.android.car.companiondevicesupport.feature.notificationmsg;
 import static com.android.car.connecteddevice.util.SafeLog.logd;
 import static com.android.car.connecteddevice.util.SafeLog.logw;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.graphics.BitmapFactory;
+import android.media.AudioAttributes;
+import android.provider.Settings;
 
 import com.android.car.companiondevicesupport.api.external.CompanionDevice;
 import com.android.car.messenger.NotificationMsgProto.NotificationMsg.Action;
@@ -36,7 +40,9 @@ import com.android.car.messenger.common.MessageKey;
 import com.android.car.messenger.common.SenderKey;
 import com.android.car.messenger.common.Utils;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Posts Message notifications sent from the {@link CompanionDevice}, and relays user interaction
@@ -50,9 +56,14 @@ public class NotificationMsgDelegate extends BaseNotificationDelegate {
     private static final String NEW_MESSAGE_MESSAGE_TYPE = "NEW_MESSAGE";
     private static final String ACTION_STATUS_UPDATE_MESSAGE_TYPE = "ACTION_STATUS_UPDATE";
     private static final String OTHER_MESSAGE_TYPE = "OTHER";
-
     /** Key for the Reply string in a {@link Action#getActionDataMap()}. **/
     private static final String REPLY_KEY = "REPLY";
+
+    private static final AudioAttributes AUDIO_ATTRIBUTES = new AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+            .build();
+
+    private Map<String, String> mAppNameToChannelId = new HashMap<>();
 
     public NotificationMsgDelegate(Context context, String className) {
         super(context, className);
@@ -148,13 +159,17 @@ public class NotificationMsgDelegate extends BaseNotificationDelegate {
                 notification, notificationKey);
         mNotificationInfos.put(convoKey, convoInfo);
 
+        String appDisplayName = convoInfo.getAppDisplayName();
+        if (!mAppNameToChannelId.containsKey(appDisplayName)) {
+            setupImportantNotificationChannel(generateNotificationChannelId(), appDisplayName);
+        }
+
         List<MessagingStyleMessage> messages =
                 notification.getMessagingStyle().getMessagingStyleMsgList();
         for (MessagingStyleMessage messagingStyleMessage : messages) {
             createNewMessage(deviceAddress, messagingStyleMessage, convoKey);
         }
-        //TODO (b/146500180): post using app-specific channel id
-        postNotification(convoKey, convoInfo, NotificationMsgService.NOTIFICATION_MSG_CHANNEL_ID);
+        postNotification(convoKey, convoInfo, mAppNameToChannelId.get(appDisplayName));
     }
 
     private void initializeNewMessage(String deviceAddress,
@@ -171,9 +186,10 @@ public class NotificationMsgDelegate extends BaseNotificationDelegate {
         }
 
         createNewMessage(deviceAddress, messagingStyleMessage, convoKey);
-        //TODO (b/146500180): post using app-specific channel id
-        postNotification(convoKey, mNotificationInfos.get(convoKey),
-                NotificationMsgService.NOTIFICATION_MSG_CHANNEL_ID);
+        ConversationNotificationInfo convoInfo = mNotificationInfos.get(convoKey);
+
+        postNotification(convoKey, convoInfo,
+                mAppNameToChannelId.get(convoInfo.getAppDisplayName()));
     }
 
     private void createNewMessage(String deviceAddress, MessagingStyleMessage messagingStyleMessage,
@@ -186,6 +202,30 @@ public class NotificationMsgDelegate extends BaseNotificationDelegate {
             byte[] iconArray = messagingStyleMessage.getSender().getIcon().toByteArray();
             mSenderLargeIcons.put(senderKey,
                     BitmapFactory.decodeByteArray(iconArray, 0, iconArray.length));
+        }
+    }
+
+    private void setupImportantNotificationChannel(String channelId, String channelName) {
+        NotificationChannel msgChannel = new NotificationChannel(channelId,
+                channelName,
+                NotificationManager.IMPORTANCE_HIGH);
+        msgChannel.setDescription(channelName);
+        msgChannel.setSound(Settings.System.DEFAULT_NOTIFICATION_URI, AUDIO_ATTRIBUTES);
+        mNotificationManager.createNotificationChannel(msgChannel);
+        mAppNameToChannelId.put(channelName, channelId);
+    }
+
+    private String generateNotificationChannelId() {
+        return NotificationMsgService.NOTIFICATION_MSG_CHANNEL_ID + "|"
+                + NotificationChannelIdGenerator.generateChannelId();
+    }
+
+    /** Helper class that generates unique IDs per Notification Channel. **/
+    static class NotificationChannelIdGenerator {
+        private static int NEXT_NOTIFICATION_CHANNEL_ID = 0;
+
+        static int generateChannelId() {
+            return ++NEXT_NOTIFICATION_CHANNEL_ID;
         }
     }
 }
