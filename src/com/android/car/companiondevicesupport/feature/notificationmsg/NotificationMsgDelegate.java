@@ -28,6 +28,7 @@ import android.provider.Settings;
 
 import com.android.car.companiondevicesupport.api.external.CompanionDevice;
 import com.android.car.messenger.NotificationMsgProto.NotificationMsg.Action;
+import com.android.car.messenger.NotificationMsgProto.NotificationMsg.ActionDataFieldEntry;
 import com.android.car.messenger.NotificationMsgProto.NotificationMsg.CarToPhoneMessage;
 import com.android.car.messenger.NotificationMsgProto.NotificationMsg.ConversationNotification;
 import com.android.car.messenger.NotificationMsgProto.NotificationMsg.MessagingStyleMessage;
@@ -56,7 +57,7 @@ public class NotificationMsgDelegate extends BaseNotificationDelegate {
     private static final String NEW_MESSAGE_MESSAGE_TYPE = "NEW_MESSAGE";
     private static final String ACTION_STATUS_UPDATE_MESSAGE_TYPE = "ACTION_STATUS_UPDATE";
     private static final String OTHER_MESSAGE_TYPE = "OTHER";
-    /** Key for the Reply string in a {@link Action#getActionDataMap()}. **/
+    /** Key for the Reply string in a {@link ActionDataFieldEntry}. **/
     private static final String REPLY_KEY = "REPLY";
 
     private static final AudioAttributes AUDIO_ATTRIBUTES = new AudioAttributes.Builder()
@@ -100,7 +101,7 @@ public class NotificationMsgDelegate extends BaseNotificationDelegate {
 
     protected CarToPhoneMessage dismiss(ConversationKey convoKey) {
         clearNotifications(key -> key.equals(convoKey));
-        // TODO(ritwikam): add a request id to the action.
+        // TODO(b/144924164): add a request id to the action.
         Action action = Action.newBuilder()
                 .setActionName(Action.ActionName.DISMISS)
                 .setNotificationKey(convoKey.getSubKey())
@@ -117,7 +118,7 @@ public class NotificationMsgDelegate extends BaseNotificationDelegate {
             Message message = mMessages.get(key);
             message.markMessageAsRead();
         }
-        // TODO(ritwikam): add a request id to the action.
+        // TODO(b/144924164): add a request id to the action.
         Action action = Action.newBuilder()
                 .setActionName(Action.ActionName.MARK_AS_READ)
                 .setNotificationKey(convoKey.getSubKey())
@@ -129,11 +130,15 @@ public class NotificationMsgDelegate extends BaseNotificationDelegate {
     }
 
     protected CarToPhoneMessage reply(ConversationKey convoKey, String message) {
-        // TODO(ritwikam): add a request id to the action.
+        // TODO(b/144924164): add a request id to the action.
+        ActionDataFieldEntry entry = ActionDataFieldEntry.newBuilder()
+                .setKey(REPLY_KEY)
+                .setValue(message)
+                .build();
         Action action = Action.newBuilder()
                 .setActionName(Action.ActionName.REPLY)
                 .setNotificationKey(convoKey.getSubKey())
-                .putActionData(REPLY_KEY, message)
+                .addActionDataField(entry)
                 .build();
         return CarToPhoneMessage.newBuilder()
                 .setNotificationKey(convoKey.getSubKey())
