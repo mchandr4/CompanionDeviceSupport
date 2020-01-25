@@ -56,6 +56,6 @@ public class ConnectionHowitzer extends LocalFeature {
 
     private void sendMessage(ConnectedDevice device, int messageSize) {
         byte[] message = ByteUtils.randomBytes(messageSize);
-        getConnectedDeviceManager().sendMessageSecurely(device, getFeatureId(), message);
+        sendMessageSecurely(device, message);
     }
 }
