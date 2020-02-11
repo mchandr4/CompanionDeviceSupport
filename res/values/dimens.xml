@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2019 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<resources>
+    <dimen name="car_button_height">@*android:dimen/car_button_height</dimen>
+    <dimen name="icon_size">@*android:dimen/car_primary_icon_size</dimen>
+    <dimen name="list_item_margin_top">@dimen/car_ui_preference_content_margin_top</dimen>
+    <dimen name="list_item_margin_bottom">@dimen/car_ui_preference_content_margin_bottom</dimen>
+    <dimen name="list_item_margin_end">@dimen/car_ui_preference_icon_margin_end</dimen>
+
+    <dimen name="instruction_icon_size">@dimen/car_ui_primary_icon_size</dimen>
+    <dimen name="instruction_icon_margin">@dimen/car_ui_padding_3</dimen>
+    <dimen name="instruction_detail_margin">@dimen/car_ui_padding_3</dimen>
+    <dimen name="instruction_margin">@dimen/car_ui_padding_5</dimen>
+
+    <dimen name="device_detail_top_margin">@dimen/car_ui_padding_3</dimen>
+    <dimen name="device_detail_margin">@dimen/car_ui_padding_2</dimen>
+    <dimen name="device_detail_button_margin">@dimen/car_ui_padding_3</dimen>
+
+    <dimen name="car_ui_display1_size">56dp</dimen>
+
+    <item name="pairing_code_text_spacing" format="float" type="dimen">0.6</item>
+</resources>
