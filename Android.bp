@@ -71,7 +71,7 @@ android_library {
         "androidx.room_room-runtime",
         "car-messenger-common",
         "car-messenger-protos",
-        "car-ui-lib",
+        "car-ui-lib-bp",
         "com.google.android.material_material",
         "companion-feature-calendarsync-protos",
         "connected-device-lib",
