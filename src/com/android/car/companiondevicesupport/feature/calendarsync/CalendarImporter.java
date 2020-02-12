@@ -20,6 +20,8 @@ import static com.android.car.connecteddevice.util.SafeLog.logd;
 import static com.android.car.connecteddevice.util.SafeLog.loge;
 import static com.android.car.connecteddevice.util.SafeLog.logw;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
+
 import android.annotation.NonNull;
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
@@ -153,18 +155,15 @@ final class CalendarImporter {
     private void insertEvent(@NonNull Event event, int calId) {
         logd(TAG, "insert(calId=" + calId + ", event=" + event.getTitle() + ")");
 
-        long startDate = TimestampConverter.convertTimestamp(event.getStartDate(),
-                event.getTimeZone(), event.getIsAllDay(), true);
-        long endDate = TimestampConverter.convertTimestamp(event.getEndDate(), event.getTimeZone(),
-                event.getIsAllDay(), false);
-
         ContentValues values = new ContentValues();
         values.put(CalendarContract.Events.CALENDAR_ID, calId);
         values.put(CalendarContract.Events.TITLE, event.getTitle());
         values.put(CalendarContract.Events.DESCRIPTION, event.getDescription());
         values.put(CalendarContract.Events._SYNC_ID, event.getExternalIdentifier());
-        values.put(CalendarContract.Events.DTSTART, startDate);
-        values.put(CalendarContract.Events.DTEND, endDate);
+        values.put(CalendarContract.Events.DTSTART,
+                SECONDS.toMillis(event.getStartDate().getSeconds()));
+        values.put(CalendarContract.Events.DTEND,
+                SECONDS.toMillis(event.getEndDate().getSeconds()));
         values.put(CalendarContract.Events.EVENT_LOCATION, event.getLocation());
 
         if (event.hasColor()) {
