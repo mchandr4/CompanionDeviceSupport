@@ -53,7 +53,7 @@ class CalendarImporter {
 
     private static final Pattern CALENDAR_ID_PATTERN = Pattern.compile(".*/calendars/(\\d+)\\?.*");
     private static final int CALENDAR_ID_GROUP = 1;
-    private static final Pattern EVENT_ID_PATTERN = Pattern.compile(".*/events/(\\d+)");
+    private static final Pattern EVENT_ID_PATTERN = Pattern.compile(".*/events/(\\d+)\\?.*");
     private static final int EVENT_ID_GROUP = 1;
 
     static final String DEFAULT_ACCOUNT_NAME = "CloudlessCalSync";
