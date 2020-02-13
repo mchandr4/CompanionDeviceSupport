@@ -46,7 +46,7 @@ import java.util.regex.Pattern;
  * A helper class dealing with the import and deletion of calendar event data that was sent from a
  * mobile device to the head unit.
  */
-final class CalendarImporter {
+class CalendarImporter {
     private static final String TAG = "CalendarImporter";
 
     static final int INVALID_CALENDAR_ID = -1;
