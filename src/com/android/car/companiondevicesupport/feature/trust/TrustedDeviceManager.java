@@ -30,7 +30,10 @@ import android.os.UserHandle;
 
 import androidx.room.Room;
 
+import com.android.car.companiondevicesupport.api.external.AssociatedDevice;
 import com.android.car.companiondevicesupport.api.external.CompanionDevice;
+import com.android.car.companiondevicesupport.api.external.IConnectedDeviceManager;
+import com.android.car.companiondevicesupport.api.external.IDeviceAssociationCallback;
 import com.android.car.companiondevicesupport.api.internal.trust.IOnValidateCredentialsRequestListener;
 import com.android.car.companiondevicesupport.api.internal.trust.ITrustedDeviceAgentDelegate;
 import com.android.car.companiondevicesupport.api.internal.trust.ITrustedDeviceCallback;
@@ -49,6 +52,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 
 /** Manager for the feature of unlocking the head unit with a user's trusted device. */
@@ -59,10 +63,15 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
     /** Length of token generated on a trusted device. */
     private static final int ESCROW_TOKEN_LENGTH = 8;
 
+    private static final byte[] ACKNOWLEDGEMENT_MESSAGE = "ACK".getBytes();
+
     private final ThreadSafeCallbacks<ITrustedDeviceCallback> mTrustedDeviceCallbacks =
             new ThreadSafeCallbacks<>();
 
     private final ThreadSafeCallbacks<IOnValidateCredentialsRequestListener> mEnrollmentCallbacks =
+            new ThreadSafeCallbacks<>();
+
+    private final ThreadSafeCallbacks<IDeviceAssociationCallback> mAssociatedDeviceCallbacks =
             new ThreadSafeCallbacks<>();
 
     private final Context mContext;
@@ -70,6 +79,8 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
     private final TrustedDeviceFeature mTrustedDeviceFeature;
 
     private final Executor mExecutor = Executors.newSingleThreadExecutor();
+
+    private final AtomicBoolean mIsWaitingForCredentials = new AtomicBoolean(false);
 
     private TrustedDeviceDao mDatabase;
 
@@ -79,15 +90,14 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
 
     private byte[] mPendingToken;
 
-    private PhoneCredentials mPendingCredentials;
-
-    private boolean mIsWaitingForCredentials;
+    private PendingCredentials mPendingCredentials;
 
 
     TrustedDeviceManager(@NonNull Context context) {
         mContext = context;
         mTrustedDeviceFeature = new TrustedDeviceFeature(context);
         mTrustedDeviceFeature.setCallback(mFeatureCallback);
+        mTrustedDeviceFeature.setAssociatedDeviceCallback(mAssociatedDeviceCallback);
         mTrustedDeviceFeature.start();
         mDatabase = Room.databaseBuilder(context, TrustedDeviceDatabase.class,
                 TrustedDeviceDatabase.DATABASE_NAME).build().trustedDeviceDao();
@@ -98,9 +108,10 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
         mPendingToken = null;
         mPendingDevice = null;
         mPendingCredentials = null;
-        mIsWaitingForCredentials = false;
+        mIsWaitingForCredentials.set(false);
         mTrustedDeviceCallbacks.clear();
         mEnrollmentCallbacks.clear();
+        mAssociatedDeviceCallbacks.clear();
         mTrustedDeviceFeature.stop();
     }
 
@@ -126,12 +137,13 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
         }
     }
 
-    private void unlockUser(@NonNull PhoneCredentials credentials) {
+    private void unlockUser(@NonNull String deviceId, @NonNull PhoneCredentials credentials) {
         logd(TAG, "Unlocking with credentials.");
         try {
             mTrustAgentDelegate.unlockUserWithToken(credentials.getEscrowToken().toByteArray(),
                     ByteUtils.bytesToLong(credentials.getHandle().toByteArray()),
                     ActivityManager.getCurrentUser());
+            mTrustedDeviceFeature.sendMessageSecurely(deviceId, ACKNOWLEDGEMENT_MESSAGE);
         } catch (RemoteException e) {
             loge(TAG, "Error while unlocking user through delegate.", e);
         }
@@ -141,7 +153,13 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
     public void onEscrowTokenAdded(int userId, long handle) {
         logd(TAG, "Escrow token has been successfully added.");
         mPendingToken = null;
-        mIsWaitingForCredentials = true;
+
+        if (mEnrollmentCallbacks.size() == 0) {
+            mIsWaitingForCredentials.set(true);
+            return;
+        }
+
+        mIsWaitingForCredentials.set(false);
         mEnrollmentCallbacks.invoke(callback -> {
             try {
                 callback.onValidateCredentialsRequest();
@@ -161,11 +179,20 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
                 + "persisting trusted device record.");
         mTrustedDeviceFeature.sendMessageSecurely(mPendingDevice, ByteUtils.longToBytes(handle));
         TrustedDeviceEntity entity = new TrustedDeviceEntity();
-        entity.id = mPendingDevice.getDeviceId();
+        String deviceId = mPendingDevice.getDeviceId();
+        entity.id = deviceId;
         entity.userId = userId;
         entity.handle = handle;
         mDatabase.addOrReplaceTrustedDevice(entity);
         mPendingDevice = null;
+        TrustedDevice trustedDevice = new TrustedDevice(deviceId, userId, handle);
+        mTrustedDeviceCallbacks.invoke(callback -> {
+            try {
+                callback.onTrustedDeviceAdded(trustedDevice);
+            } catch (RemoteException e) {
+                loge(TAG, "Failed to notify that enrollment completed successfully.", e);
+            }
+        });
     }
 
     @Override
@@ -198,7 +225,31 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
             mDatabase.removeTrustedDevice(new TrustedDeviceEntity(trustedDevice));
         } catch (RemoteException e) {
             loge(TAG, "Error while removing token through delegate.", e);
+            return;
         }
+        mTrustedDeviceCallbacks.invoke(callback -> {
+            try {
+                callback.onTrustedDeviceRemoved(trustedDevice);
+            } catch (RemoteException e) {
+                loge(TAG, "Failed to notify that a trusted device has been removed.", e);
+            }
+        });
+    }
+
+    @Override
+    public List<CompanionDevice> getActiveUserConnectedDevices() {
+        List<CompanionDevice> devices = new ArrayList<>();
+        IConnectedDeviceManager manager = mTrustedDeviceFeature.getConnectedDeviceManager();
+        if (manager == null) {
+            loge(TAG, "Unable to get connected devices. Service not connected. ");
+            return devices;
+        }
+        try {
+            devices = manager.getActiveUserConnectedDevices();
+        } catch (RemoteException e) {
+            loge(TAG, "Failed to get connected devices. ", e);
+        }
+        return devices;
     }
 
     @Override
@@ -212,13 +263,22 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
     }
 
     @Override
+    public void registerAssociatedDeviceCallback(IDeviceAssociationCallback callback) {
+        mAssociatedDeviceCallbacks.add(callback, mExecutor);
+    }
+
+    @Override
+    public void unregisterAssociatedDeviceCallback(IDeviceAssociationCallback callback) {
+        mAssociatedDeviceCallbacks.remove(callback);
+    }
+
+    @Override
     public void addOnValidateCredentialsRequestListener(
             IOnValidateCredentialsRequestListener listener) {
         mEnrollmentCallbacks.add(listener, mExecutor);
 
         // A token has been added and is waiting on user credential validation.
-        if (mIsWaitingForCredentials) {
-            mIsWaitingForCredentials = false;
+        if (mIsWaitingForCredentials.getAndSet(false)) {
             mExecutor.execute(() -> {
                 try {
                     listener.onValidateCredentialsRequest();
@@ -256,7 +316,7 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
 
         // Unlock with pending credentials if present.
         if (mPendingCredentials != null) {
-            unlockUser(mPendingCredentials);
+            unlockUser(mPendingCredentials.mDeviceId, mPendingCredentials.mPhoneCredentials);
             mPendingCredentials = null;
         }
     }
@@ -314,14 +374,16 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
             return;
         }
 
+        TrustedDeviceEventLog.onCredentialsReceived();
+
         if (mTrustAgentDelegate == null) {
             logd(TAG, "No trust agent delegate set yet. Credentials will be delivered once "
                     + "set.");
-            mPendingCredentials = credentials;
+            mPendingCredentials = new PendingCredentials(device.getDeviceId(), credentials);
             return;
         }
 
-        unlockUser(credentials);
+        unlockUser(device.getDeviceId(), credentials);
     }
 
     private final TrustedDeviceFeature.Callback mFeatureCallback =
@@ -341,4 +403,52 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
         public void onDeviceError(CompanionDevice device, int error) {
         }
     };
+
+    private final TrustedDeviceFeature.AssociatedDeviceCallback mAssociatedDeviceCallback =
+            new TrustedDeviceFeature.AssociatedDeviceCallback() {
+        @Override
+        public void onAssociatedDeviceAdded(String deviceId) {
+            mAssociatedDeviceCallbacks.invoke(callback -> {
+                try {
+                    callback.onAssociatedDeviceAdded(deviceId);
+                } catch (RemoteException e) {
+                    loge(TAG, "Failed to notify that an associated device has been added.", e);
+                }
+            });
+        }
+
+        @Override
+        public void onAssociatedDeviceRemoved(String deviceId) {
+            mAssociatedDeviceCallbacks.invoke(callback -> {
+                try {
+                    callback.onAssociatedDeviceRemoved(deviceId);
+                } catch (RemoteException e) {
+                    loge(TAG, "Failed to notify that an associate device has been " +
+                            "removed.", e);
+                }
+            });
+        }
+
+        @Override
+        public void onAssociatedDeviceUpdated(AssociatedDevice device) {
+            mAssociatedDeviceCallbacks.invoke(callback -> {
+                try {
+                    callback.onAssociatedDeviceUpdated(device);
+                } catch (RemoteException e) {
+                    loge(TAG, "Failed to notify that an associated device has been " +
+                            "updated.", e);
+                }
+            });
+        }
+    };
+
+    private static class PendingCredentials {
+        final String mDeviceId;
+        final PhoneCredentials mPhoneCredentials;
+
+        PendingCredentials(@NonNull String deviceId, @NonNull PhoneCredentials credentials) {
+            mDeviceId = deviceId;
+            mPhoneCredentials = credentials;
+        }
+    }
 }

@@ -26,16 +26,8 @@
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS"/>
 
     <application android:testOnly="true"
-                 android:debuggable="true"
-                 xmlns:tools="http://schemas.android.com/tools">
+                 android:debuggable="true">
         <uses-library android:name="android.test.runner"/>
-        <!-- Workaround for b/113294940 -->
-        <provider
-            android:name="androidx.lifecycle.ProcessLifecycleOwnerInitializer"
-            tools:replace="android:authorities"
-            android:authorities="${applicationId}.lifecycle"
-            android:exported="false"
-            android:multiprocess="true" />
     </application>
 
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
