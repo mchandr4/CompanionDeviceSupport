@@ -136,6 +136,7 @@ class CalendarImporter {
         ContentValues values = new ContentValues();
         // TODO: maybe use the name of the logged in user instead.
         values.put(CalendarContract.Calendars.ACCOUNT_NAME, DEFAULT_ACCOUNT_NAME);
+        values.put(CalendarContract.Calendars.OWNER_ACCOUNT, calendar.getAccountName());
         values.put(CalendarContract.Calendars.ACCOUNT_TYPE, CalendarContract.ACCOUNT_TYPE_LOCAL);
         values.put(CalendarContract.Calendars.NAME, calendar.getTitle());
         values.put(CalendarContract.Calendars.CALENDAR_DISPLAY_NAME, calendar.getTitle());
@@ -165,6 +166,7 @@ class CalendarImporter {
         values.put(CalendarContract.Events.DTEND,
                 SECONDS.toMillis(event.getEndDate().getSeconds()));
         values.put(CalendarContract.Events.EVENT_LOCATION, event.getLocation());
+        values.put(CalendarContract.Events.ORGANIZER, event.getOrganizer());
 
         if (event.hasColor()) {
             values.put(CalendarContract.Events.EVENT_COLOR, event.getColor().getArgb());
