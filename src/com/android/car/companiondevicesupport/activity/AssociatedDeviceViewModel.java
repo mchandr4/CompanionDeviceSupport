@@ -51,6 +51,7 @@ import com.android.car.companiondevicesupport.service.CompanionDeviceSupportServ
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Implementation {@link ViewModel} for sharing associated devices data between
@@ -268,10 +269,11 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
         updateDeviceDetails();
     }
 
-    private void removeAssociatedDevice(AssociatedDevice device) {
-        if (mAssociatedDevices.removeIf(d -> d.getDeviceId().equals(device.getDeviceId()))) {
-            mRemovedDevice.postValue(device);
+    private void removeAssociatedDevice(String deviceId) {
+        if (mAssociatedDevices.removeIf(d -> d.getDeviceId().equals(deviceId))) {
+            mRemovedDevice.postValue(getAssociatedDevice());
             mDeviceDetails.postValue(null);
+            mIsFinished.postValue(true);
         }
     }
 
@@ -372,7 +374,7 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
 
                 @Override
                 public void onAssociatedDeviceRemoved(AssociatedDevice device) {
-                    removeAssociatedDevice(device);
+                    removeAssociatedDevice(device.getDeviceId());
                 }
 
                 @Override
