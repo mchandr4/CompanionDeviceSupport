@@ -113,6 +113,7 @@ public class CalendarImporterTest {
 
         when(mContentProvider.insert(
                 argThat(startsWithUriMatcher(CalendarContract.Attendees.CONTENT_URI)),
+                any(),
                 any()))
                 .thenReturn(CalendarContract.Attendees.CONTENT_URI);
     }
@@ -277,6 +278,7 @@ public class CalendarImporterTest {
     private void verifyAttendeeInsert(Attendee attendee) {
         verify(mContentProvider).insert(
                 argThat(startsWithUriMatcher(CalendarContract.Attendees.CONTENT_URI)),
-                argThat(attendeeMatcher(attendee)));
+                argThat(attendeeMatcher(attendee)),
+                any());
     }
 }
