@@ -75,11 +75,8 @@ class CalendarImporter {
      */
     void importCalendars(@NonNull Calendars calendars) {
         for (Calendar calendar : calendars.getCalendarList()) {
-            logd(
-                    TAG,
-                    String.format(
-                            "Import Calendar[title=%s, uuid=%s] with %d events",
-                            calendar.getTitle(), calendar.getUuid(), calendar.getEventCount()));
+            logd(TAG, String.format("Import Calendar[title=%s, uuid=%s] with %d events",
+                    calendar.getTitle(), calendar.getUuid(), calendar.getEventCount()));
             if (calendar.getEventCount() == 0) {
                 logd(TAG, "Ignore calendar- has no events");
                 continue;
@@ -102,21 +99,23 @@ class CalendarImporter {
 
     /**
      * Provides the calendar identifier used by the system.
-     *
-     * <p>This identifier is system-specific and is used to know to which calendar an events
-     * belongs.
+     * <p>
+     * This identifier is system-specific and is used to know to which calendar an events belongs.
      *
      * @param uuid The UUID of the calendar to find.
      * @return The identifier of the calendar or {@link #INVALID_CALENDAR_ID} if nothing was found.
      */
     int findCalendar(@NonNull final String uuid) {
-        Cursor cursor =
-                mContentResolver.query(
-                        CalendarContract.Calendars.CONTENT_URI,
-                        new String[]{CalendarContract.Calendars._ID},
-                        CalendarContract.Calendars._SYNC_ID + " = ?",
-                        new String[]{uuid},
-                        null);
+        Cursor cursor = mContentResolver.query(
+                CalendarContract.Calendars.CONTENT_URI,
+                new String[]{
+                        CalendarContract.Calendars._ID
+                },
+                CalendarContract.Calendars._SYNC_ID + " = ?",
+                new String[]{
+                        uuid
+                },
+                null);
 
         if (cursor.getCount() == 0) {
             return INVALID_CALENDAR_ID;
@@ -150,8 +149,7 @@ class CalendarImporter {
 
         Uri uri = insertContent(CalendarContract.Calendars.CONTENT_URI, values);
         Matcher matcher = CALENDAR_ID_PATTERN.matcher(uri.toString());
-        return matcher.matches()
-                ? Integer.valueOf(matcher.group(CALENDAR_ID_GROUP))
+        return matcher.matches() ? Integer.valueOf(matcher.group(CALENDAR_ID_GROUP))
                 : findCalendar(calendar.getUuid());
     }
 
@@ -208,16 +206,14 @@ class CalendarImporter {
             values.put(CalendarContract.Attendees.ATTENDEE_EMAIL, attendee.getEmail());
             values.put(CalendarContract.Attendees.ATTENDEE_TYPE,
                     convertAttendeeType(attendee.getType()));
-            values.put(
-                    CalendarContract.Attendees.ATTENDEE_STATUS,
+            values.put(CalendarContract.Attendees.ATTENDEE_STATUS,
                     convertAttendeeStatus(attendee.getStatus()));
             values.put(CalendarContract.Attendees.EVENT_ID, eventId);
 
-            operations.add(
-                    ContentProviderOperation.newInsert(
-                            appendQueryParameters(CalendarContract.Attendees.CONTENT_URI))
-                            .withValues(values)
-                            .build());
+            operations.add(ContentProviderOperation.newInsert(
+                    appendQueryParameters(CalendarContract.Attendees.CONTENT_URI))
+                    .withValues(values)
+                    .build());
         }
 
         try {
@@ -234,8 +230,8 @@ class CalendarImporter {
     private Uri appendQueryParameters(@NonNull Uri contentUri) {
         Uri.Builder builder = contentUri.buildUpon();
         builder.appendQueryParameter(CalendarContract.Calendars.ACCOUNT_NAME, DEFAULT_ACCOUNT_NAME);
-        builder.appendQueryParameter(
-                CalendarContract.Calendars.ACCOUNT_TYPE, CalendarContract.ACCOUNT_TYPE_LOCAL);
+        builder.appendQueryParameter(CalendarContract.Calendars.ACCOUNT_TYPE,
+                CalendarContract.ACCOUNT_TYPE_LOCAL);
         builder.appendQueryParameter(CalendarContract.CALLER_IS_SYNCADAPTER, "true");
         return builder.build();
     }
