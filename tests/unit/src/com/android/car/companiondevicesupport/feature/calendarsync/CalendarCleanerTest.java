@@ -181,7 +181,7 @@ public class CalendarCleanerTest {
     private void verifyDelete(Uri uri, String selection, String selectionArg) {
         verify(mContentProvider).delete(
                 eq(uri),
-                argThat(selectionBundleMatcher(
-                        String.format("%s = ?", selection), new String[]{selectionArg})));
+                eq(String.format("%s = ?", selection)),
+                argThat(createStringArrayMatcher(selectionArg)));
     }
 }

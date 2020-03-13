@@ -41,7 +41,7 @@ import com.android.car.companiondevicesupport.api.external.AssociatedDevice;
 import com.android.car.companiondevicesupport.api.external.CompanionDevice;
 import com.android.car.companiondevicesupport.api.external.IConnectedDeviceManager;
 import com.android.car.companiondevicesupport.api.external.IDeviceAssociationCallback;
-import com.android.car.companiondevicesupport.api.internal.trust.ITrustedDeviceEnrollmentCallback;
+import com.android.car.companiondevicesupport.api.internal.trust.IOnValidateCredentialsRequestListener;
 import com.android.car.companiondevicesupport.api.internal.trust.ITrustedDeviceAgentDelegate;
 import com.android.car.companiondevicesupport.api.internal.trust.ITrustedDeviceCallback;
 import com.android.car.companiondevicesupport.api.internal.trust.ITrustedDeviceManager;
@@ -51,8 +51,6 @@ import com.android.car.companiondevicesupport.feature.trust.storage.TrustedDevic
 import com.android.car.companiondevicesupport.feature.trust.storage.TrustedDeviceEntity;
 import com.android.car.companiondevicesupport.feature.trust.ui.TrustedDeviceActivity;
 import com.android.car.companiondevicesupport.protos.PhoneAuthProto.PhoneCredentials;
-import com.android.car.companiondevicesupport.protos.TrustedDeviceMessageProto.TrustedDeviceError;
-import com.android.car.companiondevicesupport.protos.TrustedDeviceMessageProto.TrustedDeviceError.ErrorType;
 import com.android.car.companiondevicesupport.protos.TrustedDeviceMessageProto.TrustedDeviceMessage.MessageType;
 import com.android.car.companiondevicesupport.protos.TrustedDeviceMessageProto.TrustedDeviceMessage;
 import com.android.car.connecteddevice.util.ByteUtils;
@@ -88,7 +86,7 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
     private final Map<IBinder, ITrustedDeviceCallback> mTrustedDeviceCallbacks =
             new ConcurrentHashMap<>();
 
-    private final Map<IBinder, ITrustedDeviceEnrollmentCallback> mEnrollmentCallbacks
+    private final Map<IBinder, IOnValidateCredentialsRequestListener> mEnrollmentCallbacks
             = new ConcurrentHashMap<>();
 
     private final Map<IBinder, IDeviceAssociationCallback> mAssociatedDeviceCallbacks =
@@ -308,11 +306,6 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
     }
 
     @Override
-    public void initiateEnrollment(String deviceId) {
-        mTrustedDeviceFeature.sendMessageSecurely(deviceId, createStartEnrollmentMessage());
-    }
-
-    @Override
     public void registerTrustedDeviceCallback(ITrustedDeviceCallback callback)  {
         mTrustedDeviceCallbacks.put(callback.asBinder(), callback);
         RemoteCallbackBinder remoteBinder = new RemoteCallbackBinder(callback.asBinder(), iBinder ->
@@ -343,17 +336,17 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
     }
 
     @Override
-    public void registerTrustedDeviceEnrollmentCallback(
-            ITrustedDeviceEnrollmentCallback callback) {
-        mEnrollmentCallbacks.put(callback.asBinder(), callback);
-        RemoteCallbackBinder remoteBinder = new RemoteCallbackBinder(callback.asBinder(),
-                iBinder -> unregisterTrustedDeviceEnrollmentCallback(callback));
+    public void addOnValidateCredentialsRequestListener(
+            IOnValidateCredentialsRequestListener listener) {
+        mEnrollmentCallbacks.put(listener.asBinder(), listener);
+        RemoteCallbackBinder remoteBinder = new RemoteCallbackBinder(listener.asBinder(),
+                iBinder -> removeOnValidateCredentialsRequestListener(listener));
         mCallbackBinders.add(remoteBinder);
         // A token has been added and is waiting on user credential validation.
         if (mIsWaitingForCredentials.getAndSet(false)) {
             mExecutor.execute(() -> {
                 try {
-                    callback.onValidateCredentialsRequest();
+                    listener.onValidateCredentialsRequest();
                 } catch (RemoteException e) {
                     loge(TAG, "Error while notifying enrollment listener.", e);
                 }
@@ -362,9 +355,9 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
     }
 
     @Override
-    public void unregisterTrustedDeviceEnrollmentCallback(
-            ITrustedDeviceEnrollmentCallback callback) {
-        IBinder binder = callback.asBinder();
+    public void removeOnValidateCredentialsRequestListener(
+            IOnValidateCredentialsRequestListener listener)  {
+        IBinder binder = listener.asBinder();
         mEnrollmentCallbacks.remove(binder);
         removeRemoteBinder(binder);
     }
@@ -466,52 +459,13 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
         unlockUser(device.getDeviceId(), credentials);
     }
 
-    private void processErrorMessage(@Nullable ByteString payload) {
-        if (payload == null) {
-            logw(TAG, "Received error message with null payload. Ignoring.");
-            return;
-        }
-        TrustedDeviceError trustedDeviceError = null;
-        try {
-            trustedDeviceError = TrustedDeviceError.parseFrom(payload.toByteArray());
-        } catch (InvalidProtocolBufferException e) {
-            loge(TAG, "Received error message from client, but cannot parse.", e);
-            notifyEnrollmentError(TrustedDeviceConstants.TRUSTED_DEVICE_ERROR_UNKNOWN);
-            return;
-        }
-        int errorType = trustedDeviceError.getTypeValue();
-        int error;
-        switch (errorType) {
-            case ErrorType.MESSAGE_TYPE_UNKNOWN_VALUE:
-                error = TrustedDeviceConstants.TRUSTED_DEVICE_ERROR_MESSAGE_TYPE_UNKNOWN;
-                break;
-            case ErrorType.DEVICE_NOT_SECURED_VALUE:
-                error = TrustedDeviceConstants.TRUSTED_DEVICE_ERROR_DEVICE_NOT_SECURED;
-                break;
-            default:
-                loge(TAG, "Encountered unexpected error type: " + errorType + ".");
-                error = TrustedDeviceConstants.TRUSTED_DEVICE_ERROR_UNKNOWN;
-        }
-        notifyEnrollmentError(error);
-    }
-
-    private void notifyEnrollmentError(@TrustedDeviceConstants.TrustedDeviceError int error) {
-        notifyEnrollmentCallbacks(callback -> {
-            try {
-                callback.onTrustedDeviceEnrollmentError(error);
-            } catch (RemoteException e) {
-                loge(TAG, "Error while notifying enrollment error.", e);
-            }
-        });
-    }
-
     private void notifyTrustedDeviceCallbacks(Consumer<ITrustedDeviceCallback> notification) {
         mTrustedDeviceCallbacks.forEach((iBinder, callback) -> mExecutor.execute(() ->
                 notification.accept(callback)));
     }
 
     private void notifyEnrollmentCallbacks(
-            Consumer<ITrustedDeviceEnrollmentCallback> notification ) {
+            Consumer<IOnValidateCredentialsRequestListener> notification ) {
         mEnrollmentCallbacks.forEach((iBinder, callback) -> mExecutor.execute(() ->
                 notification.accept(callback)));
     }
@@ -553,14 +507,6 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
                 .toByteArray();
     }
 
-    private byte[] createStartEnrollmentMessage() {
-        return TrustedDeviceMessage.newBuilder()
-                .setVersion(TRUSTED_DEVICE_MESSAGE_VERSION)
-                .setType(MessageType.START_ENROLLMENT)
-                .build()
-                .toByteArray();
-    }
-
     private final TrustedDeviceFeature.Callback mFeatureCallback =
             new TrustedDeviceFeature.Callback() {
         @Override
@@ -584,9 +530,6 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
                     // The client sends an acknowledgment when the handle has been received, but
                     // nothing needs to be on the IHU side. So simply log this message.
                     logd(TAG, "Received acknowledgment message from client.");
-                    break;
-                case ERROR:
-                    processErrorMessage(trustedDeviceMessage.getPayload());
                     break;
                 default:
                     // The client should only be sending requests to either enroll or unlock.
