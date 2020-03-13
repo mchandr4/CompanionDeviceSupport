@@ -146,7 +146,7 @@ public class CompanionDeviceSupportService extends Service {
             logd(TAG, "Features are already cleaned up. No need to clean up again.");
             return;
         }
-        mConnectedDeviceManager.reset();
+        mConnectedDeviceManager.cleanup();
         mIsEveryFeatureInitialized.set(false);
     }
 
@@ -162,12 +162,7 @@ public class CompanionDeviceSupportService extends Service {
             for (LocalFeature feature : mLocalFeatures) {
                 feature.start();
             }
-            mIsEveryFeatureInitialized.set(true);
+            mIsEveryFeatureInitialized.set(false);
         }).start();
-    }
-
-    /** Returns the service's instance of {@link ConnectedDeviceManager}. */
-    protected ConnectedDeviceManager getConnectedDeviceManager() {
-        return mConnectedDeviceManager;
     }
 }
