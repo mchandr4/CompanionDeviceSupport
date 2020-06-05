@@ -176,19 +176,22 @@ public class NotificationMsgDelegate extends BaseNotificationDelegate {
             ConversationNotification notification, String notificationKey) {
         String deviceAddress = device.getDeviceId();
         ConversationKey convoKey = new ConversationKey(deviceAddress, notificationKey);
-        if (mNotificationInfos.containsKey(convoKey)) {
-            logw(TAG, "Conversation already exists! " + notificationKey);
-        }
 
         if (!Utils.isValidConversationNotification(notification, /* isShallowCheck= */ false)) {
             logd(TAG, "Failed to initialize new Conversation, object missing required fields");
             return;
         }
 
-        ConversationNotificationInfo convoInfo = ConversationNotificationInfo.
-                createConversationNotificationInfo(device.getDeviceName(), device.getDeviceId(),
-                        notification, notificationKey);
-        mNotificationInfos.put(convoKey, convoInfo);
+        ConversationNotificationInfo convoInfo;
+        if (mNotificationInfos.containsKey(convoKey)) {
+            logw(TAG, "Conversation already exists! " + notificationKey);
+            convoInfo = mNotificationInfos.get(convoKey);
+        } else {
+            convoInfo = ConversationNotificationInfo.
+                    createConversationNotificationInfo(device.getDeviceName(), device.getDeviceId(),
+                            notification, notificationKey);
+            mNotificationInfos.put(convoKey, convoInfo);
+        }
 
         String appDisplayName = convoInfo.getAppDisplayName();
 
@@ -231,7 +234,8 @@ public class NotificationMsgDelegate extends BaseNotificationDelegate {
         if (!notificationInfo.isGroupConvo()) {
             return mOneOnOneConversationAvatarMap.get(
                     SenderKey.createSenderKey(convoKey, message.getSender()));
-        } else if (message.getSender().getAvatar() != null) {
+        } else if (message.getSender().getAvatar() != null
+                || !message.getSender().getAvatar().isEmpty()) {
             byte[] iconArray = message.getSender().getAvatar().toByteArray();
             return BitmapFactory.decodeByteArray(iconArray, 0, iconArray.length);
         }
