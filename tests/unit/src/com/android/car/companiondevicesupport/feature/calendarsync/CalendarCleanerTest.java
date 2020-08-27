@@ -20,6 +20,7 @@ import static android.provider.CalendarContract.AUTHORITY;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -165,6 +166,28 @@ public class CalendarCleanerTest {
         verifyNoMoreInteractions(mContentProvider);
     }
 
+    @Test
+    public void eraseCalendar_failingQuery() {
+        when(mContentResolver.query(eq(Events.CONTENT_URI), any(), any(), any(),
+                eq(null))).thenReturn(null);
+        try {
+            mCalendarCleaner.eraseCalendar(CALENDAR_IDENTIFIER);
+        } catch (NullPointerException e) {
+            fail();
+        }
+    }
+
+    @Test
+    public void eraseCalendars_failingQuery() {
+        when(mContentResolver.query(eq(Events.CONTENT_URI), any(), any(), any(),
+                eq(null))).thenReturn(null);
+        try {
+            mCalendarCleaner.eraseCalendars();
+        } catch (NullPointerException e) {
+            fail();
+        }
+    }
+
     // --- Helpers ---
 
     private ArgumentMatcher<String[]> createStringArrayMatcher(String expectedArg) {
@@ -181,7 +204,7 @@ public class CalendarCleanerTest {
     private void verifyDelete(Uri uri, String selection, String selectionArg) {
         verify(mContentProvider).delete(
                 eq(uri),
-                eq(String.format("%s = ?", selection)),
-                argThat(createStringArrayMatcher(selectionArg)));
+                argThat(selectionBundleMatcher(
+                        String.format("%s = ?", selection), new String[]{selectionArg})));
     }
 }
