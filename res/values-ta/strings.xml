@@ -56,11 +56,9 @@
     <string name="notDetected" msgid="4115229772085594506">"கண்டறிய முடியவில்லை"</string>
     <string name="disconnected" msgid="8526513868622591894">"துண்டிக்கப்பட்டது"</string>
     <string name="unknown" msgid="555736316465118024">"அறியாதது"</string>
-    <string name="notification_msg_channel_name" msgid="4091700845795023857">"கம்பேனியன் சாதன மெசேஜூக்கான அறிவிப்புகள் சேனல்"</string>
-    <string name="notification_msg_channel_description" msgid="5621930731783249631">"மொபைல் மெசெஜ் பெறுபவர் சேவை"</string>
-    <string name="app_running_msg_channel_name" msgid="7778100287130526405">"மொபைல் மெசேஜ் சேவை இயங்குகிறது"</string>
-    <string name="app_running_msg_notification_title" msgid="1568647456607398493">"மொபைல் மெசேஜ் சேவை செயலில் உள்ளது"</string>
-    <string name="app_running_msg_notification_content" msgid="9014317798865985823">"கம்பேனியன் சாதனத்திலிருந்து மெசேஜ்களைப் பெறுகிறது"</string>
+    <string name="app_running_msg_channel_name" msgid="87011783084544733">"மொபைல் மெசேஜ் சேவை இயங்குகிறது"</string>
+    <string name="app_running_msg_notification_title" msgid="388907180286994900">"மொபைல் மெசேஜ் சேவை செயலிலுள்ளது"</string>
+    <string name="app_running_msg_notification_content" msgid="4602261901969140233">"கம்பேனியன் சாதனம் மூலம் மெசேஜ்களைப் பெறுகிறது"</string>
     <string name="trusted_device_feature_title" msgid="2690568414493283969">"மொபைல் மூலம் சுயவிவரத்தை அன்லாக் செய்தல்"</string>
     <string name="trusted_device_feature_instruction" msgid="2546439818978826962">"அன்லாக் விருப்பங்களை அமைப்பதற்குக் கம்பேனியன் ஆப்ஸைப் பார்க்கவும்"</string>
     <string name="trusted_device_item_title" msgid="4390572381407233745">"எனது சுயவிவரத்தை &lt;b&gt;<xliff:g id="PHONE_NAME">%1$s</xliff:g>&lt;/b&gt; மூலம் அன்லாக் செய்தல்"</string>

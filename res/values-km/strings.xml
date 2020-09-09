@@ -56,11 +56,9 @@
     <string name="notDetected" msgid="4115229772085594506">"រកមិនឃើញទេ"</string>
     <string name="disconnected" msgid="8526513868622591894">"បាន​ផ្ដាច់"</string>
     <string name="unknown" msgid="555736316465118024">"មិនស្គាល់"</string>
-    <string name="notification_msg_channel_name" msgid="4091700845795023857">"បណ្ដាញ​ជូនដំណឹង​សារជាអក្សរ​របស់​ឧបករណ៍​ដៃគូ"</string>
-    <string name="notification_msg_channel_description" msgid="5621930731783249631">"សេវាកម្ម​កម្មវិធីទទួល​សារជាអក្សររបស់ទូរសព្ទ"</string>
-    <string name="app_running_msg_channel_name" msgid="7778100287130526405">"សេវាកម្ម​សារជាអក្សរ​របស់ទូរសព្ទ​កំពុងដំណើរការ"</string>
-    <string name="app_running_msg_notification_title" msgid="1568647456607398493">"សេវាកម្ម​ផ្ញើសារជាអក្សរ​របស់ទូរសព្ទ​កំពុងដំណើរការ"</string>
-    <string name="app_running_msg_notification_content" msgid="9014317798865985823">"កំពុងទទួលសារ​តាមរយៈ​ឧបករណ៍ដៃគូ"</string>
+    <string name="app_running_msg_channel_name" msgid="87011783084544733">"សេវាកម្ម​សារជាអក្សរ​របស់ទូរសព្ទ​កំពុងដំណើរការ"</string>
+    <string name="app_running_msg_notification_title" msgid="388907180286994900">"សេវាកម្ម​ផ្ញើសារជាអក្សរ​របស់ទូរសព្ទ​កំពុងដំណើរការ"</string>
+    <string name="app_running_msg_notification_content" msgid="4602261901969140233">"កំពុងទទួល​សារជាអក្សរ​តាមរយៈ​ឧបករណ៍ដៃគូ"</string>
     <string name="trusted_device_feature_title" msgid="2690568414493283969">"ដោះសោ​កម្រងព័ត៌មាន​ដោយប្រើទូរសព្ទ"</string>
     <string name="trusted_device_feature_instruction" msgid="2546439818978826962">"ពិនិត្យមើល​កម្មវិធីដៃគូ​របស់អ្នក ដើម្បី​កំណត់ជម្រើស​ដោះសោ"</string>
     <string name="trusted_device_item_title" msgid="4390572381407233745">"អនុញ្ញាតឱ្យ &lt;b&gt;<xliff:g id="PHONE_NAME">%1$s</xliff:g>&lt;/b&gt; ដោះសោ​កម្រងព័ត៌មាន​របស់ខ្ញុំ"</string>

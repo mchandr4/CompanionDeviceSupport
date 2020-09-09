@@ -56,11 +56,9 @@
     <string name="notDetected" msgid="4115229772085594506">"Not detected"</string>
     <string name="disconnected" msgid="8526513868622591894">"Disconnected"</string>
     <string name="unknown" msgid="555736316465118024">"Unknown"</string>
-    <string name="notification_msg_channel_name" msgid="4091700845795023857">"Companion device text message notifications channel"</string>
-    <string name="notification_msg_channel_description" msgid="5621930731783249631">"Phone text message receiver service"</string>
-    <string name="app_running_msg_channel_name" msgid="7778100287130526405">"Phone text message service running"</string>
-    <string name="app_running_msg_notification_title" msgid="1568647456607398493">"Phone text messaging service is active"</string>
-    <string name="app_running_msg_notification_content" msgid="9014317798865985823">"Receiving Messages via companion device"</string>
+    <string name="app_running_msg_channel_name" msgid="87011783084544733">"Phone text message service running"</string>
+    <string name="app_running_msg_notification_title" msgid="388907180286994900">"Phone text messaging service is active"</string>
+    <string name="app_running_msg_notification_content" msgid="4602261901969140233">"Receiving text messages via companion device"</string>
     <string name="trusted_device_feature_title" msgid="2690568414493283969">"Unlock profile with phone"</string>
     <string name="trusted_device_feature_instruction" msgid="2546439818978826962">"Check your Companion app to set unlocking options"</string>
     <string name="trusted_device_item_title" msgid="4390572381407233745">"Let &lt;b&gt;<xliff:g id="PHONE_NAME">%1$s</xliff:g>&lt;/b&gt; unlock my profile"</string>

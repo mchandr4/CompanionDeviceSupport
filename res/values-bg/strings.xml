@@ -56,11 +56,9 @@
     <string name="notDetected" msgid="4115229772085594506">"Не е открито"</string>
     <string name="disconnected" msgid="8526513868622591894">"Няма връзка"</string>
     <string name="unknown" msgid="555736316465118024">"Няма данни"</string>
-    <string name="notification_msg_channel_name" msgid="4091700845795023857">"Канал на придружаващото устройство за известия за SMS съобщения"</string>
-    <string name="notification_msg_channel_description" msgid="5621930731783249631">"Услуга на телефона за приемане на SMS съобщения"</string>
-    <string name="app_running_msg_channel_name" msgid="7778100287130526405">"Услугата на телефона за SMS съобщения се изпълнява"</string>
-    <string name="app_running_msg_notification_title" msgid="1568647456607398493">"Услугата на телефона за SMS съобщения е активна"</string>
-    <string name="app_running_msg_notification_content" msgid="9014317798865985823">"Получаване на съобщения посредством придружаващо устройство"</string>
+    <string name="app_running_msg_channel_name" msgid="87011783084544733">"Услугата на телефона за SMS съобщения се изпълнява"</string>
+    <string name="app_running_msg_notification_title" msgid="388907180286994900">"Услугата на телефона за SMS съобщения е активна"</string>
+    <string name="app_running_msg_notification_content" msgid="4602261901969140233">"Получаване на SMS съобщения чрез придружаващо устройство"</string>
     <string name="trusted_device_feature_title" msgid="2690568414493283969">"Отключване на профила с телефон"</string>
     <string name="trusted_device_feature_instruction" msgid="2546439818978826962">"Използвайте придружаващото приложение, за да зададете опции за отключване"</string>
     <string name="trusted_device_item_title" msgid="4390572381407233745">"Разрешаване на &lt;b&gt;<xliff:g id="PHONE_NAME">%1$s</xliff:g>&lt;/b&gt; да отключва профила ми"</string>

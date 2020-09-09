@@ -56,11 +56,9 @@
     <string name="notDetected" msgid="4115229772085594506">"No detectat"</string>
     <string name="disconnected" msgid="8526513868622591894">"Desconnectat"</string>
     <string name="unknown" msgid="555736316465118024">"Desconegut"</string>
-    <string name="notification_msg_channel_name" msgid="4091700845795023857">"Canal de notificacions per a missatges de text del dispositiu complementari"</string>
-    <string name="notification_msg_channel_description" msgid="5621930731783249631">"Servei receptor de missatges de text del telèfon"</string>
-    <string name="app_running_msg_channel_name" msgid="7778100287130526405">"Servei de missatges de text del telèfon en execució"</string>
-    <string name="app_running_msg_notification_title" msgid="1568647456607398493">"Servei de missatgeria de text del telèfon actiu"</string>
-    <string name="app_running_msg_notification_content" msgid="9014317798865985823">"S\'estan rebent missatges mitjançant un dispositiu complementari"</string>
+    <string name="app_running_msg_channel_name" msgid="87011783084544733">"Servei de missatges de text del telèfon en execució"</string>
+    <string name="app_running_msg_notification_title" msgid="388907180286994900">"Servei de missatgeria de text del telèfon actiu"</string>
+    <string name="app_running_msg_notification_content" msgid="4602261901969140233">"S\'estan rebent missatges de text mitjançant un dispositiu complementari"</string>
     <string name="trusted_device_feature_title" msgid="2690568414493283969">"Desbloqueja el perfil amb el telèfon"</string>
     <string name="trusted_device_feature_instruction" msgid="2546439818978826962">"Ves a l\'aplicació complementària per definir les opcions de desbloqueig"</string>
     <string name="trusted_device_item_title" msgid="4390572381407233745">"Permet que &lt;b&gt;<xliff:g id="PHONE_NAME">%1$s</xliff:g>&lt;/b&gt; desbloquegi el meu perfil"</string>

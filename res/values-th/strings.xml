@@ -56,11 +56,9 @@
     <string name="notDetected" msgid="4115229772085594506">"ไม่พบ"</string>
     <string name="disconnected" msgid="8526513868622591894">"เลิกเชื่อมต่อแล้ว"</string>
     <string name="unknown" msgid="555736316465118024">"ไม่ทราบ"</string>
-    <string name="notification_msg_channel_name" msgid="4091700845795023857">"ช่องทางการแจ้งเตือน SMS ผ่านอุปกรณ์ที่ใช้ร่วมกัน"</string>
-    <string name="notification_msg_channel_description" msgid="5621930731783249631">"บริการตัวรับ SMS ทางโทรศัพท์"</string>
-    <string name="app_running_msg_channel_name" msgid="7778100287130526405">"บริการ SMS ทางโทรศัพท์ทำงานอยู่"</string>
-    <string name="app_running_msg_notification_title" msgid="1568647456607398493">"เปิดใช้งานบริการรับส่งข้อความทางโทรศัพท์อยู่"</string>
-    <string name="app_running_msg_notification_content" msgid="9014317798865985823">"กำลังรับข้อความผ่านอุปกรณ์ที่ใช้ร่วมกัน"</string>
+    <string name="app_running_msg_channel_name" msgid="87011783084544733">"บริการ SMS ทางโทรศัพท์ทำงานอยู่"</string>
+    <string name="app_running_msg_notification_title" msgid="388907180286994900">"เปิดใช้งานบริการรับส่งข้อความทางโทรศัพท์อยู่"</string>
+    <string name="app_running_msg_notification_content" msgid="4602261901969140233">"รับ SMS ผ่านอุปกรณ์ที่ใช้ร่วมกัน"</string>
     <string name="trusted_device_feature_title" msgid="2690568414493283969">"ปลดล็อกโปรไฟล์ด้วยโทรศัพท์"</string>
     <string name="trusted_device_feature_instruction" msgid="2546439818978826962">"ไปที่แอปที่ใช้ร่วมกันเพื่อกำหนดตัวเลือกการปลดล็อก"</string>
     <string name="trusted_device_item_title" msgid="4390572381407233745">"อนุญาตให้ &lt;b&gt;<xliff:g id="PHONE_NAME">%1$s</xliff:g>&lt;/b&gt; ปลดล็อกโปรไฟล์ของฉัน"</string>

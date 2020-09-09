@@ -56,11 +56,9 @@
     <string name="notDetected" msgid="4115229772085594506">"감지되지 않음"</string>
     <string name="disconnected" msgid="8526513868622591894">"연결 해제됨"</string>
     <string name="unknown" msgid="555736316465118024">"알 수 없음"</string>
-    <string name="notification_msg_channel_name" msgid="4091700845795023857">"컴패니언 기기 SMS 알림 채널"</string>
-    <string name="notification_msg_channel_description" msgid="5621930731783249631">"휴대전화 SMS 수신기 서비스"</string>
-    <string name="app_running_msg_channel_name" msgid="7778100287130526405">"휴대전화 SMS 서비스 실행 중"</string>
-    <string name="app_running_msg_notification_title" msgid="1568647456607398493">"휴대전화 SMS 서비스가 활성화됨"</string>
-    <string name="app_running_msg_notification_content" msgid="9014317798865985823">"컴패니언 기기를 통해 메시지 수신 중"</string>
+    <string name="app_running_msg_channel_name" msgid="87011783084544733">"휴대전화 SMS 서비스 실행 중"</string>
+    <string name="app_running_msg_notification_title" msgid="388907180286994900">"휴대전화 SMS 서비스가 활성화됨"</string>
+    <string name="app_running_msg_notification_content" msgid="4602261901969140233">"컴패니언 기기를 통해 SMS 수신 중"</string>
     <string name="trusted_device_feature_title" msgid="2690568414493283969">"휴대전화로 프로필 잠금 해제"</string>
     <string name="trusted_device_feature_instruction" msgid="2546439818978826962">"컴패니언 앱을 확인하여 잠금 해제 옵션을 설정하세요."</string>
     <string name="trusted_device_item_title" msgid="4390572381407233745">"&lt;b&gt;<xliff:g id="PHONE_NAME">%1$s</xliff:g>&lt;/b&gt;에서 프로필을 잠금 해제하도록 허용"</string>

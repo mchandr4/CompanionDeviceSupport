@@ -56,11 +56,9 @@
     <string name="notDetected" msgid="4115229772085594506">"Ni zaznano"</string>
     <string name="disconnected" msgid="8526513868622591894">"Ni povezave"</string>
     <string name="unknown" msgid="555736316465118024">"Neznano"</string>
-    <string name="notification_msg_channel_name" msgid="4091700845795023857">"Kanal za obvestila za sporočila SMS prek spremljevalne naprave"</string>
-    <string name="notification_msg_channel_description" msgid="5621930731783249631">"Storitev sprejemnika sporočil SMS prek telefona"</string>
-    <string name="app_running_msg_channel_name" msgid="7778100287130526405">"Storitev za sporočila SMS prek telefona se izvaja"</string>
-    <string name="app_running_msg_notification_title" msgid="1568647456607398493">"Storitev za sporočila SMS prek telefona je aktivna"</string>
-    <string name="app_running_msg_notification_content" msgid="9014317798865985823">"Prejemanje sporočil prek spremljevalne naprave"</string>
+    <string name="app_running_msg_channel_name" msgid="87011783084544733">"Storitev za sporočila SMS prek telefona se izvaja"</string>
+    <string name="app_running_msg_notification_title" msgid="388907180286994900">"Storitev za sporočila SMS prek telefona je aktivna"</string>
+    <string name="app_running_msg_notification_content" msgid="4602261901969140233">"Prejemanje sporočil SMS prek spremljevalne naprave"</string>
     <string name="trusted_device_feature_title" msgid="2690568414493283969">"Odklepanje profila s telefonom"</string>
     <string name="trusted_device_feature_instruction" msgid="2546439818978826962">"V spremljevalni aplikaciji nastavite možnosti odklepanja"</string>
     <string name="trusted_device_item_title" msgid="4390572381407233745">"Omogočanje, da telefon &lt;b&gt;<xliff:g id="PHONE_NAME">%1$s</xliff:g>&lt;/b&gt; odklene moj profil"</string>

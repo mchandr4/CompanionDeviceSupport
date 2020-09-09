@@ -56,11 +56,9 @@
     <string name="notDetected" msgid="4115229772085594506">"Ayitholiwe"</string>
     <string name="disconnected" msgid="8526513868622591894">"Inqamukile"</string>
     <string name="unknown" msgid="555736316465118024">"Akwaziwa"</string>
-    <string name="notification_msg_channel_name" msgid="4091700845795023857">"Isiteshi sezaziso zombhalo obhaliwe wedivayisi engumngane"</string>
-    <string name="notification_msg_channel_description" msgid="5621930731783249631">"Isevisi yomamukeli wombhalo obhaliwe wefoni"</string>
-    <string name="app_running_msg_channel_name" msgid="7778100287130526405">"Isevisi Yomlayezo obhaliwe wefoni iyasebenza"</string>
-    <string name="app_running_msg_notification_title" msgid="1568647456607398493">"Isevisi Yomlayezo obhaliwe wefoni iyasebenza"</string>
-    <string name="app_running_msg_notification_content" msgid="9014317798865985823">"Ukuthola Imiyalezo ngedivayisi Engumngane"</string>
+    <string name="app_running_msg_channel_name" msgid="87011783084544733">"Isevisi yomyalezo obhaliwe wefoni iyasebenza"</string>
+    <string name="app_running_msg_notification_title" msgid="388907180286994900">"Isevisi yomlayezo obhaliwe wefoni iyasebenza"</string>
+    <string name="app_running_msg_notification_content" msgid="4602261901969140233">"Ithola imiyalezo ebhaliwe ngohlelo lokusebenza lomngane"</string>
     <string name="trusted_device_feature_title" msgid="2690568414493283969">"Vula iphrofayela ngefoni"</string>
     <string name="trusted_device_feature_instruction" msgid="2546439818978826962">"Hlola Uhlelo lwakho lokusebenza elingumngane ukusetha izinketho zokuvula"</string>
     <string name="trusted_device_item_title" msgid="4390572381407233745">"Vumela i-&lt;b&gt;<xliff:g id="PHONE_NAME">%1$s</xliff:g>&lt;b&gt; ukuvula iphrofayela yami"</string>

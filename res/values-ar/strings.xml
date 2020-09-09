@@ -56,11 +56,9 @@
     <string name="notDetected" msgid="4115229772085594506">"لم يتم رصد أي أجهزة."</string>
     <string name="disconnected" msgid="8526513868622591894">"تم إلغاء الربط"</string>
     <string name="unknown" msgid="555736316465118024">"غير معروفة"</string>
-    <string name="notification_msg_channel_name" msgid="4091700845795023857">"قناة إشعارات الرسائل النصية على الجهاز المصاحب"</string>
-    <string name="notification_msg_channel_description" msgid="5621930731783249631">"خدمة استلام الرسائل النصية على الهاتف"</string>
-    <string name="app_running_msg_channel_name" msgid="7778100287130526405">"خدمة تلقّي رسائل نصية على الهاتف مُفعَّلة."</string>
-    <string name="app_running_msg_notification_title" msgid="1568647456607398493">"خدمة الرسائل النصية على الهاتف مُفعَّلة."</string>
-    <string name="app_running_msg_notification_content" msgid="9014317798865985823">"جارٍ تلقّي الرسائل باستخدام الجهاز المصاحب"</string>
+    <string name="app_running_msg_channel_name" msgid="87011783084544733">"خدمة تلقّي الرسائل النصية على الهاتف مُفعَّلة"</string>
+    <string name="app_running_msg_notification_title" msgid="388907180286994900">"خدمة تلقّي الرسائل النصية على الهاتف مُفعَّلة"</string>
+    <string name="app_running_msg_notification_content" msgid="4602261901969140233">"تلقّي الرسائل النصية باستخدام الجهاز المصاحب"</string>
     <string name="trusted_device_feature_title" msgid="2690568414493283969">"فتح قفل الملف الشخصي باستخدام الهاتف"</string>
     <string name="trusted_device_feature_instruction" msgid="2546439818978826962">"افتح تطبيقك المصاحب لضبط خيارات فتح القفل."</string>
     <string name="trusted_device_item_title" msgid="4390572381407233745">"السماح لهاتف &lt;b&gt;<xliff:g id="PHONE_NAME">%1$s</xliff:g>&lt;/b&gt; بفتح قفل ملفي الشخصي"</string>

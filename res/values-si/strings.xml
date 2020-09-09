@@ -56,11 +56,9 @@
     <string name="notDetected" msgid="4115229772085594506">"අනාවරණ නොවිය"</string>
     <string name="disconnected" msgid="8526513868622591894">"විසන්ධි විය"</string>
     <string name="unknown" msgid="555736316465118024">"නොදනී"</string>
-    <string name="notification_msg_channel_name" msgid="4091700845795023857">"මිත්‍ර උපාංග පාඨ පණිවුඩ දැනුම් දීම් නාලිකාව"</string>
-    <string name="notification_msg_channel_description" msgid="5621930731783249631">"දුරකථන පාඨ පණිවුඩ ග්‍රාහක සේවය"</string>
-    <string name="app_running_msg_channel_name" msgid="7778100287130526405">"දුරකථන පාඨ පණිවුඩ සේවය ධාවන වෙයි"</string>
-    <string name="app_running_msg_notification_title" msgid="1568647456607398493">"දුරකථන පාඨ පණිවුඩ සේවය ක්‍රියාත්මකයි"</string>
-    <string name="app_running_msg_notification_content" msgid="9014317798865985823">"මිත්‍ර උපාංගය හරහා පණිවුඩ ලබා ගන්න"</string>
+    <string name="app_running_msg_channel_name" msgid="87011783084544733">"දුරකථන පෙළ පණිවිඩ සේවය ධාවනය වේ"</string>
+    <string name="app_running_msg_notification_title" msgid="388907180286994900">"දුරකථන පෙළ පණිවිඩ යැවීමේ සේවය සක්‍රියයි"</string>
+    <string name="app_running_msg_notification_content" msgid="4602261901969140233">"සහායක උපාංගය හරහා පෙළ පණිවිඩ ලැබීම"</string>
     <string name="trusted_device_feature_title" msgid="2690568414493283969">"දුරකථනය මඟින් පැතිකඩ අගුලු අරින්න"</string>
     <string name="trusted_device_feature_instruction" msgid="2546439818978826962">"අගුලු ඇරීමේ විකල්ප සැකසීමට ඔබේ මිත්‍ර යෙදුම පරීක්‍ෂා කරන්න"</string>
     <string name="trusted_device_item_title" msgid="4390572381407233745">"&lt;b&gt;<xliff:g id="PHONE_NAME">%1$s</xliff:g>&lt;/b&gt; හට මගේ පැතිකඩ අගුලු ඇරීමට ඉඩ දෙන්න"</string>

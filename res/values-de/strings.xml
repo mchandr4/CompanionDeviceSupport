@@ -56,11 +56,9 @@
     <string name="notDetected" msgid="4115229772085594506">"Nicht gefunden"</string>
     <string name="disconnected" msgid="8526513868622591894">"Nicht verbunden"</string>
     <string name="unknown" msgid="555736316465118024">"Unbekannt"</string>
-    <string name="notification_msg_channel_name" msgid="4091700845795023857">"SMS-Benachrichtigungskanal auf dem Begleitgerät"</string>
-    <string name="notification_msg_channel_description" msgid="5621930731783249631">"SMS-Empfangsdienst auf dem Smartphone"</string>
-    <string name="app_running_msg_channel_name" msgid="7778100287130526405">"SMS vom Smartphone werden synchronisiert"</string>
-    <string name="app_running_msg_notification_title" msgid="1568647456607398493">"SMS-Dienst auf Smartphone ist aktiv"</string>
-    <string name="app_running_msg_notification_content" msgid="9014317798865985823">"Nachrichten werden über das Begleitgerät empfangen"</string>
+    <string name="app_running_msg_channel_name" msgid="87011783084544733">"SMS-Dienst auf Smartphone läuft"</string>
+    <string name="app_running_msg_notification_title" msgid="388907180286994900">"SMS-Dienst auf Smartphone ist aktiv"</string>
+    <string name="app_running_msg_notification_content" msgid="4602261901969140233">"SMS werden über Begleitgerät empfangen"</string>
     <string name="trusted_device_feature_title" msgid="2690568414493283969">"Profil mit Smartphone entsperren"</string>
     <string name="trusted_device_feature_instruction" msgid="2546439818978826962">"Konfiguriere die Optionen zum Entsperren über die Companion App"</string>
     <string name="trusted_device_item_title" msgid="4390572381407233745">"Entsperren meines Profils über &lt;b&gt;<xliff:g id="PHONE_NAME">%1$s</xliff:g>&lt;/b&gt; zulassen"</string>

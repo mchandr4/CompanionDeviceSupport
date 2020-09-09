@@ -56,11 +56,9 @@
     <string name="notDetected" msgid="4115229772085594506">"Не знайдено"</string>
     <string name="disconnected" msgid="8526513868622591894">"Відключено"</string>
     <string name="unknown" msgid="555736316465118024">"Невідомо"</string>
-    <string name="notification_msg_channel_name" msgid="4091700845795023857">"Канал сповіщень для текстових повідомлень супутнього пристрою"</string>
-    <string name="notification_msg_channel_description" msgid="5621930731783249631">"Сервіс отримання текстових повідомлень на телефоні"</string>
-    <string name="app_running_msg_channel_name" msgid="7778100287130526405">"Сервіс текстових повідомлень на телефоні запущено"</string>
-    <string name="app_running_msg_notification_title" msgid="1568647456607398493">"Сервіс текстових повідомлень на телефоні активний"</string>
-    <string name="app_running_msg_notification_content" msgid="9014317798865985823">"Отримання повідомлень через супутній пристрій"</string>
+    <string name="app_running_msg_channel_name" msgid="87011783084544733">"Сервіс текстових повідомлень на телефоні запущено"</string>
+    <string name="app_running_msg_notification_title" msgid="388907180286994900">"Сервіс текстових повідомлень на телефоні активний"</string>
+    <string name="app_running_msg_notification_content" msgid="4602261901969140233">"Отримання текстових повідомлень через супутній пристрій"</string>
     <string name="trusted_device_feature_title" msgid="2690568414493283969">"Розблокувати пристрій через телефон"</string>
     <string name="trusted_device_feature_instruction" msgid="2546439818978826962">"Щоб налаштувати розблокування, перейдіть у супутній додаток"</string>
     <string name="trusted_device_item_title" msgid="4390572381407233745">"Дозволити пристрою &lt;b&gt;<xliff:g id="PHONE_NAME">%1$s</xliff:g>&lt;/b&gt; розблокувати мій профіль"</string>

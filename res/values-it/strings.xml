@@ -56,11 +56,9 @@
     <string name="notDetected" msgid="4115229772085594506">"Non rilevato"</string>
     <string name="disconnected" msgid="8526513868622591894">"Scollegato"</string>
     <string name="unknown" msgid="555736316465118024">"Sconosciuto"</string>
-    <string name="notification_msg_channel_name" msgid="4091700845795023857">"Canale di notifica dei messaggi del dispositivo complementare"</string>
-    <string name="notification_msg_channel_description" msgid="5621930731783249631">"Servizio di ricezione dei messaggi telefonici"</string>
-    <string name="app_running_msg_channel_name" msgid="7778100287130526405">"Servizio di messaggistica telefonica in esecuzione"</string>
-    <string name="app_running_msg_notification_title" msgid="1568647456607398493">"Il servizio di messaggistica telefonica è attivo"</string>
-    <string name="app_running_msg_notification_content" msgid="9014317798865985823">"Ricezione messaggi tramite dispositivo complementare"</string>
+    <string name="app_running_msg_channel_name" msgid="87011783084544733">"Servizio di messaggistica telefonica in esecuzione"</string>
+    <string name="app_running_msg_notification_title" msgid="388907180286994900">"Il servizio di messaggistica telefonica è attivo"</string>
+    <string name="app_running_msg_notification_content" msgid="4602261901969140233">"Ricezione di SMS tramite dispositivo complementare"</string>
     <string name="trusted_device_feature_title" msgid="2690568414493283969">"Sblocca il profilo con il telefono"</string>
     <string name="trusted_device_feature_instruction" msgid="2546439818978826962">"Verifica la tua app complementare per impostare le opzioni di sblocco"</string>
     <string name="trusted_device_item_title" msgid="4390572381407233745">"Consenti a &lt;b&gt;<xliff:g id="PHONE_NAME">%1$s</xliff:g>&lt;/b&gt; di sbloccare il mio profilo"</string>

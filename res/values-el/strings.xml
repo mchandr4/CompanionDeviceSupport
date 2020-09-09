@@ -56,11 +56,9 @@
     <string name="notDetected" msgid="4115229772085594506">"Δεν εντοπίστηκε"</string>
     <string name="disconnected" msgid="8526513868622591894">"Αποσυνδεδεμένο"</string>
     <string name="unknown" msgid="555736316465118024">"Άγνωστο"</string>
-    <string name="notification_msg_channel_name" msgid="4091700845795023857">"Κανάλι ειδοποιήσεων μηνυμάτων κειμένου συνοδευτικής συσκευής"</string>
-    <string name="notification_msg_channel_description" msgid="5621930731783249631">"Υπηρεσία λήψης μηνυμάτων κειμένου τηλεφώνου"</string>
-    <string name="app_running_msg_channel_name" msgid="7778100287130526405">"Εκτελείται η υπηρεσία μηνυμάτων κειμένου τηλεφώνου"</string>
-    <string name="app_running_msg_notification_title" msgid="1568647456607398493">"Η υπηρ. μηνυμάτων κειμένου τηλεφώνου είναι ενεργή."</string>
-    <string name="app_running_msg_notification_content" msgid="9014317798865985823">"Λήψη μηνυμάτων μέσω συνοδευτικής συσκευής"</string>
+    <string name="app_running_msg_channel_name" msgid="87011783084544733">"Εκτελείται η υπηρεσία μηνυμάτων κειμένου τηλεφώνου"</string>
+    <string name="app_running_msg_notification_title" msgid="388907180286994900">"Η υπηρ. μηνυμάτων κειμένου τηλεφώνου είναι ενεργή."</string>
+    <string name="app_running_msg_notification_content" msgid="4602261901969140233">"Λήψη μηνυμάτων κειμένου μέσω συνοδευτικής συσκευής"</string>
     <string name="trusted_device_feature_title" msgid="2690568414493283969">"Ξεκλείδωμα προφίλ με τηλέφωνο"</string>
     <string name="trusted_device_feature_instruction" msgid="2546439818978826962">"Ελέγξτε τη συνοδευτική εφαρμογή για να ορίσετε τις ρυθμίσεις ξεκλειδώματος."</string>
     <string name="trusted_device_item_title" msgid="4390572381407233745">"Να επιτρέπεται στο &lt;b&gt;<xliff:g id="PHONE_NAME">%1$s</xliff:g>&lt;/b&gt; να ξεκλειδώνει το προφίλ μου"</string>

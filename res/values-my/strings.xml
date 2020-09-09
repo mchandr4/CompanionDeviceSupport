@@ -56,11 +56,9 @@
     <string name="notDetected" msgid="4115229772085594506">"ရှာမတွေ့ပါ"</string>
     <string name="disconnected" msgid="8526513868622591894">"ချိတ်ဆက်မထားပါ"</string>
     <string name="unknown" msgid="555736316465118024">"အမျိုးအမည်မသိ"</string>
-    <string name="notification_msg_channel_name" msgid="4091700845795023857">"တွဲဖက်စက်ပစ္စည်း မိုဘိုင်းမက်ဆေ့ဂျ် အကြောင်းကြားချက်ချန်နယ်"</string>
-    <string name="notification_msg_channel_description" msgid="5621930731783249631">"မိုဘိုင်းမက်ဆေ့ဂျ် လက်ခံခြင်းဝန်ဆောင်မှု"</string>
-    <string name="app_running_msg_channel_name" msgid="7778100287130526405">"မိုဘိုင်းမက်ဆေ့ဂျ်ဝန်ဆောင်မှုကို ဖွင့်ထားသည်"</string>
-    <string name="app_running_msg_notification_title" msgid="1568647456607398493">"မိုဘိုင်းမက်ဆေ့ဂျ်ဝန်ဆောင်မှုကို ဖွင့်ထားသည်"</string>
-    <string name="app_running_msg_notification_content" msgid="9014317798865985823">"တွဲဖက်စက်ပစ္စည်းမှတစ်ဆင့် မက်ဆေ့ဂျ်များလက်ခံရယူခြင်း"</string>
+    <string name="app_running_msg_channel_name" msgid="87011783084544733">"ဖုန်း၏ မိုဘိုင်းမက်ဆေ့ဂျ်ဝန်ဆောင်မှု ဖွင့်ထားသည်"</string>
+    <string name="app_running_msg_notification_title" msgid="388907180286994900">"ဖုန်း၏ မိုဘိုင်းမက်ဆေ့ဂျ်ဝန်ဆောင်မှု ဖွင့်ထားသည်"</string>
+    <string name="app_running_msg_notification_content" msgid="4602261901969140233">"တွဲဖက်စက်မှတစ်ဆင့် မိုဘိုင်းမက်ဆေ့ဂျ်များ ရယူနေသည်"</string>
     <string name="trusted_device_feature_title" msgid="2690568414493283969">"ဖုန်းဖြင့် ပရိုဖိုင်ကို လော့ခ်ဖွင့်ခြင်း"</string>
     <string name="trusted_device_feature_instruction" msgid="2546439818978826962">"လောခ့်ဖွင့်ခြင်းနည်းလမ်းများ သတ်မှတ်ရန် သင့် \'တွဲဖက်အက်ပ်\' ကို စစ်ဆေးပါ"</string>
     <string name="trusted_device_item_title" msgid="4390572381407233745">"သင့်ပရိုဖိုင်ကို &lt;b&gt;<xliff:g id="PHONE_NAME">%1$s</xliff:g>&lt;/b&gt; အား လော့ခ်ဖွင့်ခွင့်ပြုခြင်း"</string>

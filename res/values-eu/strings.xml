@@ -56,11 +56,9 @@
     <string name="notDetected" msgid="4115229772085594506">"Ez da hauteman"</string>
     <string name="disconnected" msgid="8526513868622591894">"Deskonektatuta"</string>
     <string name="unknown" msgid="555736316465118024">"Ezezaguna"</string>
-    <string name="notification_msg_channel_name" msgid="4091700845795023857">"Gailu osagarriaren testu-mezuen jakinarazpenen kanala"</string>
-    <string name="notification_msg_channel_description" msgid="5621930731783249631">"Telefonoaren testu-mezuak jasotzeko zerbitzua"</string>
-    <string name="app_running_msg_channel_name" msgid="7778100287130526405">"Telefonoaren testu-mezuen zerbitzua abian"</string>
-    <string name="app_running_msg_notification_title" msgid="1568647456607398493">"Telefonoaren testu-mezuen zerbitzua aktibo"</string>
-    <string name="app_running_msg_notification_content" msgid="9014317798865985823">"Gailu osagarriaren bidez mezuak jasotzen"</string>
+    <string name="app_running_msg_channel_name" msgid="87011783084544733">"Telefonoaren testu-mezuen zerbitzua abian"</string>
+    <string name="app_running_msg_notification_title" msgid="388907180286994900">"Telefonoaren testu-mezuen zerbitzua aktibo"</string>
+    <string name="app_running_msg_notification_content" msgid="4602261901969140233">"Gailu osagarriaren bidez jasoko dira testu-mezuak"</string>
     <string name="trusted_device_feature_title" msgid="2690568414493283969">"Desblokeatu profila telefonoaren bidez"</string>
     <string name="trusted_device_feature_instruction" msgid="2546439818978826962">"Desblokeatzeko aukerak ezartzeko, erabili aplikazio osagarria"</string>
     <string name="trusted_device_item_title" msgid="4390572381407233745">"Utzi &lt;b&gt;<xliff:g id="PHONE_NAME">%1$s</xliff:g>&lt;/b&gt; telefonoari nire profila desblokeatzen"</string>

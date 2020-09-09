@@ -56,11 +56,9 @@
     <string name="notDetected" msgid="4115229772085594506">"未能偵測"</string>
     <string name="disconnected" msgid="8526513868622591894">"已解除連接"</string>
     <string name="unknown" msgid="555736316465118024">"不明"</string>
-    <string name="notification_msg_channel_name" msgid="4091700845795023857">"隨附裝置短訊通知頻道"</string>
-    <string name="notification_msg_channel_description" msgid="5621930731783249631">"手機短訊接收服務"</string>
-    <string name="app_running_msg_channel_name" msgid="7778100287130526405">"正在執行手機短訊服務"</string>
-    <string name="app_running_msg_notification_title" msgid="1568647456607398493">"已啟用手機短訊服務"</string>
-    <string name="app_running_msg_notification_content" msgid="9014317798865985823">"透過隨附裝置接收訊息"</string>
+    <string name="app_running_msg_channel_name" msgid="87011783084544733">"正在執行手機短訊服務"</string>
+    <string name="app_running_msg_notification_title" msgid="388907180286994900">"已啟用手機短訊服務"</string>
+    <string name="app_running_msg_notification_content" msgid="4602261901969140233">"正在透過隨附裝置接收短訊"</string>
     <string name="trusted_device_feature_title" msgid="2690568414493283969">"使用手機為設定檔解鎖"</string>
     <string name="trusted_device_feature_instruction" msgid="2546439818978826962">"請查看您的隨附應用程式以設定解鎖選項"</string>
     <string name="trusted_device_item_title" msgid="4390572381407233745">"允許「<xliff:g id="PHONE_NAME">%1$s</xliff:g>」為我的設定檔解鎖"</string>

@@ -56,11 +56,9 @@
     <string name="notDetected" msgid="4115229772085594506">"Не выяўлена"</string>
     <string name="disconnected" msgid="8526513868622591894">"Адключана"</string>
     <string name="unknown" msgid="555736316465118024">"Невядома"</string>
-    <string name="notification_msg_channel_name" msgid="4091700845795023857">"Канал апавяшчэнняў для тэкставых паведамленняў спадарожнай прылады"</string>
-    <string name="notification_msg_channel_description" msgid="5621930731783249631">"Сэрвіс атрымання тэкставых паведамленняў тэлефона"</string>
-    <string name="app_running_msg_channel_name" msgid="7778100287130526405">"Працуе сэрвіс тэкставых паведамленняў тэлефона"</string>
-    <string name="app_running_msg_notification_title" msgid="1568647456607398493">"Сэрвіс тэкставых паведамленняў тэлефона актыўны"</string>
-    <string name="app_running_msg_notification_content" msgid="9014317798865985823">"Атрыманне паведамленняў праз спадарожную прыладу"</string>
+    <string name="app_running_msg_channel_name" msgid="87011783084544733">"Працуе сэрвіс тэкставых паведамленняў тэлефона"</string>
+    <string name="app_running_msg_notification_title" msgid="388907180286994900">"Сэрвіс тэкставых паведамленняў тэлефона актыўны"</string>
+    <string name="app_running_msg_notification_content" msgid="4602261901969140233">"Ідзе атрыманне тэкставых паведамленняў праз спадарожную прыладу"</string>
     <string name="trusted_device_feature_title" msgid="2690568414493283969">"Разблакіроўка профілю з тэлефона"</string>
     <string name="trusted_device_feature_instruction" msgid="2546439818978826962">"Параметры разблакіроўкі можна наладзіць у спадарожнай праграме"</string>
     <string name="trusted_device_item_title" msgid="4390572381407233745">"Дазволіць прыладзе &lt;b&gt;<xliff:g id="PHONE_NAME">%1$s</xliff:g>&lt;/b&gt; ажыццяўляць разблакіроўку профілю"</string>

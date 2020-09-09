@@ -56,11 +56,9 @@
     <string name="notDetected" msgid="4115229772085594506">"Не е пронајдено"</string>
     <string name="disconnected" msgid="8526513868622591894">"Прекината врска"</string>
     <string name="unknown" msgid="555736316465118024">"Непознат"</string>
-    <string name="notification_msg_channel_name" msgid="4091700845795023857">"Канал за известувања за SMS-пораки на придружниот уред"</string>
-    <string name="notification_msg_channel_description" msgid="5621930731783249631">"Услуга за примање SMS-пораки на телефонот"</string>
-    <string name="app_running_msg_channel_name" msgid="7778100287130526405">"Услугата за SMS-пораки на телефонот се извршува"</string>
-    <string name="app_running_msg_notification_title" msgid="1568647456607398493">"Услугата за SMS-пораки на телефонот е активна"</string>
-    <string name="app_running_msg_notification_content" msgid="9014317798865985823">"Пораките се примаат преку придружен уред"</string>
+    <string name="app_running_msg_channel_name" msgid="87011783084544733">"Услугата за текстуални пораки на телефонот се извршува"</string>
+    <string name="app_running_msg_notification_title" msgid="388907180286994900">"Услугата за текстуални пораки на телефонот е активна"</string>
+    <string name="app_running_msg_notification_content" msgid="4602261901969140233">"Добивање текстуални пораки преку придружен уред"</string>
     <string name="trusted_device_feature_title" msgid="2690568414493283969">"Отклучете го профилот со телефон"</string>
     <string name="trusted_device_feature_instruction" msgid="2546439818978826962">"Проверете ја придружната апликација за да поставите опции за отклучување"</string>
     <string name="trusted_device_item_title" msgid="4390572381407233745">"Дозволи &lt;b&gt;<xliff:g id="PHONE_NAME">%1$s</xliff:g>&lt;/b&gt; да го отклучува мојот профил"</string>

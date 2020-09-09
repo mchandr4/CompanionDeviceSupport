@@ -56,11 +56,9 @@
     <string name="notDetected" msgid="4115229772085594506">"未检测到"</string>
     <string name="disconnected" msgid="8526513868622591894">"已断开连接"</string>
     <string name="unknown" msgid="555736316465118024">"未知"</string>
-    <string name="notification_msg_channel_name" msgid="4091700845795023857">"配套设备短信通知渠道"</string>
-    <string name="notification_msg_channel_description" msgid="5621930731783249631">"手机短信接收器服务"</string>
-    <string name="app_running_msg_channel_name" msgid="7778100287130526405">"手机短信服务正在运行"</string>
-    <string name="app_running_msg_notification_title" msgid="1568647456607398493">"手机短信服务已启用"</string>
-    <string name="app_running_msg_notification_content" msgid="9014317798865985823">"通过配套设备接收短信"</string>
+    <string name="app_running_msg_channel_name" msgid="87011783084544733">"手机短信服务正在运行"</string>
+    <string name="app_running_msg_notification_title" msgid="388907180286994900">"手机短信服务已启用"</string>
+    <string name="app_running_msg_notification_content" msgid="4602261901969140233">"正在通过配套设备接收短信"</string>
     <string name="trusted_device_feature_title" msgid="2690568414493283969">"使用手机解锁个人资料"</string>
     <string name="trusted_device_feature_instruction" msgid="2546439818978826962">"查看您的配套应用以设置解锁选项"</string>
     <string name="trusted_device_item_title" msgid="4390572381407233745">"允许&lt;b&gt;<xliff:g id="PHONE_NAME">%1$s</xliff:g>&lt;/b&gt;解锁我的个人资料"</string>

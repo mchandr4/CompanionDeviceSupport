@@ -56,11 +56,9 @@
     <string name="notDetected" msgid="4115229772085594506">"چیزی شناسایی نشد"</string>
     <string name="disconnected" msgid="8526513868622591894">"اتصال قطع شد"</string>
     <string name="unknown" msgid="555736316465118024">"ناشناس"</string>
-    <string name="notification_msg_channel_name" msgid="4091700845795023857">"کانال اعلان پیامک دستگاه همراه"</string>
-    <string name="notification_msg_channel_description" msgid="5621930731783249631">"سرویس گیرنده پیامک تلفن"</string>
-    <string name="app_running_msg_channel_name" msgid="7778100287130526405">"سرویس پیامک تلفن درحال اجرا است"</string>
-    <string name="app_running_msg_notification_title" msgid="1568647456607398493">"سرویس پیامک تلفن فعال است"</string>
-    <string name="app_running_msg_notification_content" msgid="9014317798865985823">"دریافت پیام ازطریق دستگاه همراه"</string>
+    <string name="app_running_msg_channel_name" msgid="87011783084544733">"سرویس پیامک تلفن درحال اجرا است"</string>
+    <string name="app_running_msg_notification_title" msgid="388907180286994900">"سرویس پیامک تلفن فعال است"</string>
+    <string name="app_running_msg_notification_content" msgid="4602261901969140233">"درحال دریافت پیامک‌ها ازطریق دستگاه همراه"</string>
     <string name="trusted_device_feature_title" msgid="2690568414493283969">"باز کردن قفل نمایه با تلفن"</string>
     <string name="trusted_device_feature_instruction" msgid="2546439818978826962">"برای تنظیم گزینه‌های باز کردن قفل، برنامه همراه را بررسی کنید"</string>
     <string name="trusted_device_item_title" msgid="4390572381407233745">"برای باز کردن قفل نمایه به &lt;b&gt;<xliff:g id="PHONE_NAME">%1$s</xliff:g>&lt;/b&gt; اجازه داده شود"</string>

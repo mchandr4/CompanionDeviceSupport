@@ -56,11 +56,9 @@
     <string name="notDetected" msgid="4115229772085594506">"Tidak dikesan"</string>
     <string name="disconnected" msgid="8526513868622591894">"Diputuskan sambungan"</string>
     <string name="unknown" msgid="555736316465118024">"Tidak diketahui"</string>
-    <string name="notification_msg_channel_name" msgid="4091700845795023857">"Saluran Pemberitahuan Mesej Teks Peranti Rakan"</string>
-    <string name="notification_msg_channel_description" msgid="5621930731783249631">"Perkhidmatan Penerima Mesej Teks Telefon"</string>
-    <string name="app_running_msg_channel_name" msgid="7778100287130526405">"Perkhidmatan Mesej Teks Telefon sedang berjalan"</string>
-    <string name="app_running_msg_notification_title" msgid="1568647456607398493">"Perkhidmatan Pemesejan Teks Telefon aktif"</string>
-    <string name="app_running_msg_notification_content" msgid="9014317798865985823">"Menerima Mesej melalui Peranti Rakan"</string>
+    <string name="app_running_msg_channel_name" msgid="87011783084544733">"Perkhidmatan mesej teks telefon sedang berjalan"</string>
+    <string name="app_running_msg_notification_title" msgid="388907180286994900">"Perkhidmatan pemesejan teks telefon aktif"</string>
+    <string name="app_running_msg_notification_content" msgid="4602261901969140233">"Menerima mesej teks melalui peranti rakan"</string>
     <string name="trusted_device_feature_title" msgid="2690568414493283969">"Buka kunci profil dengan telefon"</string>
     <string name="trusted_device_feature_instruction" msgid="2546439818978826962">"Semak Apl Rakan anda untuk menetapkan pilihan membuka kunci"</string>
     <string name="trusted_device_item_title" msgid="4390572381407233745">"Benarkan &lt;b&gt;<xliff:g id="PHONE_NAME">%1$s</xliff:g>&lt;/b&gt; membuka kunci profil saya"</string>

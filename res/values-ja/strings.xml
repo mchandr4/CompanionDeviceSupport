@@ -56,11 +56,9 @@
     <string name="notDetected" msgid="4115229772085594506">"検出されませんでした"</string>
     <string name="disconnected" msgid="8526513868622591894">"接続解除"</string>
     <string name="unknown" msgid="555736316465118024">"不明"</string>
-    <string name="notification_msg_channel_name" msgid="4091700845795023857">"コンパニオン デバイス テキスト メッセージ通知チャンネル"</string>
-    <string name="notification_msg_channel_description" msgid="5621930731783249631">"スマートフォン テキスト メッセージ受信サービス"</string>
-    <string name="app_running_msg_channel_name" msgid="7778100287130526405">"スマートフォン テキスト メッセージ サービス実行中"</string>
-    <string name="app_running_msg_notification_title" msgid="1568647456607398493">"スマートフォン テキスト メッセージ サービス有効"</string>
-    <string name="app_running_msg_notification_content" msgid="9014317798865985823">"コンパニオン デバイスからメッセージを受信中"</string>
+    <string name="app_running_msg_channel_name" msgid="87011783084544733">"スマートフォン テキスト メッセージ サービス実行中"</string>
+    <string name="app_running_msg_notification_title" msgid="388907180286994900">"スマートフォン テキスト メッセージ サービス有効"</string>
+    <string name="app_running_msg_notification_content" msgid="4602261901969140233">"コンパニオン デバイス経由でテキスト メッセージを受信中"</string>
     <string name="trusted_device_feature_title" msgid="2690568414493283969">"スマートフォンでプロファイルのロック解除"</string>
     <string name="trusted_device_feature_instruction" msgid="2546439818978826962">"コンパニオン アプリを確認してロック解除オプションを設定します"</string>
     <string name="trusted_device_item_title" msgid="4390572381407233745">"&lt;b&gt;<xliff:g id="PHONE_NAME">%1$s</xliff:g>&lt;/b&gt; によるプロファイルのロック解除"</string>

@@ -56,11 +56,9 @@
     <string name="notDetected" msgid="4115229772085594506">"Não detectado"</string>
     <string name="disconnected" msgid="8526513868622591894">"Desconectado"</string>
     <string name="unknown" msgid="555736316465118024">"Desconhecido"</string>
-    <string name="notification_msg_channel_name" msgid="4091700845795023857">"Canal de notificações de mensagens de texto do dispositivo complementar"</string>
-    <string name="notification_msg_channel_description" msgid="5621930731783249631">"Serviço receptor de mens. de texto do smartphone"</string>
-    <string name="app_running_msg_channel_name" msgid="7778100287130526405">"Serviço de mensagens de texto em funcionamento no smartphone"</string>
-    <string name="app_running_msg_notification_title" msgid="1568647456607398493">"Serviço de mensagens de texto ativo no smartphone"</string>
-    <string name="app_running_msg_notification_content" msgid="9014317798865985823">"Recebendo mensagens via dispositivo complementar"</string>
+    <string name="app_running_msg_channel_name" msgid="87011783084544733">"Serviço de mensagens de texto em funcionamento no smartphone"</string>
+    <string name="app_running_msg_notification_title" msgid="388907180286994900">"Serviço de mensagens de texto ativo no smartphone"</string>
+    <string name="app_running_msg_notification_content" msgid="4602261901969140233">"Recebendo mensagens de texto via dispositivo complementar"</string>
     <string name="trusted_device_feature_title" msgid="2690568414493283969">"Desbloquear perfil usando o smartphone"</string>
     <string name="trusted_device_feature_instruction" msgid="2546439818978826962">"Verifique seu aplicativo Companion para definir opções de desbloqueio"</string>
     <string name="trusted_device_item_title" msgid="4390572381407233745">"Permitir que o smartphone &lt;b&gt;<xliff:g id="PHONE_NAME">%1$s</xliff:g>&lt;/b&gt; desbloqueie meu perfil"</string>

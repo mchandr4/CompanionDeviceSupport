@@ -56,11 +56,9 @@
     <string name="notDetected" msgid="4115229772085594506">"Fannst ekki"</string>
     <string name="disconnected" msgid="8526513868622591894">"Aftengt"</string>
     <string name="unknown" msgid="555736316465118024">"Óþekkt"</string>
-    <string name="notification_msg_channel_name" msgid="4091700845795023857">"Tilkynningarás fyrir SMS-skilaboð frá fylgitæki"</string>
-    <string name="notification_msg_channel_description" msgid="5621930731783249631">"Þjónusta SMS-skilaboðamóttöku í síma"</string>
-    <string name="app_running_msg_channel_name" msgid="7778100287130526405">"SMS-skilaboðaþjónusta síma í gangi"</string>
-    <string name="app_running_msg_notification_title" msgid="1568647456607398493">"SMS-skilaboðaþjónusta síma er virk"</string>
-    <string name="app_running_msg_notification_content" msgid="9014317798865985823">"Tekur á móti skilaboðum gegnum fylgitæki"</string>
+    <string name="app_running_msg_channel_name" msgid="87011783084544733">"SMS-skilaboðaþjónusta síma í gangi"</string>
+    <string name="app_running_msg_notification_title" msgid="388907180286994900">"SMS-skilaboðaþjónusta síma er virk"</string>
+    <string name="app_running_msg_notification_content" msgid="4602261901969140233">"Tekur við SMS-skilaboðum með fylgdartæki"</string>
     <string name="trusted_device_feature_title" msgid="2690568414493283969">"Taktu prófílinn úr lás með símanum"</string>
     <string name="trusted_device_feature_instruction" msgid="2546439818978826962">"Farðu í fylgiforritið til að stilla valkosti til að taka úr lás"</string>
     <string name="trusted_device_item_title" msgid="4390572381407233745">"Leyfa &lt;b&gt;<xliff:g id="PHONE_NAME">%1$s</xliff:g>&lt;/b&gt; að taka prófílinn minn úr lás"</string>

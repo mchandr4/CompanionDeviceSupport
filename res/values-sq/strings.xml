@@ -56,11 +56,9 @@
     <string name="notDetected" msgid="4115229772085594506">"Nuk u zbulua"</string>
     <string name="disconnected" msgid="8526513868622591894">"Shkëputur"</string>
     <string name="unknown" msgid="555736316465118024">"I panjohur"</string>
-    <string name="notification_msg_channel_name" msgid="4091700845795023857">"Kanali i njoftimeve të mesazheve me tekst të pajisjes shoqëruese"</string>
-    <string name="notification_msg_channel_description" msgid="5621930731783249631">"Shërbimi i marrësit të mesazheve me tekst të telefonit"</string>
-    <string name="app_running_msg_channel_name" msgid="7778100287130526405">"Shërbimi i mesazheve me tekst të telefonit është në ekzekutim"</string>
-    <string name="app_running_msg_notification_title" msgid="1568647456607398493">"Shërbimi i mesazheve me tekst të telefonit është aktiv"</string>
-    <string name="app_running_msg_notification_content" msgid="9014317798865985823">"Mesazhet po merren nëpërmjet pajisjes shoqëruese"</string>
+    <string name="app_running_msg_channel_name" msgid="87011783084544733">"Shërbimi i mesazheve me tekst i telefonit është në ekzekutim"</string>
+    <string name="app_running_msg_notification_title" msgid="388907180286994900">"Shërbimi i mesazheve me tekst është aktiv"</string>
+    <string name="app_running_msg_notification_content" msgid="4602261901969140233">"Mesazhet me tekst po merren përmes pajisjes shoqëruese"</string>
     <string name="trusted_device_feature_title" msgid="2690568414493283969">"Shkyçe profilin me telefonin tënd"</string>
     <string name="trusted_device_feature_instruction" msgid="2546439818978826962">"Kontrollo aplikacionin shoqërues për të caktuar opsionet e shkyçjes"</string>
     <string name="trusted_device_item_title" msgid="4390572381407233745">"Lejo që &lt;b&gt;<xliff:g id="PHONE_NAME">%1$s</xliff:g>&lt;/b&gt; ta shkyçë profilin tim"</string>

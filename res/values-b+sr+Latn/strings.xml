@@ -56,11 +56,9 @@
     <string name="notDetected" msgid="4115229772085594506">"Nije otkriveno"</string>
     <string name="disconnected" msgid="8526513868622591894">"Veza je prekinuta"</string>
     <string name="unknown" msgid="555736316465118024">"Nepoznato"</string>
-    <string name="notification_msg_channel_name" msgid="4091700845795023857">"Kanal za obaveštenja za SMS-ove na pridruženom uređaju"</string>
-    <string name="notification_msg_channel_description" msgid="5621930731783249631">"Usluga za prijem SMS-ova na telefonu"</string>
-    <string name="app_running_msg_channel_name" msgid="7778100287130526405">"SMS usluga na telefonu je pokrenuta"</string>
-    <string name="app_running_msg_notification_title" msgid="1568647456607398493">"SMS usluga na telefonu je aktivna"</string>
-    <string name="app_running_msg_notification_content" msgid="9014317798865985823">"Dobijate poruke preko pridruženog uređaja"</string>
+    <string name="app_running_msg_channel_name" msgid="87011783084544733">"SMS usluga na telefonu je pokrenuta"</string>
+    <string name="app_running_msg_notification_title" msgid="388907180286994900">"SMS usluga na telefonu je aktivna"</string>
+    <string name="app_running_msg_notification_content" msgid="4602261901969140233">"Prijem SMS-ova preko pridruženog uređaja"</string>
     <string name="trusted_device_feature_title" msgid="2690568414493283969">"Otključajte profil pomoću telefona"</string>
     <string name="trusted_device_feature_instruction" msgid="2546439818978826962">"Proverite prateću aplikaciju da biste podesili opcije za otključavanje"</string>
     <string name="trusted_device_item_title" msgid="4390572381407233745">"Omogući telefonu &lt;b&gt;<xliff:g id="PHONE_NAME">%1$s</xliff:g>&lt;/b&gt; da otključa moj profil"</string>

@@ -56,11 +56,9 @@
     <string name="notDetected" msgid="4115229772085594506">"Nezjištěno"</string>
     <string name="disconnected" msgid="8526513868622591894">"Odpojeno"</string>
     <string name="unknown" msgid="555736316465118024">"Neznámé"</string>
-    <string name="notification_msg_channel_name" msgid="4091700845795023857">"Kanál oznámení o textových zprávách z doprovodného zařízení"</string>
-    <string name="notification_msg_channel_description" msgid="5621930731783249631">"Služba pro přijímání textových zpráv z telefonu"</string>
-    <string name="app_running_msg_channel_name" msgid="7778100287130526405">"Služba textových zpráv z telefonu spuštěna"</string>
-    <string name="app_running_msg_notification_title" msgid="1568647456607398493">"Služba textových zpráv z telefonu je aktivní"</string>
-    <string name="app_running_msg_notification_content" msgid="9014317798865985823">"Přijímání zpráv přes doprovodné zařízení"</string>
+    <string name="app_running_msg_channel_name" msgid="87011783084544733">"Služba textových zpráv z telefonu je spuštěna"</string>
+    <string name="app_running_msg_notification_title" msgid="388907180286994900">"Služba textových zpráv z telefonu je aktivní"</string>
+    <string name="app_running_msg_notification_content" msgid="4602261901969140233">"Příjem textových zpráv prostřednictvím doprovodného zařízení"</string>
     <string name="trusted_device_feature_title" msgid="2690568414493283969">"Odemknutí profilu telefonem"</string>
     <string name="trusted_device_feature_instruction" msgid="2546439818978826962">"V doprovodné aplikaci nastavte možnosti odemknutí"</string>
     <string name="trusted_device_item_title" msgid="4390572381407233745">"Povolit telefonu &lt;b&gt;<xliff:g id="PHONE_NAME">%1$s</xliff:g>&lt;/b&gt; odemykat profil"</string>

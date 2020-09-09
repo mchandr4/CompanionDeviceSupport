@@ -56,11 +56,9 @@
     <string name="notDetected" msgid="4115229772085594506">"শনাক্ত করা যায়নি"</string>
     <string name="disconnected" msgid="8526513868622591894">"ডিসকানেক্ট করা হয়েছে"</string>
     <string name="unknown" msgid="555736316465118024">"অজানা"</string>
-    <string name="notification_msg_channel_name" msgid="4091700845795023857">"কম্প্যানিয়ন ডিভাইসের টেক্সট মেসেজের বিজ্ঞপ্তির চ্যানেল"</string>
-    <string name="notification_msg_channel_description" msgid="5621930731783249631">"ফোনেতে টেক্সট মেসেজ পাওয়ার পরিষেবা"</string>
-    <string name="app_running_msg_channel_name" msgid="7778100287130526405">"ফোনের টেক্সট মেসেজ পরিষেবা চালানো হচ্ছে"</string>
-    <string name="app_running_msg_notification_title" msgid="1568647456607398493">"ফোনের টেক্সট মেসেজ পরিষেবা অ্যাক্টিভ আছে"</string>
-    <string name="app_running_msg_notification_content" msgid="9014317798865985823">"কম্প্যানিয়ন ডিভাইসের মাধ্যমে মেসেজ পাওয়া"</string>
+    <string name="app_running_msg_channel_name" msgid="87011783084544733">"ফোনের টেক্সট মেসেজ পরিষেবা চলছে"</string>
+    <string name="app_running_msg_notification_title" msgid="388907180286994900">"ফোনের টেক্সট মেসেজ পরিষেবা অ্যাক্টিভ আছে"</string>
+    <string name="app_running_msg_notification_content" msgid="4602261901969140233">"কম্প্যানিয়ন ডিভাইসের মাধ্যমে টেক্সট মেসেজ পাচ্ছেন"</string>
     <string name="trusted_device_feature_title" msgid="2690568414493283969">"ফোনের মাধ্যমে প্রোফাইল আনলক করুন"</string>
     <string name="trusted_device_feature_instruction" msgid="2546439818978826962">"আনলক করার বিকল্প সেট করতে আপনার কম্প্যানিয়ন অ্যাপ চেক করে দেখুন"</string>
     <string name="trusted_device_item_title" msgid="4390572381407233745">"&lt;b&gt;<xliff:g id="PHONE_NAME">%1$s</xliff:g>&lt;/b&gt;-কে আমার প্রোফাইল আনলক করতে দিন"</string>

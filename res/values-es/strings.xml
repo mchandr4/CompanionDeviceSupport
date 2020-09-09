@@ -56,11 +56,9 @@
     <string name="notDetected" msgid="4115229772085594506">"No detectado"</string>
     <string name="disconnected" msgid="8526513868622591894">"Desconectado"</string>
     <string name="unknown" msgid="555736316465118024">"Desconocido"</string>
-    <string name="notification_msg_channel_name" msgid="4091700845795023857">"Canal de notificaciones de mensajes de texto del dispositivo complementario"</string>
-    <string name="notification_msg_channel_description" msgid="5621930731783249631">"Servicio receptor de mensajes de texto del móvil"</string>
-    <string name="app_running_msg_channel_name" msgid="7778100287130526405">"Se está ejecutando el servicio de mensajes de texto del teléfono"</string>
-    <string name="app_running_msg_notification_title" msgid="1568647456607398493">"Servicio de mensajes de texto del teléfono activo"</string>
-    <string name="app_running_msg_notification_content" msgid="9014317798865985823">"Se están recibiendo mensajes a través del dispositivo complementario"</string>
+    <string name="app_running_msg_channel_name" msgid="87011783084544733">"Servicio de mensajes de texto del teléfono ejecutándose"</string>
+    <string name="app_running_msg_notification_title" msgid="388907180286994900">"Servicio de mensajes de texto del teléfono activo"</string>
+    <string name="app_running_msg_notification_content" msgid="4602261901969140233">"Recibiendo mensajes de texto mediante un dispositivo complementario"</string>
     <string name="trusted_device_feature_title" msgid="2690568414493283969">"Desbloquear perfil con el teléfono"</string>
     <string name="trusted_device_feature_instruction" msgid="2546439818978826962">"Mira la aplicación complementaria para configurar las opciones de desbloqueo"</string>
     <string name="trusted_device_item_title" msgid="4390572381407233745">"Permitir que &lt;b&gt;<xliff:g id="PHONE_NAME">%1$s</xliff:g>&lt;/b&gt; desbloquee mi perfil"</string>
