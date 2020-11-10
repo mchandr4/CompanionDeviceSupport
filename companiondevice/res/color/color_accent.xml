@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- We need this to be a selector instead of a straight reference or else the
+     app will crash when using it as a TextView's text color -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:color="?android:attr/colorAccent"/>
+</selector>

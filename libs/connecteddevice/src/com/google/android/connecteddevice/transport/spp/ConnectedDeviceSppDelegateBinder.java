@@ -1,0 +1,229 @@
+package com.google.android.connecteddevice.transport.spp;
+
+import static com.google.android.connecteddevice.util.SafeLog.logw;
+
+import android.bluetooth.BluetoothDevice;
+import android.os.ParcelUuid;
+import android.os.RemoteException;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
+import com.google.android.connecteddevice.util.RemoteCallbackBinder;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+
+/**
+ * Binder used to delegate calls to {@link android.bluetooth.BluetoothSocket} via a service running
+ * in the foreground user.
+ */
+public class ConnectedDeviceSppDelegateBinder extends IConnectedDeviceSppDelegate.Stub {
+  public static final String ACTION_BIND_SPP = "com.google.android.connecteddevice.BIND_SPP";
+
+  private static final String TAG = "ConnectedDeviceSppDelegateBinder";
+
+  private ISppCallback remoteCallback;
+  private final Map<Connection, OnMessageReceivedListener> onMessageReceivedListeners =
+      new HashMap<>();
+  private final Map<UUID, OnErrorListener> connectionErrorListeners = new HashMap<>();
+  private final Set<PendingConnection> pendingConnections = new HashSet<>();
+
+  @VisibleForTesting RemoteCallbackBinder callbackBinder;
+
+  @Override
+  public void setCallback(ISppCallback callback) {
+    callbackBinder = new RemoteCallbackBinder(callback.asBinder(), iBinder -> clearCallback());
+    this.remoteCallback = callback;
+  }
+
+  @Override
+  public void clearCallback() {
+    remoteCallback = null;
+    if (callbackBinder == null) {
+      logw(TAG, "Remote callback binder is null when trying to clear callback");
+      return;
+    }
+    callbackBinder.cleanUp();
+    callbackBinder = null;
+  }
+
+  /**
+   * Notify the system user that an SPP connection has been established
+   *
+   * @param pendingConnectionId ID associated with the initial connection request
+   * @param remoteDevice device on the other end of the connection
+   * @param deviceName name of the device on the other end of the connection
+   */
+  @Override
+  public void notifyConnected(
+      int pendingConnectionId, @NonNull BluetoothDevice remoteDevice, @Nullable String deviceName) {
+    for (PendingConnection pendingConnection : pendingConnections) {
+      if (pendingConnection.getId() == pendingConnectionId) {
+        pendingConnections.remove(pendingConnection);
+        pendingConnection.notifyConnected(remoteDevice, deviceName);
+        return;
+      }
+    }
+    logw(
+        TAG,
+        "No pendingConnection is associated with ID "
+            + pendingConnectionId
+            + ". Skipping notifyConnected.");
+  }
+
+  /**
+   * Notify the system user that a message was received from the connected device.
+   *
+   * @param connection The active connection that the message was received on
+   * @param message Raw content of the message that was received
+   */
+  @Override
+  public void notifyMessageReceived(@NonNull Connection connection, @NonNull byte[] message) {
+    OnMessageReceivedListener listener = onMessageReceivedListeners.get(connection);
+    if (listener != null) {
+      listener.onMessageReceived(message);
+    }
+  }
+
+  /** Notify the system user that an error occurred on an active connection. */
+  @Override
+  public void notifyError(@NonNull Connection connection) {
+    OnErrorListener onErrorListener =
+        connectionErrorListeners.get(connection.getServiceUuid().getUuid());
+    if (onErrorListener != null) {
+      onErrorListener.onError(connection);
+    }
+  }
+
+  /**
+   * Notify the system user that a requested connection attempt failed.
+   *
+   * @param pendingConnectionId ID associated with the initial connection request
+   */
+  @Override
+  public void notifyConnectAttemptFailed(int pendingConnectionId) {
+    for (PendingConnection pendingConnection : pendingConnections) {
+      if (pendingConnection.getId() == pendingConnectionId) {
+        pendingConnections.remove(pendingConnection);
+        pendingConnection.notifyConnectionError();
+        return;
+      }
+    }
+    logw(
+        TAG,
+        "No pendingConnection is associated with id "
+            + pendingConnectionId
+            + ". Skipping notifyConnectionError.");
+  }
+
+  /**
+   * Request to the foreground user to open a connection as the RFCOMM server.
+   *
+   * @param serviceUuid UUID to listen for client connection requests
+   * @param isSecure true if resulting BT connection should be encrypted by the platform
+   * @return An object representing the pending connection request
+   */
+  @Nullable
+  public PendingConnection connectAsServer(@NonNull UUID serviceUuid, boolean isSecure)
+      throws RemoteException {
+    if (remoteCallback == null) {
+      return null;
+    }
+    if (remoteCallback.onStartConnectionAsServerRequested(new ParcelUuid(serviceUuid), isSecure)) {
+      PendingConnection pendingConnection = new PendingConnection(serviceUuid, isSecure);
+      pendingConnections.add(pendingConnection);
+      return pendingConnection;
+    }
+
+    return null;
+  }
+
+  /**
+   * Request to the foreground user to connect to a remote device as an RFCOMM client.
+   *
+   * @param serviceUuid UUID of connection request
+   * @param remoteDevice Device to connect to
+   * @param isSecure true if resulting BT connection should be encrypted by the platform
+   * @return An object representing the pending connection request
+   */
+  @Nullable
+  public PendingConnection connectAsClient(
+      @NonNull UUID serviceUuid, @NonNull BluetoothDevice remoteDevice, boolean isSecure)
+      throws RemoteException {
+    if (remoteCallback == null) {
+      logw(TAG, "connectAsClient: remoteCallback is null, returning null connection");
+      return null;
+    }
+    remoteCallback.onStartConnectionAsClientRequested(
+        new ParcelUuid(serviceUuid), remoteDevice, isSecure);
+
+    PendingConnection pendingConnection =
+        new PendingConnection(serviceUuid, remoteDevice, isSecure);
+    pendingConnections.add(pendingConnection);
+    return pendingConnection;
+  }
+
+  /** Request to the foreground user to disconnect an active connection */
+  public void disconnect(@NonNull Connection connection) throws RemoteException {
+    if (remoteCallback != null) {
+      remoteCallback.onDisconnectRequested(connection);
+    }
+  }
+
+  /**
+   * Request to the foreground user to cancel a connection request before an active connection is
+   * established
+   */
+  public void cancelConnectionAttempt(@NonNull PendingConnection pendingConnection)
+      throws RemoteException {
+    pendingConnections.remove(pendingConnection);
+    if (remoteCallback != null) {
+      remoteCallback.onCancelConnectionAttemptRequested(pendingConnection.getId());
+    }
+  }
+
+  /**
+   * Request to the foreground user to send a {@code message} on an active {@code connection}
+   *
+   * @return An object representing the pending send message request
+   */
+  @Nullable
+  public PendingSentMessage sendMessage(@NonNull Connection connection, @NonNull byte[] message)
+      throws RemoteException {
+    if (remoteCallback != null) {
+      return remoteCallback.onSendMessageRequested(connection, message);
+    }
+    return null;
+  }
+
+  public void registerConnectionCallback(
+      @NonNull UUID serviceUuid, @Nullable OnErrorListener onErrorListener) {
+    connectionErrorListeners.put(serviceUuid, onErrorListener);
+  }
+
+  public void unregisterConnectionCallback(@NonNull UUID serviceUuid) {
+    connectionErrorListeners.remove(serviceUuid);
+  }
+
+  public void setOnMessageReceivedListener(
+      @NonNull Connection connection,
+      @Nullable OnMessageReceivedListener onMessageReceivedListener) {
+    onMessageReceivedListeners.put(connection, onMessageReceivedListener);
+  }
+
+  public void clearOnMessageReceivedListener(@NonNull Connection connection) {
+    onMessageReceivedListeners.remove(connection);
+  }
+
+  /** Callbacks for notifying the relevant events with the SPP connection. */
+  public interface OnErrorListener {
+    void onError(Connection connection);
+  }
+
+  /** Listener for when a message has been received on an open connection. */
+  public interface OnMessageReceivedListener {
+    void onMessageReceived(byte[] message);
+  }
+}

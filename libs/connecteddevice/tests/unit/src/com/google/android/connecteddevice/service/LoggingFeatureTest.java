@@ -1,0 +1,127 @@
+package com.google.android.connecteddevice.service;
+
+import static com.google.common.truth.Truth.assertThat;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+
+import android.content.Context;
+import androidx.annotation.NonNull;
+import androidx.test.core.app.ApplicationProvider;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import com.google.android.companionprotos.LoggingMessageProto.LoggingMessage;
+import com.google.android.companionprotos.LoggingMessageProto.LoggingMessage.MessageType;
+import com.google.android.connecteddevice.ConnectedDeviceManager;
+import com.google.android.connecteddevice.logging.LoggingManager;
+import com.google.android.connecteddevice.logging.LoggingManager.LoggingEventCallback;
+import com.google.android.connecteddevice.model.ConnectedDevice;
+import com.google.protobuf.ExtensionRegistryLite;
+import com.google.protobuf.InvalidProtocolBufferException;
+import java.util.UUID;
+import java.util.concurrent.Executor;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+@RunWith(AndroidJUnit4.class)
+public class LoggingFeatureTest {
+
+  private final Context context = ApplicationProvider.getApplicationContext();
+
+  @Mock private LoggingManager mockLoggingManager;
+  @Mock private ConnectedDeviceManager mockConnectedDeviceManager;
+
+  private LoggingFeature loggingFeature;
+  private LoggingEventCallback loggingEventCallback;
+
+  @Before
+  public void createLoggingFeature() {
+    MockitoAnnotations.initMocks(this);
+
+    ArgumentCaptor<LoggingEventCallback> callbackCaptor =
+        ArgumentCaptor.forClass(LoggingEventCallback.class);
+    loggingFeature = new LoggingFeature(context, mockConnectedDeviceManager, mockLoggingManager);
+    verify(mockLoggingManager)
+        .registerLoggingEventCallback(callbackCaptor.capture(), any(Executor.class));
+    loggingEventCallback = callbackCaptor.getValue();
+  }
+
+  @Test
+  public void onLogMessageReceived_sendRequest() {
+    ConnectedDevice connectedDevice = createConnectedDevice();
+
+    loggingFeature.onMessageReceived(connectedDevice, LoggingFeature.createRemoteRequestMessage());
+
+    verify(mockLoggingManager).startSendingLogRecords();
+  }
+
+  @Test
+  public void onLogMessageReceived_log() {
+    byte[] payload = "LOG_MESSAGE_CONTENT".getBytes(UTF_8);
+    ConnectedDevice connectedDevice = createConnectedDevice();
+
+    loggingFeature.onMessageReceived(
+        connectedDevice, LoggingFeature.createLocalLogMessage(payload));
+
+    verify(mockLoggingManager).processRemoteLogRecords(connectedDevice, payload);
+  }
+
+  @Test
+  public void onLogMessageReceived_unparseableMessage() {
+    byte[] payload = "UNPARSEABLE_MESSAGE".getBytes(UTF_8);
+    ConnectedDevice connectedDevice = createConnectedDevice();
+
+    loggingFeature.onMessageReceived(connectedDevice, payload);
+
+    verify(mockLoggingManager, never()).startSendingLogRecords();
+    verify(mockLoggingManager, never())
+        .processRemoteLogRecords(any(ConnectedDevice.class), any(byte[].class));
+  }
+
+  @Test
+  public void loggingEventCallback_onRemoteLogRequested() throws InvalidProtocolBufferException {
+    ArgumentCaptor<byte[]> messageCaptor = ArgumentCaptor.forClass(byte[].class);
+    ConnectedDevice connectedDevice = createConnectedDevice();
+
+    loggingFeature.onSecureChannelEstablished(connectedDevice);
+    loggingEventCallback.onRemoteLogRequested();
+
+    verify(mockConnectedDeviceManager)
+        .sendMessageSecurely(eq(connectedDevice), any(UUID.class), messageCaptor.capture());
+    LoggingMessage message =
+        LoggingMessage.parseFrom(
+            messageCaptor.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    assertThat(message.getType()).isSameInstanceAs(MessageType.START_SENDING);
+  }
+
+  @Test
+  public void loggingEventCallback_onLocalLogAvailable() throws InvalidProtocolBufferException {
+    ArgumentCaptor<byte[]> messageCaptor = ArgumentCaptor.forClass(byte[].class);
+    byte[] testLogs = "LOG_MESSAGE_CONTENT".getBytes(UTF_8);
+    ConnectedDevice connectedDevice = createConnectedDevice();
+
+    loggingFeature.onSecureChannelEstablished(connectedDevice);
+    loggingEventCallback.onLocalLogAvailable(testLogs);
+
+    verify(mockConnectedDeviceManager)
+        .sendMessageSecurely(eq(connectedDevice), any(UUID.class), messageCaptor.capture());
+    LoggingMessage message =
+        LoggingMessage.parseFrom(
+            messageCaptor.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    assertThat(message.getType()).isSameInstanceAs(MessageType.LOG);
+  }
+
+  @NonNull
+  private static ConnectedDevice createConnectedDevice() {
+    return new ConnectedDevice(
+        /* deviceId = */ "TEST_ID",
+        /* deviceName = */ "TEST_NAME",
+        /* belongsToActiveUser = */ true,
+        /* hasSecureChannel = */ true);
+  }
+}

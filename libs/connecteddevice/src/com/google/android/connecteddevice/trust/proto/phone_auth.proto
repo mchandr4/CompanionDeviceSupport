@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package com.google.android.connecteddevice.trust.proto;
+
+option java_package = "com.google.android.connecteddevice.trust.proto";
+option java_outer_classname = "PhoneAuthProto";
+
+// Credentials to be sent from a phone to unlock the user.
+message PhoneCredentials {
+  // Required field representing the escrow token that needs to be sent for
+  // authenticating the user
+  bytes escrow_token = 1;
+
+  // Required field representing the handle associated with the escrow token
+  // that needs to be sent for authenticating the user
+  bytes handle = 2;
+}

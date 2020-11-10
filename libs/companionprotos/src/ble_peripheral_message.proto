@@ -1,0 +1,185 @@
+syntax = "proto3";
+
+package aae.bleproxy;
+
+option java_package = "com.google.protos.aae.bleproxy";
+option java_outer_classname = "BlePeripheralMessage";
+
+// Message packaged for sending a payload along with the type to identify the
+// payload.
+message BlePeripheralMessageParcel {
+  int32 version = 1;
+
+  // Enumerations of payload types that can be packaged with this parcel.
+  enum PayloadType {
+    PAYLOAD_TYPE_UNSPECIFIED = 0;
+
+    // Simple plain text message just for diagnostics.
+    PLAIN_TEXT = 1;
+
+    // Type of payload from client to stop advertising.
+    STOP_ADVERTISING = 2;
+
+    // Type of payload from client to start advertising.
+    START_ADVERTISING = 3;
+
+    // Type of payload from client requesting to add a service.
+    ADD_SERVICE = 4;
+
+    // Type of payload from proxy indicating peripheral state change.
+    NOTIFY_STATE_UPDATED = 5;
+
+    // Type of payload from proxy for a central having written a value to a
+    // characteristic.
+    NOTIFY_CENTRAL_WROTE_VALUE = 6;
+
+    // Type of payload from client to update a characteristic.
+    UPDATE_CHARACTERISTIC = 7;
+
+    // Type of payload from proxy indicating the peripheral started
+    // advertising.
+    NOTIFY_STARTED_ADVERTISING = 8;
+
+    // Type of payload from proxy indicating a central subscription event.
+    NOTIFY_CENTRAL_SUBSCRIPTION_EVENT = 9;
+  }
+
+  // The type of payload that is packaged with this parcel.
+  PayloadType type = 2;
+
+  // The payload.
+  bytes payload = 3;
+}
+
+// Plain Text Message for diagnostics. Can be sent to or from the proxy.
+message PlainTextMessage {
+  string body = 1;
+}
+
+// Request for the proxy to stop advertising.
+message StopAdvertisingMessage {}
+
+// Request for the proxy to start advertising.
+message StartAdvertisingMessage {
+  // Name used within the BLE advertisement.
+  string name = 1;
+}
+
+// Request for the proxy to add the specified service.
+message AddServiceMessage {
+  // Service to add to the BLE peripheral.
+  Service service = 1;
+}
+
+// Notification sent from the proxy that a central wrote a value to a
+// characteristic.
+message NotifyCentralDidWriteValueMessage {
+  // The central that wrote the value.
+  Central central = 1;
+
+  // The characteristic whose value was written.
+  Characteristic characteristic = 2;
+}
+
+// Notification sent from the proxy that a central performed a subscription
+// event.
+message NotifyCentralSubscriptionMessage {
+  // The central that performed the event.
+  Central central = 1;
+
+  // The characteristic on which the subsciption event was applied.
+  Characteristic characteristic = 2;
+
+  // Enumeration of possible subscription events.
+  enum Event {
+    EVENT_UNSPECIFIED = 0;
+    SUBSCRIBED = 1;
+    UNSUBSCRIBED = 2;
+  }
+
+  // The subscription event.
+  Event event = 3;
+}
+
+// Request to send to the proxy indicating that the characteristic was
+// updated.
+message UpdateCharacteristicMessage {
+  // The characteristic that was updated.
+  Characteristic characteristic = 1;
+}
+
+// BLE Service (maps to different implementations on the client and server).
+message Service {
+  // UUID identifying the service.
+  string identifier = 1;
+
+  // The advertisement data to include in the service's advertisement.
+  // Note: The service implementation may ignore this data.
+  bytes advertisement_data = 2;
+
+  // This service's BLE characteristics.
+  repeated Characteristic characteristics = 3;
+}
+
+// BLE Characteristic (maps to different implementations on the client and
+// server).
+message Characteristic {
+  // UUID identifying the characteristic.
+  string identifier = 1;
+
+  // Property for behavior when accessing a characteristic's value.
+  enum Property {
+    PROPERTY_UNSPECIFIED = 0;
+    READ = 1;
+    WRITE = 2;
+    WRITE_WITHOUT_RESPONSE = 3;
+    NOTIFY = 4;
+  }
+
+  // Permission for accessing a characteristic's value.
+  enum Permission {
+    PERMISSION_UNSPECIFIED = 0;
+    READABLE = 1;
+    WRITEABLE = 2;
+  }
+
+  // The characteristic's value to be read (if readonly) or posted as a
+  // an update (if notify).
+  bytes value = 2;
+
+  // One or more properties indicating behaviors (e.g. read/write/notify/
+  // write without response) for accessing the characteristic's value.
+  repeated Property properties = 3;
+
+  // One or more permissions for accessing the characteristic's value.
+  repeated Permission permissions = 4;
+}
+
+// BLE Central (maps to different implementations on the client and server).
+message Central {
+  // UUID identifying the central.
+  string identifier = 1;
+
+  // Number of bytes the central can receive in a single event.
+  int32 max_update_value_length = 2;
+}
+
+// Enumeration of possible BLE peripheral states.
+enum PeripheralState {
+  PERIPHERAL_STATE_UNSPECIFIED = 0;
+  UNKNOWN = 1;
+  RESETTING = 2;
+  UNSUPPORTED = 3;
+  UNAUTHORIZED = 4;
+  POWERED_OFF = 5;
+  POWERED_ON = 6;
+}
+
+// Notification sent from the proxy that the peripheral's state has changed.
+message NotifyPeripheralStateDidUpdateMessage {
+  // The new peripheral state.
+  PeripheralState state = 1;
+}
+
+// Notification sent from the proxy that advertising has started.
+message NotifyStartedAdvertisingMessage {}

@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package com.google.android.companionprotos;
+
+option java_package = "com.google.android.companionprotos";
+option java_outer_classname = "VersionExchangeProto";
+
+message VersionExchange {
+  // Minimum supported protobuf version.
+  int32 min_supported_messaging_version = 1;
+
+  // Maximum supported protobuf version.
+  int32 max_supported_messaging_version = 2;
+
+  // Minimum supported version of the encryption engine.
+  int32 min_supported_security_version = 3;
+
+  // Maximum supported version of the encryption engine.
+  int32 max_supported_security_version = 4;
+}

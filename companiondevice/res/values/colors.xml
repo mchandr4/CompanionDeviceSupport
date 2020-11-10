@@ -1,0 +1,14 @@
+<resources>
+    <color name="connection_color_connected">@*android:color/car_green_500</color>
+    <color name="connection_color_disconnected">@*android:color/car_red_500</color>
+    <color name="connection_color_not_detected">#b7ffffff</color>
+
+    <color name="list_item_focus_stroke_color">#94CBFF</color>
+    <color name="list_item_focus_fill_color">#3D94CBFF</color>
+    <color name="list_item_focus_pressed_stroke_color">#94CBFF</color>
+    <color name="list_item_focus_pressed_fill_color">#8A94CBFF</color>
+
+    <color name="ripple_color">#27ffffff</color>
+
+    <color name="car_red_300">@*android:color/car_red_300</color>
+</resources>

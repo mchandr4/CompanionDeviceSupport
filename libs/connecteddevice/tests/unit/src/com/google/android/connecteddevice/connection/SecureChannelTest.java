@@ -1,0 +1,183 @@
+package com.google.android.connecteddevice.connection;
+
+import static com.google.android.companionprotos.OperationProto.OperationType.CLIENT_MESSAGE;
+import static com.google.android.companionprotos.OperationProto.OperationType.ENCRYPTION_HANDSHAKE;
+import static com.google.android.connecteddevice.connection.SecureChannel.CHANNEL_ERROR_INVALID_HANDSHAKE;
+import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import com.google.android.connecteddevice.util.ByteUtils;
+import com.google.android.encryptionrunner.EncryptionRunnerFactory;
+import com.google.android.encryptionrunner.HandshakeException;
+import com.google.android.encryptionrunner.Key;
+import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
+import java.util.UUID;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+@RunWith(AndroidJUnit4.class)
+public class SecureChannelTest {
+  @Mock private DeviceMessageStream mockStream;
+  @Mock private SecureChannel.Callback mockCallback;
+
+  private Key fakeKey;
+
+  private SecureChannel secureChannel;
+
+  @Before
+  public void setUp() throws SignatureException {
+    MockitoAnnotations.initMocks(this);
+
+    fakeKey =
+        spy(
+            new Key() {
+              @Override
+              public byte[] asBytes() {
+                return new byte[0];
+              }
+
+              @Override
+              public byte[] encryptData(byte[] data) {
+                return data;
+              }
+
+              @Override
+              public byte[] decryptData(byte[] encryptedData) throws SignatureException {
+                return encryptedData;
+              }
+
+              @Override
+              public byte[] getUniqueSession() throws NoSuchAlgorithmException {
+                return new byte[0];
+              }
+            });
+
+    secureChannel =
+        new SecureChannel(mockStream, EncryptionRunnerFactory.newFakeRunner()) {
+          @Override
+          void processHandshake(byte[] message) {}
+        };
+    secureChannel.setEncryptionKey(fakeKey);
+  }
+
+  @Test
+  public void processMessage_doesNothingForUnencryptedMessage() throws SignatureException {
+    byte[] payload = ByteUtils.randomBytes(10);
+    DeviceMessage message =
+        new DeviceMessage(UUID.randomUUID(), /* isMessageEncrypted= */ false, payload);
+    secureChannel.processMessage(message);
+    assertThat(message.getMessage()).isEqualTo(payload);
+    verify(fakeKey, never()).decryptData(any());
+  }
+
+  @Test
+  public void processMessage_decryptsEncryptedMessage() throws SignatureException {
+    byte[] payload = ByteUtils.randomBytes(10);
+    DeviceMessage message =
+        new DeviceMessage(UUID.randomUUID(), /* isMessageEncrypted= */ true, payload);
+    secureChannel.processMessage(message);
+    verify(fakeKey).decryptData(any());
+  }
+
+  @Test
+  public void processMessage_onMessageReceivedErrorForEncryptedMessageWithNoKey()
+      throws InterruptedException {
+    DeviceMessage message =
+        new DeviceMessage(
+            UUID.randomUUID(), /* isMessageEncrypted= */ true, ByteUtils.randomBytes(10));
+
+    secureChannel.setEncryptionKey(null);
+    secureChannel.registerCallback(mockCallback);
+    secureChannel.processMessage(message);
+
+    verify(mockCallback).onMessageReceivedError(isNull());
+    assertThat(message.getMessage()).isNull();
+  }
+
+  @Test
+  public void onMessageReceived_onEstablishSecureChannelFailureBadHandshakeMessage()
+      throws InterruptedException {
+    DeviceMessage message =
+        new DeviceMessage(
+            UUID.randomUUID(), /* isMessageEncrypted= */ true, ByteUtils.randomBytes(10));
+
+    secureChannel.setEncryptionKey(null);
+    secureChannel.registerCallback(mockCallback);
+    secureChannel.onMessageReceived(message, ENCRYPTION_HANDSHAKE);
+
+    verify(mockCallback).onEstablishSecureChannelFailure(CHANNEL_ERROR_INVALID_HANDSHAKE);
+  }
+
+  @Test
+  public void onMessageReceived_onMessageReceivedNotIssuedForNullMessage()
+      throws InterruptedException {
+    DeviceMessage message =
+        new DeviceMessage(UUID.randomUUID(), /* isMessageEncrypted= */ false, /* message= */ null);
+
+    secureChannel.registerCallback(mockCallback);
+    secureChannel.onMessageReceived(message, CLIENT_MESSAGE);
+
+    verify(mockCallback, never()).onMessageReceived(any());
+  }
+
+  @Test
+  public void onMessageReceived_processHandshakeExceptionIssuesSecureChannelFailureCallback()
+      throws InterruptedException {
+    SecureChannel secureChannel =
+        new SecureChannel(mockStream, EncryptionRunnerFactory.newFakeRunner()) {
+          @Override
+          void processHandshake(byte[] message) throws HandshakeException {
+            throw new HandshakeException("test");
+          }
+        };
+    secureChannel.registerCallback(mockCallback);
+    DeviceMessage message =
+        new DeviceMessage(
+            UUID.randomUUID(),
+            /* isMessageEncrypted= */ true,
+            /* message= */ ByteUtils.randomBytes(10));
+
+    secureChannel.onMessageReceived(message, ENCRYPTION_HANDSHAKE);
+
+    verify(mockCallback).onEstablishSecureChannelFailure(CHANNEL_ERROR_INVALID_HANDSHAKE);
+  }
+
+  @Test
+  public void decompressMessage_returnsOriginalMessageIfOriginalSizeIsZero() {
+    byte[] message = ByteUtils.randomBytes(10);
+    DeviceMessage deviceMessage =
+        new DeviceMessage(UUID.randomUUID(), /* isMessageEncrypted= */ false, message);
+    deviceMessage.setOriginalMessageSize(0);
+    assertThat(secureChannel.decompressMessage(deviceMessage)).isTrue();
+    assertThat(deviceMessage.getMessage()).isEqualTo(message);
+  }
+
+  @Test
+  public void compressMessage_returnsCompressedMessageWithOriginalSize() {
+    byte[] message = new byte[100];
+    DeviceMessage deviceMessage =
+        new DeviceMessage(UUID.randomUUID(), /* isMessageEncrypted= */ false, message);
+    secureChannel.compressMessage(deviceMessage);
+    assertThat(deviceMessage.getMessage()).isNotEqualTo(message);
+    assertThat(deviceMessage.getOriginalMessageSize()).isEqualTo(message.length);
+  }
+
+  @Test
+  public void compressedMessageCanBeDecompressed() {
+    byte[] message = new byte[100];
+    DeviceMessage deviceMessage =
+        new DeviceMessage(UUID.randomUUID(), /* isMessageEncrypted= */ false, message);
+    secureChannel.compressMessage(deviceMessage);
+    assertThat(secureChannel.decompressMessage(deviceMessage)).isTrue();
+    assertThat(deviceMessage.getMessage()).isEqualTo(message);
+  }
+}

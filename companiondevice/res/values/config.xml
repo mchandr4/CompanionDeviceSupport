@@ -1,0 +1,26 @@
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+
+    <!-- Platform values -->
+    <string name="car_association_service_uuid" translatable="false">5e2a68a4-27be-43f9-8d1e-4546976fabd7</string>
+
+    <string name="car_spp_service_uuid_secure" translatable="false">32a0e1c6-bbd2-11ea-b3de-0242ac130004</string>
+
+    <bool name="enable_spp_support">false</bool>
+
+    <!-- Services to start early in the single user (user 0). -->
+    <string-array name="early_single_user_services" translatable="false">
+        <item>com.google.android.companiondevicesupport/com.google.android.connecteddevice.trust.TrustedDeviceManagerService</item>
+    </string-array>
+
+    <!-- Services to start early in the foreground user. -->
+    <string-array name="early_fg_user_services" translatable="false">
+        <item>com.google.android.companiondevicesupport/com.google.android.connecteddevice.service.SppService</item>
+    </string-array>
+
+    <!-- Services to start in the foreground user once the user has been unlocked. -->
+    <string-array name="unlock_fg_user_services" translatable="false">
+        <item>com.google.android.companiondevicesupport/com.google.android.connecteddevice.calendarsync.CalendarSyncService</item>
+        <item>com.google.android.companiondevicesupport/com.google.android.connecteddevice.notificationmsg.NotificationMsgService</item>
+        <item>com.google.android.companiondevicesupport/com.google.android.connecteddevice.trust.TrustedDeviceUiDelegateService</item>
+    </string-array>
+</resources>

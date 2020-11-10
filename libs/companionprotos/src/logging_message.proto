@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package com.google.android.companionprotos;
+
+option java_package = "com.google.android.companionprotos";
+option java_outer_classname = "LoggingMessageProto";
+
+// A message specific to logging feature.
+message LoggingMessage {
+  // Current version of this proto. Must be positive but declared as an
+  // int32 for interoperability reasons.
+  int32 version = 1;
+
+  enum MessageType {
+    // The contents of the payload are unknown.
+    MESSAGE_TYPE_UNKNOWN = 0;
+
+    // This message is a request for the other device to start sending logs.
+    // The payload is empty for this type.
+    START_SENDING = 1;
+
+    // This message payload contains a log.
+    LOG = 2;
+
+    // This message is an acknowledgment of a previously received message.
+    // The payload is empty for this type.
+    ACK = 3;
+
+    // An error has occurred on the sender of this message. The payload will be
+    // The payload is empty for this type.
+    ERROR = 4;
+  }
+
+  // The type of this message.
+  MessageType type = 2;
+
+  // The bytes that represent the content for this message.
+  bytes payload = 3;
+}

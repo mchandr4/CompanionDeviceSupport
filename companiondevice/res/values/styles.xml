@@ -1,0 +1,43 @@
+<resources>
+    <style name="AssociationTopIcon">
+        <item name="android:tint">@color/color_accent</item>
+        <item name="android:scaleType">fitCenter</item>
+    </style>
+
+    <style name="TextAppearance.Companion" parent="android:TextAppearance.DeviceDefault">
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textAlignment">viewStart</item>
+    </style>
+
+    <style name="AssociationTitle" parent="TextAppearance.Companion">
+        <item name="android:textSize">@dimen/body1_size</item>
+    </style>
+
+    <style name="AssociationInstruction" parent="TextAppearance.Companion">
+        <item name="android:textSize">@dimen/body3_size</item>
+    </style>
+
+    <style name="AssociationMessage" parent="TextAppearance.Companion">
+        <item name="android:textSize">@dimen/body3_size</item>
+        <item name="android:textColor">?android:attr/textColorTertiary</item>
+    </style>
+
+    <style name="AssociationPairingCode" parent="TextAppearance.Companion">
+        <item name="android:textSize">56sp</item>
+        <item name="android:letterSpacing">@dimen/pairing_code_text_spacing</item>
+        <item name="android:textColor">@color/color_accent</item>
+    </style>
+
+    <style name="TrustedDeviceTitle" parent="TextAppearance.Companion">
+        <item name="android:textSize">@dimen/body1_size</item>
+    </style>
+
+    <style name="TrustedDeviceMessage" parent="TextAppearance.Companion">
+        <item name="android:textSize">@dimen/body3_size</item>
+        <item name="android:textColor">?android:attr/textColorTertiary</item>
+    </style>
+
+    <style name="DeviceDetailDivider">
+        <item name="android:background">?android:attr/textColorPrimary</item>
+    </style>
+</resources>

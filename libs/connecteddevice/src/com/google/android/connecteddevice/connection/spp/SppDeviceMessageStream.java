@@ -1,0 +1,50 @@
+package com.google.android.connecteddevice.connection.spp;
+
+import static com.google.android.connecteddevice.util.SafeLog.logd;
+import static com.google.android.connecteddevice.util.SafeLog.loge;
+
+import android.os.RemoteException;
+import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
+import com.google.android.connecteddevice.connection.DeviceMessageStream;
+import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelegateBinder;
+import com.google.android.connecteddevice.transport.spp.Connection;
+
+/** Spp message stream to a device. */
+class SppDeviceMessageStream extends DeviceMessageStream {
+
+  private static final String TAG = "SppDeviceMessageStream";
+
+  private final ConnectedDeviceSppDelegateBinder sppServiceBinder;
+  private final Connection connection;
+
+  SppDeviceMessageStream(
+      @NonNull ConnectedDeviceSppDelegateBinder sppBinder,
+      @NonNull Connection connection,
+      int maxWriteSize) {
+    super(maxWriteSize);
+    this.sppServiceBinder = sppBinder;
+    this.connection = connection;
+    this.sppServiceBinder.setOnMessageReceivedListener(connection, this::onMessageReceived);
+  }
+
+  @Override
+  protected void send(byte[] data) {
+    try {
+      sppServiceBinder.sendMessage(connection, data);
+    } catch (RemoteException e) {
+      loge(TAG, "Error when sending message to remote device");
+    }
+    sendCompleted();
+  }
+
+  @VisibleForTesting
+  void onMessageReceived(@NonNull byte[] value) {
+    logd(
+        TAG,
+        "Received a message from remote device("
+            + connection.getRemoteDevice().getAddress()
+            + ").");
+    onDataReceived(value);
+  }
+}

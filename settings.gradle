@@ -1,0 +1,7 @@
+include ':libs:companionprotos'
+include ':libs:connecteddevice'
+include ':libs:encryptionrunner'
+include ':companiondevice'
+include ':ukey2'
+project(':ukey2').projectDir = new File('../../../../external/ukey2')
+rootProject.name = "CompanionDeviceSupport"
