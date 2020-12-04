@@ -387,6 +387,22 @@ public class ConnectedDeviceStorage {
     }
   }
 
+  /**
+   * Get associated device with the given id.
+   *
+   * @param deviceId The id of the associated device.
+   * @return Associated device.
+   */
+  @Nullable
+  public AssociatedDevice getAssociatedDevice(@NonNull String deviceId) {
+    AssociatedDeviceEntity entity = associatedDeviceDatabase.getAssociatedDevice(deviceId);
+    if (entity == null) {
+      logw(TAG, "No device has been associated with device id " + deviceId + ". Returning null");
+      return null;
+    }
+    return new AssociatedDevice(deviceId, entity.address, entity.name, entity.isConnectionEnabled);
+  }
+
   /** Callback for association device related events. */
   public interface AssociatedDeviceCallback {
     /** Triggered when an associated device has been added. */

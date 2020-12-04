@@ -352,6 +352,15 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
         @Override
         public void onAssociationStartSuccess(String deviceName) {
           associationState.postValue(AssociationState.STARTED);
+          if (deviceName == null) {
+            deviceName = BluetoothAdapter.getDefaultAdapter().getName();
+            logd(
+                TAG,
+                "Association advertising started with null device name, falling back to "
+                    + "display bluetooth adapter name: "
+                    + deviceName
+                    + ".");
+          }
           advertisedCarName.postValue(deviceName);
         }
 

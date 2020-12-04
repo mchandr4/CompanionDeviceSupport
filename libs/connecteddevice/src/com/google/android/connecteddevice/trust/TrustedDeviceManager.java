@@ -7,7 +7,8 @@ import static com.google.android.connecteddevice.util.SafeLog.logw;
 import android.app.ActivityManager;
 import androidx.room.Room;
 import android.content.Context;
-import android.os.IBinder;
+import android.os.IInterface;
+import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -30,16 +31,11 @@ import com.google.android.connecteddevice.trust.storage.TrustedDeviceDao;
 import com.google.android.connecteddevice.trust.storage.TrustedDeviceDatabase;
 import com.google.android.connecteddevice.trust.storage.TrustedDeviceEntity;
 import com.google.android.connecteddevice.util.ByteUtils;
-import com.google.android.connecteddevice.util.RemoteCallbackBinder;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -55,23 +51,23 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
   /** Length of token generated on a trusted device. */
   private static final int ESCROW_TOKEN_LENGTH = 8;
 
-  private final Map<IBinder, ITrustedDeviceCallback> trustedDeviceCallbacks =
-      new ConcurrentHashMap<>();
+  private final RemoteCallbackList<ITrustedDeviceCallback> remoteTrustedDeviceCallbacks =
+      new RemoteCallbackList<>();
 
-  private final Map<IBinder, ITrustedDeviceEnrollmentCallback> enrollmentCallbacks =
-      new ConcurrentHashMap<>();
+  private final RemoteCallbackList<ITrustedDeviceEnrollmentCallback> remoteEnrollmentCallbacks =
+      new RemoteCallbackList<>();
 
-  private final Map<IBinder, IOnTrustedDeviceEnrollmentNotificationRequestListener>
-      enrollmentNotificationRequestListeners = new ConcurrentHashMap<>();
+  private final RemoteCallbackList<IOnTrustedDeviceEnrollmentNotificationRequestListener>
+      remoteEnrollmentNotificationRequestListeners = new RemoteCallbackList<>();
 
-  private final Map<IBinder, IDeviceAssociationCallback> associatedDeviceCallbacks =
-      new ConcurrentHashMap<>();
-
-  private final Set<RemoteCallbackBinder> callbackBinders = new CopyOnWriteArraySet<>();
+  private final RemoteCallbackList<IDeviceAssociationCallback> remoteDeviceAssociationCallbacks =
+      new RemoteCallbackList<>();
 
   private final TrustedDeviceFeature trustedDeviceFeature;
 
   private final Executor executor = Executors.newSingleThreadExecutor();
+
+  private final Executor remoteCallbackListExecutor = Executors.newSingleThreadExecutor();
 
   private final AtomicBoolean isWaitingForCredentials = new AtomicBoolean(false);
 
@@ -108,17 +104,26 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
     pendingCredentials = null;
     isWaitingForCredentials.set(false);
     pendingUnlockDeviceId.set(null);
-    trustedDeviceCallbacks.clear();
-    enrollmentCallbacks.clear();
-    associatedDeviceCallbacks.clear();
     trustedDeviceFeature.stop();
+    remoteDeviceAssociationCallbacks.kill();
+    remoteTrustedDeviceCallbacks.kill();
+    remoteEnrollmentCallbacks.kill();
+    remoteEnrollmentNotificationRequestListeners.kill();
   }
 
   private void startEnrollment(@NonNull ConnectedDevice device, @NonNull byte[] token) {
     logd(TAG, "Starting trusted device enrollment process.");
     pendingDevice = device;
 
-    notifyEnrollmentNotificationRequestListeners();
+    notifyRemoteCallbackList(
+        remoteEnrollmentNotificationRequestListeners,
+        listener -> {
+          try {
+            listener.onTrustedDeviceEnrollmentNotificationRequest();
+          } catch (RemoteException e) {
+            loge(TAG, "Failed to notify the enrollment notification request.");
+          }
+        });
 
     pendingToken = token;
     if (trustAgentDelegate == null) {
@@ -155,13 +160,14 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
     logd(TAG, "Escrow token has been successfully added.");
     pendingToken = null;
 
-    if (enrollmentCallbacks.isEmpty()) {
+    if (remoteEnrollmentCallbacks.getRegisteredCallbackCount() == 0) {
       isWaitingForCredentials.set(true);
       return;
     }
 
     isWaitingForCredentials.set(false);
-    notifyEnrollmentCallbacks(
+    notifyRemoteCallbackList(
+        remoteEnrollmentCallbacks,
         callback -> {
           try {
             callback.onValidateCredentialsRequest();
@@ -197,7 +203,8 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
     pendingDevice = null;
 
     TrustedDevice trustedDevice = new TrustedDevice(deviceId, userId, handle);
-    notifyTrustedDeviceCallbacks(
+    notifyRemoteCallbackList(
+        remoteTrustedDeviceCallbacks,
         callback -> {
           try {
             callback.onTrustedDeviceAdded(trustedDevice);
@@ -249,7 +256,8 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
       loge(TAG, "Error while removing token through delegate.", e);
       return;
     }
-    notifyTrustedDeviceCallbacks(
+    notifyRemoteCallbackList(
+        remoteTrustedDeviceCallbacks,
         callback -> {
           try {
             callback.onTrustedDeviceRemoved(trustedDevice);
@@ -282,43 +290,27 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
 
   @Override
   public void registerTrustedDeviceCallback(ITrustedDeviceCallback callback) {
-    trustedDeviceCallbacks.put(callback.asBinder(), callback);
-    RemoteCallbackBinder remoteBinder =
-        new RemoteCallbackBinder(
-            callback.asBinder(), iBinder -> unregisterTrustedDeviceCallback(callback));
-    callbackBinders.add(remoteBinder);
+    remoteTrustedDeviceCallbacks.register(callback);
   }
 
   @Override
   public void unregisterTrustedDeviceCallback(ITrustedDeviceCallback callback) {
-    IBinder binder = callback.asBinder();
-    trustedDeviceCallbacks.remove(binder);
-    removeRemoteBinder(binder);
+    remoteTrustedDeviceCallbacks.unregister(callback);
   }
 
   @Override
   public void registerAssociatedDeviceCallback(IDeviceAssociationCallback callback) {
-    associatedDeviceCallbacks.put(callback.asBinder(), callback);
-    RemoteCallbackBinder remoteBinder =
-        new RemoteCallbackBinder(
-            callback.asBinder(), iBinder -> unregisterAssociatedDeviceCallback(callback));
-    callbackBinders.add(remoteBinder);
+    remoteDeviceAssociationCallbacks.register(callback);
   }
 
   @Override
   public void unregisterAssociatedDeviceCallback(IDeviceAssociationCallback callback) {
-    IBinder binder = callback.asBinder();
-    associatedDeviceCallbacks.remove(binder);
-    removeRemoteBinder(binder);
+    remoteDeviceAssociationCallbacks.unregister(callback);
   }
 
   @Override
   public void registerTrustedDeviceEnrollmentCallback(ITrustedDeviceEnrollmentCallback callback) {
-    enrollmentCallbacks.put(callback.asBinder(), callback);
-    RemoteCallbackBinder remoteBinder =
-        new RemoteCallbackBinder(
-            callback.asBinder(), iBinder -> unregisterTrustedDeviceEnrollmentCallback(callback));
-    callbackBinders.add(remoteBinder);
+    remoteEnrollmentCallbacks.register(callback);
     // A token has been added and is waiting on user credential validation.
     if (isWaitingForCredentials.getAndSet(false)) {
       executor.execute(
@@ -334,29 +326,19 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
 
   @Override
   public void unregisterTrustedDeviceEnrollmentCallback(ITrustedDeviceEnrollmentCallback callback) {
-    IBinder binder = callback.asBinder();
-    enrollmentCallbacks.remove(binder);
-    removeRemoteBinder(binder);
+    remoteEnrollmentCallbacks.unregister(callback);
   }
 
   @Override
   public void registerTrustedDeviceEnrollmentNotificationRequestListener(
       IOnTrustedDeviceEnrollmentNotificationRequestListener listener) {
-    logd(TAG, "Registering listener.");
-    enrollmentNotificationRequestListeners.put(listener.asBinder(), listener);
-    RemoteCallbackBinder remoteBinder =
-        new RemoteCallbackBinder(
-            listener.asBinder(),
-            iBinder -> unregisterTrustedDeviceEnrollmentNotificationRequestListener(listener));
-    callbackBinders.add(remoteBinder);
+    remoteEnrollmentNotificationRequestListeners.register(listener);
   }
 
   @Override
   public void unregisterTrustedDeviceEnrollmentNotificationRequestListener(
       IOnTrustedDeviceEnrollmentNotificationRequestListener listener) {
-    IBinder binder = listener.asBinder();
-    enrollmentNotificationRequestListeners.remove(binder);
-    removeRemoteBinder(binder);
+    remoteEnrollmentNotificationRequestListeners.unregister(listener);
   }
 
   @Override
@@ -500,7 +482,8 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
   }
 
   private void notifyEnrollmentError(@TrustedDeviceConstants.TrustedDeviceError int error) {
-    notifyEnrollmentCallbacks(
+    notifyRemoteCallbackList(
+        remoteEnrollmentCallbacks,
         callback -> {
           try {
             callback.onTrustedDeviceEnrollmentError(error);
@@ -510,46 +493,17 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
         });
   }
 
-  private void notifyTrustedDeviceCallbacks(Consumer<ITrustedDeviceCallback> notification) {
-    trustedDeviceCallbacks.forEach(
-        (iBinder, callback) -> executor.execute(() -> notification.accept(callback)));
-  }
-
-  private void notifyEnrollmentCallbacks(Consumer<ITrustedDeviceEnrollmentCallback> notification) {
-    enrollmentCallbacks.forEach(
-        (iBinder, callback) -> executor.execute(() -> notification.accept(callback)));
-  }
-
-  private void notifyAssociatedDeviceCallbacks(Consumer<IDeviceAssociationCallback> notification) {
-    associatedDeviceCallbacks.forEach(
-        (iBinder, callback) -> executor.execute(() -> notification.accept(callback)));
-  }
-
-  private void notifyEnrollmentNotificationRequestListeners() {
-    enrollmentNotificationRequestListeners.forEach(
-        (iBinder, listener) ->
-            executor.execute(
-                () -> {
-                  try {
-                    listener.onTrustedDeviceEnrollmentNotificationRequest();
-                  } catch (RemoteException e) {
-                    loge(TAG, "Failed to notify the enrollment notification request.");
-                  }
-                }));
-  }
-
-  private void removeRemoteBinder(IBinder binder) {
-    RemoteCallbackBinder remoteBinderToRemove = null;
-    for (RemoteCallbackBinder remoteBinder : callbackBinders) {
-      if (remoteBinder.getCallbackBinder().equals(binder)) {
-        remoteBinderToRemove = remoteBinder;
-        break;
-      }
-    }
-    if (remoteBinderToRemove != null) {
-      remoteBinderToRemove.cleanUp();
-      callbackBinders.remove(remoteBinderToRemove);
-    }
+  private <T extends IInterface> void notifyRemoteCallbackList(
+      RemoteCallbackList<T> remoteCallbackList, Consumer<T> notification) {
+    remoteCallbackListExecutor.execute(
+        () -> {
+          int num = remoteCallbackList.beginBroadcast();
+          for (int i = 0; i < num; i++) {
+            T callback = remoteCallbackList.getBroadcastItem(i);
+            executor.execute(() -> notification.accept(callback));
+          }
+          remoteCallbackList.finishBroadcast();
+        });
   }
 
   private static byte[] createAcknowledgmentMessage() {
@@ -624,7 +578,8 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
       new TrustedDeviceFeature.AssociatedDeviceCallback() {
         @Override
         public void onAssociatedDeviceAdded(AssociatedDevice device) {
-          notifyAssociatedDeviceCallbacks(
+          notifyRemoteCallbackList(
+              remoteDeviceAssociationCallbacks,
               callback -> {
                 try {
                   callback.onAssociatedDeviceAdded(device);
@@ -650,7 +605,8 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
           if (deviceToRemove != null) {
             removeTrustedDevice(deviceToRemove);
           }
-          notifyAssociatedDeviceCallbacks(
+          notifyRemoteCallbackList(
+              remoteDeviceAssociationCallbacks,
               callback -> {
                 try {
                   callback.onAssociatedDeviceRemoved(device);
@@ -662,7 +618,8 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
 
         @Override
         public void onAssociatedDeviceUpdated(AssociatedDevice device) {
-          notifyAssociatedDeviceCallbacks(
+          notifyRemoteCallbackList(
+              remoteDeviceAssociationCallbacks,
               callback -> {
                 try {
                   callback.onAssociatedDeviceUpdated(device);

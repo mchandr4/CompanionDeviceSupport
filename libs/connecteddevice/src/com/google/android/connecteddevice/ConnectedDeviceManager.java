@@ -658,7 +658,7 @@ public class ConnectedDeviceManager {
     ConnectedDevice updatedConnectedDevice =
         new ConnectedDevice(
             connectedDevice.getDeviceId(),
-            connectedDevice.getDeviceName(),
+            getConnectedDeviceName(deviceId),
             connectedDevice.isAssociatedWithActiveUser(),
             /* hasSecureChannel= */ true);
 
@@ -762,6 +762,23 @@ public class ConnectedDeviceManager {
     }
     removeConnectedDevice(deviceId);
     addConnectedDevice(deviceId);
+  }
+
+  @Nullable
+  private String getConnectedDeviceName(@NonNull String deviceId) {
+    ConnectedDevice device = connectedDevices.get(deviceId);
+    if (device == null) {
+      return null;
+    }
+    String deviceName = device.getDeviceName();
+    if (deviceName != null) {
+      return deviceName;
+    }
+    AssociatedDevice associatedDevice = storage.getAssociatedDevice(deviceId);
+    if (associatedDevice == null) {
+      return null;
+    }
+    return associatedDevice.getDeviceName();
   }
 
   private void invokeConnectionCallbacks(
