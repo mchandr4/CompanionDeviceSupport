@@ -1,8 +1,23 @@
+/*
+ * Copyright (C) 2020 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.google.android.connecteddevice.transport.spp;
 
 import static com.google.android.connecteddevice.util.SafeLog.logd;
 import static com.google.android.connecteddevice.util.SafeLog.loge;
-import static com.google.android.connecteddevice.util.SafeLog.logw;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -119,49 +134,65 @@ public class SppManager {
   /**
    * Start listening to connection request from the client.
    *
-   * @param serviceUuid The Uuid which the accept task is listening on.
+   * <p>This method should only be called once. To call it again, first call {@link #cleanup()} on
+   * this class.
+   *
+   * @param serviceUuid The UUID to listen on.
    * @return {@code true} if listening is started successfully
    */
   public boolean startListening(@NonNull UUID serviceUuid) {
-    logd(TAG, "Start socket to listening to incoming connection request.");
-    if (connectedSocket != null) {
-      synchronized (lock) {
-        disconnectLocked();
-      }
-    }
     if (acceptTask != null) {
-      acceptTask.cancel();
+      loge(TAG, "startListening() called again before cleanup() invoked. Ignoring.");
+      return false;
     }
+
+    logd(TAG, "Starting socket to listen for incoming connection request.");
+
     // Start the task to listen on a BluetoothServerSocket
     acceptTask =
         new AcceptTask(adapter, isSecure, serviceUuid, acceptTaskListener, taskCallbackExecutor);
+
     if (!acceptTask.startListening()) {
       // TODO(b/159376003): Handle listening error.
       acceptTask.cancel();
       acceptTask = null;
       return false;
     }
+
     synchronized (lock) {
       state = ConnectionState.LISTEN;
     }
+
     taskExecutor.execute(acceptTask);
     return true;
   }
 
-  /** Start connection as client with remote {@code device}. */
+  /**
+   * Start connection as client with remote {@code device}.
+   *
+   * <p>This method should only be called once. To call it again, first call {@link #cleanup()} on
+   * this class.
+   *
+   * @param device The {@link BluetoothDevice} to connect to.
+   * @param serviceUuid The UUID for the socket on {@code device}.
+   */
   public void connect(@NonNull BluetoothDevice device, @NonNull UUID serviceUuid) {
-    // TODO(b/162537040): add retry logic for SPP
-    logd(TAG, "Attempt connect to remote device.");
     // Cancel any thread attempting to make a connection
     if (connectTask != null) {
-      connectTask.cancel();
+      loge(TAG, "connect() called again before cleanup() invoked. Ignoring.");
+      return;
     }
+
+    // TODO(b/162537040): add retry logic for SPP
+    logd(TAG, "Attempting connect to remote device: " + device.getAddress());
 
     // Start the task to connect with the given device
     connectTask =
         new ConnectTask(device, isSecure, serviceUuid, connectTaskCallback, taskCallbackExecutor);
+
     taskExecutor.execute(connectTask);
   }
+
   /**
    * Send data to remote connected bluetooth device.
    *
@@ -181,6 +212,7 @@ public class SppManager {
       loge(TAG, "Wrapping data with array length failed.");
       return false;
     }
+
     writeExecutor.execute(
         () -> {
           try {
@@ -189,11 +221,10 @@ public class SppManager {
             logd(TAG, "Sent message to remote device with length: " + dataReadyToSend.length);
           } catch (IOException e) {
             loge(TAG, "Exception during write", e);
-            synchronized (lock) {
-              disconnectLocked();
-            }
+            cleanup();
           }
         });
+
     return true;
   }
 
@@ -225,32 +256,22 @@ public class SppManager {
     return outputStream.toByteArray();
   }
 
-  /** Disconnect from remote device and clear state. */
-  @GuardedBy("lock")
-  private void disconnectLocked() {
-    logd(TAG, "cancel current connection: close connected socket.");
-    if (connectedSocket == null) {
-      logw(TAG, "Try to disconnect when there is no connected socket. Ignored.");
-      return;
+  /**
+   * Cleans up the registered listeners and disconnects any remote device.
+   *
+   * <p>This method will reset this manager for listening and connection.
+   */
+  public void cleanup() {
+    synchronized (lock) {
+      cleanupLocked();
     }
-
-    if (readMessageTask != null) {
-      readMessageTask.cancel();
-      readMessageTask = null;
-    }
-
-    try {
-      connectedSocket.close();
-    } catch (IOException e) {
-      loge(TAG, "close() of connected socket failed", e);
-    }
-    connectedSocket = null;
-    state = ConnectionState.DISCONNECTED;
-    callbacks.invoke(callback -> callback.onRemoteDeviceDisconnected(device));
   }
 
-  /** Cleans up the registered listeners and disconnect remote device. */
-  public void cleanup() {
+  /** Internal version of {@link #cleanup()} for use when the lock has already been acquired. */
+  @GuardedBy("lock")
+  private void cleanupLocked() {
+    logd(TAG, "Cleaning up state of SppManager");
+
     if (acceptTask != null) {
       acceptTask.cancel();
       acceptTask = null;
@@ -263,9 +284,23 @@ public class SppManager {
 
     receivedListeners.clear();
 
-    synchronized (lock) {
-      disconnectLocked();
+    if (readMessageTask != null) {
+      readMessageTask.cancel();
+      readMessageTask = null;
     }
+
+    try {
+      if (connectedSocket != null) {
+        connectedSocket.close();
+      }
+    } catch (IOException e) {
+      loge(TAG, "close() of connected socket failed", e);
+    }
+
+    connectedSocket = null;
+    state = ConnectionState.DISCONNECTED;
+
+    callbacks.invoke(callback -> callback.onRemoteDeviceDisconnected(device));
   }
 
   /**
@@ -276,7 +311,7 @@ public class SppManager {
    */
   @GuardedBy("lock")
   private void startConnectionLocked(BluetoothSocket socket, BluetoothDevice device) {
-    logd(TAG, "Get connected bluetooth socket, start listening to incoming messages.");
+    logd(TAG, "Connected over Bluetooth socket. Started listening for incoming messages");
 
     this.device = device;
     connectedSocket = socket;
@@ -288,12 +323,14 @@ public class SppManager {
     try {
       inputStream = connectedSocket.getInputStream();
     } catch (IOException e) {
-      loge(TAG, "Error getting input stream from socket, disconnecting");
-      disconnectLocked();
+      loge(TAG, "Error retrieving input stream from socket. Disconnecting.");
+      cleanupLocked();
       return;
     }
+
     readMessageTask =
         new ReadMessageTask(inputStream, readMessageTaskCallback, taskCallbackExecutor);
+
     // Start listening to incoming messages
     taskExecutor.execute(readMessageTask);
   }
@@ -304,10 +341,11 @@ public class SppManager {
         @Override
         public void onTaskCompleted(BluetoothSocket socket, boolean isSecure) {
           if (socket == null) {
-            loge(TAG, "AcceptTask failed getting the socket");
+            loge(TAG, "AcceptTask returned a null socket. Cleaning up.");
             cleanup();
             return;
           }
+
           synchronized (lock) {
             switch (state) {
               case LISTEN:
@@ -315,19 +353,19 @@ public class SppManager {
                 logd(TAG, "Starting connection with device " + socket.getRemoteDevice());
                 startConnectionLocked(socket, socket.getRemoteDevice());
                 break;
-              case NONE:
-                loge(TAG, "Try to start connection while in NONE state.");
-                break;
               case CONNECTED:
+                loge(TAG, "AcceptTask completed while in CONNECTED state. Cosing socket.");
                 // Already connected. Terminate new socket.
                 try {
                   socket.close();
+                  cleanupLocked();
                 } catch (IOException e) {
                   loge(TAG, "Could not close unwanted socket", e);
                 }
                 break;
+              case NONE:
               case DISCONNECTED:
-                loge(TAG, "Start connection while in DISCONNECTED state.");
+                loge(TAG, "AcceptTask completed while in state: " + state + ". Ignoring.");
                 break;
             }
           }
@@ -344,10 +382,8 @@ public class SppManager {
 
         @Override
         public void onMessageReadError() {
-          loge(TAG, "Error read message from remote device, disconnecting.");
-          synchronized (lock) {
-            disconnectLocked();
-          }
+          loge(TAG, "Error reading message from remote device. Disconnecting.");
+          cleanup();
         }
       };
 
@@ -356,20 +392,15 @@ public class SppManager {
       new ConnectTask.Callback() {
         @Override
         public void onConnectionSuccess(BluetoothSocket socket) {
-          // Reset connectTask when the task is completed successfully.
-          connectTask = null;
           synchronized (lock) {
-            logd(
-                TAG,
-                "onConnectionSucceeded: Starting connection with device "
-                    + socket.getRemoteDevice());
+            logd(TAG, "onConnectionSucceeded for device " + socket.getRemoteDevice());
             startConnectionLocked(socket, socket.getRemoteDevice());
           }
         }
 
         @Override
         public void onConnectionAttemptFailed() {
-          loge(TAG, "ConnectTask failed");
+          loge(TAG, "ConnectTask failed. Disconnecting");
           cleanup();
         }
       };

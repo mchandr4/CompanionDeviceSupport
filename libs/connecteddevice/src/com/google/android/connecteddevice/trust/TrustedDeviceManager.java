@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2020 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.google.android.connecteddevice.trust;
 
 import static com.google.android.connecteddevice.util.SafeLog.logd;
@@ -31,6 +47,7 @@ import com.google.android.connecteddevice.trust.storage.TrustedDeviceDao;
 import com.google.android.connecteddevice.trust.storage.TrustedDeviceDatabase;
 import com.google.android.connecteddevice.trust.storage.TrustedDeviceEntity;
 import com.google.android.connecteddevice.util.ByteUtils;
+import com.google.android.connecteddevice.util.SafeConsumer;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -40,7 +57,6 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 
 /** Manager for the feature of unlocking the head unit with a user's trusted device. */
 public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
@@ -494,7 +510,7 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
   }
 
   private <T extends IInterface> void notifyRemoteCallbackList(
-      RemoteCallbackList<T> remoteCallbackList, Consumer<T> notification) {
+      RemoteCallbackList<T> remoteCallbackList, SafeConsumer<T> notification) {
     remoteCallbackListExecutor.execute(
         () -> {
           int num = remoteCallbackList.beginBroadcast();

@@ -1,5 +1,22 @@
+/*
+ * Copyright (C) 2020 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.google.android.connecteddevice.transport.spp;
 
+import static com.google.android.connecteddevice.util.SafeLog.logd;
 import static com.google.android.connecteddevice.util.SafeLog.loge;
 import static com.google.android.connecteddevice.util.SafeLog.logi;
 import static com.google.android.connecteddevice.util.SafeLog.logw;
@@ -47,7 +64,9 @@ class ConnectTask implements Runnable {
       callbackExecutor.execute(callback::onConnectionAttemptFailed);
       return;
     }
+
     logi(TAG, "Begin ConnectTask.");
+
     // Always cancel discovery because it will slow down a connection
     BluetoothAdapter.getDefaultAdapter().cancelDiscovery();
 
@@ -56,27 +75,35 @@ class ConnectTask implements Runnable {
       socket.connect();
     } catch (IOException e) {
       loge(TAG, "Exception when connecting to device.", e);
+
       // Do not trigger attempt failed callback when the task is cancelled intentionally.
       if (!isCanceled.get()) {
         callbackExecutor.execute(callback::onConnectionAttemptFailed);
       }
       return;
     }
+
     if (!isCanceled.get()) {
       callbackExecutor.execute(() -> callback.onConnectionSuccess(socket));
     }
   }
 
+  /**
+   * Cancels this connection task and closes any {@link BluetoothSocket}s that have been created.
+   */
+  @SuppressWarnings("ObjectToString")
   public void cancel() {
+    logd(TAG, "CANCEL ConnectTask. Current socket: " + socket);
+
     if (isCanceled.getAndSet(true)) {
-      logw(TAG, "Task already canceled. Ignored.");
+      logw(TAG, "Task already canceled. Ignoring.");
       return;
     }
 
     if (socket == null) {
-      loge(TAG, "Try to cancel task before socket creation. Ignore.");
       return;
     }
+
     try {
       socket.close();
     } catch (IOException e) {

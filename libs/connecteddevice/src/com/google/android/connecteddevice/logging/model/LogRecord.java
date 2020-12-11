@@ -1,4 +1,20 @@
-package com.google.android.connecteddevice.model;
+/*
+ * Copyright (C) 2020 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.google.android.connecteddevice.logging.model;
 
 import android.os.Process;
 import androidx.annotation.NonNull;
@@ -6,11 +22,17 @@ import androidx.annotation.Nullable;
 import com.google.gson.Gson;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.time.Instant;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 import java.util.Objects;
 
 /** Contains basic info of a log record. */
 public final class LogRecord {
+
+  private static final String ISO_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSX";
+
   /** Priority level constant for logging. */
   public enum Level {
     VERBOSE,
@@ -49,7 +71,7 @@ public final class LogRecord {
    */
   public LogRecord(
       @NonNull Level level, @NonNull String tag, @NonNull String message, Exception exception) {
-    time = Instant.now().toString();
+    time = currentIsoTime();
     processId = Process.myPid();
     threadId = Process.myTid();
     this.level = level;
@@ -134,5 +156,13 @@ public final class LogRecord {
   @Override
   public int hashCode() {
     return Objects.hash(time, processId, threadId, level, backTrace, tag, message);
+  }
+
+  // Date APIs are only used for log messages and must be Java 7 compatible for external
+  // applications.
+  @SuppressWarnings("JavaUtilDate")
+  private static String currentIsoTime() {
+    DateFormat dateFormat = new SimpleDateFormat(ISO_FORMAT, Locale.US);
+    return dateFormat.format(new Date());
   }
 }
