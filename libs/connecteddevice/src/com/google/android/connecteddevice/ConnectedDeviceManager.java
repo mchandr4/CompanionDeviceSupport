@@ -34,7 +34,6 @@ import com.google.android.connecteddevice.oob.BluetoothRfcommChannel;
 import com.google.android.connecteddevice.oob.OobChannel;
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage;
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage.AssociatedDeviceCallback;
-import com.google.android.connecteddevice.storage.ConnectedDeviceStorage.OnAssociatedDevicesRetrievedListener;
 import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelegateBinder;
 import com.google.android.connecteddevice.util.ByteUtils;
 import com.google.android.connecteddevice.util.EventLog;
@@ -53,7 +52,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /** Manager of devices connected to the car. */
-@SuppressWarnings("AndroidConcurrentHashMap") // Targeting sdk version 29
 public class ConnectedDeviceManager {
 
   private static final String TAG = "ConnectedDeviceManager";
@@ -79,8 +77,6 @@ public class ConnectedDeviceManager {
    * includes advertising for association and reconnection with an associated device.
    */
   private final Executor connectionExecutor;
-
-  private final Executor storageExecutor;
 
   private final ThreadSafeCallbacks<DeviceAssociationCallback> deviceAssociationCallbacks =
       new ThreadSafeCallbacks<>();
@@ -129,7 +125,6 @@ public class ConnectedDeviceManager {
         storage,
         sppDelegateBinder,
         Executors.newCachedThreadPool(),
-        Executors.newSingleThreadExecutor(),
         Executors.newSingleThreadExecutor());
   }
 
@@ -139,15 +134,13 @@ public class ConnectedDeviceManager {
       @NonNull ConnectedDeviceStorage storage,
       @NonNull ConnectedDeviceSppDelegateBinder sppDelegateBinder,
       @NonNull Executor connectionExecutor,
-      @NonNull Executor callbackExecutor,
-      @NonNull Executor storageExecutor) {
+      @NonNull Executor callbackExecutor) {
     this.storage = storage;
     this.carBluetoothManager = carBluetoothManager;
     this.connectionExecutor = connectionExecutor;
     this.carBluetoothManager.registerCallback(generateCarManagerCallback(), callbackExecutor);
     this.storage.setAssociatedDeviceCallback(associatedDeviceCallback);
     this.sppDelegateBinder = sppDelegateBinder;
-    this.storageExecutor = storageExecutor;
   }
 
   /**
@@ -346,11 +339,13 @@ public class ConnectedDeviceManager {
   }
 
   /**
-   * Retrieves devices associated with the active user and notifies the given {@link
-   * OnAssociatedDevicesRetrievedListener}.
+   * Get a list of associated devices for the given user.
+   *
+   * @return Associated device list.
    */
-  public void retrieveActiveUserAssociatedDevices(OnAssociatedDevicesRetrievedListener listener) {
-    storageExecutor.execute(() -> storage.retrieveForActiveUserAssociatedDevice(listener));
+  @NonNull
+  public List<AssociatedDevice> getActiveUserAssociatedDevices() {
+    return storage.getActiveUserAssociatedDevices();
   }
 
   /** Notify that the user has accepted a pairing code or any out-of-band confirmation. */
@@ -364,36 +359,31 @@ public class ConnectedDeviceManager {
    * @param deviceId Device identifier.
    */
   public void removeActiveUserAssociatedDevice(@NonNull String deviceId) {
-    storageExecutor.execute(() -> storage.removeAssociatedDeviceForActiveUser(deviceId));
+    storage.removeAssociatedDeviceForActiveUser(deviceId);
     disconnectDevice(deviceId);
   }
 
   /**
    * Enable connection on an associated device.
+   *
    * @param deviceId Device identifier.
    */
   public void enableAssociatedDeviceConnection(@NonNull String deviceId) {
     logd(TAG, "enableAssociatedDeviceConnection() called on " + deviceId);
-    storageExecutor.execute(
-        () -> {
-          storage.updateAssociatedDeviceConnectionEnabled(
-              deviceId, /* isConnectionEnabled= */ true);
-          connectToActiveUserDevice();
-        });
+    storage.updateAssociatedDeviceConnectionEnabled(deviceId, /* isConnectionEnabled= */ true);
+
+    connectToActiveUserDevice();
   }
 
   /**
    * Disable connection on an associated device.
+   *
    * @param deviceId Device identifier.
    */
   public void disableAssociatedDeviceConnection(@NonNull String deviceId) {
     logd(TAG, "disableAssociatedDeviceConnection() called on " + deviceId);
-    storageExecutor.execute(
-        () -> {
-          storage.updateAssociatedDeviceConnectionEnabled(
-              deviceId, /* isConnectionEnabled= */ false);
-          disconnectDevice(deviceId);
-        });
+    storage.updateAssociatedDeviceConnectionEnabled(deviceId, /* isConnectionEnabled= */ false);
+    disconnectDevice(deviceId);
   }
 
   private void disconnectDevice(String deviceId) {

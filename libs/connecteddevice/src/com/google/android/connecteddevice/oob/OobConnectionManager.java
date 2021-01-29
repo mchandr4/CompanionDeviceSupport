@@ -16,14 +16,12 @@
 
 package com.google.android.connecteddevice.oob;
 
-import static com.google.android.connecteddevice.util.SafeLog.logd;
 import static com.google.android.connecteddevice.util.SafeLog.loge;
 
 import android.security.keystore.KeyProperties;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 import com.google.common.primitives.Bytes;
-import com.google.security.annotations.SuppressInsecureCipherModeCheckerNoReview;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -88,7 +86,6 @@ public class OobConnectionManager {
   @VisibleForTesting byte[] decryptionIv = new byte[NONCE_LENGTH_BYTES];
   @VisibleForTesting SecretKey encryptionKey;
 
-  @SuppressInsecureCipherModeCheckerNoReview
   public OobConnectionManager() {
     try {
       cipher = Cipher.getInstance(ALGORITHM);
@@ -147,13 +144,5 @@ public class OobConnectionManager {
 
     oobChannel.sendOobData(Bytes.concat(decryptionIv, encryptionIv, encryptionKey.getEncoded()));
     return true;
-  }
-
-  /** Clears all stored encryption keys. */
-  public void reset() {
-    logd(TAG, "Resetting encryption keys.");
-    encryptionIv = new byte[NONCE_LENGTH_BYTES];
-    decryptionIv = new byte[NONCE_LENGTH_BYTES];
-    encryptionKey = null;
   }
 }

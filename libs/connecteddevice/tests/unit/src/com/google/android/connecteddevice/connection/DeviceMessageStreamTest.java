@@ -23,27 +23,22 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import androidx.annotation.NonNull;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
-import com.google.android.companionprotos.CapabilitiesExchangeProto.CapabilitiesExchange;
 import com.google.android.companionprotos.DeviceMessageProto.Message;
 import com.google.android.companionprotos.OperationProto.OperationType;
 import com.google.android.companionprotos.PacketProto.Packet;
-import com.google.android.companionprotos.VersionExchangeProto.VersionExchange;
 import com.google.android.connecteddevice.connection.DeviceMessageStream.MessageReceivedErrorListener;
 import com.google.android.connecteddevice.connection.DeviceMessageStream.MessageReceivedListener;
 import com.google.android.connecteddevice.util.ByteUtils;
 import com.google.common.collect.Iterables;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.InvalidProtocolBufferException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -164,77 +159,6 @@ public class DeviceMessageStreamTest {
     verify(mockErrorListener).onMessageReceivedError(any(IllegalStateException.class));
   }
 
-  @Test
-  public void processVersionExchange_invalidVersionExchangeMessage() {
-    stream.setMessageReceivedErrorListener(mockErrorListener);
-    stream.onDataReceived(ByteUtils.randomBytes(WRITE_SIZE));
-    verify(mockErrorListener).onMessageReceivedError(any(InvalidProtocolBufferException.class));
-    verify(stream, times(0)).send(any());
-  }
-
-  @Test
-  public void processVersionExchange_invalidVersionNumbers() {
-    int invalidVersion = 0;
-    stream.setMessageReceivedErrorListener(mockErrorListener);
-    byte[] phoneVersionBytes =
-        VersionExchange.newBuilder()
-            .setMinSupportedMessagingVersion(invalidVersion)
-            .setMaxSupportedMessagingVersion(invalidVersion)
-            .setMinSupportedSecurityVersion(invalidVersion)
-            .setMaxSupportedSecurityVersion(invalidVersion)
-            .build()
-            .toByteArray();
-    stream.onDataReceived(phoneVersionBytes);
-    verify(mockErrorListener).onMessageReceivedError(any(IllegalStateException.class));
-    verify(stream, times(0)).send(any());
-  }
-
-  @Test
-  public void processVersionExchange_success() {
-    stream.setMessageReceivedListener(mockMessageReceivedListener);
-    byte[] phoneVersionBytes = createVersionExchangeMessage().toByteArray();
-    stream.onDataReceived(phoneVersionBytes);
-    verify(stream).send(phoneVersionBytes);
-
-    ArgumentCaptor<DeviceMessage> messageCaptor = ArgumentCaptor.forClass(DeviceMessage.class);
-    byte[] data = ByteUtils.randomBytes(WRITE_SIZE);
-    notifyPacketsReceived(data);
-    verify(mockMessageReceivedListener).onMessageReceived(messageCaptor.capture(), any());
-    assertThat(Arrays.equals(data, messageCaptor.getValue().getMessage())).isTrue();
-  }
-
-  @Test
-  @Ignore("b/175066810")
-  public void processCapabilitiesExchange_success() {
-    stream.setMessageReceivedListener(mockMessageReceivedListener);
-    byte[] phoneVersionBytes = createVersionExchangeMessage().toByteArray();
-    stream.onDataReceived(phoneVersionBytes);
-    verify(stream).send(phoneVersionBytes);
-
-    byte[] phoneCapabilitiesBytes = CapabilitiesExchange.newBuilder().build().toByteArray();
-    stream.onDataReceived(phoneCapabilitiesBytes);
-    verify(stream).send(phoneCapabilitiesBytes);
-
-    ArgumentCaptor<DeviceMessage> messageCaptor = ArgumentCaptor.forClass(DeviceMessage.class);
-    byte[] data = ByteUtils.randomBytes((int) WRITE_SIZE);
-    notifyPacketsReceived(data);
-    verify(mockMessageReceivedListener).onMessageReceived(messageCaptor.capture(), any());
-    assertThat(Arrays.equals(data, messageCaptor.getValue().getMessage())).isTrue();
-  }
-
-  @Test
-  @Ignore("b/175066810")
-  public void processCapabilitiesExchange_invalidCapabilitiesExchangeMessage() {
-    stream.setMessageReceivedErrorListener(mockErrorListener);
-    byte[] phoneVersionBytes = createVersionExchangeMessage().toByteArray();
-    stream.onDataReceived(phoneVersionBytes);
-    verify(stream).send(phoneVersionBytes);
-
-    stream.onDataReceived(ByteUtils.randomBytes((int) WRITE_SIZE));
-    verify(mockErrorListener).onMessageReceivedError(any(InvalidProtocolBufferException.class));
-    verifyNoMoreInteractions(stream);
-  }
-
   @NonNull
   private static List<Packet> createPackets(byte[] data) {
     try {
@@ -251,26 +175,10 @@ public class DeviceMessageStreamTest {
     }
   }
 
-  private static VersionExchange createVersionExchangeMessage() {
-    return VersionExchange.newBuilder()
-        .setMinSupportedMessagingVersion(DeviceMessageStream.MESSAGING_VERSION)
-        .setMaxSupportedMessagingVersion(DeviceMessageStream.MESSAGING_VERSION)
-        .setMinSupportedSecurityVersion(DeviceMessageStream.MIN_SECURITY_VERSION)
-        .setMaxSupportedSecurityVersion(DeviceMessageStream.MAX_SECURITY_VERSION)
-        .build();
-  }
-
   private void processMessage(byte[] data) {
     List<Packet> packets = createPackets(data);
     for (Packet packet : packets) {
       stream.processPacket(packet);
-    }
-  }
-
-  private void notifyPacketsReceived(byte[] data) {
-    List<Packet> packets = createPackets(data);
-    for (Packet packet : packets) {
-      stream.onDataReceived(packet.toByteArray());
     }
   }
 }

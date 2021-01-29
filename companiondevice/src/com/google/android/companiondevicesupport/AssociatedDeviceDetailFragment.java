@@ -16,33 +16,21 @@
 
 package com.google.android.companiondevicesupport;
 
-import android.app.AlertDialog;
-import android.app.Dialog;
-import androidx.lifecycle.ViewModelProvider;
-import android.content.DialogInterface;
+import androidx.lifecycle.ViewModelProviders;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
-import android.text.Html;
-import android.text.Spanned;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
-import com.google.android.connecteddevice.model.AssociatedDeviceDetails;
-import com.google.android.connecteddevice.service.AssociatedDeviceViewModel;
-import com.google.android.connecteddevice.service.AssociatedDeviceViewModelFactory;
 import com.google.android.connecteddevice.trust.TrustedDeviceConstants;
 
 /** Fragment that shows the details of an associated device. */
 public class AssociatedDeviceDetailFragment extends Fragment {
   private static final String TAG = "AssociatedDeviceDetailFragment";
-  private static final String REMOVE_DEVICE_DIALOG_TAG = "RemoveDeviceDialog";
   private TextView deviceName;
   private TextView connectionStatusText;
   private ImageView connectionStatusIndicator;
@@ -64,34 +52,21 @@ public class AssociatedDeviceDetailFragment extends Fragment {
     connectionStatusText = view.findViewById(R.id.connection_status_text);
     connectionStatusIndicator = view.findViewById(R.id.connection_status_indicator);
 
-    model =
-        new ViewModelProvider(
-                requireActivity(),
-                new AssociatedDeviceViewModelFactory(
-                    requireActivity().getApplication(),
-                    getResources().getBoolean(R.bool.enable_spp)))
-            .get(AssociatedDeviceViewModel.class);
-    model.getCurrentDeviceDetails().observe(this, this::setDeviceDetails);
+    model = ViewModelProviders.of(getActivity()).get(AssociatedDeviceViewModel.class);
+    model.getDeviceDetails().observe(this, this::setDeviceDetails);
 
     view.findViewById(R.id.connection_button)
         .setOnClickListener(
             l -> {
               model.toggleConnectionStatusForCurrentDevice();
             });
-    view.findViewById(R.id.remove_button).setOnClickListener(v -> showRemoveDeviceDialog());
+    view.findViewById(R.id.remove_button)
+        .setOnClickListener(v -> model.selectCurrentDeviceToRemove());
     view.findViewById(R.id.trusted_device_feature_button)
         .setOnClickListener(
             v ->
                 model.startFeatureActivityForCurrentDevice(
                     TrustedDeviceConstants.INTENT_ACTION_TRUSTED_DEVICE_SETTING));
-  }
-
-  @Override
-  public void onCreate(@Nullable Bundle bundle) {
-    super.onCreate(bundle);
-    if (bundle != null) {
-      resumeRemoveDeviceDialog();
-    }
   }
 
   private void setDeviceDetails(AssociatedDeviceDetails deviceDetails) {
@@ -130,57 +105,5 @@ public class AssociatedDeviceDetailFragment extends Fragment {
     connectionStatusIndicator.setColorFilter(connectionStatusColor);
     this.connectionText.setText(connectionText);
     this.connectionIcon.setImageDrawable(connectionIcon);
-  }
-
-  private void showRemoveDeviceDialog() {
-    String deviceName = model.getCurrentDeviceDetails().getValue().getDeviceName();
-    RemoveDeviceDialogFragment dialogFragment =
-        RemoveDeviceDialogFragment.newInstance(deviceName, (d, w) -> model.removeCurrentDevice());
-    dialogFragment.show(getParentFragmentManager(), REMOVE_DEVICE_DIALOG_TAG);
-  }
-
-  private void resumeRemoveDeviceDialog() {
-    RemoveDeviceDialogFragment removeDeviceDialogFragment =
-        (RemoveDeviceDialogFragment)
-            getParentFragmentManager().findFragmentByTag(REMOVE_DEVICE_DIALOG_TAG);
-    if (removeDeviceDialogFragment != null) {
-      removeDeviceDialogFragment.setOnConfirmListener((d, w) -> model.removeCurrentDevice());
-    }
-  }
-
-  /** Dialog fragment to confirm removing an associated device. */
-  public static class RemoveDeviceDialogFragment extends DialogFragment {
-    private static final String DEVICE_NAME_KEY = "device_name";
-
-    private DialogInterface.OnClickListener onConfirmListener;
-
-    static RemoveDeviceDialogFragment newInstance(
-        @NonNull String deviceName, @NonNull DialogInterface.OnClickListener listener) {
-      Bundle bundle = new Bundle();
-      bundle.putString(DEVICE_NAME_KEY, deviceName);
-      RemoveDeviceDialogFragment fragment = new RemoveDeviceDialogFragment();
-      fragment.setArguments(bundle);
-      fragment.setOnConfirmListener(listener);
-      return fragment;
-    }
-
-    @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-      Bundle bundle = getArguments();
-      String deviceName = bundle.getString(DEVICE_NAME_KEY);
-      String title = getString(R.string.remove_associated_device_title, deviceName);
-      Spanned styledTitle = Html.fromHtml(title, Html.FROM_HTML_MODE_LEGACY);
-      return new AlertDialog.Builder(getActivity())
-          .setTitle(styledTitle)
-          .setMessage(getString(R.string.remove_associated_device_message))
-          .setNegativeButton(getString(R.string.cancel), null)
-          .setPositiveButton(getString(R.string.forget), onConfirmListener)
-          .setCancelable(true)
-          .create();
-    }
-
-    void setOnConfirmListener(@NonNull DialogInterface.OnClickListener onConfirmListener) {
-      this.onConfirmListener = onConfirmListener;
-    }
   }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.android.connecteddevice.service;
+package com.google.android.companiondevicesupport;
 
 import static com.google.android.connecteddevice.api.RemoteFeature.ASSOCIATED_DEVICE_DATA_NAME_EXTRA;
 import static com.google.android.connecteddevice.service.ConnectedDeviceService.ACTION_BIND_ASSOCIATION;
@@ -34,23 +34,24 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
 import com.google.android.connecteddevice.api.IAssociatedDeviceManager;
 import com.google.android.connecteddevice.api.IAssociationCallback;
 import com.google.android.connecteddevice.api.IConnectionCallback;
 import com.google.android.connecteddevice.api.IDeviceAssociationCallback;
-import com.google.android.connecteddevice.api.IOnAssociatedDevicesRetrievedListener;
 import com.google.android.connecteddevice.model.AssociatedDevice;
-import com.google.android.connecteddevice.model.AssociatedDeviceDetails;
 import com.google.android.connecteddevice.model.ConnectedDevice;
+import com.google.android.connecteddevice.service.ConnectedDeviceService;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Executors;
 
 /**
  * Implementation {@link ViewModel} for sharing associated devices data between {@link
@@ -73,49 +74,29 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
   }
 
   private IAssociatedDeviceManager associatedDeviceManager;
-  private final List<AssociatedDevice> associatedDevices = new CopyOnWriteArrayList<>();
-  private final List<ConnectedDevice> connectedDevices = new CopyOnWriteArrayList<>();
+  private List<AssociatedDevice> associatedDevices = new ArrayList<>();
+  private List<ConnectedDevice> connectedDevices = new ArrayList<>();
 
-  private final MutableLiveData<AssociatedDeviceDetails> currentDeviceDetails =
+  private final MutableLiveData<AssociatedDeviceDetails> deviceDetails =
       new MutableLiveData<>(null);
   private final MutableLiveData<String> advertisedCarName = new MutableLiveData<>(null);
   private final MutableLiveData<String> pairingCode = new MutableLiveData<>(null);
+  private final MutableLiveData<AssociatedDevice> deviceToRemove = new MutableLiveData<>(null);
   private final MutableLiveData<Integer> bluetoothState =
       new MutableLiveData<>(BluetoothAdapter.STATE_OFF);
   private final MutableLiveData<AssociationState> associationState =
       new MutableLiveData<>(AssociationState.NONE);
   private final MutableLiveData<AssociatedDevice> removedDevice = new MutableLiveData<>(null);
-  private final MutableLiveData<Boolean> isServiceDisconnected = new MutableLiveData<>(false);
-  private final boolean isSppEnabled;
-  private final BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+  private final MutableLiveData<Boolean> isFinished = new MutableLiveData<>(false);
 
-  public AssociatedDeviceViewModel(@NonNull Application application, boolean isSppEnabled) {
+  public AssociatedDeviceViewModel(@NonNull Application application) {
     super(application);
-    this.isSppEnabled = isSppEnabled;
     Intent intent = new Intent(getApplication(), ConnectedDeviceService.class);
     intent.setAction(ACTION_BIND_ASSOCIATION);
     getApplication().bindService(intent, connection, Context.BIND_AUTO_CREATE);
-    if (bluetoothAdapter != null) {
-      bluetoothState.postValue(bluetoothAdapter.getState());
-    }
-  }
-
-  @VisibleForTesting
-  AssociatedDeviceViewModel(
-      @NonNull Application application,
-      IAssociatedDeviceManager associatedDeviceManager,
-      boolean isSppEnabled) {
-    super(application);
-    this.isSppEnabled = isSppEnabled;
-    this.associatedDeviceManager = associatedDeviceManager;
-    bluetoothState.postValue(BluetoothAdapter.STATE_ON);
-    try {
-      registerCallbacks();
-      setConnectedDevices(associatedDeviceManager.getActiveUserConnectedDevices());
-      associatedDeviceManager.retrievedActiveUserAssociatedDevices(
-          associatedDevicesRetrievedListener);
-    } catch (RemoteException e) {
-      loge(TAG, "Initial setup failed.", e);
+    BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+    if (adapter != null) {
+      bluetoothState.postValue(adapter.getState());
     }
   }
 
@@ -158,13 +139,18 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
     associationState.postValue(AssociationState.NONE);
   }
 
-  /** Retries association. */
+  /** Retry association. */
   public void retryAssociation() {
     stopAssociation();
     startAssociation();
   }
 
-  /** Removes the current associated device. */
+  /** Select the current associated device as the device to remove. */
+  public void selectCurrentDeviceToRemove() {
+    deviceToRemove.postValue(getAssociatedDevice());
+  }
+
+  /** Remove the current associated device. */
   public void removeCurrentDevice() {
     AssociatedDevice device = getAssociatedDevice();
     if (device == null) {
@@ -177,7 +163,7 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
     }
   }
 
-  /** Toggles connection on the current associated device. */
+  /** Toggle connection on the current associated device. */
   public void toggleConnectionStatusForCurrentDevice() {
     AssociatedDevice device = getAssociatedDevice();
     if (device == null) {
@@ -194,12 +180,12 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
     }
   }
 
-  /** Gets the associated device details. */
-  public LiveData<AssociatedDeviceDetails> getCurrentDeviceDetails() {
-    return currentDeviceDetails;
+  /** Get the associated device details. */
+  public MutableLiveData<AssociatedDeviceDetails> getDeviceDetails() {
+    return deviceDetails;
   }
 
-  /** Starts feature activity for the current associated device. */
+  /** Start feature activity for the current associated device. */
   public void startFeatureActivityForCurrentDevice(@NonNull String action) {
     AssociatedDevice device = getAssociatedDevice();
     if (device == null || action == null) {
@@ -210,53 +196,62 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
     getApplication().startActivityAsUser(intent, UserHandle.of(ActivityManager.getCurrentUser()));
   }
 
-  /** Resets the value of {@link #associationState} to {@link AssociationState.NONE}. */
+  /** Reset the value of {@link #associationState} to {@link AssociationState.NONE}. */
   public void resetAssociationState() {
     associationState.postValue(AssociationState.NONE);
   }
 
-  /** Gets the name that is being advertised by the car. */
-  public LiveData<String> getAdvertisedCarName() {
+  /** Get the associated device to remove. The associated device could be null. */
+  public LiveData<AssociatedDevice> getDeviceToRemove() {
+    return deviceToRemove;
+  }
+
+  /** Get the name that is being advertised by the car. */
+  public MutableLiveData<String> getAdvertisedCarName() {
     return advertisedCarName;
   }
 
-  /** Gets the generated pairing code. */
-  public LiveData<String> getPairingCode() {
+  /** Get the generated pairing code. */
+  public MutableLiveData<String> getPairingCode() {
     return pairingCode;
   }
 
   /** Value is {@code true} if the current associated device has been removed. */
-  public LiveData<AssociatedDevice> getRemovedDevice() {
+  public MutableLiveData<AssociatedDevice> getRemovedDevice() {
     return removedDevice;
   }
 
-  /** Gets the current {@link AssociationState}. */
+  /** Get the current {@link AssociationState}. */
   public MutableLiveData<AssociationState> getAssociationState() {
     return associationState;
   }
 
-  /** Gets the current Bluetooth state. */
-  public LiveData<Integer> getBluetoothState() {
+  /** Get the current Bluetooth state. */
+  public MutableLiveData<Integer> getBluetoothState() {
     return bluetoothState;
   }
 
-  /** Value is {@code true} if the service connection is lost. */
-  public LiveData<Boolean> isServiceDisconnected() {
-    return isServiceDisconnected;
+  /** Value is {@code true} if IHU is not in association and has no associated device. */
+  public MutableLiveData<Boolean> isFinished() {
+    return isFinished;
   }
 
-  /** Starts adding associated device. */
-  public void startAssociation() {
+  protected void startAssociation() {
     if (associatedDeviceManager == null) {
       return;
     }
     associationState.postValue(AssociationState.PENDING);
-    if (bluetoothAdapter == null || !bluetoothAdapter.isEnabled()) {
+    if (!BluetoothAdapter.getDefaultAdapter().isEnabled()) {
       return;
     }
     try {
+      boolean isSppEnabled =
+          getApplication()
+              .getApplicationContext()
+              .getResources()
+              .getBoolean(R.bool.enable_spp_support);
       if (isSppEnabled
-          && bluetoothAdapter.getScanMode()
+          && BluetoothAdapter.getDefaultAdapter().getScanMode()
               != BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
         Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
         discoverableIntent.putExtra(
@@ -284,8 +279,7 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
     if (device == null) {
       return;
     }
-    currentDeviceDetails.postValue(
-        new AssociatedDeviceDetails(getAssociatedDevice(), isConnected()));
+    deviceDetails.postValue(new AssociatedDeviceDetails(getAssociatedDevice(), isConnected()));
   }
 
   @Nullable
@@ -306,27 +300,25 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
   }
 
   private void setAssociatedDevices(@NonNull List<AssociatedDevice> associatedDevices) {
-    this.associatedDevices.clear();
-    this.associatedDevices.addAll(associatedDevices);
+    this.associatedDevices = associatedDevices;
     updateDeviceDetails();
   }
 
   private void setConnectedDevices(@NonNull List<ConnectedDevice> connectedDevices) {
-    this.connectedDevices.clear();
-    this.connectedDevices.addAll(connectedDevices);
+    this.connectedDevices = connectedDevices;
     updateDeviceDetails();
   }
 
   private void addOrUpdateAssociatedDevice(@NonNull AssociatedDevice device) {
-    associatedDevices.remove(device);
+    associatedDevices.removeIf(d -> d.getDeviceId().equals(device.getDeviceId()));
     associatedDevices.add(device);
     updateDeviceDetails();
   }
 
   private void removeAssociatedDevice(AssociatedDevice device) {
-    if (associatedDevices.remove(device)) {
+    if (associatedDevices.removeIf(d -> d.getDeviceId().equals(device.getDeviceId()))) {
       removedDevice.postValue(device);
-      currentDeviceDetails.postValue(null);
+      deviceDetails.postValue(null);
     }
   }
 
@@ -342,6 +334,30 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
     associatedDeviceManager.clearConnectionCallback();
   }
 
+  private void retrieveAssociatedDevicesOnConnection() {
+    AssociationState state = associationState.getValue();
+    Executors.newSingleThreadExecutor()
+        .execute(
+            () -> {
+              try {
+                List<AssociatedDevice> devices =
+                    associatedDeviceManager.getActiveUserAssociatedDevices();
+                Handler mainHandler = new Handler(Looper.getMainLooper());
+                mainHandler.post(
+                    () -> {
+                      setAssociatedDevices(devices);
+                      if (devices.isEmpty()
+                          && state != AssociationState.STARTING
+                          && state != AssociationState.STARTED) {
+                        startAssociation();
+                      }
+                    });
+              } catch (RemoteException e) {
+                loge(TAG, "Failed to retrieve associated devices.", e);
+              }
+            });
+  }
+
   private final ServiceConnection connection =
       new ServiceConnection() {
         @Override
@@ -350,11 +366,10 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
           try {
             registerCallbacks();
             setConnectedDevices(associatedDeviceManager.getActiveUserConnectedDevices());
-            associatedDeviceManager.retrievedActiveUserAssociatedDevices(
-                associatedDevicesRetrievedListener);
           } catch (RemoteException e) {
             loge(TAG, "Initial set failed onServiceConnected", e);
           }
+          retrieveAssociatedDevicesOnConnection();
           logd(TAG, "Service connected:" + name.getClassName());
           IntentFilter filter = new IntentFilter();
           filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
@@ -365,7 +380,7 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
         public void onServiceDisconnected(ComponentName name) {
           associatedDeviceManager = null;
           logd(TAG, "Service disconnected: " + name.getClassName());
-          isServiceDisconnected.postValue(true);
+          isFinished.postValue(true);
         }
       };
 
@@ -410,20 +425,6 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
         }
       };
 
-  private final IOnAssociatedDevicesRetrievedListener associatedDevicesRetrievedListener =
-      new IOnAssociatedDevicesRetrievedListener.Stub() {
-        @Override
-        public void onAssociatedDevicesRetrieved(List<AssociatedDevice> devices) {
-          setAssociatedDevices(devices);
-          AssociationState state = associationState.getValue();
-          if (devices.isEmpty()
-              && state != AssociationState.STARTING
-              && state != AssociationState.STARTED) {
-            startAssociation();
-          }
-        }
-      };
-
   private final IDeviceAssociationCallback deviceAssociationCallback =
       new IDeviceAssociationCallback.Stub() {
         @Override
@@ -451,8 +452,8 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
         }
 
         @Override
-        public void onDeviceDisconnected(ConnectedDevice connectedDevice) {
-          connectedDevices.remove(connectedDevice);
+        public void onDeviceDisconnected(ConnectedDevice companionDevice) {
+          connectedDevices.removeIf(d -> d.getDeviceId().equals(companionDevice.getDeviceId()));
           updateDeviceDetails();
         }
       };

@@ -19,7 +19,6 @@ package com.google.android.connecteddevice.api;
 import com.google.android.connecteddevice.api.IAssociationCallback;
 import com.google.android.connecteddevice.api.IConnectionCallback;
 import com.google.android.connecteddevice.api.IDeviceAssociationCallback;
-import com.google.android.connecteddevice.api.IOnAssociatedDevicesRetrievedListener;
 import com.google.android.connecteddevice.model.AssociatedDevice;
 import com.google.android.connecteddevice.model.ConnectedDevice;
 import com.google.android.connecteddevice.model.OobEligibleDevice;
@@ -46,12 +45,12 @@ interface IAssociatedDeviceManager {
     void stopAssociation();
 
     /**
-     * Retrieves the devices associated with the active user from the database.
+     * Returns a {@link List<AssociatedDevice>} of devices associated with the
+     * given user from the database.
      *
-     * @param listener {@link IOnAssociatedDevicesRetrievedListener} that will
-     * be notified when the associated devices are retrieved.
+     * <p>Cannot be called on the main thread.
      */
-    void retrievedActiveUserAssociatedDevices(in IOnAssociatedDevicesRetrievedListener listener);
+    List<AssociatedDevice> getActiveUserAssociatedDevices();
 
     /** Confirms the paring code. */
     void acceptVerification();

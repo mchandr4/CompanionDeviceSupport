@@ -32,6 +32,8 @@ import com.google.android.connecteddevice.connection.CarBluetoothManager;
 import com.google.android.connecteddevice.connection.DeviceMessageStream;
 import com.google.android.connecteddevice.connection.ReconnectSecureChannel;
 import com.google.android.connecteddevice.connection.SecureChannel;
+import com.google.android.connecteddevice.oob.OobChannel;
+import com.google.android.connecteddevice.oob.OobConnectionManager;
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage;
 import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelegateBinder;
 import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelegateBinder.OnErrorListener;
@@ -62,6 +64,10 @@ public class CarSppManager extends CarBluetoothManager {
   @VisibleForTesting Connection currentConnection;
 
   private PendingConnection currentPendingConnection;
+
+  private OobConnectionManager oobConnectionManager;
+
+  private AssociationCallback associationCallback;
 
   /**
    * Initialize a new instance of manager.
@@ -99,6 +105,16 @@ public class CarSppManager extends CarBluetoothManager {
   }
 
   @Override
+  public AssociationCallback getAssociationCallback() {
+    return associationCallback;
+  }
+
+  @Override
+  public void setAssociationCallback(AssociationCallback callback) {
+    associationCallback = callback;
+  }
+
+  @Override
   public void initiateConnectionToDevice(@NonNull UUID deviceId) {
     logd(TAG, "Start spp reconnection listening for device with id: " + deviceId);
     currentConnection = null;
@@ -126,6 +142,7 @@ public class CarSppManager extends CarBluetoothManager {
   public void reset() {
     super.reset();
     reconnectDeviceId = null;
+    associationCallback = null;
     if (currentConnection != null) {
       try {
         sppServiceBinder.disconnect(currentConnection);
@@ -158,7 +175,7 @@ public class CarSppManager extends CarBluetoothManager {
       sppServiceBinder.unregisterConnectionCallback(UUID.fromString(reconnectDeviceId));
     }
     reset();
-    setAssociationCallback(callback);
+    associationCallback = callback;
     sppServiceBinder.registerConnectionCallback(associationServiceUuid, associationOnErrorListener);
     try {
       PendingConnection pendingConnection =
@@ -178,7 +195,41 @@ public class CarSppManager extends CarBluetoothManager {
     }
   }
 
+  /** Start the association with a new device using out of band verification code exchange */
+  @Override
+  public void startOutOfBandAssociation(
+      @NonNull String nameForAssociation,
+      @NonNull OobChannel oobChannel,
+      @NonNull AssociationCallback callback) {
+
+    logd(TAG, "Starting out of band association.");
+    startAssociation(
+        nameForAssociation,
+        new AssociationCallback() {
+          @Override
+          public void onAssociationStartSuccess(String deviceName) {
+            associationCallback = callback;
+            boolean success = oobConnectionManager.startOobExchange(oobChannel);
+            if (!success) {
+              callback.onAssociationStartFailure();
+              return;
+            }
+            callback.onAssociationStartSuccess(deviceName);
+          }
+
+          @Override
+          public void onAssociationStartFailure() {
+            callback.onAssociationStartFailure();
+          }
+        });
+    oobConnectionManager = new OobConnectionManager();
+  }
+
   private void onDeviceConnected(Connection connection, boolean isReconnect) {
+    onDeviceConnected(connection, isReconnect, /* isOob= */ false);
+  }
+
+  private void onDeviceConnected(Connection connection, boolean isReconnect, boolean isOob) {
     currentConnection = connection;
     currentPendingConnection = null;
     EventLog.onDeviceConnected();
@@ -191,12 +242,15 @@ public class CarSppManager extends CarBluetoothManager {
         exception -> {
           disconnectWithError("Error occurred in stream: " + exception.getMessage(), exception);
         });
-    // TODO(b/172276170): Re-enable out of band support for SPP
     SecureChannel secureChannel;
     if (isReconnect) {
       secureChannel =
           new ReconnectSecureChannel(
               secureStream, storage, reconnectDeviceId, /* expectedChallengeResponse= */ null);
+    } else if (isOob) {
+      // TODO(b/160901821): Integrate Oob with Spp channel
+      loge(TAG, "Oob verification is currently not available for Spp");
+      return;
     } else {
       secureChannel = new AssociationSecureChannel(secureStream, storage);
     }
@@ -260,11 +314,11 @@ public class CarSppManager extends CarBluetoothManager {
           ((AssociationSecureChannel) connectedDevice.secureChannel)
               .setShowVerificationCodeListener(
                   code -> {
-                    if (!isAssociating()) {
+                    if (associationCallback == null) {
                       loge(TAG, "No valid callback for association.");
                       return;
                     }
-                    getAssociationCallback().onVerificationCodeAvailable(code);
+                    associationCallback.onVerificationCodeAvailable(code);
                   });
         }
       };
@@ -289,9 +343,7 @@ public class CarSppManager extends CarBluetoothManager {
           }
           currentConnection = null;
           if (isAssociating()) {
-            getAssociationCallback().onAssociationError(DEVICE_ERROR_UNEXPECTED_DISCONNECTION);
-          } else {
-            loge(TAG, "Encounter association error with no association callback registered.");
+            associationCallback.onAssociationError(DEVICE_ERROR_UNEXPECTED_DISCONNECTION);
           }
           ConnectedRemoteDevice connectedDevice = getConnectedDevice(connection.getRemoteDevice());
           // Reset before invoking callbacks to avoid a race condition with reconnect

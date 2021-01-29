@@ -102,12 +102,15 @@ public class ConnectedDevice implements Parcelable {
       return false;
     }
     ConnectedDevice connectedDevice = (ConnectedDevice) obj;
-    return Objects.equals(deviceId, connectedDevice.deviceId);
+    return Objects.equals(deviceId, connectedDevice.deviceId)
+        && Objects.equals(deviceName, connectedDevice.deviceName)
+        && belongsToActiveUser == connectedDevice.belongsToActiveUser
+        && hasSecureChannel == connectedDevice.hasSecureChannel;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(deviceId);
+    return Objects.hash(deviceId, deviceName, belongsToActiveUser, hasSecureChannel);
   }
 
   public static final Parcelable.Creator<ConnectedDevice> CREATOR =

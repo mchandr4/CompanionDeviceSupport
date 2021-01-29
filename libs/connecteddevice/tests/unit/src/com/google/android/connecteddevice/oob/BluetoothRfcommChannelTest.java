@@ -45,7 +45,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.robolectric.shadows.ShadowLooper;
 
 @RunWith(AndroidJUnit4.class)
 public class BluetoothRfcommChannelTest {
@@ -113,17 +112,6 @@ public class BluetoothRfcommChannelTest {
   }
 
   @Test
-  public void completeOobExchange_timeout_cancelsConnectionAndCallsOnFailed() throws Exception {
-    PendingConnection pendingConnection = requestConnection();
-
-    // Simulate the timeout
-    ShadowLooper.runUiThreadTasksIncludingDelayedTasks();
-
-    verify(mockSppDelegateBinder).cancelConnectionAttempt(pendingConnection);
-    verify(mockCallback).onOobExchangeFailure();
-  }
-
-  @Test
   public void sendOobData_nullBluetoothDevice_callOnFailed() {
     bluetoothRfcommChannel.callback = mockCallback;
 
@@ -165,14 +153,6 @@ public class BluetoothRfcommChannelTest {
   }
 
   private PendingConnection establishConnection() throws Exception {
-    PendingConnection connection = requestConnection();
-    connection.notifyConnected(TEST_BLUETOOTH_DEVICE, TEST_BLUETOOTH_DEVICE.getName());
-    verify(mockCallback).onOobExchangeSuccess();
-
-    return connection;
-  }
-
-  private PendingConnection requestConnection() throws Exception {
     ConnectionResultCaptor connectionCaptor = new ConnectionResultCaptor();
     doAnswer(connectionCaptor)
         .when(mockSppDelegateBinder)
@@ -182,7 +162,11 @@ public class BluetoothRfcommChannelTest {
         OOB_ELIGIBLE_DEVICE, mockCallback, BLUETOOTH_ADAPTER);
     verify(mockSppDelegateBinder).connectAsClient(any(), any(), anyBoolean());
 
-    return connectionCaptor.getResult();
+    PendingConnection connection = connectionCaptor.getResult();
+    connection.notifyConnected(TEST_BLUETOOTH_DEVICE, TEST_BLUETOOTH_DEVICE.getName());
+    verify(mockCallback).onOobExchangeSuccess();
+
+    return connection;
   }
 
   private static class ConnectionResultCaptor implements Answer<PendingConnection> {

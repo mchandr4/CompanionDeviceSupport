@@ -26,10 +26,8 @@ import android.bluetooth.BluetoothGatt;
 import androidx.annotation.CallSuper;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
 import com.google.android.connecteddevice.model.AssociatedDevice;
 import com.google.android.connecteddevice.oob.OobChannel;
-import com.google.android.connecteddevice.oob.OobConnectionManager;
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage;
 import com.google.android.connecteddevice.util.ThreadSafeCallbacks;
 import java.util.UUID;
@@ -52,19 +50,14 @@ public abstract class CarBluetoothManager {
 
   private final boolean isCompressionEnabled;
 
-  private final OobConnectionManager oobConnectionManager;
-
   private String clientDeviceName;
 
   private String clientDeviceAddress;
-
-  private AssociationCallback associationCallback;
 
   protected CarBluetoothManager(
       @NonNull ConnectedDeviceStorage connectedDeviceStorage, boolean enableCompression) {
     storage = connectedDeviceStorage;
     isCompressionEnabled = enableCompression;
-    oobConnectionManager = new OobConnectionManager();
   }
 
   /** Attempt to connect to device with provided id. */
@@ -89,52 +82,20 @@ public abstract class CarBluetoothManager {
       @NonNull String nameForAssociation, @NonNull AssociationCallback callback);
 
   /** Start the association with a new device using out of band verification code exchange */
-  public void startOutOfBandAssociation(
+  public abstract void startOutOfBandAssociation(
       @NonNull String nameForAssociation,
       @NonNull OobChannel oobChannel,
-      @NonNull AssociationCallback callback) {
-    logd(TAG, "Starting out of band association.");
-    startAssociation(
-        nameForAssociation,
-        new AssociationCallback() {
-          @Override
-          public void onAssociationStartSuccess(String deviceName) {
-            associationCallback = callback;
-            boolean success = oobConnectionManager.startOobExchange(oobChannel);
-            if (!success) {
-              callback.onAssociationStartFailure();
-              return;
-            }
-            callback.onAssociationStartSuccess(deviceName);
-          }
-
-          @Override
-          public void onAssociationStartFailure() {
-            callback.onAssociationStartFailure();
-          }
-        });
-  }
+      @NonNull AssociationCallback callback);
 
   /** Disconnect the provided device from this manager. */
   public abstract void disconnectDevice(@NonNull String deviceId);
 
-  /** Get current {@link OobConnectionManager}. */
-  @Nullable
-  @VisibleForTesting
-  public OobConnectionManager getOobConnectionManager() {
-    return oobConnectionManager;
-  }
-
   /** Get current {@link AssociationCallback}. */
   @Nullable
-  public AssociationCallback getAssociationCallback() {
-    return associationCallback;
-  }
+  public abstract AssociationCallback getAssociationCallback();
 
   /** Set current {@link AssociationCallback}. */
-  public void setAssociationCallback(@Nullable AssociationCallback callback) {
-    this.associationCallback = callback;
-  }
+  public abstract void setAssociationCallback(@Nullable AssociationCallback callback);
 
   /** Set the value of the client device name */
   public void setClientDeviceName(String deviceName) {
@@ -220,8 +181,6 @@ public abstract class CarBluetoothManager {
     clientDeviceAddress = null;
     clientDeviceName = null;
     connectedDevices.clear();
-    oobConnectionManager.reset();
-    associationCallback = null;
   }
 
   /** Notify that the user has accepted a pairing code or other out-of-band confirmation. */
@@ -352,7 +311,7 @@ public abstract class CarBluetoothManager {
   protected final void disconnectWithError(@NonNull String errorMessage, @Nullable Exception e) {
     loge(TAG, errorMessage, e);
     if (isAssociating()) {
-      associationCallback.onAssociationError(DEVICE_ERROR_INVALID_HANDSHAKE);
+      getAssociationCallback().onAssociationError(DEVICE_ERROR_INVALID_HANDSHAKE);
     }
     reset();
   }
@@ -388,9 +347,9 @@ public abstract class CarBluetoothManager {
                     clientDeviceAddress,
                     clientDeviceName,
                     /* isConnectionEnabled= */ true));
-            if (associationCallback != null) {
-              associationCallback.onAssociationCompleted(deviceId);
-              oobConnectionManager.reset();
+            AssociationCallback callback = getAssociationCallback();
+            if (callback != null) {
+              callback.onAssociationCompleted(deviceId);
               setAssociationCallback(null);
             }
           }
@@ -409,8 +368,7 @@ public abstract class CarBluetoothManager {
           callbacks.invoke(callback -> callback.onSecureChannelError(deviceId));
 
           if (isAssociating()) {
-            associationCallback.onAssociationError(error);
-            oobConnectionManager.reset();
+            getAssociationCallback().onAssociationError(error);
           }
 
           disconnectWithError("Error while establishing secure connection.");

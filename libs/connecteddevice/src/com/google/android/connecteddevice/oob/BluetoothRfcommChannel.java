@@ -22,8 +22,6 @@ import static com.google.android.connecteddevice.util.SafeLog.logw;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.os.Handler;
-import android.os.Looper;
 import android.os.ParcelUuid;
 import android.os.RemoteException;
 import androidx.annotation.NonNull;
@@ -42,8 +40,6 @@ public class BluetoothRfcommChannel implements OobChannel {
   private static final String TAG = "BluetoothRfcommChannel";
   // TODO(b/159500330): Generate random UUID.
   private static final UUID RFCOMM_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
-  private static final int CONNECTION_TIMEOUT_MS = 500;
-
   private final AtomicBoolean isInterrupted = new AtomicBoolean();
   private final ConnectedDeviceSppDelegateBinder sppDelegateBinder;
   private Connection activeConnection;
@@ -71,40 +67,15 @@ public class BluetoothRfcommChannel implements OobChannel {
       PendingConnection connection =
           sppDelegateBinder.connectAsClient(RFCOMM_UUID, remoteDevice, /* isSecure= */ true);
       if (connection == null) {
-        notifyFailure(
-            "Connection with " + remoteDevice.getName() + " failed.", /* exception= */ null);
+        notifyFailure("Connection with " + remoteDevice.getName() + " failed.", null);
         return;
       }
 
-      Handler handler = new Handler(Looper.getMainLooper());
-      handler.postDelayed(
-          () -> {
-            logd(TAG, "Cancelling connection with " + remoteDevice.getName());
-            try {
-              sppDelegateBinder.cancelConnectionAttempt(connection);
-            } catch (RemoteException e) {
-              logw(TAG, "Failed to cancel connection attempt with " + remoteDevice.getName());
-            }
-            notifyFailure(
-                "Connection with " + remoteDevice.getName() + " timed out.", /* exception= */ null);
-          },
-          CONNECTION_TIMEOUT_MS);
-
-      connection
-          .setOnConnectedListener(
-              (uuid, btDevice, isSecure, deviceName) -> {
-                handler.removeCallbacksAndMessages(null);
-                activeConnection =
-                    new Connection(new ParcelUuid(uuid), btDevice, isSecure, deviceName);
-                notifySuccess();
-              })
-          .setOnConnectionErrorListener(
-              () -> {
-                handler.removeCallbacksAndMessages(null);
-                notifyFailure(
-                    "Connection with " + remoteDevice.getName() + " failed.",
-                    /* exception= */ null);
-              });
+      connection.setOnConnectedListener(
+          (uuid, btDevice, isSecure, deviceName) -> {
+            activeConnection = new Connection(new ParcelUuid(uuid), btDevice, isSecure, deviceName);
+            notifySuccess();
+          });
     } catch (RemoteException e) {
       notifyFailure("Connection with " + remoteDevice.getName() + " failed.", e);
     }

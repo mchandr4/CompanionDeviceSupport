@@ -24,20 +24,16 @@ import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
-import com.google.android.companionprotos.CapabilitiesExchangeProto.CapabilitiesExchange;
-import com.google.android.companionprotos.CapabilitiesExchangeProto.CapabilitiesExchange.OobChannel;
 import com.google.android.companionprotos.DeviceMessageProto.Message;
 import com.google.android.companionprotos.OperationProto.OperationType;
 import com.google.android.companionprotos.PacketProto.Packet;
 import com.google.android.companionprotos.VersionExchangeProto.VersionExchange;
 import com.google.android.connecteddevice.util.ByteUtils;
-import com.google.common.collect.ImmutableList;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,16 +46,9 @@ public abstract class DeviceMessageStream {
 
   private static final String TAG = "DeviceMessageStream";
 
-  public static final int MIN_SECURITY_VERSION_FOR_CAPABILITIES_EXCHANGE = 3;
-
   // Messaging and security versions are dictated by this device.
   @VisibleForTesting public static final int MESSAGING_VERSION = 3;
-  @VisibleForTesting public static final int MIN_SECURITY_VERSION = 2;
-  // TODO(b/175066810): Increment the security version to 3 only when capabilities exchange is fully
-  // implemented on IHU and mobile.
-  @VisibleForTesting public static final int MAX_SECURITY_VERSION = 2;
-
-  private static final ImmutableList<OobChannel> SUPPORTED_OOB_CHANNELS = ImmutableList.of();
+  @VisibleForTesting public static final int SECURITY_VERSION = 2;
 
   private final ArrayDeque<Packet> packetQueue = new ArrayDeque<>();
 
@@ -70,15 +59,7 @@ public abstract class DeviceMessageStream {
 
   private final MessageIdGenerator messageIdGenerator = new MessageIdGenerator();
 
-  private enum MessageExchangeState {
-    UNKNOWN,
-    WAITING_FOR_VERSION_EXCHANGE,
-    WAITING_FOR_CAPABILITIES_EXCHANGE,
-    WAITING_FOR_MESSAGE_PACKETS
-  }
-
-  private MessageExchangeState messageExchangeState =
-      MessageExchangeState.WAITING_FOR_VERSION_EXCHANGE;
+  private final AtomicBoolean isVersionExchanged = new AtomicBoolean(false);
 
   private final AtomicBoolean isSendingInProgress = new AtomicBoolean(false);
 
@@ -89,12 +70,6 @@ public abstract class DeviceMessageStream {
 
   /** Listener which will be notified when there is error parsing the received message. */
   private MessageReceivedErrorListener messageReceivedErrorListener;
-
-  /** Listener which will be notified when the version is exchanged. */
-  private VersionExchangedListener versionExchangedListener;
-
-  /** Listener which will be notified when the capabilities are exchanged. */
-  private CapabilitiesExchangedListener capabilitiesExchangedListener;
 
   protected DeviceMessageStream(int defaultMaxWriteSize) {
     maxWriteSize = defaultMaxWriteSize;
@@ -124,24 +99,6 @@ public abstract class DeviceMessageStream {
   }
 
   /**
-   * Set the given listener to be notified when the version was exchanged between the two devices.
-   * If listener is {@code null}, clear.
-   */
-  public final void setVersionExchangedListener(@Nullable VersionExchangedListener listener) {
-    versionExchangedListener = listener;
-  }
-
-  /**
-   * Set the given listener to be notified when the capabilities were exchanged between the two
-   * devices. If listener is {@code null}, clear.
-   */
-  public final void setCapabilitiesExchangedListener(
-      @Nullable CapabilitiesExchangedListener listener) {
-    logd(TAG, "Setting capabilities exchanged listener");
-    capabilitiesExchangedListener = listener;
-  }
-
-  /**
    * Notify the {@code mMessageReceivedListener} about the message received if it is not {@code
    * null}.
    *
@@ -164,24 +121,6 @@ public abstract class DeviceMessageStream {
   protected final void notifyMessageReceivedErrorListener(Exception e) {
     if (messageReceivedErrorListener != null) {
       messageReceivedErrorListener.onMessageReceivedError(e);
-    }
-  }
-
-  @VisibleForTesting
-  public final void notifyVersionExchanged(int messagingVersion, int securityVersion) {
-    if (versionExchangedListener != null) {
-      versionExchangedListener.onVersionExchanged(messagingVersion, securityVersion);
-    }
-  }
-
-  private final void notifyOobCapabilitiesExchanged(@NonNull List<OobChannel> oobChannels) {
-    logd(
-        TAG,
-        "Capabilitied exchanged listener is " + capabilitiesExchangedListener == null
-            ? "null"
-            : "not null");
-    if (capabilitiesExchangedListener != null) {
-      capabilitiesExchangedListener.onOobCapabilitiesExchanged(oobChannels);
     }
   }
 
@@ -254,28 +193,21 @@ public abstract class DeviceMessageStream {
   }
 
   /** Process incoming data from stream. */
-  protected final synchronized void onDataReceived(byte[] data) {
-    switch (messageExchangeState) {
-      case WAITING_FOR_VERSION_EXCHANGE:
-        processVersionExchange(data);
-        break;
-      case WAITING_FOR_CAPABILITIES_EXCHANGE:
-        processCapabilitiesExchange(data);
-        break;
-      case WAITING_FOR_MESSAGE_PACKETS:
-        Packet packet;
-        try {
-          packet = Packet.parseFrom(data, ExtensionRegistryLite.getEmptyRegistry());
-        } catch (IOException e) {
-          loge(TAG, "Can not parse packet from client.", e);
-          notifyMessageReceivedErrorListener(e);
-          return;
-        }
-        processPacket(packet);
-        break;
-      case UNKNOWN:
-        loge(TAG, "Unknown state, don't know what to do with this message.");
+  protected final void onDataReceived(byte[] data) {
+    if (!hasVersionBeenExchanged()) {
+      processVersionExchange(data);
+      return;
     }
+
+    Packet packet;
+    try {
+      packet = Packet.parseFrom(data, ExtensionRegistryLite.getEmptyRegistry());
+    } catch (IOException e) {
+      loge(TAG, "Can not parse packet from client.", e);
+      notifyMessageReceivedErrorListener(e);
+      return;
+    }
+    processPacket(packet);
   }
 
   protected final void processPacket(@NonNull Packet packet) {
@@ -355,6 +287,10 @@ public abstract class DeviceMessageStream {
     this.maxWriteSize = maxWriteSize;
   }
 
+  private boolean hasVersionBeenExchanged() {
+    return isVersionExchanged.get();
+  }
+
   /** Indicate current send operation has completed. */
   public void sendCompleted() {
     isSendingInProgress.set(false);
@@ -378,8 +314,8 @@ public abstract class DeviceMessageStream {
     int maxSecurityVersion = versionExchange.getMaxSupportedSecurityVersion();
     if (minMessagingVersion > MESSAGING_VERSION
         || maxMessagingVersion < MESSAGING_VERSION
-        || minSecurityVersion > MAX_SECURITY_VERSION
-        || maxSecurityVersion < MIN_SECURITY_VERSION) {
+        || minSecurityVersion > SECURITY_VERSION
+        || maxSecurityVersion < SECURITY_VERSION) {
       loge(
           TAG,
           "Unsupported message version for min "
@@ -399,47 +335,13 @@ public abstract class DeviceMessageStream {
         VersionExchange.newBuilder()
             .setMinSupportedMessagingVersion(MESSAGING_VERSION)
             .setMaxSupportedMessagingVersion(MESSAGING_VERSION)
-            .setMinSupportedSecurityVersion(MIN_SECURITY_VERSION)
-            .setMaxSupportedSecurityVersion(MAX_SECURITY_VERSION)
+            .setMinSupportedSecurityVersion(SECURITY_VERSION)
+            .setMaxSupportedSecurityVersion(SECURITY_VERSION)
             .build();
+
     send(headunitVersion.toByteArray());
+    isVersionExchanged.set(true);
     logd(TAG, "Sent supported version to the phone.");
-
-    int maxSharedSecurityVersion = Math.min(maxSecurityVersion, MAX_SECURITY_VERSION);
-    notifyVersionExchanged(MESSAGING_VERSION, maxSharedSecurityVersion);
-    messageExchangeState =
-        maxSharedSecurityVersion >= MIN_SECURITY_VERSION_FOR_CAPABILITIES_EXCHANGE
-            ? MessageExchangeState.WAITING_FOR_CAPABILITIES_EXCHANGE
-            : MessageExchangeState.WAITING_FOR_MESSAGE_PACKETS;
-  }
-
-  // TODO(b/178045908): Move capabilities exchange logic out of DeviceMessageStream
-  private void processCapabilitiesExchange(@NonNull byte[] value) {
-    CapabilitiesExchange capabilitiesExchange;
-    try {
-      capabilitiesExchange =
-          CapabilitiesExchange.parseFrom(value, ExtensionRegistryLite.getEmptyRegistry());
-    } catch (IOException e) {
-      loge(TAG, "Could not parse capabilities exchange message", e);
-      notifyMessageReceivedErrorListener(e);
-      return;
-    }
-
-    CapabilitiesExchange headunitCapabilities =
-        CapabilitiesExchange.newBuilder()
-            .addAllSupportedOobChannels(SUPPORTED_OOB_CHANNELS)
-            .build();
-    send(headunitCapabilities.toByteArray());
-    logd(TAG, "Sent supported capabilities to the phone.");
-
-    List<OobChannel> sharedSupportedOobChanels = capabilitiesExchange.getSupportedOobChannelsList();
-    if (sharedSupportedOobChanels == null) {
-      sharedSupportedOobChanels = new ArrayList<>();
-    }
-    sharedSupportedOobChanels.retainAll(SUPPORTED_OOB_CHANNELS);
-    notifyOobCapabilitiesExchanged(sharedSupportedOobChanels);
-
-    messageExchangeState = MessageExchangeState.WAITING_FOR_MESSAGE_PACKETS;
   }
 
   /** A generator of unique IDs for messages. */
@@ -473,26 +375,5 @@ public abstract class DeviceMessageStream {
      * @param exception The error.
      */
     void onMessageReceivedError(@NonNull Exception exception);
-  }
-
-  /** Listener to be invoked when the version exchange has been completed on the IHU. */
-  public interface VersionExchangedListener {
-    /**
-     * Called when version exchange has been completed on the IHU.
-     *
-     * @param messagingVersion The supported messaging version agreed upon by both devices
-     * @param securityVersion The supported security version agreed upon by both devices
-     */
-    void onVersionExchanged(int messagingVersion, int securityVersion);
-  }
-
-  /** Listener to be invoked when the capabilities exchange has been completed on the IHU. */
-  public interface CapabilitiesExchangedListener {
-    /**
-     * Called when the capabilities exchange has been completed on the IHU.
-     *
-     * @param oobChannels The list of out of band channels supported by both devices
-     */
-    void onOobCapabilitiesExchanged(@NonNull List<OobChannel> oobChannels);
   }
 }

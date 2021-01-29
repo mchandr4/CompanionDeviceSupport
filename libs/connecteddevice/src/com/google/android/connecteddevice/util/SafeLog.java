@@ -23,13 +23,11 @@ import androidx.annotation.Nullable;
 /** Convenience logging methods that respect allow list tags. */
 public class SafeLog {
 
-  private static final boolean LOCAL_MODE = false;
-
   private SafeLog() {}
 
   /** Log message if tag is allow listed for {@code Log.VERBOSE}. */
   public static void logv(@NonNull String tag, @NonNull String message) {
-    if (LOCAL_MODE || Log.isLoggable(tag, Log.VERBOSE)) {
+    if (Log.isLoggable(tag, Log.VERBOSE)) {
       Log.v(tag, message);
     }
     Logger.getLogger().verbose(tag, message);
@@ -37,7 +35,7 @@ public class SafeLog {
 
   /** Log message if tag is allow listed for {@code Log.INFO}. */
   public static void logi(@NonNull String tag, @NonNull String message) {
-    if (LOCAL_MODE || Log.isLoggable(tag, Log.INFO)) {
+    if (Log.isLoggable(tag, Log.INFO)) {
       Log.i(tag, message);
     }
     Logger.getLogger().info(tag, message);
@@ -45,7 +43,7 @@ public class SafeLog {
 
   /** Log message if tag is allow listed for {@code Log.DEBUG}. */
   public static void logd(@NonNull String tag, @NonNull String message) {
-    if (LOCAL_MODE || Log.isLoggable(tag, Log.DEBUG)) {
+    if (Log.isLoggable(tag, Log.DEBUG)) {
       Log.d(tag, message);
     }
     Logger.getLogger().debug(tag, message);
@@ -53,7 +51,7 @@ public class SafeLog {
 
   /** Log message if tag is allow listed for {@code Log.WARN}. */
   public static void logw(@NonNull String tag, @NonNull String message) {
-    if (LOCAL_MODE || Log.isLoggable(tag, Log.WARN)) {
+    if (Log.isLoggable(tag, Log.WARN)) {
       Log.w(tag, message);
     }
     Logger.getLogger().warn(tag, message);
@@ -62,12 +60,13 @@ public class SafeLog {
   /** Log message if tag is allow listed for {@code Log.ERROR}. */
   public static void loge(@NonNull String tag, @NonNull String message) {
     loge(tag, message, /* exception= */ null);
+    Logger.getLogger().error(tag, message);
   }
 
   /** Log message and optional exception if tag is allow listed for {@code Log.ERROR}. */
   public static void loge(
       @NonNull String tag, @NonNull String message, @Nullable Exception exception) {
-    if (LOCAL_MODE || Log.isLoggable(tag, Log.ERROR)) {
+    if (Log.isLoggable(tag, Log.ERROR)) {
       Log.e(tag, message, exception);
     }
     Logger.getLogger().error(tag, message, exception);

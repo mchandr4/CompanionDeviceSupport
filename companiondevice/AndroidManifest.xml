@@ -53,13 +53,13 @@
         <service
             android:name="com.google.android.connecteddevice.service.ConnectedDeviceService"
             android:singleUser="true"
-            android:exported="true">
+            android:exported="false">
             <intent-filter>
                 <action android:name="com.google.android.connecteddevice.BIND_ASSOCIATION" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <intent-filter>
-                <action android:name="com.google.android.connecteddevice.BIND_REMOTE_FEATURE" />
+                <action android:name="com.google.android.connecteddevice.BIND_CONNECTED_DEVICE_MANAGER" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <intent-filter>
@@ -74,16 +74,10 @@
                 android:resource="@string/car_association_service_uuid" />
             <meta-data android:name="com.google.android.connecteddevice.enable_proxy"
                 android:resource="@bool/enable_proxy" />
-            <meta-data android:name="com.google.android.connecteddevice.enable_spp"
-                android:resource="@bool/enable_spp" />
         </service>
         <service
             android:name="com.google.android.connecteddevice.service.ConnectedDeviceFgUserService"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="com.google.android.connecteddevice.BIND_REMOTE_FEATURE" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
+            android:exported="false">
             <meta-data android:name="com.google.android.connecteddevice.early_services"
                 android:resource="@array/early_fg_user_services"/>
             <meta-data android:name="com.google.android.connecteddevice.unlock_services"

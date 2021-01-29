@@ -25,7 +25,6 @@ import android.security.keystore.KeyProperties;
 import android.util.Base64;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import com.google.security.annotations.SuppressInsecureCipherModeCheckerNoReview;
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -68,7 +67,6 @@ final class KeyStoreCryptoHelper implements CryptoHelper {
   // possible value.
   private static final int GCM_AUTHENTICATION_TAG_LENGTH = 128;
 
-  @SuppressInsecureCipherModeCheckerNoReview
   @Override
   @Nullable
   public String encrypt(@Nullable byte[] value) {
@@ -95,7 +93,6 @@ final class KeyStoreCryptoHelper implements CryptoHelper {
     }
   }
 
-  @SuppressInsecureCipherModeCheckerNoReview
   @Override
   @Nullable
   public byte[] decrypt(@Nullable String value) {

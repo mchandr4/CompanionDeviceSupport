@@ -33,10 +33,8 @@ import android.bluetooth.le.AdvertiseSettings;
 import android.os.Handler;
 import android.os.ParcelUuid;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
-import com.google.android.companionprotos.VersionExchangeProto.VersionExchange;
 import com.google.android.connecteddevice.connection.AssociationCallback;
 import com.google.android.connecteddevice.connection.AssociationSecureChannel;
-import com.google.android.connecteddevice.connection.DeviceMessageStream;
 import com.google.android.connecteddevice.connection.SecureChannel;
 import com.google.android.connecteddevice.model.AssociatedDevice;
 import com.google.android.connecteddevice.oob.OobConnectionManager;
@@ -249,22 +247,6 @@ public class CarBlePeripheralManagerTest {
     BluetoothDevice bluetoothDevice =
         BluetoothAdapter.getDefaultAdapter().getRemoteDevice(TEST_REMOTE_DEVICE_ADDRESS);
     bleManagerCallback.onRemoteDeviceConnected(bluetoothDevice);
-    ArgumentCaptor<BlePeripheralManager.OnCharacteristicWriteListener> listenerCaptor =
-        ArgumentCaptor.forClass(BlePeripheralManager.OnCharacteristicWriteListener.class);
-    verify(mockBlePeripheralManager).addOnCharacteristicWriteListener(listenerCaptor.capture());
-    VersionExchange versionExchangeMessage =
-        VersionExchange.newBuilder()
-            .setMinSupportedMessagingVersion(DeviceMessageStream.MESSAGING_VERSION)
-            .setMaxSupportedMessagingVersion(DeviceMessageStream.MESSAGING_VERSION)
-            .setMinSupportedSecurityVersion(DeviceMessageStream.MIN_SECURITY_VERSION)
-            .setMaxSupportedSecurityVersion(DeviceMessageStream.MAX_SECURITY_VERSION)
-            .build();
-    listenerCaptor
-        .getValue()
-        .onCharacteristicWrite(
-            bluetoothDevice,
-            carBlePeripheralManager.readCharacteristic,
-            versionExchangeMessage.toByteArray());
     return (AssociationSecureChannel) carBlePeripheralManager.getConnectedDeviceChannel();
   }
 

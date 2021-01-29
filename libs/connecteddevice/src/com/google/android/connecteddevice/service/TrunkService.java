@@ -31,8 +31,6 @@ import androidx.annotation.NonNull;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 import java.time.Duration;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /** A service that is used to maintain the lifecycle of branch services. */
 public abstract class TrunkService extends MetaDataService {
@@ -48,9 +46,6 @@ public abstract class TrunkService extends MetaDataService {
   private static final int MAX_BIND_ATTEMPTS = 3;
 
   private final Multiset<String> bindAttempts = HashMultiset.create();
-
-  @SuppressWarnings("AndroidConcurrentHashMap")
-  private final Map<ComponentName, ServiceConnection> startedServices = new ConcurrentHashMap<>();
 
   @Override
   public void onCreate() {
@@ -79,23 +74,12 @@ public abstract class TrunkService extends MetaDataService {
     }
   }
 
-  /** Stop all branch services that have been started by this service. */
-  protected final void stopBranchServices() {
-    logd(TAG, "Stopping connected branch services.");
-    for (Map.Entry<ComponentName, ServiceConnection> connection : startedServices.entrySet()) {
-      ComponentName name = connection.getKey();
-      ServiceConnection serviceConnection = connection.getValue();
-      logd(TAG, "Attempting to stop " + name.flattenToString());
-      unbindService(serviceConnection);
-    }
-  }
-
   private void bindToService(@NonNull ComponentName componentName) {
     Intent intent = new Intent();
     intent.setComponent(componentName);
     String flatComponentName = componentName.flattenToString();
-    boolean success = bindService(intent, createServiceConnection(), Context.BIND_AUTO_CREATE);
-    logd(TAG, "Attempted to start " + flatComponentName + " with success: " + success + ".");
+    logd(TAG, "Attempting to start " + flatComponentName + ".");
+    boolean success = bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
     if (success) {
       bindAttempts.remove(flatComponentName);
       return;
@@ -113,29 +97,18 @@ public abstract class TrunkService extends MetaDataService {
         .postDelayed(() -> bindToService(componentName), BIND_RETRY_DURATION.toMillis());
   }
 
-  private void onBranchServiceStarted(ComponentName name, ServiceConnection connection) {
-    logd(TAG, name.flattenToString() + " started successfully.");
-    startedServices.put(name, connection);
-  }
+  private final ServiceConnection serviceConnection =
+      new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+          logd(TAG, name.flattenToString() + " started successfully.");
+        }
 
-  private  ServiceConnection createServiceConnection() {
-    return new ServiceConnection() {
-      @Override
-      public void onServiceConnected(ComponentName name, IBinder service) {
-        onBranchServiceStarted(name, this);
-      }
-
-      @Override
-      public void onServiceDisconnected(ComponentName name) {
-        loge(TAG, "Lost connection to " + name.flattenToString() + ". Attempting to reconnect.");
-        bindAttempts.setCount(name.flattenToString(), 0);
-        bindToService(name);
-      }
-
-      @Override
-      public void onNullBinding(ComponentName name) {
-        onBranchServiceStarted(name, this);
-      }
-    };
-  }
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+          loge(TAG, "Lost connection to " + name.flattenToString() + ". Attempting to reconnect.");
+          bindAttempts.setCount(name.flattenToString(), 0);
+          bindToService(name);
+        }
+      };
 }

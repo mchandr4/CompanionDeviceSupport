@@ -19,42 +19,43 @@ package com.google.android.connecteddevice.service;
 import static com.google.android.connecteddevice.util.SafeLog.loge;
 import static com.google.android.connecteddevice.util.SafeLog.logw;
 
+import android.os.Looper;
 import android.os.RemoteException;
+import androidx.annotation.WorkerThread;
 import com.google.android.connecteddevice.ConnectedDeviceManager;
 import com.google.android.connecteddevice.ConnectedDeviceManager.DeviceAssociationCallback;
 import com.google.android.connecteddevice.api.IAssociatedDeviceManager;
 import com.google.android.connecteddevice.api.IAssociationCallback;
 import com.google.android.connecteddevice.api.IConnectionCallback;
 import com.google.android.connecteddevice.api.IDeviceAssociationCallback;
-import com.google.android.connecteddevice.api.IOnAssociatedDevicesRetrievedListener;
 import com.google.android.connecteddevice.connection.AssociationCallback;
 import com.google.android.connecteddevice.model.AssociatedDevice;
 import com.google.android.connecteddevice.model.ConnectedDevice;
 import com.google.android.connecteddevice.model.OobEligibleDevice;
-import com.google.android.connecteddevice.storage.ConnectedDeviceStorage.OnAssociatedDevicesRetrievedListener;
 import com.google.android.connecteddevice.util.RemoteCallbackBinder;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-/** Binder for exposing associated device actions to internal features. */
+/** Binder for exposing connected device association actions to internal features. */
 public class AssociationBinder extends IAssociatedDeviceManager.Stub {
 
   private static final String TAG = "AssociationBinder";
 
   private final ConnectedDeviceManager connectedDeviceManager;
   /**
-   * {@link #remoteAssociationCallbackBinder} and {@link #iAssociationCallback} can only be modified
-   * together through {@link #setAssociationCallback(IAssociationCallback)} or {@link
+   * {@link #remoteAssociationCallbackBinder} and {@link #iAssociationCallback} can only be
+   * modified together through {@link #setAssociationCallback(IAssociationCallback)} or {@link
    * #clearAssociationCallback()} from the association thread.
    */
   private RemoteCallbackBinder remoteAssociationCallbackBinder;
 
   private IAssociationCallback iAssociationCallback;
   /**
-   * {@link #remoteDeviceAssociationCallbackBinder} and {@link #deviceAssociationCallback} can only
-   * be modified together through {@link #setDeviceAssociationCallback(IDeviceAssociationCallback)}
-   * or {@link #clearDeviceAssociationCallback()} from the association thread.
+   * {@link #remoteDeviceAssociationCallbackBinder} and {@link #deviceAssociationCallback} can
+   * only be modified together through {@link
+   * #setDeviceAssociationCallback(IDeviceAssociationCallback)} or {@link
+   * #clearDeviceAssociationCallback()} from the association thread.
    */
   private RemoteCallbackBinder remoteDeviceAssociationCallbackBinder;
 
@@ -107,7 +108,8 @@ public class AssociationBinder extends IAssociatedDeviceManager.Stub {
       return;
     }
 
-    connectedDeviceManager.startOutOfBandAssociation(eligibleDevice, associationCallback);
+    connectedDeviceManager.startOutOfBandAssociation(
+        eligibleDevice, associationCallback);
   }
 
   @Override
@@ -115,18 +117,13 @@ public class AssociationBinder extends IAssociatedDeviceManager.Stub {
     connectedDeviceManager.stopAssociation(associationCallback);
   }
 
+  @WorkerThread
   @Override
-  public void retrievedActiveUserAssociatedDevices(
-      IOnAssociatedDevicesRetrievedListener remoteListener) {
-    OnAssociatedDevicesRetrievedListener listener =
-        devices -> {
-          try {
-            remoteListener.onAssociatedDevicesRetrieved(devices);
-          } catch (RemoteException exception) {
-            loge(TAG, "onAssociatedDevicesRetrieved failed.", exception);
-          }
-        };
-    connectedDeviceManager.retrieveActiveUserAssociatedDevices(listener);
+  public List<AssociatedDevice> getActiveUserAssociatedDevices() {
+    if (Looper.myLooper() == Looper.getMainLooper()) {
+      throw new IllegalThreadStateException("Calling thread cannot be the main thread.");
+    }
+    return connectedDeviceManager.getActiveUserAssociatedDevices();
   }
 
   @Override
@@ -172,7 +169,8 @@ public class AssociationBinder extends IAssociatedDeviceManager.Stub {
         };
     remoteDeviceAssociationCallbackBinder =
         new RemoteCallbackBinder(callback.asBinder(), iBinder -> clearDeviceAssociationCallback());
-    connectedDeviceManager.registerDeviceAssociationCallback(deviceAssociationCallback, executor);
+    connectedDeviceManager.registerDeviceAssociationCallback(
+        deviceAssociationCallback, executor);
   }
 
   @Override
@@ -224,7 +222,8 @@ public class AssociationBinder extends IAssociatedDeviceManager.Stub {
         };
     remoteConnectionCallbackBinder =
         new RemoteCallbackBinder(callback.asBinder(), iBinder -> clearConnectionCallback());
-    connectedDeviceManager.registerActiveUserConnectionCallback(connectionCallback, executor);
+    connectedDeviceManager.registerActiveUserConnectionCallback(
+        connectionCallback, executor);
   }
 
   @Override

@@ -16,21 +16,14 @@
 
 package com.google.android.connecteddevice.calendarsync;
 
-import static com.google.android.connecteddevice.util.SafeLog.logi;
-
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
-import android.os.StrictMode;
-import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 /** Early start service that provides the Calendar Sync feature to the foreground user. */
 public final class CalendarSyncService extends Service {
-
-  private static final String TAG = "CalendarSyncService";
-
   /**
    * A flag that controls whether the new bi-directional sync implementation is used. The value
    * should only by changed by tests before the service is created.
@@ -62,23 +55,10 @@ public final class CalendarSyncService extends Service {
   public void onCreate() {
     super.onCreate();
     if (enableBidirectionalSync) {
-      logi(TAG, "Creating CalendarSyncFeature2");
       calendarSyncFeature = new CalendarSyncFeature2(getApplicationContext());
       calendarSyncFeature.start();
     } else {
-      logi(TAG, "Creating CalendarSyncManager");
       calendarSyncManager = new CalendarSyncManager(getApplicationContext());
-    }
-
-    // TODO(b/177819109) This setting is global and should be enabled in Application.onCreate().
-    // Enable StrictMode globally when debug logging is enabled.
-    if (Log.isLoggable(TAG, Log.DEBUG)) {
-      // Settings for the current (main) thread.
-      StrictMode.setThreadPolicy(
-          new StrictMode.ThreadPolicy.Builder().detectAll().penaltyDialog().build());
-
-      // Settings for the entire application process.
-      StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().detectAll().penaltyDeath().build());
     }
   }
 

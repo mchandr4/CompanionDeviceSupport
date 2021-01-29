@@ -38,7 +38,6 @@ import com.google.android.connecteddevice.connection.ble.CarBlePeripheralManager
 import com.google.android.connecteddevice.connection.ble.OnDeviceBlePeripheralManager;
 import com.google.android.connecteddevice.connection.spp.CarSppManager;
 import com.google.android.connecteddevice.logging.LoggingManager;
-import com.google.android.connecteddevice.oob.BluetoothRfcommChannel;
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage;
 import com.google.android.connecteddevice.transport.proxy.ProxyBlePeripheralManager;
 import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelegateBinder;
@@ -63,8 +62,9 @@ public final class ConnectedDeviceService extends TrunkService {
   // reconnect advertisement every 6 minutes to avoid crossing a rotation.
   private static final Duration MAX_ADVERTISEMENT_DURATION = Duration.ofMinutes(6);
 
-  /** {@code boolean} Enable SPP. */
-  private static final String META_ENABLE_SPP = "com.google.android.connecteddevice.enable_spp";
+  /** {@code boolean} Enable SPP transport. */
+  private static final String META_ENABLE_SPP_SUPPORT =
+      "com.google.android.connecteddevice.enable_spp_support";
   /** {@code String} UUID for SPP server. */
   private static final String META_SPP_SERVICE_UUID =
       "com.google.android.connecteddevice.spp_service_uuid";
@@ -157,7 +157,7 @@ public final class ConnectedDeviceService extends TrunkService {
     super.onCreate();
     logd(TAG, "Service created.");
     EventLog.onServiceStarted();
-    boolean isSppSupported = getMetaBoolean(META_ENABLE_SPP, SPP_ENABLED_BY_DEFAULT);
+    boolean isSppSupported = getMetaBoolean(META_ENABLE_SPP_SUPPORT, SPP_ENABLED_BY_DEFAULT);
 
     ConnectedDeviceStorage storage = new ConnectedDeviceStorage(this);
     boolean isCompressionEnabled =
@@ -233,8 +233,7 @@ public final class ConnectedDeviceService extends TrunkService {
         readUuid,
         MAX_ADVERTISEMENT_DURATION,
         defaultMtuSize,
-        isCompressionEnabled,
-        new BluetoothRfcommChannel(sppDelegateBinder));
+        isCompressionEnabled);
   }
 
   @Override
