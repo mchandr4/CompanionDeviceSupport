@@ -19,6 +19,7 @@ package com.google.android.connecteddevice.transport.spp;
 import static com.google.android.connecteddevice.util.SafeLog.logd;
 import static com.google.android.connecteddevice.util.SafeLog.loge;
 import static com.google.android.connecteddevice.util.SafeLog.logi;
+import static com.google.android.connecteddevice.util.SafeLog.logw;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
@@ -86,7 +87,7 @@ class ReadMessageTask implements Runnable {
       try {
         bytesRead = inputStream.read(buffer, offset, bytesToRead);
       } catch (IOException e) {
-        loge(TAG, "Encountered an exception when listening for incoming message.", e);
+        logw(TAG, "Encountered an exception when listening for incoming message.");
         return false;
       }
       if (bytesRead == -1) {

@@ -17,4 +17,5 @@
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <bool name="enable_proxy">false</bool>
+    <bool name="enable_spp">false</bool>
 </resources>

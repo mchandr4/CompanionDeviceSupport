@@ -77,8 +77,9 @@ public class TrustedDeviceUiDelegateService extends MetaDataService {
 
   @Override
   public void onDestroy() {
-    super.onDestroy();
+    logd(TAG, "Service was destroyed.");
     unregisterCallbacks();
+    super.onDestroy();
   }
 
   private void showEnrollmentNotification() {

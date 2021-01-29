@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package com.google.android.companiondevicesupport;
+package com.google.android.connecteddevice.model;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import com.google.android.connecteddevice.model.AssociatedDevice;
 
 /** Class that contains the details of an associated device. */
-class AssociatedDeviceDetails {
+public class AssociatedDeviceDetails {
   private final String deviceId;
 
   private final String deviceAddress;
@@ -32,7 +31,7 @@ class AssociatedDeviceDetails {
 
   private final boolean isConnected;
 
-  AssociatedDeviceDetails(@NonNull AssociatedDevice device, boolean isConnected) {
+  public AssociatedDeviceDetails(@NonNull AssociatedDevice device, boolean isConnected) {
     deviceId = device.getDeviceId();
     deviceAddress = device.getDeviceAddress();
     deviceName = device.getDeviceName();
@@ -42,35 +41,35 @@ class AssociatedDeviceDetails {
 
   /** Get the device id. */
   @NonNull
-  String getDeviceId() {
+  public String getDeviceId() {
     return deviceId;
   }
 
   /** Get the name of the associated device. */
   @Nullable
-  String getDeviceName() {
+  public String getDeviceName() {
     return deviceName;
   }
 
   /** Get the device address. */
   @NonNull
-  String getDeviceAddress() {
+  public String getDeviceAddress() {
     return deviceAddress;
   }
 
   /** {@code true} if the connection is enabled for the device. */
-  boolean isConnectionEnabled() {
+  public boolean isConnectionEnabled() {
     return isConnectionEnabled;
   }
 
   /** {@code true} if the device is connected. */
-  boolean isConnected() {
+  public boolean isConnected() {
     return isConnected;
   }
 
   /** Get {@link AssociatedDevice}. */
   @NonNull
-  AssociatedDevice getAssociatedDevice() {
+  public AssociatedDevice getAssociatedDevice() {
     return new AssociatedDevice(deviceId, deviceAddress, deviceName, isConnectionEnabled);
   }
 }

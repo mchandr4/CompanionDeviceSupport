@@ -16,12 +16,14 @@
 
 package com.google.android.companiondevicesupport;
 
-import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
 import android.os.Bundle;
 import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import com.google.android.connecteddevice.service.AssociatedDeviceViewModel;
+import com.google.android.connecteddevice.service.AssociatedDeviceViewModelFactory;
 
 /** Fragment that displays when an error happens during association. */
 public class AssociationErrorFragment extends Fragment {
@@ -38,7 +40,12 @@ public class AssociationErrorFragment extends Fragment {
         .setOnClickListener(
             v -> {
               AssociatedDeviceViewModel model =
-                  ViewModelProviders.of(getActivity()).get(AssociatedDeviceViewModel.class);
+                  new ViewModelProvider(
+                          requireActivity(),
+                          new AssociatedDeviceViewModelFactory(
+                              requireActivity().getApplication(),
+                              getResources().getBoolean(R.bool.enable_spp)))
+                      .get(AssociatedDeviceViewModel.class);
               model.retryAssociation();
             });
   }
