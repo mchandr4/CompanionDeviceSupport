@@ -92,9 +92,10 @@ public class OobAssociationActivity extends FragmentActivity {
     model =
         new ViewModelProvider(
                 ViewModelStore::new,
-                OobAssociatedDeviceViewModelFactory.getInstance(
+                new OobAssociatedDeviceViewModelFactory(
                     getApplication(),
-                    new OobEligibleDevice(deviceAddress, OobEligibleDevice.OOB_TYPE_BLUETOOTH)))
+                    new OobEligibleDevice(deviceAddress, OobEligibleDevice.OOB_TYPE_BLUETOOTH),
+                    getResources().getBoolean(R.bool.enable_spp)))
             .get(OobAssociatedDeviceViewModel.class);
 
     model

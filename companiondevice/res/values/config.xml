@@ -22,8 +22,6 @@
 
     <string name="car_spp_service_uuid_secure" translatable="false">32a0e1c6-bbd2-11ea-b3de-0242ac130004</string>
 
-    <bool name="enable_spp_support">false</bool>
-
     <!-- Services to start early in the single user (user 0). -->
     <string-array name="early_single_user_services" translatable="false">
         <item>com.google.android.companiondevicesupport/com.google.android.connecteddevice.trust.TrustedDeviceManagerService</item>

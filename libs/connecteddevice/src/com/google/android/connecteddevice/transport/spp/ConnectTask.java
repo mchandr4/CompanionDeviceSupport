@@ -31,7 +31,10 @@ import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-/** This task runs when sending a connection request to remote device. */
+/**
+ * This task runs when always trying sending connection request to remote device until the task is
+ * cancelled or connection succeed.
+ */
 class ConnectTask implements Runnable {
   private static final String TAG = "ConnectTask";
   private final Callback callback;
@@ -61,29 +64,28 @@ class ConnectTask implements Runnable {
   public void run() {
     if (socket == null) {
       loge(TAG, "Socket is null, can not begin ConnectTask");
-      callbackExecutor.execute(callback::onConnectionAttemptFailed);
-      return;
-    }
-
-    logi(TAG, "Begin ConnectTask.");
-
-    // Always cancel discovery because it will slow down a connection
-    BluetoothAdapter.getDefaultAdapter().cancelDiscovery();
-
-    try {
-      // This is a blocking call and will only return on a successful connection or an exception
-      socket.connect();
-    } catch (IOException e) {
-      loge(TAG, "Exception when connecting to device.", e);
-
       // Do not trigger attempt failed callback when the task is cancelled intentionally.
       if (!isCanceled.get()) {
         callbackExecutor.execute(callback::onConnectionAttemptFailed);
       }
       return;
     }
+    boolean isConnected = false;
+    logi(TAG, "Begin ConnectTask.");
 
-    if (!isCanceled.get()) {
+    // Always cancel discovery because it will slow down a connection
+    BluetoothAdapter.getDefaultAdapter().cancelDiscovery();
+    while (!isConnected && !isCanceled.get()) {
+      try {
+        // This is a blocking call and will only return on a successful connection or an exception
+        socket.connect();
+      } catch (IOException e) {
+        logi(TAG, "Exception when connecting to device, retry...");
+        continue;
+      }
+      isConnected = true;
+    }
+    if (!isCanceled.get() && isConnected) {
       callbackExecutor.execute(() -> callback.onConnectionSuccess(socket));
     }
   }
@@ -93,7 +95,7 @@ class ConnectTask implements Runnable {
    */
   @SuppressWarnings("ObjectToString")
   public void cancel() {
-    logd(TAG, "CANCEL ConnectTask. Current socket: " + socket);
+    logd(TAG, "CANCEL ConnectTask.");
 
     if (isCanceled.getAndSet(true)) {
       logw(TAG, "Task already canceled. Ignoring.");

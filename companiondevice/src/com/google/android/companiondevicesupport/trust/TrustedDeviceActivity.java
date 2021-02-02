@@ -25,15 +25,10 @@ import static com.google.android.connecteddevice.util.SafeLog.logw;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.KeyguardManager;
-import androidx.lifecycle.ViewModelProviders;
-import android.content.ComponentName;
-import android.content.Context;
+import androidx.lifecycle.ViewModelProvider;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.IBinder;
-import android.os.RemoteException;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentActivity;
 import android.text.Html;
@@ -42,17 +37,11 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import com.google.android.companiondevicesupport.R;
 import com.google.android.companiondevicesupport.ui.Toolbar;
-import com.google.android.connecteddevice.api.IDeviceAssociationCallback;
 import com.google.android.connecteddevice.model.AssociatedDevice;
-import com.google.android.connecteddevice.model.ConnectedDevice;
 import com.google.android.connecteddevice.trust.TrustedDeviceConstants;
-import com.google.android.connecteddevice.trust.TrustedDeviceManagerService;
 import com.google.android.connecteddevice.trust.TrustedDeviceViewModel;
-import com.google.android.connecteddevice.trust.api.ITrustedDeviceCallback;
-import com.google.android.connecteddevice.trust.api.ITrustedDeviceEnrollmentCallback;
-import com.google.android.connecteddevice.trust.api.ITrustedDeviceManager;
+import com.google.android.connecteddevice.trust.TrustedDeviceViewModel.EnrollmentState;
 import com.google.android.connecteddevice.trust.api.TrustedDevice;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /** Activity for enrolling and viewing trusted devices. */
@@ -88,8 +77,6 @@ public class TrustedDeviceActivity extends FragmentActivity {
 
   private final AtomicBoolean isStartedForEnrollment = new AtomicBoolean(false);
 
-  private final AtomicBoolean hasPendingCredential = new AtomicBoolean(false);
-
   /**
    * {@code true} if this activity is relaunched for enrollment and the activity needs to be
    * finished after enrollment has completed.
@@ -97,8 +84,6 @@ public class TrustedDeviceActivity extends FragmentActivity {
   private final AtomicBoolean wasRelaunched = new AtomicBoolean(false);
 
   private KeyguardManager keyguardManager;
-
-  private ITrustedDeviceManager trustedDeviceManager;
 
   private Toolbar toolbar;
 
@@ -116,12 +101,11 @@ public class TrustedDeviceActivity extends FragmentActivity {
     toolbar.showProgressBar();
     toolbar.setOnBackButtonClickListener(v -> finish());
 
+    extractAssociatedDevice();
+
     isScreenLockNewlyCreated.set(false);
     isStartedForEnrollment.set(false);
-    hasPendingCredential.set(false);
     wasRelaunched.set(false);
-    Intent intent = new Intent(this, TrustedDeviceManagerService.class);
-    bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
   }
 
   @Override
@@ -132,7 +116,7 @@ public class TrustedDeviceActivity extends FragmentActivity {
       case ACTIVATE_TOKEN_REQUEST_CODE:
         if (resultCode != RESULT_OK) {
           loge(TAG, "Lock screen was unsuccessful. Returned result code: " + resultCode + ".");
-          finishEnrollment();
+          model.finishEnrollment();
           return;
         }
         logd(TAG, "Credentials accepted. Waiting for TrustAgent to activate " + "token.");
@@ -143,24 +127,11 @@ public class TrustedDeviceActivity extends FragmentActivity {
           isScreenLockNewlyCreated.set(false);
           return;
         }
-
-        if (hasPendingCredential.get()) {
-          showUnlockProfileDialogFragment();
-        }
+        isScreenLockNewlyCreated.set(true);
+        model.processEnrollment();
         break;
       case RETRIEVE_ASSOCIATED_DEVICE_REQUEST_CODE:
-        AssociatedDevice device = data.getParcelableExtra(ASSOCIATED_DEVICE_DATA_NAME_EXTRA);
-        if (device == null) {
-          loge(TAG, "No valid associated device.");
-          return;
-        }
-        model.setAssociatedDevice(device);
-        Intent incomingIntent = getIntent();
-        if (isStartedForEnrollment(incomingIntent)) {
-          processEnrollment();
-          return;
-        }
-        showTrustedDeviceDetailFragment(device);
+        onAssociatedDeviceRetrieved(data);
         break;
       default:
         logw(TAG, "Unrecognized activity result. Request code: " + requestCode + ". Ignoring.");
@@ -173,19 +144,8 @@ public class TrustedDeviceActivity extends FragmentActivity {
     super.onNewIntent(intent);
     wasRelaunched.set(true);
     if (isStartedForEnrollment(intent)) {
-      processEnrollment();
+      model.processEnrollment();
     }
-  }
-
-  @Override
-  protected void onDestroy() {
-    try {
-      unregisterCallbacks();
-    } catch (RemoteException e) {
-      loge(TAG, "Error while disconnecting from service.", e);
-    }
-    unbindService(serviceConnection);
-    super.onDestroy();
   }
 
   private void resumePreviousState(Bundle saveInstanceState) {
@@ -208,104 +168,84 @@ public class TrustedDeviceActivity extends FragmentActivity {
   }
 
   private void observeViewModel() {
-    model = ViewModelProviders.of(this).get(TrustedDeviceViewModel.class);
+    model = new ViewModelProvider(this).get(TrustedDeviceViewModel.class);
+    model.getAssociatedDevice().observe(this, this::onAssociatedDeviceEnrolled);
+    model.getEnrollmentError().observe(this, this::onEnrollmentError);
+
+    model.getEnrollmentState().observe(this, this::onEnrollmentStateChanged);
+
     model
-        .getDeviceToDisable()
+        .getEnabledDevice()
+        .observe(this, device -> runOnUiThread(() -> showEnrollmentSuccessToast(device)));
+    model
+        .isCurrentAssociatedDeviceRemoved()
         .observe(
             this,
-            trustedDevice -> {
-              if (trustedDevice == null) {
-                return;
+            isFinished -> {
+              if (isFinished) {
+                finish();
               }
-              model.setDeviceToDisable(null);
-              if (trustedDeviceManager == null) {
-                loge(TAG, "Failed to remove trusted device. service not connected.");
-                return;
-              }
-              try {
-                logd(TAG, "calling removeTrustedDevice");
-                trustedDeviceManager.removeTrustedDevice(trustedDevice);
-              } catch (RemoteException e) {
-                loge(TAG, "Failed to remove trusted device.", e);
-              }
-            });
-    model
-        .getDeviceToEnable()
-        .observe(
-            this,
-            associatedDevice -> {
-              if (associatedDevice == null) {
-                return;
-              }
-              model.setDeviceToEnable(null);
-              attemptInitiatingEnrollment(associatedDevice);
             });
   }
 
-  private boolean hasAssociatedDevice() {
+  private void onAssociatedDeviceEnrolled(AssociatedDevice device) {
+    if (device == null) {
+      return;
+    }
+    showTrustedDeviceDetailFragment(device);
+    Intent incomingIntent = getIntent();
+    if (isStartedForEnrollment(incomingIntent)) {
+      model.processEnrollment();
+    }
+  }
+
+  private void onEnrollmentError(Integer error) {
+    if (error != null) {
+      runOnUiThread(() -> showEnrollmentErrorDialogFragment(error));
+    }
+  }
+
+  private void onEnrollmentStateChanged(EnrollmentState state) {
+    logd(TAG, "new enrollment state: " + state.name());
+    switch (state) {
+      case WAITING_FOR_PASSWORD_SETUP:
+        runOnUiThread(this::promptToCreatePassword);
+        break;
+      case NO_CONNECTION:
+        runOnUiThread(this::showDeviceNotConnectedDialog);
+        break;
+      case CREDENTIAL_PENDING:
+        validateCredentials();
+        break;
+      case FINISHED:
+        model.resetEnrollmentState();
+        finishEnrollment();
+        break;
+      default:
+        break;
+    }
+  }
+
+  private void extractAssociatedDevice() {
     Intent intent = getIntent();
     String action = intent.getAction();
     if (!TrustedDeviceConstants.INTENT_ACTION_TRUSTED_DEVICE_SETTING.equals(action)) {
-      return false;
+      retrieveAssociatedDevice();
+      return;
     }
     AssociatedDevice device = intent.getParcelableExtra(ASSOCIATED_DEVICE_DATA_NAME_EXTRA);
     if (device == null) {
-      loge(TAG, "No valid associated device.");
-      return false;
-    }
-    model.setAssociatedDevice(device);
-    showTrustedDeviceDetailFragment(device);
-    return true;
-  }
-
-  private void attemptInitiatingEnrollment(AssociatedDevice device) {
-    if (!isCompanionDeviceConnected(device.getDeviceId())) {
-      DeviceNotConnectedDialogFragment fragment = new DeviceNotConnectedDialogFragment();
-      fragment.show(getSupportFragmentManager(), DEVICE_NOT_CONNECTED_DIALOG_TAG);
+      logd(TAG, "Failed to extract associated device intent, start retrieving associated device.");
+      retrieveAssociatedDevice();
       return;
     }
-    try {
-      trustedDeviceManager.initiateEnrollment(device.getDeviceId());
-    } catch (RemoteException e) {
-      loge(TAG, "Failed to initiate enrollment. ", e);
-    }
-  }
-
-  private boolean isCompanionDeviceConnected(String deviceId) {
-    if (trustedDeviceManager == null) {
-      loge(
-          TAG,
-          "Failed to check connection status for device: " + deviceId + "Service not connected.");
-      return false;
-    }
-    List<ConnectedDevice> devices = null;
-    try {
-      devices = trustedDeviceManager.getActiveUserConnectedDevices();
-    } catch (RemoteException e) {
-      loge(TAG, "Failed to check connection status for device: " + deviceId, e);
-      return false;
-    }
-    if (devices == null || devices.isEmpty()) {
-      return false;
-    }
-    for (ConnectedDevice device : devices) {
-      if (device.getDeviceId().equals(deviceId)) {
-        return true;
-      }
-    }
-    return false;
+    model.setAssociatedDevice(device);
   }
 
   private void validateCredentials() {
-    logd(TAG, "Validating credentials to activate token.");
     KeyguardManager keyguardManager = getKeyguardManager();
     if (keyguardManager == null) {
       logd(TAG, "KeyguardManager was null. Aborting.");
-      return;
-    }
-    if (!isStartedForEnrollment.get()) {
-      hasPendingCredential.set(true);
-      logd(TAG, "Activity not started for enrollment. Credentials are pending.");
       return;
     }
     if (isScreenLockNewlyCreated.get()) {
@@ -320,19 +260,8 @@ public class TrustedDeviceActivity extends FragmentActivity {
       loge(TAG, "User either has no lock screen, or a token is already registered.");
       return;
     }
-    hasPendingCredential.set(false);
-    isStartedForEnrollment.set(false);
     logd(TAG, "Prompting user to validate credentials.");
     startActivityForResult(confirmIntent, ACTIVATE_TOKEN_REQUEST_CODE);
-  }
-
-  private void processEnrollment() {
-    isStartedForEnrollment.set(true);
-    if (hasPendingCredential.get()) {
-      validateCredentials();
-      return;
-    }
-    maybePromptToCreatePassword();
   }
 
   private static boolean isStartedForEnrollment(Intent intent) {
@@ -348,11 +277,10 @@ public class TrustedDeviceActivity extends FragmentActivity {
     }
   }
 
-  private void maybePromptToCreatePassword() {
+  private void promptToCreatePassword() {
     if (isDeviceSecure()) {
       return;
     }
-
     CreateProfileLockDialogFragment fragment =
         CreateProfileLockDialogFragment.newInstance((d, w) -> createScreenLock());
     fragment.show(getSupportFragmentManager(), CREATE_PROFILE_LOCK_DIALOG_TAG);
@@ -364,7 +292,6 @@ public class TrustedDeviceActivity extends FragmentActivity {
     }
     logd(TAG, "User has not set a lock screen. Redirecting to set up.");
     Intent intent = new Intent(ACTION_LOCK_SETTINGS);
-    isScreenLockNewlyCreated.set(true);
     startActivityForResult(intent, CREATE_LOCK_REQUEST_CODE);
   }
 
@@ -397,7 +324,15 @@ public class TrustedDeviceActivity extends FragmentActivity {
     fragment.show(getSupportFragmentManager(), UNLOCK_PROFILE_TO_FINISH_DIALOG_TAG);
   }
 
+  private void showDeviceNotConnectedDialog() {
+    DeviceNotConnectedDialogFragment fragment = new DeviceNotConnectedDialogFragment();
+    fragment.show(getSupportFragmentManager(), DEVICE_NOT_CONNECTED_DIALOG_TAG);
+  }
+
   private void showEnrollmentSuccessToast(TrustedDevice device) {
+    if (device == null) {
+      return;
+    }
     AssociatedDevice addedDevice = model.getAssociatedDevice().getValue();
     if (addedDevice == null) {
       loge(TAG, "No associated device retrieved when a trusted device has been added.");
@@ -434,90 +369,6 @@ public class TrustedDeviceActivity extends FragmentActivity {
     }
   }
 
-  private void registerCallbacks() throws RemoteException {
-    if (trustedDeviceManager == null) {
-      loge(TAG, "Server not connected when attempting to register callbacks.");
-      return;
-    }
-    trustedDeviceManager.registerTrustedDeviceEnrollmentCallback(trustedDeviceEnrollmentCallback);
-    trustedDeviceManager.registerTrustedDeviceCallback(trustedDeviceCallback);
-    trustedDeviceManager.registerAssociatedDeviceCallback(deviceAssociationCallback);
-  }
-
-  private void unregisterCallbacks() throws RemoteException {
-    if (trustedDeviceManager == null) {
-      loge(TAG, "Server not connected when attempting to unregister callbacks.");
-      return;
-    }
-    trustedDeviceManager.unregisterTrustedDeviceEnrollmentCallback(
-        trustedDeviceEnrollmentCallback);
-    trustedDeviceManager.unregisterTrustedDeviceCallback(trustedDeviceCallback);
-    trustedDeviceManager.unregisterAssociatedDeviceCallback(deviceAssociationCallback);
-  }
-
-  private final ServiceConnection serviceConnection =
-      new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-          trustedDeviceManager = ITrustedDeviceManager.Stub.asInterface(service);
-          try {
-            registerCallbacks();
-          } catch (RemoteException e) {
-            loge(TAG, "Error while connecting to service.");
-            return;
-          }
-
-          model.updateTrustedDevices(trustedDeviceManager);
-
-          logd(TAG, "Successfully connected to TrustedDeviceManager.");
-
-          if (!hasAssociatedDevice()) {
-            retrieveAssociatedDevice();
-          }
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {}
-      };
-
-  private final ITrustedDeviceCallback trustedDeviceCallback =
-      new ITrustedDeviceCallback.Stub() {
-        @Override
-        public void onTrustedDeviceAdded(TrustedDevice device) {
-          logd(TAG, "Added trusted device: " + device.getDeviceId() + ".");
-          model.setEnabledDevice(device);
-          showEnrollmentSuccessToast(device);
-          finishEnrollment();
-        }
-
-        @Override
-        public void onTrustedDeviceRemoved(TrustedDevice device) {
-          logd(TAG, "Removed trusted device: " + device.getDeviceId() + ".");
-          model.setDisabledDevice(device);
-        }
-      };
-
-  private final IDeviceAssociationCallback deviceAssociationCallback =
-      new IDeviceAssociationCallback.Stub() {
-        @Override
-        public void onAssociatedDeviceAdded(AssociatedDevice device) {}
-
-        @Override
-        public void onAssociatedDeviceRemoved(AssociatedDevice device) {
-          AssociatedDevice currentDevice = model.getAssociatedDevice().getValue();
-          if (device.equals(currentDevice)) {
-            finish();
-          }
-        }
-
-        @Override
-        public void onAssociatedDeviceUpdated(AssociatedDevice device) {
-          if (device != null) {
-            model.setAssociatedDevice(device);
-          }
-        }
-      };
-
   @Nullable
   private KeyguardManager getKeyguardManager() {
     if (keyguardManager == null) {
@@ -529,20 +380,21 @@ public class TrustedDeviceActivity extends FragmentActivity {
     return keyguardManager;
   }
 
-  private final ITrustedDeviceEnrollmentCallback trustedDeviceEnrollmentCallback =
-      new ITrustedDeviceEnrollmentCallback.Stub() {
-
-        @Override
-        public void onValidateCredentialsRequest() {
-          validateCredentials();
-        }
-
-        @Override
-        public void onTrustedDeviceEnrollmentError(int error) {
-          loge(TAG, "Failed to enroll trusted device, encountered error: " + error + ".");
-          showEnrollmentErrorDialogFragment(error);
-        }
-      };
+  private void onAssociatedDeviceRetrieved(Intent data) {
+    if (data == null) {
+      loge(TAG, "Intent is null. Failed to extract associated device from intent.");
+      finish();
+      return;
+    }
+    AssociatedDevice device = data.getParcelableExtra(ASSOCIATED_DEVICE_DATA_NAME_EXTRA);
+    if (device == null) {
+      loge(TAG, "Associated device extracted from intent is null.");
+      finish();
+      return;
+    }
+    model.setAssociatedDevice(device);
+    logd(TAG, "on associated device retrieved from association activity: " + device);
+  }
 
   /** Dialog Fragment to notify that the device is not actively connected. */
   public static class DeviceNotConnectedDialogFragment extends DialogFragment {

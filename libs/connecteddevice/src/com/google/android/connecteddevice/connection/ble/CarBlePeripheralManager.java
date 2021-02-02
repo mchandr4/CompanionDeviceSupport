@@ -16,6 +16,7 @@
 
 package com.google.android.connecteddevice.connection.ble;
 
+import static com.google.android.companionprotos.CapabilitiesExchangeProto.CapabilitiesExchange.OobChannel.BT_RFCOMM;
 import static com.google.android.connecteddevice.model.Errors.DEVICE_ERROR_UNEXPECTED_DISCONNECTION;
 import static com.google.android.connecteddevice.util.SafeLog.logd;
 import static com.google.android.connecteddevice.util.SafeLog.loge;
@@ -38,11 +39,11 @@ import androidx.annotation.VisibleForTesting;
 import com.google.android.connecteddevice.connection.AssociationCallback;
 import com.google.android.connecteddevice.connection.AssociationSecureChannel;
 import com.google.android.connecteddevice.connection.CarBluetoothManager;
+import com.google.android.connecteddevice.connection.DeviceMessageStream;
 import com.google.android.connecteddevice.connection.OobAssociationSecureChannel;
 import com.google.android.connecteddevice.connection.ReconnectSecureChannel;
-import com.google.android.connecteddevice.connection.SecureChannel;
+import com.google.android.connecteddevice.model.OobEligibleDevice;
 import com.google.android.connecteddevice.oob.OobChannel;
-import com.google.android.connecteddevice.oob.OobConnectionManager;
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage;
 import com.google.android.connecteddevice.util.ByteUtils;
 import com.google.android.connecteddevice.util.EventLog;
@@ -81,7 +82,7 @@ public class CarBlePeripheralManager extends CarBluetoothManager {
 
   private final BluetoothGattCharacteristic writeCharacteristic;
 
-  private final BluetoothGattCharacteristic readCharacteristic;
+  @VisibleForTesting final BluetoothGattCharacteristic readCharacteristic;
 
   private final BluetoothGattCharacteristic advertiseDataCharacteristic;
 
@@ -99,11 +100,36 @@ public class CarBlePeripheralManager extends CarBluetoothManager {
 
   private AdvertiseCallback advertiseCallback;
 
-  private OobConnectionManager oobConnectionManager;
-
   private Future<?> bluetoothNameTask;
 
-  private AssociationCallback associationCallback;
+  private final OobChannel oobChannel;
+
+  public CarBlePeripheralManager(
+      @NonNull BlePeripheralManager blePeripheralManager,
+      @NonNull ConnectedDeviceStorage connectedDeviceStorage,
+      @NonNull UUID associationServiceUuid,
+      @NonNull UUID reconnectServiceUuid,
+      @NonNull UUID reconnectDataUuid,
+      @NonNull UUID advertiseDataCharacteristicUuid,
+      @NonNull UUID writeCharacteristicUuid,
+      @NonNull UUID readCharacteristicUuid,
+      @NonNull Duration maxReconnectAdvertisementDuration,
+      int defaultMtuSize,
+      boolean enableCompression) {
+    this(
+        blePeripheralManager,
+        connectedDeviceStorage,
+        associationServiceUuid,
+        reconnectServiceUuid,
+        reconnectDataUuid,
+        advertiseDataCharacteristicUuid,
+        writeCharacteristicUuid,
+        readCharacteristicUuid,
+        maxReconnectAdvertisementDuration,
+        defaultMtuSize,
+        enableCompression,
+        null);
+  }
 
   /**
    * Initialize a new instance of manager.
@@ -133,12 +159,14 @@ public class CarBlePeripheralManager extends CarBluetoothManager {
       @NonNull UUID readCharacteristicUuid,
       @NonNull Duration maxReconnectAdvertisementDuration,
       int defaultMtuSize,
-      boolean enableCompression) {
+      boolean enableCompression,
+      @Nullable OobChannel oobChannel) {
     super(connectedDeviceStorage, enableCompression);
     this.blePeripheralManager = blePeripheralManager;
     this.associationServiceUuid = associationServiceUuid;
     this.reconnectServiceUuid = reconnectServiceUuid;
     this.reconnectDataUuid = reconnectDataUuid;
+    this.oobChannel = oobChannel;
 
     writeCharacteristic =
         new BluetoothGattCharacteristic(
@@ -207,16 +235,6 @@ public class CarBlePeripheralManager extends CarBluetoothManager {
   }
 
   @Override
-  public AssociationCallback getAssociationCallback() {
-    return associationCallback;
-  }
-
-  @Override
-  public void setAssociationCallback(AssociationCallback callback) {
-    associationCallback = callback;
-  }
-
-  @Override
   public void reset() {
     super.reset();
     logd(TAG, "Resetting state.");
@@ -226,8 +244,6 @@ public class CarBlePeripheralManager extends CarBluetoothManager {
     blePeripheralManager.cleanup();
     reconnectDeviceId = null;
     reconnectChallenge = null;
-    oobConnectionManager = null;
-    associationCallback = null;
     if (bluetoothNameTask != null) {
       bluetoothNameTask.cancel(true);
     }
@@ -300,7 +316,7 @@ public class CarBlePeripheralManager extends CarBluetoothManager {
     }
 
     reset();
-    associationCallback = callback;
+    setAssociationCallback(callback);
     blePeripheralManager.unregisterCallback(reconnectPeripheralCallback);
     blePeripheralManager.registerCallback(associationPeripheralCallback);
     advertiseCallback =
@@ -329,36 +345,6 @@ public class CarBlePeripheralManager extends CarBluetoothManager {
         reconnectDataUuid);
   }
 
-  /** Start the association with a new device using out of band verification code exchange */
-  @Override
-  public void startOutOfBandAssociation(
-      @NonNull String nameForAssociation,
-      @NonNull OobChannel oobChannel,
-      @NonNull AssociationCallback callback) {
-
-    logd(TAG, "Starting out of band association.");
-    startAssociation(
-        nameForAssociation,
-        new AssociationCallback() {
-          @Override
-          public void onAssociationStartSuccess(String deviceName) {
-            associationCallback = callback;
-            boolean success = oobConnectionManager.startOobExchange(oobChannel);
-            if (!success) {
-              callback.onAssociationStartFailure();
-              return;
-            }
-            callback.onAssociationStartSuccess(deviceName);
-          }
-
-          @Override
-          public void onAssociationStartFailure() {
-            callback.onAssociationStartFailure();
-          }
-        });
-    oobConnectionManager = new OobConnectionManager();
-  }
-
   /** Set the timeout handler for testing. This should be called after {@link #start()}. */
   @VisibleForTesting
   void setTimeoutHandler(Handler handler) {
@@ -377,8 +363,7 @@ public class CarBlePeripheralManager extends CarBluetoothManager {
     gattService.addCharacteristic(writeCharacteristic);
     gattService.addCharacteristic(readCharacteristic);
 
-    AdvertiseData.Builder advertisementBuilder =
-        new AdvertiseData.Builder();
+    AdvertiseData.Builder advertisementBuilder = new AdvertiseData.Builder();
     ParcelUuid uuid = new ParcelUuid(serviceUuid);
     advertisementBuilder.addServiceUuid(uuid);
     if (advertiseData != null) {
@@ -393,25 +378,17 @@ public class CarBlePeripheralManager extends CarBluetoothManager {
       gattService.addCharacteristic(advertiseDataCharacteristic);
     }
 
-    AdvertiseData.Builder scanResponseBuilder =
-        new AdvertiseData.Builder();
+    AdvertiseData.Builder scanResponseBuilder = new AdvertiseData.Builder();
     if (scanResponse != null && scanResponseUuid != null) {
       ParcelUuid scanResponseParcelUuid = new ParcelUuid(scanResponseUuid);
       scanResponseBuilder.addServiceData(scanResponseParcelUuid, scanResponse);
     }
 
-    blePeripheralManager.startAdvertising(gattService, advertisementBuilder.build(),
-        scanResponseBuilder.build(), callback);
+    blePeripheralManager.startAdvertising(
+        gattService, advertisementBuilder.build(), scanResponseBuilder.build(), callback);
   }
 
   private void addConnectedDevice(BluetoothDevice device, boolean isReconnect) {
-    addConnectedDevice(device, isReconnect, /* oobConnectionManager= */ null);
-  }
-
-  private void addConnectedDevice(
-      @NonNull BluetoothDevice device,
-      boolean isReconnect,
-      @Nullable OobConnectionManager oobConnectionManager) {
     EventLog.onDeviceConnected();
     blePeripheralManager.stopAdvertising(advertiseCallback);
     if (timeoutHandler != null) {
@@ -427,7 +404,7 @@ public class CarBlePeripheralManager extends CarBluetoothManager {
     }
     setClientDeviceAddress(device.getAddress());
 
-    BleDeviceMessageStream secureStream =
+    DeviceMessageStream secureStream =
         new BleDeviceMessageStream(
             blePeripheralManager,
             device,
@@ -438,20 +415,71 @@ public class CarBlePeripheralManager extends CarBluetoothManager {
         exception -> {
           disconnectWithError("Error occurred in stream: " + exception.getMessage());
         });
-    SecureChannel secureChannel;
-    if (isReconnect) {
-      secureChannel =
-          new ReconnectSecureChannel(
-              secureStream, storage, reconnectDeviceId, reconnectChallenge);
-    } else if (oobConnectionManager != null) {
-      secureChannel = new OobAssociationSecureChannel(secureStream, storage, oobConnectionManager);
-    } else {
-      secureChannel = new AssociationSecureChannel(secureStream, storage);
-    }
-    secureChannel.registerCallback(secureChannelCallback);
+
     ConnectedRemoteDevice connectedDevice = new ConnectedRemoteDevice(device, /* gatt= */ null);
-    connectedDevice.secureChannel = secureChannel;
-    addConnectedDevice(connectedDevice);
+
+    if (isReconnect) {
+      ReconnectSecureChannel secureChannel =
+          new ReconnectSecureChannel(secureStream, storage, reconnectDeviceId, reconnectChallenge);
+      secureChannel.registerCallback(secureChannelCallback);
+      connectedDevice.secureChannel = secureChannel;
+      addConnectedDevice(connectedDevice);
+
+    } else {
+      secureStream.setVersionExchangedListener(
+          (messagingVersion, securityVersion) -> {
+            if (securityVersion
+                >= DeviceMessageStream.MIN_SECURITY_VERSION_FOR_CAPABILITIES_EXCHANGE) {
+              secureStream.setCapabilitiesExchangedListener(
+                  oobChannels -> {
+                    if (oobChannels.contains(BT_RFCOMM) && oobChannel != null) {
+                      logd(TAG, "Completing out of band data exchange.");
+                      oobChannel.completeOobDataExchange(
+                          new OobEligibleDevice(
+                              device.getAddress(), OobEligibleDevice.OOB_TYPE_BLUETOOTH),
+                          new OobChannel.Callback() {
+                            @Override
+                            public void onOobExchangeSuccess() {
+                              logd(
+                                  TAG,
+                                  "Out of band exchange succeeded. Proceeding to association with"
+                                      + " device.");
+                              if (getOobConnectionManager().startOobExchange(oobChannel)) {
+                                addConnectedDeviceWithAssociationSecureChannel(
+                                    connectedDevice,
+                                    new OobAssociationSecureChannel(
+                                        secureStream, storage, getOobConnectionManager()));
+                              } else {
+                                logw(
+                                    TAG,
+                                    "Out of band exchange failed, falling back to Numeric"
+                                        + " Comparison.");
+                                addConnectedDeviceWithAssociationSecureChannel(
+                                    connectedDevice,
+                                    new AssociationSecureChannel(secureStream, storage));
+                              }
+                            }
+
+                            @Override
+                            public void onOobExchangeFailure() {
+                              logw(
+                                  TAG,
+                                  "Out of band exchange failed, falling back to Numeric"
+                                      + " Comparison.");
+                              addConnectedDeviceWithAssociationSecureChannel(
+                                  connectedDevice,
+                                  new AssociationSecureChannel(secureStream, storage));
+                            }
+                          });
+                    }
+                  });
+            } else {
+              addConnectedDeviceWithAssociationSecureChannel(
+                  connectedDevice, new AssociationSecureChannel(secureStream, storage));
+            }
+          });
+    }
+
     if (isReconnect) {
       setDeviceIdAndNotifyCallbacks(reconnectDeviceId);
       reconnectDeviceId = null;
@@ -459,13 +487,20 @@ public class CarBlePeripheralManager extends CarBluetoothManager {
     }
   }
 
+  private void addConnectedDeviceWithAssociationSecureChannel(
+      ConnectedRemoteDevice connectedDevice, AssociationSecureChannel secureChannel) {
+    secureChannel.setShowVerificationCodeListener(this::onVerificationCodeAvailable);
+    secureChannel.registerCallback(secureChannelCallback);
+    connectedDevice.secureChannel = secureChannel;
+    addConnectedDevice(connectedDevice);
+  }
+
   private void setMtuSize(int mtuSize) {
     ConnectedRemoteDevice connectedDevice = getConnectedDevice();
     if (connectedDevice != null
         && connectedDevice.secureChannel != null
         && connectedDevice.secureChannel.getStream() != null) {
-        connectedDevice.secureChannel.getStream()
-          .setMaxWriteSize(mtuSize - ATT_PROTOCOL_BYTES);
+      connectedDevice.secureChannel.getStream().setMaxWriteSize(mtuSize - ATT_PROTOCOL_BYTES);
     }
   }
 
@@ -531,20 +566,14 @@ public class CarBlePeripheralManager extends CarBluetoothManager {
 
         @Override
         public void onRemoteDeviceConnected(BluetoothDevice device) {
-          addConnectedDevice(device, /* isReconnect= */ false, oobConnectionManager);
+          addConnectedDevice(device, /* isReconnect= */ false);
           ConnectedRemoteDevice connectedDevice = getConnectedDevice();
           if (connectedDevice == null || connectedDevice.secureChannel == null) {
             return;
           }
           ((AssociationSecureChannel) connectedDevice.secureChannel)
               .setShowVerificationCodeListener(
-                  code -> {
-                    if (!isAssociating()) {
-                      loge(TAG, "No valid callback for association.");
-                      return;
-                    }
-                    associationCallback.onVerificationCodeAvailable(code);
-                  });
+                  CarBlePeripheralManager.this::onVerificationCodeAvailable);
         }
 
         @Override
@@ -552,7 +581,7 @@ public class CarBlePeripheralManager extends CarBluetoothManager {
           logd(TAG, "Remote device disconnected.");
           ConnectedRemoteDevice connectedDevice = getConnectedDevice(device);
           if (isAssociating()) {
-            associationCallback.onAssociationError(DEVICE_ERROR_UNEXPECTED_DISCONNECTION);
+            getAssociationCallback().onAssociationError(DEVICE_ERROR_UNEXPECTED_DISCONNECTION);
           }
           // Reset before invoking callbacks to avoid a race condition with reconnect
           // logic.
@@ -574,4 +603,12 @@ public class CarBlePeripheralManager extends CarBluetoothManager {
           connectToDevice(UUID.fromString(reconnectDeviceId));
         }
       };
+
+  private void onVerificationCodeAvailable(String code) {
+    if (!isAssociating()) {
+      loge(TAG, "No valid callback for association.");
+      return;
+    }
+    getAssociationCallback().onVerificationCodeAvailable(code);
+  }
 }

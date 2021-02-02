@@ -90,6 +90,7 @@ public class ConnectedDeviceManagerTest {
             mockStorage,
             new ConnectedDeviceSppDelegateBinder(),
             directExecutor,
+            directExecutor,
             directExecutor);
     verify(mockStorage).setAssociatedDeviceCallback(callbackCaptor.capture());
     when(mockStorage.getActiveUserAssociatedDevices()).thenReturn(userDevices);

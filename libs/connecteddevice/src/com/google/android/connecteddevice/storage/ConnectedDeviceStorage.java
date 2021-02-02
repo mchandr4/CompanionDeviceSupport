@@ -43,7 +43,6 @@ public class ConnectedDeviceStorage {
 
   private static final String SHARED_PREFS_NAME = "com.google.android.connecteddevice";
   private static final String UNIQUE_ID_KEY = "CTABM_unique_id";
-  private static final String BT_NAME_KEY = "CTABM_bt_name";
   private static final String DATABASE_NAME = "connected-device-database";
 
   private static final String CHALLENGE_HASHING_ALGORITHM = "HmacSHA256";
@@ -195,8 +194,7 @@ public class ConnectedDeviceStorage {
     if (sharedPreferences != null) {
       return sharedPreferences;
     }
-    sharedPreferences =
-        context.getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE);
+    sharedPreferences = context.getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE);
     return sharedPreferences;
   }
 
@@ -225,22 +223,6 @@ public class ConnectedDeviceStorage {
     }
 
     return uniqueId;
-  }
-
-  /** Store the current bluetooth adapter name. */
-  public void storeBluetoothName(@NonNull String name) {
-    getSharedPrefs().edit().putString(BT_NAME_KEY, name).apply();
-  }
-
-  /** Get the previously stored bluetooth adapter name or {@code null} if not found. */
-  @Nullable
-  public String getStoredBluetoothName() {
-    return getSharedPrefs().getString(BT_NAME_KEY, null);
-  }
-
-  /** Remove the previously stored bluetooth adapter name from storage. */
-  public void removeStoredBluetoothName() {
-    getSharedPrefs().edit().remove(BT_NAME_KEY).apply();
   }
 
   /**
@@ -292,6 +274,16 @@ public class ConnectedDeviceStorage {
     }
 
     return userDeviceIds;
+  }
+
+  /**
+   * Retrieves devices associated with the active user.
+   *
+   * @param listener {@link OnAssociatedDevicesRetrievedListener} that will be notified when devices
+   *     are retrieved.
+   */
+  public void retrieveForActiveUserAssociatedDevice(OnAssociatedDevicesRetrievedListener listener) {
+    listener.onAssociatedDevicesRetrieved(getActiveUserAssociatedDevices());
   }
 
   /**
@@ -429,5 +421,12 @@ public class ConnectedDeviceStorage {
 
     /** Triggered when an associated device has been updated. */
     void onAssociatedDeviceUpdated(@NonNull AssociatedDevice device);
+  }
+
+  /** Listener for retrieving devices associated with the active user. */
+  public interface OnAssociatedDevicesRetrievedListener {
+
+    /** Triggered when the devices associated with the active user are retrieved. */
+    void onAssociatedDevicesRetrieved(List<AssociatedDevice> devices);
   }
 }

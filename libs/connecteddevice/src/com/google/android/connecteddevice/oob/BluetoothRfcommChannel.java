@@ -22,6 +22,8 @@ import static com.google.android.connecteddevice.util.SafeLog.logw;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.ParcelUuid;
 import android.os.RemoteException;
 import androidx.annotation.NonNull;
@@ -32,6 +34,7 @@ import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelega
 import com.google.android.connecteddevice.transport.spp.Connection;
 import com.google.android.connecteddevice.transport.spp.PendingConnection;
 import com.google.android.connecteddevice.transport.spp.PendingSentMessage;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -40,6 +43,8 @@ public class BluetoothRfcommChannel implements OobChannel {
   private static final String TAG = "BluetoothRfcommChannel";
   // TODO(b/159500330): Generate random UUID.
   private static final UUID RFCOMM_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+  private static final int CONNECTION_TIMEOUT_MS = 500;
+
   private final AtomicBoolean isInterrupted = new AtomicBoolean();
   private final ConnectedDeviceSppDelegateBinder sppDelegateBinder;
   private Connection activeConnection;
@@ -53,29 +58,63 @@ public class BluetoothRfcommChannel implements OobChannel {
   @Override
   public void completeOobDataExchange(
       @NonNull OobEligibleDevice device, @NonNull Callback callback) {
-    completeOobDataExchange(device, callback, BluetoothAdapter.getDefaultAdapter());
+    completeOobDataExchange(
+        device, callback, () -> BluetoothAdapter.getDefaultAdapter().getBondedDevices());
   }
 
   @VisibleForTesting
   void completeOobDataExchange(
-      OobEligibleDevice device, Callback callback, BluetoothAdapter bluetoothAdapter) {
+      OobEligibleDevice device, Callback callback, BondedDevicesResolver bondedDevicesResolver) {
     this.callback = callback;
 
-    BluetoothDevice remoteDevice = bluetoothAdapter.getRemoteDevice(device.getDeviceAddress());
+    BluetoothDevice remoteDevice =
+        BluetoothAdapter.getDefaultAdapter().getRemoteDevice(device.getDeviceAddress());
+    Set<BluetoothDevice> bondedDevices = bondedDevicesResolver.getBondedDevices();
+    if (bondedDevices == null || !bondedDevices.contains(remoteDevice)) {
+      notifyFailure(
+          "This device has not been bonded to device with address " + remoteDevice.getAddress(),
+          /* exception= */ null);
+      return;
+    }
 
     try {
       PendingConnection connection =
           sppDelegateBinder.connectAsClient(RFCOMM_UUID, remoteDevice, /* isSecure= */ true);
       if (connection == null) {
-        notifyFailure("Connection with " + remoteDevice.getName() + " failed.", null);
+        notifyFailure(
+            "Connection with " + remoteDevice.getName() + " failed.", /* exception= */ null);
         return;
       }
 
-      connection.setOnConnectedListener(
-          (uuid, btDevice, isSecure, deviceName) -> {
-            activeConnection = new Connection(new ParcelUuid(uuid), btDevice, isSecure, deviceName);
-            notifySuccess();
-          });
+      Handler handler = new Handler(Looper.getMainLooper());
+      handler.postDelayed(
+          () -> {
+            logd(TAG, "Cancelling connection with " + remoteDevice.getName());
+            try {
+              sppDelegateBinder.cancelConnectionAttempt(connection);
+            } catch (RemoteException e) {
+              logw(TAG, "Failed to cancel connection attempt with " + remoteDevice.getName());
+            }
+            notifyFailure(
+                "Connection with " + remoteDevice.getName() + " timed out.", /* exception= */ null);
+          },
+          CONNECTION_TIMEOUT_MS);
+
+      connection
+          .setOnConnectedListener(
+              (uuid, btDevice, isSecure, deviceName) -> {
+                handler.removeCallbacksAndMessages(null);
+                activeConnection =
+                    new Connection(new ParcelUuid(uuid), btDevice, isSecure, deviceName);
+                notifySuccess();
+              })
+          .setOnConnectionErrorListener(
+              () -> {
+                handler.removeCallbacksAndMessages(null);
+                notifyFailure(
+                    "Connection with " + remoteDevice.getName() + " failed.",
+                    /* exception= */ null);
+              });
     } catch (RemoteException e) {
       notifyFailure("Connection with " + remoteDevice.getName() + " failed.", e);
     }
@@ -144,5 +183,13 @@ public class BluetoothRfcommChannel implements OobChannel {
     if (callback != null && !isInterrupted.get()) {
       callback.onOobExchangeSuccess();
     }
+  }
+
+  /**
+   * Interface for determining all the devices that the current device is Bluetooth bonded to, used
+   * for testing.
+   */
+  interface BondedDevicesResolver {
+    Set<BluetoothDevice> getBondedDevices();
   }
 }

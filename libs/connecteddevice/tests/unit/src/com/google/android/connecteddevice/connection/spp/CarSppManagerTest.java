@@ -35,6 +35,7 @@ import com.google.android.connecteddevice.connection.CarBluetoothManager;
 import com.google.android.connecteddevice.connection.ReconnectSecureChannel;
 import com.google.android.connecteddevice.connection.SecureChannel;
 import com.google.android.connecteddevice.model.AssociatedDevice;
+import com.google.android.connecteddevice.oob.OobChannel;
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage;
 import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelegateBinder;
 import com.google.android.connecteddevice.transport.spp.PendingConnection;
@@ -71,6 +72,7 @@ public class CarSppManagerTest {
   @Mock private AssociationCallback mockAssociationCallback;
   @Mock private ConnectedDeviceSppDelegateBinder mockSppBinder;
   @Mock private ConnectedDeviceStorage mockStorage;
+  @Mock private OobChannel mockOobChannel;
   private CarSppManager carSppManager;
   private ConnectionResultCaptor connectionResultCaptor;
 
@@ -253,6 +255,14 @@ public class CarSppManagerTest {
     connectionResultCaptor.getResult().notifyConnectionError();
 
     verify(mockCallback, never()).onDeviceDisconnected(any());
+  }
+
+  @Test
+  public void testStartOutOfBandAssociation() {
+    carSppManager.startOutOfBandAssociation(
+        /* nameForAssociation= */ null, mockOobChannel, mockAssociationCallback);
+
+    assertThat(carSppManager.getOobConnectionManager()).isNotNull();
   }
 
   private AssociationSecureChannel getChannelForAssociation(AssociationCallback callback) {

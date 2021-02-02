@@ -155,6 +155,9 @@ public class SppService extends Service {
     for (SppManager manager : activeConnections.values()) {
       manager.cleanup();
     }
+    for (SppManager manager : pendingConnections.values()) {
+      manager.cleanup();
+    }
     activeConnections.clear();
     pendingConnections.clear();
     if (delegate == null) {

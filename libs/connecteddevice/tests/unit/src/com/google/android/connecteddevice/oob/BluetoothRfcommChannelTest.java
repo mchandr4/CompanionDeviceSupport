@@ -35,6 +35,7 @@ import com.google.android.connecteddevice.model.OobEligibleDevice;
 import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelegateBinder;
 import com.google.android.connecteddevice.transport.spp.PendingConnection;
 import com.google.android.connecteddevice.transport.spp.PendingSentMessage;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.primitives.Bytes;
 import java.util.UUID;
 import org.junit.Before;
@@ -45,6 +46,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.robolectric.shadows.ShadowLooper;
 
 @RunWith(AndroidJUnit4.class)
 public class BluetoothRfcommChannelTest {
@@ -107,7 +109,35 @@ public class BluetoothRfcommChannelTest {
         .connectAsClient(any(), any(), anyBoolean());
 
     bluetoothRfcommChannel.completeOobDataExchange(
-        OOB_ELIGIBLE_DEVICE, mockCallback, BLUETOOTH_ADAPTER);
+        OOB_ELIGIBLE_DEVICE, mockCallback, () -> ImmutableSet.of(TEST_BLUETOOTH_DEVICE));
+    verify(mockCallback).onOobExchangeFailure();
+  }
+
+  @Test
+  public void completeOobExchange_noBondedDevices_callOnFailed() throws Exception {
+    bluetoothRfcommChannel.completeOobDataExchange(
+        OOB_ELIGIBLE_DEVICE, mockCallback, ImmutableSet::of);
+
+    verify(mockCallback).onOobExchangeFailure();
+  }
+
+  @Test
+  public void completeOobExchange_bondedToTheWrongDevice_callOnFailed() throws Exception {
+    BluetoothDevice otherBtDevice = BLUETOOTH_ADAPTER.getRemoteDevice("BB:AA:33:22:11:00");
+    bluetoothRfcommChannel.completeOobDataExchange(
+        OOB_ELIGIBLE_DEVICE, mockCallback, () -> ImmutableSet.of(otherBtDevice));
+
+    verify(mockCallback).onOobExchangeFailure();
+  }
+
+  @Test
+  public void completeOobExchange_timeout_cancelsConnectionAndCallsOnFailed() throws Exception {
+    PendingConnection pendingConnection = requestConnection();
+
+    // Simulate the timeout
+    ShadowLooper.runUiThreadTasksIncludingDelayedTasks();
+
+    verify(mockSppDelegateBinder).cancelConnectionAttempt(pendingConnection);
     verify(mockCallback).onOobExchangeFailure();
   }
 
@@ -146,27 +176,31 @@ public class BluetoothRfcommChannelTest {
         .connectAsClient(any(), any(), anyBoolean());
 
     bluetoothRfcommChannel.completeOobDataExchange(
-        OOB_ELIGIBLE_DEVICE, mockCallback, BLUETOOTH_ADAPTER);
+        OOB_ELIGIBLE_DEVICE, mockCallback, () -> ImmutableSet.of(TEST_BLUETOOTH_DEVICE));
 
     verify(mockCallback, never()).onOobExchangeSuccess();
     verify(mockCallback, never()).onOobExchangeFailure();
   }
 
   private PendingConnection establishConnection() throws Exception {
+    PendingConnection connection = requestConnection();
+    connection.notifyConnected(TEST_BLUETOOTH_DEVICE, TEST_BLUETOOTH_DEVICE.getName());
+    verify(mockCallback).onOobExchangeSuccess();
+
+    return connection;
+  }
+
+  private PendingConnection requestConnection() throws Exception {
     ConnectionResultCaptor connectionCaptor = new ConnectionResultCaptor();
     doAnswer(connectionCaptor)
         .when(mockSppDelegateBinder)
         .connectAsClient(any(), any(), anyBoolean());
 
     bluetoothRfcommChannel.completeOobDataExchange(
-        OOB_ELIGIBLE_DEVICE, mockCallback, BLUETOOTH_ADAPTER);
+        OOB_ELIGIBLE_DEVICE, mockCallback, () -> ImmutableSet.of(TEST_BLUETOOTH_DEVICE));
     verify(mockSppDelegateBinder).connectAsClient(any(), any(), anyBoolean());
 
-    PendingConnection connection = connectionCaptor.getResult();
-    connection.notifyConnected(TEST_BLUETOOTH_DEVICE, TEST_BLUETOOTH_DEVICE.getName());
-    verify(mockCallback).onOobExchangeSuccess();
-
-    return connection;
+    return connectionCaptor.getResult();
   }
 
   private static class ConnectionResultCaptor implements Answer<PendingConnection> {

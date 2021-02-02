@@ -88,15 +88,12 @@ public class AssociatedDevice implements Parcelable {
       return false;
     }
     AssociatedDevice associatedDevice = (AssociatedDevice) obj;
-    return Objects.equals(deviceId, associatedDevice.deviceId)
-        && Objects.equals(deviceAddress, associatedDevice.deviceAddress)
-        && Objects.equals(deviceName, associatedDevice.deviceName)
-        && isConnectionEnabled == associatedDevice.isConnectionEnabled;
+    return Objects.equals(deviceId, associatedDevice.deviceId);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(deviceId, deviceAddress, deviceName, isConnectionEnabled);
+    return Objects.hashCode(deviceId);
   }
 
   @Override

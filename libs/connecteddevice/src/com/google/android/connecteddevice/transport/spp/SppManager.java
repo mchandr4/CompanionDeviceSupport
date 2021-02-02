@@ -18,6 +18,7 @@ package com.google.android.connecteddevice.transport.spp;
 
 import static com.google.android.connecteddevice.util.SafeLog.logd;
 import static com.google.android.connecteddevice.util.SafeLog.loge;
+import static com.google.android.connecteddevice.util.SafeLog.logw;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -33,6 +34,7 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -65,6 +67,8 @@ public class SppManager {
   private final ExecutorService writeExecutor = Executors.newSingleThreadExecutor();
   private final Executor taskCallbackExecutor;
   private BluetoothDevice device;
+  // Only the first registered {@code OnMessageReceivedListener} will receive the missed messages.
+  private final ConcurrentLinkedQueue<byte[]> missedMessages = new ConcurrentLinkedQueue<>();
 
   @GuardedBy("lock")
   @VisibleForTesting
@@ -120,6 +124,16 @@ public class SppManager {
   public void addOnMessageReceivedListener(
       @NonNull OnMessageReceivedListener listener, @NonNull Executor executor) {
     receivedListeners.add(listener, executor);
+    while (!missedMessages.isEmpty()) {
+      logd(
+          TAG,
+          "OnMessageReceivedListener registered, poll missed message, current missed messages size"
+              + " is "
+              + missedMessages.size());
+      byte[] missedMessage = missedMessages.poll();
+      receivedListeners.invoke(
+          receivedListener -> receivedListener.onMessageReceived(device, missedMessage));
+    }
   }
 
   /**
@@ -183,7 +197,6 @@ public class SppManager {
       return;
     }
 
-    // TODO(b/162537040): add retry logic for SPP
     logd(TAG, "Attempting connect to remote device: " + device.getAddress());
 
     // Start the task to connect with the given device
@@ -377,6 +390,15 @@ public class SppManager {
       new ReadMessageTask.Callback() {
         @Override
         public void onMessageReceived(byte[] message) {
+          if (receivedListeners.size() == 0) {
+            missedMessages.add(message);
+            logw(
+                TAG,
+                "Receive message with size "
+                    + message.length
+                    + " while no listener registered, storing the message");
+            return;
+          }
           receivedListeners.invoke(listener -> listener.onMessageReceived(device, message));
         }
 

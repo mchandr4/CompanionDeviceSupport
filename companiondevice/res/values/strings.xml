@@ -16,9 +16,11 @@
   -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- Name of application [CHAR LIMIT=25] -->
+    <!-- Name of application -->
     <string name="app_name" translatable="false">Companion Device</string>
-    <!-- Default value for associated device list item [CHAR LIMIT=20] -->
+    <!-- Title of application entry in Settings [CHAR LIMIT=30] -->
+    <string name="settings_entry_title">Companion Device</string>
+    <!-- Default value for associated device list item [CHAR LIMIT=25] -->
     <string name="default_device_name">Associated Device</string>
     <!-- Label for button to add an associated device [CHAR LIMIT=50] -->
     <string name="add_device_title">Add Associated Device</string>
@@ -26,7 +28,7 @@
     <string name="add_associated_device_title">Connect a companion device</string>
     <!-- Instruction for adding associated device [CHAR LIMIT=100] -->
     <string name="add_associated_device_instruction">You can use your phone as a companion device to help manage your driving experience</string>
-    <!-- Instruction for opening Companion App [CHAR LIMIT=60] -->
+    <!-- Instruction for opening Companion App [CHAR LIMIT=100] -->
     <string name="associated_device_install_app">Make sure you have <b>Companion App</b> installed on your phone</string>
     <!-- Title for confirm pairing code fragment [CHAR LIMIT=60]-->
     <string name="associated_device_pairing_code_title">Confirm code on phone</string>
@@ -34,8 +36,8 @@
     <string name="associated_device_pairing_message">Confirm that this matches the code shown on your phone</string>
     <!-- Message shown when user associates a device successfully [CHAR LIMIT=100]-->
     <string name="associated_device_success">Device has been associated successfully</string>
-    <!-- Adding an associated device [CHAR LIMIT=50]-->
-    <string name="associated_device_select_device">Open the app and connect to &lt;b><xliff:g id="car_name" example="MyCar">%1$s</xliff:g>&lt;b></string>
+    <!-- Adding an associated device [CHAR LIMIT=100]-->
+    <string name="associated_device_select_device">Open the app and connect to &lt;b><xliff:g id="car_name" example="MyCar">%1$s</xliff:g>&lt;/b></string>
     <!-- Open the companion app and follow the instructions that appear in the companion app when it is opened [CHAR LIMIT=60]-->
     <string name="associated_device_open_app">Open the app and follow instructions in the app</string>
     <!-- Title for remove device dialog [CHAR LIMIT=40]-->
@@ -104,7 +106,7 @@
     <!-- NotificationMsg Feature strings-->
     <!--Notification Channel name for the silent "message notification service running" notification [CHAR LIMIT=100]-->
     <string name="app_running_msg_channel_name">Phone text message service running</string>
-    <!--Notification Channel description for the silent "message notification service running" notification [CHAR LIMIT=50]-->
+    <!--Notification Channel description for the silent "message notification service running" notification [CHAR LIMIT=60]-->
     <string name="app_running_msg_notification_title">Phone text messaging service is active</string>
     <!--Notification Channel content for the silent "message notification service running" notification [CHAR LIMIT=100]-->
     <string name="app_running_msg_notification_content">Receiving text messages via companion device</string>

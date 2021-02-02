@@ -24,7 +24,6 @@ import static org.mockito.Mockito.verify;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
-import java.io.IOException;
 import java.util.UUID;
 import java.util.concurrent.Executor;
 import org.junit.Before;
@@ -83,26 +82,7 @@ public class ConnectTaskTest {
   }
 
   @Test
-  public void testRun_connectException_onConnectionAttemptFailed() throws IOException {
-    connectTask.socket.close();
-
-    connectTask.run();
-
-    verify(mockCallback).onConnectionAttemptFailed();
-  }
-
-  @Test
-  public void testCancel_runAfterCancel_doNotInformCallback() throws IOException {
-    connectTask.cancel();
-
-    connectTask.socket.close();
-    connectTask.run();
-
-    verify(mockCallback, never()).onConnectionAttemptFailed();
-  }
-
-  @Test
-  public void testCancel_connectAfterCancel_doNotInformCallback() {
+  public void testRun_connectAfterCancel_doNotInformCallback() {
     connectTask.cancel();
 
     connectTask.run();

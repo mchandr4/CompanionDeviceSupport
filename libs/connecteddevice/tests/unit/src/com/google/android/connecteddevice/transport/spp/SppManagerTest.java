@@ -21,6 +21,7 @@ import static com.google.common.util.concurrent.MoreExecutors.directExecutor;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.robolectric.Shadows.shadowOf;
 
@@ -64,7 +65,6 @@ public class SppManagerTest {
     sppManager = new SppManager(IS_SECURE_RFCOMM_CHANNEL, callbackExecutor);
     sppManager.connectedSocket = shadowBluetoothSocket;
     sppManager.registerCallback(mockConnectionCallback, callbackExecutor);
-    sppManager.addOnMessageReceivedListener(mockListener, callbackExecutor);
   }
 
   @After
@@ -93,6 +93,7 @@ public class SppManagerTest {
   @Test
   public void testReadMessageTaskCallback_onMessageReceived_callOnMessageReceivedListener()
       throws InterruptedException {
+    sppManager.addOnMessageReceivedListener(mockListener, callbackExecutor);
     sppManager.readMessageTaskCallback.onMessageReceived(testData);
     verify(mockListener).onMessageReceived(any(), eq(testData));
   }
@@ -152,5 +153,14 @@ public class SppManagerTest {
     sppManager.cleanup();
 
     assertThat(sppManager.acceptTask).isNull();
+  }
+
+  @Test
+  public void testAddOnMessageReceivedListener_sendMissedMessages() {
+    sppManager.readMessageTaskCallback.onMessageReceived(testData);
+    verify(mockListener, never()).onMessageReceived(any(), eq(testData));
+
+    sppManager.addOnMessageReceivedListener(mockListener, callbackExecutor);
+    verify(mockListener).onMessageReceived(any(), eq(testData));
   }
 }

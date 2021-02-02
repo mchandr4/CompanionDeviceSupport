@@ -18,7 +18,7 @@ package com.google.android.companiondevicesupport.trust;
 
 import static com.google.android.connecteddevice.util.SafeLog.loge;
 
-import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
 import android.os.Bundle;
 import androidx.fragment.app.Fragment;
 import android.text.Html;
@@ -70,19 +70,19 @@ public class TrustedDeviceDetailFragment extends Fragment {
     associatedDevice = bundle.getParcelable(ASSOCIATED_DEVICE_KEY);
     trustedDeviceTitle = view.findViewById(R.id.trusted_device_item_title);
     setTrustedDeviceTitle();
-    model = ViewModelProviders.of(requireActivity()).get(TrustedDeviceViewModel.class);
+    model = new ViewModelProvider(requireActivity()).get(TrustedDeviceViewModel.class);
     trustedDeviceSwitch = view.findViewById(R.id.trusted_device_switch);
     trustedDeviceSwitch.setOnCheckedChangeListener(
         (buttonView, isChecked) -> {
           if (isChecked && trustedDevice == null) {
             // When the current device has not been enrolled as trusted device, turning on the
             // switch is for enrolling the current device.
-            model.setDeviceToEnable(associatedDevice);
+            model.enrollTrustedDevice(associatedDevice);
             trustedDeviceSwitch.setChecked(false);
           } else if (!isChecked && trustedDevice != null) {
             // When the current device has been enrolled as trusted device, turning off the
             // switch is for disable trusted device feature for the current device.
-            model.setDeviceToDisable(trustedDevice);
+            model.disableTrustedDevice(trustedDevice);
             trustedDeviceSwitch.setChecked(true);
           }
           // Ignore other conditions as {@link Switch#setChecked(boolean)} will always trigger

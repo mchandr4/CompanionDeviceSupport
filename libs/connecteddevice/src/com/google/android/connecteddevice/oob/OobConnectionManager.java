@@ -16,6 +16,7 @@
 
 package com.google.android.connecteddevice.oob;
 
+import static com.google.android.connecteddevice.util.SafeLog.logd;
 import static com.google.android.connecteddevice.util.SafeLog.loge;
 
 import android.security.keystore.KeyProperties;
@@ -144,5 +145,13 @@ public class OobConnectionManager {
 
     oobChannel.sendOobData(Bytes.concat(decryptionIv, encryptionIv, encryptionKey.getEncoded()));
     return true;
+  }
+
+  /** Clears all stored encryption keys. */
+  public void reset() {
+    logd(TAG, "Resetting encryption keys.");
+    encryptionIv = new byte[NONCE_LENGTH_BYTES];
+    decryptionIv = new byte[NONCE_LENGTH_BYTES];
+    encryptionKey = null;
   }
 }

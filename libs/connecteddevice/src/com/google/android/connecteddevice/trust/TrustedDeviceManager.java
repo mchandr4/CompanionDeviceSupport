@@ -28,11 +28,13 @@ import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.WorkerThread;
 import com.google.android.connecteddevice.api.IConnectedDeviceManager;
 import com.google.android.connecteddevice.api.IDeviceAssociationCallback;
 import com.google.android.connecteddevice.model.AssociatedDevice;
 import com.google.android.connecteddevice.model.ConnectedDevice;
 import com.google.android.connecteddevice.trust.api.IOnTrustedDeviceEnrollmentNotificationRequestListener;
+import com.google.android.connecteddevice.trust.api.IOnTrustedDevicesRetrievedListener;
 import com.google.android.connecteddevice.trust.api.ITrustedDeviceAgentDelegate;
 import com.google.android.connecteddevice.trust.api.ITrustedDeviceCallback;
 import com.google.android.connecteddevice.trust.api.ITrustedDeviceEnrollmentCallback;
@@ -81,9 +83,9 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
 
   private final TrustedDeviceFeature trustedDeviceFeature;
 
-  private final Executor executor = Executors.newSingleThreadExecutor();
+  private final Executor databaseExecutor = Executors.newSingleThreadExecutor();
 
-  private final Executor remoteCallbackListExecutor = Executors.newSingleThreadExecutor();
+  private final Executor remoteCallbackExecutor = Executors.newSingleThreadExecutor();
 
   private final AtomicBoolean isWaitingForCredentials = new AtomicBoolean(false);
 
@@ -214,7 +216,7 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
     entity.userId = userId;
     entity.handle = handle;
 
-    Executors.newSingleThreadExecutor().execute(() -> database.addOrReplaceTrustedDevice(entity));
+    databaseExecutor.execute(() -> database.addOrReplaceTrustedDevice(entity));
 
     pendingDevice = null;
 
@@ -242,20 +244,16 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
   }
 
   @Override
-  public List<TrustedDevice> getTrustedDevicesForActiveUser() {
-    List<TrustedDeviceEntity> foundEntities =
-        database.getTrustedDevicesForUser(ActivityManager.getCurrentUser());
-
-    List<TrustedDevice> trustedDevices = new ArrayList<>();
-    if (foundEntities == null) {
-      return trustedDevices;
-    }
-
-    for (TrustedDeviceEntity entity : foundEntities) {
-      trustedDevices.add(entity.toTrustedDevice());
-    }
-
-    return trustedDevices;
+  public void retrieveTrustedDevicesForActiveUser(IOnTrustedDevicesRetrievedListener listener) {
+    databaseExecutor.execute(
+        () -> {
+          List<TrustedDevice> devices = getTrustedDevicesForActiveUser();
+          try {
+            listener.onTrustedDevicesRetrieved(devices);
+          } catch (RemoteException exception) {
+            loge(TAG, "Failed to notify that trusted devices are retrieved.", exception);
+          }
+        });
   }
 
   @Override
@@ -265,21 +263,25 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
       return;
     }
 
-    try {
-      trustAgentDelegate.removeEscrowToken(trustedDevice.getHandle(), trustedDevice.getUserId());
-      database.removeTrustedDevice(new TrustedDeviceEntity(trustedDevice));
-    } catch (RemoteException e) {
-      loge(TAG, "Error while removing token through delegate.", e);
-      return;
-    }
-    notifyRemoteCallbackList(
-        remoteTrustedDeviceCallbacks,
-        callback -> {
+    databaseExecutor.execute(
+        () -> {
           try {
-            callback.onTrustedDeviceRemoved(trustedDevice);
+            trustAgentDelegate.removeEscrowToken(
+                trustedDevice.getHandle(), trustedDevice.getUserId());
+            database.removeTrustedDevice(new TrustedDeviceEntity(trustedDevice));
           } catch (RemoteException e) {
-            loge(TAG, "Failed to notify that a trusted device has been removed.", e);
+            loge(TAG, "Error while removing token through delegate.", e);
+            return;
           }
+          notifyRemoteCallbackList(
+              remoteTrustedDeviceCallbacks,
+              callback -> {
+                try {
+                  callback.onTrustedDeviceRemoved(trustedDevice);
+                } catch (RemoteException e) {
+                  loge(TAG, "Failed to notify that a trusted device has been removed.", e);
+                }
+              });
         });
   }
 
@@ -329,7 +331,7 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
     remoteEnrollmentCallbacks.register(callback);
     // A token has been added and is waiting on user credential validation.
     if (isWaitingForCredentials.getAndSet(false)) {
-      executor.execute(
+      remoteCallbackExecutor.execute(
           () -> {
             try {
               callback.onValidateCredentialsRequest();
@@ -396,6 +398,23 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
     this.trustAgentDelegate = null;
   }
 
+  @WorkerThread
+  private List<TrustedDevice> getTrustedDevicesForActiveUser() {
+    List<TrustedDeviceEntity> foundEntities =
+        database.getTrustedDevicesForUser(ActivityManager.getCurrentUser());
+
+    List<TrustedDevice> trustedDevices = new ArrayList<>();
+    if (foundEntities == null) {
+      return trustedDevices;
+    }
+
+    for (TrustedDeviceEntity entity : foundEntities) {
+      trustedDevices.add(entity.toTrustedDevice());
+    }
+
+    return trustedDevices;
+  }
+
   private static boolean areCredentialsValid(@Nullable PhoneCredentials credentials) {
     return credentials != null;
   }
@@ -425,8 +444,7 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
 
     PhoneCredentials credentials = null;
     try {
-      credentials = PhoneCredentials.parseFrom(message,
-          ExtensionRegistryLite.getEmptyRegistry());
+      credentials = PhoneCredentials.parseFrom(message, ExtensionRegistryLite.getEmptyRegistry());
     } catch (InvalidProtocolBufferException e) {
       loge(TAG, "Unable to parse credentials from device. Not unlocking head unit.");
       return;
@@ -474,8 +492,8 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
     }
     TrustedDeviceError trustedDeviceError = null;
     try {
-      trustedDeviceError = TrustedDeviceError.parseFrom(payload,
-          ExtensionRegistryLite.getEmptyRegistry());
+      trustedDeviceError =
+          TrustedDeviceError.parseFrom(payload, ExtensionRegistryLite.getEmptyRegistry());
     } catch (InvalidProtocolBufferException e) {
       loge(TAG, "Received error message from client, but cannot parse.", e);
       notifyEnrollmentError(TrustedDeviceConstants.TRUSTED_DEVICE_ERROR_UNKNOWN);
@@ -511,15 +529,12 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
 
   private <T extends IInterface> void notifyRemoteCallbackList(
       RemoteCallbackList<T> remoteCallbackList, SafeConsumer<T> notification) {
-    remoteCallbackListExecutor.execute(
-        () -> {
-          int num = remoteCallbackList.beginBroadcast();
-          for (int i = 0; i < num; i++) {
-            T callback = remoteCallbackList.getBroadcastItem(i);
-            executor.execute(() -> notification.accept(callback));
-          }
-          remoteCallbackList.finishBroadcast();
-        });
+    int num = remoteCallbackList.beginBroadcast();
+    for (int i = 0; i < num; i++) {
+      T callback = remoteCallbackList.getBroadcastItem(i);
+      remoteCallbackExecutor.execute(() -> notification.accept(callback));
+    }
+    remoteCallbackList.finishBroadcast();
   }
 
   private static byte[] createAcknowledgmentMessage() {
@@ -554,8 +569,7 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
           TrustedDeviceMessage trustedDeviceMessage = null;
           try {
             trustedDeviceMessage =
-                TrustedDeviceMessage.parseFrom(
-                    message, ExtensionRegistryLite.getEmptyRegistry());
+                TrustedDeviceMessage.parseFrom(message, ExtensionRegistryLite.getEmptyRegistry());
           } catch (InvalidProtocolBufferException e) {
             loge(TAG, "Received message from client, but cannot parse.", e);
             return;

@@ -20,6 +20,7 @@ import com.google.android.connecteddevice.trust.api.ITrustedDeviceAgentDelegate;
 import com.google.android.connecteddevice.trust.api.ITrustedDeviceCallback;
 import com.google.android.connecteddevice.trust.api.ITrustedDeviceEnrollmentCallback;
 import com.google.android.connecteddevice.trust.api.IOnTrustedDeviceEnrollmentNotificationRequestListener;
+import com.google.android.connecteddevice.trust.api.IOnTrustedDevicesRetrievedListener;
 import com.google.android.connecteddevice.trust.api.TrustedDevice;
 import com.google.android.connecteddevice.api.IDeviceAssociationCallback;
 import com.google.android.connecteddevice.model.ConnectedDevice;
@@ -65,8 +66,8 @@ interface ITrustedDeviceManager {
     /** Remove a prevoiusly set delegate. */
     void clearTrustedDeviceAgentDelegate(in ITrustedDeviceAgentDelegate trustAgentDelegate);
 
-    /** Returns a list of trusted devices for user. */
-    List<TrustedDevice> getTrustedDevicesForActiveUser();
+    /** Retrieves trusted devices for the active user. */
+    void retrieveTrustedDevicesForActiveUser(in IOnTrustedDevicesRetrievedListener listener);
 
     /** Remove a trusted device and invalidate any credentials associated with it. */
     void removeTrustedDevice(in TrustedDevice trustedDevice);
