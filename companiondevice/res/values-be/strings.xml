@@ -16,6 +16,7 @@
   -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="settings_entry_title">Companion Device</string>
   <string name="default_device_name">Звязаная прылада</string>
   <string name="add_device_title">Дадаць звязаную прыладу</string>
   <string name="add_associated_device_title">Падключэнне спадарожнай прылады</string>
@@ -62,8 +63,8 @@
   <string name="trusted_device_feature_title">Разблакіроўка профілю з тэлефона</string>
   <string name="trusted_device_feature_instruction">Параметры разблакіроўкі можна наладзіць у спадарожнай праграме</string>
   <string name="trusted_device_item_title">Дазволіць разблакіроўку профілю з дапамогай тэлефона &lt;b&gt;%1$s&lt;/b&gt;</string>
-  <string name="device_not_connected_dialog_title">У тэлефона павінна быць актыўнае падключэнне</string>
-  <string name="device_not_connected_dialog_message">Каб уключыць гэту функцыю, на аўтамабілі і тэлефоне павінен быць уключаны Bluetooth і яны павінны знаходзіцца недалёка адзін ад аднаго</string>
+  <string name="device_not_connected_dialog_title">Падключэнне спадарожнай праграмы павінна быць актыўным</string>
+  <string name="device_not_connected_dialog_message">Каб уключыць гэту функцыю, трэба адкрыць спадарожную праграму на тэлефоне. На аўтамабілі і тэлефоне павінен быць уключаны Bluetooth і яны павінны знаходзіцца недалёка адзін ад аднаго.</string>
   <string name="trusted_device_enrollment_success_message">Цяпер з дапамогай тэлефона &lt;b&gt;%1$s&lt;/b&gt; можна ажыццяўляць разблакіроўку профілю</string>
   <string name="create_profile_lock_dialog_title">Наладжванне асноўнай блакіроўкі профілю</string>
   <string name="create_profile_lock_dialog_message">Каб выкарыстоўваць тэлефон для разблакіроўкі профілю, трэба зрабіць асноўны спосаб блакіроўкі профілю рэзервовым</string>

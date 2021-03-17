@@ -16,6 +16,7 @@
 
 package com.google.android.connecteddevice.transport.spp;
 
+import static com.google.android.connecteddevice.util.SafeLog.logd;
 import static com.google.android.connecteddevice.util.SafeLog.logw;
 
 import android.bluetooth.BluetoothDevice;
@@ -50,12 +51,19 @@ public class ConnectedDeviceSppDelegateBinder extends IConnectedDeviceSppDelegat
 
   @Override
   public void setCallback(ISppCallback callback) {
-    callbackBinder = new RemoteCallbackBinder(callback.asBinder(), iBinder -> clearCallback());
+    logd(TAG, "Set callback:" + callback);
+    callbackBinder =
+        new RemoteCallbackBinder(callback.asBinder(), iBinder -> clearCallback(callback));
     this.remoteCallback = callback;
   }
 
   @Override
-  public void clearCallback() {
+  public void clearCallback(ISppCallback callback) {
+    if (remoteCallback != callback) {
+      return;
+    }
+
+    logd(TAG, "Clear callback:" + callback);
     remoteCallback = null;
     if (callbackBinder == null) {
       logw(TAG, "Remote callback binder is null when trying to clear callback");
@@ -145,8 +153,10 @@ public class ConnectedDeviceSppDelegateBinder extends IConnectedDeviceSppDelegat
   public PendingConnection connectAsServer(@NonNull UUID serviceUuid, boolean isSecure)
       throws RemoteException {
     if (remoteCallback == null) {
+      logw(TAG, "Remote callback is null when trying to establish connection");
       return null;
     }
+
     if (remoteCallback.onStartConnectionAsServerRequested(new ParcelUuid(serviceUuid), isSecure)) {
       PendingConnection pendingConnection = new PendingConnection(serviceUuid, isSecure);
       pendingConnections.add(pendingConnection);

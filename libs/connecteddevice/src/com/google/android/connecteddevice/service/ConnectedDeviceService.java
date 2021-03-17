@@ -82,11 +82,9 @@ public final class ConnectedDeviceService extends TrunkService {
   private static final String META_ADVERTISE_DATA_CHARACTERISTIC_UUID =
       "com.google.android.connecteddevice.advertise_data_characteristic_uuid";
   /** {@code String} UUID for write characteristic. */
-  private static final String META_WRITE_UUID =
-      "com.google.android.connecteddevice.write_uuid";
+  private static final String META_WRITE_UUID = "com.google.android.connecteddevice.write_uuid";
   /** {@code String} UUID for read characteristic. */
-  private static final String META_READ_UUID =
-      "com.google.android.connecteddevice.read_uuid";
+  private static final String META_READ_UUID = "com.google.android.connecteddevice.read_uuid";
   /** {@code int} Number of bytes for the default BLE MTU size. */
   private static final String META_DEFAULT_MTU_BYTES =
       "com.google.android.connecteddevice.default_mtu_bytes";
@@ -98,6 +96,10 @@ public final class ConnectedDeviceService extends TrunkService {
       "com.google.android.connecteddevice.compress_outgoing_messages";
   /** {@code boolean} Enable BLE proxy. */
   private static final String META_ENABLE_PROXY = "com.google.android.connecteddevice.enable_proxy";
+  /** {@code boolean} Enable a capabilities exchange during association. */
+  private static final String META_ENABLE_CAPABILITIES_EXCHANGE =
+      "com.google.android.connecteddevice.enable_capabilities_exchange";
+
 
   private static final boolean SPP_ENABLED_BY_DEFAULT = false;
 
@@ -120,6 +122,8 @@ public final class ConnectedDeviceService extends TrunkService {
   private static final int DEFAULT_SPP_PACKET_SIZE = 700;
 
   private static final boolean ENABLE_COMPRESSION_BY_DEFAULT = true;
+
+  private static final boolean ENABLE_CAPABILITIES_EXCHANGE_BY_DEFAULT = false;
 
   /**
    * When a client calls {@link Context#bindService(Intent, ServiceConnection, int)} to get the
@@ -162,12 +166,14 @@ public final class ConnectedDeviceService extends TrunkService {
     ConnectedDeviceStorage storage = new ConnectedDeviceStorage(this);
     boolean isCompressionEnabled =
         getMetaBoolean(META_COMPRESS_OUTGOING_MESSAGES, ENABLE_COMPRESSION_BY_DEFAULT);
+    boolean isCapabilitiesEligible =
+        getMetaBoolean(META_ENABLE_CAPABILITIES_EXCHANGE, ENABLE_CAPABILITIES_EXCHANGE_BY_DEFAULT);
     sppDelegateBinder = new ConnectedDeviceSppDelegateBinder();
     CarBluetoothManager carBluetoothManager;
     if (isSppSupported) {
-      carBluetoothManager = createSppManager(storage, isCompressionEnabled);
+      carBluetoothManager = createSppManager(storage, isCompressionEnabled, isCapabilitiesEligible);
     } else {
-      carBluetoothManager = createBleManager(storage, isCompressionEnabled);
+      carBluetoothManager = createBleManager(storage, isCompressionEnabled, isCapabilitiesEligible);
     }
     connectedDeviceManager =
         new ConnectedDeviceManager(carBluetoothManager, storage, sppDelegateBinder);
@@ -186,7 +192,8 @@ public final class ConnectedDeviceService extends TrunkService {
 
   private CarBluetoothManager createSppManager(
       @NonNull ConnectedDeviceStorage storage,
-      boolean isCompressionEnabled) {
+      boolean isCompressionEnabled,
+      boolean isCapabilitiesEligible) {
     UUID sppServiceUuid = UUID.fromString(requireMetaString(META_SPP_SERVICE_UUID));
     int maxSppPacketSize = getMetaInt(META_SPP_PACKET_BYTES, DEFAULT_SPP_PACKET_SIZE);
     return new CarSppManager(
@@ -194,17 +201,19 @@ public final class ConnectedDeviceService extends TrunkService {
         storage,
         sppServiceUuid,
         maxSppPacketSize,
-        isCompressionEnabled);
+        isCompressionEnabled,
+        isCapabilitiesEligible);
   }
 
   private CarBluetoothManager createBleManager(
       @NonNull ConnectedDeviceStorage storage,
-      boolean isCompressionEnabled) {
+      boolean isCompressionEnabled,
+      boolean isCapabilitiesEligible) {
     UUID associationUuid = UUID.fromString(requireMetaString(META_ASSOCIATION_SERVICE_UUID));
-    UUID reconnectUuid = UUID.fromString(
-        getMetaString(META_RECONNECT_SERVICE_UUID, DEFAULT_RECONNECT_UUID));
-    UUID reconnectDataUuid = UUID.fromString(
-        getMetaString(META_RECONNECT_DATA_UUID, DEFAULT_RECONNECT_DATA_UUID));
+    UUID reconnectUuid =
+        UUID.fromString(getMetaString(META_RECONNECT_SERVICE_UUID, DEFAULT_RECONNECT_UUID));
+    UUID reconnectDataUuid =
+        UUID.fromString(getMetaString(META_RECONNECT_DATA_UUID, DEFAULT_RECONNECT_DATA_UUID));
     UUID advertiseDataCharacteristicUuid =
         UUID.fromString(
             getMetaString(
@@ -234,7 +243,8 @@ public final class ConnectedDeviceService extends TrunkService {
         MAX_ADVERTISEMENT_DURATION,
         defaultMtuSize,
         isCompressionEnabled,
-        new BluetoothRfcommChannel(sppDelegateBinder));
+        new BluetoothRfcommChannel(sppDelegateBinder),
+        isCapabilitiesEligible);
   }
 
   @Override

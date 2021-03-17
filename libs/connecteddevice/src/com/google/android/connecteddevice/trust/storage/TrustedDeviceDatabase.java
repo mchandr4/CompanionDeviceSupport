@@ -5,14 +5,10 @@ import androidx.room.RoomDatabase;
 
 /** Database for trusted device feature. */
 @Database(
-    entities = {TrustedDeviceEntity.class},
-    version = 1,
-    exportSchema = false)
+    entities = {TrustedDeviceEntity.class, FeatureStateEntity.class},
+    version = 3,
+    exportSchema = true)
 public abstract class TrustedDeviceDatabase extends RoomDatabase {
-
-  /** Name of trusted device database. */
-  public static final String DATABASE_NAME = "trusted-device-database";
-
   /** Return the DAO for the trusted device table. */
   public abstract TrustedDeviceDao trustedDeviceDao();
 }

@@ -16,10 +16,10 @@
   -->
 
 <resources>
-    <dimen name="instruction_steps_margin_top">@dimen/padding_4</dimen>
+    <dimen name="instruction_steps_margin_top">@dimen/car_ui_padding_4</dimen>
 
-    <dimen name="device_detail_margin_top">@dimen/padding_1</dimen>
-    <dimen name="device_detail_margin">@dimen/padding_1</dimen>
-    <dimen name="device_detail_button_margin_top">@dimen/padding_1</dimen>
+    <dimen name="device_detail_margin_top">@dimen/car_ui_padding_1</dimen>
+    <dimen name="device_detail_margin">@dimen/car_ui_padding_1</dimen>
+    <dimen name="device_detail_button_margin_top">@dimen/car_ui_padding_1</dimen>
     <dimen name="device_detail_divider_margin">0dp</dimen>
 </resources>

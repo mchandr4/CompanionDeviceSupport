@@ -22,8 +22,8 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import com.google.android.connecteddevice.service.AssociatedDeviceViewModel;
-import com.google.android.connecteddevice.service.AssociatedDeviceViewModelFactory;
+import com.google.android.connecteddevice.ui.AssociatedDeviceViewModel;
+import com.google.android.connecteddevice.ui.AssociatedDeviceViewModelFactory;
 
 /** Fragment that displays when an error happens during association. */
 public class AssociationErrorFragment extends Fragment {

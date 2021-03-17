@@ -16,6 +16,7 @@
   -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="settings_entry_title">Дэмжигч төхөөрөмж</string>
   <string name="default_device_name">Холбоотой төхөөрөмж</string>
   <string name="add_device_title">Холбоотой төхөөрөмж нэмэх</string>
   <string name="add_associated_device_title">Дэмжигч төхөөрөмж холбох</string>
@@ -62,8 +63,8 @@
   <string name="trusted_device_feature_title">Утсаараа профайлын түгжээг тайлна уу</string>
   <string name="trusted_device_feature_instruction">Түгжээг тайлах сонголт тохируулахын тулд Дэмжигч аппаа шалгана уу</string>
   <string name="trusted_device_item_title">&lt;b&gt;%1$s&lt;/b&gt;-д миний профайлын түгжээг тайлахыг зөвшөөрөх</string>
-  <string name="device_not_connected_dialog_title">Таны утас идэвхтэй холбогдсон байх ёстой</string>
-  <string name="device_not_connected_dialog_message">Энэ онцлогийг асаахын тулд машин болон утсаа bluetooth-г асаасан бөгөөд хоорондоо ойр байгаа эсэхийг шалгана уу</string>
+  <string name="device_not_connected_dialog_title">Таны Дэмжигч апп идэвхтэй холбогдсон байх ёстой</string>
+  <string name="device_not_connected_dialog_message">Энэ онцлогийг асаахын тулд Дэмжигч апп таны утсан дээр нээлттэй байгаа эсэхийг шалгана уу. Таны машин болон утас Bluetooth-г асаасан бөгөөд хоорондоо ойр байх ёстой.</string>
   <string name="trusted_device_enrollment_success_message">&lt;b&gt;%1$s&lt;/b&gt; одоо таны профайлын түгжээг тайлах боломжтой</string>
   <string name="create_profile_lock_dialog_title">Үндсэн профайлын түгжээ үүсгэнэ үү</string>
   <string name="create_profile_lock_dialog_message">Та утсаараа профайлынхаа түгжээг тайлахын тулд үндсэн профайлын түгжээгээ нөөцөөр ашиглах шаардлагатай</string>

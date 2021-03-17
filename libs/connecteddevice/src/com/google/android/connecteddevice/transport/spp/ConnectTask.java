@@ -70,12 +70,11 @@ class ConnectTask implements Runnable {
       }
       return;
     }
-    boolean isConnected = false;
     logi(TAG, "Begin ConnectTask.");
 
     // Always cancel discovery because it will slow down a connection
     BluetoothAdapter.getDefaultAdapter().cancelDiscovery();
-    while (!isConnected && !isCanceled.get()) {
+    while (!socket.isConnected() && !isCanceled.get()) {
       try {
         // This is a blocking call and will only return on a successful connection or an exception
         socket.connect();
@@ -83,9 +82,8 @@ class ConnectTask implements Runnable {
         logi(TAG, "Exception when connecting to device, retry...");
         continue;
       }
-      isConnected = true;
     }
-    if (!isCanceled.get() && isConnected) {
+    if (!isCanceled.get() && socket.isConnected()) {
       callbackExecutor.execute(() -> callback.onConnectionSuccess(socket));
     }
   }

@@ -16,6 +16,7 @@
   -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="settings_entry_title">Begleitgerät</string>
   <string name="default_device_name">Zugehöriges Gerät</string>
   <string name="add_device_title">Zugehöriges Gerät hinzufügen</string>
   <string name="add_associated_device_title">Begleitgerät verbinden</string>
@@ -62,8 +63,8 @@
   <string name="trusted_device_feature_title">Profil mit Smartphone entsperren</string>
   <string name="trusted_device_feature_instruction">Konfiguriere die Optionen zum Entsperren über die Companion App</string>
   <string name="trusted_device_item_title">Entsperren meines Profils über &lt;b&gt;%1$s&lt;/b&gt; zulassen</string>
-  <string name="device_not_connected_dialog_title">Dein Smartphone muss verbunden sein</string>
-  <string name="device_not_connected_dialog_message">Damit du diese Funktion aktivieren kannst, muss Bluetooth im Auto und auf deinem Smartphone eingeschaltet und das Smartphone in der Nähe des Autos sein</string>
+  <string name="device_not_connected_dialog_title">Deine Companion App muss verbunden sein</string>
+  <string name="device_not_connected_dialog_message">Öffne die Companion App auf deinem Smartphone, um diese Funktion zu aktivieren. Bluetooth muss im Auto und auf dem Smartphone eingeschaltet und das Smartphone in der Nähe des Autos sein.</string>
   <string name="trusted_device_enrollment_success_message">Du kannst dein Profil jetzt mit &lt;b&gt;%1$s&lt;/b&gt; entsperren</string>
   <string name="create_profile_lock_dialog_title">Primäre Sperre für Profil erstellen</string>
   <string name="create_profile_lock_dialog_message">Damit du dein Smartphone zum Entsperren deines Profils verwenden kannst, benötigst du für dein Profil eine primäre Sperre als Ersatz</string>

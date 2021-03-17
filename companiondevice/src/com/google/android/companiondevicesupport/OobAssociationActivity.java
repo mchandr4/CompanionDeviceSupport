@@ -16,6 +16,8 @@
 
 package com.google.android.companiondevicesupport;
 
+import static com.android.car.ui.core.CarUi.requireToolbar;
+import static com.android.car.ui.toolbar.Toolbar.State.SUBPAGE;
 import static com.google.android.connecteddevice.util.SafeLog.loge;
 
 import android.app.Activity;
@@ -24,7 +26,7 @@ import androidx.lifecycle.ViewModelStore;
 import android.os.Bundle;
 import androidx.fragment.app.FragmentActivity;
 import android.widget.Toast;
-import com.google.android.companiondevicesupport.ui.Toolbar;
+import com.android.car.ui.toolbar.ToolbarController;
 import com.google.android.connecteddevice.model.OobEligibleDevice;
 import com.google.common.base.Strings;
 
@@ -35,7 +37,7 @@ public class OobAssociationActivity extends FragmentActivity {
 
   private static final String EXTRA_DEVICE_ADDRESS = "DEVICE_ADDRESS";
 
-  private Toolbar toolbar;
+  private ToolbarController toolbar;
   private OobAssociatedDeviceViewModel model;
 
   @Override
@@ -57,8 +59,8 @@ public class OobAssociationActivity extends FragmentActivity {
 
     observeViewModel(deviceAddress);
 
-    toolbar = findViewById(R.id.toolbar);
-    toolbar.setOnBackButtonClickListener(v -> finish());
+    toolbar = requireToolbar(this);
+    toolbar.setState(SUBPAGE);
 
     getSupportFragmentManager()
         .beginTransaction()
@@ -67,7 +69,7 @@ public class OobAssociationActivity extends FragmentActivity {
             new OobAddAssociatedDeviceFragment(),
             OOB_ADD_DEVICE_FRAGMENT_TAG)
         .commit();
-    toolbar.showProgressBar();
+    toolbar.getProgressBar().setVisible(true);
   }
 
   @Override
@@ -84,7 +86,7 @@ public class OobAssociationActivity extends FragmentActivity {
 
   @Override
   protected void onDestroy() {
-    toolbar.hideProgressBar();
+    toolbar.getProgressBar().setVisible(false);
     super.onDestroy();
   }
 

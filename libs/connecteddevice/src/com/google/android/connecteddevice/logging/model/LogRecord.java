@@ -19,19 +19,20 @@ package com.google.android.connecteddevice.logging.model;
 import android.os.Process;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import com.google.gson.Gson;
+import com.google.android.connecteddevice.logging.util.LoggingUtils;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
-import java.util.Objects;
 
 /** Contains basic info of a log record. */
 public final class LogRecord {
 
-  private static final String ISO_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSX";
+  private static final String LOGCAT_FORMAT = "MM-dd HH:mm:ss.SSS";
+  private static final String DELIMITER = "  ";
+  private static final String TAG_DELIMITER = ":  ";
 
   /** Priority level constant for logging. */
   public enum Level {
@@ -39,10 +40,20 @@ public final class LogRecord {
     DEBUG,
     INFO,
     WARN,
-    ERROR
+    ERROR;
+
+    /** Returns the short name of the level. */
+    public String toShortName() {
+      return Character.toString(name().charAt(0));
+    }
   }
 
-  @NonNull private final String time;
+  // Date APIs are only used for log messages and must be Java 7 compatible for external
+  // applications
+  @SuppressWarnings("JavaUtilDate")
+  @NonNull
+  private final Date time;
+
   private final int processId;
   private final int threadId;
   @NonNull private final Level level;
@@ -69,9 +80,12 @@ public final class LogRecord {
    * @param message Log message.
    * @param exception Log exception.
    */
+  // Date APIs are only used for log messages and must be Java 7 compatible for external
+  // applications
+  @SuppressWarnings("JavaUtilDate")
   public LogRecord(
       @NonNull Level level, @NonNull String tag, @NonNull String message, Exception exception) {
-    time = currentIsoTime();
+    time = new Date();
     processId = Process.myPid();
     threadId = Process.myTid();
     this.level = level;
@@ -87,7 +101,7 @@ public final class LogRecord {
   }
 
   @NonNull
-  public String getTime() {
+  public Date getTime() {
     return time;
   }
 
@@ -131,38 +145,28 @@ public final class LogRecord {
   /** Return serialization of log record in byte array. */
   @NonNull
   public byte[] toByteArray() {
-    Gson gson = new Gson();
-    return gson.toJson(this).getBytes();
+    return LoggingUtils.objectToBytes(this);
   }
 
   @Override
-  public boolean equals(Object obj) {
-    if (obj == this) {
-      return true;
+  public String toString() {
+    DateFormat dateFormat = new SimpleDateFormat(LOGCAT_FORMAT, Locale.US);
+    StringBuilder stringBuilder =
+        new StringBuilder()
+            .append(dateFormat.format(time))
+            .append(DELIMITER)
+            .append(processId)
+            .append(DELIMITER)
+            .append(threadId)
+            .append(DELIMITER)
+            .append(level.toShortName())
+            .append(DELIMITER)
+            .append(tag)
+            .append(TAG_DELIMITER)
+            .append(message);
+    if (backTrace != null) {
+      stringBuilder.append(DELIMITER).append(backTrace);
     }
-    if (!(obj instanceof LogRecord)) {
-      return false;
-    }
-    LogRecord logRecord = (LogRecord) obj;
-    return Objects.equals(time, logRecord.time)
-        && processId == logRecord.processId
-        && threadId == logRecord.threadId
-        && Objects.equals(level, logRecord.level)
-        && Objects.equals(backTrace, logRecord.backTrace)
-        && Objects.equals(tag, logRecord.tag)
-        && Objects.equals(message, logRecord.message);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(time, processId, threadId, level, backTrace, tag, message);
-  }
-
-  // Date APIs are only used for log messages and must be Java 7 compatible for external
-  // applications.
-  @SuppressWarnings("JavaUtilDate")
-  private static String currentIsoTime() {
-    DateFormat dateFormat = new SimpleDateFormat(ISO_FORMAT, Locale.US);
-    return dateFormat.format(new Date());
+    return stringBuilder.toString();
   }
 }

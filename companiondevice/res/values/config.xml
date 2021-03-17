@@ -38,4 +38,8 @@
         <item>com.google.android.companiondevicesupport/com.google.android.connecteddevice.notificationmsg.NotificationMsgService</item>
         <item>com.google.android.companiondevicesupport/com.google.android.connecteddevice.trust.TrustedDeviceUiDelegateService</item>
     </string-array>
+
+    <bool name="enable_proxy">false</bool>
+    <bool name="enable_spp">false</bool>
+    <bool name="enable_capabilities">false</bool>
 </resources>

@@ -93,6 +93,7 @@ public class CarBleCentralManager extends CarBluetoothManager {
    * @param writeCharacteristicUuid [UUID] of characteristic the car will write to.
    * @param readCharacteristicUuid [UUID] of characteristic the device will write to.
    * @param enableCompression Enable compression on outgoing messages.
+   * @param isCapabilitiesEligible Association should attempt a capabilities exchange.
    */
   public CarBleCentralManager(
       @NonNull Context context,
@@ -102,8 +103,9 @@ public class CarBleCentralManager extends CarBluetoothManager {
       @NonNull String bgServiceMask,
       @NonNull UUID writeCharacteristicUuid,
       @NonNull UUID readCharacteristicUuid,
-      boolean enableCompression) {
-    super(connectedDeviceStorage, enableCompression);
+      boolean enableCompression,
+      boolean isCapabilitiesEligible) {
+    super(connectedDeviceStorage, enableCompression, isCapabilitiesEligible);
     this.context = context;
     this.bleCentralManager = bleCentralManager;
     this.serviceUuid = serviceUuid;

@@ -16,6 +16,7 @@
   -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="settings_entry_title">Көмөкчү түзмөк</string>
   <string name="default_device_name">Байланышкан түзмөк</string>
   <string name="add_device_title">Байланышкан түзмөктү кошуу</string>
   <string name="add_associated_device_title">Өнөктөш түзмөктү туташтыруу</string>
@@ -62,8 +63,8 @@
   <string name="trusted_device_feature_title">Профилдин кулпусун телефон менен ачуу</string>
   <string name="trusted_device_feature_instruction">Кулпуну ачуу параметрлерин жөндөө үчүн Өнөктөш колдонмого өтүңүз</string>
   <string name="trusted_device_item_title">&lt;b&gt;%1$s&lt;/b&gt; менин профилимдин кулпусун ачсын</string>
-  <string name="device_not_connected_dialog_title">Телефонуңуз туташтырылышы керек</string>
-  <string name="device_not_connected_dialog_message">Бул функцияны иштетүү үчүн унааңызда жана телефонуңузда Bluetooth күйгүзүлүп, алар бири-бирине жакын жайгашканын текшериңиз</string>
+  <string name="device_not_connected_dialog_title">Өнөктөш колдонмо туташтырылышы керек</string>
+  <string name="device_not_connected_dialog_message">Бул функцияны күйгүзүү үчүн телефонуңуздагы Өнөктөш колдонмо ачык экенин текшериңиз. Унаа менен телефондун Bluetooth\'у күйүп, бири-бирине жакын турушу керек.</string>
   <string name="trusted_device_enrollment_success_message">Эми &lt;b&gt;%1$s&lt;/b&gt; профилиңиздин кулпусун ача алат</string>
   <string name="create_profile_lock_dialog_title">Негизги профилдин кулпусун түзүү</string>
   <string name="create_profile_lock_dialog_message">Профилди телефондун жардамы менен ачуу үчүн негизги профилдин кулпусун түзүшүңүз керек</string>

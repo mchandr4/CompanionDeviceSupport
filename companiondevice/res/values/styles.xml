@@ -17,40 +17,27 @@
 
 <resources>
     <style name="AssociationTopIcon">
-        <item name="android:tint">@color/color_accent</item>
+        <item name="android:tint">@color/car_ui_color_accent</item>
         <item name="android:scaleType">fitCenter</item>
     </style>
 
-    <style name="TextAppearance.Companion" parent="android:TextAppearance.DeviceDefault">
-        <item name="android:textColor">?android:attr/textColorPrimary</item>
-        <item name="android:textAlignment">viewStart</item>
-    </style>
+    <style name="AssociationTitle" parent="TextAppearance.CarUi.Body1"/>
 
-    <style name="AssociationTitle" parent="TextAppearance.Companion">
-        <item name="android:textSize">@dimen/body1_size</item>
-    </style>
+    <style name="AssociationInstruction" parent="TextAppearance.CarUi.Body3"/>
 
-    <style name="AssociationInstruction" parent="TextAppearance.Companion">
-        <item name="android:textSize">@dimen/body3_size</item>
-    </style>
-
-    <style name="AssociationMessage" parent="TextAppearance.Companion">
-        <item name="android:textSize">@dimen/body3_size</item>
+    <style name="AssociationMessage" parent="TextAppearance.CarUi.Body3">
         <item name="android:textColor">?android:attr/textColorTertiary</item>
     </style>
 
-    <style name="AssociationPairingCode" parent="TextAppearance.Companion">
+    <style name="AssociationPairingCode" parent="TextAppearance.CarUi">
         <item name="android:textSize">56sp</item>
         <item name="android:letterSpacing">@dimen/pairing_code_text_spacing</item>
-        <item name="android:textColor">@color/color_accent</item>
+        <item name="android:textColor">@color/car_ui_color_accent</item>
     </style>
 
-    <style name="TrustedDeviceTitle" parent="TextAppearance.Companion">
-        <item name="android:textSize">@dimen/body1_size</item>
-    </style>
+    <style name="TrustedDeviceTitle" parent="TextAppearance.CarUi.Body1"/>
 
-    <style name="TrustedDeviceMessage" parent="TextAppearance.Companion">
-        <item name="android:textSize">@dimen/body3_size</item>
+    <style name="TrustedDeviceMessage" parent="TextAppearance.CarUi.Body3">
         <item name="android:textColor">?android:attr/textColorTertiary</item>
     </style>
 

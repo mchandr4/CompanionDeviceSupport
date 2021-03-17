@@ -16,6 +16,7 @@
   -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="settings_entry_title">Companion Device</string>
   <string name="default_device_name">Társított eszköz</string>
   <string name="add_device_title">Társított eszköz hozzáadása</string>
   <string name="add_associated_device_title">Társeszköz csatlakoztatása</string>
@@ -62,8 +63,8 @@
   <string name="trusted_device_feature_title">Profil feloldása telefonnal</string>
   <string name="trusted_device_feature_instruction">Ellenőrizze a társalkalmazást a feloldási lehetőségek beállításához</string>
   <string name="trusted_device_item_title">Profil feloldásának engedélyezése a(z) &lt;b&gt;%1$s&lt;/b&gt; számára</string>
-  <string name="device_not_connected_dialog_title">Telefonjának aktívan csatlakozva kell lennie</string>
-  <string name="device_not_connected_dialog_message">A funkció használatához az autóban és a telefonon is bekapcsolva kell lennie a Bluetoothnak, és az eszközöknek közel kell lenniük egymáshoz</string>
+  <string name="device_not_connected_dialog_title">A társalkalmazásnak aktívan is társítva kell lennie</string>
+  <string name="device_not_connected_dialog_message">A funkció használatához nyissa meg a társalkalmazást a telefonon. Az autóban és a telefonon is bekapcsolva kell lennie a Bluetoothnak, és közel kell lenniük egymáshoz.</string>
   <string name="trusted_device_enrollment_success_message">A(z) &lt;b&gt;%1$s&lt;/b&gt; mostantól fel tudja oldani a profilját</string>
   <string name="create_profile_lock_dialog_title">Elsődleges profilzárolás létrehozása</string>
   <string name="create_profile_lock_dialog_message">Ahhoz, hogy a telefont a profil feloldására használhassa, elsődleges profilzárolásra van szükség biztonsági megoldásként</string>

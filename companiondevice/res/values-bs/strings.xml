@@ -16,6 +16,7 @@
   -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="settings_entry_title">Prateći uređaj</string>
   <string name="default_device_name">Povezani uređaj</string>
   <string name="add_device_title">Dodaj povezani uređaj</string>
   <string name="add_associated_device_title">Povežite prateći uređaj</string>
@@ -62,8 +63,8 @@
   <string name="trusted_device_feature_title">Otključajte profil telefonom</string>
   <string name="trusted_device_feature_instruction">Provjerite prateću aplikaciju da postavite opcije otključavanja</string>
   <string name="trusted_device_item_title">Dozvolite da telefon &lt;b&gt;%1$s&lt;/b&gt; otključa moj profil</string>
-  <string name="device_not_connected_dialog_title">Telefon mora biti aktivno povezan</string>
-  <string name="device_not_connected_dialog_message">Da uključite ovu funkciju, provjerite je li Bluetooth uključen u automobilu i na telefonu i da se nalaze blizu jedno drugom</string>
+  <string name="device_not_connected_dialog_title">Prateća aplikacija mora biti aktivno povezana</string>
+  <string name="device_not_connected_dialog_message">Da uključite ovu funkciju, provjerite je li prateća aplikacija otvorena na telefonu. U automobilu i na telefonu treba uključiti Bluetooth i moraju biti blizu jedno drugom.</string>
   <string name="trusted_device_enrollment_success_message">Telefon &lt;b&gt;%1$s&lt;/b&gt; sada može otključati vaš profil</string>
   <string name="create_profile_lock_dialog_title">Postavite zaključavanje primarnog profila</string>
   <string name="create_profile_lock_dialog_message">Da koristite telefon za otključavanje profila, potrebno vam je zaključavanje primarnog profila kao sigurnosna kopija</string>

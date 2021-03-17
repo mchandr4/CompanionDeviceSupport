@@ -16,6 +16,7 @@
   -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="settings_entry_title">Companion Device</string>
   <string name="default_device_name">關聯裝置</string>
   <string name="add_device_title">新增關聯裝置</string>
   <string name="add_associated_device_title">連接隨附裝置</string>
@@ -62,8 +63,8 @@
   <string name="trusted_device_feature_title">使用手機為設定檔解鎖</string>
   <string name="trusted_device_feature_instruction">請查看您的隨附應用程式以設定解鎖選項</string>
   <string name="trusted_device_item_title">允許「%1$s」&lt;b&gt;&lt;/b&gt;為我的設定檔解鎖</string>
-  <string name="device_not_connected_dialog_title">手機必須已連接藍牙</string>
-  <string name="device_not_connected_dialog_message">如要啟用此功能，請確保您的汽車和手機均已開啟藍牙並互相靠近</string>
+  <string name="device_not_connected_dialog_title">您的隨附應用程式必須保持連接</string>
+  <string name="device_not_connected_dialog_message">如要啟用此功能，請確保隨附應用程式已在您的手機上開啟。您的汽車和手機必須已開啟藍牙並互相靠近。</string>
   <string name="trusted_device_enrollment_success_message">「%1$s」&lt;b&gt;&lt;/b&gt;現在可以為您的設定檔解鎖</string>
   <string name="create_profile_lock_dialog_title">建立主要設定檔鎖定</string>
   <string name="create_profile_lock_dialog_message">如要使用手機為您的設定檔解鎖，您需要有主要設定檔鎖定作為後備</string>

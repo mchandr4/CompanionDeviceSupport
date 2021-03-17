@@ -69,6 +69,7 @@ public class ConnectedDeviceSppDelegateBinderTest {
   private ConnectedDeviceSppDelegateBinder connectedDeviceSppDelegateBinder;
 
   @Mock private ISppCallback mockRemoteCallback;
+  @Mock private ISppCallback mockOldRemoteCallback;
   @Mock private IBinder mockRemoteCallbackBinder;
   @Mock private OnErrorListener mockOnErrorListener;
   @Mock private OnMessageReceivedListener mockOnMessageReceivedListener;
@@ -131,7 +132,10 @@ public class ConnectedDeviceSppDelegateBinderTest {
 
   @Test
   public void clearCallback() throws Exception {
-    connectedDeviceSppDelegateBinder.clearCallback();
+    connectedDeviceSppDelegateBinder.clearCallback(mockOldRemoteCallback);
+    assertThat(connectedDeviceSppDelegateBinder.callbackBinder).isNotNull();
+
+    connectedDeviceSppDelegateBinder.clearCallback(mockRemoteCallback);
     verify(mockRemoteCallbackBinder).unlinkToDeath(any(), anyInt());
 
     connectedDeviceSppDelegateBinder.connectAsServer(TEST_UUID, TEST_IS_SECURE);

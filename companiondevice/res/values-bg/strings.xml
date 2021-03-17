@@ -16,6 +16,7 @@
   -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="settings_entry_title">Придружаващо устройство</string>
   <string name="default_device_name">Свързано устройство</string>
   <string name="add_device_title">Добавяне на свързано устройство</string>
   <string name="add_associated_device_title">Свързване на придружаващо устройство</string>
@@ -62,8 +63,8 @@
   <string name="trusted_device_feature_title">Отключване на профила с телефон</string>
   <string name="trusted_device_feature_instruction">Използвайте придружаващото приложение, за да зададете опции за отключване</string>
   <string name="trusted_device_item_title">Разрешаване на &lt;b&gt;%1$s&lt;/b&gt; да отключва потребителския ми профил</string>
-  <string name="device_not_connected_dialog_title">Телефонът ви трябва да установи връзка</string>
-  <string name="device_not_connected_dialog_message">За да включите тази функция, трябва да сте активирали Bluetooth на автомобила и телефона си и те да са близо един до друг</string>
+  <string name="device_not_connected_dialog_title">Придружаващото приложение трябва да е активно свързано</string>
+  <string name="device_not_connected_dialog_message">За да включите тази функция, придружав. приложение трябва да е отворено на телефона ви, а Bluetooth да е актив. на автомобила и телефона ви и те да са близо един до друг.</string>
   <string name="trusted_device_enrollment_success_message">&lt;b&gt;%1$s&lt;/b&gt; вече може да отключва потребителския ви профил</string>
   <string name="create_profile_lock_dialog_title">Задаване на основна опция за заключване на профила</string>
   <string name="create_profile_lock_dialog_message">За да отключвате профила си с телефон, ви е необходима основна опция за заключване на съответния профил, която да използвате като резервна</string>

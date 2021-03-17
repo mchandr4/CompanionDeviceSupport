@@ -16,6 +16,7 @@
   -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="settings_entry_title">Dispositivo associado</string>
   <string name="default_device_name">Disposit. associado</string>
   <string name="add_device_title">Adicionar dispositivo associado</string>
   <string name="add_associated_device_title">Ligue um dispositivo associado</string>
@@ -62,8 +63,8 @@
   <string name="trusted_device_feature_title">Desbloqueie o perfil com o telemóvel</string>
   <string name="trusted_device_feature_instruction">Verifique a sua app associada para definir opções de desbloqueio.</string>
   <string name="trusted_device_item_title">Permitir que &lt;b&gt;%1$s&lt;/b&gt; desbloqueie o meu perfil</string>
-  <string name="device_not_connected_dialog_title">O seu telemóvel tem de estar ativamente ligado</string>
-  <string name="device_not_connected_dialog_message">Para ativar esta funcionalidade, certifique-se de que o carro e o telemóvel têm o Bluetooth ativado e estão próximos um do outro.</string>
+  <string name="device_not_connected_dialog_title">A sua app associada tem de estar associada ativamente</string>
+  <string name="device_not_connected_dialog_message">Para ativar esta funcionalidade, a app associada tem de estar aberta no telemóvel. O automóvel e o telemóvel devem ter o Bluetooth ativado e estar próximos um do outro.</string>
   <string name="trusted_device_enrollment_success_message">&lt;b&gt;%1$s&lt;/b&gt; já pode desbloquear o seu perfil.</string>
   <string name="create_profile_lock_dialog_title">Crie um bloqueio do perfil principal</string>
   <string name="create_profile_lock_dialog_message">Para utilizar o telemóvel para desbloquear o seu perfil, precisa de um bloqueio do perfil principal como alternativa.</string>

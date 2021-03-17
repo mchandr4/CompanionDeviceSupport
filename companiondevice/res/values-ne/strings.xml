@@ -16,6 +16,7 @@
   -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="settings_entry_title">सहयोगी यन्त्र</string>
   <string name="default_device_name">कनेक्ट गरिएको यन्त्र</string>
   <string name="add_device_title">कनेक्ट गरिएको यन्त्र हाल्नुहोस्</string>
   <string name="add_associated_device_title">सहयोगी यन्त्र कनेक्ट गर्नुहोस्</string>
@@ -62,8 +63,8 @@
   <string name="trusted_device_feature_title">फोन प्रयोग गरेर प्रोफाइल अनलक गर्नुहोस्</string>
   <string name="trusted_device_feature_instruction">अनलक गर्ने विकल्पहरू सेट गर्न आफ्नो सहयोगी एपमा जानुहोस्</string>
   <string name="trusted_device_item_title">&lt;b&gt;%1$s&lt;/b&gt; लाई मेरो प्रोफाइल अनलक गर्न दिइयोस्</string>
-  <string name="device_not_connected_dialog_title">तपाईंको फोन सक्रिय रूपमा कनेक्ट भएको हुनु पर्छ</string>
-  <string name="device_not_connected_dialog_message">यो सुविधा अन गर्नुअघि तपाईंको कार र फोनमा ब्लुटुथ अन गरिएको छ र ती एकअर्काका नजिक छन् भन्ने कुरा सुनिश्चित गर्नुहोस्</string>
+  <string name="device_not_connected_dialog_title">तपाईंको सहयोगी एप कनेक्ट भएको हुनु पर्छ</string>
+  <string name="device_not_connected_dialog_message">यो सुविधा अन गर्नुअघि तपाईंको फोनमा सहयोगी एप खोलिएको छ भन्ने कुरा सुनिश्चित गर्नुहोस्। तपाईंको कार र फोनमा ब्लुटुथ अन गरिएको हुनु पर्छ र ती एकअर्काको नजिक हुनु पर्छ।</string>
   <string name="trusted_device_enrollment_success_message">&lt;b&gt;%1$s&lt;/b&gt; ले अब तपाईंको प्रोफाइल अनलक गर्न सक्छ</string>
   <string name="create_profile_lock_dialog_title">प्राथमिक प्रोफाइल लक सिर्जना गर्नुहोस्</string>
   <string name="create_profile_lock_dialog_message">फोन प्रयोग गरेर प्रोफाइल अनलक गर्न तपाईंले ब्याकअपका रूपमा प्राथमिक प्रोफाइल लक सिर्जना गर्नु पर्ने हुन्छ</string>

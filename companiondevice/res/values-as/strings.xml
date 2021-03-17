@@ -16,6 +16,7 @@
   -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="settings_entry_title">Companion Device</string>
   <string name="default_device_name">জড়িত ডিভাইচ</string>
   <string name="add_device_title">জড়িত ডিভাইচটো যোগ দিয়ক</string>
   <string name="add_associated_device_title">এটা সহযোগী ডিভাইচ সংযোগ কৰক</string>
@@ -62,8 +63,8 @@
   <string name="trusted_device_feature_title">ফ’নৰ জৰিয়তে প্ৰ’ফাইল আনলক কৰক</string>
   <string name="trusted_device_feature_instruction">আনলক কৰাৰ বিকল্পসমূহ ছেট কৰিবলৈ আপোনাৰ সহযোগী এপ্‌টো পৰীক্ষা কৰক</string>
   <string name="trusted_device_item_title">&lt;b&gt;%1$s&lt;/b&gt;ক মোৰ প্ৰ’ফাইলটো আনলক কৰিবলৈ দিয়ক</string>
-  <string name="device_not_connected_dialog_title">আপোনাৰ ফ’নটো সক্ৰিয়ভাৱে সংযোগ হৈ থাকিবই লাগিব</string>
-  <string name="device_not_connected_dialog_message">এই সুবিধাটো অন কৰিবলৈ আপোনাৰ গাড়ী আৰু ফ’নটোত ব্লুটুথ অন থকাটো আৰু এটা আনটোৰ ওচৰত থকাটো নিশ্চিত কৰক</string>
+  <string name="device_not_connected_dialog_title">আপোনাৰ সহযোগী এপ্‌টো সক্ৰিয়ভাৱে সংযোগ কৰি থ\'বই লাগিব</string>
+  <string name="device_not_connected_dialog_message">এই সুবিধাটো অন কৰিবলৈ, আপোনাৰ ফ\'নত সহযোগী এপ্‌টো খুলি থোৱাটো নিশ্চিত কৰক। আপোনাৰ গাড়ীখনত আৰু ফ’নটোত ব্লুটুথ অন কৰি থোৱা অৱস্থাত এটা আনটোৰ ওচৰত থাকিব লাগে।</string>
   <string name="trusted_device_enrollment_success_message">&lt;b&gt;%1$s&lt;/b&gt;এ এতিয়া আপোনাৰ প্ৰ’ফাইলটো আনলক কৰিব পাৰে</string>
   <string name="create_profile_lock_dialog_title">এটা প্ৰাথমিক প্ৰ’ফাইল লক সৃষ্টি কৰক</string>
   <string name="create_profile_lock_dialog_message">আপোনাৰ প্ৰ’ফাইলটো আনলক কৰাৰ বাবে নিজৰ ফ’নটো ব্যৱহাৰ কৰিবলৈ আপোনাক বেকআপ হিচাপে এটা প্ৰাথমিক প্ৰ’ফাইল লকৰ প্ৰয়োজন</string>

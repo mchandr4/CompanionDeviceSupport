@@ -16,6 +16,7 @@
   -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="settings_entry_title">Companion Device</string>
   <string name="default_device_name">Seotud seade</string>
   <string name="add_device_title">Lisa seotud seade</string>
   <string name="add_associated_device_title">Kaasseadme ühendamine</string>
@@ -62,8 +63,8 @@
   <string name="trusted_device_feature_title">Profiili avamine telefoniga</string>
   <string name="trusted_device_feature_instruction">Kontrollige avamise valikute määramiseks kaasrakendust</string>
   <string name="trusted_device_item_title">Luba telefonil &lt;b&gt;%1$s&lt;/b&gt; minu profiil avada</string>
-  <string name="device_not_connected_dialog_title">Teie telefon peab olema aktiivselt ühendatud</string>
-  <string name="device_not_connected_dialog_message">Selle funktsiooni sisselülitamiseks veenduge, et Bluetooth oleks teie autos ja telefonis sisse lülitatud ning auto ja telefon oleksid lähestiku</string>
+  <string name="device_not_connected_dialog_title">Teie kaasrakendus peab olema aktiivselt ühendatud</string>
+  <string name="device_not_connected_dialog_message">Funktsiooni sisselülitamiseks veenduge, et kaasrakendus oleks telefonis avatud. Bluetooth peaks olema autos ja telefonis sisse lülitatud ja need peaksid asuma lähestikku.</string>
   <string name="trusted_device_enrollment_success_message">&lt;b&gt;%1$s&lt;/b&gt; saab nüüd teie profiili avada</string>
   <string name="create_profile_lock_dialog_title">Peamise profiililuku loomine</string>
   <string name="create_profile_lock_dialog_message">Selleks et oma profiili avamiseks telefoni kasutada, peab varuvalikuna olema seadistatud peamine profiililukk</string>

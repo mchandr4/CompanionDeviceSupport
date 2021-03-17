@@ -16,7 +16,6 @@
 
 package com.google.android.connecteddevice.connection.ble;
 
-import static com.google.android.companionprotos.CapabilitiesExchangeProto.CapabilitiesExchange.OobChannel.BT_RFCOMM;
 import static com.google.android.connecteddevice.model.Errors.DEVICE_ERROR_UNEXPECTED_DISCONNECTION;
 import static com.google.android.connecteddevice.util.SafeLog.logd;
 import static com.google.android.connecteddevice.util.SafeLog.loge;
@@ -39,10 +38,9 @@ import androidx.annotation.VisibleForTesting;
 import com.google.android.connecteddevice.connection.AssociationCallback;
 import com.google.android.connecteddevice.connection.AssociationSecureChannel;
 import com.google.android.connecteddevice.connection.CarBluetoothManager;
+import com.google.android.connecteddevice.connection.ConnectionResolver;
 import com.google.android.connecteddevice.connection.DeviceMessageStream;
-import com.google.android.connecteddevice.connection.OobAssociationSecureChannel;
 import com.google.android.connecteddevice.connection.ReconnectSecureChannel;
-import com.google.android.connecteddevice.model.OobEligibleDevice;
 import com.google.android.connecteddevice.oob.OobChannel;
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage;
 import com.google.android.connecteddevice.util.ByteUtils;
@@ -102,8 +100,6 @@ public class CarBlePeripheralManager extends CarBluetoothManager {
 
   private Future<?> bluetoothNameTask;
 
-  private final OobChannel oobChannel;
-
   public CarBlePeripheralManager(
       @NonNull BlePeripheralManager blePeripheralManager,
       @NonNull ConnectedDeviceStorage connectedDeviceStorage,
@@ -115,7 +111,8 @@ public class CarBlePeripheralManager extends CarBluetoothManager {
       @NonNull UUID readCharacteristicUuid,
       @NonNull Duration maxReconnectAdvertisementDuration,
       int defaultMtuSize,
-      boolean enableCompression) {
+      boolean enableCompression,
+      boolean isCapabilitiesEligible) {
     this(
         blePeripheralManager,
         connectedDeviceStorage,
@@ -128,7 +125,8 @@ public class CarBlePeripheralManager extends CarBluetoothManager {
         maxReconnectAdvertisementDuration,
         defaultMtuSize,
         enableCompression,
-        null);
+        /* oobChannel= */ null,
+        isCapabilitiesEligible);
   }
 
   /**
@@ -147,6 +145,8 @@ public class CarBlePeripheralManager extends CarBluetoothManager {
    *     restarting.
    * @param defaultMtuSize Default MTU size for new channels.
    * @param enableCompression Enable compression on outgoing messages.
+   * @param oobChannel Channel for exchanging out of band verification.
+   * @param isCapabilitiesEligible Association should attempt a capabilities exchange.
    */
   public CarBlePeripheralManager(
       @NonNull BlePeripheralManager blePeripheralManager,
@@ -160,13 +160,13 @@ public class CarBlePeripheralManager extends CarBluetoothManager {
       @NonNull Duration maxReconnectAdvertisementDuration,
       int defaultMtuSize,
       boolean enableCompression,
-      @Nullable OobChannel oobChannel) {
-    super(connectedDeviceStorage, enableCompression);
+      @Nullable OobChannel oobChannel,
+      boolean isCapabilitiesEligible) {
+    super(connectedDeviceStorage, enableCompression, oobChannel, isCapabilitiesEligible);
     this.blePeripheralManager = blePeripheralManager;
     this.associationServiceUuid = associationServiceUuid;
     this.reconnectServiceUuid = reconnectServiceUuid;
     this.reconnectDataUuid = reconnectDataUuid;
-    this.oobChannel = oobChannel;
 
     writeCharacteristic =
         new BluetoothGattCharacteristic(
@@ -411,88 +411,33 @@ public class CarBlePeripheralManager extends CarBluetoothManager {
             writeCharacteristic,
             readCharacteristic,
             defaultMtuSize - ATT_PROTOCOL_BYTES);
+
     secureStream.setMessageReceivedErrorListener(
-        exception -> {
-          disconnectWithError("Error occurred in stream: " + exception.getMessage());
-        });
+        exception ->
+          disconnectWithError("Error occurred in stream: " + exception.getMessage(), exception));
 
     ConnectedRemoteDevice connectedDevice = new ConnectedRemoteDevice(device, /* gatt= */ null);
 
     if (isReconnect) {
-      ReconnectSecureChannel secureChannel =
-          new ReconnectSecureChannel(secureStream, storage, reconnectDeviceId, reconnectChallenge);
-      secureChannel.registerCallback(secureChannelCallback);
-      connectedDevice.secureChannel = secureChannel;
-      addConnectedDevice(connectedDevice);
-
-    } else {
-      secureStream.setVersionExchangedListener(
-          (messagingVersion, securityVersion) -> {
-            if (securityVersion
-                >= DeviceMessageStream.MIN_SECURITY_VERSION_FOR_CAPABILITIES_EXCHANGE) {
-              secureStream.setCapabilitiesExchangedListener(
-                  oobChannels -> {
-                    if (oobChannels.contains(BT_RFCOMM) && oobChannel != null) {
-                      logd(TAG, "Completing out of band data exchange.");
-                      oobChannel.completeOobDataExchange(
-                          new OobEligibleDevice(
-                              device.getAddress(), OobEligibleDevice.OOB_TYPE_BLUETOOTH),
-                          new OobChannel.Callback() {
-                            @Override
-                            public void onOobExchangeSuccess() {
-                              logd(
-                                  TAG,
-                                  "Out of band exchange succeeded. Proceeding to association with"
-                                      + " device.");
-                              if (getOobConnectionManager().startOobExchange(oobChannel)) {
-                                addConnectedDeviceWithAssociationSecureChannel(
-                                    connectedDevice,
-                                    new OobAssociationSecureChannel(
-                                        secureStream, storage, getOobConnectionManager()));
-                              } else {
-                                logw(
-                                    TAG,
-                                    "Out of band exchange failed, falling back to Numeric"
-                                        + " Comparison.");
-                                addConnectedDeviceWithAssociationSecureChannel(
-                                    connectedDevice,
-                                    new AssociationSecureChannel(secureStream, storage));
-                              }
-                            }
-
-                            @Override
-                            public void onOobExchangeFailure() {
-                              logw(
-                                  TAG,
-                                  "Out of band exchange failed, falling back to Numeric"
-                                      + " Comparison.");
-                              addConnectedDeviceWithAssociationSecureChannel(
-                                  connectedDevice,
-                                  new AssociationSecureChannel(secureStream, storage));
-                            }
-                          });
-                    }
-                  });
-            } else {
-              addConnectedDeviceWithAssociationSecureChannel(
-                  connectedDevice, new AssociationSecureChannel(secureStream, storage));
-            }
+      // Capabilities are only exchanged during association so isCapabilitiesEligible is always
+      // false here.
+      ConnectionResolver connectionResolver =
+          new ConnectionResolver(secureStream, /* isCapabilitiesEligible= */ false);
+      connectionResolver.resolveConnection(
+          (resolvedConnection) -> {
+            ReconnectSecureChannel secureChannel =
+                new ReconnectSecureChannel(
+                    secureStream, storage, reconnectDeviceId, reconnectChallenge);
+            secureChannel.registerCallback(secureChannelCallback);
+            connectedDevice.secureChannel = secureChannel;
+            addConnectedDevice(connectedDevice);
+            setDeviceIdAndNotifyCallbacks(reconnectDeviceId);
+            reconnectDeviceId = null;
+            reconnectChallenge = null;
           });
+    } else {
+      onDeviceConnectedForAssociation(secureStream, connectedDevice);
     }
-
-    if (isReconnect) {
-      setDeviceIdAndNotifyCallbacks(reconnectDeviceId);
-      reconnectDeviceId = null;
-      reconnectChallenge = null;
-    }
-  }
-
-  private void addConnectedDeviceWithAssociationSecureChannel(
-      ConnectedRemoteDevice connectedDevice, AssociationSecureChannel secureChannel) {
-    secureChannel.setShowVerificationCodeListener(this::onVerificationCodeAvailable);
-    secureChannel.registerCallback(secureChannelCallback);
-    connectedDevice.secureChannel = secureChannel;
-    addConnectedDevice(connectedDevice);
   }
 
   private void setMtuSize(int mtuSize) {
@@ -603,12 +548,4 @@ public class CarBlePeripheralManager extends CarBluetoothManager {
           connectToDevice(UUID.fromString(reconnectDeviceId));
         }
       };
-
-  private void onVerificationCodeAvailable(String code) {
-    if (!isAssociating()) {
-      loge(TAG, "No valid callback for association.");
-      return;
-    }
-    getAssociationCallback().onVerificationCodeAvailable(code);
-  }
 }

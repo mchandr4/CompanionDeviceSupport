@@ -16,6 +16,7 @@
   -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="settings_entry_title">Companion Device</string>
   <string name="default_device_name">Kopplad enhet</string>
   <string name="add_device_title">Lägg till kopplad enhet</string>
   <string name="add_associated_device_title">Anslut en hjälpenhet</string>
@@ -62,8 +63,8 @@
   <string name="trusted_device_feature_title">Lås upp profilen med telefonen</string>
   <string name="trusted_device_feature_instruction">Upplåsningsalternativ finns i den tillhörande appen</string>
   <string name="trusted_device_item_title">Låt &lt;b&gt;%1$s&lt;/b&gt; låsa upp min profil</string>
-  <string name="device_not_connected_dialog_title">Telefonen måste vara ansluten</string>
-  <string name="device_not_connected_dialog_message">Kontrollera att Bluetooth är aktiverat i bilen och på telefonen och att de är i närheten av varandra om du vill aktivera den här funktionen</string>
+  <string name="device_not_connected_dialog_title">Den tillhörande appen måste vara ansluten</string>
+  <string name="device_not_connected_dialog_message">Om du vill aktivera funktionen ska den tillhörande appen vara öppen på telefonen. Bluetooth ska vara aktiverat i bilen och på telefonen och de ska vara nära varandra.</string>
   <string name="trusted_device_enrollment_success_message">&lt;b&gt;%1$s&lt;/b&gt; kan nu låsa upp din profil</string>
   <string name="create_profile_lock_dialog_title">Skapa ett primärt profillås</string>
   <string name="create_profile_lock_dialog_message">Innan du kan låsa upp profilen med telefonen måste du ha ett primärt profillås som reservalternativ</string>

@@ -24,7 +24,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.os.RemoteException;
 import com.google.android.connecteddevice.api.IAssociatedDeviceManager;
 import com.google.android.connecteddevice.model.OobEligibleDevice;
-import com.google.android.connecteddevice.service.AssociatedDeviceViewModel;
+import com.google.android.connecteddevice.ui.AssociatedDeviceViewModel;
 
 /** {@link ViewModel} for out of band association. */
 public class OobAssociatedDeviceViewModel extends AssociatedDeviceViewModel {

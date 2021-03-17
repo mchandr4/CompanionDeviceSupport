@@ -16,6 +16,7 @@
   -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="settings_entry_title">Companion Device</string>
   <string name="default_device_name">ਸੰਬੰਧਿਤ ਡੀਵਾਈਸ</string>
   <string name="add_device_title">ਸੰਬੰਧਿਤ ਡੀਵਾਈਸ ਨੂੰ ਸ਼ਾਮਲ ਕਰੋ</string>
   <string name="add_associated_device_title">ਸੰਬੰਧੀ ਡੀਵਾਈਸ ਨੂੰ ਕਨੈਕਟ ਕਰੋ</string>
@@ -62,8 +63,8 @@
   <string name="trusted_device_feature_title">ਪ੍ਰੋਫਾਈਲ ਨੂੰ ਫ਼ੋਨ ਨਾਲ ਅਣਲਾਕ ਕਰੋ</string>
   <string name="trusted_device_feature_instruction">ਅਣਲਾਕ ਕਰਨ ਦੇ ਵਿਕਲਪ ਸੈੱਟ ਕਰਨ ਲਈ ਆਪਣੀ ਸੰਬੰਧੀ ਐਪ ਦੀ ਜਾਂਚ ਕਰੋ</string>
   <string name="trusted_device_item_title">&lt;b&gt;%1$s&lt;/b&gt; ਨੂੰ ਮੇਰਾ ਪ੍ਰੋਫਾਈਲ ਅਣਲਾਕ ਕਰਨ ਦਿਓ</string>
-  <string name="device_not_connected_dialog_title">ਤੁਹਾਡਾ ਫ਼ੋਨ ਕਿਰਿਆਸ਼ੀਲ ਤੌਰ \'ਤੇ ਕਨੈਕਟ ਹੋਣਾ ਚਾਹੀਦਾ ਹੈ</string>
-  <string name="device_not_connected_dialog_message">ਇਸ ਵਿਸ਼ੇਸ਼ਤਾ ਨੂੰ ਚਾਲੂ ਕਰਨ ਲਈ, ਪੱਕਾ ਕਰੋ ਕਿ ਤੁਹਾਡੇ ਫ਼ੋਨ ਅਤੇ ਕਾਰ ਵਿੱਚ ਬਲੂਟੁੱਥ ਚਾਲੂ ਹੈ ਅਤੇ ਉਹ ਇੱਕ ਦੂਜੇ ਦੇ ਨੇੜੇ ਹਨ</string>
+  <string name="device_not_connected_dialog_title">ਤੁਹਾਡੀ ਸੰਬੰਧੀ ਐਪ ਕਿਰਿਆਸ਼ੀਲ ਤੌਰ \'ਤੇ ਕਨੈਕਟ ਹੋਣੀ ਚਾਹੀਦੀ ਹੈ</string>
+  <string name="device_not_connected_dialog_message">ਇਸ ਵਿਸ਼ੇਸ਼ਤਾ ਨੂੰ ਚਾਲੂ ਕਰਨ ਲਈ, ਪੱਕਾ ਕਰੋ ਕਿ ਸੰਬੰਧੀ ਐਪ ਤੁਹਾਡੇ ਫ਼ੋਨ \'ਤੇ ਖੁੱਲ੍ਹੀ ਹੈ। ਤੁਹਾਡੀ ਕਾਰ ਅਤੇ ਫ਼ੋਨ ਦੀ ਬਲੂਟੁੱਥ ਚਾਲੂ ਹੋਣੀ ਚਾਹੀਦੀ ਹੈ ਅਤੇ ਇਹ ਇੱਕ ਦੂਜੇ ਦੇ ਨੇੜੇ ਹੋਣੇ ਚਾਹੀਦੇ ਹਨ।</string>
   <string name="trusted_device_enrollment_success_message">&lt;b&gt;%1$s&lt;/b&gt; ਹੁਣ ਤੁਹਾਡੇ ਪ੍ਰੋਫਾਈਲ ਨੂੰ ਅਣਲਾਕ ਕਰ ਸਕਦਾ ਹੈ</string>
   <string name="create_profile_lock_dialog_title">ਮੁੱਖ ਪ੍ਰੋਫਾਈਲ ਲਾਕ ਬਣਾਓ</string>
   <string name="create_profile_lock_dialog_message">ਆਪਣੇ ਪ੍ਰੋਫਾਈਲ ਨੂੰ ਅਣਲਾਕ ਕਰਨ ਵਾਸਤੇ ਆਪਣੇ ਫ਼ੋਨ ਨੂੰ ਵਰਤਣ ਲਈ, ਤੁਹਾਨੂੰ ਬੈਕਅੱਪ ਦੇ ਤੌਰ \'ਤੇ ਇੱਕ ਮੁੱਖ ਪ੍ਰੋਫਾਈਲ ਲਾਕ ਦੀ ਲੋੜ ਹੈ</string>

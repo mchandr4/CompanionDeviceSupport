@@ -59,6 +59,7 @@ public class TrustedDeviceViewModel extends AndroidViewModel {
   }
 
   private final AtomicBoolean hasPendingCredential = new AtomicBoolean(false);
+  private final AtomicBoolean hasEnrollmentIntent = new AtomicBoolean(false);
   private final MutableLiveData<List<TrustedDevice>> trustedDevices = new MutableLiveData<>();
   private final MutableLiveData<AssociatedDevice> associatedDevice = new MutableLiveData<>(null);
   private final MutableLiveData<TrustedDevice> deviceDisabled = new MutableLiveData<>(null);
@@ -159,16 +160,10 @@ public class TrustedDeviceViewModel extends AndroidViewModel {
     enrollmentState.postValue(EnrollmentState.NONE);
   }
 
+  /** Process trusted device enrollment. */
   public void processEnrollment() {
-    if (!isDeviceSecure()) {
-      enrollmentState.postValue(EnrollmentState.WAITING_FOR_PASSWORD_SETUP);
-      return;
-    }
-    if (hasPendingCredential.get()) {
-      enrollmentState.postValue(EnrollmentState.CREDENTIAL_PENDING);
-      return;
-    }
-    enrollmentState.postValue(EnrollmentState.IN_PROGRESS);
+    hasEnrollmentIntent.set(true);
+    processEnrollmentInternal();
   }
 
   /**
@@ -200,6 +195,7 @@ public class TrustedDeviceViewModel extends AndroidViewModel {
   /** Marks enrollment as finished. */
   public void finishEnrollment() {
     hasPendingCredential.set(false);
+    hasEnrollmentIntent.set(false);
     enrollmentState.postValue(EnrollmentState.FINISHED);
   }
 
@@ -213,6 +209,18 @@ public class TrustedDeviceViewModel extends AndroidViewModel {
     }
     getApplication().unbindService(serviceConnection);
     trustedDeviceManager = null;
+  }
+
+  private void processEnrollmentInternal() {
+    if (!isDeviceSecure()) {
+      enrollmentState.postValue(EnrollmentState.WAITING_FOR_PASSWORD_SETUP);
+      return;
+    }
+    if (hasEnrollmentIntent.get() && hasPendingCredential.getAndSet(false)) {
+      enrollmentState.postValue(EnrollmentState.CREDENTIAL_PENDING);
+      return;
+    }
+    enrollmentState.postValue(EnrollmentState.IN_PROGRESS);
   }
 
   private void attemptInitiatingEnrollment(AssociatedDevice device) {
@@ -353,12 +361,8 @@ public class TrustedDeviceViewModel extends AndroidViewModel {
 
         @Override
         public void onValidateCredentialsRequest() {
-
-          if (enrollmentState.getValue() == EnrollmentState.IN_PROGRESS) {
-            enrollmentState.postValue(EnrollmentState.CREDENTIAL_PENDING);
-            return;
-          }
           hasPendingCredential.set(true);
+          processEnrollmentInternal();
         }
 
         @Override

@@ -35,9 +35,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import com.google.android.connecteddevice.model.AssociatedDeviceDetails;
-import com.google.android.connecteddevice.service.AssociatedDeviceViewModel;
-import com.google.android.connecteddevice.service.AssociatedDeviceViewModelFactory;
 import com.google.android.connecteddevice.trust.TrustedDeviceConstants;
+import com.google.android.connecteddevice.ui.AssociatedDeviceViewModel;
+import com.google.android.connecteddevice.ui.AssociatedDeviceViewModelFactory;
 
 /** Fragment that shows the details of an associated device. */
 public class AssociatedDeviceDetailFragment extends Fragment {

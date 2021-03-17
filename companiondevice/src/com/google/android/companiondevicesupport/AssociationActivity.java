@@ -16,6 +16,9 @@
 
 package com.google.android.companiondevicesupport;
 
+import static com.android.car.ui.core.CarUi.requireToolbar;
+import static com.android.car.ui.toolbar.Toolbar.State.SUBPAGE;
+
 import android.app.AlertDialog;
 import android.app.Dialog;
 import androidx.lifecycle.ViewModelProvider;
@@ -26,11 +29,13 @@ import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import android.widget.Toast;
-import com.google.android.companiondevicesupport.ui.Toolbar;
+import com.android.car.ui.toolbar.MenuItem;
+import com.android.car.ui.toolbar.ToolbarController;
 import com.google.android.connecteddevice.api.RemoteFeature;
 import com.google.android.connecteddevice.model.AssociatedDevice;
-import com.google.android.connecteddevice.service.AssociatedDeviceViewModel;
-import com.google.android.connecteddevice.service.AssociatedDeviceViewModelFactory;
+import com.google.android.connecteddevice.ui.AssociatedDeviceViewModel;
+import com.google.android.connecteddevice.ui.AssociatedDeviceViewModelFactory;
+import java.util.Arrays;
 
 /** Activity class for association */
 public class AssociationActivity extends FragmentActivity {
@@ -43,7 +48,7 @@ public class AssociationActivity extends FragmentActivity {
   private static final String ASSOCIATION_ERROR_FRAGMENT_TAG = "AssociationErrorFragment";
   private static final String TURN_ON_BLUETOOTH_DIALOG_TAG = "TurnOnBluetoothDialog";
 
-  private Toolbar toolbar;
+  private ToolbarController toolbar;
   private AssociatedDeviceViewModel model;
 
   @Override
@@ -51,8 +56,8 @@ public class AssociationActivity extends FragmentActivity {
     super.onCreate(saveInstanceState);
     setContentView(R.layout.base_activity);
 
-    toolbar = findViewById(R.id.toolbar);
-    toolbar.setOnBackButtonClickListener(v -> finish());
+    toolbar = requireToolbar(this);
+    toolbar.setState(SUBPAGE);
 
     observeViewModel();
   }
@@ -108,7 +113,7 @@ public class AssociationActivity extends FragmentActivity {
                   runOnUiThread(
                       () -> {
                         dismissConfirmButtons();
-                        toolbar.hideProgressBar();
+                        hideProgressBar();
                       });
                   break;
                 case STARTING:
@@ -223,22 +228,33 @@ public class AssociationActivity extends FragmentActivity {
   }
 
   private void showConfirmButtons() {
-    toolbar.setSecondaryActionButton(R.string.retry, v -> retryAssociation());
-    toolbar.setPrimaryActionButton(
-        R.string.confirm,
-        v -> {
-          model.acceptVerification();
-          dismissConfirmButtons();
-        });
+    MenuItem cancelButton =
+        MenuItem.builder(this)
+            .setTitle(R.string.retry)
+            .setOnClickListener(i -> retryAssociation())
+            .build();
+    MenuItem confirmButton =
+        MenuItem.builder(this)
+            .setTitle(R.string.confirm)
+            .setOnClickListener(
+                i -> {
+                  model.acceptVerification();
+                  dismissConfirmButtons();
+                })
+            .build();
+    toolbar.setMenuItems(Arrays.asList(cancelButton, confirmButton));
   }
 
   private void dismissConfirmButtons() {
-    toolbar.hideSecondaryActionButton();
-    toolbar.hidePrimaryActionButton();
+    toolbar.setMenuItems(null);
   }
 
   private void showProgressBar() {
-    toolbar.showProgressBar();
+    toolbar.getProgressBar().setVisible(true);
+  }
+
+  private void hideProgressBar() {
+    toolbar.getProgressBar().setVisible(false);
   }
 
   private void showTurnOnBluetoothDialog() {

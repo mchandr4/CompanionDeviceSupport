@@ -16,6 +16,7 @@
   -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="settings_entry_title">Companion Device</string>
   <string name="default_device_name">Συσχετισμένη συσκευή</string>
   <string name="add_device_title">Προσθήκη συσχετισμένης συσκευής</string>
   <string name="add_associated_device_title">Σύνδεση συνοδευτικής συσκευής</string>
@@ -62,8 +63,8 @@
   <string name="trusted_device_feature_title">Ξεκλείδωμα προφίλ με τηλέφωνο</string>
   <string name="trusted_device_feature_instruction">Ελέγξτε τη συνοδευτική εφαρμογή για να ορίσετε τις ρυθμίσεις ξεκλειδώματος.</string>
   <string name="trusted_device_item_title">Να επιτρέπεται στο τηλέφωνο &lt;b&gt;%1$s&lt;/b&gt; να ξεκλειδώνει το προφίλ μου</string>
-  <string name="device_not_connected_dialog_title">Το τηλέφωνό σας πρέπει να είναι ενεργά συνδεδεμένο</string>
-  <string name="device_not_connected_dialog_message">Για την ενεργοποίηση της λειτουργίας, βεβαιωθείτε ότι το Bluetooth είναι ενεργό σε αυτοκίνητο και τηλέφωνο και ότι βρίσκονται κοντά μεταξύ τους.</string>
+  <string name="device_not_connected_dialog_title">Η συνοδευτική εφαρμογή πρέπει να είναι ενεργά συνδεδεμένη</string>
+  <string name="device_not_connected_dialog_message">Για ενεργοποίηση της λειτουργίας, η συνοδευτική εφαρμογή πρέπει να είναι ανοιχτή στο τηλέφωνο. Αυτοκίνητο και τηλέφωνο πρέπει να βρίσκονται κοντά, με το Bluetooth ενεργό.</string>
   <string name="trusted_device_enrollment_success_message">Το τηλέφωνο &lt;b&gt;%1$s&lt;/b&gt; μπορεί πλέον να ξεκλειδώνει το προφίλ σας</string>
   <string name="create_profile_lock_dialog_title">Δημιουργία κύριου κλειδώματος προφίλ</string>
   <string name="create_profile_lock_dialog_message">Για να χρησιμοποιήσετε το τηλέφωνό σας ώστε να ξεκλειδώσετε το προφίλ σας, χρειάζεστε ένα κύριο κλείδωμα προφίλ ως αντίγραφο ασφαλείας.</string>

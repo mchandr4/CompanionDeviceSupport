@@ -852,7 +852,6 @@ public class ConnectedDeviceManager {
     return new CarBluetoothManager.Callback() {
       @Override
       public void onDeviceConnected(String deviceId) {
-        EventLog.onDeviceIdReceived();
         addConnectedDevice(deviceId);
       }
 

@@ -35,7 +35,7 @@ public final class CalendarSyncService extends Service {
    * A flag that controls whether the new bi-directional sync implementation is used. The value
    * should only by changed by tests before the service is created.
    */
-  @VisibleForTesting static boolean enableBidirectionalSync = false;
+  @VisibleForTesting static boolean enableBidirectionalSync = true;
 
   /**
    * The legacy implementation that handles only receiving a full calendar data push.

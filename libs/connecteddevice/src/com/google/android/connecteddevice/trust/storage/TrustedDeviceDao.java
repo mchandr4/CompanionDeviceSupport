@@ -12,12 +12,20 @@ import java.util.List;
 public interface TrustedDeviceDao {
 
   /** Get a {@link TrustedDeviceEntity} based on device id. */
-  @Query("SELECT * FROM trusted_devices WHERE id LIKE :deviceId LIMIT 1")
+  @Query("SELECT * FROM trusted_devices WHERE id LIKE :deviceId AND isValid = 1 LIMIT 1")
   TrustedDeviceEntity getTrustedDevice(String deviceId);
 
+  /** Get a {@link FeatureStateEntity} based on device id. */
+  @Query("SELECT * FROM feature_state WHERE id = :deviceId")
+  FeatureStateEntity getFeatureState(String deviceId);
+
   /** Get all {@link TrustedDeviceEntity}s associated with a user. */
-  @Query("SELECT * FROM trusted_devices WHERE userId LIKE :userId")
-  List<TrustedDeviceEntity> getTrustedDevicesForUser(int userId);
+  @Query("SELECT * FROM trusted_devices WHERE userId LIKE :userId AND isValid = 1")
+  List<TrustedDeviceEntity> getValidTrustedDevicesForUser(int userId);
+
+  /** Get all invalid {@link TrustedDeviceEntity}s associated with a user. */
+  @Query("SELECT * FROM trusted_devices WHERE userId LIKE :userId AND isValid = 0")
+  List<TrustedDeviceEntity> getInvalidTrustedDevicesForUser(int userId);
 
   /**
    * Add a {@link TrustedDeviceEntity}. Replace if a device already exists with the same device id.
@@ -25,7 +33,18 @@ public interface TrustedDeviceDao {
   @Insert(onConflict = OnConflictStrategy.REPLACE)
   void addOrReplaceTrustedDevice(TrustedDeviceEntity trustedDevice);
 
+  /**
+   * Add a {@link FeatureStateEntity}. Replaces any stored feature states if the device id is the
+   * same.
+   */
+  @Insert(onConflict = OnConflictStrategy.REPLACE)
+  void addOrReplaceFeatureState(FeatureStateEntity featureState);
+
   /** Remove a {@link TrustedDeviceEntity}. */
   @Delete
   void removeTrustedDevice(TrustedDeviceEntity trustedDevice);
+
+  /** Remove any stored feature statue for a car with the given {@code deviceId}. */
+  @Query("DELETE FROM feature_state WHERE id = :deviceId")
+  void removeFeatureState(String deviceId);
 }

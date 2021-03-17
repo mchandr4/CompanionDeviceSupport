@@ -23,7 +23,7 @@ import androidx.annotation.Nullable;
 /** Convenience logging methods that respect allow list tags. */
 public class SafeLog {
 
-  private static final boolean LOCAL_MODE = false;
+  private static final boolean LOCAL_MODE = true;
 
   private SafeLog() {}
 

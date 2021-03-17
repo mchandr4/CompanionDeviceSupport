@@ -24,14 +24,12 @@ import android.content.Context;
 import android.os.Build;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
+import com.google.android.connecteddevice.logging.util.LoggingUtils;
 import com.google.android.connecteddevice.model.ConnectedDevice;
 import com.google.android.connecteddevice.util.Logger;
 import com.google.android.connecteddevice.util.ThreadSafeCallbacks;
 import java.io.File;
 import java.io.IOException;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -330,16 +328,10 @@ public class LoggingManager {
 
   @NonNull
   private static String getLogFileNameForDevice(String deviceName) {
-    return deviceName + FILE_NAME_SEPARATOR + getCurrentTime() + LOG_FILE_EXTENSION;
-  }
-
-  // DateTimeFormatter was added in API level 26 and the project has a min SDK of 29.
-  // https://developer.android.com/reference/java/time/format/DateTimeFormatter
-  @SuppressWarnings("AndroidJdkLibsChecker")
-  @NonNull
-  private static String getCurrentTime() {
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern(FILE_NAME_TIME_FORMAT);
-    return ZonedDateTime.now(ZoneOffset.UTC).format(formatter);
+    return deviceName
+        + FILE_NAME_SEPARATOR
+        + LoggingUtils.getCurrentTime(FILE_NAME_TIME_FORMAT)
+        + LOG_FILE_EXTENSION;
   }
 
   /** Listener for the log request. */

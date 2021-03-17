@@ -4,4 +4,6 @@ include ':libs:encryptionrunner'
 include ':companiondevice'
 include ':ukey2'
 project(':ukey2').projectDir = new File('../../../../external/ukey2')
+include ':car-ui-lib'
+project(':car-ui-lib').projectDir=new File('../libs/car-ui-lib/car-ui-lib')
 rootProject.name = "CompanionDeviceSupport"

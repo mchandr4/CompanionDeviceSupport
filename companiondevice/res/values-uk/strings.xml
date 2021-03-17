@@ -16,6 +16,7 @@
   -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="settings_entry_title">Супутній пристрій</string>
   <string name="default_device_name">Зв\'язаний пристрій</string>
   <string name="add_device_title">Додати зв\'язаний пристрій</string>
   <string name="add_associated_device_title">Підключити супутній пристрій</string>
@@ -62,8 +63,8 @@
   <string name="trusted_device_feature_title">Розблокувати профіль через телефон</string>
   <string name="trusted_device_feature_instruction">Щоб налаштувати розблокування, перейдіть у супутній додаток</string>
   <string name="trusted_device_item_title">Дозволити телефону &lt;b&gt;%1$s&lt;/b&gt; розблоковувати мій профіль</string>
-  <string name="device_not_connected_dialog_title">Ваш телефон має бути підключеним</string>
-  <string name="device_not_connected_dialog_message">Щоб увімкнути цю функцію, переконайтеся, що в автомобілі й на телефоні ввімкнено Bluetooth і що пристрої розташовані поруч</string>
+  <string name="device_not_connected_dialog_title">Підключіть супутній додаток</string>
+  <string name="device_not_connected_dialog_message">Щоб увімкнути цю функцію, відкрийте супутній додаток на телефоні. Крім того, переконайтеся, що в авто й на телефоні ввімкнено Bluetooth і що пристрої розташовані поруч.</string>
   <string name="trusted_device_enrollment_success_message">Телефон &lt;b&gt;%1$s&lt;/b&gt; тепер може розблоковувати ваш профіль</string>
   <string name="create_profile_lock_dialog_title">Налаштувати основний спосіб блокування профілю</string>
   <string name="create_profile_lock_dialog_message">Щоб розблоковувати профіль через телефон, спершу потрібно налаштувати основний спосіб блокування профілю</string>

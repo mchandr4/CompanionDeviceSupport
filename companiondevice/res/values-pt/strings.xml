@@ -16,6 +16,7 @@
   -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="settings_entry_title">Companion Device</string>
   <string name="default_device_name">Disposit. associado</string>
   <string name="add_device_title">Adicionar dispositivo associado</string>
   <string name="add_associated_device_title">Conectar um dispositivo complementar</string>
@@ -62,8 +63,8 @@
   <string name="trusted_device_feature_title">Desbloquear perfil usando o smartphone</string>
   <string name="trusted_device_feature_instruction">Verifique seu aplicativo Companion para definir opções de desbloqueio</string>
   <string name="trusted_device_item_title">Permitir que o smartphone &lt;b&gt;%1$s&lt;/b&gt; desbloqueie meu perfil</string>
-  <string name="device_not_connected_dialog_title">Seu telefone precisa estar conectado</string>
-  <string name="device_not_connected_dialog_message">Para usar esse recurso, verifique se o Bluetooth está ativado no carro e no smartphone e se o veículo e o dispositivo estão próximos um do outro</string>
+  <string name="device_not_connected_dialog_title">O aplicativo Companion precisa estar conectado</string>
+  <string name="device_not_connected_dialog_message">Para ativar este recurso, é necessário abrir o aplicativo Companion no smartphone. O carro e o dispositivo precisam estar próximos e com o Bluetooth ativado.</string>
   <string name="trusted_device_enrollment_success_message">Agora o smartphone &lt;b&gt;%1$s&lt;/b&gt; pode desbloquear seu perfil</string>
   <string name="create_profile_lock_dialog_title">Criar um bloqueio de perfil principal</string>
   <string name="create_profile_lock_dialog_message">Ao usar o smartphone para desbloquear seu perfil, você precisará de um bloqueio de perfil principal como backup</string>

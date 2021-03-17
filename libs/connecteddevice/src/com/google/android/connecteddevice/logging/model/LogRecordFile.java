@@ -16,8 +16,10 @@
 
 package com.google.android.connecteddevice.logging.model;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import androidx.annotation.NonNull;
-import com.google.gson.Gson;
+import com.google.android.connecteddevice.logging.util.LoggingUtils;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -54,11 +56,20 @@ public class LogRecordFile {
     logRecords.add(logRecord);
   }
 
+  /** Return json serialization of this log record file in byte array. */
+  @NonNull
+  public byte[] toJsonByteArray() {
+    return LoggingUtils.objectToBytes(this);
+  }
+
   /** Return serialization of this log record file in byte array. */
   @NonNull
   public byte[] toByteArray() {
-    Gson gson = new Gson();
-    return gson.toJson(this).getBytes();
+    StringBuilder logRecordFileStringBuilder = new StringBuilder(deviceName);
+    for (LogRecord logRecord : logRecords) {
+      logRecordFileStringBuilder.append("\n").append(logRecord);
+    }
+    return logRecordFileStringBuilder.toString().getBytes(UTF_8);
   }
 
   @Override

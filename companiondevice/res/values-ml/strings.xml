@@ -16,6 +16,7 @@
   -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="settings_entry_title">Companion Device</string>
   <string name="default_device_name">ബന്ധപ്പെട്ട ഉപകരണം</string>
   <string name="add_device_title">ബന്ധപ്പെട്ട ഉപകരണം ചേർക്കുക</string>
   <string name="add_associated_device_title">സഹകാരി ഉപകരണം കണക്റ്റ് ചെയ്യുക</string>
@@ -62,8 +63,8 @@
   <string name="trusted_device_feature_title">ഫോൺ ഉപയോഗിച്ച് പ്രൊഫൈൽ അൺലോക്ക് ചെയ്യുക</string>
   <string name="trusted_device_feature_instruction">അൺലോക്ക് ചെയ്യാനുള്ള ഓപ്ഷനുകൾ സജ്ജീകരിക്കാൻ സഹകാരി ആപ്പ് പരിശോധിക്കുക</string>
   <string name="trusted_device_item_title">എന്റെ പ്രൊഫൈൽ അൺലോക്ക് ചെയ്യാൻ &lt;b&gt;%1$s&lt;/b&gt; എന്നതിനെ അനുവദിക്കുക</string>
-  <string name="device_not_connected_dialog_title">നിങ്ങളുടെ ഫോൺ സജീവമായി കണക്റ്റ് ചെയ്‌തിരിക്കണം</string>
-  <string name="device_not_connected_dialog_message">ഈ ഫീച്ചർ ഓണാക്കാൻ, നിങ്ങളുടെ കാറിന്റെയും ഫോണിന്റെയും Bluetooth ഓണാണെന്നും അവ അടുത്തടുത്ത് ആണെന്നും ഉറപ്പാക്കുക</string>
+  <string name="device_not_connected_dialog_title">നിങ്ങളുടെ സഹകാരി ആപ്പ് സജീവമായി കണക്‌റ്റ് ചെയ്‌തിരിക്കണം</string>
+  <string name="device_not_connected_dialog_message">ഈ ഫീച്ചർ ഓണാക്കാൻ, നിങ്ങളുടെ ഫോണിൽ സഹകാരി ആപ്പ് തുറന്നിട്ടുണ്ടെന്ന് ഉറപ്പാക്കുക. കാറിലും ഫോണിലും Bluetooth ഓണാക്കിയിരിക്കണം, അവ പരസ്‌പരം അടുത്തായിരിക്കുകയും വേണം.</string>
   <string name="trusted_device_enrollment_success_message">&lt;b&gt;%1$s&lt;/b&gt; എന്നതിന് നിങ്ങളുടെ പ്രൊഫൈൽ അൺലോക്ക് ചെയ്യാൻ കഴിയും</string>
   <string name="create_profile_lock_dialog_title">പ്രാഥമിക പ്രൊഫൈൽ ലോക്ക് സൃഷ്‌ടിക്കുക</string>
   <string name="create_profile_lock_dialog_message">നിങ്ങളുടെ പ്രൊഫൈൽ അൺലോക്ക് ചെയ്യുന്നതിന് ഫോൺ ഉപയോഗിക്കാൻ, ബാക്കപ്പ് എന്ന നിലയിൽ പ്രാഥമിക പ്രൊഫൈൽ ലോക്ക് ആവശ്യമാണ്</string>

@@ -9,7 +9,7 @@ import android.content.Context;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.google.android.connecteddevice.calendarsync.android.CalendarSyncAccess;
-import com.google.android.connecteddevice.calendarsync.common.CalendarSync;
+import com.google.android.connecteddevice.calendarsync.common.ReplicaCalendarSync;
 import com.google.android.connecteddevice.model.ConnectedDevice;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Consumer;
@@ -22,12 +22,13 @@ import org.mockito.stubbing.Answer;
 
 @RunWith(AndroidJUnit4.class)
 public class CalendarSyncFeature2Test {
-
   private static final String DEVICE_ID = "The device id";
   private static final byte[] MESSAGE = "A message from the phone".getBytes(StandardCharsets.UTF_8);
-  @Mock private CalendarSyncAccess mockCalendarSyncAccess;
+
+  @Mock private CalendarSyncAccess.Factory<ReplicaCalendarSync> mockCalendarSyncAccessFactory;
+  @Mock private CalendarSyncAccess<ReplicaCalendarSync> mockCalendarSyncAccess;
   @Mock private ConnectedDevice mockConnectedDevice;
-  @Mock private CalendarSync mockCalendarSync;
+  @Mock private ReplicaCalendarSync mockCalendarSync;
 
   private CalendarSyncFeature2 feature;
 
@@ -35,7 +36,6 @@ public class CalendarSyncFeature2Test {
   public void setUp() {
     MockitoAnnotations.initMocks(this);
     Context context = ApplicationProvider.getApplicationContext();
-    feature = new CalendarSyncFeature2(context, mockCalendarSyncAccess);
     when(mockConnectedDevice.getDeviceId()).thenReturn(DEVICE_ID);
     when(mockConnectedDevice.hasSecureChannel()).thenReturn(true);
 
@@ -43,12 +43,15 @@ public class CalendarSyncFeature2Test {
     doAnswer(
             (Answer<Void>)
                 invocation -> {
-                  Consumer<CalendarSync> callback = invocation.getArgument(0);
+                  Consumer<ReplicaCalendarSync> callback = invocation.getArgument(0);
                   callback.accept(mockCalendarSync);
                   return null;
                 })
         .when(mockCalendarSyncAccess)
         .access(any());
+    when(mockCalendarSyncAccessFactory.create(any())).thenReturn(mockCalendarSyncAccess);
+
+    feature = new CalendarSyncFeature2(context, mockCalendarSyncAccessFactory);
   }
 
   @Test

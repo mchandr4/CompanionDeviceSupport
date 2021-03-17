@@ -21,8 +21,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.google.android.connecteddevice.logging.model.LogRecord;
 import com.google.android.connecteddevice.logging.model.LogRecord.Level;
+import com.google.android.connecteddevice.logging.util.LoggingUtils;
 import com.google.common.collect.EvictingQueue;
-import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
@@ -83,8 +83,7 @@ public class Logger {
   @NonNull
   public byte[] toByteArray() {
     List<LogRecord> currentRecords = new ArrayList<>(logRecordQueue);
-    Gson gson = new Gson();
-    return gson.toJson(currentRecords).getBytes();
+    return LoggingUtils.objectToBytes(currentRecords);
   }
 
   private void addLogRecord(@NonNull LogRecord logRecord) {

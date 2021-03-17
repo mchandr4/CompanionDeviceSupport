@@ -16,6 +16,7 @@
   -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="settings_entry_title">Doprovodné zařízení</string>
   <string name="default_device_name">Přidružené zařízení</string>
   <string name="add_device_title">Přidat přidružené zařízení</string>
   <string name="add_associated_device_title">Připojení doprovodného zařízení</string>
@@ -62,8 +63,8 @@
   <string name="trusted_device_feature_title">Odemknutí profilu telefonem</string>
   <string name="trusted_device_feature_instruction">V doprovodné aplikaci nastavte možnosti odemknutí</string>
   <string name="trusted_device_item_title">Povolit telefonu &lt;b&gt;%1$s&lt;/b&gt; odemykat můj profil</string>
-  <string name="device_not_connected_dialog_title">Telefon musí být aktivně připojen</string>
-  <string name="device_not_connected_dialog_message">Chcete-li tuto funkci zapnout, zkontrolujte, zda je v autě i v telefonu zapnuto Bluetooth a obě zařízení jsou blízko u sebe</string>
+  <string name="device_not_connected_dialog_title">Doprovodná aplikace musí být aktivně připojena</string>
+  <string name="device_not_connected_dialog_message">Pokud chcete tuto funkci zapnout, v telefonu musí být otevřena doprovodná aplikace. V autě i telefonu je třeba mít zapnuté Bluetooth a telefon musí být blízko u auta.</string>
   <string name="trusted_device_enrollment_success_message">Telefon &lt;b&gt;%1$s&lt;/b&gt; teď může odemykat můj profil</string>
   <string name="create_profile_lock_dialog_title">Vytvoření zámku primárního profilu</string>
   <string name="create_profile_lock_dialog_message">Chcete-li pomocí telefonu odemykat profil, musíte mít jako záložní možnost nastaven zámek primárního profilu</string>

@@ -16,6 +16,7 @@
   -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="settings_entry_title">Fylgitæki</string>
   <string name="default_device_name">Tengt tæki</string>
   <string name="add_device_title">Bæta tengdu tæki við</string>
   <string name="add_associated_device_title">Tengja fylgitæki</string>
@@ -62,8 +63,8 @@
   <string name="trusted_device_feature_title">Taka prófílinn úr lás með símanum</string>
   <string name="trusted_device_feature_instruction">Stilltu hvernig er hægt að taka úr lás í fylgiforritinu</string>
   <string name="trusted_device_item_title">Leyfa &lt;b&gt;%1$s&lt;/b&gt; að taka prófílinn minn úr lás</string>
-  <string name="device_not_connected_dialog_title">Síminn verður að vera með virka tengingu</string>
-  <string name="device_not_connected_dialog_message">Til að kveikja á þessum eiginleika skaltu ganga úr skugga um að bíllinn og síminn séu með kveikt á Bluetooth og nálægt hvor öðrum</string>
+  <string name="device_not_connected_dialog_title">Fylgiforritið verður að vera tengt</string>
+  <string name="device_not_connected_dialog_message">Til að kveikja á þessum eiginleika þarf fylgiforritið að vera opið í símanum. Kveikja þarf á Bluetooth í símanum og í bílnum og hafa símann nálægt bílnum.</string>
   <string name="trusted_device_enrollment_success_message">&lt;b&gt;%1$s&lt;/b&gt; getur nú tekið prófílinn þinn úr lás</string>
   <string name="create_profile_lock_dialog_title">Búa til aðalprófíllás</string>
   <string name="create_profile_lock_dialog_message">Til að geta notað símann til að taka prófílinn þinn úr lás þarftu að hafa aðalprófíllás til vara</string>

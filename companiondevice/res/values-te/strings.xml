@@ -16,6 +16,7 @@
   -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="settings_entry_title">Companion Device</string>
   <string name="default_device_name">అనుబంధించబడిన పరికరం</string>
   <string name="add_device_title">అనుబంధించబడిన పరికరాన్ని జోడించు</string>
   <string name="add_associated_device_title">సహచర పరికరాన్ని కనెక్ట్ చేయండి</string>
@@ -62,8 +63,8 @@
   <string name="trusted_device_feature_title">ఫోన్‌తో ప్రొఫైల్‌ను అన్‌లాక్ చేయండి</string>
   <string name="trusted_device_feature_instruction">అన్‌లాక్ చేసే ఆప్షన్‌లను సెట్ చేయడానికి మీ సహచర యాప్‌ను చెక్ చేయండి</string>
   <string name="trusted_device_item_title">నా ప్రొఫైల్‌ను అన్‌లాక్ చేయడానికి &lt;b&gt;%1$s&lt;/b&gt;కు అనుమతిని ఇవ్వు</string>
-  <string name="device_not_connected_dialog_title">మీ ఫోన్ యాక్టివ్‌గా కనెక్ట్ అయి ఉండాలి</string>
-  <string name="device_not_connected_dialog_message">ఈ ఫీచర్‌ను ఆన్ చేయడానికి, మీ కారులోను, ఫోన్‌లోను బ్లూటూత్ ఆన్‌లో ఉందని, అవి రెండు ఒకదానికొకటి దగ్గరగా ఉన్నాయని నిర్ధారించుకోండి</string>
+  <string name="device_not_connected_dialog_title">మీ సహచర యాప్ తప్పనిసరిగా యాక్టివ్‌గా కనెక్ట్ అయి ఉండాలి</string>
+  <string name="device_not_connected_dialog_message">ఈ ఫీచర్‌ను ఆన్ చేయడానికి, మీ ఫోన్‌లో సహచర యాప్ తెరిచి ఉందా అని నిర్ధారించుకోండి. మీ కారులో, ఫోన్‌లో బ్లూటూత్ ఆన్ చేయబడి ఉండాలి మరియు ఒకదానికొకటి సమీపంలో ఉండాలి.</string>
   <string name="trusted_device_enrollment_success_message">&lt;b&gt;%1$s&lt;/b&gt; ఇప్పుడు మీ ప్రొఫైల్‌ను అన్‌లాక్ చేయగలదు</string>
   <string name="create_profile_lock_dialog_title">ప్రాథమిక ప్రొఫైల్ లాక్‌ను క్రియేట్ చేయండి</string>
   <string name="create_profile_lock_dialog_message">మీ ప్రొఫైల్‌ను అన్‌లాక్ చేయడానికి మీ ఫోన్‌ను ఉపయోగించేందుకు, మీకు బ్యాకప్‌గా ఒక ప్రాథమిక ప్రొఫైల్ లాక్ అవసరం</string>

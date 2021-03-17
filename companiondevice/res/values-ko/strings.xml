@@ -16,6 +16,7 @@
   -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="settings_entry_title">Companion Device</string>
   <string name="default_device_name">연결된 기기</string>
   <string name="add_device_title">연결된 기기 추가</string>
   <string name="add_associated_device_title">호환 기기 연결</string>
@@ -62,8 +63,8 @@
   <string name="trusted_device_feature_title">휴대전화로 프로필 잠금 해제</string>
   <string name="trusted_device_feature_instruction">호환 앱을 확인하여 잠금 해제 옵션을 설정하세요.</string>
   <string name="trusted_device_item_title">&lt;b&gt;%1$s&lt;/b&gt;에서 프로필을 잠금 해제하도록 허용</string>
-  <string name="device_not_connected_dialog_title">휴대전화가 현재 연결되어 있어야 함</string>
-  <string name="device_not_connected_dialog_message">이 기능을 사용 설정하려면 차량과 휴대전화에서 블루투스가 사용 설정되어 있으며 서로 가까이 있어야 합니다.</string>
+  <string name="device_not_connected_dialog_title">호환 앱이 현재 연결되어 있어야 함</string>
+  <string name="device_not_connected_dialog_message">이 기능을 사용 설정하려면 휴대전화에 호환 앱이 열려있어야 합니다. 차량과 휴대전화에서 블루투스가 사용 설정되어 있으며 서로 가까이 있어야 합니다.</string>
   <string name="trusted_device_enrollment_success_message">이제 &lt;b&gt;%1$s&lt;/b&gt;에서 프로필을 잠금 해제할 수 있습니다.</string>
   <string name="create_profile_lock_dialog_title">기본 프로필 잠금 생성</string>
   <string name="create_profile_lock_dialog_message">휴대전화를 사용하여 프로필을 잠금 해제하려면 백업으로 기본 프로필 잠금이 필요합니다.</string>

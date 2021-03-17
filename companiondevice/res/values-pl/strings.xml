@@ -16,6 +16,7 @@
   -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="settings_entry_title">Companion Device</string>
   <string name="default_device_name">Urządzenie powiązane</string>
   <string name="add_device_title">Dodaj urządzenie powiązane</string>
   <string name="add_associated_device_title">Połącz urządzenie towarzyszące</string>
@@ -62,8 +63,8 @@
   <string name="trusted_device_feature_title">Odblokowuj profil za pomocą telefonu</string>
   <string name="trusted_device_feature_instruction">Ustaw opcje odblokowywania w aplikacji towarzyszącej</string>
   <string name="trusted_device_item_title">Zezwalaj telefonowi &lt;b&gt;%1$s&lt;/b&gt; na odblokowywanie profilu</string>
-  <string name="device_not_connected_dialog_title">Telefon musi być połączony</string>
-  <string name="device_not_connected_dialog_message">Aby można było włączyć tę funkcję, samochód i telefon muszą mieć włączony Bluetooth i znajdować się blisko siebie</string>
+  <string name="device_not_connected_dialog_title">Aplikacja towarzysząca musi mieć aktywne połączenie</string>
+  <string name="device_not_connected_dialog_message">Przed włączeniem tej funkcji sprawdź, czy na telefonie masz otwartą aplikację towarzyszącą. Samochód i telefon muszą mieć włączony Bluetooth i znajdować się w pobliżu.</string>
   <string name="trusted_device_enrollment_success_message">&lt;b&gt;%1$s&lt;/b&gt; może teraz odblokowywać Twój profil</string>
   <string name="create_profile_lock_dialog_title">Utwórz główną blokadę profilu</string>
   <string name="create_profile_lock_dialog_message">Aby odblokowywać profil za pomocą telefonu, główna blokada profilu musi służyć jako blokada zapasowa</string>

@@ -16,6 +16,7 @@
   -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="settings_entry_title">কম্প্যানিয়ন ডিভাইস</string>
   <string name="default_device_name">আনুষঙ্গিক ডিভাইস</string>
   <string name="add_device_title">আনুষঙ্গিক ডিভাইস যোগ করুন</string>
   <string name="add_associated_device_title">একটি কম্প্যানিয়ন ডিভাইসের সাথে কানেক্ট করুন</string>
@@ -62,8 +63,8 @@
   <string name="trusted_device_feature_title">ফোনের মাধ্যমে প্রোফাইল আনলক করুন</string>
   <string name="trusted_device_feature_instruction">আনলক করার বিকল্প সেট করতে আপনার কম্প্যানিয়ন অ্যাপ চেক করে দেখুন</string>
   <string name="trusted_device_item_title">&lt;b&gt;%1$s&lt;/b&gt; কে \'আমার প্রোফাইল\' আনলক করার অনুমতি দিন</string>
-  <string name="device_not_connected_dialog_title">আপনার ফোনকে অবশ্যই সম্পূর্ণ কানেক্ট হয়ে থাকতে হবে</string>
-  <string name="device_not_connected_dialog_message">এই ফিচার চালু করতে, নিশ্চিত করে নিন আপনার গাড়ি ও ফোনের ব্লুটুথ চালু করা আছে এবং সেগুলি একে অপরের কাছাকাছি আছে</string>
+  <string name="device_not_connected_dialog_title">কম্প্যানিয়ন অ্যাপ অ্যাক্টিভ হিসেবে কানেক্ট করা থাকতে হবে</string>
+  <string name="device_not_connected_dialog_message">এই ফিচার চালু করতে, আপনার ফোনে কম্প্যানিয়ন অ্যাপ চালু আছে কিনা দেখে নিন। আপনার গাড়ী এবং ফোনের ব্লুটুথ চালু এবং একটি অন্যটির কাছাকাছি থাকতে হবে।</string>
   <string name="trusted_device_enrollment_success_message">&lt;b&gt;%1$s&lt;/b&gt; এখন আপনার প্রোফাইল আনলক করতে পারবে</string>
   <string name="create_profile_lock_dialog_title">একটি প্রাথমিক প্রোফাইল লক তৈরি করুন</string>
   <string name="create_profile_lock_dialog_message">প্রোফাইল আনলক করতে আপনার ফোন ব্যবহার করার জন্য, আপনার কাছে ব্যাক-আপ হিসেবে একটি প্রাথমিক প্রোফাইল লক থাকতে হবে</string>

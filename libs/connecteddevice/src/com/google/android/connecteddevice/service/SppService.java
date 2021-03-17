@@ -115,7 +115,7 @@ public class SppService extends Service {
       new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-          logd(TAG, "Connected to remote service.");
+          logd(TAG, "Successfully connected to remote service.");
           delegate = IConnectedDeviceSppDelegate.Stub.asInterface(service);
           try {
             delegate.setCallback(sppCallback);
@@ -135,15 +135,17 @@ public class SppService extends Service {
   @Override
   public void onCreate() {
     super.onCreate();
-    logd(TAG, "Service is created, start binding to CompanionDeviceSupportService.");
+    logd(TAG, "Service is created, start binding to ConnectedDeviceService.");
     bindAttempts = 0;
     bindToService();
   }
 
   @Override
   public void onDestroy() {
-    super.onDestroy();
+    logd(TAG, "Service was destroyed.");
     cleanUp();
+    unbindService(serviceConnection);
+    super.onDestroy();
   }
 
   @Override
@@ -152,6 +154,7 @@ public class SppService extends Service {
   }
 
   private void cleanUp() {
+    logd(TAG, "Cleaning up service.");
     for (SppManager manager : activeConnections.values()) {
       manager.cleanup();
     }
@@ -164,7 +167,7 @@ public class SppService extends Service {
       return;
     }
     try {
-      delegate.clearCallback();
+      delegate.clearCallback(sppCallback);
     } catch (RemoteException e) {
       loge(TAG, "Error while clear callback of delegate.", e);
     }
@@ -176,7 +179,7 @@ public class SppService extends Service {
     intent.setAction(ConnectedDeviceSppDelegateBinder.ACTION_BIND_SPP);
     boolean success = bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
     if (success) {
-      logd(TAG, "Successfully bind to CompanionDeviceSupportService");
+      logd(TAG, "Successfully started bind attempt to ConnectedDeviceService.");
       return;
     }
     bindAttempts++;

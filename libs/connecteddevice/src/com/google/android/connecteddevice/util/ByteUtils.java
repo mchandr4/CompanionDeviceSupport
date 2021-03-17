@@ -23,8 +23,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.security.SecureRandom;
 import java.util.UUID;
-import java.util.concurrent.ThreadLocalRandom;
 
 /** Utility classes for manipulating bytes. */
 public final class ByteUtils {
@@ -32,6 +32,8 @@ public final class ByteUtils {
   private static final int UUID_LENGTH = 16;
 
   private static final int LONG_BYTES = 8;
+
+  private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
   private ByteUtils() {}
 
@@ -115,7 +117,7 @@ public final class ByteUtils {
   @SuppressLint("DefaultLocale") // Should always have the same format regardless of locale
   public static String generateRandomNumberString(int length) {
     return String.format(
-        "%0" + length + "d", ThreadLocalRandom.current().nextInt((int) Math.pow(10, length)));
+        "%0" + length + "d", SECURE_RANDOM.nextInt((int) Math.pow(10, length)));
   }
 
   /**
@@ -127,7 +129,7 @@ public final class ByteUtils {
   @NonNull
   public static byte[] randomBytes(int size) {
     byte[] array = new byte[size];
-    ThreadLocalRandom.current().nextBytes(array);
+    SECURE_RANDOM.nextBytes(array);
     return array;
   }
 

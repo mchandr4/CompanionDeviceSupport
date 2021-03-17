@@ -16,11 +16,12 @@
 
 package com.google.android.companiondevicesupport.trust;
 
+import static com.android.car.ui.core.CarUi.requireToolbar;
+import static com.android.car.ui.toolbar.Toolbar.State.SUBPAGE;
 import static com.google.android.connecteddevice.api.RemoteFeature.ACTION_ASSOCIATION_SETTING;
 import static com.google.android.connecteddevice.api.RemoteFeature.ASSOCIATED_DEVICE_DATA_NAME_EXTRA;
 import static com.google.android.connecteddevice.util.SafeLog.logd;
 import static com.google.android.connecteddevice.util.SafeLog.loge;
-import static com.google.android.connecteddevice.util.SafeLog.logw;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -34,9 +35,11 @@ import androidx.fragment.app.FragmentActivity;
 import android.text.Html;
 import android.text.Spanned;
 import android.widget.Toast;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult;
 import androidx.annotation.Nullable;
+import com.android.car.ui.toolbar.ToolbarController;
 import com.google.android.companiondevicesupport.R;
-import com.google.android.companiondevicesupport.ui.Toolbar;
 import com.google.android.connecteddevice.model.AssociatedDevice;
 import com.google.android.connecteddevice.trust.TrustedDeviceConstants;
 import com.google.android.connecteddevice.trust.TrustedDeviceViewModel;
@@ -45,16 +48,9 @@ import com.google.android.connecteddevice.trust.api.TrustedDevice;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /** Activity for enrolling and viewing trusted devices. */
-@SuppressWarnings("deprecation") // TODO(b/165802790) Remove startActivityForResult
 public class TrustedDeviceActivity extends FragmentActivity {
 
   private static final String TAG = "TrustedDeviceActivity";
-
-  private static final int ACTIVATE_TOKEN_REQUEST_CODE = 1;
-
-  private static final int CREATE_LOCK_REQUEST_CODE = 2;
-
-  private static final int RETRIEVE_ASSOCIATED_DEVICE_REQUEST_CODE = 3;
 
   private static final String ACTION_LOCK_SETTINGS = "android.car.settings.SCREEN_LOCK_ACTIVITY";
 
@@ -75,8 +71,6 @@ public class TrustedDeviceActivity extends FragmentActivity {
   /** {@code true} if a PIN/Pattern/Password has just been set as a screen lock. */
   private final AtomicBoolean isScreenLockNewlyCreated = new AtomicBoolean(false);
 
-  private final AtomicBoolean isStartedForEnrollment = new AtomicBoolean(false);
-
   /**
    * {@code true} if this activity is relaunched for enrollment and the activity needs to be
    * finished after enrollment has completed.
@@ -85,58 +79,41 @@ public class TrustedDeviceActivity extends FragmentActivity {
 
   private KeyguardManager keyguardManager;
 
-  private Toolbar toolbar;
+  private ToolbarController toolbar;
 
   private TrustedDeviceViewModel model;
+
+  private ActivityResultLauncher<Intent> createCredentialLauncher;
+  private ActivityResultLauncher<Intent> verifyCredentialLauncher;
+  private ActivityResultLauncher<Intent> retrieveDeviceLauncher;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.base_activity);
     observeViewModel();
+
+    // ActivityResultLauncher has to be registered before the activity state reaches STARTED.
+    retrieveDeviceLauncher =
+        registerForActivityResult(
+            new StartActivityForResult(), result -> onAssociatedDeviceRetrieved(result.getData()));
+    createCredentialLauncher =
+        registerForActivityResult(new StartActivityForResult(), result -> onLockScreenCreated());
+    verifyCredentialLauncher =
+        registerForActivityResult(
+            new StartActivityForResult(), result -> onCredentialVerified(result.getResultCode()));
+
     resumePreviousState(savedInstanceState);
 
-    toolbar = findViewById(R.id.toolbar);
+    toolbar = requireToolbar(this);
+    toolbar.setState(SUBPAGE);
     toolbar.setTitle(R.string.trusted_device_feature_title);
-    toolbar.showProgressBar();
-    toolbar.setOnBackButtonClickListener(v -> finish());
+    toolbar.getProgressBar().setVisible(true);
 
     extractAssociatedDevice();
 
     isScreenLockNewlyCreated.set(false);
-    isStartedForEnrollment.set(false);
     wasRelaunched.set(false);
-  }
-
-  @Override
-  protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-    super.onActivityResult(requestCode, resultCode, data);
-
-    switch (requestCode) {
-      case ACTIVATE_TOKEN_REQUEST_CODE:
-        if (resultCode != RESULT_OK) {
-          loge(TAG, "Lock screen was unsuccessful. Returned result code: " + resultCode + ".");
-          model.finishEnrollment();
-          return;
-        }
-        logd(TAG, "Credentials accepted. Waiting for TrustAgent to activate " + "token.");
-        break;
-      case CREATE_LOCK_REQUEST_CODE:
-        if (!isDeviceSecure()) {
-          loge(TAG, "Set up new lock unsuccessful. Returned result code: " + resultCode + ".");
-          isScreenLockNewlyCreated.set(false);
-          return;
-        }
-        isScreenLockNewlyCreated.set(true);
-        model.processEnrollment();
-        break;
-      case RETRIEVE_ASSOCIATED_DEVICE_REQUEST_CODE:
-        onAssociatedDeviceRetrieved(data);
-        break;
-      default:
-        logw(TAG, "Unrecognized activity result. Request code: " + requestCode + ". Ignoring.");
-        break;
-    }
   }
 
   @Override
@@ -163,7 +140,7 @@ public class TrustedDeviceActivity extends FragmentActivity {
         (UnlockProfileDialogFragment)
             getSupportFragmentManager().findFragmentByTag(UNLOCK_PROFILE_TO_FINISH_DIALOG_TAG);
     if (unlockProfileDialogFragment != null) {
-      unlockProfileDialogFragment.setOnConfirmListener((d, w) -> validateCredentials());
+      unlockProfileDialogFragment.setOnConfirmListener((d, w) -> validateCredential());
     }
   }
 
@@ -215,7 +192,7 @@ public class TrustedDeviceActivity extends FragmentActivity {
         runOnUiThread(this::showDeviceNotConnectedDialog);
         break;
       case CREDENTIAL_PENDING:
-        validateCredentials();
+        validateCredential();
         break;
       case FINISHED:
         model.resetEnrollmentState();
@@ -242,7 +219,7 @@ public class TrustedDeviceActivity extends FragmentActivity {
     model.setAssociatedDevice(device);
   }
 
-  private void validateCredentials() {
+  private void validateCredential() {
     KeyguardManager keyguardManager = getKeyguardManager();
     if (keyguardManager == null) {
       logd(TAG, "KeyguardManager was null. Aborting.");
@@ -252,6 +229,10 @@ public class TrustedDeviceActivity extends FragmentActivity {
       showUnlockProfileDialogFragment();
       return;
     }
+    promptToVerifyCredential();
+  }
+
+  private void promptToVerifyCredential() {
     @SuppressWarnings("deprecation") // Car does not support Biometric lock as of now.
     Intent confirmIntent =
         keyguardManager.createConfirmDeviceCredentialIntent(
@@ -260,8 +241,21 @@ public class TrustedDeviceActivity extends FragmentActivity {
       loge(TAG, "User either has no lock screen, or a token is already registered.");
       return;
     }
+    if (verifyCredentialLauncher == null) {
+      loge(TAG, "No ActivityResultLauncher registered for verifying credential. ");
+      return;
+    }
     logd(TAG, "Prompting user to validate credentials.");
-    startActivityForResult(confirmIntent, ACTIVATE_TOKEN_REQUEST_CODE);
+    verifyCredentialLauncher.launch(confirmIntent);
+  }
+
+  private void onCredentialVerified(int resultCode) {
+    if (resultCode == RESULT_OK) {
+      logd(TAG, "Credentials accepted. Waiting for TrustAgent to activate " + "token.");
+      return;
+    }
+    loge(TAG, "Lock screen was unsuccessful. Returned result code: " + resultCode + ".");
+    model.finishEnrollment();
   }
 
   private static boolean isStartedForEnrollment(Intent intent) {
@@ -291,8 +285,22 @@ public class TrustedDeviceActivity extends FragmentActivity {
       return;
     }
     logd(TAG, "User has not set a lock screen. Redirecting to set up.");
+    if (createCredentialLauncher == null) {
+      loge(TAG, "No ActivityResultLauncher registered for creating lock screen. ");
+      return;
+    }
     Intent intent = new Intent(ACTION_LOCK_SETTINGS);
-    startActivityForResult(intent, CREATE_LOCK_REQUEST_CODE);
+    createCredentialLauncher.launch(intent);
+  }
+
+  private void onLockScreenCreated() {
+    if (!isDeviceSecure()) {
+      loge(TAG, "Failed to create lock screen.");
+      isScreenLockNewlyCreated.set(false);
+      return;
+    }
+    isScreenLockNewlyCreated.set(true);
+    model.processEnrollment();
   }
 
   private boolean isDeviceSecure() {
@@ -304,12 +312,16 @@ public class TrustedDeviceActivity extends FragmentActivity {
   }
 
   private void retrieveAssociatedDevice() {
+    if (retrieveDeviceLauncher == null) {
+      loge(TAG, "No ActivityResultLauncher registered for retrieving associated device. ");
+      return;
+    }
     Intent intent = new Intent(ACTION_ASSOCIATION_SETTING);
-    startActivityForResult(intent, RETRIEVE_ASSOCIATED_DEVICE_REQUEST_CODE);
+    retrieveDeviceLauncher.launch(intent);
   }
 
   private void showTrustedDeviceDetailFragment(AssociatedDevice device) {
-    toolbar.hideProgressBar();
+    toolbar.getProgressBar().setVisible(false);
     TrustedDeviceDetailFragment fragment = TrustedDeviceDetailFragment.newInstance(device);
     getSupportFragmentManager()
         .beginTransaction()
@@ -320,7 +332,7 @@ public class TrustedDeviceActivity extends FragmentActivity {
   private void showUnlockProfileDialogFragment() {
     isScreenLockNewlyCreated.set(false);
     UnlockProfileDialogFragment fragment =
-        UnlockProfileDialogFragment.newInstance((d, w) -> validateCredentials());
+        UnlockProfileDialogFragment.newInstance((d, w) -> validateCredential());
     fragment.show(getSupportFragmentManager(), UNLOCK_PROFILE_TO_FINISH_DIALOG_TAG);
   }
 

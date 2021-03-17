@@ -16,6 +16,7 @@
   -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="settings_entry_title">Bijbehorend apparaat</string>
   <string name="default_device_name">Bijbehorend apparaat</string>
   <string name="add_device_title">Gekoppeld apparaat toevoegen</string>
   <string name="add_associated_device_title">Een bijbehorend apparaat koppelen</string>
@@ -62,8 +63,8 @@
   <string name="trusted_device_feature_title">Profiel ontgrendelen met telefoon</string>
   <string name="trusted_device_feature_instruction">Check je bijbehorende app om ontgrendelingsopties in te stellen</string>
   <string name="trusted_device_item_title">&lt;b&gt;%1$s&lt;/b&gt; mijn profiel laten ontgrendelen</string>
-  <string name="device_not_connected_dialog_title">Je telefoon moet actief gekoppeld zijn</string>
-  <string name="device_not_connected_dialog_message">Voor deze functie moet bluetooth zijn ingeschakeld op je telefoon en in je auto en moeten je telefoon en auto bij elkaar in de buurt zijn</string>
+  <string name="device_not_connected_dialog_title">De bijbehorende app moet actief verbonden zijn</string>
+  <string name="device_not_connected_dialog_message">Open de bijbehorende app op je telefoon om deze functie aan te zetten. Bluetooth moet aanstaan in je auto en op je telefoon en ze moeten bij elkaar in de buurt zijn.</string>
   <string name="trusted_device_enrollment_success_message">&lt;b&gt;%1$s&lt;/b&gt; kan je profiel nu ontgrendelen</string>
   <string name="create_profile_lock_dialog_title">Maak een primaire profielvergrendeling</string>
   <string name="create_profile_lock_dialog_message">Als je je telefoon wilt gebruiken om je profiel te ontgrendelen, heb je een primaire profielvergrendeling nodig als back-up</string>

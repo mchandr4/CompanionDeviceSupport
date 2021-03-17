@@ -54,6 +54,8 @@ public final class ConnectedDeviceFgUserService extends TrunkService {
 
   private static final int MAX_BIND_ATTEMPTS = 3;
 
+  private boolean receiversRegistered = true;
+
   private int bindAttempts;
 
   private IBinder connectedDeviceBinder;
@@ -77,8 +79,7 @@ public final class ConnectedDeviceFgUserService extends TrunkService {
 
   @Override
   public void onDestroy() {
-    unregisterReceiver(userUnlockedReceiver);
-    unregisterReceiver(userBackgroundReceiver);
+    unregisterReceivers();
     logd(TAG, "Service was destroyed.");
     super.onDestroy();
   }
@@ -126,6 +127,14 @@ public final class ConnectedDeviceFgUserService extends TrunkService {
     startBranchServices(META_UNLOCK_SERVICES);
   }
 
+  private void unregisterReceivers() {
+    if (receiversRegistered) {
+      receiversRegistered = false;
+      unregisterReceiver(userUnlockedReceiver);
+      unregisterReceiver(userBackgroundReceiver);
+    }
+  }
+
   private final ServiceConnection serviceConnection =
       new ServiceConnection() {
         @Override
@@ -153,6 +162,7 @@ public final class ConnectedDeviceFgUserService extends TrunkService {
     @Override
     public void onReceive(Context context, Intent intent) {
       logd(TAG, "User has been placed into the background. Stopping foreground user services.");
+      unregisterReceivers();
       stopBranchServices();
       stopSelf();
     }

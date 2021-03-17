@@ -88,6 +88,7 @@ public abstract class TrunkService extends MetaDataService {
       logd(TAG, "Attempting to stop " + name.flattenToString());
       unbindService(serviceConnection);
     }
+    startedServices.clear();
   }
 
   private void bindToService(@NonNull ComponentName componentName) {
@@ -128,6 +129,7 @@ public abstract class TrunkService extends MetaDataService {
       @Override
       public void onServiceDisconnected(ComponentName name) {
         loge(TAG, "Lost connection to " + name.flattenToString() + ". Attempting to reconnect.");
+        startedServices.remove(name);
         bindAttempts.setCount(name.flattenToString(), 0);
         bindToService(name);
       }

@@ -18,6 +18,7 @@ package com.google.android.connecteddevice.connection.spp;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.util.concurrent.MoreExecutors.directExecutor;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
@@ -29,15 +30,19 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.os.RemoteException;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import com.google.android.companionprotos.VersionExchangeProto.VersionExchange;
 import com.google.android.connecteddevice.connection.AssociationCallback;
 import com.google.android.connecteddevice.connection.AssociationSecureChannel;
 import com.google.android.connecteddevice.connection.CarBluetoothManager;
+import com.google.android.connecteddevice.connection.ConnectionResolver;
 import com.google.android.connecteddevice.connection.ReconnectSecureChannel;
 import com.google.android.connecteddevice.connection.SecureChannel;
 import com.google.android.connecteddevice.model.AssociatedDevice;
 import com.google.android.connecteddevice.oob.OobChannel;
+import com.google.android.connecteddevice.oob.OobConnectionManager;
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage;
 import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelegateBinder;
+import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelegateBinder.OnMessageReceivedListener;
 import com.google.android.connecteddevice.transport.spp.PendingConnection;
 import java.util.UUID;
 import java.util.concurrent.Executor;
@@ -60,8 +65,10 @@ public class CarSppManagerTest {
   private static final UUID TEST_SERVICE_UUID_1 = UUID.randomUUID();
   private static final boolean IS_SECURE = true;
   private static final String TEST_VERIFICATION_CODE = "000000";
+  private static final String TEST_ENCRYPTED_VERIFICATION_CODE = "12345";
   private static final int MAX_PACKET_SIZE = 700;
   private static final boolean COMPRESSION_ENABLED = true;
+  private static final boolean EXCHANGE_CAPABILITIES = false;
   private static final BluetoothDevice TEST_BLUETOOTH_DEVICE =
       BluetoothAdapter.getDefaultAdapter().getRemoteDevice(TEST_REMOTE_DEVICE_ADDRESS);
 
@@ -73,6 +80,7 @@ public class CarSppManagerTest {
   @Mock private ConnectedDeviceSppDelegateBinder mockSppBinder;
   @Mock private ConnectedDeviceStorage mockStorage;
   @Mock private OobChannel mockOobChannel;
+  @Mock private OobConnectionManager mockOobConnectionManager;
   private CarSppManager carSppManager;
   private ConnectionResultCaptor connectionResultCaptor;
 
@@ -82,8 +90,18 @@ public class CarSppManagerTest {
     doAnswer(connectionResultCaptor).when(mockSppBinder).connectAsServer(any(), eq(true));
     carSppManager =
         new CarSppManager(
-            mockSppBinder, mockStorage, TEST_SERVICE_UUID_1, MAX_PACKET_SIZE, COMPRESSION_ENABLED);
+            mockSppBinder,
+            mockStorage,
+            TEST_SERVICE_UUID_1,
+            MAX_PACKET_SIZE,
+            COMPRESSION_ENABLED,
+            EXCHANGE_CAPABILITIES);
     carSppManager.registerCallback(mockCallback, callbackExecutor);
+    when(mockOobConnectionManager.encryptVerificationCode(TEST_VERIFICATION_CODE.getBytes(UTF_8)))
+        .thenReturn(TEST_ENCRYPTED_VERIFICATION_CODE.getBytes(UTF_8));
+    when(mockOobConnectionManager.decryptVerificationCode(
+            TEST_ENCRYPTED_VERIFICATION_CODE.getBytes(UTF_8)))
+        .thenReturn(TEST_VERIFICATION_CODE.getBytes(UTF_8));
   }
 
   @After
@@ -271,18 +289,39 @@ public class CarSppManagerTest {
     connectionResultCaptor
         .getResult()
         .notifyConnected(TEST_BLUETOOTH_DEVICE, TEST_BLUETOOTH_DEVICE.getName());
+    completeVersionExchange();
 
     return (AssociationSecureChannel) carSppManager.getConnectedDeviceChannel();
   }
 
   private ReconnectSecureChannel getChannelForReconnect() {
     carSppManager.initiateConnectionToDevice(TEST_REMOTE_DEVICE_ID);
-
+    
     connectionResultCaptor
         .getResult()
         .notifyConnected(TEST_BLUETOOTH_DEVICE, TEST_BLUETOOTH_DEVICE.getName());
+    completeVersionExchange();
 
     return (ReconnectSecureChannel) carSppManager.getConnectedDeviceChannel();
+  }
+
+  private void completeVersionExchange() {
+    ArgumentCaptor<OnMessageReceivedListener> listenerCaptor =
+        ArgumentCaptor.forClass(OnMessageReceivedListener.class);
+    verify(mockSppBinder)
+        .setOnMessageReceivedListener(
+            eq(carSppManager.currentConnection), listenerCaptor.capture());
+    // Use the MIN_SECURITY_VERSION for both to avoid further complexity introduced with
+    // the capabilities exchange that has nothing to do with the tests here. In the future this
+    // class will be deprecated in favor of a protocol agnostic version.
+    VersionExchange versionExchangeMessage =
+        VersionExchange.newBuilder()
+            .setMinSupportedMessagingVersion(ConnectionResolver.MESSAGING_VERSION)
+            .setMaxSupportedMessagingVersion(ConnectionResolver.MESSAGING_VERSION)
+            .setMinSupportedSecurityVersion(ConnectionResolver.MIN_SECURITY_VERSION)
+            .setMaxSupportedSecurityVersion(ConnectionResolver.MIN_SECURITY_VERSION)
+            .build();
+    listenerCaptor.getValue().onMessageReceived(versionExchangeMessage.toByteArray());
   }
 
   private static class ConnectionResultCaptor implements Answer<PendingConnection> {

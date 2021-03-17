@@ -6,26 +6,44 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import android.content.Context;
 import android.os.Looper;
+import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
-import com.google.android.connecteddevice.calendarsync.common.Logger;
+import com.google.android.connecteddevice.calendarsync.common.CommonLogger;
+import com.google.android.connecteddevice.calendarsync.common.ReplicaCalendarSync;
 import java.util.concurrent.CountDownLatch;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @RunWith(AndroidJUnit4.class)
 public class CalendarSyncAccessTest {
 
-  private CalendarSyncAccess calendarSyncAccess;
+  @Mock private CommonLogger.Factory mockLoggerFactory;
+  @Mock private ReplicaCalendarSync mockCalendarSync;
+
+  private CalendarSyncAccess<ReplicaCalendarSync> calendarSyncAccess;
 
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
-    Logger.Factory mockLoggerFactory = mock(Logger.Factory.class);
-    when(mockLoggerFactory.create(anyString())).thenReturn(mock(Logger.class));
-    calendarSyncAccess = new CalendarSyncAccess(mockLoggerFactory);
+    when(mockLoggerFactory.create(anyString())).thenReturn(mock(CommonLogger.class));
+    calendarSyncAccess = new CalendarSyncAccess<>(mockLoggerFactory, (handler) -> mockCalendarSync);
+  }
+
+  @Test
+  public void factoryCreate_startSync_doesNotDie() {
+    Context context = ApplicationProvider.getApplicationContext();
+    CalendarSyncAccess.Factory<ReplicaCalendarSync> factory =
+        CalendarSyncAccess.Factory.createReplicaFactory(
+            mockLoggerFactory, context.getContentResolver());
+
+    CalendarSyncAccess<ReplicaCalendarSync> calendarSyncAccess =
+        factory.create((id, message) -> {});
+    calendarSyncAccess.start();
   }
 
   @Test

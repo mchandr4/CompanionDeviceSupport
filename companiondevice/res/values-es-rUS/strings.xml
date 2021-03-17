@@ -16,6 +16,7 @@
   -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="settings_entry_title">Dispositivo complementario</string>
   <string name="default_device_name">Dispositivo asociado</string>
   <string name="add_device_title">Agregar un dispositivo asociado</string>
   <string name="add_associated_device_title">Conecta un dispositivo complementario</string>
@@ -62,8 +63,8 @@
   <string name="trusted_device_feature_title">Desbloquea tu perfil con el teléfono</string>
   <string name="trusted_device_feature_instruction">Revisa la aplicación complementaria para configurar las opciones de desbloqueo</string>
   <string name="trusted_device_item_title">Permitir que &lt;b&gt;%1$s&lt;/b&gt; desbloquee mi perfil</string>
-  <string name="device_not_connected_dialog_title">El teléfono debe estar conectado de forma activa</string>
-  <string name="device_not_connected_dialog_message">Para activar esta función, asegúrate de que el vehículo y el teléfono tengan el Bluetooth activado y estén cerca uno del otro</string>
+  <string name="device_not_connected_dialog_title">La aplicación complementaria debe estar conectada y abierta</string>
+  <string name="device_not_connected_dialog_message">Para activar la función, la aplicación complementaria debe estar abierta en el teléfono, y el vehículo y el teléfono deben tener activado el Bluetooth y estar cerca.</string>
   <string name="trusted_device_enrollment_success_message">&lt;b&gt;%1$s&lt;/b&gt; ahora puede desbloquear tu perfil</string>
   <string name="create_profile_lock_dialog_title">Crear un bloqueo de perfil principal</string>
   <string name="create_profile_lock_dialog_message">Si quieres usar el teléfono para desbloquear tu perfil, necesitas un bloqueo de perfil principal como copia de seguridad</string>

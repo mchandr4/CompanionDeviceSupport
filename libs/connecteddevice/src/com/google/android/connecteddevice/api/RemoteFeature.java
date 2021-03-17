@@ -24,6 +24,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -32,6 +34,7 @@ import android.os.RemoteException;
 import androidx.annotation.CallSuper;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import com.google.android.connecteddevice.model.AssociatedDevice;
 import com.google.android.connecteddevice.model.ConnectedDevice;
 import com.google.android.connecteddevice.util.Logger;
@@ -45,9 +48,6 @@ import java.util.List;
 public abstract class RemoteFeature {
 
   private static final String TAG = "RemoteFeature";
-
-  private static final String FULLY_QUALIFIED_SERVICE_NAME =
-      "com.google.android.connecteddevice.service.ConnectedDeviceService";
 
   /**
    * When a client calls {@link Context#bindService(Intent, ServiceConnection, int)} to get the
@@ -81,11 +81,24 @@ public abstract class RemoteFeature {
     this.featureId = featureId;
   }
 
+  @VisibleForTesting
+  protected RemoteFeature(
+      @NonNull Context context,
+      @NonNull ParcelUuid featureId,
+      @NonNull IConnectedDeviceManager connectedDeviceManager) {
+    this(context, featureId);
+    this.connectedDeviceManager = connectedDeviceManager;
+  }
+
   /** Start setup process and begin binding to {@code ConnectedDeviceService}. */
   @CallSuper
   public void start() {
-    bindAttempts = 0;
-    bindToService();
+    if (connectedDeviceManager == null) {
+      bindAttempts = 0;
+      bindToService();
+      return;
+    }
+    setupConnectedDeviceManager();
   }
 
   /** Called when the hosting service is being destroyed. Cleans up internal feature logic. */
@@ -105,7 +118,11 @@ public abstract class RemoteFeature {
     } catch (RemoteException e) {
       loge(TAG, "Error while stopping remote feature.", e);
     }
-    context.unbindService(serviceConnection);
+    try {
+      context.unbindService(serviceConnection);
+    } catch (IllegalArgumentException e) {
+      logw(TAG, "Tried to unbind an unbound service.");
+    }
   }
 
   /** Return the {@link Context} registered with the feature. */
@@ -133,6 +150,7 @@ public abstract class RemoteFeature {
   public void sendMessageSecurely(@NonNull String deviceId, @NonNull byte[] message) {
     if (connectedDeviceManager == null) {
       loge(TAG, "Unable to send message, ConnectedDeviceManager not actively connected.");
+      onMessageFailedToSend(deviceId, message, /* isTransient= */ true);
       return;
     }
     ConnectedDevice device = getConnectedDeviceById(deviceId);
@@ -143,7 +161,7 @@ public abstract class RemoteFeature {
               + deviceId
               + " when trying to send "
               + "secure message.");
-      onMessageFailedToSend(deviceId, message, false);
+      onMessageFailedToSend(deviceId, message, /* isTransient= */ false);
       return;
     }
 
@@ -154,46 +172,14 @@ public abstract class RemoteFeature {
   public void sendMessageSecurely(@NonNull ConnectedDevice device, @NonNull byte[] message) {
     if (connectedDeviceManager == null) {
       loge(TAG, "Unable to send message, ConnectedDeviceManager not actively connected.");
+      onMessageFailedToSend(device.getDeviceId(), message, /* isTransient= */ true);
       return;
     }
     try {
       getConnectedDeviceManager().sendMessageSecurely(device, getFeatureId(), message);
     } catch (RemoteException e) {
       loge(TAG, "Error while sending secure message.", e);
-      onMessageFailedToSend(device.getDeviceId(), message, true);
-    }
-  }
-
-  /** Send a message to a device without encryption. */
-  public void sendMessageUnsecurely(@NonNull String deviceId, @NonNull byte[] message) {
-    if (connectedDeviceManager == null) {
-      loge(TAG, "Unable to send message, ConnectedDeviceManager not actively connected.");
-      return;
-    }
-    ConnectedDevice device = getConnectedDeviceById(deviceId);
-    if (device == null) {
-      loge(
-          TAG,
-          "No matching device found with id "
-              + deviceId
-              + " when trying to send "
-              + "unsecure message.");
-      onMessageFailedToSend(deviceId, message, false);
-      return;
-    }
-  }
-
-  /** Send a message to a device without encryption. */
-  public void sendMessageUnsecurely(@NonNull ConnectedDevice device, @NonNull byte[] message) {
-    if (connectedDeviceManager == null) {
-      loge(TAG, "Unable to send message, ConnectedDeviceManager not actively connected.");
-      return;
-    }
-    try {
-      getConnectedDeviceManager().sendMessageUnsecurely(device, getFeatureId(), message);
-    } catch (RemoteException e) {
-      loge(TAG, "Error while sending unsecure message.", e);
-      onMessageFailedToSend(device.getDeviceId(), message, true);
+      onMessageFailedToSend(device.getDeviceId(), message, /* isTransient= */ false);
     }
   }
 
@@ -264,10 +250,21 @@ public abstract class RemoteFeature {
   protected void onAssociatedDeviceUpdated(@NonNull AssociatedDevice device) {}
 
   private void bindToService() {
-    String packageName = context.getApplicationContext().getPackageName();
-    Intent intent = new Intent();
-    intent.setComponent(new ComponentName(packageName, FULLY_QUALIFIED_SERVICE_NAME));
-    intent.setAction(ACTION_BIND_REMOTE_FEATURE);
+    PackageManager packageManager = context.getPackageManager();
+    Intent intent = new Intent(ACTION_BIND_REMOTE_FEATURE);
+    List<ResolveInfo> services =
+        packageManager.queryIntentServices(intent, PackageManager.MATCH_DEFAULT_ONLY);
+    if (services.isEmpty()) {
+      logw(
+          TAG,
+          "No service supporting the "
+              + ACTION_BIND_REMOTE_FEATURE
+              + " action is installed on this device. Aborting binding.");
+      return;
+    }
+    ResolveInfo service = services.get(0);
+    intent.setComponent(
+        new ComponentName(service.serviceInfo.packageName, service.serviceInfo.name));
     boolean success = context.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
     if (!success) {
       bindAttempts++;
@@ -284,28 +281,33 @@ public abstract class RemoteFeature {
     }
   }
 
+  private void setupConnectedDeviceManager() {
+    try {
+      connectedDeviceManager.registerActiveUserConnectionCallback(connectionCallback);
+      connectedDeviceManager.registerDeviceAssociationCallback(deviceAssociationCallback);
+      connectedDeviceManager.registerOnLogRequestedListener(
+          Logger.getLogger().getLoggerId(), onLogRequestedListener);
+      logd(TAG, "Successfully bound to ConnectedDeviceManager.");
+      List<ConnectedDevice> activeUserConnectedDevices =
+          connectedDeviceManager.getActiveUserConnectedDevices();
+      for (ConnectedDevice device : activeUserConnectedDevices) {
+        onDeviceConnected(device);
+        if (device.hasSecureChannel()) {
+          onSecureChannelEstablished(device);
+        }
+        connectedDeviceManager.registerDeviceCallback(device, featureId, deviceCallback);
+      }
+    } catch (RemoteException e) {
+      loge(TAG, "Error while inspecting connected devices.", e);
+    }
+  }
+
   private final ServiceConnection serviceConnection =
       new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
           connectedDeviceManager = IConnectedDeviceManager.Stub.asInterface(service);
-          try {
-            connectedDeviceManager.registerActiveUserConnectionCallback(connectionCallback);
-            connectedDeviceManager.registerDeviceAssociationCallback(deviceAssociationCallback);
-            connectedDeviceManager.registerOnLogRequestedListener(
-                Logger.getLogger().getLoggerId(), onLogRequestedListener);
-            logd(TAG, "Successfully bound to ConnectedDeviceManager.");
-            List<ConnectedDevice> activeUserConnectedDevices =
-                connectedDeviceManager.getActiveUserConnectedDevices();
-            for (ConnectedDevice device : activeUserConnectedDevices) {
-              if (device.hasSecureChannel()) {
-                onSecureChannelEstablished(device);
-              }
-              connectedDeviceManager.registerDeviceCallback(device, featureId, deviceCallback);
-            }
-          } catch (RemoteException e) {
-            loge(TAG, "Error while inspecting connected devices.", e);
-          }
+          setupConnectedDeviceManager();
         }
 
         @Override

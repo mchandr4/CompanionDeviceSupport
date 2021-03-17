@@ -54,6 +54,10 @@ message TrustedDeviceMessage {
     // a message of TrustedDeviceError. Both sender and receiver should reset
     // their states after this message.
     ERROR = 6;
+
+    // Indicates that the payload contains data necessary to sync the current
+    // state of trusted device between two devices.
+    STATE_SYNC = 7;
   }
 
   // The type of this message.
@@ -77,4 +81,11 @@ message TrustedDeviceError {
 
   // The type of this error.
   ErrorType type = 1;
+}
+
+// All possible trusted device states that can be synced between two devices.
+message TrustedDeviceState {
+  // `true` if trusted device is currently enabled on the device that is
+  // sending this message.
+  bool enabled = 1;
 }

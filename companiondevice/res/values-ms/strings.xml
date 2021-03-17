@@ -16,6 +16,7 @@
   -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="settings_entry_title">Peranti Rakan</string>
   <string name="default_device_name">Peranti Dikaitkan</string>
   <string name="add_device_title">Tambah Peranti Dikaitkan</string>
   <string name="add_associated_device_title">Sambungkan peranti rakan</string>
@@ -62,8 +63,8 @@
   <string name="trusted_device_feature_title">Buka kunci profil dengan telefon</string>
   <string name="trusted_device_feature_instruction">Semak Apl Rakan anda untuk menetapkan pilihan membuka kunci</string>
   <string name="trusted_device_item_title">Benarkan &lt;b&gt;%1$s&lt;/b&gt; membuka kunci profil saya</string>
-  <string name="device_not_connected_dialog_title">Telefon anda mestilah disambungkan secara aktif</string>
-  <string name="device_not_connected_dialog_message">Untuk menghidupkan ciri ini, pastikan kereta dan telefon anda telah menghidupkan bluetooth serta terletak berdekatan antara satu sama lain</string>
+  <string name="device_not_connected_dialog_title">Apl Rakan anda mesti disambungkan secara aktif</string>
+  <string name="device_not_connected_dialog_message">Untuk menghidupkan ciri ini, pastikan Apl Rakan dibuka pada telefon anda. Kereta dan telefon anda harus berdekatan dan Bluetooth harus dihidupkan.</string>
   <string name="trusted_device_enrollment_success_message">&lt;b&gt;%1$s&lt;/b&gt; boleh membuka kunci profil anda sekarang</string>
   <string name="create_profile_lock_dialog_title">Buat kunci profil utama</string>
   <string name="create_profile_lock_dialog_message">Anda memerlukan kunci profil utama sebagai sandaran untuk membuka kunci profil menggunakan telefon anda.</string>

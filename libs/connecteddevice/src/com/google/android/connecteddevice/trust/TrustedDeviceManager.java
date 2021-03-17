@@ -18,16 +18,17 @@ package com.google.android.connecteddevice.trust;
 
 import static com.google.android.connecteddevice.util.SafeLog.logd;
 import static com.google.android.connecteddevice.util.SafeLog.loge;
+import static com.google.android.connecteddevice.util.SafeLog.logi;
 import static com.google.android.connecteddevice.util.SafeLog.logw;
 
 import android.app.ActivityManager;
-import androidx.room.Room;
 import android.content.Context;
 import android.os.IInterface;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import androidx.annotation.WorkerThread;
 import com.google.android.connecteddevice.api.IConnectedDeviceManager;
 import com.google.android.connecteddevice.api.IDeviceAssociationCallback;
@@ -45,8 +46,11 @@ import com.google.android.connecteddevice.trust.proto.TrustedDeviceMessageProto.
 import com.google.android.connecteddevice.trust.proto.TrustedDeviceMessageProto.TrustedDeviceError.ErrorType;
 import com.google.android.connecteddevice.trust.proto.TrustedDeviceMessageProto.TrustedDeviceMessage;
 import com.google.android.connecteddevice.trust.proto.TrustedDeviceMessageProto.TrustedDeviceMessage.MessageType;
+import com.google.android.connecteddevice.trust.proto.TrustedDeviceMessageProto.TrustedDeviceState;
+import com.google.android.connecteddevice.trust.storage.FeatureStateEntity;
 import com.google.android.connecteddevice.trust.storage.TrustedDeviceDao;
 import com.google.android.connecteddevice.trust.storage.TrustedDeviceDatabase;
+import com.google.android.connecteddevice.trust.storage.TrustedDeviceDatabaseProvider;
 import com.google.android.connecteddevice.trust.storage.TrustedDeviceEntity;
 import com.google.android.connecteddevice.util.ByteUtils;
 import com.google.android.connecteddevice.util.SafeConsumer;
@@ -64,7 +68,8 @@ import java.util.concurrent.atomic.AtomicReference;
 public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
   private static final String TAG = "TrustedDeviceManager";
 
-  private static final int TRUSTED_DEVICE_MESSAGE_VERSION = 2;
+  @VisibleForTesting
+  static final int TRUSTED_DEVICE_MESSAGE_VERSION = 2;
 
   /** Length of token generated on a trusted device. */
   private static final int ESCROW_TOKEN_LENGTH = 8;
@@ -83,9 +88,9 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
 
   private final TrustedDeviceFeature trustedDeviceFeature;
 
-  private final Executor databaseExecutor = Executors.newSingleThreadExecutor();
+  private final Executor databaseExecutor;
 
-  private final Executor remoteCallbackExecutor = Executors.newSingleThreadExecutor();
+  private final Executor remoteCallbackExecutor;
 
   private final AtomicBoolean isWaitingForCredentials = new AtomicBoolean(false);
 
@@ -102,17 +107,28 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
   private PendingCredentials pendingCredentials;
 
   TrustedDeviceManager(@NonNull Context context) {
-    trustedDeviceFeature = new TrustedDeviceFeature(context);
+    this(context,
+        TrustedDeviceDatabaseProvider.get(context),
+        new TrustedDeviceFeature(context),
+        /* databaseExecutor= */ Executors.newSingleThreadExecutor(),
+        /* remoteCallbackExecutor= */ Executors.newSingleThreadExecutor());
+  }
+
+  @VisibleForTesting
+  TrustedDeviceManager(
+      @NonNull Context context,
+      @NonNull TrustedDeviceDatabase database,
+      @NonNull TrustedDeviceFeature trustedDeviceFeature,
+      @NonNull Executor databaseExecutor,
+      @NonNull Executor remoteCallbackExecutor) {
+    this.database = database.trustedDeviceDao();
+    this.databaseExecutor = databaseExecutor;
+    this.remoteCallbackExecutor = remoteCallbackExecutor;
+    this.trustedDeviceFeature = trustedDeviceFeature;
+
     trustedDeviceFeature.setCallback(featureCallback);
     trustedDeviceFeature.setAssociatedDeviceCallback(associatedDeviceCallback);
     trustedDeviceFeature.start();
-    database =
-        Room.databaseBuilder(
-                context.createDeviceProtectedStorageContext(),
-                TrustedDeviceDatabase.class,
-                TrustedDeviceDatabase.DATABASE_NAME)
-            .build()
-            .trustedDeviceDao();
     logd(TAG, "TrustedDeviceManager created successfully.");
   }
 
@@ -211,12 +227,11 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
 
     String deviceId = pendingDevice.getDeviceId();
 
-    TrustedDeviceEntity entity = new TrustedDeviceEntity();
-    entity.id = deviceId;
-    entity.userId = userId;
-    entity.handle = handle;
-
-    databaseExecutor.execute(() -> database.addOrReplaceTrustedDevice(entity));
+    TrustedDeviceEntity entity = new TrustedDeviceEntity(deviceId, userId, handle);
+    databaseExecutor.execute(() -> {
+      database.removeFeatureState(deviceId);
+      database.addOrReplaceTrustedDevice(entity);
+    });
 
     pendingDevice = null;
 
@@ -258,30 +273,15 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
 
   @Override
   public void removeTrustedDevice(TrustedDevice trustedDevice) {
-    if (trustAgentDelegate == null) {
-      loge(TAG, "No TrustAgent delegate has been set. Unable to remove trusted device.");
-      return;
-    }
-
+    logd(TAG, "Received request to remove trusted device");
     databaseExecutor.execute(
         () -> {
-          try {
-            trustAgentDelegate.removeEscrowToken(
-                trustedDevice.getHandle(), trustedDevice.getUserId());
-            database.removeTrustedDevice(new TrustedDeviceEntity(trustedDevice));
-          } catch (RemoteException e) {
-            loge(TAG, "Error while removing token through delegate.", e);
+          TrustedDeviceEntity entity = database.getTrustedDevice(trustedDevice.getDeviceId());
+          if (entity == null) {
             return;
           }
-          notifyRemoteCallbackList(
-              remoteTrustedDeviceCallbacks,
-              callback -> {
-                try {
-                  callback.onTrustedDeviceRemoved(trustedDevice);
-                } catch (RemoteException e) {
-                  loge(TAG, "Failed to notify that a trusted device has been removed.", e);
-                }
-              });
+          invalidateTrustedDevice(entity);
+          removeTrustedDeviceInternal(entity);
         });
   }
 
@@ -364,10 +364,21 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
     logd(TAG, "Set trusted device agent delegate: " + trustAgentDelegate + ".");
     this.trustAgentDelegate = trustAgentDelegate;
 
+    int userId = ActivityManager.getCurrentUser();
+
+    // Remove invalid trusted devices.
+    databaseExecutor.execute(
+        () -> {
+          List<TrustedDeviceEntity> entities = database.getInvalidTrustedDevicesForUser(userId);
+          for (TrustedDeviceEntity entity : entities) {
+            removeTrustedDeviceInternal(entity);
+          }
+        });
+
     // Add pending token if present.
     if (pendingToken != null) {
       try {
-        trustAgentDelegate.addEscrowToken(pendingToken, ActivityManager.getCurrentUser());
+        trustAgentDelegate.addEscrowToken(pendingToken, userId);
       } catch (RemoteException e) {
         loge(TAG, "Error while adding token through delegate.", e);
       }
@@ -396,12 +407,60 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
     }
     logd(TAG, "Clear current TrustedDeviceAgentDelegate: " + trustAgentDelegate + ".");
     this.trustAgentDelegate = null;
+    invalidateAllTrustedDevices();
+  }
+
+  private void invalidateAllTrustedDevices() {
+    databaseExecutor.execute(
+        () -> {
+          List<TrustedDeviceEntity> entities =
+              database.getValidTrustedDevicesForUser(ActivityManager.getCurrentUser());
+          for (TrustedDeviceEntity entity : entities) {
+            invalidateTrustedDevice(entity);
+          }
+        });
+  }
+
+  @WorkerThread
+  private void invalidateTrustedDevice(TrustedDeviceEntity entity) {
+    logd(TAG, "Marking device " + entity.id + " as invalid.");
+    entity.isValid = false;
+    database.addOrReplaceTrustedDevice(entity);
+    sendStateDisabledMessage(entity.id);
+    notifyRemoteCallbackList(
+        remoteTrustedDeviceCallbacks,
+        callback -> {
+          try {
+            callback.onTrustedDeviceRemoved(entity.toTrustedDevice());
+          } catch (RemoteException e) {
+            loge(TAG, "Failed to notify that a trusted device has been removed.", e);
+          }
+        });
+  }
+
+  @WorkerThread
+  private void removeTrustedDeviceInternal(TrustedDeviceEntity entity) {
+    if (trustAgentDelegate == null) {
+      logw(
+          TAG,
+          "No trusted device delegate set when attempting to remove trusted device "
+              + entity.id
+              + ".");
+      return;
+    }
+    logd(TAG, "Removing trusted device " + entity.id + ".");
+    try {
+      trustAgentDelegate.removeEscrowToken(entity.handle, entity.userId);
+      database.removeTrustedDevice(entity);
+    } catch (RemoteException e) {
+      loge(TAG, "Error while removing token through delegate.", e);
+    }
   }
 
   @WorkerThread
   private List<TrustedDevice> getTrustedDevicesForActiveUser() {
     List<TrustedDeviceEntity> foundEntities =
-        database.getTrustedDevicesForUser(ActivityManager.getCurrentUser());
+        database.getValidTrustedDevicesForUser(ActivityManager.getCurrentUser());
 
     List<TrustedDevice> trustedDevices = new ArrayList<>();
     if (foundEntities == null) {
@@ -417,6 +476,23 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
 
   private static boolean areCredentialsValid(@Nullable PhoneCredentials credentials) {
     return credentials != null;
+  }
+
+  private void sendStateDisabledMessage(@NonNull String deviceId) {
+    byte[] stateMessage = createDisabledStateSyncMessage();
+    ConnectedDevice device = trustedDeviceFeature.getConnectedDeviceById(deviceId);
+
+    if (device != null) {
+      logd(TAG, "Enrolled car currently connected. Sending feature state sync message to it.");
+      trustedDeviceFeature.sendMessageSecurely(device, stateMessage);
+      return;
+    }
+
+    logd(TAG, "Trusted device enrollment status cleared, but vehicle not currently connected. "
+        + "Saving status to send on next connection.");
+
+    FeatureStateEntity stateEntity = new FeatureStateEntity(deviceId, stateMessage);
+    databaseExecutor.execute(() -> database.addOrReplaceFeatureState(stateEntity));
   }
 
   private void processEnrollmentMessage(
@@ -485,6 +561,38 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
     unlockUser(device.getDeviceId(), credentials);
   }
 
+  private void processStatusSyncMessage(@NonNull ConnectedDevice device,
+      @NonNull ByteString payload) {
+    TrustedDeviceState state = null;
+    try {
+      state = TrustedDeviceState.parseFrom(payload, ExtensionRegistryLite.getEmptyRegistry());
+    } catch (InvalidProtocolBufferException e) {
+      loge(TAG, "Received state sync message from client, but cannot parse. Ignoring", e);
+      return;
+    }
+
+    // The user could only turn off trusted device on the phone when it is not connected. Thus,
+    // only need to sync state if the feature is disabled. Otherwise, if the two devices are
+    // connected and the feature is enabled, then the normal enrollment flow will be triggered.
+    if (state.getEnabled()) {
+      logi(TAG, "Received state sync message from client indicating feature enabled. "
+          + "Nothing more to be done.");
+      return;
+    }
+
+    TrustedDeviceEntity entity = database.getTrustedDevice(device.getDeviceId());
+
+    if (entity == null) {
+      logw(TAG, "Received state sync message from an untrusted device.");
+      return;
+    }
+
+    logd(TAG, "Received state sync message from client indicating feature disabled. "
+        + "Clearing enrollment state.");
+
+    removeTrustedDevice(entity.toTrustedDevice());
+  }
+
   private void processErrorMessage(@Nullable ByteString payload) {
     if (payload == null) {
       logw(TAG, "Received error message with null payload. Ignoring.");
@@ -537,6 +645,23 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
     remoteCallbackList.finishBroadcast();
   }
 
+  private void onSecureChannelEstablished(@NonNull ConnectedDevice device) {
+    databaseExecutor.execute(() -> {
+      String deviceId = device.getDeviceId();
+      FeatureStateEntity stateEntity = database.getFeatureState(deviceId);
+
+      if (stateEntity == null) {
+        logd(TAG, "A device has connected securely. No feature state messages to send to it.");
+        return;
+      }
+
+      logd(TAG, "Connected device has stored feature state messages. Syncing now.");
+
+      trustedDeviceFeature.sendMessageSecurely(device, stateEntity.state);
+      database.removeFeatureState(deviceId);
+    });
+  }
+
   private static byte[] createAcknowledgmentMessage() {
     return TrustedDeviceMessage.newBuilder()
         .setVersion(TRUSTED_DEVICE_MESSAGE_VERSION)
@@ -562,7 +687,22 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
         .toByteArray();
   }
 
-  private final TrustedDeviceFeature.Callback featureCallback =
+  @NonNull
+  private static byte[] createDisabledStateSyncMessage() {
+    TrustedDeviceState state = TrustedDeviceState.newBuilder()
+        .setEnabled(false)
+        .build();
+
+    return TrustedDeviceMessage.newBuilder()
+        .setVersion(TrustedDeviceManager.TRUSTED_DEVICE_MESSAGE_VERSION)
+        .setType(MessageType.STATE_SYNC)
+        .setPayload(state.toByteString())
+        .build()
+        .toByteArray();
+  }
+
+  @VisibleForTesting
+  final TrustedDeviceFeature.Callback featureCallback =
       new TrustedDeviceFeature.Callback() {
         @Override
         public void onMessageReceived(ConnectedDevice device, byte[] message) {
@@ -590,6 +730,10 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
             case ERROR:
               processErrorMessage(trustedDeviceMessage.getPayload());
               break;
+            case STATE_SYNC:
+              // Note: proto does not allow payload to be null.
+              processStatusSyncMessage(device, trustedDeviceMessage.getPayload());
+              break;
             default:
               // The client should only be sending requests to either enroll or unlock.
               loge(
@@ -598,6 +742,11 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
                       + trustedDeviceMessage.getType().name()
                       + "). Ignoring.");
           }
+        }
+
+        @Override
+        public void onSecureChannelEstablished(ConnectedDevice device) {
+          TrustedDeviceManager.this.onSecureChannelEstablished(device);
         }
 
         @Override

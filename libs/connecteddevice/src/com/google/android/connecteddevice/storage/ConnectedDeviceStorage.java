@@ -72,7 +72,7 @@ public class ConnectedDeviceStorage {
   }
 
   @VisibleForTesting
-  ConnectedDeviceStorage(
+  public ConnectedDeviceStorage(
       @NonNull Context context,
       @NonNull CryptoHelper cryptoHelper,
       @NonNull AssociatedDeviceDao associatedDeviceDatabase) {

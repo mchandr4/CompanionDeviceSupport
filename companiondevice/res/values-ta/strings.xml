@@ -16,6 +16,7 @@
   -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="settings_entry_title">கம்பேனியன் சாதனம்</string>
   <string name="default_device_name">தொடர்புடைய சாதனம்</string>
   <string name="add_device_title">தொடர்புடைய சாதனத்தைச் சேர்</string>
   <string name="add_associated_device_title">தொடர்புடைய சாதனத்தை இணைத்தல்</string>
@@ -62,8 +63,8 @@
   <string name="trusted_device_feature_title">மொபைல் மூலம் சுயவிவரத்தை அன்லாக் செய்தல்</string>
   <string name="trusted_device_feature_instruction">அன்லாக் விருப்பங்களை அமைப்பதற்குக் கம்பேனியன் ஆப்ஸைப் பார்க்கவும்</string>
   <string name="trusted_device_item_title">&lt;b&gt;%1$s&lt;/b&gt; மூலம் சுயவிவரத்தை அன்லாக் செய்தல்</string>
-  <string name="device_not_connected_dialog_title">உங்கள் மொபைல் சரியாக இணைக்கப்பட்டிருக்க வேண்டும்</string>
-  <string name="device_not_connected_dialog_message">இந்த அம்சத்தை ஆன் செய்ய, உங்கள் காரிலும் மொபைலிலும் \'புளூடூத்\' ஆனில் இருப்பதையும் இரண்டும் அருகருகே இருப்பதையும் உறுதிசெய்துகொள்ளவும்</string>
+  <string name="device_not_connected_dialog_title">உங்கள் கம்பேனியன் ஆப்ஸ் சரியாக இணைக்கப்பட்டிருக்க வேண்டும்</string>
+  <string name="device_not_connected_dialog_message">இந்த அம்சத்தை ஆன் செய்ய, மொபைலில் கம்பேனியன் ஆப்ஸ் திறந்திருப்பதை உறுதிசெய்து கொள்ளவும். காரிலும் மொபைலிலும் புளூடூத் ஆன் செய்யப்பட்டு, அவை அருகருகே இருக்க வேண்டும்.</string>
   <string name="trusted_device_enrollment_success_message">இப்போது உங்கள் சுயவிவரத்தை &lt;b&gt;%1$s&lt;/b&gt; மூலம் அன்லாக் செய்ய முடியும்</string>
   <string name="create_profile_lock_dialog_title">சுயவிவரத்திற்கான முதன்மை லாக்கை உருவாக்குதல்</string>
   <string name="create_profile_lock_dialog_message">உங்கள் காரின் சுயவிவரத்தை மொபைல் மூலம் அன்லாக் செய்ய, சுயவிவரத்திற்கான முதன்மை லாக்கை மாற்று முறையாக அமைக்க வேண்டும்.</string>

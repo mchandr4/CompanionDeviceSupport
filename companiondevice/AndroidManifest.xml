@@ -59,7 +59,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <intent-filter>
-                <action android:name="com.google.android.connecteddevice.BIND_REMOTE_FEATURE" />
+                <action android:name="com.google.android.connecteddevice.api.BIND_REMOTE_FEATURE" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <intent-filter>
@@ -76,12 +76,14 @@
                 android:resource="@bool/enable_proxy" />
             <meta-data android:name="com.google.android.connecteddevice.enable_spp"
                 android:resource="@bool/enable_spp" />
+            <meta-data android:name="com.google.android.connecteddevice.enable_capabilities_exchange"
+                android:resource="@bool/enable_capabilities" />
         </service>
         <service
             android:name="com.google.android.connecteddevice.service.ConnectedDeviceFgUserService"
             android:exported="true">
             <intent-filter>
-                <action android:name="com.google.android.connecteddevice.BIND_REMOTE_FEATURE" />
+                <action android:name="com.google.android.connecteddevice.api.BIND_REMOTE_FEATURE" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <meta-data android:name="com.google.android.connecteddevice.early_services"

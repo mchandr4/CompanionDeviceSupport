@@ -24,7 +24,7 @@ import com.google.android.connecteddevice.transport.spp.ISppCallback;
 interface IConnectedDeviceSppDelegate {
 
   void setCallback(in ISppCallback callback);
-  void clearCallback();
+  void clearCallback(in ISppCallback callback);
   void notifyConnected(in int pendingConnectionId,
                        in BluetoothDevice remoteDevice,
                        in String deviceName);

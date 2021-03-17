@@ -26,6 +26,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.os.ParcelUuid;
 import android.os.RemoteException;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import com.google.android.connecteddevice.connection.DeviceMessageStream.DataReceivedListener;
 import com.google.android.connecteddevice.connection.DeviceMessageStream.MessageReceivedErrorListener;
 import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelegateBinder;
 import com.google.android.connecteddevice.transport.spp.Connection;
@@ -54,7 +55,8 @@ public class SppDeviceMessageStreamTest {
   @Rule public final MockitoRule mockito = MockitoJUnit.rule();
 
   @Mock private ConnectedDeviceSppDelegateBinder mockSppBinder;
-  @Mock private MessageReceivedErrorListener mockListener;
+  @Mock private MessageReceivedErrorListener mockErrorListener;
+  @Mock private DataReceivedListener mockListener;
 
   private SppDeviceMessageStream sppDeviceMessageStream;
 
@@ -62,7 +64,8 @@ public class SppDeviceMessageStreamTest {
   public void setUp() {
     sppDeviceMessageStream =
         spy(new SppDeviceMessageStream(mockSppBinder, TEST_CONNECTION, MAX_WRITE_SIZE));
-    sppDeviceMessageStream.setMessageReceivedErrorListener(mockListener);
+    sppDeviceMessageStream.setMessageReceivedErrorListener(mockErrorListener);
+    sppDeviceMessageStream.setDataReceivedListener(mockListener);
   }
 
   @Test
@@ -73,11 +76,21 @@ public class SppDeviceMessageStreamTest {
   }
 
   @Test
-  public void testOnMessageReceived() {
+  public void testOnMessageReceived_connectionIsNotResolved() {
     verify(mockSppBinder).setOnMessageReceivedListener(eq(TEST_CONNECTION), any());
 
     sppDeviceMessageStream.onMessageReceived(TEST_DATA);
 
-    verify(mockListener).onMessageReceivedError(any());
+    verify(mockListener).onDataReceived(TEST_DATA);
+  }
+
+  @Test
+  public void testOnMessageReceived_connectionIsResolved() {
+    sppDeviceMessageStream.setConnectionResolved(true);
+    verify(mockSppBinder).setOnMessageReceivedListener(eq(TEST_CONNECTION), any());
+
+    sppDeviceMessageStream.onMessageReceived(TEST_DATA);
+
+    verify(mockErrorListener).onMessageReceivedError(any());
   }
 }

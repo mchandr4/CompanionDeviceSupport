@@ -29,6 +29,7 @@ import com.google.android.connecteddevice.ConnectedDeviceManager;
 import com.google.android.connecteddevice.ConnectedDeviceManager.ConnectionCallback;
 import com.google.android.connecteddevice.ConnectedDeviceManager.DeviceAssociationCallback;
 import com.google.android.connecteddevice.ConnectedDeviceManager.DeviceCallback;
+import com.google.android.connecteddevice.api.ConnectedDeviceManagerBinder;
 import com.google.android.connecteddevice.api.IConnectionCallback;
 import com.google.android.connecteddevice.api.IDeviceAssociationCallback;
 import com.google.android.connecteddevice.api.IDeviceCallback;

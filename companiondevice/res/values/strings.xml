@@ -117,10 +117,10 @@
     <string name="trusted_device_feature_instruction">Check your Companion App to set unlocking options</string>
     <!-- Trusted device item title [CHAR LIMIT=80]-->
     <string name="trusted_device_item_title">Let &lt;b><xliff:g id="phone_name" example="MyPhone">%1$s</xliff:g>&lt;/b> unlock my profile</string>
-    <!-- Title for device not connected dialog [CHAR LIMIT=50]-->
-    <string name="device_not_connected_dialog_title">Your phone must be actively connected</string>
-    <!-- Message for device not connected dialog [CHAR LIMIT=150]-->
-    <string name="device_not_connected_dialog_message">To turn on this feature, make sure your car and phone have bluetooth turned on and are near each other</string>
+    <!-- Title for the warning dialog that informs the user that their companion app should be connected before enrollment can occur. [CHAR LIMIT=60]-->
+    <string name="device_not_connected_dialog_title">Your Companion App must be actively connected</string>
+    <!-- Instructions for the user on the prerequisites for enrolling in the trusted device feature. The user should have their companion app opened and Bluetooth turned on for both devices. [CHAR LIMIT=170]-->
+    <string name="device_not_connected_dialog_message">To turn on this feature, make sure Companion App is open on your phone. Your car and phone should have Bluetooth turned on and be near each other.</string>
     <!-- Toast message to show when a trusted device has been enrolled successfully [CHAR LIMIT=100]-->
     <string name="trusted_device_enrollment_success_message">&lt;b><xliff:g id="phone_name" example="MyPhone">%1$s</xliff:g>&lt;/b> can now unlock your profile</string>
 

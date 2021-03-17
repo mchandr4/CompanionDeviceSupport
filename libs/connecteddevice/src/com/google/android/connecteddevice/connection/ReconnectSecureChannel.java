@@ -23,6 +23,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage;
 import com.google.android.connecteddevice.util.ByteUtils;
+import com.google.android.connecteddevice.util.EventLog;
 import com.google.android.encryptionrunner.EncryptionRunner;
 import com.google.android.encryptionrunner.EncryptionRunnerFactory;
 import com.google.android.encryptionrunner.EncryptionRunnerFactory.EncryptionRunnerType;
@@ -103,6 +104,7 @@ public class ReconnectSecureChannel extends SecureChannel {
   }
 
   private void processHandshakeDeviceVerification(byte[] message) {
+    EventLog.onDeviceChallengeReceived();
     byte[] challengeResponse = Arrays.copyOf(message, expectedChallengeResponse.length);
     byte[] deviceChallenge =
         Arrays.copyOfRange(message, expectedChallengeResponse.length, message.length);

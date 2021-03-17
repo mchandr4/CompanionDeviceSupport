@@ -112,7 +112,7 @@ public class LoggingFeatureTest {
     LoggingMessage message =
         LoggingMessage.parseFrom(
             messageCaptor.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-    assertThat(message.getType()).isSameInstanceAs(MessageType.START_SENDING);
+    assertThat(message.getType()).isEqualTo(MessageType.START_SENDING);
   }
 
   @Test
@@ -129,7 +129,7 @@ public class LoggingFeatureTest {
     LoggingMessage message =
         LoggingMessage.parseFrom(
             messageCaptor.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-    assertThat(message.getType()).isSameInstanceAs(MessageType.LOG);
+    assertThat(message.getType()).isEqualTo(MessageType.LOG);
   }
 
   @NonNull

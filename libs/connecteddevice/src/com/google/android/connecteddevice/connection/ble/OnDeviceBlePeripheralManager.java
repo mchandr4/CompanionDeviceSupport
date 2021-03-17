@@ -41,6 +41,7 @@ import android.os.Handler;
 import androidx.annotation.NonNull;
 import com.google.android.connecteddevice.util.ByteUtils;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 /** An implementation that uses Android platform API for BLE peripheral operations. */
@@ -52,6 +53,8 @@ public class OnDeviceBlePeripheralManager extends BlePeripheralManager {
 
   private static final int GATT_SERVER_RETRY_LIMIT = 20;
   private static final int GATT_SERVER_RETRY_DELAY_MS = 200;
+
+  private static final int DEFAULT_CONNECTION_STATE = -1;
 
   // https://www.bluetooth.com/specifications/gatt/viewer?attributeXmlFile=org.bluetooth
   // .service.generic_access.xml
@@ -68,6 +71,7 @@ public class OnDeviceBlePeripheralManager extends BlePeripheralManager {
   private final AtomicReference<BluetoothGattServer> gattServer = new AtomicReference<>();
   private final AtomicReference<BluetoothGatt> bluetoothGatt = new AtomicReference<>();
   private final AtomicReference<BluetoothLeAdvertiser> advertiser = new AtomicReference<>();
+  private final AtomicInteger connectionState = new AtomicInteger(DEFAULT_CONNECTION_STATE);
 
   private int mtuSize = 20;
 
@@ -188,6 +192,7 @@ public class OnDeviceBlePeripheralManager extends BlePeripheralManager {
     }
     gattServer.clearServices();
     gattServer.close();
+    connectionState.set(DEFAULT_CONNECTION_STATE);
   }
 
   private void openGattServer() {
@@ -244,6 +249,11 @@ public class OnDeviceBlePeripheralManager extends BlePeripheralManager {
       new BluetoothGattServerCallback() {
         @Override
         public void onConnectionStateChange(BluetoothDevice device, int status, int newState) {
+          int oldState = connectionState.getAndSet(newState);
+          if (oldState == newState) {
+            logw(TAG, "Received duplicate state change to " + newState + ". Ignoring.");
+            return;
+          }
           switch (newState) {
             case BluetoothProfile.STATE_CONNECTED:
               logd(TAG, "BLE Connection State Change: CONNECTED");

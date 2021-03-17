@@ -16,6 +16,7 @@
   -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="settings_entry_title">Palīgierīce</string>
   <string name="default_device_name">Saistītā ierīce</string>
   <string name="add_device_title">Pievienot saistīto ierīci</string>
   <string name="add_associated_device_title">Palīgierīces pievienošana</string>
@@ -62,8 +63,8 @@
   <string name="trusted_device_feature_title">Profila atbloķēšana, izmantojot tālruni</string>
   <string name="trusted_device_feature_instruction">Skatiet palīglietotni, lai iestatītu atbloķēšanas iespējas.</string>
   <string name="trusted_device_item_title">Atļauja atbloķēt profilu, izmantojot tālruni &lt;b&gt;%1$s&lt;/b&gt;</string>
-  <string name="device_not_connected_dialog_title">Tālrunī ir jābūt aktīvam savienojumam</string>
-  <string name="device_not_connected_dialog_message">Lai ieslēgtu šo funkciju, automašīnā un tālrunī ir jābūt ieslēgtam Bluetooth savienojumam un tiem ir jāatrodas netālu vienam no otra.</string>
+  <string name="device_not_connected_dialog_title">Jūsu palīglietotnei ir jābūt aktīvam savienojumam</string>
+  <string name="device_not_connected_dialog_message">Lai ieslēgtu šo funkciju, jūsu tālrunī ir jābūt atvērtai palīglietotnei. Jūsu automašīnai un tālrunim ir jābūt ar ieslēgtu Bluetooth savienojumu un jāatrodas tuvu blakus.</string>
   <string name="trusted_device_enrollment_success_message">Jūsu profilu tagad var atbloķēt, izmantojot tālruni &lt;b&gt;%1$s&lt;/b&gt;.</string>
   <string name="create_profile_lock_dialog_title">Profila bloķēšanas galvenā veida iestatīšana</string>
   <string name="create_profile_lock_dialog_message">Lai varētu atbloķēt profilu, izmantojot tālruni, galvenajam profila bloķēšanas veidam ir jābūt iestatītam kā rezerves iespējai.</string>

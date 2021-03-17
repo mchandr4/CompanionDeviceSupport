@@ -17,7 +17,6 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.google.android.connecteddevice">
-
   <!--  Needed for BLE scanning/advertising -->
   <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
   <uses-permission android:name="android.permission.BLUETOOTH"/>

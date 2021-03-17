@@ -22,14 +22,12 @@ import android.os.Build;
 import androidx.annotation.NonNull;
 import com.google.android.connecteddevice.logging.model.LogRecord;
 import com.google.android.connecteddevice.logging.model.LogRecordFile;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import com.google.android.connecteddevice.logging.util.LoggingUtils;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -64,14 +62,13 @@ public class FileHelper {
     return files == null ? new ArrayList<>() : Arrays.asList(files);
   }
 
-  /** Merges multiple {@link LogRecord} lists into a {@link LogRecordFile} */
+  /** Merges multiple {@link LogRecord} lists into a {@link LogRecordFile}. */
   @NonNull
   public LogRecordFile mergeLogsIntoLogRecordFile(@NonNull List<byte[]> logs) {
     LogRecordFile logRecordFile = new LogRecordFile(Build.MODEL, new ArrayList<>());
-    Gson gson = new Gson();
-    Type listType = TypeToken.getParameterized(ArrayList.class, LogRecord.class).getType();
     for (byte[] loggerLogRecords : logs) {
-      List<LogRecord> logRecordList = gson.fromJson(new String(loggerLogRecords), listType);
+      List<LogRecord> logRecordList =
+          LoggingUtils.bytesToObjectList(loggerLogRecords, LogRecord.class);
       logRecordFile.appendLogRecords(logRecordList);
     }
     return logRecordFile;

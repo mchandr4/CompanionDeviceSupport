@@ -16,6 +16,7 @@
   -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="settings_entry_title">دستگاه همراه</string>
   <string name="default_device_name">دستگاه مرتبط</string>
   <string name="add_device_title">افزودن دستگاه مرتبط</string>
   <string name="add_associated_device_title">اتصال دستگاه همراه</string>
@@ -62,8 +63,8 @@
   <string name="trusted_device_feature_title">باز کردن قفل نمایه با تلفن</string>
   <string name="trusted_device_feature_instruction">برای تنظیم گزینه‌های باز کردن قفل، «برنامه همراه» را بررسی کنید</string>
   <string name="trusted_device_item_title">به &lt;b&gt;%1$s&lt;/b&gt; اجازه دهید قفل نمایه‌تان را باز کند</string>
-  <string name="device_not_connected_dialog_title">تلفنتان باید اتصال فعالی داشته باشد</string>
-  <string name="device_not_connected_dialog_message">برای روشن کردن این ویژگی، مطمئن شوید بلوتوث خودرو و تلفن روشن است و نزدیک یکدیگر هستند</string>
+  <string name="device_not_connected_dialog_title">«برنامه همراه» باید به‌صورت فعال متصل باشد</string>
+  <string name="device_not_connected_dialog_message">برای روشن کردن این ویژگی، مطمئن شوید «برنامه همراه» در تلفن باز باشد. خودرو و تلفن باید نزدیک یکدیگر باشند و بلوتوث آن‌ها روشن باشد.</string>
   <string name="trusted_device_enrollment_success_message">&lt;b&gt;%1$s&lt;/b&gt; اکنون می‌تواند قفل نمایه‌تان را باز کند</string>
   <string name="create_profile_lock_dialog_title">ایجاد قفل نمایه اصلی</string>
   <string name="create_profile_lock_dialog_message">برای باز کردن قفل نمایه بااستفاده از تلفن، به قفل نمایه اصلی به‌عنوان پشتیبان نیاز دارید</string>

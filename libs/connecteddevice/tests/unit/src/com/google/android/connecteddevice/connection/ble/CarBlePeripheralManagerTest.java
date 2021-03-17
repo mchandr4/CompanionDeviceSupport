@@ -31,12 +31,13 @@ import android.bluetooth.le.AdvertiseCallback;
 import android.bluetooth.le.AdvertiseData;
 import android.bluetooth.le.AdvertiseSettings;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.ParcelUuid;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.google.android.companionprotos.VersionExchangeProto.VersionExchange;
 import com.google.android.connecteddevice.connection.AssociationCallback;
 import com.google.android.connecteddevice.connection.AssociationSecureChannel;
-import com.google.android.connecteddevice.connection.DeviceMessageStream;
+import com.google.android.connecteddevice.connection.ConnectionResolver;
 import com.google.android.connecteddevice.connection.SecureChannel;
 import com.google.android.connecteddevice.model.AssociatedDevice;
 import com.google.android.connecteddevice.oob.OobConnectionManager;
@@ -72,6 +73,7 @@ public class CarBlePeripheralManagerTest {
   private static final Duration RECONNECT_ADVERTISEMENT_DURATION = Duration.ofMillis(2);
   private static final int DEFAULT_MTU_SIZE = 23;
   private static final boolean COMPRESSION_ENABLED = true;
+  private static final boolean EXCHANGE_CAPABILITIES = false;
 
   @Rule public final MockitoRule mockito = MockitoJUnit.rule();
 
@@ -95,7 +97,8 @@ public class CarBlePeripheralManagerTest {
             READ_UUID,
             RECONNECT_ADVERTISEMENT_DURATION,
             DEFAULT_MTU_SIZE,
-            COMPRESSION_ENABLED);
+            COMPRESSION_ENABLED,
+            EXCHANGE_CAPABILITIES);
 
     when(mockOobConnectionManager.encryptVerificationCode(TEST_VERIFICATION_CODE.getBytes(UTF_8)))
         .thenReturn(TEST_ENCRYPTED_VERIFICATION_CODE.getBytes(UTF_8));
@@ -195,7 +198,7 @@ public class CarBlePeripheralManagerTest {
 
   @Test
   public void connectToDevice_embedAdvertiseDataInCharacteristic() {
-    carBlePeripheralManager.setTimeoutHandler(new Handler());
+    carBlePeripheralManager.setTimeoutHandler(new Handler(Looper.getMainLooper()));
     when(mockConnectedDeviceStorage.hashWithChallengeSecret(any(), any()))
         .thenReturn(ByteUtils.randomBytes(32));
     carBlePeripheralManager.connectToDevice(UUID.randomUUID());
@@ -218,7 +221,7 @@ public class CarBlePeripheralManagerTest {
 
   @Test
   public void connectToDevice_stopsAdvertisingAfterTimeout() {
-    carBlePeripheralManager.setTimeoutHandler(new Handler());
+    carBlePeripheralManager.setTimeoutHandler(new Handler(Looper.getMainLooper()));
     when(mockConnectedDeviceStorage.hashWithChallengeSecret(any(), any()))
         .thenReturn(ByteUtils.randomBytes(32));
     carBlePeripheralManager.connectToDevice(UUID.randomUUID());
@@ -252,12 +255,15 @@ public class CarBlePeripheralManagerTest {
     ArgumentCaptor<BlePeripheralManager.OnCharacteristicWriteListener> listenerCaptor =
         ArgumentCaptor.forClass(BlePeripheralManager.OnCharacteristicWriteListener.class);
     verify(mockBlePeripheralManager).addOnCharacteristicWriteListener(listenerCaptor.capture());
+    // Use the MIN_SECURITY_VERSION for both to avoid further complexity introduced with
+    // the capabilities exchange that has nothing to do with the tests here. In the future this
+    // class will be deprecated in favor of a protocol agnostic version.
     VersionExchange versionExchangeMessage =
         VersionExchange.newBuilder()
-            .setMinSupportedMessagingVersion(DeviceMessageStream.MESSAGING_VERSION)
-            .setMaxSupportedMessagingVersion(DeviceMessageStream.MESSAGING_VERSION)
-            .setMinSupportedSecurityVersion(DeviceMessageStream.MIN_SECURITY_VERSION)
-            .setMaxSupportedSecurityVersion(DeviceMessageStream.MAX_SECURITY_VERSION)
+            .setMinSupportedMessagingVersion(ConnectionResolver.MESSAGING_VERSION)
+            .setMaxSupportedMessagingVersion(ConnectionResolver.MESSAGING_VERSION)
+            .setMinSupportedSecurityVersion(ConnectionResolver.MIN_SECURITY_VERSION)
+            .setMaxSupportedSecurityVersion(ConnectionResolver.MIN_SECURITY_VERSION)
             .build();
     listenerCaptor
         .getValue()

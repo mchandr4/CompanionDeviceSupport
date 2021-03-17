@@ -16,6 +16,7 @@
   -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="settings_entry_title">ସହଯୋଗୀ ଡିଭାଇସ୍</string>
   <string name="default_device_name">ସମ୍ବନ୍ଧିତ ଡିଭାଇସ୍</string>
   <string name="add_device_title">ସମ୍ବନ୍ଧିତ ଡିଭାଇସ୍ ଯୋଗ କରନ୍ତୁ</string>
   <string name="add_associated_device_title">ଏକ ସହଯୋଗୀ ଡିଭାଇସ୍ ସଂଯୋଗ କରନ୍ତୁ</string>
@@ -62,8 +63,8 @@
   <string name="trusted_device_feature_title">ଫୋନ୍ ମାଧ୍ୟମରେ ପ୍ରୋଫାଇଲ୍ ଅନଲକ୍ କରନ୍ତୁ</string>
   <string name="trusted_device_feature_instruction">ଅନଲକ୍ କରିବାର ବିକଳ୍ପଗୁଡ଼ିକ ସେଟ୍ କରିବାକୁ ଆପଣଙ୍କର ସହଯୋଗୀ ଆପ୍ ଯାଞ୍ଚ କରନ୍ତୁ</string>
   <string name="trusted_device_item_title">&lt;b&gt;%1$s&lt;/b&gt;କୁ ମୋ ପ୍ରୋଫାଇଲ୍ ଅନଲକ୍ କରିବାକୁ ଦିଅନ୍ତୁ</string>
-  <string name="device_not_connected_dialog_title">ଆପଣଙ୍କ ଫୋନ୍ ସକ୍ରିୟ ଭାବେ ସଂଯୁକ୍ତ ହୋଇଥିବା ଆବଶ୍ୟକ</string>
-  <string name="device_not_connected_dialog_message">ଏହି ଫିଚର୍ ଚାଲୁ କରିବାକୁ, ଆପଣଙ୍କ କାର ଏବଂ ଫୋନର ବ୍ଲୁଟୁଥ୍ ଚାଲୁ ଥିବା ଏବଂ ସେଗୁଡ଼ିକ ପରସ୍ପରର ନିକଟରେ ଥିବା ନିଶ୍ଚିତ କରନ୍ତୁ</string>
+  <string name="device_not_connected_dialog_title">ଆପଣଙ୍କ ସହଯୋଗୀ ଆପ୍ ସକ୍ରିୟ ଭାବେ ସଂଯୁକ୍ତ ହୋଇଥିବା ଆବଶ୍ୟକ</string>
+  <string name="device_not_connected_dialog_message">ଏହି ଫିଚର୍ ଚାଲୁ କରିବାକୁ, ଆପଣଙ୍କ ଫୋନରେ ସହଯୋଗୀ ଆପ୍ ଖୋଲା ଅଛି ବୋଲି ସୁନିଶ୍ଚିତ କରନ୍ତୁ। ଆପଣଙ୍କ କାର ଓ ଫୋନରେ ବ୍ଲୁଟୁଥ୍ ଚାଲୁ ଥିବା ଏବଂ ସେଗୁଡ଼ିକ ପରସ୍ପରର ନିକଟରେ ଥିବା ଆବଶ୍ୟକ।</string>
   <string name="trusted_device_enrollment_success_message">&lt;b&gt;%1$s&lt;/b&gt; ବର୍ତ୍ତମାନ ଆପଣଙ୍କ ପ୍ରୋଫାଇଲ୍ ଅନଲକ୍ କରିପାରିବ</string>
   <string name="create_profile_lock_dialog_title">ଏକ ପ୍ରାଥମିକ ପ୍ରୋଫାଇଲ୍ ଲକ୍ ତିଆରି କରନ୍ତୁ</string>
   <string name="create_profile_lock_dialog_message">ଆପଣଙ୍କ ପ୍ରୋଫାଇଲ୍ ଅନଲକ୍ କରିବାକୁ ଆପଣଙ୍କର ଫୋନ୍ ବ୍ୟବହାର କରିବା ପାଇଁ, ବ୍ୟାକଅପ୍ ଭାବେ ଆପଣ ଏକ ପ୍ରାଥମିକ ପ୍ରୋଫାଇଲ୍ ଲକ୍ ଆବଶ୍ୟକ କରନ୍ତି</string>

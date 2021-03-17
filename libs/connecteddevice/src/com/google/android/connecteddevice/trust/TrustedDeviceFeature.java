@@ -20,6 +20,8 @@ import android.content.Context;
 import android.os.ParcelUuid;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
+import com.google.android.connecteddevice.api.IConnectedDeviceManager;
 import com.google.android.connecteddevice.api.RemoteFeature;
 import com.google.android.connecteddevice.model.AssociatedDevice;
 import com.google.android.connecteddevice.model.ConnectedDevice;
@@ -29,7 +31,8 @@ class TrustedDeviceFeature extends RemoteFeature {
 
   private static final String TAG = "TrustedDeviceFeature";
 
-  private static final ParcelUuid FEATURE_ID =
+  @VisibleForTesting
+  static final ParcelUuid FEATURE_ID =
       ParcelUuid.fromString("85dff28b-3036-4662-bb22-baa7f898dc47");
 
   private Callback callback;
@@ -38,6 +41,12 @@ class TrustedDeviceFeature extends RemoteFeature {
 
   TrustedDeviceFeature(@NonNull Context context) {
     super(context, FEATURE_ID);
+  }
+
+  @VisibleForTesting
+  TrustedDeviceFeature(@NonNull Context context,
+      @NonNull IConnectedDeviceManager connectedDeviceManager) {
+    super(context, FEATURE_ID, connectedDeviceManager);
   }
 
   /** Set a {@link Callback} for events from the device. Set {@code null} to clear. */
@@ -50,7 +59,7 @@ class TrustedDeviceFeature extends RemoteFeature {
     associatedDeviceCallback = callback;
   }
 
-  /** Clear the callback fo associated device events. */
+  /** Clear the callback of associated device events. */
   void clearAssociatedDeviceCallback() {
     associatedDeviceCallback = null;
   }
@@ -66,6 +75,13 @@ class TrustedDeviceFeature extends RemoteFeature {
   protected void onDeviceError(ConnectedDevice device, int error) {
     if (callback != null) {
       callback.onDeviceError(device, error);
+    }
+  }
+
+  @Override
+  protected void onSecureChannelEstablished(@NonNull ConnectedDevice device) {
+    if (callback != null) {
+      callback.onSecureChannelEstablished(device);
     }
   }
 
@@ -91,6 +107,9 @@ class TrustedDeviceFeature extends RemoteFeature {
   }
 
   interface Callback {
+    /** Called when a new device has connected and can be sent secure messages. */
+    void onSecureChannelEstablished(@NonNull ConnectedDevice device);
+
     /** Called when a new {@link byte[]} message is received for this feature. */
     void onMessageReceived(@NonNull ConnectedDevice device, @NonNull byte[] message);
 

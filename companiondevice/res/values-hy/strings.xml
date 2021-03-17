@@ -16,6 +16,7 @@
   -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="settings_entry_title">Ուղեկցող սարք</string>
   <string name="default_device_name">Կապված սարք</string>
   <string name="add_device_title">Ավելացնել կապված սարք</string>
   <string name="add_associated_device_title">Ուղեկցող սարքի միացում</string>
@@ -62,8 +63,8 @@
   <string name="trusted_device_feature_title">Ապակողպեք պրոֆիլը հեռախոսի միջոցով</string>
   <string name="trusted_device_feature_instruction">Ապակողպման տարբերակները կարելի է կարգավորել ուղեկցող հավելվածում</string>
   <string name="trusted_device_item_title">Թույլ տալ &lt;b&gt;%1$s&lt;/b&gt; հեռախոսին ապակողպել իմ պրոֆիլը</string>
-  <string name="device_not_connected_dialog_title">Ձեր հեռախոսը պետք է միացած լինի</string>
-  <string name="device_not_connected_dialog_message">Այս գործառույթը միացնելու համար համոզվեք, որ ձեր մեքենայում և հեռախոսում միացված է Bluetooth-ը, և դրանք իրար մոտ են գտնվում։</string>
+  <string name="device_not_connected_dialog_title">Ուղեկցող հավելվածը պետք է միացված լինի</string>
+  <string name="device_not_connected_dialog_message">Գործառույթը միացնելու համար ուղեկցող հավելվածը պետք է բացված լինի հեռախոսում։ Ձեր մեքենան և հեռախոսը պետք է իրար մոտ գտնվեն, և դրանց Bluetooth-ը պետք է միացված լինի։</string>
   <string name="trusted_device_enrollment_success_message">&lt;b&gt;%1$s&lt;/b&gt; հեռախոսն արդեն կարող է ապակողպել ձեր պրոֆիլը</string>
   <string name="create_profile_lock_dialog_title">Նշեք պրոֆիլի կողպման հիմնական եղանակը</string>
   <string name="create_profile_lock_dialog_message">Հեռախոսի միջոցով պրոֆիլն ապակողպելու համար պրոֆիլի ապակողպման հիմնական եղանակն անհրաժեշտ է նշել որպես լրացուցիչ</string>

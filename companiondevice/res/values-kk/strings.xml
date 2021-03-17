@@ -16,6 +16,7 @@
   -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="settings_entry_title">Companion Device</string>
   <string name="default_device_name">Байланысқан құрылғы</string>
   <string name="add_device_title">Байланысқан құрылғыны енгізу</string>
   <string name="add_associated_device_title">Көмекші құрылғыны байланыстырыңыз</string>
@@ -62,8 +63,8 @@
   <string name="trusted_device_feature_title">Профиль құлпын телефонмен ашу</string>
   <string name="trusted_device_feature_instruction">Құлпын ашу опцияларын орнату үшін көмекші қолданбаны тексеріңіз.</string>
   <string name="trusted_device_item_title">&lt;b&gt;%1$s&lt;/b&gt; телефонына профиль құлпын ашуға рұқсат ету</string>
-  <string name="device_not_connected_dialog_title">Телефоныңыз байланыстырулы күйде болуы керек</string>
-  <string name="device_not_connected_dialog_message">Бұл функцияны қосу үшін көлігіңіз бен телефоныңызда Bluetooth қосулы екеніне және құрылғылар бір-біріне жақын екеніне көз жеткізіңіз.</string>
+  <string name="device_not_connected_dialog_title">Қосымша қолданбаңыз белсенді түрде жалғанып тұруы керек</string>
+  <string name="device_not_connected_dialog_message">Бұл функцияны қосу үшін телефоныңызда қосымша қолданба ашық тұрғанына көз жеткізіңіз. Көлік пен телефон бір-біріне жақын болып, екеуінде де Bluetooth қосулы болуы керек.</string>
   <string name="trusted_device_enrollment_success_message">&lt;b&gt;%1$s&lt;/b&gt; телефоны енді профиліңіздің құлпын аша алады.</string>
   <string name="create_profile_lock_dialog_title">Негізгі профиль құлпын жасау</string>
   <string name="create_profile_lock_dialog_message">Профиль құлпын телефонмен ашу үшін негізгі профиль құлпы да орнатылған болу керек.</string>

@@ -16,6 +16,7 @@
 
 package com.google.android.connecteddevice.connection;
 
+import static com.google.android.companionprotos.CapabilitiesExchangeProto.CapabilitiesExchange.OobChannel.BT_RFCOMM;
 import static com.google.android.connecteddevice.model.Errors.DEVICE_ERROR_INVALID_HANDSHAKE;
 import static com.google.android.connecteddevice.util.SafeLog.logd;
 import static com.google.android.connecteddevice.util.SafeLog.loge;
@@ -27,11 +28,14 @@ import androidx.annotation.CallSuper;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
+import com.google.android.companionprotos.CapabilitiesExchangeProto.CapabilitiesExchange;
 import com.google.android.connecteddevice.model.AssociatedDevice;
+import com.google.android.connecteddevice.model.OobEligibleDevice;
 import com.google.android.connecteddevice.oob.OobChannel;
 import com.google.android.connecteddevice.oob.OobConnectionManager;
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage;
 import com.google.android.connecteddevice.util.ThreadSafeCallbacks;
+import com.google.common.collect.ImmutableList;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executor;
@@ -43,6 +47,9 @@ public abstract class CarBluetoothManager {
 
   private static final String TAG = "CarBluetoothManager";
 
+  private static final ImmutableList<CapabilitiesExchange.OobChannel> SUPPORTED_OOB_CAPABILITIES =
+      ImmutableList.of(BT_RFCOMM);
+
   protected final ConnectedDeviceStorage storage;
 
   protected final CopyOnWriteArraySet<ConnectedRemoteDevice> connectedDevices =
@@ -50,9 +57,13 @@ public abstract class CarBluetoothManager {
 
   protected final ThreadSafeCallbacks<Callback> callbacks = new ThreadSafeCallbacks<>();
 
+  protected final OobChannel oobChannel;
+
   private final boolean isCompressionEnabled;
 
   private final OobConnectionManager oobConnectionManager;
+
+  private final boolean isCapabilitiesEligible;
 
   private String clientDeviceName;
 
@@ -61,10 +72,22 @@ public abstract class CarBluetoothManager {
   private AssociationCallback associationCallback;
 
   protected CarBluetoothManager(
-      @NonNull ConnectedDeviceStorage connectedDeviceStorage, boolean enableCompression) {
+      @NonNull ConnectedDeviceStorage connectedDeviceStorage,
+      boolean enableCompression,
+      @Nullable OobChannel oobChannel,
+      boolean isCapabilitiesEligible) {
     storage = connectedDeviceStorage;
     isCompressionEnabled = enableCompression;
     oobConnectionManager = new OobConnectionManager();
+    this.oobChannel = oobChannel;
+    this.isCapabilitiesEligible = isCapabilitiesEligible;
+  }
+
+  protected CarBluetoothManager(
+      @NonNull ConnectedDeviceStorage connectedDeviceStorage,
+      boolean enableCompression,
+      boolean isCapabilitiesEligible) {
+    this(connectedDeviceStorage, enableCompression, /* oobChannel= */ null, isCapabilitiesEligible);
   }
 
   /** Attempt to connect to device with provided id. */
@@ -310,6 +333,81 @@ public abstract class CarBluetoothManager {
     return null;
   }
 
+  protected final void onDeviceConnectedForAssociation(
+      DeviceMessageStream secureStream, ConnectedRemoteDevice connectedDevice) {
+
+    BluetoothDevice device = connectedDevice.device;
+    ImmutableList<CapabilitiesExchange.OobChannel> supportedOobCapabilities =
+        SUPPORTED_OOB_CAPABILITIES;
+    if (!isCapabilitiesEligible) {
+      supportedOobCapabilities = ImmutableList.of();
+    }
+
+    // TODO(b/180743873) Hardcoding to true until ConnectionResolver is capable of resolving all
+    // the way to a SecureChannel. At that time we will introduce another flag for whether we
+    // are reconnecting and move this logic internal to the resolver itself.
+    ConnectionResolver connectionResolver =
+        new ConnectionResolver(
+            secureStream,
+            /* isCapabilitiesEligible= */ true,
+            supportedOobCapabilities);
+
+    connectionResolver.resolveConnection(
+        resolvedConnection -> {
+          ImmutableList<
+                  com.google.android.companionprotos.CapabilitiesExchangeProto.CapabilitiesExchange
+                      .OobChannel>
+              oobChannels = resolvedConnection.oobChannels();
+
+          if (oobChannel == null || oobChannels == null || !oobChannels.contains(BT_RFCOMM)) {
+            logd(TAG, "Oob channels list are empty, fallback to normal association " + "flow.");
+            addConnectedDeviceWithAssociationSecureChannel(
+                connectedDevice, new AssociationSecureChannel(secureStream, storage));
+            return;
+          }
+
+          logd(TAG, "Completing out of band data exchange.");
+          oobChannel.completeOobDataExchange(
+              new OobEligibleDevice(device.getAddress(), OobEligibleDevice.OOB_TYPE_BLUETOOTH),
+              new OobChannel.Callback() {
+                @Override
+                public void onOobExchangeSuccess() {
+                  logd(
+                      TAG,
+                      "Out of band exchange succeeded. Proceeding to association with"
+                          + " device.");
+                  if (getOobConnectionManager().startOobExchange(oobChannel)) {
+                    addConnectedDeviceWithAssociationSecureChannel(
+                        connectedDevice,
+                        new OobAssociationSecureChannel(
+                            secureStream, storage, getOobConnectionManager()));
+                  } else {
+                    logw(
+                        TAG,
+                        "Out of band exchange failed, falling back to Numeric" + " Comparison.");
+                    addConnectedDeviceWithAssociationSecureChannel(
+                        connectedDevice, new AssociationSecureChannel(secureStream, storage));
+                  }
+                }
+
+                @Override
+                public void onOobExchangeFailure() {
+                  logw(
+                      TAG, "Out of band exchange failed, falling back to Numeric" + " Comparison.");
+                  addConnectedDeviceWithAssociationSecureChannel(
+                      connectedDevice, new AssociationSecureChannel(secureStream, storage));
+                }
+              });
+        });
+  }
+
+  protected void onVerificationCodeAvailable(String code) {
+    if (!isAssociating()) {
+      loge(TAG, "No valid callback for association.");
+      return;
+    }
+    getAssociationCallback().onVerificationCodeAvailable(code);
+  }
   /** Add the {@link ConnectedRemoteDevice} that has connected. */
   protected final void addConnectedDevice(@NonNull ConnectedRemoteDevice device) {
     device.secureChannel.setCompressionEnabled(isCompressionEnabled);
@@ -360,6 +458,15 @@ public abstract class CarBluetoothManager {
   /** Log error which cause the disconnection and notify callbacks. */
   protected final void disconnectWithError(@NonNull String errorMessage) {
     disconnectWithError(errorMessage, null);
+  }
+
+  private void addConnectedDeviceWithAssociationSecureChannel(
+      ConnectedRemoteDevice connectedDevice,
+      AssociationSecureChannel secureChannel) {
+    secureChannel.setShowVerificationCodeListener(this::onVerificationCodeAvailable);
+    secureChannel.registerCallback(secureChannelCallback);
+    connectedDevice.secureChannel = secureChannel;
+    addConnectedDevice(connectedDevice);
   }
 
   protected final SecureChannel.Callback secureChannelCallback =

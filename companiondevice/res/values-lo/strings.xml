@@ -16,6 +16,7 @@
   -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="settings_entry_title">ອຸປະກອນທີ່ໃຊ້ຮ່ວມກັນ</string>
   <string name="default_device_name">ອຸປະກອນທີ່ເຊື່ອມໂຍງ</string>
   <string name="add_device_title">ເພີ່ມອຸປະກອນທີ່ເຊື່ອມໂຍງ</string>
   <string name="add_associated_device_title">ເຊື່ອມຕໍ່ອຸປະກອນຊ່ວຍເຫຼືອ</string>
@@ -62,8 +63,8 @@
   <string name="trusted_device_feature_title">ປົດລັອກໂປຣໄຟລ໌ດ້ວຍໂທລະສັບ</string>
   <string name="trusted_device_feature_instruction">ກວດເບິ່ງແອັບຊ່ວຍເຫຼືອຂອງທ່ານເພື່ອຕັ້ງຄ່າຕົວເລືອການປົດລັອກ</string>
   <string name="trusted_device_item_title">ອະນຸຍາດໃຫ້ &lt;b&gt;%1$s&lt;/b&gt; ປົດລັອກໂປຣໄຟລ໌ຂອງທ່ານ</string>
-  <string name="device_not_connected_dialog_title">ໂທລະສັບຕ້ອງເຊື່ອມຕໍ່ຢູ່</string>
-  <string name="device_not_connected_dialog_message">ເພື່ອເປີດຄຸນສົມບັດນີ້, ກະລຸນາກວດໃຫ້ແນ່ໃຈວ່າລົດ ແລະ ໂທລະສັບຂອງທ່ານໄດ້ເປີດ Bluetooth ແລະ ຢູ່ໃກ້ກັນແລ້ວ</string>
+  <string name="device_not_connected_dialog_title">ແອັບຊ່ວຍເຫຼືອຂອງທ່ານຈະຕ້ອງເຊື່ອມຕໍ່ຢູ່</string>
+  <string name="device_not_connected_dialog_message">ເພື່ອເປີດຄຸນສົມບັດນີ້, ກວດເບິ່ງໃຫ້ແນ່ໃຈວ່າແອັບຊ່ວຍເຫຼືອເປີດຢູ່ໃນໂທລະສັບຂອງທ່ານ. ລົດ ແລະ ໂທລະສັບຂອງທ່ານຄວນເປີດ Bluetooth ແລະ ຢູ່ໃກ້ກັນ.</string>
   <string name="trusted_device_enrollment_success_message">&lt;b&gt;%1$s&lt;/b&gt; ດຽວນີ້ສາມາດປົດລັອກໂປຣໄຟລ໌ຂອງທ່ານ</string>
   <string name="create_profile_lock_dialog_title">ສ້າງລັອກໂປຣໄຟລ໌ຫຼັກ</string>
   <string name="create_profile_lock_dialog_message">ເພື່ອໃຊ້ໂທລະສັບຂອງທ່ານປົດລັອກໂປຣໄຟລ໌ຂອງທ່ານ, ທ່ານຈຳເປັນຕ້ອງມີລັອກໂປຣໄຟລ໌ຫຼັກເປັນລາຍການສຳຮອງ</string>

@@ -19,7 +19,7 @@ package com.google.android.connecteddevice.storage;
 import androidx.annotation.Nullable;
 
 /** A helper that can encrypt and decrypt arbitrary values. */
-interface CryptoHelper {
+public interface CryptoHelper {
   /**
    * Encrypts the given {@code value} and returns its encrypted value or {@code null} if encryption
    * fails.

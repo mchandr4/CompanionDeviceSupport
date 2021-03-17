@@ -16,6 +16,7 @@
   -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="settings_entry_title">Spremljevalna naprava</string>
   <string name="default_device_name">Povezana naprava</string>
   <string name="add_device_title">Dodaj povezano napravo</string>
   <string name="add_associated_device_title">Povezava spremljevalne naprave</string>
@@ -62,8 +63,8 @@
   <string name="trusted_device_feature_title">Odklepanje profila s telefonom</string>
   <string name="trusted_device_feature_instruction">V spremljevalni aplikaciji nastavite možnosti odklepanja.</string>
   <string name="trusted_device_item_title">Naj &lt;b&gt;%1$s&lt;/b&gt; odklepa moj profil</string>
-  <string name="device_not_connected_dialog_title">Telefon mora imeti aktivno povezavo</string>
-  <string name="device_not_connected_dialog_message">Če želite vklopiti to funkcijo, poskrbite, da je Bluetooth omogočen v avtomobilu in telefonu ter da sta si blizu.</string>
+  <string name="device_not_connected_dialog_title">Spremljevalna aplikacija mora biti aktivno povezana</string>
+  <string name="device_not_connected_dialog_message">Če želite vklopiti to funkcijo, mora biti spremljevalna aplikacija odprta v telefonu. Bluetooth mora biti vklopljen v avtomobilu in telefonu ter morata biti blizu.</string>
   <string name="trusted_device_enrollment_success_message">&lt;b&gt;%1$s&lt;/b&gt; lahko odklepa vaš profil.</string>
   <string name="create_profile_lock_dialog_title">Ustvarjanje glavnega zaklepanja profila</string>
   <string name="create_profile_lock_dialog_message">Če želite uporabljati telefon za odklepanje profila, morate imeti kot rezervno možnost nastavljeno glavno zaklepanje profila.</string>

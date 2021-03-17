@@ -17,7 +17,6 @@
 package com.google.android.connecteddevice.logging;
 
 import static com.google.common.truth.Truth.assertThat;
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -34,9 +33,9 @@ import com.google.android.connecteddevice.logging.LoggingManager.LoggingEventCal
 import com.google.android.connecteddevice.logging.LoggingManager.OnLogRequestedListener;
 import com.google.android.connecteddevice.logging.model.LogRecord;
 import com.google.android.connecteddevice.logging.model.LogRecordFile;
+import com.google.android.connecteddevice.logging.util.LoggingUtils;
 import com.google.android.connecteddevice.model.ConnectedDevice;
 import com.google.common.util.concurrent.MoreExecutors;
-import com.google.gson.Gson;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -181,8 +180,7 @@ public class LoggingManagerTest {
     for (int i = 0; i < size; i++) {
       logRecords.add(new LogRecord(LogRecord.Level.INFO, "TEST_TAG", "TEST_MESSAGE"));
     }
-    Gson gson = new Gson();
-    return gson.toJson(logRecords).getBytes(UTF_8);
+    return LoggingUtils.objectToBytes(logRecords);
   }
 
   private static ConnectedDevice createConnectedDevice() {

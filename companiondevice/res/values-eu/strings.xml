@@ -16,6 +16,7 @@
   -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="settings_entry_title">Gailu osagarria</string>
   <string name="default_device_name">Erlazionatutako gailua</string>
   <string name="add_device_title">Gehitu erlazionatutako gailu bat</string>
   <string name="add_associated_device_title">Konektatu gailu osagarri bat</string>
@@ -62,8 +63,8 @@
   <string name="trusted_device_feature_title">Desblokeatu profila telefonoaren bidez</string>
   <string name="trusted_device_feature_instruction">Desblokeatzeko aukerak ezartzeko, erabili Companion App</string>
   <string name="trusted_device_item_title">Utzi &lt;b&gt;%1$s&lt;/b&gt; telefonoari nire profila desblokeatzen</string>
-  <string name="device_not_connected_dialog_title">Telefonoaren konexioak aktibatuta egon behar du</string>
-  <string name="device_not_connected_dialog_message">Eginbide hau aktibatzeko, ziurtatu autoak nahiz telefonoak Bluetooth-a aktibatuta daukatela eta elkarrengandik gertu daudela</string>
+  <string name="device_not_connected_dialog_title">Aplikazio osagarriaren konexioak aktibatuta egon behar du</string>
+  <string name="device_not_connected_dialog_message">Eginbide hau aktibatzeko, ziurtatu aplikazio osagarria irekita dagoela telefonoan. Autoak eta telefonoak Bluetooth-a aktibatuta eduki behar dute, eta elkarrengandik gertu egon.</string>
   <string name="trusted_device_enrollment_success_message">&lt;b&gt;%1$s&lt;/b&gt; telefonoak zure profila desblokea dezake orain</string>
   <string name="create_profile_lock_dialog_title">Sortu profilaren blokeo nagusi bat</string>
   <string name="create_profile_lock_dialog_message">Telefonoa erabili nahi baduzu profila desblokeatzeko, profilaren blokeo nagusi bat behar duzu ordezko aukera gisa</string>

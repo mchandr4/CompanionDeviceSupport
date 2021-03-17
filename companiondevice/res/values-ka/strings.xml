@@ -16,6 +16,7 @@
   -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="settings_entry_title">კომპანიონი მოწყობილობა</string>
   <string name="default_device_name">დაკავშირებული მოწყ.</string>
   <string name="add_device_title">დაკავშირებული მოწყობილობის დამატება</string>
   <string name="add_associated_device_title">კომპანიონი მოწყობილობის დაკავშირება</string>
@@ -62,8 +63,8 @@
   <string name="trusted_device_feature_title">პროფილის განბლოკვა ტელეფონით</string>
   <string name="trusted_device_feature_instruction">შეამოწმეთ თქვენი კომპანიონი აპი განბლოკვის ვარიანტების დასაყენებლად</string>
   <string name="trusted_device_item_title">&lt;b&gt;%1$s&lt;/b&gt;-მა შეძლოს ჩემი პროფილის განბლოკვა</string>
-  <string name="device_not_connected_dialog_title">თქვენი ტელეფონი აქტიურად უნდა იყოს დაკავშირებული</string>
-  <string name="device_not_connected_dialog_message">ამ ფუნქციის ჩასართავად დარწმუნდით, რომ თქვენს მანქანას და ტელეფონს ჩართული აქვს Bluetooth და ისინი ერთმანეთთან ახლოს არიან</string>
+  <string name="device_not_connected_dialog_title">თქვენი კომპანიონი აპი აქტიურად უნდა იყოს დაკავშირებული</string>
+  <string name="device_not_connected_dialog_message">ამ ფუნქციის ჩასართავად დარწმუნდით, რომ თქვენს ტელეფონზე გახსნილია კომპანიონი აპი. თქვენი მანქანა და ტელეფონი ერთმანეთთან ახლოს უნდა იყვნენ და ჩართული ჰქონდეთ Bluetooth.</string>
   <string name="trusted_device_enrollment_success_message">&lt;b&gt;%1$s&lt;/b&gt;-ს ახლა შეუძლია თქვენი პროფილის განბლოკვა</string>
   <string name="create_profile_lock_dialog_title">შექმენით პროფილის ძირითადი ბლოკი</string>
   <string name="create_profile_lock_dialog_message">თქვენი პროფილის განსაბლოკად ტელეფონის გამოსაყენებლად სარეზერვო ასლის სახით დაგჭირდებათ პროფილის ძირითადი ბლოკი</string>

@@ -16,6 +16,7 @@
   -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="settings_entry_title">Kompanyon Cihaz</string>
   <string name="default_device_name">Əlaqəli Cihaz</string>
   <string name="add_device_title">Əlaqəli Cihaz əlavə edin</string>
   <string name="add_associated_device_title">Kompanyon cihazı qoşun</string>
@@ -62,8 +63,8 @@
   <string name="trusted_device_feature_title">Profili telefonla kiliddən çıxarın</string>
   <string name="trusted_device_feature_instruction">Kiliddən çıxarma seçimlərini ayarlamaq üçün Kompanyon Tətbiqini yoxlayın</string>
   <string name="trusted_device_item_title">&lt;b&gt;%1$s&lt;/b&gt; telefonunun profilimi kiliddən çıxarmasına icazə verin</string>
-  <string name="device_not_connected_dialog_title">Telefonunuz aktiv şəkildə qoşulmalıdır</string>
-  <string name="device_not_connected_dialog_message">Bu funksiyanı aktiv etmək üçün avtomobildə və telefonda Bluetooth\'un aktiv və bir-birinin yaxınında olduğuna əmin olun</string>
+  <string name="device_not_connected_dialog_title">Kompanyon Tətbiqiniz aktiv şəkildə qoşulmalıdır</string>
+  <string name="device_not_connected_dialog_message">Bu funksiyanı aktiv etmək üçün telefonda Kompanyon Tətbiqinin açıq olduğuna əmin olun. Avtomobildə və telefonda Bluetooth aktiv olmalı və onlar bir-birinin yanında olmalıdır.</string>
   <string name="trusted_device_enrollment_success_message">&lt;b&gt;%1$s&lt;/b&gt; indi profilinizi kiliddən çıxara bilər</string>
   <string name="create_profile_lock_dialog_title">Əsas profil kilidi yaradın</string>
   <string name="create_profile_lock_dialog_message">Profili kiliddən çıxarmaq üçün telefonu istifadə etmək üçün yedək olaraq əsas profil kilidi lazımdır</string>

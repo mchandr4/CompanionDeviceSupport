@@ -29,9 +29,10 @@ import androidx.annotation.VisibleForTesting;
 import com.google.android.connecteddevice.connection.AssociationCallback;
 import com.google.android.connecteddevice.connection.AssociationSecureChannel;
 import com.google.android.connecteddevice.connection.CarBluetoothManager;
+import com.google.android.connecteddevice.connection.ConnectionResolver;
 import com.google.android.connecteddevice.connection.DeviceMessageStream;
 import com.google.android.connecteddevice.connection.ReconnectSecureChannel;
-import com.google.android.connecteddevice.connection.SecureChannel;
+import com.google.android.connecteddevice.oob.BluetoothRfcommChannel;
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage;
 import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelegateBinder;
 import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelegateBinder.OnErrorListener;
@@ -70,14 +71,20 @@ public class CarSppManager extends CarBluetoothManager {
    * @param connectedDeviceStorage Shared {@link ConnectedDeviceStorage} for companion features.
    * @param packetMaxBytes Maximum size in bytes to write in one packet.
    * @param enableCompression Enable compression on outgoing messages.
+   * @param isCapabilitiesEligible Association should attempt a capabilities exchange.
    */
   public CarSppManager(
       @NonNull ConnectedDeviceSppDelegateBinder sppBinder,
       @NonNull ConnectedDeviceStorage connectedDeviceStorage,
       @NonNull UUID associationServiceUuid,
       int packetMaxBytes,
-      boolean enableCompression) {
-    super(connectedDeviceStorage, enableCompression);
+      boolean enableCompression,
+      boolean isCapabilitiesEligible) {
+    super(
+        connectedDeviceStorage,
+        enableCompression,
+        new BluetoothRfcommChannel(sppBinder),
+        isCapabilitiesEligible);
     this.sppServiceBinder = sppBinder;
     this.associationServiceUuid = associationServiceUuid;
     this.packetMaxBytes = packetMaxBytes;
@@ -188,25 +195,32 @@ public class CarSppManager extends CarBluetoothManager {
     DeviceMessageStream secureStream =
         new SppDeviceMessageStream(sppServiceBinder, connection, packetMaxBytes);
     secureStream.setMessageReceivedErrorListener(
-        exception -> {
-          disconnectWithError("Error occurred in stream: " + exception.getMessage(), exception);
-        });
-    // TODO(b/172276170): Re-enable out of band support for SPP
-    SecureChannel secureChannel;
-    if (isReconnect) {
-      secureChannel =
-          new ReconnectSecureChannel(
-              secureStream, storage, reconnectDeviceId, /* expectedChallengeResponse= */ null);
-    } else {
-      secureChannel = new AssociationSecureChannel(secureStream, storage);
-    }
-    secureChannel.registerCallback(secureChannelCallback);
+        exception ->
+          disconnectWithError("Error occurred in stream: " + exception.getMessage(), exception));
+
     ConnectedRemoteDevice connectedDevice = new ConnectedRemoteDevice(device, /* gatt= */ null);
-    connectedDevice.secureChannel = secureChannel;
-    addConnectedDevice(connectedDevice);
+
     if (isReconnect) {
-      setDeviceIdAndNotifyCallbacks(reconnectDeviceId);
-      reconnectDeviceId = null;
+      // Capabilities are only exchanged during association so isCapabilitiesEligible is always
+      // false here.
+      ConnectionResolver connectionResolver =
+          new ConnectionResolver(secureStream, /* isCapabilitiesEligible= */ false);
+      connectionResolver.resolveConnection(
+          (resolvedConnection) -> {
+            ReconnectSecureChannel secureChannel =
+                new ReconnectSecureChannel(
+                    secureStream,
+                    storage,
+                    reconnectDeviceId,
+                    /* expectedChallengeResponse= */ null);
+            secureChannel.registerCallback(secureChannelCallback);
+            connectedDevice.secureChannel = secureChannel;
+            addConnectedDevice(connectedDevice);
+            setDeviceIdAndNotifyCallbacks(reconnectDeviceId);
+            reconnectDeviceId = null;
+          });
+    } else {
+      onDeviceConnectedForAssociation(secureStream, connectedDevice);
     }
   }
 
