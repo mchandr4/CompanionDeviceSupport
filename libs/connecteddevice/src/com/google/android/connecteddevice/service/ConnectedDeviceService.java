@@ -42,6 +42,7 @@ import com.google.android.connecteddevice.oob.BluetoothRfcommChannel;
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage;
 import com.google.android.connecteddevice.transport.proxy.ProxyBlePeripheralManager;
 import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelegateBinder;
+import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelegateBinder.OnRemoteCallbackSetListener;
 import com.google.android.connecteddevice.util.EventLog;
 import com.google.android.connecteddevice.util.Logger;
 import java.time.Duration;
@@ -141,6 +142,7 @@ public final class ConnectedDeviceService extends TrunkService {
           }
         }
       };
+  private final AtomicBoolean isSppServiceBound = new AtomicBoolean(false);
 
   private final List<LocalFeature> localFeatures = new ArrayList<>();
 
@@ -149,6 +151,8 @@ public final class ConnectedDeviceService extends TrunkService {
   private ConnectedDeviceManager connectedDeviceManager;
 
   private LoggingManager loggingManager;
+
+  private boolean isSppSupported;
 
   private ConnectedDeviceManagerBinder connectedDeviceManagerBinder;
 
@@ -161,14 +165,14 @@ public final class ConnectedDeviceService extends TrunkService {
     super.onCreate();
     logd(TAG, "Service created.");
     EventLog.onServiceStarted();
-    boolean isSppSupported = getMetaBoolean(META_ENABLE_SPP, SPP_ENABLED_BY_DEFAULT);
+    isSppSupported = getMetaBoolean(META_ENABLE_SPP, SPP_ENABLED_BY_DEFAULT);
 
     ConnectedDeviceStorage storage = new ConnectedDeviceStorage(this);
     boolean isCompressionEnabled =
         getMetaBoolean(META_COMPRESS_OUTGOING_MESSAGES, ENABLE_COMPRESSION_BY_DEFAULT);
     boolean isCapabilitiesEligible =
         getMetaBoolean(META_ENABLE_CAPABILITIES_EXCHANGE, ENABLE_CAPABILITIES_EXCHANGE_BY_DEFAULT);
-    sppDelegateBinder = new ConnectedDeviceSppDelegateBinder();
+    sppDelegateBinder = new ConnectedDeviceSppDelegateBinder(onRemoteCallbackSetListener);
     CarBluetoothManager carBluetoothManager;
     if (isSppSupported) {
       carBluetoothManager = createSppManager(storage, isCompressionEnabled, isCapabilitiesEligible);
@@ -185,10 +189,17 @@ public final class ConnectedDeviceService extends TrunkService {
     associationBinder = new AssociationBinder(connectedDeviceManager);
     registerReceiver(
         bleBroadcastReceiver, new IntentFilter(BluetoothAdapter.ACTION_BLE_STATE_CHANGED));
-    if (BluetoothAdapter.getDefaultAdapter().isLeEnabled()) {
+    if (!isSppSupported && BluetoothAdapter.getDefaultAdapter().isLeEnabled()) {
       initializeFeatures();
     }
   }
+
+  private final OnRemoteCallbackSetListener onRemoteCallbackSetListener = (hasBeenSet)-> {
+      if (BluetoothAdapter.getDefaultAdapter().isEnabled()) {
+        initializeFeatures();
+      }
+      isSppServiceBound.set(hasBeenSet);
+    };
 
   private CarBluetoothManager createSppManager(
       @NonNull ConnectedDeviceStorage storage,
@@ -280,7 +291,9 @@ public final class ConnectedDeviceService extends TrunkService {
     switch (state) {
       case BluetoothAdapter.STATE_ON:
         EventLog.onBleOn();
-        initializeFeatures();
+        if (!isSppSupported || isSppServiceBound.get()) {
+          initializeFeatures();
+        }
         break;
       case BluetoothAdapter.STATE_OFF:
         cleanup();

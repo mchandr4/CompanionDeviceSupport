@@ -23,6 +23,9 @@ import static com.google.android.connecteddevice.notificationmsg.common.BaseNoti
 import static com.google.android.connecteddevice.notificationmsg.common.BaseNotificationDelegate.EXTRA_REMOTE_INPUT_KEY;
 import static com.google.android.connecteddevice.util.SafeLog.logw;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Intent;
 import android.content.res.TypedArray;
 import android.graphics.Color;
@@ -30,6 +33,7 @@ import android.graphics.Typeface;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
+import androidx.core.app.NotificationCompat;
 import androidx.core.app.RemoteInput;
 import androidx.annotation.Nullable;
 import com.google.android.connecteddevice.model.ConnectedDevice;
@@ -101,6 +105,9 @@ public class NotificationMsgService extends MetaDataService {
 
   /* NOTIFICATIONS */
   static final String NOTIFICATION_MSG_CHANNEL_ID = "NOTIFICATION_MSG_CHANNEL_ID";
+  private static final int SERVICE_STARTED_NOTIFICATION_ID = Integer.MAX_VALUE;
+  private static final String APP_RUNNING_CHANNEL_ID = "APP_RUNNING_CHANNEL_ID";
+  private static final String APP_RUNNING_CHANNEL_NAME = "APP_RUNNING_CHANNEL_ID";
 
   private NotificationMsgDelegate notificationMsgDelegate;
   private NotificationMsgFeature notificationMsgFeature;
@@ -125,6 +132,7 @@ public class NotificationMsgService extends MetaDataService {
     notificationMsgDelegate = createNotificationMsgDelegate();
     notificationMsgFeature = new NotificationMsgFeature(this, notificationMsgDelegate);
     notificationMsgFeature.start();
+    sendServiceRunningNotification();
   }
 
   @Override
@@ -156,6 +164,29 @@ public class NotificationMsgService extends MetaDataService {
     }
 
     return START_STICKY;
+  }
+
+  /**
+   * Posts a service running (silent/hidden) notification, so we don't throw ANR after service is
+   * started.
+   */
+  private void sendServiceRunningNotification() {
+    NotificationManager notificationManager = getSystemService(NotificationManager.class);
+    // Create notification channel for app running notification
+    NotificationChannel appRunningNotificationChannel =
+        new NotificationChannel(
+            APP_RUNNING_CHANNEL_ID,
+            APP_RUNNING_CHANNEL_NAME,
+            NotificationManager.IMPORTANCE_MIN);
+    notificationManager.createNotificationChannel(appRunningNotificationChannel);
+
+    final Notification notification =
+        new NotificationCompat.Builder(this, APP_RUNNING_CHANNEL_ID)
+            .setSmallIcon(requireMetaResourceId(META_DEFAULT_ICON))
+            .setContentTitle(APP_RUNNING_CHANNEL_NAME)
+            .setContentText(APP_RUNNING_CHANNEL_NAME)
+            .build();
+    startForeground(SERVICE_STARTED_NOTIFICATION_ID, notification);
   }
 
   private void handleDismissNotificationIntent(Intent intent) {

@@ -49,22 +49,35 @@ public class ConnectedDeviceSppDelegateBinder extends IConnectedDeviceSppDelegat
 
   @VisibleForTesting RemoteCallbackBinder callbackBinder;
 
+  private final OnRemoteCallbackSetListener onRemoteCallbackSetListener;
+
+  public ConnectedDeviceSppDelegateBinder(OnRemoteCallbackSetListener listener) {
+    onRemoteCallbackSetListener = listener;
+  }
+
   @Override
-  public void setCallback(ISppCallback callback) {
+  public void setCallback(@NonNull ISppCallback callback) {
     logd(TAG, "Set callback:" + callback);
     callbackBinder =
         new RemoteCallbackBinder(callback.asBinder(), iBinder -> clearCallback(callback));
     this.remoteCallback = callback;
+    if (onRemoteCallbackSetListener != null) {
+      onRemoteCallbackSetListener.onRemoteCallbackSet(true);
+    }
   }
 
   @Override
-  public void clearCallback(ISppCallback callback) {
-    if (remoteCallback != callback) {
+  public void clearCallback(@NonNull ISppCallback callback) {
+    if (remoteCallback == null || remoteCallback.asBinder() != callback.asBinder()) {
+      logw(TAG, "ISppCallback(" + callback + ") has not been set before.");
       return;
     }
 
     logd(TAG, "Clear callback:" + callback);
     remoteCallback = null;
+    if (onRemoteCallbackSetListener != null) {
+      onRemoteCallbackSetListener.onRemoteCallbackSet(false);
+    }
     if (callbackBinder == null) {
       logw(TAG, "Remote callback binder is null when trying to clear callback");
       return;
@@ -251,5 +264,10 @@ public class ConnectedDeviceSppDelegateBinder extends IConnectedDeviceSppDelegat
   /** Listener for when a message has been received on an open connection. */
   public interface OnMessageReceivedListener {
     void onMessageReceived(byte[] message);
+  }
+
+  /** Listener for when the remote callback is set by the remote service. */
+  public interface OnRemoteCallbackSetListener {
+    void onRemoteCallbackSet(boolean hasBeenSet);
   }
 }

@@ -20,9 +20,11 @@ import static com.google.android.connecteddevice.util.SafeLog.loge;
 
 import android.app.Service;
 import android.content.ComponentName;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
+import android.os.IBinder;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
@@ -178,5 +180,11 @@ public abstract class MetaDataService extends Service {
     }
     loge(TAG, "Missing required meta-data value " + name + ". Cannot instantiate service.");
     throw new IllegalArgumentException("Missing required meta-data value " + name + ".");
+  }
+
+  @Nullable
+  @Override
+  public IBinder onBind(Intent intent) {
+    return null;
   }
 }

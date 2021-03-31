@@ -74,6 +74,7 @@ public class ConnectedDeviceManagerTest {
   @Mock private ConnectionCallback mockConnectionCallback;
   @Mock private DeviceCallback mockDeviceCallback;
   @Mock private DeviceAssociationCallback mockDeviceAssociationCallback;
+  @Mock private ConnectedDeviceSppDelegateBinder mockDelegateBinder;
 
   private ConnectedDeviceManager connectedDeviceManager;
 
@@ -88,7 +89,7 @@ public class ConnectedDeviceManagerTest {
         new ConnectedDeviceManager(
             mockCarBluetoothManager,
             mockStorage,
-            new ConnectedDeviceSppDelegateBinder(),
+            mockDelegateBinder,
             directExecutor,
             directExecutor,
             directExecutor);

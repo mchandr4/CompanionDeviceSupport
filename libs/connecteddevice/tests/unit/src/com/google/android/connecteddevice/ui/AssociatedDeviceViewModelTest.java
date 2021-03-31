@@ -16,16 +16,15 @@
 
 package com.google.android.connecteddevice.ui;
 
-import static android.os.Looper.getMainLooper;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.robolectric.Shadows.shadowOf;
 
 import androidx.lifecycle.Observer;
 import android.bluetooth.BluetoothAdapter;
 import android.os.RemoteException;
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.google.android.connecteddevice.api.IAssociatedDeviceManager;
@@ -38,7 +37,6 @@ import com.google.android.connecteddevice.model.AssociatedDeviceDetails;
 import com.google.android.connecteddevice.model.ConnectedDevice;
 import com.google.android.connecteddevice.ui.AssociatedDeviceViewModel.AssociationState;
 import java.util.Collections;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -58,6 +56,10 @@ public final class AssociatedDeviceViewModelTest {
   private static final String TEST_VERIFICATION_CODE = "test_code";
 
   @Rule public final MockitoRule mockito = MockitoJUnit.rule();
+
+  @Rule
+  public final InstantTaskExecutorRule instantTaskExecutorRule = new InstantTaskExecutorRule();
+
   @Mock private IAssociatedDeviceManager mockAssociatedDeviceManager;
   @Mock private Observer<AssociationState> mockAssociationStateObserver;
   @Mock private Observer<AssociatedDeviceDetails> mockDeviceDetailsObserver;
@@ -81,15 +83,6 @@ public final class AssociatedDeviceViewModelTest {
             /* isSppEnabled= */ false);
     BluetoothAdapter.getDefaultAdapter().enable();
     captureCallbacks();
-  }
-
-  @After
-  public void cleanUp() {
-    viewModel.getAdvertisedCarName().removeObserver(mockCarNameObserver);
-    viewModel.getRemovedDevice().removeObserver(mockRemovedDeviceObserver);
-    viewModel.getPairingCode().removeObserver(mockPairingCodeObserver);
-    viewModel.getAssociationState().removeObserver(mockAssociationStateObserver);
-    viewModel.getCurrentDeviceDetails().removeObserver(mockDeviceDetailsObserver);
   }
 
   @Test
@@ -129,7 +122,6 @@ public final class AssociatedDeviceViewModelTest {
     BluetoothAdapter.getDefaultAdapter().disable();
     viewModel.startAssociation();
     viewModel.getAssociationState().observeForever(mockAssociationStateObserver);
-    waitForLiveDataUpdate();
     verify(mockAssociationStateObserver).onChanged(AssociationState.PENDING);
     verify(mockAssociatedDeviceManager, never()).startAssociation();
   }
@@ -138,7 +130,6 @@ public final class AssociatedDeviceViewModelTest {
   public void startAssociation_waitingForPasswordSetup() throws RemoteException {
     viewModel.startAssociation();
     viewModel.getAssociationState().observeForever(mockAssociationStateObserver);
-    waitForLiveDataUpdate();
     verify(mockAssociationStateObserver).onChanged(AssociationState.STARTING);
     verify(mockAssociatedDeviceManager).startAssociation();
   }
@@ -149,7 +140,6 @@ public final class AssociatedDeviceViewModelTest {
     associationCallback.onAssociationStartSuccess(TEST_CAR_NAME);
     viewModel.getAssociationState().observeForever(mockAssociationStateObserver);
     viewModel.getAdvertisedCarName().observeForever(mockCarNameObserver);
-    waitForLiveDataUpdate();
     verify(mockAssociationStateObserver).onChanged(AssociationState.STARTED);
     verify(mockCarNameObserver).onChanged(TEST_CAR_NAME);
   }
@@ -161,7 +151,6 @@ public final class AssociatedDeviceViewModelTest {
     associationCallback.onVerificationCodeAvailable(TEST_VERIFICATION_CODE);
     viewModel.getAssociationState().observeForever(mockAssociationStateObserver);
     viewModel.getPairingCode().observeForever(mockPairingCodeObserver);
-    waitForLiveDataUpdate();
     verify(mockAssociationStateObserver).onChanged(AssociationState.STARTED);
     verify(mockPairingCodeObserver).onChanged(TEST_VERIFICATION_CODE);
   }
@@ -173,17 +162,14 @@ public final class AssociatedDeviceViewModelTest {
     associationCallback.onVerificationCodeAvailable(TEST_VERIFICATION_CODE);
     associationCallback.onAssociationCompleted();
     viewModel.getAssociationState().observeForever(mockAssociationStateObserver);
-    waitForLiveDataUpdate();
     verify(mockAssociationStateObserver).onChanged(AssociationState.COMPLETED);
   }
 
   @Test
   public void stopAssociation() throws RemoteException {
     viewModel.startAssociation();
-    waitForLiveDataUpdate();
     viewModel.stopAssociation();
     viewModel.getAssociationState().observeForever(mockAssociationStateObserver);
-    waitForLiveDataUpdate();
     verify(mockAssociationStateObserver).onChanged(AssociationState.NONE);
     verify(mockAssociatedDeviceManager).stopAssociation();
   }
@@ -193,7 +179,6 @@ public final class AssociatedDeviceViewModelTest {
     AssociatedDevice testDevice = createAssociatedDevice(/* isConnectionEnabled= */ true);
     devicesRetrievedListener.onAssociatedDevicesRetrieved(Collections.singletonList(testDevice));
     viewModel.getCurrentDeviceDetails().observeForever(mockDeviceDetailsObserver);
-    waitForLiveDataUpdate();
     assertThat(viewModel.getCurrentDeviceDetails().getValue().getAssociatedDevice())
         .isEqualTo(testDevice);
   }
@@ -210,7 +195,6 @@ public final class AssociatedDeviceViewModelTest {
             /* isConnectionEnabled= */ true);
     deviceAssociationCallback.onAssociatedDeviceUpdated(updatedDevice);
     viewModel.getCurrentDeviceDetails().observeForever(mockDeviceDetailsObserver);
-    waitForLiveDataUpdate();
     assertThat(viewModel.getCurrentDeviceDetails().getValue().getDeviceName())
         .isEqualTo(TEST_ASSOCIATED_DEVICE_NAME_2);
   }
@@ -219,7 +203,6 @@ public final class AssociatedDeviceViewModelTest {
   public void removeAssociatedDevice() throws RemoteException {
     AssociatedDevice testDevice = createAssociatedDevice(/* isConnectionEnabled= */ true);
     devicesRetrievedListener.onAssociatedDevicesRetrieved(Collections.singletonList(testDevice));
-    waitForLiveDataUpdate();
     viewModel.removeCurrentDevice();
     verify(mockAssociatedDeviceManager).removeAssociatedDevice(eq(TEST_ASSOCIATED_DEVICE_ID));
   }
@@ -230,7 +213,6 @@ public final class AssociatedDeviceViewModelTest {
     devicesRetrievedListener.onAssociatedDevicesRetrieved(Collections.singletonList(testDevice));
     deviceAssociationCallback.onAssociatedDeviceRemoved(testDevice);
     viewModel.getRemovedDevice().observeForever(mockRemovedDeviceObserver);
-    waitForLiveDataUpdate();
     verify(mockRemovedDeviceObserver).onChanged(testDevice);
   }
 
@@ -242,7 +224,6 @@ public final class AssociatedDeviceViewModelTest {
     ConnectedDevice testConnectedDevice = createConnectedDevice();
     connectionCallback.onDeviceConnected(testConnectedDevice);
     viewModel.getCurrentDeviceDetails().observeForever(mockDeviceDetailsObserver);
-    waitForLiveDataUpdate();
     assertThat(viewModel.getCurrentDeviceDetails().getValue().isConnected()).isTrue();
   }
 
@@ -255,7 +236,6 @@ public final class AssociatedDeviceViewModelTest {
     connectionCallback.onDeviceConnected(testConnectedDevice);
     connectionCallback.onDeviceDisconnected(testConnectedDevice);
     viewModel.getCurrentDeviceDetails().observeForever(mockDeviceDetailsObserver);
-    waitForLiveDataUpdate();
     assertThat(viewModel.getCurrentDeviceDetails().getValue().isConnected()).isFalse();
   }
 
@@ -265,7 +245,6 @@ public final class AssociatedDeviceViewModelTest {
         ApplicationProvider.getApplicationContext(),
         /* associatedDeviceManager= */ null,
         /* isSppEnabled= */ false);
-    waitForLiveDataUpdate();
     associatedDeviceViewModel.onCleared();
   }
 
@@ -291,10 +270,6 @@ public final class AssociatedDeviceViewModelTest {
     verify(mockAssociatedDeviceManager)
         .retrievedActiveUserAssociatedDevices(devicesRetrievedListenerCaptor.capture());
     devicesRetrievedListener = devicesRetrievedListenerCaptor.getValue();
-  }
-
-  private void waitForLiveDataUpdate() {
-    shadowOf(getMainLooper()).idle();
   }
 
   private static AssociatedDevice createAssociatedDevice(boolean isConnectionEnabled) {

@@ -20,12 +20,9 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.os.IBinder;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import org.junit.Before;
@@ -54,13 +51,6 @@ public class MetaDataServiceTest {
   private final Context context = ApplicationProvider.getApplicationContext();
 
   private final MetaDataService metaDataService = new MetaDataService() {
-
-    @Nullable
-    @Override
-    public IBinder onBind(Intent intent) {
-      return null;
-    }
-
     @Override
     public Resources getResources() {
       return new Resources(

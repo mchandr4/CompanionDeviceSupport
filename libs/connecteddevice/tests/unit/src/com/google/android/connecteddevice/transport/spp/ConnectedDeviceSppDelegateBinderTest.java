@@ -19,8 +19,10 @@ package com.google.android.connecteddevice.transport.spp;
 import static com.google.common.truth.Truth.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -34,6 +36,7 @@ import android.os.RemoteException;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelegateBinder.OnErrorListener;
 import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelegateBinder.OnMessageReceivedListener;
+import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelegateBinder.OnRemoteCallbackSetListener;
 import com.google.android.connecteddevice.transport.spp.PendingConnection.OnConnectedListener;
 import com.google.android.connecteddevice.transport.spp.PendingConnection.OnConnectionErrorListener;
 import java.util.UUID;
@@ -75,15 +78,18 @@ public class ConnectedDeviceSppDelegateBinderTest {
   @Mock private OnMessageReceivedListener mockOnMessageReceivedListener;
   @Mock private OnConnectedListener mockOnConnectedListener;
   @Mock private OnConnectionErrorListener mockOnConnectionErrorListener;
+  @Mock private OnRemoteCallbackSetListener mockOnRemoteCallbackSetListener;
 
   @Before
   public void setUp() throws RemoteException {
     when(mockRemoteCallback.asBinder()).thenReturn(mockRemoteCallbackBinder);
-    connectedDeviceSppDelegateBinder = new ConnectedDeviceSppDelegateBinder();
+    connectedDeviceSppDelegateBinder =
+        new ConnectedDeviceSppDelegateBinder(mockOnRemoteCallbackSetListener);
 
     connectedDeviceSppDelegateBinder.setCallback(mockRemoteCallback);
     verify(mockRemoteCallback).asBinder();
     verify(mockRemoteCallbackBinder).linkToDeath(any(), anyInt());
+    verify(mockOnRemoteCallbackSetListener).onRemoteCallbackSet(true);
 
     connectedDeviceSppDelegateBinder.setOnMessageReceivedListener(
         testConnection, mockOnMessageReceivedListener);
@@ -137,16 +143,25 @@ public class ConnectedDeviceSppDelegateBinderTest {
 
     connectedDeviceSppDelegateBinder.clearCallback(mockRemoteCallback);
     verify(mockRemoteCallbackBinder).unlinkToDeath(any(), anyInt());
+    assertThat(connectedDeviceSppDelegateBinder.callbackBinder).isNull();
+    verify(mockOnRemoteCallbackSetListener).onRemoteCallbackSet(false);
 
     connectedDeviceSppDelegateBinder.connectAsServer(TEST_UUID, TEST_IS_SECURE);
+    verify(mockRemoteCallback, never()).onStartConnectionAsServerRequested(any(), anyBoolean());
+
     connectedDeviceSppDelegateBinder.connectAsClient(
         TEST_UUID, TEST_BLUETOOTH_DEVICE, TEST_IS_SECURE);
-    connectedDeviceSppDelegateBinder.sendMessage(testConnection, TEST_MESSAGE);
-    connectedDeviceSppDelegateBinder.disconnect(testConnection);
-    connectedDeviceSppDelegateBinder.cancelConnectionAttempt(TEST_PENDING_CONNECTION);
+    verify(mockRemoteCallback, never())
+        .onStartConnectionAsClientRequested(any(), any(), anyBoolean());
 
-    verifyNoMoreInteractions(mockRemoteCallback);
-    assertThat(connectedDeviceSppDelegateBinder.callbackBinder).isNull();
+    connectedDeviceSppDelegateBinder.sendMessage(testConnection, TEST_MESSAGE);
+    verify(mockRemoteCallback, never()).onSendMessageRequested(any(), any());
+
+    connectedDeviceSppDelegateBinder.disconnect(testConnection);
+    verify(mockRemoteCallback, never()).onDisconnectRequested(any());
+
+    connectedDeviceSppDelegateBinder.cancelConnectionAttempt(TEST_PENDING_CONNECTION);
+    verify(mockRemoteCallback, never()).onCancelConnectionAttemptRequested(anyInt());
   }
 
   @Test
