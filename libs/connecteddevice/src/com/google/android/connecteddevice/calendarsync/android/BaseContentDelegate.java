@@ -36,11 +36,15 @@ abstract class BaseContentDelegate<MessageT extends MessageLite>
   protected static final String ACCOUNT_NAME = "CloudlessCalSync";
 
   protected final ContentResolver resolver;
-  @Nullable protected final Uri contentUri;
   protected final CommonLogger logger;
   protected final FieldTranslator<String> keyField;
   private final ImmutableSet<FieldTranslator<?>> fields;
   private final String idColumn;
+
+  // Can be null when the content cannot be read and a write uri is given from getWriteContentUri().
+  @Nullable private final Uri contentUri;
+
+  // Can be null if there is no parent content e.g. calendars on the source device.
   @Nullable private final String parentIdColumn;
 
   BaseContentDelegate(

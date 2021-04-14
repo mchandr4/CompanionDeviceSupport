@@ -79,6 +79,8 @@ final class EventContentDelegate extends BaseContentDelegate<Event> {
   /** The set of fields that are used when writing an event. */
   private final ImmutableSet<FieldTranslator<?>> writeEventFields;
 
+  private final Uri writeContentUri;
+
   EventContentDelegate(
       CommonLogger.Factory commonLoggerFactory,
       ContentResolver resolver,
@@ -87,14 +89,16 @@ final class EventContentDelegate extends BaseContentDelegate<Event> {
     super(
         commonLoggerFactory.create(TAG),
         timeRange != null
-            ? createInstanceUri(timeRange.lowerEndpoint(), timeRange.upperEndpoint(), ownership)
-            : null,
+            ? createReadInstanceUri(timeRange.lowerEndpoint(), timeRange.upperEndpoint(), ownership)
+            : null, // No read uri on replica when source sends no time range.
         createKeyField(ownership),
         createReadInstanceFields(ownership),
         resolver,
         /* idColumn= */ Instances.EVENT_ID,
         /* parentIdColumn= */ Instances.CALENDAR_ID);
     writeEventFields = createWriteEventFields(ownership);
+    writeContentUri =
+        ownership == SOURCE ? Events.CONTENT_URI : addSyncAdapterParameters(Events.CONTENT_URI);
   }
 
   @Override
@@ -107,7 +111,7 @@ final class EventContentDelegate extends BaseContentDelegate<Event> {
   /** Writes to the Events content rather that Instances from where data is read. */
   @Override
   protected Uri getWriteContentUri() {
-    return addSyncAdapterParameters(Events.CONTENT_URI);
+    return writeContentUri;
   }
 
   @Override
@@ -119,12 +123,12 @@ final class EventContentDelegate extends BaseContentDelegate<Event> {
    * Creates a content {@link Uri} to {@link android.provider.CalendarContract.Instances} for the
    * given time range.
    */
-  private static Uri createInstanceUri(Instant start, Instant end, ContentOwnership ownership) {
+  private static Uri createReadInstanceUri(Instant start, Instant end, ContentOwnership ownership) {
     Uri.Builder builder = Instances.CONTENT_URI.buildUpon();
     ContentUris.appendId(builder, start.toEpochMilli());
     ContentUris.appendId(builder, end.toEpochMilli());
     Uri contentUri = builder.build();
-    if (ownership == SOURCE) {
+    if (ownership == REPLICA) {
       contentUri = addSyncAdapterParameters(contentUri);
     }
     return contentUri;

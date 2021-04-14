@@ -46,7 +46,7 @@ abstract class ContentManager<
     if (content == null) {
       return null;
     }
-    return readWithChildren(content);
+    return setChildren((Content<MessageT>) content);
   }
 
   /** Reads all content items with their children for the given parentId. */
@@ -54,9 +54,18 @@ abstract class ContentManager<
     ImmutableList<Content<MessageT>> contents = delegate.readAll(parentId);
     ImmutableList.Builder<MessageT> results = ImmutableList.builder();
     for (Content<MessageT> content : contents) {
-      results.add(readWithChildren(content));
+      MessageT contentWithChildren = setChildren(content);
+      results.add(contentWithChildren);
     }
     return results.build();
+  }
+
+  @SuppressWarnings("unchecked")
+  private MessageT setChildren(Content<MessageT> content) {
+    BuilderT builder = (BuilderT) content.getMessage().toBuilder();
+    onCreateBuilder(builder);
+    maybeSetChildren(builder, key(content.getMessage()), content.getId());
+    return (MessageT) builder.build();
   }
 
   /**
@@ -87,6 +96,11 @@ abstract class ContentManager<
     }
   }
 
+  public ImmutableSet<MessageT> createUpdateMessages(
+      Collection<MessageT> previousContents, Collection<MessageT> currentContents) {
+    return createReplaceOrUpdateMessages(previousContents, currentContents, true);
+  }
+
   @SuppressWarnings("unchecked")
   public MessageT createUpdateMessage(MessageT previous, MessageT current) {
     String key = key(current);
@@ -96,9 +110,9 @@ abstract class ContentManager<
     if (previous == current) {
       // Optimization for identical items.
       updateMessageBuilder = newMessageBuilder();
-      onCreateBuilder(updateMessageBuilder);
       setKey(updateMessageBuilder, key);
       setAction(updateMessageBuilder, UpdateAction.UNCHANGED);
+      onCreateBuilder(updateMessageBuilder);
       return (MessageT) updateMessageBuilder.build();
     }
 
@@ -129,11 +143,6 @@ abstract class ContentManager<
     }
 
     return (MessageT) updateMessageBuilder.build();
-  }
-
-  public ImmutableSet<MessageT> createUpdateMessages(
-      Collection<MessageT> previousContents, Collection<MessageT> currentContents) {
-    return createReplaceOrUpdateMessages(previousContents, currentContents, true);
   }
 
   public void applyUpdateMessages(Object parentId, Collection<MessageT> updates) {
@@ -305,17 +314,11 @@ abstract class ContentManager<
     clearChildren(builder);
   }
 
-  @SuppressWarnings("unchecked")
-  private MessageT readWithChildren(Content<MessageT> content) {
-    ContentManager<ChildMessageT, ChildBuilderT, ?, ?> childManager =
-        getChildManager(key(content.getMessage()));
+  private void maybeSetChildren(BuilderT builder, String key, Object id) {
+    ContentManager<ChildMessageT, ChildBuilderT, ?, ?> childManager = getChildManager(key);
     if (childManager != null) {
-      ImmutableList<ChildMessageT> children = childManager.readAll(content.getId());
-      BuilderT builder = (BuilderT) content.getMessage().toBuilder();
-      onCreateBuilder(builder);
+      ImmutableList<ChildMessageT> children = childManager.readAll(id);
       addChildren(builder, children);
-      return (MessageT) builder.build();
     }
-    return content.getMessage();
   }
 }

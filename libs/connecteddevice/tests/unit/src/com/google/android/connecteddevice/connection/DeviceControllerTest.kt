@@ -15,6 +15,7 @@ import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.spy
 import com.nhaarman.mockitokotlin2.verify
 import java.util.UUID
 import org.junit.Before
@@ -22,6 +23,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 private const val DEVICE_NAME = "TestDeviceName"
+private const val REMOTE_DEVICE_NAME = "TestRemoteDeviceName"
 
 @RunWith(AndroidJUnit4::class)
 class DeviceControllerTest {
@@ -38,6 +40,7 @@ class DeviceControllerTest {
   private val testDeviceMessage =
     DeviceMessage(testRecipientUuid, true, "test message".toByteArray())
   private val mockSecureChannel: SecureChannel = mock()
+  private var spyStorage: ConnectedDeviceStorage? = null
 
   @Before
   fun setUp() {
@@ -49,7 +52,8 @@ class DeviceControllerTest {
       .setQueryExecutor(directExecutor())
       .build()
       .associatedDeviceDao()
-    val storage = ConnectedDeviceStorage(context, Base64CryptoHelper(), database)
+    val storage = spy(ConnectedDeviceStorage(context, Base64CryptoHelper(), database))
+    spyStorage = storage
     deviceController = DeviceController(protocols, storage)
     deviceController.registerCallback(mockCallback, directExecutor())
     testConnectedDevice = DeviceController.ConnectedRemoteDevice(testUuid)
@@ -59,7 +63,7 @@ class DeviceControllerTest {
   fun startAssociation_startedSuccessfully() {
     deviceController.startAssociation(DEVICE_NAME, mockAssociationCallback)
     argumentCaptor<ConnectionProtocol.DiscoveryCallback>().apply {
-      verify(mockConnectionProtocol).startAssociationDiscovery(capture())
+      verify(mockConnectionProtocol).startAssociationDiscovery(eq(DEVICE_NAME), capture())
       firstValue.onDiscoveryStartedSuccessfully()
       verify(mockAssociationCallback).onAssociationStartSuccess(DEVICE_NAME)
     }
@@ -69,7 +73,7 @@ class DeviceControllerTest {
   fun startAssociation_startedFailed() {
     deviceController.startAssociation(DEVICE_NAME, mockAssociationCallback)
     argumentCaptor<ConnectionProtocol.DiscoveryCallback>().apply {
-      verify(mockConnectionProtocol).startAssociationDiscovery(capture())
+      verify(mockConnectionProtocol).startAssociationDiscovery(eq(DEVICE_NAME), capture())
       firstValue.onDiscoveryFailedToStart()
       verify(mockAssociationCallback).onAssociationStartFailure()
     }
@@ -130,6 +134,16 @@ class DeviceControllerTest {
     deviceController.connectedDevices.elementAt(0).secureChannel = mockSecureChannel
 
     assertThat(deviceController.sendMessage(testUuid, testDeviceMessage)).isTrue()
+  }
+
+  @Test
+  fun onDeviceNameRetrieved_storageMethodTriggered() {
+    deviceController.startAssociation(DEVICE_NAME, mockAssociationCallback)
+    argumentCaptor<ConnectionProtocol.DiscoveryCallback>().apply {
+      verify(mockConnectionProtocol).startAssociationDiscovery(eq(DEVICE_NAME), capture())
+      firstValue.onDeviceNameRetrieved(testProtocolId.toString(), REMOTE_DEVICE_NAME)
+      verify(spyStorage)?.updateAssociatedDeviceName(any(), eq(REMOTE_DEVICE_NAME))
+    }
   }
 
   private class Base64CryptoHelper : CryptoHelper {

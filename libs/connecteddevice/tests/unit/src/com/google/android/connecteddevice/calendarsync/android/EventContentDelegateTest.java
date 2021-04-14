@@ -1,10 +1,14 @@
 package com.google.android.connecteddevice.calendarsync.android;
 
 import static com.google.android.connecteddevice.calendarsync.android.BaseContentDelegate.addSyncAdapterParameters;
+import static com.google.android.connecteddevice.calendarsync.android.ContentOwnership.REPLICA;
+import static com.google.android.connecteddevice.calendarsync.android.ContentOwnership.SOURCE;
 import static com.google.android.connecteddevice.calendarsync.android.TestCalendarProvider.NULL_VALUE;
 import static com.google.android.connecteddevice.calendarsync.common.TimeProtoUtil.toTimestamp;
+import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.common.truth.Truth.assertThat;
 
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.pm.ProviderInfo;
@@ -23,7 +27,6 @@ import com.google.android.connecteddevice.calendarsync.android.TestCalendarProvi
 import com.google.android.connecteddevice.calendarsync.common.CommonLogger;
 import com.google.android.connecteddevice.calendarsync.common.PlatformContentDelegate.Content;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Range;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -31,7 +34,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -99,22 +101,25 @@ public class EventContentDelegateTest {
 
   @Test
   public void read_source_allFields() {
-    // In this case using org.robolectric.ParameterizedRobolectricTestRunner is more complex.
-    testReadAllFields(ContentOwnership.SOURCE);
-  }
-
-  @Test
-  public void read_replica_allFields() {
-    testReadAllFields(ContentOwnership.REPLICA);
-  }
-
-  private void testReadAllFields(ContentOwnership ownership) {
-    EventContentDelegate delegate = createEventContentDelegate(ownership);
-
+    EventContentDelegate delegate = createEventContentDelegate(ContentOwnership.SOURCE);
     testCalendarProvider.addRow(TEST_COLUMN_VALUES);
 
     Content<Event> content = delegate.read(CALENDAR_ID, KEY);
 
+    assertAllReadFields(content);
+  }
+
+  @Test
+  public void read_replica_allFields() {
+    EventContentDelegate delegate = createEventContentDelegate(ContentOwnership.REPLICA);
+    testCalendarProvider.addRow(TEST_COLUMN_VALUES);
+
+    Content<Event> content = delegate.read(CALENDAR_ID, KEY);
+
+    assertAllReadFields(content);
+  }
+
+  private void assertAllReadFields(Content<Event> content) {
     assertThat(content.getId()).isEqualTo(ID);
     assertThat(content.getMessage().getKey()).isEqualTo(KEY);
     assertThat(content.getMessage().getStatus()).isEqualTo(Status.CONFIRMED);
@@ -175,41 +180,158 @@ public class EventContentDelegateTest {
 
   @Test
   public void insert_source_allFields() {
-    // In this case using org.robolectric.ParameterizedRobolectricTestRunner is more complex.
-    testInsertAllFields(ContentOwnership.SOURCE);
+    EventContentDelegate delegate = createEventContentDelegate(ContentOwnership.SOURCE);
+    Event event = createTestEvent();
+
+    delegate.insert(CALENDAR_ID, event);
+
+    ProviderCall expected = new ProviderCall(MethodType.INSERT, Events.CONTENT_URI);
+    addTestEventValues(ContentOwnership.SOURCE, expected.getValues());
+    ProviderCall onlyElement = getOnlyElement(testCalendarProvider.getCalls());
+    onlyElement.assertSameArgs(expected);
   }
 
   @Test
   public void insert_replica_allFields() {
-    testInsertAllFields(ContentOwnership.REPLICA);
-  }
+    EventContentDelegate delegate = createEventContentDelegate(ContentOwnership.REPLICA);
 
-  private void testInsertAllFields(ContentOwnership ownership) {
-    EventContentDelegate delegate = createEventContentDelegate(ownership);
-
-    Event event =
-        Event.newBuilder()
-            .setKey(KEY)
-            .setStatus(Status.CONFIRMED)
-            .setTitle(TITLE)
-            .setDescription(DESCRIPTION)
-            .setLocation(LOCATION)
-            .setBeginTime(toTimestamp(BEGIN_TIME))
-            .setEndTime(toTimestamp(END_TIME))
-            .setTimeZone(TimeZone.newBuilder().setName(ZONE_ID.getId()).build())
-            .setEndTimeZone(TimeZone.newBuilder().setName(ZONE_ID.getId()).build())
-            .setIsAllDay(ALL_DAY)
-            .setColor(Color.newBuilder().setArgb(COLOR_RGB).build())
-            .setOrganizer(ORGANIZER)
-            .build();
+    Event event = createTestEvent();
 
     delegate.insert(CALENDAR_ID, event);
 
-    List<ProviderCall> calls = testCalendarProvider.getCalls();
-    assertThat(calls).hasSize(1);
+    ProviderCall expected =
+        new ProviderCall(MethodType.INSERT, addSyncAdapterParameters(Events.CONTENT_URI));
+    addTestEventValues(ContentOwnership.REPLICA, expected.getValues());
+    ProviderCall onlyElement = getOnlyElement(testCalendarProvider.getCalls());
+    onlyElement.assertSameArgs(expected);
+  }
+
+  @Test
+  public void delete_source() {
+    EventContentDelegate delegate = createEventContentDelegate(ContentOwnership.SOURCE);
+
+    delegate.delete(CALENDAR_ID, KEY);
+
+    ProviderCall expected = new ProviderCall(MethodType.DELETE, Events.CONTENT_URI);
+    expected.setSelection(
+        "calendar_id = ? AND event_id = ?",
+        new String[] {Long.toString(CALENDAR_ID), Long.toString(ID)});
+    ProviderCall call = getOnlyElement(testCalendarProvider.getCalls());
+    call.assertSameArgs(expected);
+  }
+
+  @Test
+  public void delete_replica() {
+    EventContentDelegate delegate = createEventContentDelegate(ContentOwnership.REPLICA);
+
+    delegate.delete(CALENDAR_ID, KEY);
+
+    ProviderCall expected =
+        new ProviderCall(MethodType.DELETE, addSyncAdapterParameters(Events.CONTENT_URI));
+    expected.setSelection(
+        "calendar_id = ? AND _sync_id = ?", new String[] {Long.toString(CALENDAR_ID), KEY});
+    ProviderCall call = getOnlyElement(testCalendarProvider.getCalls());
+    call.assertSameArgs(expected);
+  }
+
+  @Test
+  public void deleteAll() {
+    EventContentDelegate delegate = createEventContentDelegate(ContentOwnership.REPLICA);
+
+    delegate.deleteAll(CALENDAR_ID);
+
     Uri expectedUri = addSyncAdapterParameters(Events.CONTENT_URI);
-    ProviderCall expected = new ProviderCall(MethodType.INSERT, expectedUri);
-    ContentValues values = expected.getValues();
+    ProviderCall expected = new ProviderCall(MethodType.DELETE, expectedUri);
+    expected.setSelection("calendar_id = ?", new String[] {Long.toString(CALENDAR_ID)});
+    ProviderCall call = getOnlyElement(testCalendarProvider.getCalls());
+    call.assertSameArgs(expected);
+  }
+
+  @Test
+  public void update_source() {
+    EventContentDelegate delegate = createEventContentDelegate(SOURCE);
+    Event event = createTestEvent();
+
+    delegate.update(CALENDAR_ID, KEY, event);
+
+    ProviderCall expected = new ProviderCall(MethodType.UPDATE, Events.CONTENT_URI);
+    expected.setSelection(
+        "calendar_id = ? AND event_id = ?",
+        new String[] {Long.toString(CALENDAR_ID), Long.toString(ID)});
+    addTestEventValues(SOURCE, expected.getValues());
+    ProviderCall call = getOnlyElement(testCalendarProvider.getCalls());
+    call.assertSameArgs(expected);
+  }
+
+  @Test
+  public void update_replica() {
+    EventContentDelegate delegate = createEventContentDelegate(REPLICA);
+    Event event = createTestEvent();
+
+    delegate.update(CALENDAR_ID, KEY, event);
+
+    ProviderCall expected =
+        new ProviderCall(MethodType.UPDATE, addSyncAdapterParameters(Events.CONTENT_URI));
+    expected.setSelection(
+        "calendar_id = ? AND _sync_id = ?", new String[] {Long.toString(CALENDAR_ID), KEY});
+    addTestEventValues(REPLICA, expected.getValues());
+    ProviderCall call = getOnlyElement(testCalendarProvider.getCalls());
+    call.assertSameArgs(expected);
+  }
+
+  @Test
+  public void find_source() {
+    EventContentDelegate delegate = createEventContentDelegate(SOURCE);
+
+    delegate.find(CALENDAR_ID, KEY);
+
+    Uri.Builder builder = Instances.CONTENT_URI.buildUpon();
+    ContentUris.appendId(builder, BEGIN_TIME.toEpochMilli());
+    ContentUris.appendId(builder, END_TIME.toEpochMilli());
+    Uri expectedUri = builder.build();
+    ProviderCall expected = new ProviderCall(MethodType.QUERY, expectedUri);
+    expected.setSelection(
+        "calendar_id = ? AND event_id = ?",
+        new String[] {Long.toString(CALENDAR_ID), Long.toString(ID)});
+    ProviderCall call = getOnlyElement(testCalendarProvider.getCalls());
+    call.assertSameArgs(expected);
+  }
+
+  @Test
+  public void find_replica() {
+    EventContentDelegate delegate = createEventContentDelegate(REPLICA);
+
+    delegate.find(CALENDAR_ID, KEY);
+
+    Uri.Builder builder = Instances.CONTENT_URI.buildUpon();
+    ContentUris.appendId(builder, BEGIN_TIME.toEpochMilli());
+    ContentUris.appendId(builder, END_TIME.toEpochMilli());
+    Uri expectedUri = addSyncAdapterParameters(builder.build());
+    ProviderCall expected = new ProviderCall(MethodType.QUERY, expectedUri);
+    expected.setSelection(
+        "calendar_id = ? AND _sync_id = ?", new String[] {Long.toString(CALENDAR_ID), KEY});
+    ProviderCall call = getOnlyElement(testCalendarProvider.getCalls());
+    call.assertSameArgs(expected);
+  }
+
+  private Event createTestEvent() {
+    return Event.newBuilder()
+        .setKey(KEY)
+        .setStatus(Status.CONFIRMED)
+        .setTitle(TITLE)
+        .setDescription(DESCRIPTION)
+        .setLocation(LOCATION)
+        .setBeginTime(toTimestamp(BEGIN_TIME))
+        .setEndTime(toTimestamp(END_TIME))
+        .setTimeZone(TimeZone.newBuilder().setName(ZONE_ID.getId()).build())
+        .setEndTimeZone(TimeZone.newBuilder().setName(ZONE_ID.getId()).build())
+        .setIsAllDay(ALL_DAY)
+        .setColor(Color.newBuilder().setArgb(COLOR_RGB).build())
+        .setOrganizer(ORGANIZER)
+        .build();
+  }
+
+  private void addTestEventValues(ContentOwnership ownership, ContentValues values) {
     values.put(Attendees.CALENDAR_ID, CALENDAR_ID);
     values.put(Events.STATUS, Events.STATUS_CONFIRMED);
     values.put(Events.TITLE, TITLE);
@@ -222,56 +344,9 @@ public class EventContentDelegateTest {
     values.put(Events.ALL_DAY, ALL_DAY ? 1 : 0);
     values.put(Events.EVENT_COLOR, COLOR_RGB);
     values.put(Events.ORGANIZER, ORGANIZER);
-
     if (ownership == ContentOwnership.REPLICA) {
       values.put(Events._SYNC_ID, KEY);
     }
-
-    Iterables.getOnlyElement(testCalendarProvider.getCalls()).assertEquals(expected);
-  }
-
-  @Test
-  public void delete_source() {
-    testDelete(ContentOwnership.SOURCE);
-  }
-
-  @Test
-  public void delete_replica() {
-    testDelete(ContentOwnership.REPLICA);
-  }
-
-  private void testDelete(ContentOwnership ownership) {
-    EventContentDelegate delegate = createEventContentDelegate(ownership);
-
-    delegate.delete(CALENDAR_ID, KEY);
-
-    List<ProviderCall> calls = testCalendarProvider.getCalls();
-    assertThat(calls).hasSize(1);
-    Uri expectedUri = addSyncAdapterParameters(Events.CONTENT_URI);
-    ProviderCall expected = new ProviderCall(MethodType.DELETE, expectedUri);
-    if (ownership == ContentOwnership.SOURCE) {
-      expected.setSelection(
-          "calendar_id = ? AND event_id = ?",
-          new String[] {Long.toString(CALENDAR_ID), Long.toString(ID)});
-    } else {
-      expected.setSelection(
-          "calendar_id = ? AND _sync_id = ?", new String[] {Long.toString(CALENDAR_ID), KEY});
-    }
-    Iterables.getOnlyElement(testCalendarProvider.getCalls()).assertEquals(expected);
-  }
-
-  @Test
-  public void deleteAll() {
-    EventContentDelegate delegate = createEventContentDelegate(ContentOwnership.REPLICA);
-
-    delegate.deleteAll(CALENDAR_ID);
-
-    List<ProviderCall> calls = testCalendarProvider.getCalls();
-    assertThat(calls).hasSize(1);
-    Uri expectedUri = addSyncAdapterParameters(Events.CONTENT_URI);
-    ProviderCall expected = new ProviderCall(MethodType.DELETE, expectedUri);
-    expected.setSelection("calendar_id = ?", new String[] {Long.toString(CALENDAR_ID)});
-    Iterables.getOnlyElement(testCalendarProvider.getCalls()).assertEquals(expected);
   }
 
   private Event next(Iterator<Content<Event>> contents) {

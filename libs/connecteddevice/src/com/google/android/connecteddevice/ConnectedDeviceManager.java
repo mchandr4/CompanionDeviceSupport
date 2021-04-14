@@ -393,6 +393,7 @@ public class ConnectedDeviceManager {
           storage.updateAssociatedDeviceConnectionEnabled(
               deviceId, /* isConnectionEnabled= */ false);
           disconnectDevice(deviceId);
+          isConnectingToUserDevice.set(false);
         });
   }
 

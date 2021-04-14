@@ -83,7 +83,7 @@
             android:name="com.google.android.connecteddevice.service.ConnectedDeviceFgUserService"
             android:exported="true">
             <intent-filter>
-                <action android:name="com.google.android.connecteddevice.api.BIND_REMOTE_FEATURE" />
+                <action android:name="com.google.android.connecteddevice.api.BIND_REMOTE_FEATURE_FG" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <meta-data android:name="com.google.android.connecteddevice.early_services"

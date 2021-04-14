@@ -56,6 +56,14 @@ public abstract class RemoteFeature {
   public static final String ACTION_BIND_REMOTE_FEATURE =
       "com.google.android.connecteddevice.api.BIND_REMOTE_FEATURE";
 
+  /**
+   * When a client calls {@link Context#bindService(Intent, ServiceConnection, int)} to get the
+   * IConnectedDeviceManager from a service running the foreground user. Any process that resides
+   * outside of the service host application must use this action in its {@link Intent}.
+   */
+  public static final String ACTION_BIND_REMOTE_FEATURE_FG =
+      "com.google.android.connecteddevice.api.BIND_REMOTE_FEATURE_FG";
+
   /** Intent action used to request a device be associated. */
   public static final String ACTION_ASSOCIATION_SETTING =
       "com.google.android.connecteddevice.api.ASSOCIATION_ACTIVITY";
@@ -72,13 +80,36 @@ public abstract class RemoteFeature {
 
   private final ParcelUuid featureId;
 
+  private final boolean forceFgUserBind;
+
   private IConnectedDeviceManager connectedDeviceManager;
 
   private int bindAttempts;
 
+  /**
+   * Create a new RemoteFeature.
+   *
+   * @param context {@link Context} of the application process
+   * @param featureId The id for this feature
+   */
   protected RemoteFeature(@NonNull Context context, @NonNull ParcelUuid featureId) {
+    this(context, featureId, /* forceFgUserBind= */ false);
+  }
+
+  /**
+   * Create a new RemoteFeature.
+   *
+   * @param context {@link Context} of the application process
+   * @param featureId The id for this feature
+   * @param forceFgUserBind Force binding to the foreground user service to avoid a cross-user bind
+   */
+  protected RemoteFeature(
+      @NonNull Context context,
+      @NonNull ParcelUuid featureId,
+      boolean forceFgUserBind) {
     this.context = context;
     this.featureId = featureId;
+    this.forceFgUserBind = forceFgUserBind;
   }
 
   @VisibleForTesting
@@ -251,14 +282,20 @@ public abstract class RemoteFeature {
 
   private void bindToService() {
     PackageManager packageManager = context.getPackageManager();
-    Intent intent = new Intent(ACTION_BIND_REMOTE_FEATURE);
+    String action;
+    if (forceFgUserBind) {
+      action = ACTION_BIND_REMOTE_FEATURE_FG;
+    } else {
+      action = ACTION_BIND_REMOTE_FEATURE;
+    }
+    Intent intent = new Intent(action);
     List<ResolveInfo> services =
         packageManager.queryIntentServices(intent, PackageManager.MATCH_DEFAULT_ONLY);
     if (services.isEmpty()) {
       logw(
           TAG,
           "No service supporting the "
-              + ACTION_BIND_REMOTE_FEATURE
+              + action
               + " action is installed on this device. Aborting binding.");
       return;
     }

@@ -30,8 +30,8 @@ abstract class ConnectionProtocol {
   protected val deviceCallbacks: ConcurrentHashMap<String, ThreadSafeCallbacks<DeviceCallback>> =
     ConcurrentHashMap()
 
-  /** Begin the discovery process for a new device to associate with. */
-  abstract fun startAssociationDiscovery(callback: DiscoveryCallback)
+  /** Begin the discovery process with [name] for a new device to associate with. */
+  abstract fun startAssociationDiscovery(name: String, callback: DiscoveryCallback)
 
   /**
    * Begin the discovery process for a device that will respond to the supplied [id].
@@ -97,6 +97,9 @@ abstract class ConnectionProtocol {
 
     /** Invoked when a device connection is established in response to the discovery. */
     fun onDeviceConnected(protocolId: String)
+
+    /** Invoked when the name of a device is retrieved. */
+    fun onDeviceNameRetrieved(protocolId: String, name: String)
   }
 
   /** Event notifications for a device on the protocol. */

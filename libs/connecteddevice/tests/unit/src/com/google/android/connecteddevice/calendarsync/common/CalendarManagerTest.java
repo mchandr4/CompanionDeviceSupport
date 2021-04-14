@@ -1,5 +1,7 @@
 package com.google.android.connecteddevice.calendarsync.common;
 
+import static com.google.android.connecteddevice.calendarsync.common.TimeProtoUtil.toTimeRange;
+import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -10,14 +12,17 @@ import static org.mockito.Mockito.when;
 
 import com.google.android.connecteddevice.calendarsync.Calendar;
 import com.google.android.connecteddevice.calendarsync.Event;
+import com.google.android.connecteddevice.calendarsync.UpdateAction;
 import com.google.android.connecteddevice.calendarsync.common.PlatformContentDelegate.Content;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Range;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.Before;
@@ -45,7 +50,6 @@ public class CalendarManagerTest {
   @Mock private PlatformContentDelegate<Calendar> mockCalendarContentDelegate;
   @Mock private EventManagerFactory mockEventManagerFactory;
   @Mock private EventManager mockEventManager;
-  @Mock private CalendarStore mockCalendarStore;
 
   @Captor ArgumentCaptor<Range<Instant>> timeRangeCaptor;
 
@@ -108,7 +112,7 @@ public class CalendarManagerTest {
     Calendar calendar =
         Calendar.newBuilder()
             .setKey(CALENDAR_KEY)
-            .setRange(TimeProtoUtil.toTimeRange(TIME_RANGE))
+            .setRange(toTimeRange(TIME_RANGE))
             .addEvents(event)
             .build();
 
@@ -121,10 +125,7 @@ public class CalendarManagerTest {
   public void create_createsEventManagerWithTimeRange() {
     CalendarManager manager = createCalendarManager(new HashMap<>());
     Calendar calendar =
-        Calendar.newBuilder()
-            .setKey(CALENDAR_KEY)
-            .setRange(TimeProtoUtil.toTimeRange(TIME_RANGE))
-            .build();
+        Calendar.newBuilder().setKey(CALENDAR_KEY).setRange(toTimeRange(TIME_RANGE)).build();
 
     manager.create(DEVICE_ID, calendar);
 
@@ -139,10 +140,7 @@ public class CalendarManagerTest {
   public void create_insertsCalendar() {
     CalendarManager manager = createCalendarManager(new HashMap<>());
     Calendar calendar =
-        Calendar.newBuilder()
-            .setKey(CALENDAR_KEY)
-            .setRange(TimeProtoUtil.toTimeRange(TIME_RANGE))
-            .build();
+        Calendar.newBuilder().setKey(CALENDAR_KEY).setRange(toTimeRange(TIME_RANGE)).build();
 
     manager.create(DEVICE_ID, calendar);
 
@@ -171,13 +169,257 @@ public class CalendarManagerTest {
     verify(mockCalendarContentDelegate).deleteAll(DEVICE_ID);
   }
 
+  @Test
+  public void createUpdateMessages_identical_updatesEmpty() {
+    Map<String, Range<Instant>> calendarKeyToTimeRange = new HashMap<>();
+    calendarKeyToTimeRange.put(CALENDAR_KEY, TIME_RANGE);
+    CalendarManager manager = createCalendarManager(calendarKeyToTimeRange);
+    Calendar calendar =
+        Calendar.newBuilder().setKey(CALENDAR_KEY).setRange(toTimeRange(TIME_RANGE)).build();
+    Collection<Calendar> currentContents = ImmutableSet.of(calendar);
+    Collection<Calendar> previousContents = ImmutableSet.of(calendar);
+
+    ImmutableSet<Calendar> updateMessages =
+        manager.createUpdateMessages(previousContents, currentContents);
+
+    assertThat(updateMessages).isEmpty();
+  }
+
+  @Test
+  public void createUpdateMessages_equal_updatesEmpty() {
+    when(mockEventManager.createUpdateMessages(any(), any())).thenReturn(ImmutableSet.of());
+    Map<String, Range<Instant>> calendarKeyToTimeRange = new HashMap<>();
+    calendarKeyToTimeRange.put(CALENDAR_KEY, TIME_RANGE);
+    CalendarManager manager = createCalendarManager(calendarKeyToTimeRange);
+    Calendar calendar1 = Calendar.newBuilder().setKey(CALENDAR_KEY).build();
+    Calendar calendar2 = calendar1.toBuilder().build();
+    Collection<Calendar> currentContents = ImmutableSet.of(calendar1);
+    Collection<Calendar> previousContents = ImmutableSet.of(calendar2);
+
+    ImmutableSet<Calendar> updateMessages =
+        manager.createUpdateMessages(previousContents, currentContents);
+
+    assertThat(updateMessages).isEmpty();
+  }
+
+  @Test
+  public void createUpdateMessages_additionalCalendar_createMessage() {
+    when(mockEventManager.createUpdateMessages(any(), any())).thenReturn(ImmutableSet.of());
+    Map<String, Range<Instant>> calendarKeyToTimeRange = new HashMap<>();
+    calendarKeyToTimeRange.put("calendar key 1", TIME_RANGE);
+    calendarKeyToTimeRange.put("calendar key 2", TIME_RANGE);
+    CalendarManager manager = createCalendarManager(calendarKeyToTimeRange);
+    Calendar calendar1 = Calendar.newBuilder().setKey("calendar key 1").build();
+    Calendar calendar2 = Calendar.newBuilder().setKey("calendar key 2").build();
+
+    Collection<Calendar> previousContents = ImmutableSet.of(calendar1);
+    Collection<Calendar> currentContents = ImmutableSet.of(calendar1, calendar2);
+
+    ImmutableSet<Calendar> updateMessages =
+        manager.createUpdateMessages(previousContents, currentContents);
+
+    Calendar createMessage = getOnlyElement(updateMessages);
+    assertThat(createMessage.getAction()).isEqualTo(UpdateAction.CREATE);
+  }
+
+  @Test
+  public void createUpdateMessages_removedCalendar_deleteMessage() {
+    when(mockEventManager.createUpdateMessages(any(), any())).thenReturn(ImmutableSet.of());
+    Map<String, Range<Instant>> calendarKeyToTimeRange = new HashMap<>();
+    calendarKeyToTimeRange.put("calendar key 1", TIME_RANGE);
+    calendarKeyToTimeRange.put("calendar key 2", TIME_RANGE);
+    CalendarManager manager = createCalendarManager(calendarKeyToTimeRange);
+    Calendar calendar1 = Calendar.newBuilder().setKey("calendar key 1").build();
+    Calendar calendar2 = Calendar.newBuilder().setKey("calendar key 2").build();
+
+    Collection<Calendar> previousContents = ImmutableSet.of(calendar1, calendar2);
+    Collection<Calendar> currentContents = ImmutableSet.of(calendar1);
+
+    ImmutableSet<Calendar> updateMessages =
+        manager.createUpdateMessages(previousContents, currentContents);
+
+    Calendar createMessage = getOnlyElement(updateMessages);
+    assertThat(createMessage.getAction()).isEqualTo(UpdateAction.DELETE);
+  }
+
+  @Test
+  public void createUpdateMessages_modifyCalendar_updateMessage() {
+    when(mockEventManager.createUpdateMessages(any(), any())).thenReturn(ImmutableSet.of());
+    Map<String, Range<Instant>> calendarKeyToTimeRange = new HashMap<>();
+    calendarKeyToTimeRange.put(CALENDAR_KEY, TIME_RANGE);
+    CalendarManager manager = createCalendarManager(calendarKeyToTimeRange);
+    Calendar calendar1 = Calendar.newBuilder().setKey(CALENDAR_KEY).setTitle("title 1").build();
+    Calendar calendar2 = Calendar.newBuilder().setKey(CALENDAR_KEY).setTitle("title 2").build();
+
+    Collection<Calendar> previousContents = ImmutableSet.of(calendar1);
+    Collection<Calendar> currentContents = ImmutableSet.of(calendar2);
+
+    ImmutableSet<Calendar> updateMessages =
+        manager.createUpdateMessages(previousContents, currentContents);
+
+    Calendar createMessage = getOnlyElement(updateMessages);
+    assertThat(createMessage.getAction()).isEqualTo(UpdateAction.UPDATE);
+  }
+
+  @Test
+  public void createUpdateMessages_childChanged_unchangedMessage() {
+    when(mockEventManager.createUpdateMessages(any(), any()))
+        .thenReturn(ImmutableSet.of(Event.getDefaultInstance()));
+    Map<String, Range<Instant>> calendarKeyToTimeRange = new HashMap<>();
+    calendarKeyToTimeRange.put(CALENDAR_KEY, TIME_RANGE);
+    CalendarManager manager = createCalendarManager(calendarKeyToTimeRange);
+    Calendar calendar1 = Calendar.newBuilder().setKey(CALENDAR_KEY).build();
+    Calendar calendar2 = Calendar.newBuilder().setKey(CALENDAR_KEY).build();
+
+    Collection<Calendar> previousContents = ImmutableSet.of(calendar1);
+    Collection<Calendar> currentContents = ImmutableSet.of(calendar2);
+
+    ImmutableSet<Calendar> updateMessages =
+        manager.createUpdateMessages(previousContents, currentContents);
+
+    Calendar createMessage = getOnlyElement(updateMessages);
+    assertThat(createMessage.getAction()).isEqualTo(UpdateAction.UNCHANGED);
+  }
+
+  @Test
+  public void createReplaceMessages() {
+    Map<String, Range<Instant>> calendarKeyToTimeRange = new HashMap<>();
+    calendarKeyToTimeRange.put(CALENDAR_KEY, TIME_RANGE);
+    CalendarManager manager = createCalendarManager(calendarKeyToTimeRange);
+
+    Calendar calendar1 = Calendar.newBuilder().setKey(CALENDAR_KEY).setTitle("title 1").build();
+    Calendar calendar2 = Calendar.newBuilder().setKey(CALENDAR_KEY).setTitle("title 2").build();
+
+    Collection<Calendar> previousContents = ImmutableSet.of(calendar1);
+    Collection<Calendar> currentContents = ImmutableSet.of(calendar2);
+
+    ImmutableSet<Calendar> updateMessages =
+        manager.createReplaceMessages(previousContents, currentContents);
+
+    Calendar createMessage = getOnlyElement(updateMessages);
+    assertThat(createMessage.getAction()).isEqualTo(UpdateAction.REPLACE);
+  }
+
+  @Test
+  public void applyUpdateMessages_replace_deletesCalendar() {
+    Map<String, Range<Instant>> calendarKeyToTimeRange = new HashMap<>();
+    calendarKeyToTimeRange.put(CALENDAR_KEY, TIME_RANGE);
+    CalendarManager manager = createCalendarManager(calendarKeyToTimeRange);
+    Calendar calendarUpdate =
+        Calendar.newBuilder().setAction(UpdateAction.REPLACE).setKey(CALENDAR_KEY).build();
+
+    manager.applyUpdateMessages(DEVICE_ID, ImmutableSet.of(calendarUpdate));
+
+    verify(mockCalendarContentDelegate).delete(DEVICE_ID, CALENDAR_KEY);
+  }
+
+  @Test
+  public void applyUpdateMessages_noActionNoChildren_deletesCalendar() {
+    Map<String, Range<Instant>> calendarKeyToTimeRange = new HashMap<>();
+    calendarKeyToTimeRange.put(CALENDAR_KEY, TIME_RANGE);
+    CalendarManager manager = createCalendarManager(calendarKeyToTimeRange);
+    Calendar calendarUpdate = Calendar.newBuilder().setKey(CALENDAR_KEY).build();
+
+    manager.applyUpdateMessages(DEVICE_ID, ImmutableSet.of(calendarUpdate));
+
+    verify(mockCalendarContentDelegate).delete(DEVICE_ID, CALENDAR_KEY);
+  }
+
+  @Test
+  public void applyUpdateMessages_noActionWithChild_deletesAndInsertsCalendar() {
+    Map<String, Range<Instant>> calendarKeyToTimeRange = new HashMap<>();
+    calendarKeyToTimeRange.put(CALENDAR_KEY, TIME_RANGE);
+    CalendarManager manager = createCalendarManager(calendarKeyToTimeRange);
+    Calendar calendarUpdate =
+        Calendar.newBuilder().addEvents(Event.newBuilder()).setKey(CALENDAR_KEY).build();
+
+    manager.applyUpdateMessages(DEVICE_ID, ImmutableSet.of(calendarUpdate));
+
+    verify(mockCalendarContentDelegate).delete(DEVICE_ID, CALENDAR_KEY);
+    ArgumentCaptor<Calendar> calendarArgumentCaptor = ArgumentCaptor.forClass(Calendar.class);
+    verify(mockCalendarContentDelegate).insert(eq(DEVICE_ID), calendarArgumentCaptor.capture());
+    Calendar insertedCalendar = calendarArgumentCaptor.getValue();
+    assertThat(insertedCalendar.getKey()).isEqualTo(CALENDAR_KEY);
+  }
+
+  @Test
+  public void applyUpdateMessages_create_insertsCalendar() {
+    Map<String, Range<Instant>> calendarKeyToTimeRange = new HashMap<>();
+    calendarKeyToTimeRange.put(CALENDAR_KEY, TIME_RANGE);
+    CalendarManager manager = createCalendarManager(calendarKeyToTimeRange);
+    Calendar calendarUpdate =
+        Calendar.newBuilder().setAction(UpdateAction.CREATE).setKey(CALENDAR_KEY).build();
+
+    manager.applyUpdateMessages(DEVICE_ID, ImmutableSet.of(calendarUpdate));
+
+    ArgumentCaptor<Calendar> calendarArgumentCaptor = ArgumentCaptor.forClass(Calendar.class);
+    verify(mockCalendarContentDelegate).insert(eq(DEVICE_ID), calendarArgumentCaptor.capture());
+    Calendar insertedCalendar = calendarArgumentCaptor.getValue();
+    assertThat(insertedCalendar.getKey()).isEqualTo(CALENDAR_KEY);
+  }
+
+  @Test
+  public void applyUpdateMessages_delete_deletesCalendar() {
+    Map<String, Range<Instant>> calendarKeyToTimeRange = new HashMap<>();
+    calendarKeyToTimeRange.put(CALENDAR_KEY, TIME_RANGE);
+    CalendarManager manager = createCalendarManager(calendarKeyToTimeRange);
+    Calendar calendarUpdate =
+        Calendar.newBuilder().setAction(UpdateAction.DELETE).setKey(CALENDAR_KEY).build();
+
+    manager.applyUpdateMessages(DEVICE_ID, ImmutableSet.of(calendarUpdate));
+
+    verify(mockCalendarContentDelegate).delete(DEVICE_ID, CALENDAR_KEY);
+  }
+
+  @Test
+  public void applyUpdateMessages_update_updatesCalendar() {
+    Map<String, Range<Instant>> calendarKeyToTimeRange = new HashMap<>();
+    calendarKeyToTimeRange.put(CALENDAR_KEY, TIME_RANGE);
+    CalendarManager manager = createCalendarManager(calendarKeyToTimeRange);
+    Calendar calendarUpdate =
+        Calendar.newBuilder()
+            .setAction(UpdateAction.UPDATE)
+            .setRange(toTimeRange(TIME_RANGE))
+            .setKey(CALENDAR_KEY)
+            .build();
+
+    manager.applyUpdateMessages(DEVICE_ID, ImmutableSet.of(calendarUpdate));
+
+    ArgumentCaptor<Calendar> calendarArgumentCaptor = ArgumentCaptor.forClass(Calendar.class);
+    verify(mockCalendarContentDelegate)
+        .update(eq(DEVICE_ID), eq(CALENDAR_KEY), calendarArgumentCaptor.capture());
+    Calendar insertedCalendar = calendarArgumentCaptor.getValue();
+    assertThat(insertedCalendar.getKey()).isEqualTo(CALENDAR_KEY);
+  }
+
+  @Test
+  public void applyUpdateMessages_unchanged_updatesOnlyChildren() {
+    when(mockCalendarContentDelegate.find(DEVICE_ID, CALENDAR_KEY)).thenReturn(CALENDAR_ID);
+    Map<String, Range<Instant>> calendarKeyToTimeRange = new HashMap<>();
+    calendarKeyToTimeRange.put(CALENDAR_KEY, TIME_RANGE);
+    CalendarManager manager = createCalendarManager(calendarKeyToTimeRange);
+    Event event = Event.newBuilder().setKey("event key").build();
+    Calendar calendarUpdate =
+        Calendar.newBuilder()
+            .setAction(UpdateAction.UNCHANGED)
+            .setRange(toTimeRange(TIME_RANGE))
+            .setKey(CALENDAR_KEY)
+            .addEvents(event)
+            .build();
+
+    manager.applyUpdateMessages(DEVICE_ID, ImmutableSet.of(calendarUpdate));
+
+    verify(mockCalendarContentDelegate).find(DEVICE_ID, CALENDAR_KEY);
+    verify(mockEventManager).applyUpdateMessages(CALENDAR_ID, calendarUpdate.getEventsList());
+  }
+
   private CalendarManager createCalendarManager(
       Map<String, Range<Instant>> calendarKeyToTimeRange) {
     return new CalendarManager(
         mockLoggerFactory,
         mockCalendarContentDelegate,
         mockEventManagerFactory,
-        mockCalendarStore,
+        new CalendarStore(),
         calendarKeyToTimeRange);
   }
 }

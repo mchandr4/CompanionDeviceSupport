@@ -145,10 +145,10 @@ public class SourceCalendarSyncTest {
   }
 
   @Test
-  public void clear_sendsDisableMessage() throws InvalidProtocolBufferException {
+  public void disable_sendsDisableMessage() throws InvalidProtocolBufferException {
     // Clearing and then syncing no calendars should not send again.
     sync.start();
-    sync.clear(DEVICE_ID);
+    sync.disable(DEVICE_ID);
 
     // Only one message was sent for the initial sync.
     ArgumentCaptor<byte[]> bytesArgumentCaptor = ArgumentCaptor.forClass(byte[].class);

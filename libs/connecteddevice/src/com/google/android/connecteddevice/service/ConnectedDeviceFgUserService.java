@@ -93,7 +93,7 @@ public final class ConnectedDeviceFgUserService extends TrunkService {
 
     String action = intent.getAction();
     logd(TAG, "Service bound. Action: " + action);
-    if (action.equals(RemoteFeature.ACTION_BIND_REMOTE_FEATURE)) {
+    if (action.equals(RemoteFeature.ACTION_BIND_REMOTE_FEATURE_FG)) {
       return connectedDeviceBinder;
     }
 

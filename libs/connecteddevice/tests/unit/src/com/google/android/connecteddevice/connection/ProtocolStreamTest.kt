@@ -195,7 +195,7 @@ class ProtocolStreamTest {
       deviceCallbacks[PROTOCOL_ID]?.invoke { it.onDataReceived(PROTOCOL_ID, data) }
     }
 
-    override fun startAssociationDiscovery(callback: DiscoveryCallback) {
+    override fun startAssociationDiscovery(name: String, callback: DiscoveryCallback) {
     }
 
     override fun startConnectionDiscovery(id: UUID, callback: DiscoveryCallback) {
@@ -222,7 +222,7 @@ class ProtocolStreamTest {
 
   open class FailingSendProtocol : ConnectionProtocol() {
 
-    override fun startAssociationDiscovery(callback: DiscoveryCallback) {
+    override fun startAssociationDiscovery(name: String, callback: DiscoveryCallback) {
     }
 
     override fun startConnectionDiscovery(id: UUID, callback: DiscoveryCallback) {

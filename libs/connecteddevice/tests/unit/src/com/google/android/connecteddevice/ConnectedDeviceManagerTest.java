@@ -23,6 +23,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -524,6 +525,24 @@ public class ConnectedDeviceManagerTest {
     String deviceId = UUID.randomUUID().toString();
     connectedDeviceManager.enableAssociatedDeviceConnection(deviceId);
     verify(mockStorage).updateAssociatedDeviceConnectionEnabled(deviceId, true);
+  }
+
+  @Test
+  public void enableAssociatedDeviceConnection_startsDiscoveryAfterBeingDisabled() {
+    UUID deviceId = UUID.randomUUID();
+    when(mockStorage.getActiveUserAssociatedDeviceIds())
+        .thenReturn(ImmutableList.of(deviceId.toString()));
+    AssociatedDevice device =
+        new AssociatedDevice(
+            deviceId.toString(),
+            TEST_DEVICE_ADDRESS,
+            TEST_DEVICE_NAME,
+            /* isConnectionEnabled= */ true);
+    when(mockStorage.getActiveUserAssociatedDevices()).thenReturn(ImmutableList.of(device));
+    connectedDeviceManager.connectToActiveUserDevice();
+    connectedDeviceManager.disableAssociatedDeviceConnection(deviceId.toString());
+    connectedDeviceManager.enableAssociatedDeviceConnection(deviceId.toString());
+    verify(mockCarBluetoothManager, times(2)).connectToDevice(deviceId);
   }
 
   @Test

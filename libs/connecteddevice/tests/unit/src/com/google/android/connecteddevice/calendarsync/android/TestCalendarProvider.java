@@ -39,6 +39,8 @@ public class TestCalendarProvider extends ContentProvider {
     public enum MethodType {
       DELETE,
       INSERT,
+      UPDATE,
+      QUERY,
     }
 
     // Column names must start with a lowercase letter to distinguish from operators like AND.
@@ -54,6 +56,8 @@ public class TestCalendarProvider extends ContentProvider {
     private ContentValues values = new ContentValues();
     private String selection;
     private String[] selectionArgs;
+    private String[] projection;
+    private String sortOrder;
     private Map<String, String> columnToArg;
 
     public String getSelection() {
@@ -90,7 +94,23 @@ public class TestCalendarProvider extends ContentProvider {
       return selectionArgs;
     }
 
-    public void assertEquals(ProviderCall expected) {
+    public void setProjection(String[] projection) {
+      this.projection = projection;
+    }
+
+    public String[] getProjection() {
+      return projection;
+    }
+
+    public void setSortOrder(String sortOrder) {
+      this.sortOrder = sortOrder;
+    }
+
+    public String getSortOrder() {
+      return sortOrder;
+    }
+
+    public void assertSameArgs(ProviderCall expected) {
       assertThat(type).isEqualTo(expected.type);
       assertThat(uri).isEqualTo(expected.uri);
       assertThat(values).isEqualTo(expected.values);
@@ -157,6 +177,11 @@ public class TestCalendarProvider extends ContentProvider {
     if (cursor == null) {
       throw new IllegalStateException("Must call #setCursor");
     }
+    ProviderCall call = new ProviderCall(MethodType.QUERY, uri);
+    call.setSelection(selection, selectionArgs);
+    call.setProjection(projection);
+    call.setSortOrder(sortOrder);
+    calls.add(call);
     return cursor;
   }
 
@@ -190,6 +215,10 @@ public class TestCalendarProvider extends ContentProvider {
 
   @Override
   public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-    return 0;
+    ProviderCall call = new ProviderCall(MethodType.UPDATE, uri);
+    call.setSelection(selection, selectionArgs);
+    call.setValues(values);
+    calls.add(call);
+    return 1;
   }
 }

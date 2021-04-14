@@ -54,10 +54,12 @@ public class CalendarSyncAccess<CalendarSyncT extends BaseCalendarSync> {
    */
   public void access(Consumer<CalendarSyncT> task) {
     checkState(handler != null, "Must call start() first");
+    // Reference the sync locally in case the field is nulled.
+    final CalendarSyncT nonNullSync = sync;
     handler.post(
         () -> {
           try {
-            task.accept(sync);
+            task.accept(nonNullSync);
           } catch (RuntimeException e) {
             // Catch and log exceptions without crashing the background thread.
             logger.error("Caught exception running calendar access task", e);
@@ -81,7 +83,7 @@ public class CalendarSyncAccess<CalendarSyncT extends BaseCalendarSync> {
       backgroundHandlerThread.start();
       handler = new Handler(backgroundHandlerThread.getLooper());
       sync = calendarSyncFactory.create(handler);
-      handler.post(sync::start);
+      access(BaseCalendarSync::start);
     } else {
       logger.error("start() was called multiple times without calling stop() first.");
     }
@@ -93,7 +95,7 @@ public class CalendarSyncAccess<CalendarSyncT extends BaseCalendarSync> {
    */
   public void stop() {
     if (sync != null) {
-      sync.stop();
+      access(BaseCalendarSync::stop);
       sync = null;
       backgroundHandlerThread.quitSafely();
       backgroundHandlerThread = null;

@@ -11,9 +11,9 @@ import com.google.auto.factory.Provided;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Range;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import javax.annotation.Nullable;
 
 /**
@@ -160,7 +160,7 @@ class CalendarManager extends ContentManager<Calendar, Calendar.Builder, Event, 
 
   /** Creates REPLACE messages for older replica devices that to not support UPDATE. */
   public ImmutableSet<Calendar> createReplaceMessages(
-      ImmutableSet<Calendar> previousCalendars, Set<Calendar> currentCalendars) {
+      Collection<Calendar> previousCalendars, Collection<Calendar> currentCalendars) {
     return createReplaceOrUpdateMessages(previousCalendars, currentCalendars, /* update= */ false);
   }
 }

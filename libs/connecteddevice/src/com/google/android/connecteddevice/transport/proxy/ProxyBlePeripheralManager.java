@@ -52,9 +52,7 @@ public class ProxyBlePeripheralManager extends BlePeripheralManager {
   // https://developer.android.com/studio/run/emulator-networking
   private static final byte[] HOST_LOOPBACK_ADDRESS = {10, 0, 2, 2};
   // Ensure the host running the proxy service listens to the same port.
-  // LINT.IfChange
   private static final int PORT = 12120;
-  // LINT.ThenChange(//depot/google3/third_party/swift/BleProxyService/bleperipheral/BlePeripheralService.swift)
 
   private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 

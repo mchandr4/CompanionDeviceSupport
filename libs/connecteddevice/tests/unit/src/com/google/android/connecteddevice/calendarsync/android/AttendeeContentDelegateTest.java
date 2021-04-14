@@ -1,5 +1,6 @@
 package com.google.android.connecteddevice.calendarsync.android;
 
+import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.content.ContentValues;
@@ -16,7 +17,6 @@ import com.google.android.connecteddevice.calendarsync.common.CommonLogger;
 import com.google.android.connecteddevice.calendarsync.common.PlatformContentDelegate.Content;
 import com.google.common.collect.ImmutableMap;
 import java.util.Iterator;
-import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,7 +27,6 @@ import org.robolectric.RobolectricTestRunner;
 public class AttendeeContentDelegateTest {
   private static final long EVENT_ID = 123454657879L;
   private static final long ID = 987654321L;
-  private static final String KEY = "a key";
   private static final String NAME = "the name";
   private static final String EMAIL = "the email";
 
@@ -61,7 +60,7 @@ public class AttendeeContentDelegateTest {
   public void read_allFields() {
     addTestRowWithStatus(Attendees.ATTENDEE_STATUS_ACCEPTED);
 
-    Content<Attendee> content = delegate.read(EVENT_ID, KEY);
+    Content<Attendee> content = delegate.read(EVENT_ID, EMAIL);
 
     assertThat(content.getId()).isEqualTo(ID);
     assertThat(content.getMessage().getEmail()).isEqualTo(EMAIL);
@@ -99,53 +98,80 @@ public class AttendeeContentDelegateTest {
 
   @Test
   public void insert() {
-    Attendee attendee =
-        Attendee.newBuilder()
-            .setEmail(EMAIL)
-            .setName(NAME)
-            .setStatus(Status.ACCEPTED)
-            .setType(Attendee.Type.REQUIRED)
-            .build();
+    Attendee attendee = createTestAttendee();
 
     delegate.insert(EVENT_ID, attendee);
 
-    List<ProviderCall> calls = testCalendarProvider.getCalls();
-    assertThat(calls).hasSize(1);
-    ProviderCall call = calls.get(0);
     ProviderCall expected = new ProviderCall(MethodType.INSERT, Attendees.CONTENT_URI);
     ContentValues values = expected.getValues();
-    values.put(Attendees.EVENT_ID, EVENT_ID);
-    values.put(Attendees.ATTENDEE_EMAIL, EMAIL);
-    values.put(Attendees.ATTENDEE_NAME, NAME);
-    values.put(Attendees.ATTENDEE_STATUS, Attendees.ATTENDEE_STATUS_ACCEPTED);
-    values.put(Attendees.ATTENDEE_TYPE, Attendees.TYPE_REQUIRED);
+    addTestAttendeeValues(values);
 
-    call.assertEquals(expected);
+    ProviderCall call = getOnlyElement(testCalendarProvider.getCalls());
+    call.assertSameArgs(expected);
+  }
+
+  private Attendee createTestAttendee() {
+    return Attendee.newBuilder()
+        .setEmail(EMAIL)
+        .setName(NAME)
+        .setStatus(Status.ACCEPTED)
+        .setType(Attendee.Type.REQUIRED)
+        .build();
   }
 
   @Test
   public void delete() {
-    delegate.delete(EVENT_ID, KEY);
+    delegate.delete(EVENT_ID, EMAIL);
 
-    List<ProviderCall> calls = testCalendarProvider.getCalls();
-    assertThat(calls).hasSize(1);
-    ProviderCall call = calls.get(0);
     ProviderCall expected = new ProviderCall(MethodType.DELETE, Attendees.CONTENT_URI);
     expected.setSelection(
-        "attendeeEmail = ? AND event_id = ?", new String[] {KEY, Long.toString(EVENT_ID)});
-    call.assertEquals(expected);
+        "attendeeEmail = ? AND event_id = ?", new String[] {EMAIL, Long.toString(EVENT_ID)});
+
+    ProviderCall call = getOnlyElement(testCalendarProvider.getCalls());
+    call.assertSameArgs(expected);
   }
 
   @Test
   public void deleteAll() {
     delegate.deleteAll(EVENT_ID);
 
-    List<ProviderCall> calls = testCalendarProvider.getCalls();
-    assertThat(calls).hasSize(1);
-    ProviderCall call = calls.get(0);
     ProviderCall expected = new ProviderCall(MethodType.DELETE, Attendees.CONTENT_URI);
     expected.setSelection("event_id = ?", new String[] {Long.toString(EVENT_ID)});
-    call.assertEquals(expected);
+
+    ProviderCall call = getOnlyElement(testCalendarProvider.getCalls());
+    call.assertSameArgs(expected);
+  }
+
+  @Test
+  public void update() {
+    Attendee attendee = createTestAttendee();
+
+    delegate.update(EVENT_ID, EMAIL, attendee);
+
+    ProviderCall expected = new ProviderCall(MethodType.UPDATE, Attendees.CONTENT_URI);
+    expected.setSelection(
+        "event_id = ? AND attendeeEmail = ?", new String[] {Long.toString(EVENT_ID), EMAIL});
+    addTestAttendeeValues(expected.getValues());
+    ProviderCall call = getOnlyElement(testCalendarProvider.getCalls());
+    call.assertSameArgs(expected);
+  }
+
+  @Test
+  public void find() {
+    delegate.find(EVENT_ID, EMAIL);
+    ProviderCall expected = new ProviderCall(MethodType.QUERY, Attendees.CONTENT_URI);
+    expected.setSelection(
+        "event_id = ? AND attendeeEmail = ?", new String[] {Long.toString(EVENT_ID), EMAIL});
+    ProviderCall call = getOnlyElement(testCalendarProvider.getCalls());
+    call.assertSameArgs(expected);
+  }
+
+  private void addTestAttendeeValues(ContentValues values) {
+    values.put(Attendees.EVENT_ID, EVENT_ID);
+    values.put(Attendees.ATTENDEE_EMAIL, EMAIL);
+    values.put(Attendees.ATTENDEE_NAME, NAME);
+    values.put(Attendees.ATTENDEE_STATUS, Attendees.ATTENDEE_STATUS_ACCEPTED);
+    values.put(Attendees.ATTENDEE_TYPE, Attendees.TYPE_REQUIRED);
   }
 
   private void addTestRowWithType(int type) {

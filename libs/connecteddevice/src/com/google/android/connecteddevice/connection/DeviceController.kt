@@ -62,7 +62,7 @@ class DeviceController(
     val associationId = UUID.randomUUID()
     val discoveryCallback = generateDiscoveryCallback(callback, associationId, nameForAssociation)
     for (protocol in protocols) {
-      protocol.startAssociationDiscovery(discoveryCallback)
+      protocol.startAssociationDiscovery(nameForAssociation, discoveryCallback)
     }
   }
 
@@ -156,6 +156,7 @@ class DeviceController(
     val protocolIds = CopyOnWriteArraySet<String>()
     var secureChannel: SecureChannel? = null
     var callback: AssociationCallback? = null
+    var name: String? = null
   }
 
   /**
@@ -200,6 +201,12 @@ class DeviceController(
 
       override fun onDiscoveryFailedToStart() {
         associationCallback?.onAssociationStartFailure()
+      }
+
+      override fun onDeviceNameRetrieved(protocolId: String, name: String) {
+        val device = getConnectedDevice(deviceId)
+        device?.name = name
+        storage.updateAssociatedDeviceName(deviceId.toString(), name)
       }
     }
   }

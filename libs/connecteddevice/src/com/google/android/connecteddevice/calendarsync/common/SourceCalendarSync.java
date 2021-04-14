@@ -84,9 +84,13 @@ public class SourceCalendarSync extends BaseCalendarSync {
     scheduleNextUpdate();
   }
 
-  @Override
-  public void clear(String deviceId) {
-    super.clear(deviceId);
+  /**
+   * Clears state for the remote device and also sends a message to the remote device to remove its
+   * state for this device.
+   */
+  public void disable(String deviceId) {
+    logger.debug("Disable device " + deviceId);
+    clear(deviceId);
 
     // Send a message to the remote replica device to remove all stored data for this device.
     send(newUpdateBuilder(UpdateCalendars.Type.DISABLE).build(), deviceId);

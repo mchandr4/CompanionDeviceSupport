@@ -68,7 +68,7 @@ public class TestCalendarProviderTest {
     call1.setSelection("col1 = ? AND col2 = ?", new String[] {"1", "2"});
     call2.setSelection("col2 = ? AND col1 = ?", new String[] {"2", "1"});
 
-    call1.assertEquals(call2);
+    call1.assertSameArgs(call2);
   }
 
   @Test
@@ -78,7 +78,7 @@ public class TestCalendarProviderTest {
     call1.setSelection("col1 = ? AND col2 = ?", new String[] {"1", "2"});
     call2.setSelection("col1 = ? AND col2 = ?", new String[] {"1", "3"});
 
-    assertThrows(AssertionError.class, () -> call1.assertEquals(call2));
+    assertThrows(AssertionError.class, () -> call1.assertSameArgs(call2));
   }
 
   @Test
@@ -88,6 +88,6 @@ public class TestCalendarProviderTest {
     call1.setSelection("col1 = ? AND col2 = ?", new String[] {"1", "2"});
     call2.setSelection("col1 = ? AND col3 = ?", new String[] {"1", "2"});
 
-    assertThrows(AssertionError.class, () -> call1.assertEquals(call2));
+    assertThrows(AssertionError.class, () -> call1.assertSameArgs(call2));
   }
 }
