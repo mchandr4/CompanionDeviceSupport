@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.android.connecteddevice.connection.ble;
+package com.google.android.connecteddevice.transport.ble;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGattCharacteristic;
@@ -49,7 +49,7 @@ public abstract class BlePeripheralManager {
    *
    * @param callback The callback to be notified.
    */
-  void registerCallback(@NonNull Callback callback) {
+  public void registerCallback(@NonNull Callback callback) {
     callbacks.add(callback);
   }
 
@@ -58,7 +58,7 @@ public abstract class BlePeripheralManager {
    *
    * @param callback The callback to unregister.
    */
-  void unregisterCallback(@NonNull Callback callback) {
+  public void unregisterCallback(@NonNull Callback callback) {
     callbacks.remove(callback);
   }
 
@@ -67,7 +67,7 @@ public abstract class BlePeripheralManager {
    *
    * @param listener The listener to invoke.
    */
-  void addOnCharacteristicWriteListener(@NonNull OnCharacteristicWriteListener listener) {
+  public void addOnCharacteristicWriteListener(@NonNull OnCharacteristicWriteListener listener) {
     writeListeners.add(listener);
   }
 
@@ -76,7 +76,7 @@ public abstract class BlePeripheralManager {
    *
    * @param listener The listener to remove.
    */
-  void removeOnCharacteristicWriteListener(@NonNull OnCharacteristicWriteListener listener) {
+  public void removeOnCharacteristicWriteListener(@NonNull OnCharacteristicWriteListener listener) {
     writeListeners.remove(listener);
   }
 
@@ -85,7 +85,7 @@ public abstract class BlePeripheralManager {
    *
    * @param listener The listener to invoke.
    */
-  void addOnCharacteristicReadListener(@NonNull OnCharacteristicReadListener listener) {
+  public void addOnCharacteristicReadListener(@NonNull OnCharacteristicReadListener listener) {
     readListeners.add(listener);
   }
 
@@ -94,7 +94,7 @@ public abstract class BlePeripheralManager {
    *
    * @param listener The listener to remove.
    */
-  void removeOnCharacteristicReadistener(@NonNull OnCharacteristicReadListener listener) {
+  public void removeOnCharacteristicReadistener(@NonNull OnCharacteristicReadListener listener) {
     readListeners.remove(listener);
   }
 
@@ -103,7 +103,7 @@ public abstract class BlePeripheralManager {
    *
    * @return The size of the MTU in bytes.
    */
-  protected abstract int getMtuSize();
+  public abstract int getMtuSize();
 
   /**
    * Starts the GATT server with the given {@link BluetoothGattService} and begins advertising.
@@ -116,7 +116,7 @@ public abstract class BlePeripheralManager {
    * @param scanResponse {@link AdvertiseData} scan response
    * @param advertiseCallback {@link AdvertiseCallback} callback for advertiser
    */
-  protected abstract void startAdvertising(
+  public abstract void startAdvertising(
       BluetoothGattService service,
       AdvertiseData advertiseData,
       AdvertiseData scanResponse,
@@ -127,27 +127,27 @@ public abstract class BlePeripheralManager {
    *
    * @param advertiseCallback The callback that is associated with the advertisement.
    */
-  protected abstract void stopAdvertising(AdvertiseCallback advertiseCallback);
+  public abstract void stopAdvertising(AdvertiseCallback advertiseCallback);
 
   /** Notifies the characteristic change via {@link BluetoothGattServer} */
-  protected abstract void notifyCharacteristicChanged(
+  public abstract void notifyCharacteristicChanged(
       @NonNull BluetoothDevice device,
       @NonNull BluetoothGattCharacteristic characteristic,
       boolean confirm);
 
   /** Connects the Gatt server of the remote device to retrieve device name. */
-  protected abstract void retrieveDeviceName(BluetoothDevice device);
+  public abstract void retrieveDeviceName(BluetoothDevice device);
 
   /** Cleans up the BLE GATT server state. */
   @CallSuper
-  protected void cleanup() {
+  public void cleanup() {
     // Clears all registered listeners. IHU only supports single connection in peripheral role.
     readListeners.clear();
     writeListeners.clear();
   }
 
   /** Interface to be notified of various events within the {@link BlePeripheralManager}. */
-  protected interface Callback {
+  public interface Callback {
     /**
      * Triggered when the name of the remote device is retrieved.
      *
@@ -178,7 +178,7 @@ public abstract class BlePeripheralManager {
   }
 
   /** An interface for classes that wish to be notified of writes to a characteristic. */
-  protected interface OnCharacteristicWriteListener {
+  public interface OnCharacteristicWriteListener {
     /**
      * Triggered when this BlePeripheralManager receives a write request from a remote device.
      *
@@ -193,7 +193,7 @@ public abstract class BlePeripheralManager {
   }
 
   /** An interface for classes that wish to be notified of reads on a characteristic. */
-  protected interface OnCharacteristicReadListener {
+  public interface OnCharacteristicReadListener {
     /**
      * Triggered when this BlePeripheralManager receives a read request from a remote device.
      *

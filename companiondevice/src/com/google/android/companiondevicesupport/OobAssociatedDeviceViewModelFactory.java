@@ -28,19 +28,25 @@ public class OobAssociatedDeviceViewModelFactory extends ViewModelProvider.Andro
   private final Application application;
   private final OobEligibleDevice oobEligibleDevice;
   private final boolean isSppEnabled;
+  private final String bleDeviceNamePrefix;
 
   public OobAssociatedDeviceViewModelFactory(
-      @NonNull Application application, OobEligibleDevice oobEligibleDevice, boolean isSppEnabled) {
+      @NonNull Application application,
+      OobEligibleDevice oobEligibleDevice,
+      boolean isSppEnabled,
+      String bleDeviceNamePrefix) {
     super(application);
     this.application = application;
     this.oobEligibleDevice = oobEligibleDevice;
     this.isSppEnabled = isSppEnabled;
+    this.bleDeviceNamePrefix = bleDeviceNamePrefix;
   }
 
   @NonNull
   @Override
   public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
     return modelClass.cast(
-        new OobAssociatedDeviceViewModel(application, oobEligibleDevice, isSppEnabled));
+        new OobAssociatedDeviceViewModel(
+            application, oobEligibleDevice, isSppEnabled, bleDeviceNamePrefix));
   }
 }

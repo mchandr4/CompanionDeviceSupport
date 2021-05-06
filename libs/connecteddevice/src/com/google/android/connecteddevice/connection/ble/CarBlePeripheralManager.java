@@ -43,6 +43,7 @@ import com.google.android.connecteddevice.connection.DeviceMessageStream;
 import com.google.android.connecteddevice.connection.ReconnectSecureChannel;
 import com.google.android.connecteddevice.oob.OobChannel;
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage;
+import com.google.android.connecteddevice.transport.ble.BlePeripheralManager;
 import com.google.android.connecteddevice.util.ByteUtils;
 import com.google.android.connecteddevice.util.EventLog;
 import java.time.Duration;
@@ -167,7 +168,6 @@ public class CarBlePeripheralManager extends CarBluetoothManager {
     this.associationServiceUuid = associationServiceUuid;
     this.reconnectServiceUuid = reconnectServiceUuid;
     this.reconnectDataUuid = reconnectDataUuid;
-
     writeCharacteristic =
         new BluetoothGattCharacteristic(
             writeCharacteristicUuid,
@@ -308,7 +308,7 @@ public class CarBlePeripheralManager extends CarBluetoothManager {
 
   @Override
   public void startAssociation(
-      @NonNull String nameForAssociation, @NonNull AssociationCallback callback) {
+      @NonNull byte[] nameForAssociation, @NonNull AssociationCallback callback) {
     BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
     if (adapter == null) {
       loge(TAG, "Bluetooth is unavailable on this device. Unable to start associating.");
@@ -324,7 +324,7 @@ public class CarBlePeripheralManager extends CarBluetoothManager {
           @Override
           public void onStartSuccess(AdvertiseSettings settingsInEffect) {
             super.onStartSuccess(settingsInEffect);
-            callback.onAssociationStartSuccess(nameForAssociation);
+            callback.onAssociationStartSuccess(ByteUtils.byteArrayToHexString(nameForAssociation));
             logd(TAG, "Successfully started advertising for association.");
           }
 
@@ -341,7 +341,7 @@ public class CarBlePeripheralManager extends CarBluetoothManager {
         advertiseCallback,
         /* advertiseData= */ null,
         /* advertiseDataUuid= */ null,
-        nameForAssociation.getBytes(),
+        nameForAssociation,
         reconnectDataUuid);
   }
 
@@ -414,7 +414,7 @@ public class CarBlePeripheralManager extends CarBluetoothManager {
 
     secureStream.setMessageReceivedErrorListener(
         exception ->
-          disconnectWithError("Error occurred in stream: " + exception.getMessage(), exception));
+            disconnectWithError("Error occurred in stream: " + exception.getMessage(), exception));
 
     ConnectedRemoteDevice connectedDevice = new ConnectedRemoteDevice(device, /* gatt= */ null);
 

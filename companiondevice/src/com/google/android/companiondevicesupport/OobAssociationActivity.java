@@ -97,7 +97,8 @@ public class OobAssociationActivity extends FragmentActivity {
                 new OobAssociatedDeviceViewModelFactory(
                     getApplication(),
                     new OobEligibleDevice(deviceAddress, OobEligibleDevice.OOB_TYPE_BLUETOOTH),
-                    getResources().getBoolean(R.bool.enable_spp)))
+                    getResources().getBoolean(R.bool.enable_spp),
+                    getResources().getString(R.string.ble_device_name_prefix)))
             .get(OobAssociatedDeviceViewModel.class);
 
     model

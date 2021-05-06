@@ -66,7 +66,8 @@ public class ConnectedDeviceManager {
   // - 3 bytes for advertisement being connectable;
   // which leaves 10 bytes.
   // Subtracting 2 bytes used by header, we have 8 bytes for device name.
-  private static final int DEVICE_NAME_LENGTH_LIMIT = 8;
+  // The device name length defined here should be smaller than the limit 8.
+  private static final int DEVICE_NAME_LENGTH = 2;
 
   private final ConnectedDeviceStorage storage;
 
@@ -112,7 +113,7 @@ public class ConnectedDeviceManager {
 
   private final AtomicBoolean hasStarted = new AtomicBoolean(false);
 
-  private String nameForAssociation;
+  private byte[] nameForAssociation;
 
   private AssociationCallback associationCallback;
 
@@ -370,6 +371,7 @@ public class ConnectedDeviceManager {
 
   /**
    * Enable connection on an associated device.
+   *
    * @param deviceId Device identifier.
    */
   public void enableAssociatedDeviceConnection(@NonNull String deviceId) {
@@ -384,6 +386,7 @@ public class ConnectedDeviceManager {
 
   /**
    * Disable connection on an associated device.
+   *
    * @param deviceId Device identifier.
    */
   public void disableAssociatedDeviceConnection(@NonNull String deviceId) {
@@ -836,14 +839,14 @@ public class ConnectedDeviceManager {
   }
 
   /**
-   * Returns the name that should be used for the device during enrollment of a trusted device.
+   * Returns the name that should be used for the device during association.
    *
-   * <p>The returned name will be a combination of a prefix sysprop and randomized digits.
+   * <p>The returned name will be a randomized byte array.
    */
   @NonNull
-  private String getNameForAssociation() {
+  private byte[] getNameForAssociation() {
     if (nameForAssociation == null) {
-      nameForAssociation = ByteUtils.generateRandomNumberString(DEVICE_NAME_LENGTH_LIMIT);
+      nameForAssociation = ByteUtils.randomBytes(DEVICE_NAME_LENGTH);
     }
     return nameForAssociation;
   }

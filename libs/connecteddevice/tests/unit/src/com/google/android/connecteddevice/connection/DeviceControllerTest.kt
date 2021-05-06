@@ -9,6 +9,9 @@ import com.google.android.connecteddevice.storage.ConnectedDeviceDatabase
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage
 import com.google.android.connecteddevice.storage.CryptoHelper
 import com.google.android.connecteddevice.transport.ConnectionProtocol
+import com.google.android.connecteddevice.transport.ConnectionProtocol.ConnectChallenge
+import com.google.android.connecteddevice.transport.ConnectionProtocol.DeviceCallback
+import com.google.android.connecteddevice.util.ThreadSafeCallbacks
 import com.google.common.truth.Truth.assertThat
 import com.google.common.util.concurrent.MoreExecutors.directExecutor
 import com.nhaarman.mockitokotlin2.any
@@ -17,7 +20,9 @@ import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.spy
 import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -28,10 +33,10 @@ private const val REMOTE_DEVICE_NAME = "TestRemoteDeviceName"
 @RunWith(AndroidJUnit4::class)
 class DeviceControllerTest {
   private val context = ApplicationProvider.getApplicationContext<Context>()
-  private val mockConnectionProtocol: ConnectionProtocol = mock()
+  private val testConnectionProtocol: TestConnectionProtocol = spy(TestConnectionProtocol())
   private val mockCallback: DeviceController.Callback = mock()
   private val mockAssociationCallback: AssociationCallback = mock()
-  private val protocols = setOf(mockConnectionProtocol)
+  private val protocols = setOf(testConnectionProtocol)
   private lateinit var deviceController: DeviceController
   private lateinit var testConnectedDevice: DeviceController.ConnectedRemoteDevice
   private val testUuid = UUID.randomUUID()
@@ -39,6 +44,7 @@ class DeviceControllerTest {
   private val testProtocolId = UUID.randomUUID()
   private val testDeviceMessage =
     DeviceMessage(testRecipientUuid, true, "test message".toByteArray())
+  private val testChallenge = "test Challenge".toByteArray()
   private val mockSecureChannel: SecureChannel = mock()
   private var spyStorage: ConnectedDeviceStorage? = null
 
@@ -53,17 +59,19 @@ class DeviceControllerTest {
       .build()
       .associatedDeviceDao()
     val storage = spy(ConnectedDeviceStorage(context, Base64CryptoHelper(), database))
+    whenever(storage.hashWithChallengeSecret(any(), any())).thenReturn(testChallenge)
     spyStorage = storage
     deviceController = DeviceController(protocols, storage)
     deviceController.registerCallback(mockCallback, directExecutor())
-    testConnectedDevice = DeviceController.ConnectedRemoteDevice(testUuid)
+    testConnectedDevice = DeviceController.ConnectedRemoteDevice()
+    deviceController.callbackExecutor = directExecutor()
   }
 
   @Test
   fun startAssociation_startedSuccessfully() {
     deviceController.startAssociation(DEVICE_NAME, mockAssociationCallback)
     argumentCaptor<ConnectionProtocol.DiscoveryCallback>().apply {
-      verify(mockConnectionProtocol).startAssociationDiscovery(eq(DEVICE_NAME), capture())
+      verify(testConnectionProtocol).startAssociationDiscovery(eq(DEVICE_NAME), capture())
       firstValue.onDiscoveryStartedSuccessfully()
       verify(mockAssociationCallback).onAssociationStartSuccess(DEVICE_NAME)
     }
@@ -73,7 +81,7 @@ class DeviceControllerTest {
   fun startAssociation_startedFailed() {
     deviceController.startAssociation(DEVICE_NAME, mockAssociationCallback)
     argumentCaptor<ConnectionProtocol.DiscoveryCallback>().apply {
-      verify(mockConnectionProtocol).startAssociationDiscovery(eq(DEVICE_NAME), capture())
+      verify(testConnectionProtocol).startAssociationDiscovery(eq(DEVICE_NAME), capture())
       firstValue.onDiscoveryFailedToStart()
       verify(mockAssociationCallback).onAssociationStartFailure()
     }
@@ -82,13 +90,35 @@ class DeviceControllerTest {
   @Test
   fun initiateConnectionToDevice_invokeStartConnectionDiscovery() {
     deviceController.initiateConnectionToDevice(testUuid)
-    verify(mockConnectionProtocol).startConnectionDiscovery(eq(testUuid), any())
+    verify(testConnectionProtocol).startConnectionDiscovery(eq(testUuid), any(), any())
   }
 
   @Test
   fun stop_invokeConnectionProtocolReset() {
     deviceController.stop()
-    verify(mockConnectionProtocol).reset()
+    verify(testConnectionProtocol).reset()
+  }
+
+  @Test
+  fun onDeviceConnected_registerCallback() {
+    deviceController.initiateConnectionToDevice(testUuid)
+    argumentCaptor<ConnectionProtocol.DiscoveryCallback>().apply {
+      verify(testConnectionProtocol).startConnectionDiscovery(any(), any(), capture())
+      firstValue.onDeviceConnected(testProtocolId.toString())
+    }
+    assertThat(testConnectionProtocol.getCallbackList()).hasSize(1)
+  }
+
+  @Test
+  fun onDeviceDisconnected_informCallback() {
+    deviceController.initiateConnectionToDevice(testUuid)
+    argumentCaptor<ConnectionProtocol.DiscoveryCallback>().apply {
+      verify(testConnectionProtocol).startConnectionDiscovery(any(), any(), capture())
+      firstValue.onDeviceConnected(testProtocolId.toString())
+    }
+    val callbacks = testConnectionProtocol.getCallbackList().get(testProtocolId.toString())
+    callbacks!!.invoke { callback -> callback.onDeviceDisconnected(testProtocolId.toString()) }
+    verify(mockCallback).onDeviceDisconnected(any())
   }
 
   @Test
@@ -100,10 +130,12 @@ class DeviceControllerTest {
   fun sendMessage_sendMessageSucceed() {
     deviceController.initiateConnectionToDevice(testUuid)
     argumentCaptor<ConnectionProtocol.DiscoveryCallback>().apply {
-      verify(mockConnectionProtocol).startConnectionDiscovery(any(), capture())
+      verify(testConnectionProtocol).startConnectionDiscovery(any(), any(), capture())
       firstValue.onDeviceConnected(testProtocolId.toString())
     }
+
     assertThat(deviceController.connectedDevices).hasSize(1)
+
     // TODO(b/180743873) Test the secure channel created inside code ratheer than mock.
     deviceController.connectedDevices.elementAt(0).secureChannel = mockSecureChannel
 
@@ -115,7 +147,7 @@ class DeviceControllerTest {
   fun isReadyToSendMessage_returnsFalse() {
     deviceController.initiateConnectionToDevice(testUuid)
     argumentCaptor<ConnectionProtocol.DiscoveryCallback>().apply {
-      verify(mockConnectionProtocol).startConnectionDiscovery(any(), capture())
+      verify(testConnectionProtocol).startConnectionDiscovery(any(), any(), capture())
       firstValue.onDeviceConnected(testProtocolId.toString())
     }
     assertThat(deviceController.connectedDevices).hasSize(1)
@@ -127,7 +159,7 @@ class DeviceControllerTest {
   fun isReadyToSendMessage_returnsTrue() {
     deviceController.initiateConnectionToDevice(testUuid)
     argumentCaptor<ConnectionProtocol.DiscoveryCallback>().apply {
-      verify(mockConnectionProtocol).startConnectionDiscovery(any(), capture())
+      verify(testConnectionProtocol).startConnectionDiscovery(any(), any(), capture())
       firstValue.onDeviceConnected(testProtocolId.toString())
     }
     assertThat(deviceController.connectedDevices).hasSize(1)
@@ -140,7 +172,7 @@ class DeviceControllerTest {
   fun onDeviceNameRetrieved_storageMethodTriggered() {
     deviceController.startAssociation(DEVICE_NAME, mockAssociationCallback)
     argumentCaptor<ConnectionProtocol.DiscoveryCallback>().apply {
-      verify(mockConnectionProtocol).startAssociationDiscovery(eq(DEVICE_NAME), capture())
+      verify(testConnectionProtocol).startAssociationDiscovery(eq(DEVICE_NAME), capture())
       firstValue.onDeviceNameRetrieved(testProtocolId.toString(), REMOTE_DEVICE_NAME)
       verify(spyStorage)?.updateAssociatedDeviceName(any(), eq(REMOTE_DEVICE_NAME))
     }
@@ -150,5 +182,48 @@ class DeviceControllerTest {
     override fun encrypt(value: ByteArray?): String? = Base64.encodeToString(value, Base64.DEFAULT)
 
     override fun decrypt(value: String?): ByteArray? = Base64.decode(value, Base64.DEFAULT)
+  }
+
+  open class TestConnectionProtocol : ConnectionProtocol() {
+    override fun startAssociationDiscovery(name: String, callback: DiscoveryCallback) {
+      // No implementation
+    }
+
+    override fun startConnectionDiscovery(
+      id: UUID,
+      challenge: ConnectChallenge,
+      callback: DiscoveryCallback
+    ) {
+      // No implementation
+    }
+
+    override fun stopAssociationDiscovery() {
+      // No implementation
+    }
+
+    override fun stopConnectionDiscovery(id: UUID) {
+      // No implementation
+    }
+
+    override fun sendData(protocolId: String, data: ByteArray, callback: DataSendCallback?) {
+      // No implementation
+    }
+
+    override fun disconnectDevice(protocolId: String) {
+      // No implementation
+    }
+
+    override fun reset() {
+      // No implementation
+    }
+
+    override fun getMaxWriteSize(protocolId: String): Int {
+      // No implementation
+      return 0
+    }
+
+    fun getCallbackList(): ConcurrentHashMap<String, ThreadSafeCallbacks<DeviceCallback>> {
+      return deviceCallbacks
+    }
   }
 }

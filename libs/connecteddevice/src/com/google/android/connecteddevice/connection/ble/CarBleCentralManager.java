@@ -153,11 +153,11 @@ public class CarBleCentralManager extends CarBluetoothManager {
   public void initiateConnectionToDevice(UUID deviceId) {}
 
   @Override
-  public void startAssociation(String nameForAssociation, AssociationCallback callback) {}
+  public void startAssociation(byte[] nameForAssociation, AssociationCallback callback) {}
 
   @Override
   public void startOutOfBandAssociation(
-      String nameForAssociation, OobChannel oobChannel, AssociationCallback callback) {}
+      byte[] nameForAssociation, OobChannel oobChannel, AssociationCallback callback) {}
 
   private void ignoreDevice(@NonNull ConnectedRemoteDevice device) {
     ignoredDevices.add(device);

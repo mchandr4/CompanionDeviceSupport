@@ -165,4 +165,7 @@
 
     <!-- Default Sender name that appears in message notification if sender name is not available. [CHAR_LIMIT=NONE] -->
     <string name="name_not_available">Name not available</string>
+
+    <!-- Prefix of the BLE device name. [CHAR LIMIT=20]-->
+    <string name="ble_device_name_prefix">Vehicle\u00A0</string>
 </resources>

@@ -16,7 +16,6 @@
 
 package com.google.android.connecteddevice.util;
 
-import android.annotation.SuppressLint;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import java.io.ByteArrayOutputStream;
@@ -57,8 +56,7 @@ public final class ByteUtils {
     ByteBuffer buffer = ByteBuffer.allocate(Long.SIZE / Byte.SIZE);
     buffer.put(array);
     buffer.flip();
-    long value = buffer.getLong();
-    return value;
+    return buffer.getLong();
   }
 
   /**
@@ -71,7 +69,7 @@ public final class ByteUtils {
   public static String byteArrayToHexString(byte[] array) {
     StringBuilder sb = new StringBuilder(array.length * 2);
     for (byte b : array) {
-      sb.append(String.format("%02x", b));
+      sb.append(String.format("%02X", b));
     }
     return sb.toString();
   }
@@ -106,18 +104,6 @@ public final class ByteUtils {
 
     ByteBuffer buffer = ByteBuffer.wrap(bytes);
     return new UUID(buffer.getLong(), buffer.getLong());
-  }
-
-  /**
-   * Generate a random zero-filled string of given length
-   *
-   * @param length of string
-   * @return generated string
-   */
-  @SuppressLint("DefaultLocale") // Should always have the same format regardless of locale
-  public static String generateRandomNumberString(int length) {
-    return String.format(
-        "%0" + length + "d", SECURE_RANDOM.nextInt((int) Math.pow(10, length)));
   }
 
   /**

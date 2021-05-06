@@ -86,16 +86,17 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
   private final MutableLiveData<AssociationState> associationState =
       new MutableLiveData<>(AssociationState.NONE);
   private final MutableLiveData<AssociatedDevice> removedDevice = new MutableLiveData<>(null);
-  private final MutableLiveData<Boolean> isServiceDisconnected = new MutableLiveData<>(false);
+  private final MutableLiveData<Boolean> isServiceConnected = new MutableLiveData<>(false);
   private final boolean isSppEnabled;
+  private final String bleDeviceNamePrefix;
   private final BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
-  public AssociatedDeviceViewModel(@NonNull Application application, boolean isSppEnabled) {
+  public AssociatedDeviceViewModel(
+      @NonNull Application application, boolean isSppEnabled, String bleDeviceNamePrefix) {
     super(application);
+    this.bleDeviceNamePrefix = bleDeviceNamePrefix;
     this.isSppEnabled = isSppEnabled;
-    Intent intent = new Intent(getApplication(), ConnectedDeviceService.class);
-    intent.setAction(ACTION_BIND_ASSOCIATION);
-    getApplication().bindService(intent, connection, Context.BIND_AUTO_CREATE);
+    bindService();
     if (bluetoothAdapter != null) {
       bluetoothState.postValue(bluetoothAdapter.getState());
     }
@@ -105,9 +106,11 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
   AssociatedDeviceViewModel(
       @NonNull Application application,
       IAssociatedDeviceManager associatedDeviceManager,
-      boolean isSppEnabled) {
+      boolean isSppEnabled,
+      String bleDeviceNamePrefix) {
     super(application);
     this.isSppEnabled = isSppEnabled;
+    this.bleDeviceNamePrefix = bleDeviceNamePrefix;
     this.associatedDeviceManager = associatedDeviceManager;
     bluetoothState.postValue(BluetoothAdapter.STATE_ON);
     if (associatedDeviceManager == null) {
@@ -247,9 +250,9 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
     return bluetoothState;
   }
 
-  /** Value is {@code true} if the service connection is lost. */
-  public LiveData<Boolean> isServiceDisconnected() {
-    return isServiceDisconnected;
+  /** Value is {@code true} if the service connection is alive. */
+  public LiveData<Boolean> isServiceConnected() {
+    return isServiceConnected;
   }
 
   /** Starts adding associated device. */
@@ -355,11 +358,19 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
     associatedDeviceManager.clearConnectionCallback();
   }
 
+  private void bindService() {
+    logd(TAG, "Binding to ConnectedDeviceService.");
+    Intent intent = new Intent(getApplication(), ConnectedDeviceService.class);
+    intent.setAction(ACTION_BIND_ASSOCIATION);
+    getApplication().bindService(intent, connection, Context.BIND_AUTO_CREATE);
+  }
+
   private final ServiceConnection connection =
       new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
           associatedDeviceManager = IAssociatedDeviceManager.Stub.asInterface(service);
+          isServiceConnected.postValue(true);
           try {
             registerCallbacks();
             setConnectedDevices(associatedDeviceManager.getActiveUserConnectedDevices());
@@ -378,7 +389,8 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
         public void onServiceDisconnected(ComponentName name) {
           associatedDeviceManager = null;
           logd(TAG, "Service disconnected: " + name.getClassName());
-          isServiceDisconnected.postValue(true);
+          isServiceConnected.postValue(false);
+          bindService();
         }
       };
 
@@ -396,7 +408,13 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
                     + deviceName
                     + ".");
           }
-          advertisedCarName.postValue(deviceName);
+
+          // Name prefix is only needed under BLE mode.
+          if (isSppEnabled) {
+            advertisedCarName.postValue(deviceName);
+          } else {
+             advertisedCarName.postValue(bleDeviceNamePrefix + deviceName);
+          }
         }
 
         @Override

@@ -16,7 +16,7 @@
 
 syntax = "proto3";
 
-package com.google.android.companionprotos;
+package com.google.companionprotos;
 
 option java_package = "com.google.android.companionprotos";
 option java_outer_classname = "LoggingMessageProto";

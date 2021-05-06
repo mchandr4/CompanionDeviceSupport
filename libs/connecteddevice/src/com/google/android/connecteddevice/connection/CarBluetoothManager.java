@@ -109,11 +109,11 @@ public abstract class CarBluetoothManager {
 
   /** Start the association with a new device */
   public abstract void startAssociation(
-      @NonNull String nameForAssociation, @NonNull AssociationCallback callback);
+      @NonNull byte[] nameForAssociation, @NonNull AssociationCallback callback);
 
   /** Start the association with a new device using out of band verification code exchange */
   public void startOutOfBandAssociation(
-      @NonNull String nameForAssociation,
+      @NonNull byte[] nameForAssociation,
       @NonNull OobChannel oobChannel,
       @NonNull AssociationCallback callback) {
     logd(TAG, "Starting out of band association.");

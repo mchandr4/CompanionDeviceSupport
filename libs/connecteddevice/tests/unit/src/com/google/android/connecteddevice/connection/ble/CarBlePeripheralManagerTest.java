@@ -42,6 +42,7 @@ import com.google.android.connecteddevice.connection.SecureChannel;
 import com.google.android.connecteddevice.model.AssociatedDevice;
 import com.google.android.connecteddevice.oob.OobConnectionManager;
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage;
+import com.google.android.connecteddevice.transport.ble.BlePeripheralManager;
 import com.google.android.connecteddevice.util.ByteUtils;
 import java.time.Duration;
 import java.util.Arrays;
@@ -65,7 +66,7 @@ public class CarBlePeripheralManagerTest {
   private static final UUID ADVERTISE_DATA_CHARACTERISTIC_UUID = UUID.randomUUID();
   private static final UUID WRITE_UUID = UUID.randomUUID();
   private static final UUID READ_UUID = UUID.randomUUID();
-  private static final int DEVICE_NAME_LENGTH_LIMIT = 8;
+  private static final int DEVICE_NAME_LENGTH_LIMIT = 2;
   private static final String TEST_REMOTE_DEVICE_ADDRESS = "00:11:22:33:AA:BB";
   private static final UUID TEST_REMOTE_DEVICE_ID = UUID.randomUUID();
   private static final String TEST_VERIFICATION_CODE = "000000";
@@ -118,7 +119,7 @@ public class CarBlePeripheralManagerTest {
 
   @Test
   public void testStartAssociationAdvertisingSuccess() {
-    String testDeviceName = getNameForAssociation();
+    byte[] testDeviceName = getNameForAssociation();
     startAssociation(mockAssociationCallback, testDeviceName);
     ArgumentCaptor<AdvertiseData> advertisementDataCaptor =
         ArgumentCaptor.forClass(AdvertiseData.class);
@@ -134,7 +135,7 @@ public class CarBlePeripheralManagerTest {
     assertThat(scanResponseData.getIncludeDeviceName()).isFalse();
     ParcelUuid dataUuid = new ParcelUuid(RECONNECT_DATA_UUID);
     assertThat(scanResponseData.getServiceData().get(dataUuid))
-        .isEqualTo(testDeviceName.getBytes(UTF_8));
+        .isEqualTo(testDeviceName);
   }
 
   @Test
@@ -152,7 +153,7 @@ public class CarBlePeripheralManagerTest {
 
   @Test
   public void testNotifyAssociationSuccess() {
-    String testDeviceName = getNameForAssociation();
+    byte[] testDeviceName = getNameForAssociation();
     startAssociation(mockAssociationCallback, testDeviceName);
     ArgumentCaptor<AdvertiseCallback> callbackCaptor =
         ArgumentCaptor.forClass(AdvertiseCallback.class);
@@ -161,7 +162,8 @@ public class CarBlePeripheralManagerTest {
     AdvertiseCallback advertiseCallback = callbackCaptor.getValue();
     AdvertiseSettings settings = new AdvertiseSettings.Builder().build();
     advertiseCallback.onStartSuccess(settings);
-    verify(mockAssociationCallback).onAssociationStartSuccess(eq(testDeviceName));
+      verify(mockAssociationCallback).onAssociationStartSuccess(
+          ByteUtils.byteArrayToHexString(testDeviceName));
   }
 
   @Test
@@ -275,7 +277,7 @@ public class CarBlePeripheralManagerTest {
   }
 
   private BlePeripheralManager.Callback startAssociation(
-      AssociationCallback callback, String deviceName) {
+      AssociationCallback callback, byte[] deviceName) {
     ArgumentCaptor<BlePeripheralManager.Callback> callbackCaptor =
         ArgumentCaptor.forClass(BlePeripheralManager.Callback.class);
     carBlePeripheralManager.startAssociation(deviceName, callback);
@@ -283,7 +285,7 @@ public class CarBlePeripheralManagerTest {
     return callbackCaptor.getValue();
   }
 
-  private static String getNameForAssociation() {
-    return ByteUtils.generateRandomNumberString(DEVICE_NAME_LENGTH_LIMIT);
+  private static byte[] getNameForAssociation() {
+    return ByteUtils.randomBytes(DEVICE_NAME_LENGTH_LIMIT);
   }
 }

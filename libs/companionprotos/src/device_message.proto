@@ -16,7 +16,7 @@
 
 syntax = "proto3";
 
-package com.google.android.companionprotos;
+package com.google.companionprotos;
 
 import "operation_type.proto";
 

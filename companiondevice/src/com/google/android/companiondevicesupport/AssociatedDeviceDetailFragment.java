@@ -69,7 +69,8 @@ public class AssociatedDeviceDetailFragment extends Fragment {
                 requireActivity(),
                 new AssociatedDeviceViewModelFactory(
                     requireActivity().getApplication(),
-                    getResources().getBoolean(R.bool.enable_spp)))
+                    getResources().getBoolean(R.bool.enable_spp),
+                    getResources().getString(R.string.ble_device_name_prefix)))
             .get(AssociatedDeviceViewModel.class);
     model.getCurrentDeviceDetails().observe(this, this::setDeviceDetails);
 

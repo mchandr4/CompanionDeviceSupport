@@ -29,7 +29,7 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import androidx.annotation.NonNull;
-import com.google.android.connecteddevice.connection.ble.BlePeripheralManager;
+import com.google.android.connecteddevice.transport.ble.BlePeripheralManager;
 import com.google.protobuf.MessageLite;
 import java.io.IOException;
 import java.io.InputStream;
@@ -154,7 +154,7 @@ public class ProxyBlePeripheralManager extends BlePeripheralManager {
   }
 
   @Override
-  protected int getMtuSize() {
+  public int getMtuSize() {
     return MTU_SIZE;
   }
 
@@ -172,7 +172,7 @@ public class ProxyBlePeripheralManager extends BlePeripheralManager {
    */
   @Override
   @SuppressWarnings("FutureReturnValueIgnored")
-  protected void startAdvertising(
+  public void startAdvertising(
       BluetoothGattService service,
       AdvertiseData advertiseData,
       AdvertiseData scanResponse,
@@ -236,7 +236,7 @@ public class ProxyBlePeripheralManager extends BlePeripheralManager {
    */
   @Override
   @SuppressWarnings("FutureReturnValueIgnored")
-  protected void stopAdvertising(AdvertiseCallback advertiseCallback) {
+  public void stopAdvertising(AdvertiseCallback advertiseCallback) {
     logi(TAG, "Request to stop advertising.");
     advertiseCallback = null;
     executor.submit(
@@ -248,7 +248,7 @@ public class ProxyBlePeripheralManager extends BlePeripheralManager {
   /** Requests to update a characteristic. */
   @Override
   @SuppressWarnings("FutureReturnValueIgnored")
-  protected void notifyCharacteristicChanged(
+  public void notifyCharacteristicChanged(
       @NonNull BluetoothDevice device,
       @NonNull BluetoothGattCharacteristic characteristic,
       boolean confirm) {
@@ -265,7 +265,7 @@ public class ProxyBlePeripheralManager extends BlePeripheralManager {
 
   /** Invokes callbacks with a fixed name for remote device. */
   @Override
-  protected void retrieveDeviceName(BluetoothDevice device) {
+  public void retrieveDeviceName(BluetoothDevice device) {
     for (Callback callback : callbacks) {
       callback.onDeviceNameRetrieved(REMOTE_DEVICE_NAME);
     }
@@ -274,7 +274,7 @@ public class ProxyBlePeripheralManager extends BlePeripheralManager {
   /** Closes the proxy socket and its dependent components. */
   @Override
   @SuppressWarnings("FutureReturnValueIgnored")
-  protected void cleanup() {
+  public void cleanup() {
     super.cleanup();
 
     logi(TAG, "Cleaning up manager.");

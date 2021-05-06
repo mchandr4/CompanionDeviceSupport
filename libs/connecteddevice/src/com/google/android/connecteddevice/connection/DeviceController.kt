@@ -1,11 +1,30 @@
+/*
+ * Copyright (C) 2021 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.google.android.connecteddevice.connection
 
+import androidx.annotation.VisibleForTesting
 import com.google.android.connecteddevice.connection.DeviceController.Callback
 import com.google.android.connecteddevice.connection.DeviceController.ConnectedRemoteDevice
 import com.google.android.connecteddevice.model.Errors
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage
 import com.google.android.connecteddevice.transport.ConnectionProtocol
+import com.google.android.connecteddevice.transport.ConnectionProtocol.ConnectChallenge
+import com.google.android.connecteddevice.transport.ConnectionProtocol.DeviceCallback
 import com.google.android.connecteddevice.transport.ConnectionProtocol.DiscoveryCallback
+import com.google.android.connecteddevice.util.ByteUtils
 import com.google.android.connecteddevice.util.SafeLog.logd
 import com.google.android.connecteddevice.util.SafeLog.loge
 import com.google.android.connecteddevice.util.SafeLog.logw
@@ -13,6 +32,7 @@ import com.google.android.connecteddevice.util.ThreadSafeCallbacks
 import java.util.UUID
 import java.util.concurrent.CopyOnWriteArraySet
 import java.util.concurrent.Executor
+import java.util.concurrent.Executors
 
 /**
  * The controller to manage all the connected devices and connected protocols of each connected
@@ -32,6 +52,9 @@ class DeviceController(
   private val storage: ConnectedDeviceStorage,
 ) {
   internal val connectedDevices = CopyOnWriteArraySet<ConnectedRemoteDevice>()
+
+  @VisibleForTesting
+  internal var callbackExecutor: Executor = Executors.newSingleThreadExecutor()
   private val callbacks = ThreadSafeCallbacks<Callback>()
 
   /**
@@ -45,23 +68,36 @@ class DeviceController(
 
   /** Start to connect to associated devices  */
   fun initiateConnectionToDevice(deviceId: UUID) {
-    val discoveryCallback = generateDiscoveryCallback(
-      associationCallback = null,
-      deviceId,
-      nameForAssociation = null
-    )
+    logd(TAG, "Start listening for device with id: $deviceId")
+    // Generate {challenge, concatencated challenge to advertise}.
+    val challenge = generateChallenge(deviceId)
+    if (challenge == null) {
+      loge(TAG, "Unable to create connect challenge. Aborting connection.")
+      return
+    }
     for (protocol in protocols) {
-      protocol.startConnectionDiscovery(deviceId, discoveryCallback)
+      val discoveryCallback = generateDiscoveryCallback(
+        associationCallback = null,
+        deviceId,
+        nameForAssociation = null,
+        protocol,
+        challenge.challenge
+      )
+      protocol.startConnectionDiscovery(deviceId, challenge, discoveryCallback)
     }
   }
 
   /** Start the association with a new device  */
   fun startAssociation(nameForAssociation: String, callback: AssociationCallback) {
-    // Assign an random UUID to each association request to ensure only one association process is
-    // ongoing for one device simultaneously.
-    val associationId = UUID.randomUUID()
-    val discoveryCallback = generateDiscoveryCallback(callback, associationId, nameForAssociation)
+    logd(TAG, "Start association with name $nameForAssociation")
     for (protocol in protocols) {
+      val discoveryCallback = generateDiscoveryCallback(
+        callback,
+        deviceId = null,
+        nameForAssociation,
+        protocol,
+        challenge = null
+      )
       protocol.startAssociationDiscovery(nameForAssociation, discoveryCallback)
     }
   }
@@ -94,6 +130,14 @@ class DeviceController(
    */
   private fun getConnectedDevice(deviceId: UUID): ConnectedRemoteDevice? {
     return connectedDevices.firstOrNull { it.deviceId == deviceId }
+  }
+
+  /**
+   * Returns a [ConnectedRemoteDevice] with matching association callback if it is currently
+   * connected or `null` otherwise.
+   */
+  private fun getConnectedDevice(callback: AssociationCallback): ConnectedRemoteDevice? {
+    return connectedDevices.firstOrNull { it.callback == callback }
   }
 
   /**
@@ -132,7 +176,16 @@ class DeviceController(
 
   /** Disconnect the provided device from this controller.  */
   fun disconnectDevice(deviceId: UUID) {
-    // TODO(b/182396724) Disconnect all the connected channels.
+    logd(TAG, "Disconnect device with id $deviceId")
+    val device = getConnectedDevice(deviceId)
+    if (device == null) {
+      loge(TAG, "Try to disconnect an unrecognized device, ignored.")
+      return
+    }
+
+    for ((protocol, protocolId) in device.protocolIdPairs) {
+      protocol.disconnectDevice(protocolId)
+    }
   }
 
   /** Register a [Callback] to be notified on the [Executor].  */
@@ -150,36 +203,74 @@ class DeviceController(
   }
 
   /** Container class to hold information about a connected device.  */
-  internal data class ConnectedRemoteDevice(var deviceId: UUID) {
-    /** List of connected protocol ids.  */
-    // TODO(b/182396724) Adding a protocol and protocolId pair here.
-    val protocolIds = CopyOnWriteArraySet<String>()
+  internal data class ConnectedRemoteDevice(
+    val protocolIdPairs:
+      CopyOnWriteArraySet<Pair<ConnectionProtocol, String>> = CopyOnWriteArraySet()
+  ) {
+    var deviceId: UUID? = null
     var secureChannel: SecureChannel? = null
     var callback: AssociationCallback? = null
     var name: String? = null
   }
 
   /**
+   * Create challenge for connection advertisement.
+   *
+   * Process:
+   *
+   * 1. Generate random [SALT_BYTES] byte salt and zero-pad to [TOTAL_AD_DATA_BYTES] bytes.
+   * 2. Hash with stored challenge secret to generate challenge.
+   * 3. Return the challenge and salt.
+   */
+  private fun generateChallenge(id: UUID): ConnectChallenge? {
+    val salt = ByteUtils.randomBytes(SALT_BYTES)
+    val zeroPadded = ByteUtils.concatByteArrays(salt, ByteArray(TOTAL_AD_DATA_BYTES - SALT_BYTES))
+      ?: return null
+    val challenge = storage.hashWithChallengeSecret(id.toString(), zeroPadded) ?: return null
+    return ConnectChallenge(challenge, salt)
+  }
+
+  /**
    *  Generate the [DiscoveryCallback] for device [deviceId] with advertisement name
-   *  [nameForAssociation], response will be patched through the [associationCallback].
+   *  [nameForAssociation] and reconnect [challenge], response will be patched through the
+   *  [associationCallback].
    */
   private fun generateDiscoveryCallback(
     associationCallback: AssociationCallback?,
-    deviceId: UUID,
+    deviceId: UUID?,
     nameForAssociation: String?,
+    protocol: ConnectionProtocol,
+    challenge: ByteArray?,
   ): DiscoveryCallback {
     return object : DiscoveryCallback {
       override fun onDeviceConnected(protocolId: String) {
+        logd(TAG, "New connection protocol connected, id: $protocolId, protocol: $protocol")
+        protocol.registerCallback(
+          protocolId,
+          generateDeviceCallback(associationCallback, deviceId, protocol),
+          callbackExecutor
+        )
         // TODO(b/180743856): DeviceMessageStream uses protocol interface for communication
         // Each device only do version resolver for once
-        var device = getConnectedDevice(deviceId)
+        var device = when {
+          associationCallback != null -> getConnectedDevice(associationCallback)
+          deviceId != null -> getConnectedDevice(deviceId)
+          else -> null
+        }
+
         if (device != null) {
+          logd(
+            TAG,
+            "Certain connect protocol already exist, add id to current connected " +
+              "remote device."
+          )
           // TODO(b/180743223): Add the stream to current secure channel
-          device.protocolIds.add(protocolId)
+          device.protocolIdPairs.add(Pair(protocol, protocolId))
           return
         }
-        device = ConnectedRemoteDevice(deviceId).apply {
-          protocolIds.add(protocolId)
+        device = ConnectedRemoteDevice().apply {
+          this.deviceId = deviceId
+          protocolIdPairs.add(Pair(protocol, protocolId))
           callback = associationCallback
         }
         connectedDevices.add(device)
@@ -195,6 +286,7 @@ class DeviceController(
             it.onAssociationStartFailure()
             return
           }
+          logd(TAG, "Association started successfully with name $nameForAssociation")
           it.onAssociationStartSuccess(nameForAssociation)
         }
       }
@@ -204,9 +296,52 @@ class DeviceController(
       }
 
       override fun onDeviceNameRetrieved(protocolId: String, name: String) {
-        val device = getConnectedDevice(deviceId)
+        val device = when {
+          associationCallback != null -> getConnectedDevice(associationCallback)
+          deviceId != null -> getConnectedDevice(deviceId)
+          else -> null
+        }
         device?.name = name
         storage.updateAssociatedDeviceName(deviceId.toString(), name)
+      }
+    }
+  }
+
+  private fun generateDeviceCallback(
+    callback: AssociationCallback?,
+    deviceId: UUID?,
+    protocol: ConnectionProtocol
+  ): DeviceCallback {
+    return object : DeviceCallback {
+      override fun onDeviceDisconnected(protocolId: String) {
+        logd(TAG, "Remote connect protocol disconnected, id: $protocolId, protocol: $protocol")
+        val device = when {
+          callback != null -> getConnectedDevice(callback)
+          deviceId != null -> getConnectedDevice(deviceId)
+          else -> null
+        }
+        if (device == null) {
+          loge(TAG, "Unrecognized device disconnected, ignore")
+          return
+        }
+        for (pair in device.protocolIdPairs) {
+          if (pair.first == protocol && pair.second == protocolId) {
+            device.protocolIdPairs.remove(pair)
+            break
+          }
+        }
+        if (device.protocolIdPairs.isEmpty()) {
+          connectedDevices.remove(device)
+          callbacks.invoke { callback -> callback.onDeviceDisconnected(device.deviceId.toString()) }
+        }
+      }
+
+      override fun onDeviceMaxDataSizeChanged(protocolId: String, maxBytes: Int) {
+        // No implementation
+      }
+
+      override fun onDataReceived(protocolId: String, data: ByteArray?) {
+        // No implementation
       }
     }
   }
@@ -229,7 +364,6 @@ class DeviceController(
 
       override fun onMessageReceivedError(exception: Exception?) {
         loge(TAG, "Error while receiving message.", exception)
-        // TODO(b/182396724): Disconnect certain protocol.
         device.callback?.onAssociationError(Errors.DEVICE_ERROR_INVALID_HANDSHAKE)
       }
 
@@ -282,5 +416,7 @@ class DeviceController(
 
   companion object {
     private const val TAG = "DeviceController"
+    private const val SALT_BYTES = 8
+    private const val TOTAL_AD_DATA_BYTES = 16
   }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.android.connecteddevice.connection.ble;
+package com.google.android.connecteddevice.transport.ble;
 
 import static com.google.android.connecteddevice.util.SafeLog.logd;
 import static com.google.android.connecteddevice.util.SafeLog.loge;
@@ -94,7 +94,7 @@ public class OnDeviceBlePeripheralManager extends BlePeripheralManager {
    * @return The size of the MTU in bytes.
    */
   @Override
-  protected int getMtuSize() {
+  public int getMtuSize() {
     return mtuSize;
   }
 
@@ -110,7 +110,7 @@ public class OnDeviceBlePeripheralManager extends BlePeripheralManager {
    * @param advertiseCallback {@link AdvertiseCallback} callback for advertiser
    */
   @Override
-  protected void startAdvertising(
+  public void startAdvertising(
       BluetoothGattService service,
       AdvertiseData advertiseData,
       AdvertiseData scanResponse,
@@ -138,7 +138,7 @@ public class OnDeviceBlePeripheralManager extends BlePeripheralManager {
    * @param advertiseCallback The callback that is associated with the advertisement.
    */
   @Override
-  protected void stopAdvertising(AdvertiseCallback advertiseCallback) {
+  public void stopAdvertising(AdvertiseCallback advertiseCallback) {
     BluetoothLeAdvertiser advertiser = this.advertiser.getAndSet(null);
     if (advertiser != null) {
       advertiser.stopAdvertising(advertiseCallback);
@@ -148,7 +148,7 @@ public class OnDeviceBlePeripheralManager extends BlePeripheralManager {
 
   /** Notifies the characteristic change via {@link BluetoothGattServer} */
   @Override
-  protected void notifyCharacteristicChanged(
+  public void notifyCharacteristicChanged(
       @NonNull BluetoothDevice device,
       @NonNull BluetoothGattCharacteristic characteristic,
       boolean confirm) {
@@ -164,13 +164,13 @@ public class OnDeviceBlePeripheralManager extends BlePeripheralManager {
 
   /** Connect the Gatt server of the remote device to retrieve device name. */
   @Override
-  protected void retrieveDeviceName(BluetoothDevice device) {
+  public void retrieveDeviceName(BluetoothDevice device) {
     bluetoothGatt.compareAndSet(null, device.connectGatt(context, false, gattCallback));
   }
 
   /** Cleans up the BLE GATT server state. */
   @Override
-  protected void cleanup() {
+  public void cleanup() {
     super.cleanup();
 
     logd(TAG, "Cleaning up manager.");

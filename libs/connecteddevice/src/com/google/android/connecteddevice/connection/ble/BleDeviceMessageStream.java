@@ -23,6 +23,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGattCharacteristic;
 import androidx.annotation.NonNull;
 import com.google.android.connecteddevice.connection.DeviceMessageStream;
+import com.google.android.connecteddevice.transport.ble.BlePeripheralManager;
 
 /** BLE message stream to a device. */
 public class BleDeviceMessageStream extends DeviceMessageStream {

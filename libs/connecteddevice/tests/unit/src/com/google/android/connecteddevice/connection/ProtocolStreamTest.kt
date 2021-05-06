@@ -198,10 +198,17 @@ class ProtocolStreamTest {
     override fun startAssociationDiscovery(name: String, callback: DiscoveryCallback) {
     }
 
-    override fun startConnectionDiscovery(id: UUID, callback: DiscoveryCallback) {
+    override fun startConnectionDiscovery(
+      id: UUID,
+      challenge: ConnectChallenge,
+      callback: DiscoveryCallback
+    ) {
     }
 
-    override fun stopDiscovery(id: UUID) {
+    override fun stopAssociationDiscovery() {
+    }
+
+    override fun stopConnectionDiscovery(id: UUID) {
     }
 
     override fun sendData(protocolId: String, data: ByteArray, callback: DataSendCallback?) {
@@ -225,10 +232,17 @@ class ProtocolStreamTest {
     override fun startAssociationDiscovery(name: String, callback: DiscoveryCallback) {
     }
 
-    override fun startConnectionDiscovery(id: UUID, callback: DiscoveryCallback) {
+    override fun startConnectionDiscovery(
+      id: UUID,
+      challenge: ConnectChallenge,
+      callback: DiscoveryCallback
+    ) {
     }
 
-    override fun stopDiscovery(id: UUID) {
+    override fun stopAssociationDiscovery() {
+    }
+
+    override fun stopConnectionDiscovery(id: UUID) {
     }
 
     override fun sendData(protocolId: String, data: ByteArray, callback: DataSendCallback?) {

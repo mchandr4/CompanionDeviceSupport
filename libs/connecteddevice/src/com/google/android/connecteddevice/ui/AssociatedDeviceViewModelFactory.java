@@ -25,15 +25,19 @@ import androidx.annotation.NonNull;
 public class AssociatedDeviceViewModelFactory implements ViewModelProvider.Factory {
   private final Application application;
   private final boolean isSppEnabled;
+  private final String bleDeviceNamePrefix;
 
-  public AssociatedDeviceViewModelFactory(Application application, boolean isSppEnabled) {
+  public AssociatedDeviceViewModelFactory(
+      Application application, boolean isSppEnabled, String bleDeviceNamePrefix) {
     this.application = application;
     this.isSppEnabled = isSppEnabled;
+    this.bleDeviceNamePrefix = bleDeviceNamePrefix;
   }
 
   @NonNull
   @Override
   public <T extends ViewModel> T create(@NonNull Class<T> aClass) {
-    return aClass.cast(new AssociatedDeviceViewModel(application, isSppEnabled));
+    return aClass.cast(
+        new AssociatedDeviceViewModel(application, isSppEnabled, bleDeviceNamePrefix));
   }
 }

@@ -33,8 +33,11 @@ public class OobAssociatedDeviceViewModel extends AssociatedDeviceViewModel {
   private final OobEligibleDevice oobEligibleDevice;
 
   public OobAssociatedDeviceViewModel(
-      Application application, OobEligibleDevice oobEligibleDevice, boolean isSppEnabled) {
-    super(application, isSppEnabled);
+      Application application,
+      OobEligibleDevice oobEligibleDevice,
+      boolean isSppEnabled,
+      String bleDeviceNamePrefix) {
+    super(application, isSppEnabled, bleDeviceNamePrefix);
 
     this.oobEligibleDevice = oobEligibleDevice;
   }

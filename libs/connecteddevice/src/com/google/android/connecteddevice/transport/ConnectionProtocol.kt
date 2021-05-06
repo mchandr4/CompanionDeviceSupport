@@ -34,15 +34,20 @@ abstract class ConnectionProtocol {
   abstract fun startAssociationDiscovery(name: String, callback: DiscoveryCallback)
 
   /**
-   * Begin the discovery process for a device that will respond to the supplied [id].
+   * Begin the discovery process for a device that will respond to the supplied [id] with
+   * [challenge].
    */
   abstract fun startConnectionDiscovery(
     id: UUID,
+    challenge: ConnectChallenge,
     callback: DiscoveryCallback
   )
 
-  /** Stop an ongoing discovery for the provided device. */
-  abstract fun stopDiscovery(id: UUID)
+  /** Stop an ongoing association discovery. */
+  abstract fun stopAssociationDiscovery()
+
+  /** Stop an ongoing connection discovery for the provided device. */
+  abstract fun stopConnectionDiscovery(id: UUID)
 
   /** Send data to a device. */
   abstract fun sendData(protocolId: String, data: ByteArray, callback: DataSendCallback? = null)
@@ -86,6 +91,9 @@ abstract class ConnectionProtocol {
     }
     deviceCallbacks[protocolId]?.remove(callback)
   }
+
+  /** Container class to hold the connect challenge the salt that generated the challenge. */
+  data class ConnectChallenge(val challenge: ByteArray, val salt: ByteArray)
 
   /** Event notifications on the discovery process. */
   interface DiscoveryCallback {

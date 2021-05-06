@@ -155,7 +155,7 @@ public class CarSppManager extends CarBluetoothManager {
   /** Start the association by listening to incoming connect request. */
   @Override
   public void startAssociation(
-      @NonNull String nameForAssociation, @NonNull AssociationCallback callback) {
+      @NonNull byte[] nameForAssociation, @NonNull AssociationCallback callback) {
     BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
     if (adapter == null) {
       loge(TAG, "Bluetooth is unavailable on this device. Unable to start associating.");

@@ -18,6 +18,7 @@ package com.google.android.companiondevicesupport;
 
 import static com.android.car.ui.core.CarUi.requireToolbar;
 import static com.android.car.ui.toolbar.Toolbar.State.SUBPAGE;
+import static com.google.android.connecteddevice.util.SafeLog.logd;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -82,7 +83,9 @@ public class AssociationActivity extends FragmentActivity {
         new ViewModelProvider(
                 this,
                 new AssociatedDeviceViewModelFactory(
-                    getApplication(), getResources().getBoolean(R.bool.enable_spp)))
+                    getApplication(),
+                    getResources().getBoolean(R.bool.enable_spp),
+                    getResources().getString(R.string.ble_device_name_prefix)))
             .get(AssociatedDeviceViewModel.class);
 
     model
@@ -179,12 +182,13 @@ public class AssociationActivity extends FragmentActivity {
               }
             });
     model
-        .isServiceDisconnected()
+        .isServiceConnected()
         .observe(
             this,
-            isServiceDisconnected -> {
-              if (isServiceDisconnected) {
-                finish();
+            isServiceConnected -> {
+              logd(TAG, "Service connection status: " + isServiceConnected);
+              if (!isServiceConnected) {
+                showLoadingScreen();
               }
             });
   }
@@ -195,6 +199,15 @@ public class AssociationActivity extends FragmentActivity {
             getString(R.string.device_removed_success_toast_text, deviceName),
             Toast.LENGTH_SHORT)
         .show();
+  }
+
+  private void showLoadingScreen() {
+    Fragment currentFragment =
+        getSupportFragmentManager().findFragmentById(R.id.fragment_container);
+    if (currentFragment != null) {
+      getSupportFragmentManager().beginTransaction().remove(currentFragment).commit();
+    }
+    showProgressBar();
   }
 
   private void showTurnOnBluetoothFragment() {
@@ -222,6 +235,7 @@ public class AssociationActivity extends FragmentActivity {
   }
 
   private void showAssociatedDeviceDetailFragment() {
+    hideProgressBar();
     AssociatedDeviceDetailFragment fragment = new AssociatedDeviceDetailFragment();
     launchFragment(fragment, DEVICE_DETAIL_FRAGMENT_TAG);
     showTurnOnBluetoothDialog();

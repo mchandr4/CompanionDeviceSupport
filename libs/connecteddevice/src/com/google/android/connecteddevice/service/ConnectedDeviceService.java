@@ -33,13 +33,13 @@ import com.google.android.connecteddevice.api.ConnectedDeviceManagerBinder;
 import com.google.android.connecteddevice.api.IAssociatedDeviceManager;
 import com.google.android.connecteddevice.api.RemoteFeature;
 import com.google.android.connecteddevice.connection.CarBluetoothManager;
-import com.google.android.connecteddevice.connection.ble.BlePeripheralManager;
 import com.google.android.connecteddevice.connection.ble.CarBlePeripheralManager;
-import com.google.android.connecteddevice.connection.ble.OnDeviceBlePeripheralManager;
 import com.google.android.connecteddevice.connection.spp.CarSppManager;
 import com.google.android.connecteddevice.logging.LoggingManager;
 import com.google.android.connecteddevice.oob.BluetoothRfcommChannel;
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage;
+import com.google.android.connecteddevice.transport.ble.BlePeripheralManager;
+import com.google.android.connecteddevice.transport.ble.OnDeviceBlePeripheralManager;
 import com.google.android.connecteddevice.transport.proxy.ProxyBlePeripheralManager;
 import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelegateBinder;
 import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelegateBinder.OnRemoteCallbackSetListener;
@@ -100,7 +100,6 @@ public final class ConnectedDeviceService extends TrunkService {
   /** {@code boolean} Enable a capabilities exchange during association. */
   private static final String META_ENABLE_CAPABILITIES_EXCHANGE =
       "com.google.android.connecteddevice.enable_capabilities_exchange";
-
 
   private static final boolean SPP_ENABLED_BY_DEFAULT = false;
 
@@ -194,12 +193,13 @@ public final class ConnectedDeviceService extends TrunkService {
     }
   }
 
-  private final OnRemoteCallbackSetListener onRemoteCallbackSetListener = (hasBeenSet)-> {
-      if (BluetoothAdapter.getDefaultAdapter().isEnabled()) {
-        initializeFeatures();
-      }
-      isSppServiceBound.set(hasBeenSet);
-    };
+  private final OnRemoteCallbackSetListener onRemoteCallbackSetListener =
+      isSet -> {
+        if (BluetoothAdapter.getDefaultAdapter().isEnabled()) {
+          initializeFeatures();
+        }
+        isSppServiceBound.set(isSet);
+      };
 
   private CarBluetoothManager createSppManager(
       @NonNull ConnectedDeviceStorage storage,
@@ -233,7 +233,6 @@ public final class ConnectedDeviceService extends TrunkService {
     UUID writeUuid = UUID.fromString(getMetaString(META_WRITE_UUID, DEFAULT_WRITE_UUID));
     UUID readUuid = UUID.fromString(getMetaString(META_READ_UUID, DEFAULT_READ_UUID));
     int defaultMtuSize = getMetaInt(META_DEFAULT_MTU_BYTES, DEFAULT_MTU_SIZE);
-
     boolean isProxyEnabled = getMetaBoolean(META_ENABLE_PROXY, PROXY_ENABLED_BY_DEFAULT);
     BlePeripheralManager blePeripheralManager;
     if (isProxyEnabled) {

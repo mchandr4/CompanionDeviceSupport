@@ -54,6 +54,7 @@ public final class AssociatedDeviceViewModelTest {
   private static final String TEST_ASSOCIATED_DEVICE_ADDRESS = "test_device_address";
   private static final String TEST_CAR_NAME = "test_car_name";
   private static final String TEST_VERIFICATION_CODE = "test_code";
+  private static final String TEST_BLE_DEVICE_NAME_PREFIX = "TestPrefix";
 
   @Rule public final MockitoRule mockito = MockitoJUnit.rule();
 
@@ -80,7 +81,8 @@ public final class AssociatedDeviceViewModelTest {
         new AssociatedDeviceViewModel(
             ApplicationProvider.getApplicationContext(),
             mockAssociatedDeviceManager,
-            /* isSppEnabled= */ false);
+            /* isSppEnabled= */ false,
+            TEST_BLE_DEVICE_NAME_PREFIX);
     BluetoothAdapter.getDefaultAdapter().enable();
     captureCallbacks();
   }
@@ -141,7 +143,7 @@ public final class AssociatedDeviceViewModelTest {
     viewModel.getAssociationState().observeForever(mockAssociationStateObserver);
     viewModel.getAdvertisedCarName().observeForever(mockCarNameObserver);
     verify(mockAssociationStateObserver).onChanged(AssociationState.STARTED);
-    verify(mockCarNameObserver).onChanged(TEST_CAR_NAME);
+    verify(mockCarNameObserver).onChanged(TEST_BLE_DEVICE_NAME_PREFIX + TEST_CAR_NAME);
   }
 
   @Test
@@ -244,7 +246,8 @@ public final class AssociatedDeviceViewModelTest {
     AssociatedDeviceViewModel associatedDeviceViewModel = new AssociatedDeviceViewModel(
         ApplicationProvider.getApplicationContext(),
         /* associatedDeviceManager= */ null,
-        /* isSppEnabled= */ false);
+        /* isSppEnabled= */ false,
+        TEST_BLE_DEVICE_NAME_PREFIX);
     associatedDeviceViewModel.onCleared();
   }
 
