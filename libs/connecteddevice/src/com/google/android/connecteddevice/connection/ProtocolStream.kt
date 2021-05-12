@@ -18,6 +18,7 @@ package com.google.android.connecteddevice.connection
 import com.google.android.companionprotos.DeviceMessageProto
 import com.google.android.companionprotos.OperationProto.OperationType
 import com.google.android.companionprotos.PacketProto.Packet
+import com.google.android.connecteddevice.model.DeviceMessage
 import com.google.android.connecteddevice.transport.ConnectionProtocol
 import com.google.android.connecteddevice.util.ByteUtils
 import com.google.android.connecteddevice.util.EventLog.onMessageFullyReceived
@@ -109,21 +110,22 @@ class ProtocolStream(
   }
 
   /**
-   * Sends the given [deviceMessage] to the stream with type [operationType].
+   * Sends the given [deviceMessage] to the stream.
    *
    * Note: This method will handle the chunking of messages based on the max write size.
    */
-  @JvmOverloads
   fun sendMessage(
     deviceMessage: DeviceMessage,
-    operationType: OperationType = OperationType.CLIENT_MESSAGE
   ) {
     if (!isConnected.get()) {
       logw(TAG, "Unable to send message to disconnected device.")
       return
     }
     val builder = DeviceMessageProto.Message.newBuilder()
-      .setOperation(operationType)
+      .setOperation(
+        OperationType.forNumber(deviceMessage.operationType.value)
+          ?: OperationType.OPERATION_TYPE_UNKNOWN
+      )
       .setIsPayloadEncrypted(deviceMessage.isMessageEncrypted)
       .setPayload(ByteString.copyFrom(deviceMessage.message))
       .setOriginalSize(deviceMessage.originalMessageSize)
@@ -243,7 +245,13 @@ class ProtocolStream(
       protocol.disconnectDevice(protocolId)
       return
     }
-    val deviceMessage = DeviceMessage(message)
+    val deviceMessage =
+      DeviceMessage(
+        ByteUtils.bytesToUUID(message.recipient.toByteArray()),
+        message.isPayloadEncrypted,
+        DeviceMessage.OperationType.fromValue(message.operation.number),
+        message.payload.toByteArray()
+      )
     messageReceivedListener?.onMessageReceived(deviceMessage, message.operation)
   }
 

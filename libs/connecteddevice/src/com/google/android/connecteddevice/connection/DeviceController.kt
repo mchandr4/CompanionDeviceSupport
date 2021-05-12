@@ -18,6 +18,7 @@ package com.google.android.connecteddevice.connection
 import androidx.annotation.VisibleForTesting
 import com.google.android.connecteddevice.connection.DeviceController.Callback
 import com.google.android.connecteddevice.connection.DeviceController.ConnectedRemoteDevice
+import com.google.android.connecteddevice.model.DeviceMessage
 import com.google.android.connecteddevice.model.Errors
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage
 import com.google.android.connecteddevice.transport.ConnectionProtocol

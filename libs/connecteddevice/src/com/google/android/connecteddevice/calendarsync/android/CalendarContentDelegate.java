@@ -2,7 +2,8 @@ package com.google.android.connecteddevice.calendarsync.android;
 
 import static com.google.android.connecteddevice.calendarsync.android.ContentOwnership.REPLICA;
 import static com.google.android.connecteddevice.calendarsync.android.ContentOwnership.SOURCE;
-import static com.google.android.connecteddevice.calendarsync.android.FieldTranslator.createBooleanContentConstant;
+import static com.google.android.connecteddevice.calendarsync.android.FieldTranslator.createBooleanConstant;
+import static com.google.android.connecteddevice.calendarsync.android.FieldTranslator.createIntConstant;
 import static com.google.android.connecteddevice.calendarsync.android.FieldTranslator.createIntegerField;
 import static com.google.android.connecteddevice.calendarsync.android.FieldTranslator.createStringField;
 
@@ -66,10 +67,13 @@ final class CalendarContentDelegate extends BaseContentDelegate<Calendar>
     // Write some constants to the calendar on the replica in addition to data fields.
     if (ownership == REPLICA) {
       // Created replica calendars should be visible.
-      builder.add(createBooleanContentConstant(Calendars.VISIBLE, true));
+      builder.add(createBooleanConstant(Calendars.VISIBLE, true));
+
+      // Allow the current user to be a calendar editor.
+      builder.add(createIntConstant(Calendars.CALENDAR_ACCESS_LEVEL, Calendars.CAL_ACCESS_EDITOR));
 
       // Indicates that this calendar will have events.
-      builder.add(createBooleanContentConstant(Calendars.SYNC_EVENTS, true));
+      builder.add(createBooleanConstant(Calendars.SYNC_EVENTS, true));
     }
     return builder.build();
   }

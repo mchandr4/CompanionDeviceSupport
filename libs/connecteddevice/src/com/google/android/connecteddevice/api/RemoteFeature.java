@@ -16,6 +16,9 @@
 
 package com.google.android.connecteddevice.api;
 
+import static com.google.android.connecteddevice.model.DeviceMessage.OperationType.CLIENT_MESSAGE;
+import static com.google.android.connecteddevice.model.DeviceMessage.OperationType.QUERY;
+import static com.google.android.connecteddevice.model.DeviceMessage.OperationType.QUERY_RESPONSE;
 import static com.google.android.connecteddevice.util.SafeLog.logd;
 import static com.google.android.connecteddevice.util.SafeLog.loge;
 import static com.google.android.connecteddevice.util.SafeLog.logw;
@@ -34,11 +37,21 @@ import android.os.RemoteException;
 import androidx.annotation.CallSuper;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
+import com.google.android.companionprotos.Query;
+import com.google.android.companionprotos.QueryResponse;
 import com.google.android.connecteddevice.model.AssociatedDevice;
 import com.google.android.connecteddevice.model.ConnectedDevice;
+import com.google.android.connecteddevice.model.DeviceMessage;
+import com.google.android.connecteddevice.model.DeviceMessage.OperationType;
+import com.google.android.connecteddevice.util.ByteUtils;
 import com.google.android.connecteddevice.util.Logger;
+import com.google.protobuf.ByteString;
+import com.google.protobuf.ExtensionRegistryLite;
+import com.google.protobuf.InvalidProtocolBufferException;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Base class for a feature that must bind to {@code ConnectedDeviceService}. Callbacks are
@@ -76,6 +89,14 @@ public abstract class RemoteFeature {
 
   private static final int MAX_BIND_ATTEMPTS = 3;
 
+  private final QueryIdGenerator queryIdGenerator = new QueryIdGenerator();
+
+  // queryId -> callback
+  private final Map<Integer, QueryCallback> queryCallbacks = new ConcurrentHashMap<>();
+
+  // queryId -> original sender for response
+  private final Map<Integer, ParcelUuid> queryResponseRecipients = new ConcurrentHashMap<>();
+
   private final Context context;
 
   private final ParcelUuid featureId;
@@ -112,11 +133,10 @@ public abstract class RemoteFeature {
     this.forceFgUserBind = forceFgUserBind;
   }
 
-  @VisibleForTesting
   protected RemoteFeature(
       @NonNull Context context,
       @NonNull ParcelUuid featureId,
-      @NonNull IConnectedDeviceManager connectedDeviceManager) {
+      @Nullable IConnectedDeviceManager connectedDeviceManager) {
     this(context, featureId);
     this.connectedDeviceManager = connectedDeviceManager;
   }
@@ -206,11 +226,123 @@ public abstract class RemoteFeature {
       onMessageFailedToSend(device.getDeviceId(), message, /* isTransient= */ true);
       return;
     }
+    DeviceMessage deviceMessage = new DeviceMessage(
+        getFeatureId().getUuid(),
+        /* isMessageEncrypted= */ true,
+        CLIENT_MESSAGE,
+        message);
     try {
-      getConnectedDeviceManager().sendMessageSecurely(device, getFeatureId(), message);
+      connectedDeviceManager.sendMessage(device, deviceMessage);
     } catch (RemoteException e) {
       loge(TAG, "Error while sending secure message.", e);
       onMessageFailedToSend(device.getDeviceId(), message, /* isTransient= */ false);
+    }
+  }
+
+  /** Securely send a query to a device and register a {@link QueryCallback} for a response. */
+  public void sendQuerySecurely(
+      @NonNull String deviceId,
+      @NonNull byte[] request,
+      @Nullable byte[] parameters,
+      @NonNull QueryCallback callback) {
+    if (connectedDeviceManager == null) {
+      loge(TAG, "Unable to send query, ConnectedDeviceManager not actively connected.");
+      callback.onQueryFailedToSend(/* isTransient= */ true);
+      return;
+    }
+    ConnectedDevice device = getConnectedDeviceById(deviceId);
+    if (device == null) {
+      loge(
+          TAG,
+          "No matching device found with id "
+              + deviceId
+              + " when trying to send a secure query.");
+      callback.onQueryFailedToSend(/* isTransient= */ false);
+      return;
+    }
+
+    sendQuerySecurely(device, request, parameters, callback);
+  }
+
+  /** Securely send a query to a device and register a {@link QueryCallback} for a response. */
+  public void sendQuerySecurely(
+      @NonNull ConnectedDevice device,
+      @NonNull byte[] request,
+      @Nullable byte[] parameters,
+      @NonNull QueryCallback callback) {
+    sendQuerySecurelyInternal(device, featureId, request, parameters, callback);
+  }
+
+  private void sendQuerySecurelyInternal(
+      @NonNull ConnectedDevice device,
+      @NonNull ParcelUuid recipient,
+      @NonNull byte[] request,
+      @Nullable byte[] parameters,
+      @NonNull QueryCallback callback) {
+    if (connectedDeviceManager == null) {
+      loge(TAG, "Unable to send message, ConnectedDeviceManager not actively connected.");
+      callback.onQueryFailedToSend(/* isTransient= */ true);
+      return;
+    }
+    int id = queryIdGenerator.next();
+    Query.Builder builder = Query.newBuilder()
+        .setId(id)
+        .setSender(ByteString.copyFrom(ByteUtils.uuidToBytes(featureId.getUuid())))
+        .setRequest(ByteString.copyFrom(request));
+    if (parameters != null) {
+      builder.setParameters(ByteString.copyFrom(parameters));
+    }
+
+    logd(TAG, "Sending secure query with id " + id + ".");
+    DeviceMessage deviceMessage = new DeviceMessage(
+        recipient.getUuid(),
+        /* isMessageEncrypted= */ true,
+        QUERY,
+        builder.build().toByteArray());
+    try {
+      connectedDeviceManager.sendMessage(device, deviceMessage);
+    } catch (RemoteException e) {
+      loge(TAG, "Error while sending secure query.", e);
+      callback.onQueryFailedToSend(/* isTransient= */ false);
+      return;
+    }
+    queryCallbacks.put(id, callback);
+  }
+
+  /** Send a secure response to a query with an indication of whether it was successful. */
+  public void respondToQuerySecurely(
+      @NonNull ConnectedDevice device,
+      int queryId,
+      boolean success,
+      @Nullable byte[] response) {
+    if (connectedDeviceManager == null) {
+      loge(TAG, "Unable to send query response, ConnectedDeviceManager not actively connected.");
+      return;
+    }
+    ParcelUuid recipientId = queryResponseRecipients.remove(queryId);
+    if (recipientId == null) {
+      loge(TAG, "Unable to send response to unrecognized query " + queryId + ".");
+      return;
+    }
+
+    QueryResponse.Builder builder =
+        QueryResponse.newBuilder()
+            .setQueryId(queryId)
+            .setSuccess(success);
+    if (response != null) {
+      builder.setResponse(ByteString.copyFrom(response));
+    }
+    QueryResponse queryResponse = builder.build();
+    logd(TAG, "Sending response to query " + queryId + " to "  + recipientId + ".");
+    DeviceMessage deviceMessage = new DeviceMessage(
+        recipientId.getUuid(),
+        /* isMessageEncrypted= */ true,
+        QUERY_RESPONSE,
+        queryResponse.toByteArray());
+    try {
+      connectedDeviceManager.sendMessage(device, deviceMessage);
+    } catch (RemoteException e) {
+      loge(TAG, "Error while sending query response.", e);
     }
   }
 
@@ -228,7 +360,7 @@ public abstract class RemoteFeature {
     }
     List<ConnectedDevice> connectedDevices;
     try {
-      connectedDevices = getConnectedDeviceManager().getActiveUserConnectedDevices();
+      connectedDevices = connectedDeviceManager.getActiveUserConnectedDevices();
     } catch (RemoteException e) {
       loge(TAG, "Exception while retrieving connected devices.", e);
       return null;
@@ -263,10 +395,19 @@ public abstract class RemoteFeature {
    *     false} if failure is permanent.
    */
   protected void onMessageFailedToSend(
-      @NonNull String deviceId, @NonNull byte[] message, boolean isTransient) {}
+      @NonNull String deviceId,
+      @NonNull byte[] message,
+      boolean isTransient) {}
 
   /** Called when a new {@link byte[]} message is received for this feature. */
   protected void onMessageReceived(@NonNull ConnectedDevice device, @NonNull byte[] message) {}
+
+  /** Called when a new query is received for this feature. */
+  protected void onQueryReceived(
+      @NonNull ConnectedDevice device,
+      int queryId,
+      @NonNull byte[] request,
+      @NonNull byte[] parameters) {}
 
   /** Called when an error has occurred with the connection. */
   protected void onDeviceError(@NonNull ConnectedDevice device, int error) {}
@@ -339,6 +480,61 @@ public abstract class RemoteFeature {
     }
   }
 
+  private void processIncomingMessage(ConnectedDevice device, DeviceMessage deviceMessage) {
+    OperationType operationType = deviceMessage.getOperationType();
+    byte[] message = deviceMessage.getMessage();
+    switch (operationType) {
+      case CLIENT_MESSAGE:
+        logd(TAG, "Received client message. Passing on to feature.");
+        onMessageReceived(device, message);
+        return;
+      case QUERY:
+        try {
+          Query query = Query.parseFrom(message, ExtensionRegistryLite.getEmptyRegistry());
+          processQuery(device, query);
+        } catch (InvalidProtocolBufferException e) {
+          loge(TAG, "Unable to parse query.", e);
+        }
+        return;
+      case QUERY_RESPONSE:
+        try {
+          QueryResponse response =
+              QueryResponse.parseFrom(message, ExtensionRegistryLite.getEmptyRegistry());
+          processQueryResponse(response);
+        } catch (InvalidProtocolBufferException e) {
+          loge(TAG, "Unable to parse query response.", e);
+        }
+        return;
+      default:
+        loge(TAG, "Received unknown type of message: " + operationType + ". Ignoring.");
+    }
+  }
+
+  private void processQuery(ConnectedDevice device, Query query) {
+    logd(TAG, "Received a new query with id " + query.getId() + ". Passing on to feature.");
+    ParcelUuid sender = new ParcelUuid(ByteUtils.bytesToUUID(query.getSender().toByteArray()));
+    queryResponseRecipients.put(query.getId(), sender);
+    onQueryReceived(
+        device,
+        query.getId(),
+        query.getRequest().toByteArray(),
+        query.getParameters().toByteArray());
+  }
+
+  private void processQueryResponse(QueryResponse response) {
+    logd(TAG, "Received a query response. Issuing registered callback.");
+    QueryCallback callback = queryCallbacks.remove(response.getQueryId());
+    if (callback == null) {
+      loge(TAG, "Unable to locate callback for query " + response.getQueryId() + ".");
+      return;
+    }
+    if (response.getSuccess()) {
+      callback.onSuccess(response.getResponse().toByteArray());
+    } else {
+      callback.onError(response.getResponse().toByteArray());
+    }
+  }
+
   private final ServiceConnection serviceConnection =
       new ServiceConnection() {
         @Override
@@ -380,8 +576,8 @@ public abstract class RemoteFeature {
         }
 
         @Override
-        public void onMessageReceived(ConnectedDevice connectedDevice, byte[] message) {
-          RemoteFeature.this.onMessageReceived(connectedDevice, message);
+        public void onMessageReceived(ConnectedDevice connectedDevice, DeviceMessage message) {
+          processIncomingMessage(connectedDevice, message);
         }
 
         @Override
@@ -420,4 +616,31 @@ public abstract class RemoteFeature {
           }
         }
       };
+
+  /** A generator of unique IDs for queries. */
+  private static class QueryIdGenerator {
+    private final AtomicInteger messageId = new AtomicInteger(0);
+
+    int next() {
+      int current = messageId.getAndIncrement();
+      messageId.compareAndSet(Integer.MAX_VALUE, 0);
+      return current;
+    }
+  }
+
+  /** Callback for a query response. */
+  interface QueryCallback {
+    /** Invoked with a successful response to a query. */
+    default void onSuccess(byte[] response) {}
+
+    /** Invoked with an unsuccessful response to a query. */
+    default void onError(byte[] response) {}
+
+    /**
+     * Invoked when a query failed to send to the device. {@code isTransient} is set to {@code true}
+     * if cause of failure is transient and can be retried, or {@code false} if failure is
+     * permanent.
+     */
+    default void onQueryFailedToSend(boolean isTransient) {}
+  }
 }

@@ -14,33 +14,34 @@
  * limitations under the License.
  */
 
-package com.google.android.connecteddevice.service;
+package com.google.android.connecteddevice.logging;
 
 import static com.google.android.connecteddevice.util.SafeLog.logd;
 import static com.google.android.connecteddevice.util.SafeLog.loge;
 
 import android.content.Context;
+import android.os.ParcelUuid;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 import com.google.android.companionprotos.LoggingMessageProto.LoggingMessage;
 import com.google.android.companionprotos.LoggingMessageProto.LoggingMessage.MessageType;
-import com.google.android.connecteddevice.ConnectedDeviceManager;
-import com.google.android.connecteddevice.logging.LoggingManager;
+import com.google.android.connecteddevice.api.IConnectedDeviceManager;
+import com.google.android.connecteddevice.api.RemoteFeature;
 import com.google.android.connecteddevice.logging.LoggingManager.LoggingEventCallback;
 import com.google.android.connecteddevice.model.ConnectedDevice;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executors;
 
 /** Feature that sends and receives logging support message. */
-class LoggingFeature extends LocalFeature {
+public class LoggingFeature extends RemoteFeature {
   private static final String TAG = "LoggingFeature";
   private static final int LOGGING_MESSAGE_VERSION = 1;
-  private static final UUID FEATURE_ID = UUID.fromString("675836fb-18ed-4c60-94cd-131352e8a5b7");
+  private static final ParcelUuid FEATURE_ID =
+      ParcelUuid.fromString("675836fb-18ed-4c60-94cd-131352e8a5b7");
 
   private final LoggingManager loggingManager;
   private final Set<ConnectedDevice> connectedDevices = new CopyOnWriteArraySet<>();
@@ -62,14 +63,11 @@ class LoggingFeature extends LocalFeature {
         }
       };
 
-  LoggingFeature(
+  public LoggingFeature(
       @NonNull Context context,
-      @NonNull ConnectedDeviceManager connectedDeviceManager,
+      @NonNull IConnectedDeviceManager connectedDeviceManager,
       @NonNull LoggingManager loggingManager) {
-    super(
-        context,
-        connectedDeviceManager,
-        FEATURE_ID);
+    super(context, FEATURE_ID, connectedDeviceManager);
     this.loggingManager = loggingManager;
     loggingManager.registerLoggingEventCallback(
         loggingEventCallback, Executors.newSingleThreadExecutor());

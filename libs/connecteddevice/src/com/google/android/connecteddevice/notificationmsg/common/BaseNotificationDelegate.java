@@ -298,6 +298,7 @@ public class BaseNotificationDelegate {
       builder.setCategory(Notification.CATEGORY_MESSAGE);
       if (notificationInfo.getAppIcon() != null) {
         builder.setSmallIcon(IconCompat.createFromIcon(context, notificationInfo.getAppIcon()));
+        builder.setColor(notificationInfo.getAppIconColor());
       } else {
         builder.setSmallIcon(defaultIconResourceId);
       }

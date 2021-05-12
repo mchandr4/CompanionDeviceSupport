@@ -100,7 +100,7 @@ public class NotificationMsgService extends MetaDataService {
   private static final int DEFAULT_FONT_COLOR = Color.parseColor("#ffffff");
   private static final String DEFAULT_FONT_FAMILY = "sans-serif-light";
   private static final int DEFAULT_TEXT_STYLE = 0;
-  private static final String DEFAULT_GROUP_TITLE_SEPARATOR = "&#160;&#8226;&#160;";
+  private static final String DEFAULT_GROUP_TITLE_SEPARATOR = " • ";
   private static final float DEFAULT_LETTER_TO_TILE_RATIO = 0.67f;
 
   /* NOTIFICATIONS */

@@ -38,6 +38,8 @@ import com.google.android.connecteddevice.logging.LoggingManager;
 import com.google.android.connecteddevice.logging.LoggingManager.OnLogRequestedListener;
 import com.google.android.connecteddevice.model.AssociatedDevice;
 import com.google.android.connecteddevice.model.ConnectedDevice;
+import com.google.android.connecteddevice.model.DeviceMessage;
+import com.google.android.connecteddevice.model.DeviceMessage.OperationType;
 import com.google.android.connecteddevice.util.ByteUtils;
 import java.util.UUID;
 import java.util.concurrent.Executor;
@@ -137,38 +139,23 @@ public class ConnectedDeviceManagerBinderTest {
   }
 
   @Test
-  public void sendMessageSecurely_mirrorsConnectedDeviceManager() {
+  public void sendMessage_mirrorsConnectedDeviceManager() {
     ConnectedDevice connectedDevice =
         new ConnectedDevice(
             UUID.randomUUID().toString(),
             /* deviceName = */ null,
             /* belongsToActiveUser = */ false,
             /* hasSecureChannel = */ true);
-    byte[] message = ByteUtils.randomBytes(10);
-    binder.sendMessageSecurely(connectedDevice, recipientId, message);
-    verify(mockConnectedDeviceManager)
-        .sendMessageSecurely(
-            refEq(connectedDevice),
-            refEq(recipientId.getUuid()),
-            refEq(message));
+    DeviceMessage message =
+        new DeviceMessage(
+            recipientId.getUuid(),
+            /* isMessageEncrypted= */ true,
+            OperationType.CLIENT_MESSAGE,
+            ByteUtils.randomBytes(10));
+    binder.sendMessage(connectedDevice, message);
+    verify(mockConnectedDeviceManager).sendMessage(connectedDevice, message);
   }
 
-  @Test
-  public void sendMessageUnsecurely_mirrorsConnectedDeviceManager() {
-    ConnectedDevice connectedDevice =
-        new ConnectedDevice(
-            UUID.randomUUID().toString(),
-            /* deviceName = */ null,
-            /* belongsToActiveUser = */ false,
-            /* hasSecureChannel = */ false);
-    byte[] message = ByteUtils.randomBytes(10);
-    binder.sendMessageUnsecurely(connectedDevice, recipientId, message);
-    verify(mockConnectedDeviceManager)
-        .sendMessageUnsecurely(
-            refEq(connectedDevice),
-            refEq(recipientId.getUuid()),
-            refEq(message));
-  }
 
   @Test
   public void registerDeviceAssociationCallback_mirrorsConnectedDeviceManager() {
@@ -213,7 +200,7 @@ public class ConnectedDeviceManagerBinderTest {
           }
 
           @Override
-          public void onMessageReceived(ConnectedDevice connectedDevice, byte[] message) {
+          public void onMessageReceived(ConnectedDevice connectedDevice, DeviceMessage message) {
           }
 
           @Override

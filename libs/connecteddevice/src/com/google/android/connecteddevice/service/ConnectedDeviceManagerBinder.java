@@ -31,6 +31,7 @@ import com.google.android.connecteddevice.logging.LoggingManager;
 import com.google.android.connecteddevice.logging.LoggingManager.OnLogRequestedListener;
 import com.google.android.connecteddevice.model.AssociatedDevice;
 import com.google.android.connecteddevice.model.ConnectedDevice;
+import com.google.android.connecteddevice.model.DeviceMessage;
 import com.google.android.connecteddevice.util.RemoteCallbackBinder;
 import java.util.List;
 import java.util.Set;
@@ -150,7 +151,7 @@ public class ConnectedDeviceManagerBinder extends IConnectedDeviceManager.Stub {
           }
 
           @Override
-          public void onMessageReceived(ConnectedDevice device, byte[] message) {
+          public void onMessageReceived(ConnectedDevice device, DeviceMessage message) {
             try {
               callback.onMessageReceived(device, message);
             } catch (RemoteException exception) {
@@ -206,27 +207,16 @@ public class ConnectedDeviceManagerBinder extends IConnectedDeviceManager.Stub {
   }
 
   @Override
-  public boolean sendMessageSecurely(
+  public boolean sendMessage(
       @NonNull ConnectedDevice connectedDevice,
-      @NonNull ParcelUuid recipientId,
-      @NonNull byte[] message) {
+      @NonNull DeviceMessage message) {
     try {
-      connectedDeviceManager.sendMessageSecurely(
-          connectedDevice, recipientId.getUuid(), message);
+      connectedDeviceManager.sendMessage(connectedDevice, message);
       return true;
     } catch (IllegalStateException exception) {
       loge(TAG, "Attempted to send message prior to secure channel established.", exception);
     }
     return false;
-  }
-
-  @Override
-  public void sendMessageUnsecurely(
-      @NonNull ConnectedDevice connectedDevice,
-      @NonNull ParcelUuid recipientId,
-      @NonNull byte[] message) {
-    connectedDeviceManager.sendMessageUnsecurely(
-        connectedDevice, recipientId.getUuid(), message);
   }
 
   @Override

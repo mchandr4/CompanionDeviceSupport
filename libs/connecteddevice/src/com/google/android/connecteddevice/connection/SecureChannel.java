@@ -16,6 +16,7 @@
 
 package com.google.android.connecteddevice.connection;
 
+import static com.google.android.connecteddevice.model.DeviceMessage.OperationType.ENCRYPTION_HANDSHAKE;
 import static com.google.android.connecteddevice.util.SafeLog.logd;
 import static com.google.android.connecteddevice.util.SafeLog.loge;
 
@@ -23,7 +24,8 @@ import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
-import com.google.android.companionprotos.OperationProto.OperationType;
+import com.google.android.connecteddevice.model.DeviceMessage;
+import com.google.android.connecteddevice.model.DeviceMessage.OperationType;
 import com.google.android.connecteddevice.util.SafeConsumer;
 import com.google.android.encryptionrunner.EncryptionRunner;
 import com.google.android.encryptionrunner.HandshakeException;
@@ -121,8 +123,12 @@ public abstract class SecureChannel {
     }
 
     logd(TAG, "Sending handshake message.");
-    DeviceMessage deviceMessage = new DeviceMessage(/* recipient= */ null, isEncrypted, message);
-    sendMessage(deviceMessage, OperationType.ENCRYPTION_HANDSHAKE);
+    DeviceMessage deviceMessage = new DeviceMessage(
+        /* recipient= */ null,
+        isEncrypted,
+        ENCRYPTION_HANDSHAKE,
+        message);
+    sendMessage(deviceMessage);
   }
 
   /** Set the encryption key that secures this channel. */
@@ -139,17 +145,17 @@ public abstract class SecureChannel {
    * @param deviceMessage The {@link DeviceMessage} to send.
    */
   public void sendClientMessage(@NonNull DeviceMessage deviceMessage) {
-    sendMessage(deviceMessage, OperationType.CLIENT_MESSAGE);
+    sendMessage(deviceMessage);
   }
 
-  private void sendMessage(@NonNull DeviceMessage deviceMessage, OperationType operationType) {
+  private void sendMessage(@NonNull DeviceMessage deviceMessage) {
     if (isCompressionEnabled) {
       compressMessage(deviceMessage);
     }
     if (deviceMessage.isMessageEncrypted()) {
       encryptMessage(deviceMessage);
     }
-    stream.writeMessage(deviceMessage, operationType);
+    stream.writeMessage(deviceMessage);
   }
 
   private void encryptMessage(@NonNull DeviceMessage deviceMessage) {
@@ -240,11 +246,12 @@ public abstract class SecureChannel {
   }
 
   @VisibleForTesting
-  void onMessageReceived(@NonNull DeviceMessage deviceMessage, OperationType operationType) {
+  void onMessageReceived(@NonNull DeviceMessage deviceMessage) {
     boolean success = processMessage(deviceMessage);
     if (success) {
       success = decompressMessage(deviceMessage);
     }
+    OperationType operationType = deviceMessage.getOperationType();
     switch (operationType) {
       case ENCRYPTION_HANDSHAKE:
         if (!success) {
@@ -264,6 +271,8 @@ public abstract class SecureChannel {
         }
         break;
       case CLIENT_MESSAGE:
+      case QUERY:
+      case QUERY_RESPONSE:
         if (!success || deviceMessage.getMessage() == null) {
           break;
         }

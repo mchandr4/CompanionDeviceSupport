@@ -25,7 +25,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
-import com.google.android.companionprotos.OperationProto.OperationType;
+import com.google.android.connecteddevice.model.DeviceMessage;
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage;
 import com.google.android.connecteddevice.util.ByteUtils;
 import com.google.android.encryptionrunner.EncryptionRunner;
@@ -64,13 +64,13 @@ public final class AssociationSecureChannelTest {
   }
 
   @Test
-  public void testEncryptionHandshake_association() throws InterruptedException {
+  public void testEncryptionHandshake_association() {
     setupAssociationSecureChannel(channelCallback, EncryptionRunnerFactory.newFakeRunner());
     ArgumentCaptor<String> deviceIdCaptor = ArgumentCaptor.forClass(String.class);
     ArgumentCaptor<DeviceMessage> messageCaptor = ArgumentCaptor.forClass(DeviceMessage.class);
 
     initHandshakeMessage();
-    verify(streamMock).writeMessage(messageCaptor.capture(), any());
+    verify(streamMock).writeMessage(messageCaptor.capture());
     byte[] response = messageCaptor.getValue().getMessage();
     assertThat(response).isEqualTo(FakeEncryptionRunner.INIT_RESPONSE);
 
@@ -81,7 +81,7 @@ public final class AssociationSecureChannelTest {
     sendDeviceId();
 
     verify(channelCallback).onDeviceIdReceived(deviceIdCaptor.capture());
-    verify(streamMock, times(2)).writeMessage(messageCaptor.capture(), any());
+    verify(streamMock, times(2)).writeMessage(messageCaptor.capture());
     byte[] deviceIdMessage = messageCaptor.getValue().getMessage();
     assertThat(deviceIdMessage).isEqualTo(ByteUtils.uuidToBytes(SERVER_DEVICE_ID));
     assertThat(deviceIdCaptor.getValue()).isEqualTo(CLIENT_DEVICE_ID.toString());
@@ -91,8 +91,7 @@ public final class AssociationSecureChannelTest {
   }
 
   @Test
-  public void testEncryptionHandshake_association_wrongInitHandshakeMessage()
-      throws InterruptedException {
+  public void testEncryptionHandshake_association_wrongInitHandshakeMessage() {
     setupAssociationSecureChannel(channelCallback, EncryptionRunnerFactory.newFakeRunner());
 
     // Wrong init handshake message
@@ -129,8 +128,9 @@ public final class AssociationSecureChannelTest {
         new DeviceMessage(
             /* recipient= */ null,
             /* isMessageEncrypted= */ true,
+            DeviceMessage.OperationType.ENCRYPTION_HANDSHAKE,
             ByteUtils.concatByteArrays(ByteUtils.uuidToBytes(CLIENT_DEVICE_ID), CLIENT_SECRET));
-    associationSecureChannel.onMessageReceived(message, OperationType.ENCRYPTION_HANDSHAKE);
+    associationSecureChannel.onMessageReceived(message);
   }
 
   private void initHandshakeMessage() {
@@ -138,8 +138,9 @@ public final class AssociationSecureChannelTest {
         new DeviceMessage(
             /* recipient= */ null,
             /* isMessageEncrypted= */ false,
+            DeviceMessage.OperationType.ENCRYPTION_HANDSHAKE,
             FakeEncryptionRunner.INIT_MESSAGE);
-    associationSecureChannel.onMessageReceived(message, OperationType.ENCRYPTION_HANDSHAKE);
+    associationSecureChannel.onMessageReceived(message);
   }
 
   private void respondToContinueMessage() {
@@ -147,7 +148,8 @@ public final class AssociationSecureChannelTest {
         new DeviceMessage(
             /* recipient= */ null,
             /* isMessageEncrypted= */ false,
+            DeviceMessage.OperationType.ENCRYPTION_HANDSHAKE,
             FakeEncryptionRunner.CLIENT_RESPONSE);
-    associationSecureChannel.onMessageReceived(message, OperationType.ENCRYPTION_HANDSHAKE);
+    associationSecureChannel.onMessageReceived(message);
   }
 }

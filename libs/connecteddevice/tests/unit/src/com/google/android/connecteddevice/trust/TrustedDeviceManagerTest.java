@@ -8,8 +8,10 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.robolectric.Shadows.shadowOf;
 
 import android.app.ActivityManager;
+import android.app.KeyguardManager;
 import androidx.room.Room;
 import android.content.Context;
 import android.os.IBinder;
@@ -53,11 +55,12 @@ public final class TrustedDeviceManagerTest {
 
   private static final int DEFAULT_USER_ID = ActivityManager.getCurrentUser();
 
-  private static final ConnectedDevice SECURE_CONNECTED_DEVICE = new ConnectedDevice(
-      DEFAULT_DEVICE_ID,
-      "secureConnectedDevice",
-      /* belongsToActiveUser= */ true,
-      /* hasSecureChannel= */ true);
+  private static final ConnectedDevice SECURE_CONNECTED_DEVICE =
+      new ConnectedDevice(
+          DEFAULT_DEVICE_ID,
+          "secureConnectedDevice",
+          /* belongsToActiveUser= */ true,
+          /* hasSecureChannel= */ true);
 
   @Captor private ArgumentCaptor<List<TrustedDevice>> trustedDeviceListCaptor;
 
@@ -70,30 +73,34 @@ public final class TrustedDeviceManagerTest {
   private TrustedDeviceManager manager;
   private TrustedDeviceFeature feature;
   private TrustedDeviceDatabase database;
+  private KeyguardManager keyguardManager;
 
   @Before
   public void setUp() throws RemoteException {
     MockitoAnnotations.initMocks(this);
     Context context = ApplicationProvider.getApplicationContext();
+    keyguardManager = context.getSystemService(KeyguardManager.class);
 
     // Required because ShadowRemoteCallbackList will invoke these methods and requires non-null
     // values.
     when(enrollmentCallback.asBinder()).thenReturn(mock(IBinder.class));
     when(trustedDeviceCallback.asBinder()).thenReturn(mock(IBinder.class));
 
-    database = Room.inMemoryDatabaseBuilder(context, TrustedDeviceDatabase.class)
-        .allowMainThreadQueries()
-        .setQueryExecutor(directExecutor())
-        .build();
+    database =
+        Room.inMemoryDatabaseBuilder(context, TrustedDeviceDatabase.class)
+            .allowMainThreadQueries()
+            .setQueryExecutor(directExecutor())
+            .build();
 
     feature = spy(new TrustedDeviceFeature(context, mockConnectedDeviceManager));
 
-    manager = new TrustedDeviceManager(
-        context,
-        database,
-        feature,
-        /* databaseExecutor= */ directExecutor(),
-        /* remoteCallbackExecutor= */ directExecutor());
+    manager =
+        new TrustedDeviceManager(
+            context,
+            database,
+            feature,
+            /* databaseExecutor= */ directExecutor(),
+            /* remoteCallbackExecutor= */ directExecutor());
 
     manager.setTrustedDeviceAgentDelegate(trustAgentDelegate);
     manager.registerTrustedDeviceEnrollmentCallback(enrollmentCallback);
@@ -110,8 +117,8 @@ public final class TrustedDeviceManagerTest {
     triggerDeviceConnected(SECURE_CONNECTED_DEVICE);
     executeAndVerifyValidEnrollFlow();
 
-    TrustedDevice expectedTrustedDevice = new TrustedDevice(SECURE_CONNECTED_DEVICE.getDeviceId(),
-        DEFAULT_USER_ID, FAKE_HANDLE);
+    TrustedDevice expectedTrustedDevice =
+        new TrustedDevice(SECURE_CONNECTED_DEVICE.getDeviceId(), DEFAULT_USER_ID, FAKE_HANDLE);
 
     verify(trustedDeviceCallback).onTrustedDeviceAdded(expectedTrustedDevice);
   }
@@ -124,8 +131,8 @@ public final class TrustedDeviceManagerTest {
     manager.retrieveTrustedDevicesForActiveUser(trustedDeviceListener);
     verify(trustedDeviceListener).onTrustedDevicesRetrieved(trustedDeviceListCaptor.capture());
 
-    TrustedDevice expectedTrustedDevice = new TrustedDevice(SECURE_CONNECTED_DEVICE.getDeviceId(),
-        DEFAULT_USER_ID, FAKE_HANDLE);
+    TrustedDevice expectedTrustedDevice =
+        new TrustedDevice(SECURE_CONNECTED_DEVICE.getDeviceId(), DEFAULT_USER_ID, FAKE_HANDLE);
 
     assertThat(trustedDeviceListCaptor.getValue()).containsExactly(expectedTrustedDevice);
   }
@@ -135,7 +142,8 @@ public final class TrustedDeviceManagerTest {
     triggerDeviceConnected(SECURE_CONNECTED_DEVICE);
     executeAndVerifyValidEnrollFlow();
 
-    manager.featureCallback.onMessageReceived(SECURE_CONNECTED_DEVICE,
+    manager.featureCallback.onMessageReceived(
+        SECURE_CONNECTED_DEVICE,
         createStateSyncMessage(/* enabled= */ false));
 
     manager.retrieveTrustedDevicesForActiveUser(trustedDeviceListener);
@@ -149,14 +157,15 @@ public final class TrustedDeviceManagerTest {
     triggerDeviceConnected(SECURE_CONNECTED_DEVICE);
     executeAndVerifyValidEnrollFlow();
 
-    manager.featureCallback.onMessageReceived(SECURE_CONNECTED_DEVICE,
+    manager.featureCallback.onMessageReceived(
+        SECURE_CONNECTED_DEVICE,
         createStateSyncMessage(/* enabled= */ true));
 
     manager.retrieveTrustedDevicesForActiveUser(trustedDeviceListener);
     verify(trustedDeviceListener).onTrustedDevicesRetrieved(trustedDeviceListCaptor.capture());
 
-    TrustedDevice expectedTrustedDevice = new TrustedDevice(SECURE_CONNECTED_DEVICE.getDeviceId(),
-        DEFAULT_USER_ID, FAKE_HANDLE);
+    TrustedDevice expectedTrustedDevice =
+        new TrustedDevice(SECURE_CONNECTED_DEVICE.getDeviceId(), DEFAULT_USER_ID, FAKE_HANDLE);
 
     assertThat(trustedDeviceListCaptor.getValue()).containsExactly(expectedTrustedDevice);
   }
@@ -166,20 +175,21 @@ public final class TrustedDeviceManagerTest {
     triggerDeviceConnected(SECURE_CONNECTED_DEVICE);
     executeAndVerifyValidEnrollFlow();
 
-    ConnectedDevice unenrolledDevice = new ConnectedDevice(
-      "unenrolled",
-      "unenrolled",
-      /* belongsToActiveUser= */ true,
-      /* hasSecureChannel= */ true);
+    ConnectedDevice unenrolledDevice =
+        new ConnectedDevice(
+            "unenrolled",
+            "unenrolled",
+            /* belongsToActiveUser= */ true,
+            /* hasSecureChannel= */ true);
 
-    manager.featureCallback.onMessageReceived(unenrolledDevice,
-        createStateSyncMessage(/* enabled= */ false));
+    manager.featureCallback.onMessageReceived(
+        unenrolledDevice, createStateSyncMessage(/* enabled= */ false));
 
     manager.retrieveTrustedDevicesForActiveUser(trustedDeviceListener);
     verify(trustedDeviceListener).onTrustedDevicesRetrieved(trustedDeviceListCaptor.capture());
 
-    TrustedDevice expectedTrustedDevice = new TrustedDevice(SECURE_CONNECTED_DEVICE.getDeviceId(),
-        DEFAULT_USER_ID, FAKE_HANDLE);
+    TrustedDevice expectedTrustedDevice =
+        new TrustedDevice(SECURE_CONNECTED_DEVICE.getDeviceId(), DEFAULT_USER_ID, FAKE_HANDLE);
 
     // Should not affect the existing trusted device.
     assertThat(trustedDeviceListCaptor.getValue()).containsExactly(expectedTrustedDevice);
@@ -194,8 +204,8 @@ public final class TrustedDeviceManagerTest {
         new TrustedDevice(DEFAULT_DEVICE_ID, DEFAULT_USER_ID, FAKE_HANDLE);
     manager.removeTrustedDevice(trustedDevice);
 
-    verify(feature).sendMessageSecurely(SECURE_CONNECTED_DEVICE,
-        createStateSyncMessage(/* enabled= */ false));
+    verify(feature)
+        .sendMessageSecurely(SECURE_CONNECTED_DEVICE, createStateSyncMessage(/* enabled= */ false));
   }
 
   @Test
@@ -207,15 +217,15 @@ public final class TrustedDeviceManagerTest {
         new TrustedDevice(DEFAULT_DEVICE_ID, DEFAULT_USER_ID, FAKE_HANDLE);
     manager.removeTrustedDevice(trustedDevice);
 
-    verify(feature).sendMessageSecurely(SECURE_CONNECTED_DEVICE,
-        createStateSyncMessage(/* enabled= */ false));
+    verify(feature)
+        .sendMessageSecurely(SECURE_CONNECTED_DEVICE, createStateSyncMessage(/* enabled= */ false));
 
     mockNoDevicesConnected();
     triggerDeviceConnected(SECURE_CONNECTED_DEVICE);
 
     // Should not have sent an additional message, so the count remains at 1.
-    verify(feature).sendMessageSecurely(SECURE_CONNECTED_DEVICE,
-        createStateSyncMessage(/* enabled= */ false));
+    verify(feature)
+        .sendMessageSecurely(SECURE_CONNECTED_DEVICE, createStateSyncMessage(/* enabled= */ false));
   }
 
   @Test
@@ -228,19 +238,19 @@ public final class TrustedDeviceManagerTest {
 
     mockNoDevicesConnected();
     manager.removeTrustedDevice(trustedDevice);
-    verify(feature, never()).sendMessageSecurely(SECURE_CONNECTED_DEVICE,
-        createStateSyncMessage(/* enabled= */ false));
+    verify(feature, never())
+        .sendMessageSecurely(SECURE_CONNECTED_DEVICE, createStateSyncMessage(/* enabled= */ false));
 
     triggerDeviceConnected(SECURE_CONNECTED_DEVICE);
-    verify(feature).sendMessageSecurely(SECURE_CONNECTED_DEVICE,
-        createStateSyncMessage(/* enabled= */ false));
+    verify(feature)
+        .sendMessageSecurely(SECURE_CONNECTED_DEVICE, createStateSyncMessage(/* enabled= */ false));
 
     mockNoDevicesConnected();
     triggerDeviceConnected(SECURE_CONNECTED_DEVICE);
 
     // Should not send an additional message, so the count remains at 1.
-    verify(feature).sendMessageSecurely(SECURE_CONNECTED_DEVICE,
-        createStateSyncMessage(/* enabled= */ false));
+    verify(feature)
+        .sendMessageSecurely(SECURE_CONNECTED_DEVICE, createStateSyncMessage(/* enabled= */ false));
   }
 
   @Test
@@ -281,15 +291,49 @@ public final class TrustedDeviceManagerTest {
     verify(trustedDeviceCallback).onTrustedDeviceRemoved(device);
   }
 
+  @Test
+  public void testClearTrustedDeviceAgentDelegate_invalidateTrustedDevicesOnLockScreenRemoved()
+      throws RemoteException {
+    triggerDeviceConnected(SECURE_CONNECTED_DEVICE);
+
+    executeAndVerifyValidEnrollFlow();
+    shadowOf(keyguardManager).setIsDeviceSecure(false);
+
+    manager.clearTrustedDeviceAgentDelegate(trustAgentDelegate);
+    manager.retrieveTrustedDevicesForActiveUser(trustedDeviceListener);
+    verify(trustedDeviceListener).onTrustedDevicesRetrieved(trustedDeviceListCaptor.capture());
+
+    assertThat(trustedDeviceListCaptor.getValue()).isEmpty();
+  }
+
+  @Test
+  public void testClearTrustedDeviceAgentDelegate_invalidateTrustedDevicesOnLockScreenSet()
+      throws RemoteException {
+    triggerDeviceConnected(SECURE_CONNECTED_DEVICE);
+
+    executeAndVerifyValidEnrollFlow();
+    shadowOf(keyguardManager).setIsDeviceSecure(true);
+
+    manager.clearTrustedDeviceAgentDelegate(trustAgentDelegate);
+    manager.retrieveTrustedDevicesForActiveUser(trustedDeviceListener);
+    verify(trustedDeviceListener).onTrustedDevicesRetrieved(trustedDeviceListCaptor.capture());
+
+    TrustedDevice expectedTrustedDevice =
+        new TrustedDevice(SECURE_CONNECTED_DEVICE.getDeviceId(), DEFAULT_USER_ID, FAKE_HANDLE);
+
+    assertThat(trustedDeviceListCaptor.getValue()).containsExactly(expectedTrustedDevice);
+  }
+
   /**
    * Runs through a valid enrollment flow and verifies that the current flow is run.
    *
-   * <p>At the end of this method, {@link #SECURE_CONNECTED_DEVICE} will be enrolled and
-   * {@link #FAKE_TOKEN} will be activated.
+   * <p>At the end of this method, {@link #SECURE_CONNECTED_DEVICE} will be enrolled and {@link
+   * #FAKE_TOKEN} will be activated.
    */
   private void executeAndVerifyValidEnrollFlow() throws RemoteException {
     // First, the phone will send an escrow token to start the enrollment.
-    manager.featureCallback.onMessageReceived(SECURE_CONNECTED_DEVICE,
+    manager.featureCallback.onMessageReceived(
+        SECURE_CONNECTED_DEVICE,
         createTokenMessage(FAKE_TOKEN));
     verify(trustAgentDelegate).addEscrowToken(FAKE_TOKEN, DEFAULT_USER_ID);
 
@@ -308,8 +352,7 @@ public final class TrustedDeviceManagerTest {
   }
 
   private void mockNoDevicesConnected() throws RemoteException {
-    when(mockConnectedDeviceManager.getActiveUserConnectedDevices())
-        .thenReturn(ImmutableList.of());
+    when(mockConnectedDeviceManager.getActiveUserConnectedDevices()).thenReturn(ImmutableList.of());
   }
 
   private static byte[] createTokenMessage(byte[] token) {
@@ -322,9 +365,7 @@ public final class TrustedDeviceManagerTest {
   }
 
   private static byte[] createStateSyncMessage(boolean enabled) {
-    TrustedDeviceState state = TrustedDeviceState.newBuilder()
-        .setEnabled(enabled)
-        .build();
+    TrustedDeviceState state = TrustedDeviceState.newBuilder().setEnabled(enabled).build();
 
     return TrustedDeviceMessage.newBuilder()
         .setVersion(TrustedDeviceManager.TRUSTED_DEVICE_MESSAGE_VERSION)

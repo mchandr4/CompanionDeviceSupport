@@ -17,10 +17,6 @@ import javax.inject.Inject;
 public class ReplicaCalendarSync extends BaseCalendarSync {
   private static final String TAG = "ReplicaCalendarSync";
 
-  /** If true, then update messages can be sent to the source remote device. */
-  // TODO(b/166134901) Remove once changes can be synced back to the source.
-  private static final boolean UPDATE_SOURCE_ENABLED = false;
-
   private final ContentCleanerDelegate contentCleanerDelegate;
 
   @Inject
@@ -53,11 +49,6 @@ public class ReplicaCalendarSync extends BaseCalendarSync {
 
   @Override
   protected void send(UpdateCalendars update, String deviceId) {
-    if (!UPDATE_SOURCE_ENABLED && update.getType() == UpdateCalendars.Type.RECEIVE) {
-      logger.info("Update from replica to source disabled.");
-      return;
-    }
-
     // A legacy source device that is not updatable cannot receive any messages.
     DeviceState state = getOrCreateState(deviceId);
     if (isUpdatable(state)) {

@@ -14,41 +14,77 @@
  * limitations under the License.
  */
 
-package com.google.android.connecteddevice.connection;
+package com.google.android.connecteddevice.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import com.google.android.companionprotos.DeviceMessageProto.Message;
-import com.google.android.connecteddevice.util.ByteUtils;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.UUID;
 
-/** Holds the needed data from a {@link Message}. */
-public class DeviceMessage {
+/** Representation of a message between two devices. */
+public class DeviceMessage implements Parcelable {
 
-  private static final String TAG = "DeviceMessage";
+  /** Operation type for a message. */
+  public enum OperationType {
+    UNKNOWN(0),
+    ENCRYPTION_HANDSHAKE(2),
+    ACK(3),
+    CLIENT_MESSAGE(4),
+    QUERY(5),
+    QUERY_RESPONSE(6);
+
+    private final int value;
+
+    OperationType(int value) {
+      this.value = value;
+    }
+
+    /** Get the {@link Integer} representation of this type. */
+    public int getValue() {
+      return value;
+    }
+
+    /** Returns the type matching the value. */
+    public static OperationType fromValue(int value) {
+      for (OperationType type : OperationType.values()) {
+        if (type.value == value) {
+          return type;
+        }
+      }
+      return UNKNOWN;
+    }
+  }
 
   private final UUID recipient;
 
   private final boolean isMessageEncrypted;
+
+  private final OperationType operationType;
 
   private byte[] message;
 
   private int originalMessageSize;
 
   public DeviceMessage(
-      @Nullable UUID recipient, boolean isMessageEncrypted, @NonNull byte[] message) {
+      @Nullable UUID recipient,
+      boolean isMessageEncrypted,
+      OperationType operationType,
+      @NonNull byte[] message) {
     this.recipient = recipient;
     this.isMessageEncrypted = isMessageEncrypted;
+    this.operationType = operationType;
     this.message = message;
   }
 
-  public DeviceMessage(@NonNull Message message) {
-    recipient = ByteUtils.bytesToUUID(message.getRecipient().toByteArray());
-    isMessageEncrypted = message.getIsPayloadEncrypted();
-    this.message = message.getPayload().toByteArray();
-    originalMessageSize = message.getOriginalSize();
+  private DeviceMessage(Parcel in) {
+    this(
+        UUID.fromString(in.readString()),
+        in.readBoolean(),
+        OperationType.fromValue(in.readInt()),
+        in.createByteArray());
   }
 
   /** Returns the recipient for this message. {@code null} if no recipient set. */
@@ -60,6 +96,11 @@ public class DeviceMessage {
   /** Returns whether this message is encrypted. */
   public boolean isMessageEncrypted() {
     return isMessageEncrypted;
+  }
+
+  /** Returns the operation type of the message. */
+  public OperationType getOperationType() {
+    return operationType;
   }
 
   /** Returns the message payload. */
@@ -95,12 +136,40 @@ public class DeviceMessage {
     return Objects.equals(recipient, deviceMessage.recipient)
         && isMessageEncrypted == deviceMessage.isMessageEncrypted
         && Arrays.equals(message, deviceMessage.message)
-        && originalMessageSize == deviceMessage.originalMessageSize;
+        && originalMessageSize == deviceMessage.originalMessageSize
+        && operationType == deviceMessage.operationType;
   }
 
   @Override
   public int hashCode() {
-    return 31 * Objects.hash(recipient, isMessageEncrypted, originalMessageSize)
+    return 31 * Objects.hash(recipient, isMessageEncrypted, originalMessageSize, operationType)
         + Arrays.hashCode(message);
   }
+
+  @Override
+  public int describeContents() {
+    return 0;
+  }
+
+  @Override
+  public void writeToParcel(Parcel parcel, int i) {
+    parcel.writeString(recipient.toString());
+    parcel.writeBoolean(isMessageEncrypted);
+    parcel.writeInt(operationType.getValue());
+    parcel.writeByteArray(message);
+  }
+
+  public static final Parcelable.Creator<DeviceMessage> CREATOR =
+      new Parcelable.Creator<DeviceMessage>() {
+
+        @Override
+        public DeviceMessage createFromParcel(Parcel source) {
+          return new DeviceMessage(source);
+        }
+
+        @Override
+        public DeviceMessage[] newArray(int size) {
+          return new DeviceMessage[size];
+        }
+      };
 }

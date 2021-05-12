@@ -30,6 +30,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import com.google.android.companionprotos.CapabilitiesExchangeProto.CapabilitiesExchange;
 import com.google.android.connecteddevice.model.AssociatedDevice;
+import com.google.android.connecteddevice.model.DeviceMessage;
 import com.google.android.connecteddevice.model.OobEligibleDevice;
 import com.google.android.connecteddevice.oob.OobChannel;
 import com.google.android.connecteddevice.oob.OobConnectionManager;

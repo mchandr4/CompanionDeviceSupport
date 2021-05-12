@@ -41,4 +41,10 @@ enum OperationType {
 
   // The payload contains a client-specific message.
   CLIENT_MESSAGE = 4;
+
+  // The payload contains a query message.
+  QUERY = 5;
+
+  // The payload contains a response to a query.
+  QUERY_RESPONSE = 6;
 }

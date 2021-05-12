@@ -31,6 +31,7 @@ import com.google.android.companionprotos.OperationProto.OperationType;
 import com.google.android.companionprotos.PacketProto.Packet;
 import com.google.android.connecteddevice.connection.DeviceMessageStream.MessageReceivedErrorListener;
 import com.google.android.connecteddevice.connection.DeviceMessageStream.MessageReceivedListener;
+import com.google.android.connecteddevice.model.DeviceMessage;
 import com.google.android.connecteddevice.util.ByteUtils;
 import com.google.common.collect.Iterables;
 import com.google.protobuf.ByteString;
@@ -67,29 +68,27 @@ public class DeviceMessageStreamTest {
   }
 
   @Test
-  public void processPacket_notifiesWithEntireMessageForSinglePacketMessage()
-      throws InterruptedException {
+  public void processPacket_notifiesWithEntireMessageForSinglePacketMessage() {
     stream.setMessageReceivedListener(mockMessageReceivedListener);
     byte[] data = ByteUtils.randomBytes(5);
     processMessage(data);
     ArgumentCaptor<DeviceMessage> messageCaptor = ArgumentCaptor.forClass(DeviceMessage.class);
-    verify(mockMessageReceivedListener).onMessageReceived(messageCaptor.capture(), any());
+    verify(mockMessageReceivedListener).onMessageReceived(messageCaptor.capture());
+    assertThat(messageCaptor.getValue().getMessage()).isEqualTo(data);
   }
 
   @Test
-  public void processPacket_notifiesWithEntireMessageForMultiPacketMessage()
-      throws InterruptedException {
+  public void processPacket_notifiesWithEntireMessageForMultiPacketMessage() {
     stream.setMessageReceivedListener(mockMessageReceivedListener);
     byte[] data = ByteUtils.randomBytes(750);
     processMessage(data);
     ArgumentCaptor<DeviceMessage> messageCaptor = ArgumentCaptor.forClass(DeviceMessage.class);
-    verify(mockMessageReceivedListener).onMessageReceived(messageCaptor.capture(), any());
+    verify(mockMessageReceivedListener).onMessageReceived(messageCaptor.capture());
     assertThat(Arrays.equals(data, messageCaptor.getValue().getMessage())).isTrue();
   }
 
   @Test
-  public void processPacket_receivingMultipleMessagesInParallelParsesSuccessfully()
-      throws InterruptedException {
+  public void processPacket_receivingMultipleMessagesInParallelParsesSuccessfully() {
     stream.setMessageReceivedListener(mockMessageReceivedListener);
     byte[] data = ByteUtils.randomBytes((int) (WRITE_SIZE * 1.5));
     List<Packet> packets1 = createPackets(data);
@@ -103,12 +102,12 @@ public class DeviceMessageStreamTest {
       stream.processPacket(packets2.get(i));
     }
     ArgumentCaptor<DeviceMessage> messageCaptor = ArgumentCaptor.forClass(DeviceMessage.class);
-    verify(mockMessageReceivedListener).onMessageReceived(messageCaptor.capture(), any());
+    verify(mockMessageReceivedListener).onMessageReceived(messageCaptor.capture());
     assertThat(Arrays.equals(data, messageCaptor.getValue().getMessage())).isTrue();
 
     stream.setMessageReceivedListener(mockMessageReceivedListener);
     stream.processPacket(Iterables.getLast(packets2));
-    verify(mockMessageReceivedListener, times(2)).onMessageReceived(messageCaptor.capture(), any());
+    verify(mockMessageReceivedListener, times(2)).onMessageReceived(messageCaptor.capture());
     assertThat(Arrays.equals(data, messageCaptor.getValue().getMessage())).isTrue();
   }
 
@@ -122,7 +121,7 @@ public class DeviceMessageStreamTest {
     for (int i = 0; i < packets.size() - 1; i++) {
       stream.processPacket(packets.get(i));
     }
-    verify(mockMessageReceivedListener, never()).onMessageReceived(any(), any());
+    verify(mockMessageReceivedListener, never()).onMessageReceived(any());
     verify(mockErrorListener, never()).onMessageReceivedError(any());
   }
 
@@ -130,13 +129,14 @@ public class DeviceMessageStreamTest {
   public void processPacket_ignoresDuplicatePacket() {
     byte[] data = ByteUtils.randomBytes((int) (WRITE_SIZE * 2.5));
     stream.setMessageReceivedListener(mockMessageReceivedListener);
-    ArgumentCaptor<DeviceMessage> messageCaptor = ArgumentCaptor.forClass(DeviceMessage.class);
+    ArgumentCaptor<DeviceMessage> messageCaptor = ArgumentCaptor.forClass(
+        DeviceMessage.class);
     List<Packet> packets = createPackets(data);
     for (int i = 0; i < packets.size(); i++) {
       stream.processPacket(packets.get(i));
       stream.processPacket(packets.get(i)); // Process each packet twice.
     }
-    verify(mockMessageReceivedListener).onMessageReceived(messageCaptor.capture(), any());
+    verify(mockMessageReceivedListener).onMessageReceived(messageCaptor.capture());
     assertThat(Arrays.equals(data, messageCaptor.getValue().getMessage())).isTrue();
   }
 

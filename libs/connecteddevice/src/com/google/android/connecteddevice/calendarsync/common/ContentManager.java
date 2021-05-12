@@ -72,18 +72,23 @@ abstract class ContentManager<
    * Deletes the content item with the given {@code parentId} and {@code key} and all descendants.
    */
   public void delete(Object parentId, String key) {
+    logger.debug("Delete %s", key);
+
     // The platform handles deleting ancestors.
     delegate.delete(parentId, key);
   }
 
   /** Deletes all content items with the given {@code parentId} and all descendants. */
   public void deleteAll(Object parentId) {
-    // The platform handles deleting ancestors.
+    logger.debug("Delete all for parent %s", parentId);
+
+    // The platform handles deleting descendants.
     delegate.deleteAll(parentId);
   }
 
   /** Creates a new content item with the given {@code parentId} and all descendants. */
   public void create(Object parentId, MessageT content) {
+    logger.debug("Create %s", content);
     Object id = delegate.insert(parentId, content);
     String key = key(content);
     ContentManager<ChildMessageT, ?, ?, ?> childManager = getChildManager(key);
@@ -261,16 +266,17 @@ abstract class ContentManager<
   }
 
   /** Does not modify the content item but may update its children. */
-  protected void unchanged(Object parentId, MessageT content) {
-    if (maybeUpdateChildren(parentId, content)) {
-      onContentUpdated(parentId, content);
+  protected void unchanged(Object parentId, MessageT update) {
+    if (maybeUpdateChildren(parentId, update, key(update))) {
+      onContentUpdated(parentId, update);
     }
   }
 
   /** Updates the content item and may update its children. */
   protected void update(Object parentId, String key, MessageT update) {
-    delegate.update(parentId, key, update);
-    maybeUpdateChildren(parentId, update);
+    logger.debug("Update %s with %s", key, update);
+    String updatedKey = delegate.update(parentId, key, update);
+    maybeUpdateChildren(parentId, update, updatedKey);
     onContentUpdated(parentId, update);
   }
 
@@ -289,16 +295,16 @@ abstract class ContentManager<
   @Nullable
   protected abstract ContentManager<ChildMessageT, ChildBuilderT, ?, ?> getChildManager(String key);
 
-  private boolean maybeUpdateChildren(Object parentId, MessageT update) {
-    ContentManager<ChildMessageT, ChildBuilderT, ?, ?> childManager = getChildManager(key(update));
+  private boolean maybeUpdateChildren(Object parentId, MessageT update, String key) {
+    ContentManager<ChildMessageT, ChildBuilderT, ?, ?> childManager = getChildManager(key);
     if (childManager == null) {
       return false;
     }
-    Object id = delegate.find(parentId, key(update));
     List<ChildMessageT> children = children(update);
     if (children.isEmpty()) {
       return false;
     }
+    Object id = delegate.find(parentId, key);
     childManager.applyUpdateMessages(id, children);
     return true;
   }

@@ -35,6 +35,7 @@ import com.google.android.connecteddevice.api.RemoteFeature;
 import com.google.android.connecteddevice.connection.CarBluetoothManager;
 import com.google.android.connecteddevice.connection.ble.CarBlePeripheralManager;
 import com.google.android.connecteddevice.connection.spp.CarSppManager;
+import com.google.android.connecteddevice.logging.LoggingFeature;
 import com.google.android.connecteddevice.logging.LoggingManager;
 import com.google.android.connecteddevice.oob.BluetoothRfcommChannel;
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage;
@@ -141,11 +142,20 @@ public final class ConnectedDeviceService extends TrunkService {
           }
         }
       };
+
   private final AtomicBoolean isSppServiceBound = new AtomicBoolean(false);
 
-  private final List<LocalFeature> localFeatures = new ArrayList<>();
+  private final List<RemoteFeature> localFeatures = new ArrayList<>();
 
   private final AtomicBoolean isEveryFeatureInitialized = new AtomicBoolean(false);
+
+  private final OnRemoteCallbackSetListener onRemoteCallbackSetListener =
+      isSet -> {
+        if (BluetoothAdapter.getDefaultAdapter().isEnabled()) {
+          initializeFeatures();
+        }
+        isSppServiceBound.set(isSet);
+      };
 
   private ConnectedDeviceManager connectedDeviceManager;
 
@@ -181,10 +191,9 @@ public final class ConnectedDeviceService extends TrunkService {
     connectedDeviceManager =
         new ConnectedDeviceManager(carBluetoothManager, storage, sppDelegateBinder);
     loggingManager = new LoggingManager(this);
-    registerOnLogRequestedListener();
-    localFeatures.add(new LoggingFeature(this, connectedDeviceManager, loggingManager));
     connectedDeviceManagerBinder =
         new ConnectedDeviceManagerBinder(connectedDeviceManager, loggingManager);
+    populateFeatures();
     associationBinder = new AssociationBinder(connectedDeviceManager);
     registerReceiver(
         bleBroadcastReceiver, new IntentFilter(BluetoothAdapter.ACTION_BLE_STATE_CHANGED));
@@ -193,13 +202,16 @@ public final class ConnectedDeviceService extends TrunkService {
     }
   }
 
-  private final OnRemoteCallbackSetListener onRemoteCallbackSetListener =
-      isSet -> {
-        if (BluetoothAdapter.getDefaultAdapter().isEnabled()) {
-          initializeFeatures();
-        }
-        isSppServiceBound.set(isSet);
-      };
+  private void populateFeatures() {
+    // TODO(b/187523735) Remove listener from here and place in LoggingManager
+    Logger logger = Logger.getLogger();
+    logd(TAG, "Registering listener for logger.");
+    loggingManager.addOnLogRequestedListener(
+        logger.getLoggerId(),
+        () -> loggingManager.prepareLocalLogRecords(logger.getLoggerId(), logger.toByteArray()),
+        Executors.newSingleThreadExecutor());
+    localFeatures.add(new LoggingFeature(this, connectedDeviceManagerBinder, loggingManager));
+  }
 
   private CarBluetoothManager createSppManager(
       @NonNull ConnectedDeviceStorage storage,
@@ -310,6 +322,9 @@ public final class ConnectedDeviceService extends TrunkService {
     }
     connectedDeviceManager.reset();
     loggingManager.reset();
+    for (RemoteFeature feature : localFeatures) {
+      feature.stop();
+    }
     isEveryFeatureInitialized.set(false);
   }
 
@@ -324,21 +339,12 @@ public final class ConnectedDeviceService extends TrunkService {
                 return;
               }
               connectedDeviceManager.start();
-              for (LocalFeature feature : localFeatures) {
+              for (RemoteFeature feature : localFeatures) {
                 feature.start();
               }
               isEveryFeatureInitialized.set(true);
             })
         .start();
-  }
-
-  private void registerOnLogRequestedListener() {
-    Logger logger = Logger.getLogger();
-    logd(TAG, "Registering listener for logger.");
-    loggingManager.addOnLogRequestedListener(
-        logger.getLoggerId(),
-        () -> loggingManager.prepareLocalLogRecords(logger.getLoggerId(), logger.toByteArray()),
-        Executors.newSingleThreadExecutor());
   }
 
   /** Returns the service's instance of {@link ConnectedDeviceManager}. */

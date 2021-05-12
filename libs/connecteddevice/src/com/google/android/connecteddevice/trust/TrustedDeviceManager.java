@@ -22,6 +22,7 @@ import static com.google.android.connecteddevice.util.SafeLog.logi;
 import static com.google.android.connecteddevice.util.SafeLog.logw;
 
 import android.app.ActivityManager;
+import android.app.KeyguardManager;
 import android.content.Context;
 import android.os.IInterface;
 import android.os.RemoteCallbackList;
@@ -68,8 +69,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
   private static final String TAG = "TrustedDeviceManager";
 
-  @VisibleForTesting
-  static final int TRUSTED_DEVICE_MESSAGE_VERSION = 2;
+  @VisibleForTesting static final int TRUSTED_DEVICE_MESSAGE_VERSION = 2;
 
   /** Length of token generated on a trusted device. */
   private static final int ESCROW_TOKEN_LENGTH = 8;
@@ -98,6 +98,8 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
 
   private final TrustedDeviceDao database;
 
+  private final Context context;
+
   private ITrustedDeviceAgentDelegate trustAgentDelegate;
 
   private ConnectedDevice pendingDevice;
@@ -107,7 +109,8 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
   private PendingCredentials pendingCredentials;
 
   TrustedDeviceManager(@NonNull Context context) {
-    this(context,
+    this(
+        context,
         TrustedDeviceDatabaseProvider.get(context),
         new TrustedDeviceFeature(context),
         /* databaseExecutor= */ Executors.newSingleThreadExecutor(),
@@ -121,6 +124,7 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
       @NonNull TrustedDeviceFeature trustedDeviceFeature,
       @NonNull Executor databaseExecutor,
       @NonNull Executor remoteCallbackExecutor) {
+    this.context = context;
     this.database = database.trustedDeviceDao();
     this.databaseExecutor = databaseExecutor;
     this.remoteCallbackExecutor = remoteCallbackExecutor;
@@ -228,10 +232,11 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
     String deviceId = pendingDevice.getDeviceId();
 
     TrustedDeviceEntity entity = new TrustedDeviceEntity(deviceId, userId, handle);
-    databaseExecutor.execute(() -> {
-      database.removeFeatureState(deviceId);
-      database.addOrReplaceTrustedDevice(entity);
-    });
+    databaseExecutor.execute(
+        () -> {
+          database.removeFeatureState(deviceId);
+          database.addOrReplaceTrustedDevice(entity);
+        });
 
     pendingDevice = null;
 
@@ -407,7 +412,20 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
     }
     logd(TAG, "Clear current TrustedDeviceAgentDelegate: " + trustAgentDelegate + ".");
     this.trustAgentDelegate = null;
+    if (isDeviceSecure()) {
+      return;
+    }
+    logd(TAG, "No lock screen credential set. Invalidating all enrolled trusted devices.");
     invalidateAllTrustedDevices();
+  }
+
+  /** Returns {@code true} if a lock screen credential was set. */
+  private boolean isDeviceSecure() {
+    KeyguardManager keyguardManager = context.getSystemService(KeyguardManager.class);
+    if (keyguardManager == null) {
+      return false;
+    }
+    return keyguardManager.isDeviceSecure();
   }
 
   private void invalidateAllTrustedDevices() {
@@ -488,8 +506,10 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
       return;
     }
 
-    logd(TAG, "Trusted device enrollment status cleared, but vehicle not currently connected. "
-        + "Saving status to send on next connection.");
+    logd(
+        TAG,
+        "Trusted device enrollment status cleared, but vehicle not currently connected. "
+            + "Saving status to send on next connection.");
 
     FeatureStateEntity stateEntity = new FeatureStateEntity(deviceId, stateMessage);
     databaseExecutor.execute(() -> database.addOrReplaceFeatureState(stateEntity));
@@ -561,7 +581,8 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
     unlockUser(device.getDeviceId(), credentials);
   }
 
-  private void processStatusSyncMessage(@NonNull ConnectedDevice device,
+  private void processStatusSyncMessage(
+      @NonNull ConnectedDevice device,
       @NonNull ByteString payload) {
     TrustedDeviceState state = null;
     try {
@@ -575,8 +596,10 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
     // only need to sync state if the feature is disabled. Otherwise, if the two devices are
     // connected and the feature is enabled, then the normal enrollment flow will be triggered.
     if (state.getEnabled()) {
-      logi(TAG, "Received state sync message from client indicating feature enabled. "
-          + "Nothing more to be done.");
+      logi(
+          TAG,
+          "Received state sync message from client indicating feature enabled. "
+              + "Nothing more to be done.");
       return;
     }
 
@@ -587,8 +610,10 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
       return;
     }
 
-    logd(TAG, "Received state sync message from client indicating feature disabled. "
-        + "Clearing enrollment state.");
+    logd(
+        TAG,
+        "Received state sync message from client indicating feature disabled. "
+            + "Clearing enrollment state.");
 
     removeTrustedDevice(entity.toTrustedDevice());
   }
@@ -646,20 +671,21 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
   }
 
   private void onSecureChannelEstablished(@NonNull ConnectedDevice device) {
-    databaseExecutor.execute(() -> {
-      String deviceId = device.getDeviceId();
-      FeatureStateEntity stateEntity = database.getFeatureState(deviceId);
+    databaseExecutor.execute(
+        () -> {
+          String deviceId = device.getDeviceId();
+          FeatureStateEntity stateEntity = database.getFeatureState(deviceId);
 
-      if (stateEntity == null) {
-        logd(TAG, "A device has connected securely. No feature state messages to send to it.");
-        return;
-      }
+          if (stateEntity == null) {
+            logd(TAG, "A device has connected securely. No feature state messages to send to it.");
+            return;
+          }
 
-      logd(TAG, "Connected device has stored feature state messages. Syncing now.");
+          logd(TAG, "Connected device has stored feature state messages. Syncing now.");
 
-      trustedDeviceFeature.sendMessageSecurely(device, stateEntity.state);
-      database.removeFeatureState(deviceId);
-    });
+          trustedDeviceFeature.sendMessageSecurely(device, stateEntity.state);
+          database.removeFeatureState(deviceId);
+        });
   }
 
   private static byte[] createAcknowledgmentMessage() {
@@ -689,9 +715,7 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
 
   @NonNull
   private static byte[] createDisabledStateSyncMessage() {
-    TrustedDeviceState state = TrustedDeviceState.newBuilder()
-        .setEnabled(false)
-        .build();
+    TrustedDeviceState state = TrustedDeviceState.newBuilder().setEnabled(false).build();
 
     return TrustedDeviceMessage.newBuilder()
         .setVersion(TrustedDeviceManager.TRUSTED_DEVICE_MESSAGE_VERSION)

@@ -110,8 +110,7 @@ public abstract class FieldTranslator<ValueT> {
    * Creates a {@link FieldTranslator} that puts a constant boolean value in a {@link Cursor}
    * column.
    */
-  public static FieldTranslator<Boolean> createBooleanContentConstant(
-      String column, boolean value) {
+  public static FieldTranslator<Boolean> createBooleanConstant(String column, boolean value) {
     return new ConstantFieldTranslator<Boolean>() {
       @Override
       void setTypedValue(ContentValues values) {
@@ -125,6 +124,30 @@ public abstract class FieldTranslator<ValueT> {
    */
   public static FieldTranslator<String> createStringConstant(String column, String value) {
     return new ConstantFieldTranslator<String>() {
+      @Override
+      void setTypedValue(ContentValues values) {
+        values.put(column, value);
+      }
+    };
+  }
+
+  /**
+   * Creates a {@link FieldTranslator} that puts a constant Long value in a {@link Cursor} column.
+   */
+  public static FieldTranslator<Long> createLongConstant(String column, long value) {
+    return new ConstantFieldTranslator<Long>() {
+      @Override
+      void setTypedValue(ContentValues values) {
+        values.put(column, value);
+      }
+    };
+  }
+
+  /**
+   * Creates a {@link FieldTranslator} that puts a constant int value in a {@link Cursor} column.
+   */
+  public static FieldTranslator<Integer> createIntConstant(String column, int value) {
+    return new ConstantFieldTranslator<Integer>() {
       @Override
       void setTypedValue(ContentValues values) {
         values.put(column, value);

@@ -5,12 +5,12 @@ import android.content.Context
 import android.util.Base64
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.google.android.connecteddevice.model.DeviceMessage
+import com.google.android.connecteddevice.model.DeviceMessage.OperationType
 import com.google.android.connecteddevice.storage.ConnectedDeviceDatabase
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage
 import com.google.android.connecteddevice.storage.CryptoHelper
 import com.google.android.connecteddevice.transport.ConnectionProtocol
-import com.google.android.connecteddevice.transport.ConnectionProtocol.ConnectChallenge
-import com.google.android.connecteddevice.transport.ConnectionProtocol.DeviceCallback
 import com.google.android.connecteddevice.util.ThreadSafeCallbacks
 import com.google.common.truth.Truth.assertThat
 import com.google.common.util.concurrent.MoreExecutors.directExecutor
@@ -43,7 +43,12 @@ class DeviceControllerTest {
   private val testRecipientUuid = UUID.randomUUID()
   private val testProtocolId = UUID.randomUUID()
   private val testDeviceMessage =
-    DeviceMessage(testRecipientUuid, true, "test message".toByteArray())
+    DeviceMessage(
+      testRecipientUuid,
+      true,
+      OperationType.CLIENT_MESSAGE,
+      "test message".toByteArray()
+    )
   private val testChallenge = "test Challenge".toByteArray()
   private val mockSecureChannel: SecureChannel = mock()
   private var spyStorage: ConnectedDeviceStorage? = null

@@ -5,10 +5,12 @@ import static com.google.android.connecteddevice.calendarsync.android.ContentOwn
 import static com.google.android.connecteddevice.calendarsync.android.FieldTranslator.createBooleanField;
 import static com.google.android.connecteddevice.calendarsync.android.FieldTranslator.createInstantField;
 import static com.google.android.connecteddevice.calendarsync.android.FieldTranslator.createIntegerField;
+import static com.google.android.connecteddevice.calendarsync.android.FieldTranslator.createLongConstant;
 import static com.google.android.connecteddevice.calendarsync.android.FieldTranslator.createLongField;
 import static com.google.android.connecteddevice.calendarsync.android.FieldTranslator.createStringField;
 import static com.google.android.connecteddevice.calendarsync.common.TimeProtoUtil.toInstant;
 import static com.google.android.connecteddevice.calendarsync.common.TimeProtoUtil.toTimestamp;
+import static com.google.common.collect.Sets.filter;
 
 import android.content.ContentResolver;
 import android.content.ContentUris;
@@ -32,7 +34,9 @@ import com.google.common.collect.Range;
 import com.google.protobuf.MessageLite;
 import java.time.Instant;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 import javax.annotation.Nullable;
 
 /**
@@ -79,7 +83,9 @@ final class EventContentDelegate extends BaseContentDelegate<Event> {
   /** The set of fields that are used when writing an event. */
   private final ImmutableSet<FieldTranslator<?>> writeEventFields;
 
+  private final ImmutableSet<FieldTranslator<?>> writeEventFieldsWithoutEndTime;
   private final Uri writeContentUri;
+  private final ContentOwnership ownership;
 
   EventContentDelegate(
       CommonLogger.Factory commonLoggerFactory,
@@ -97,21 +103,162 @@ final class EventContentDelegate extends BaseContentDelegate<Event> {
         /* idColumn= */ Instances.EVENT_ID,
         /* parentIdColumn= */ Instances.CALENDAR_ID);
     writeEventFields = createWriteEventFields(ownership);
+    writeEventFieldsWithoutEndTime =
+        ImmutableSet.<FieldTranslator<?>>builder()
+            .addAll(filter(writeEventFields, field -> !field.getColumns().contains(Events.DTEND)))
+            .build();
     writeContentUri =
         ownership == SOURCE ? Events.CONTENT_URI : addSyncAdapterParameters(Events.CONTENT_URI);
+    this.ownership = ownership;
   }
 
-  @Override
-  protected ContentValues createContentValues(
-      Event message, Object parentId, Collection<FieldTranslator<?>> fields) {
-    // Use write fields when creating content which differ from read fields.
-    return super.createContentValues(message, parentId, writeEventFields);
-  }
-
-  /** Writes to the Events content rather that Instances from where data is read. */
+  /** Writes to the {@link Events} content rather that {@link Instances} from where data is read. */
   @Override
   protected Uri getWriteContentUri() {
     return writeContentUri;
+  }
+
+  /** Writes to the {@link Events} fields rather that {@link Instances} from where data is read. */
+  @Override
+  protected Collection<FieldTranslator<?>> getWriteFields() {
+    return writeEventFields;
+  }
+
+  @Override
+  public Object insert(Object calendarId, Event event) {
+    String key = event.getKey();
+    if (getRecurrenceTypeFromKey(key) == RecurrenceType.EXCEPTION) {
+      if (ownership == SOURCE) {
+        // Exceptions to recurring events are only created on the source.
+        throw new IllegalStateException("Cannot insert exception on source");
+      } else {
+        maybeDeleteRecurringInstance(calendarId, key);
+      }
+    }
+    return super.insert(calendarId, event);
+  }
+
+  /**
+   * Deletes the recurring event instance on the replica when the same event is returned from the
+   * source as an exception.
+   *
+   * <p>When a change is made to a recurring event instance (with a defined begin time) on the
+   * replica device it causes a new exception event to be created on the source device. The new
+   * exception event is sent back to the replica to be created. The original changed recurring event
+   * instance still exists and needs to be deleted to avoid duplication. The details of the events
+   * should be the same except that the key will change to now represent the exception event.
+   *
+   * <p>Exceptions can also be created on the source directly so there will not always be an
+   * instance of a recurring event on the replica to delete.
+   */
+  private void maybeDeleteRecurringInstance(Object calendarId, String exceptionEventKey) {
+    long originalEventId = getOriginalEventIdFromKey(exceptionEventKey);
+    Instant originalBeginTime = getOriginalBeginTimeFromKey(exceptionEventKey);
+    String recurringKey = createRecurringKey(originalEventId, originalBeginTime);
+
+    // Use super to avoid logic in this class around deleting a recurring instance.
+    if (super.delete(calendarId, recurringKey)) {
+      logger.debug("Deleted instance of recurring event %s", recurringKey);
+    }
+  }
+
+  @Override
+  public String update(Object calendarId, String key, Event event) {
+    if (ownership == SOURCE && getRecurrenceTypeFromKey(key) == RecurrenceType.RECURRING) {
+      return insertUpdateException(key, event);
+    } else {
+      return super.update(calendarId, key, event);
+    }
+  }
+
+  /**
+   * Inserts an exception to a recurring event with updated values.
+   *
+   * <p>Updating a recurring event instance on the replica causes an exception event to be created
+   * on the source.
+   */
+  private String insertUpdateException(String key, Event event) {
+    logger.debug("Inserting exception to update recurring event %s", key);
+    // Instead of updating a recurring event we need to insert an exception event.
+    insertEventException(key, event);
+
+    // Any further changes to the attendees should happen on the exception event.
+    long originalEventId = getEventIdFromKey(key);
+    Instant originalBeginTime = getBeginTimeFromKey(key);
+    return createExceptionKey(originalEventId, originalBeginTime);
+  }
+
+  @Override
+  public boolean delete(Object calendarId, String key) {
+    if (ownership == SOURCE && getRecurrenceTypeFromKey(key) == RecurrenceType.RECURRING) {
+      insertCancelledException(key);
+      return true;
+    } else {
+      return super.delete(calendarId, key);
+    }
+  }
+
+  /**
+   * Inserts a cancelled event exception.
+   *
+   * <p>Deleted instances of recurring events result in an exception event being created with the
+   * cancelled status.
+   */
+  private void insertCancelledException(String key) {
+    logger.debug("Inserting exception to cancel recurring event %s", key);
+    Uri eventExceptionUri = createEventExceptionContentUri(key);
+    Instant originalBeginTime = getBeginTimeFromKey(key);
+    ContentValues values = new ContentValues();
+    values.put(Events.ORIGINAL_INSTANCE_TIME, originalBeginTime.toEpochMilli());
+    values.put(Events.STATUS, Events.STATUS_CANCELED);
+    insertValuesToUri(eventExceptionUri, values);
+  }
+
+  private long insertEventException(String key, Event event) {
+    // Use a special content uri to insert exceptions to recurring events.
+    Instant originalBeginTime = getBeginTimeFromKey(key);
+    Uri eventExceptionUri = createEventExceptionContentUri(key);
+
+    // Do not include the end_time field which is not allowed in an exception event.
+    Set<FieldTranslator<?>> exceptionEventFields = new HashSet<>(writeEventFieldsWithoutEndTime);
+    exceptionEventFields.add(
+        createLongConstant(Events.ORIGINAL_INSTANCE_TIME, originalBeginTime.toEpochMilli()));
+
+    // Add only the content without the parent ids as they cannot be added to an exception.
+    ContentValues values = createContentValues(event, exceptionEventFields);
+
+    // The calendar provider takes care of duplicating related data such as attendees.
+    return insertValuesToUri(eventExceptionUri, values);
+  }
+
+  private static Uri createEventExceptionContentUri(String key) {
+    Uri.Builder exceptionUriBuilder = Events.CONTENT_EXCEPTION_URI.buildUpon();
+    long originalEventId = getEventIdFromKey(key);
+    ContentUris.appendId(exceptionUriBuilder, originalEventId);
+    return exceptionUriBuilder.build();
+  }
+
+  @Override
+  public Object find(Object calendarId, String key) {
+    if (ownership == SOURCE && getRecurrenceTypeFromKey(key) == RecurrenceType.RECURRING) {
+      return duplicateEventAsException(calendarId, key);
+    } else {
+      return super.find(calendarId, key);
+    }
+  }
+
+  /**
+   * Duplicates the event as an exception so changes to attendees will not affect every instance.
+   */
+  private long duplicateEventAsException(Object calendarId, String key) {
+    logger.debug("Inserting exception to duplicate recurring event %s", key);
+
+    // Make a duplicate of the event as an exception to be updated.
+    Content<Event> existing = read(calendarId, key);
+    if (existing == null) {
+      throw new IllegalStateException("Existing recurring event not found for key " + key);
+    }
+    return insertEventException(key, existing.getMessage());
   }
 
   @Override
@@ -145,7 +292,7 @@ final class EventContentDelegate extends BaseContentDelegate<Event> {
         ALL_DAY,
         BEGIN_READ,
         TIME_ZONE,
-        createFinishTimeField(/* read= */ true),
+        createEndTimeField(/* read= */ true),
         END_TIMEZONE,
         COLOR,
         ORGANIZER,
@@ -162,7 +309,7 @@ final class EventContentDelegate extends BaseContentDelegate<Event> {
         ALL_DAY,
         createBeginTimeField(/* read= */ false),
         TIME_ZONE,
-        createFinishTimeField(/* read= */ false),
+        createEndTimeField(/* read= */ false),
         END_TIMEZONE,
         COLOR,
         ORGANIZER,
@@ -222,23 +369,6 @@ final class EventContentDelegate extends BaseContentDelegate<Event> {
           return createSingleKey(ID.get(cursor));
         }
       }
-
-      private void addKeyContentValues(String value, ContentValues values) {
-        Iterator<String> parts = KEY_SPLITTER.split(value).iterator();
-        switch (RecurrenceType.fromCode(parts.next())) {
-          case SINGLE:
-            ID.set(Long.parseLong(parts.next()), values);
-            break;
-          case EXCEPTION:
-            ORIGINAL_ID.set(Long.parseLong(parts.next()), values);
-            ORIGINAL_BEGIN.set(Instant.ofEpochMilli(Long.parseLong(parts.next())), values);
-            break;
-          case RECURRING:
-            ID.set(Long.parseLong(parts.next()), values);
-            BEGIN_READ.set(Instant.ofEpochMilli(Long.parseLong(parts.next())), values);
-            break;
-        }
-      }
     };
   }
 
@@ -274,7 +404,7 @@ final class EventContentDelegate extends BaseContentDelegate<Event> {
           (Event.Builder builder, String value) ->
               builder.setTimeZone(TimeZone.newBuilder().setName(value)));
 
-  private static FieldTranslator<Instant> createFinishTimeField(boolean read) {
+  private static FieldTranslator<Instant> createEndTimeField(boolean read) {
     return createInstantField(
         read ? Instances.END : Events.DTEND,
         (Event message) -> message.hasEndTime() ? toInstant(message.getEndTime()) : null,
@@ -402,5 +532,53 @@ final class EventContentDelegate extends BaseContentDelegate<Event> {
   static String createExceptionKey(long originalId, Instant originalBeginTime) {
     return KEY_JOINER.join(
         RecurrenceType.EXCEPTION.code, originalId, originalBeginTime.toEpochMilli());
+  }
+
+  private static RecurrenceType addKeyContentValues(String value, ContentValues values) {
+    Iterator<String> parts = KEY_SPLITTER.split(value).iterator();
+    RecurrenceType recurrenceType = RecurrenceType.fromCode(parts.next());
+    switch (recurrenceType) {
+      case SINGLE:
+        ID.set(Long.parseLong(parts.next()), values);
+        break;
+      case EXCEPTION:
+        ORIGINAL_ID.set(Long.parseLong(parts.next()), values);
+        ORIGINAL_BEGIN.set(Instant.ofEpochMilli(Long.parseLong(parts.next())), values);
+        break;
+      case RECURRING:
+        ID.set(Long.parseLong(parts.next()), values);
+        BEGIN_READ.set(Instant.ofEpochMilli(Long.parseLong(parts.next())), values);
+        break;
+    }
+    return recurrenceType;
+  }
+
+  private static RecurrenceType getRecurrenceTypeFromKey(String key) {
+    ContentValues values = new ContentValues();
+    return addKeyContentValues(key, values);
+  }
+
+  private static Instant getBeginTimeFromKey(String key) {
+    ContentValues values = new ContentValues();
+    addKeyContentValues(key, values);
+    return Instant.ofEpochMilli(values.getAsLong(Instances.BEGIN));
+  }
+
+  private static long getEventIdFromKey(String key) {
+    ContentValues values = new ContentValues();
+    addKeyContentValues(key, values);
+    return values.getAsLong(Instances.EVENT_ID);
+  }
+
+  private static long getOriginalEventIdFromKey(String key) {
+    ContentValues values = new ContentValues();
+    addKeyContentValues(key, values);
+    return values.getAsLong(Instances.ORIGINAL_ID);
+  }
+
+  private static Instant getOriginalBeginTimeFromKey(String key) {
+    ContentValues values = new ContentValues();
+    addKeyContentValues(key, values);
+    return Instant.ofEpochMilli(values.getAsLong(Instances.ORIGINAL_INSTANCE_TIME));
   }
 }

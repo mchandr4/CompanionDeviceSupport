@@ -16,6 +16,7 @@
 
 package com.google.android.connecteddevice.notificationmsg.common;
 
+import static android.app.Notification.COLOR_DEFAULT;
 import static com.google.android.connecteddevice.util.SafeLog.logw;
 
 import android.bluetooth.BluetoothDevice;
@@ -55,6 +56,7 @@ public class ConversationNotificationInfo {
   private final String appPackageName;
   @Nullable private final String userDisplayName;
   @Nullable private final Icon appIcon;
+  private final int appIconColor;
   /** Uris of all members in a MMS Group Conversation. */
   @Nullable private final List<String> ccRecipientsUris;
 
@@ -95,6 +97,7 @@ public class ConversationNotificationInfo {
         conversation.getMessagingAppPackageName(),
         messagingStyle.getUserDisplayName(),
         appIcon,
+        conversation.getAppIconColor(),
         /* ccUris= */ null);
   }
   /** Creates a ConversationNotificationInfo for a BluetoothMapClient intent. */
@@ -112,6 +115,7 @@ public class ConversationNotificationInfo {
         appPackageName, /* userDisplayName */
         null,
         appIcon,
+        COLOR_DEFAULT,
         Utils.getInclusiveRecipientsUrisList(intent));
   }
 
@@ -125,6 +129,7 @@ public class ConversationNotificationInfo {
       String appPackageName,
       @Nullable String userDisplayName,
       @Nullable Icon appIcon,
+      int appIconColor,
       @Nullable List<String> ccUris) {
     boolean missingDeviceId = (deviceId == null);
     boolean missingTitle = (convoTitle == null);
@@ -147,6 +152,7 @@ public class ConversationNotificationInfo {
     this.appPackageName = appPackageName;
     this.userDisplayName = userDisplayName;
     this.appIcon = appIcon;
+    this.appIconColor = appIconColor;
     this.ccRecipientsUris = ccUris;
   }
 
@@ -219,6 +225,11 @@ public class ConversationNotificationInfo {
   @Nullable
   public Icon getAppIcon() {
     return appIcon;
+  }
+
+  /** Returns the app's icon color of the application that posted this notification. **/
+  public int getAppIconColor() {
+      return appIconColor;
   }
 
   public MessageKey getLastMessageKey() {

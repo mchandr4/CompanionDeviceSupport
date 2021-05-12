@@ -34,6 +34,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
@@ -135,8 +136,11 @@ public class LoggingManager {
     int totalLoggerNum = logRequestedListeners.size();
     String progressLog =
         String.format(
+            Locale.getDefault(),
             "[%d/%d]: Processed log records for logger %d.",
-            processedLoggerNum, totalLoggerNum, loggerId);
+            processedLoggerNum,
+            totalLoggerNum,
+            loggerId);
     if (processedLoggerNum < totalLoggerNum) {
       logd(TAG, progressLog + " Waiting for more log records.");
       return;

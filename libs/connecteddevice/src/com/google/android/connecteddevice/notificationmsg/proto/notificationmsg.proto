@@ -107,6 +107,10 @@ message ConversationNotification {
 
   // Small app icon of the application that posted this notification.
   bytes app_icon = 5;
+
+  // Small app icon color of the application that posted this notification.
+  // Color int defined by android.graphics.Color.
+  int32 app_icon_color = 6;
 }
 
 // MessagingStyle metadata that matches MessagingStyle formatting.

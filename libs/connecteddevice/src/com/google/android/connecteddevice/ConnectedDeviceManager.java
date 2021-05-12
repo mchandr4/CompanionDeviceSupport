@@ -25,9 +25,9 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import com.google.android.connecteddevice.connection.AssociationCallback;
 import com.google.android.connecteddevice.connection.CarBluetoothManager;
-import com.google.android.connecteddevice.connection.DeviceMessage;
 import com.google.android.connecteddevice.model.AssociatedDevice;
 import com.google.android.connecteddevice.model.ConnectedDevice;
+import com.google.android.connecteddevice.model.DeviceMessage;
 import com.google.android.connecteddevice.model.Errors;
 import com.google.android.connecteddevice.model.OobEligibleDevice;
 import com.google.android.connecteddevice.oob.BluetoothRfcommChannel;
@@ -100,7 +100,7 @@ public class ConnectedDeviceManager {
   private final Map<String, ConnectedDevice> connectedDevices = new ConcurrentHashMap<>();
 
   // recipientId -> (deviceId -> message bytes)
-  private final Map<UUID, Map<String, List<byte[]>>> recipientMissedMessages =
+  private final Map<UUID, Map<String, List<DeviceMessage>>> recipientMissedMessages =
       new ConcurrentHashMap<>();
 
   // Recipient ids that received multiple callback registrations indicate that the recipient id
@@ -448,9 +448,9 @@ public class ConnectedDeviceManager {
     newCallbacks.add(callback, executor);
     recipientCallbacks.put(recipientId, newCallbacks);
 
-    List<byte[]> messages = popMissedMessages(recipientId, device.getDeviceId());
+    List<DeviceMessage> messages = popMissedMessages(recipientId, device.getDeviceId());
     if (messages != null) {
-      for (byte[] message : messages) {
+      for (DeviceMessage message : messages) {
         newCallbacks.invoke(deviceCallback -> deviceCallback.onMessageReceived(device, message));
       }
     }
@@ -479,9 +479,9 @@ public class ConnectedDeviceManager {
         () -> callback.onDeviceError(device, Errors.DEVICE_ERROR_INSECURE_RECIPIENT_ID_DETECTED));
   }
 
-  private void saveMissedMessage(
-      @NonNull String deviceId, @NonNull UUID recipientId, @NonNull byte[] message) {
+  private void saveMissedMessage(@NonNull String deviceId, @NonNull DeviceMessage message) {
     // Store last message in case recipient registers callbacks in the future.
+    UUID recipientId = message.getRecipient();
     logd(
         TAG,
         "No recipient registered for device "
@@ -496,16 +496,17 @@ public class ConnectedDeviceManager {
   }
 
   /**
-   * Remove the last message sent for this device prior to a {@link DeviceCallback} being
-   * registered.
+   * Remove all messages sent for this device prior to a {@link DeviceCallback} being registered.
    *
    * @param recipientId Recipient's id
    * @param deviceId Device id
-   * @return The missed {@code byte[]} messages, or {@code null} if no messages were missed.
+   * @return The missed {@code DeviceMessage}s, or {@code null} if no messages were missed.
    */
   @Nullable
-  private List<byte[]> popMissedMessages(@NonNull UUID recipientId, @NonNull String deviceId) {
-    Map<String, List<byte[]>> missedMessages = recipientMissedMessages.get(recipientId);
+  private List<DeviceMessage> popMissedMessages(
+      @NonNull UUID recipientId,
+      @NonNull String deviceId) {
+    Map<String, List<DeviceMessage>> missedMessages = recipientMissedMessages.get(recipientId);
     if (missedMessages == null) {
       return null;
     }
@@ -553,41 +554,20 @@ public class ConnectedDeviceManager {
    * Securely send message to a device.
    *
    * @param device {@link ConnectedDevice} to send the message to.
-   * @param recipientId Recipient {@link UUID}.
-   * @param message Message to send.
+   * @param deviceMessage Message to send to device.
    * @throws IllegalStateException Secure channel has not been established.
    */
-  public void sendMessageSecurely(
-      @NonNull ConnectedDevice device, @NonNull UUID recipientId, @NonNull byte[] message) {
-    sendMessage(device, recipientId, message, /* isEncrypted= */ true);
-  }
-
-  /**
-   * Send an unencrypted message to a device.
-   *
-   * @param device {@link ConnectedDevice} to send the message to.
-   * @param recipientId Recipient {@link UUID}.
-   * @param message Message to send.
-   */
-  public void sendMessageUnsecurely(
-      @NonNull ConnectedDevice device, @NonNull UUID recipientId, @NonNull byte[] message) {
-    sendMessage(device, recipientId, message, /* isEncrypted= */ false);
-  }
-
-  private void sendMessage(
-      @NonNull ConnectedDevice device,
-      @NonNull UUID recipientId,
-      @NonNull byte[] message,
-      boolean isEncrypted) {
+  public void sendMessage(@NonNull ConnectedDevice device, @NonNull DeviceMessage deviceMessage) {
     String deviceId = device.getDeviceId();
+    boolean isEncrypted = deviceMessage.isMessageEncrypted();
     logd(
         TAG,
         "Sending new message to device "
             + deviceId
             + " for "
-            + recipientId
+            + deviceMessage.getRecipient()
             + " containing "
-            + message.length
+            + deviceMessage.getMessage().length
             + ". Message will be sent securely: "
             + isEncrypted
             + ".");
@@ -604,7 +584,7 @@ public class ConnectedDeviceManager {
               + "established a secure channel.");
     }
 
-    carBluetoothManager.sendMessage(deviceId, new DeviceMessage(recipientId, isEncrypted, message));
+    carBluetoothManager.sendMessage(deviceId, deviceMessage);
   }
 
   private boolean isRecipientDenyListed(UUID recipientId) {
@@ -750,17 +730,17 @@ public class ConnectedDeviceManager {
     Map<UUID, ThreadSafeCallbacks<DeviceCallback>> deviceCallbacks =
         this.deviceCallbacks.get(deviceId);
     if (deviceCallbacks == null) {
-      saveMissedMessage(deviceId, recipientId, message.getMessage());
+      saveMissedMessage(deviceId, message);
       return;
     }
     ThreadSafeCallbacks<DeviceCallback> recipientCallbacks = deviceCallbacks.get(recipientId);
     if (recipientCallbacks == null) {
-      saveMissedMessage(deviceId, recipientId, message.getMessage());
+      saveMissedMessage(deviceId, message);
       return;
     }
 
     recipientCallbacks.invoke(
-        callback -> callback.onMessageReceived(connectedDevice, message.getMessage()));
+        callback -> callback.onMessageReceived(connectedDevice, message));
   }
 
   @VisibleForTesting
@@ -958,7 +938,7 @@ public class ConnectedDeviceManager {
     void onSecureChannelEstablished(@NonNull ConnectedDevice device);
 
     /** Triggered when a new message is received from a device. */
-    void onMessageReceived(@NonNull ConnectedDevice device, @NonNull byte[] message);
+    void onMessageReceived(@NonNull ConnectedDevice device, @NonNull DeviceMessage message);
 
     /** Triggered when an error has occurred for a device. */
     void onDeviceError(@NonNull ConnectedDevice device, @Errors.DeviceError int error);

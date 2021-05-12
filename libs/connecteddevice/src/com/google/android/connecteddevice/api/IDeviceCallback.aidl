@@ -17,6 +17,7 @@
 package com.google.android.connecteddevice.api;
 
 import com.google.android.connecteddevice.model.ConnectedDevice;
+import com.google.android.connecteddevice.model.DeviceMessage;
 
 /** Triggered companionDevice events for a connected companionDevice. */
 oneway interface IDeviceCallback {
@@ -27,7 +28,7 @@ oneway interface IDeviceCallback {
     void onSecureChannelEstablished(in ConnectedDevice connectedDevice);
 
     /** Triggered when a new message is received from a connectedDevice. */
-    void onMessageReceived(in ConnectedDevice connectedDevice, in byte[] message);
+    void onMessageReceived(in ConnectedDevice connectedDevice, in DeviceMessage message);
 
     /** Triggered when an error has occurred for a connectedDevice. */
     void onDeviceError(in ConnectedDevice connectedDevice, int error);

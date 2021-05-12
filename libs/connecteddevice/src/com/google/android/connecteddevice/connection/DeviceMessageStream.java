@@ -26,6 +26,7 @@ import androidx.annotation.Nullable;
 import com.google.android.companionprotos.DeviceMessageProto.Message;
 import com.google.android.companionprotos.OperationProto.OperationType;
 import com.google.android.companionprotos.PacketProto.Packet;
+import com.google.android.connecteddevice.model.DeviceMessage;
 import com.google.android.connecteddevice.util.ByteUtils;
 import com.google.android.connecteddevice.util.EventLog;
 import com.google.protobuf.ByteString;
@@ -110,12 +111,10 @@ public abstract class DeviceMessageStream {
    * null}.
    *
    * @param deviceMessage The message received.
-   * @param operationType The operation type of the message.
    */
-  protected final void notifyMessageReceivedListener(
-      @NonNull DeviceMessage deviceMessage, OperationType operationType) {
+  protected final void notifyMessageReceivedListener(@NonNull DeviceMessage deviceMessage) {
     if (messageReceivedListener != null) {
-      messageReceivedListener.onMessageReceived(deviceMessage, operationType);
+      messageReceivedListener.onMessageReceived(deviceMessage);
     }
   }
 
@@ -144,27 +143,14 @@ public abstract class DeviceMessageStream {
   }
 
   /**
-   * Writes the given message to the write characteristic of this stream with operation type {@code
-   * CLIENT_MESSAGE}.
-   *
-   * <p>This method will handle the chunking of messages based on the max write size.
-   *
-   * @param deviceMessage The data object contains recipient, isPayloadEncrypted and message.
-   */
-  public void writeMessage(@NonNull DeviceMessage deviceMessage) {
-    writeMessage(deviceMessage, OperationType.CLIENT_MESSAGE);
-  }
-
-  /**
    * Send {@link DeviceMessage} to remote connected devices.
    *
    * @param deviceMessage The message which need to be sent
-   * @param operationType The operation type of current message
    */
-  public void writeMessage(@NonNull DeviceMessage deviceMessage, OperationType operationType) {
+  public void writeMessage(@NonNull DeviceMessage deviceMessage) {
     Message.Builder builder =
         Message.newBuilder()
-            .setOperation(operationType)
+            .setOperation(OperationType.forNumber(deviceMessage.getOperationType().getValue()))
             .setIsPayloadEncrypted(deviceMessage.isMessageEncrypted())
             .setPayload(ByteString.copyFrom(deviceMessage.getMessage()))
             .setOriginalSize(deviceMessage.getOriginalMessageSize());
@@ -318,8 +304,12 @@ public abstract class DeviceMessageStream {
       return;
     }
 
-    DeviceMessage deviceMessage = new DeviceMessage(message);
-    notifyMessageReceivedListener(deviceMessage, message.getOperation());
+    DeviceMessage deviceMessage = new DeviceMessage(
+        ByteUtils.bytesToUUID(message.getRecipient().toByteArray()),
+        message.getIsPayloadEncrypted(),
+        DeviceMessage.OperationType.fromValue(message.getOperation().getNumber()),
+        message.getPayload().toByteArray());
+    notifyMessageReceivedListener(deviceMessage);
   }
 
   /** The maximum amount of bytes that can be written in a single packet. */
@@ -354,9 +344,8 @@ public abstract class DeviceMessageStream {
      * Called when a complete message is received from the client.
      *
      * @param deviceMessage The message received from the client.
-     * @param operationType The {@link OperationType} of the received message.
      */
-    void onMessageReceived(@NonNull DeviceMessage deviceMessage, OperationType operationType);
+    void onMessageReceived(@NonNull DeviceMessage deviceMessage);
   }
 
   /** Listener to be invoked when a message of raw data is received from the client. */

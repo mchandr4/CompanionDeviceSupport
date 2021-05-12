@@ -52,8 +52,11 @@ public interface PlatformContentDelegate<MessageT extends MessageLite> {
    */
   Object insert(Object parentId, MessageT content);
 
-  /** Deletes the content item with the given {@code parentId} and {@code key}. */
-  void delete(Object parentId, String key);
+  /**
+   * Deletes the content item with the given {@code parentId} and {@code key} and returns {@code
+   * true} if the item was deleted.
+   */
+  boolean delete(Object parentId, String key);
 
   /** Deletes all content items with the given {@code parentId}. */
   void deleteAll(Object parentId);
@@ -63,8 +66,10 @@ public interface PlatformContentDelegate<MessageT extends MessageLite> {
 
   /**
    * Updates the content item with the given {@code parentId} and {@code key} with {@code content}.
+   *
+   * <p>The key is returned which might change as a result of this update.
    */
-  void update(Object parentId, String key, MessageT content);
+  String update(Object parentId, String key, MessageT content);
 
   /**
    * A holder for the proto {@code message} and the {@code id} which is an object that will be used

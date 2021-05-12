@@ -23,6 +23,7 @@ import com.google.android.connecteddevice.api.IDeviceAssociationCallback;
 import com.google.android.connecteddevice.api.IDeviceCallback;
 import com.google.android.connecteddevice.api.IOnLogRequestedListener;
 import com.google.android.connecteddevice.model.ConnectedDevice;
+import com.google.android.connecteddevice.model.DeviceMessage;
 
 /** Manager of devices connected to the car. */
 interface IConnectedDeviceManager {
@@ -66,25 +67,13 @@ interface IConnectedDeviceManager {
             in IDeviceCallback callback);
 
     /**
-     * Securely send message to a connectedDevice.
+     * Send a message to a connected device.
      *
      * @param connectedDevice {@link ConnectedDevice} to send the message to.
-     * @param recipientId Recipient {@link ParcelUuid}.
      * @param message Message to send.
-     * @return `true` if message was able to initiate, `false` if secure channel was not available.
      */
-    boolean sendMessageSecurely(in ConnectedDevice connectedDevice, in ParcelUuid recipientId,
-            in byte[] message);
+    boolean sendMessage(in ConnectedDevice connectedDevice, in DeviceMessage message);
 
-    /**
-     * Send an unencrypted message to a connectedDevice.
-     *
-     * @param connectedDevice {@link ConnectedDevice} to send the message to.
-     * @param recipientId Recipient {@link ParcelUuid}.
-     * @param message Message to send.
-     */
-    void sendMessageUnsecurely(in ConnectedDevice connectedDevice, in ParcelUuid recipientId,
-            in byte[] message);
 
     /**
      * Register a callback for associated devic erelated events.

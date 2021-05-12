@@ -80,21 +80,32 @@ abstract class BaseContentDelegate<MessageT extends MessageLite>
 
   @Override
   public Object insert(Object parentId, MessageT content) {
-    ContentValues values = createContentValues(content, parentId, fields);
-    Uri uri = resolver.insert(getWriteContentUri(), values);
+    return insertFieldsToUri(parentId, content, getWriteFields(), getWriteContentUri());
+  }
+
+  /** Inserts the content using the fields to the contentUri. */
+  protected long insertFieldsToUri(
+      Object parentId, MessageT content, Collection<FieldTranslator<?>> fields, Uri contentUri) {
+    ContentValues values = createContentValues(content, fields);
+    addParentConstraint(values, parentId);
+    return insertValuesToUri(contentUri, values);
+  }
+
+  /** Inserts the given values to the contentUri. */
+  protected long insertValuesToUri(Uri contentUri, ContentValues values) {
+    Uri uri = resolver.insert(contentUri, values);
     return ContentUris.parseId(requireNonNull(uri, "Calendar provider insert must return Uri"));
   }
 
   @Override
-  public void delete(Object parentId, String key) {
+  public boolean delete(Object parentId, String key) {
     ContentValues constraints = createKeyConstraints(parentId, key);
     WhereAndArgs whereAndArgs = buildWhereAndArgs(constraints);
     int rows = resolver.delete(getWriteContentUri(), whereAndArgs.where, whereAndArgs.args);
-    if (rows == 1) {
-      logger.debug("Deleted one row for key %s", key);
-    } else {
+    if (rows > 1) {
       logger.warn("Expected to delete one row but did %d for key %s", rows, key);
     }
+    return rows > 0;
   }
 
   @Override
@@ -115,8 +126,9 @@ abstract class BaseContentDelegate<MessageT extends MessageLite>
   }
 
   @Override
-  public void update(Object parentId, String key, MessageT content) {
-    ContentValues values = createContentValues(content, parentId, fields);
+  public String update(Object parentId, String key, MessageT content) {
+    ContentValues values = createContentValues(content, getWriteFields());
+    addParentConstraint(values, parentId);
     ContentValues constraints = createKeyConstraints(parentId, key);
     WhereAndArgs whereAndArgs = buildWhereAndArgs(constraints);
     int rows = resolver.update(getWriteContentUri(), values, whereAndArgs.where, whereAndArgs.args);
@@ -125,15 +137,23 @@ abstract class BaseContentDelegate<MessageT extends MessageLite>
     } else {
       logger.warn("Expected to delete one row but did %d for key %s", rows, key);
     }
+
+    // The key remains unchanged after updating the same row.
+    return key;
+  }
+
+  /** Gets the {@link Uri} to use to write content. */
+  protected Uri getWriteContentUri() {
+    return requireNonNull(contentUri);
+  }
+
+  /** Gets the fields used when writing content. */
+  protected Collection<FieldTranslator<?>> getWriteFields() {
+    return fields;
   }
 
   private Object cursorToId(Cursor cursor) {
     return cursor.getLong(cursor.getColumnIndex(idColumn));
-  }
-
-  /** Gets the {@link Uri} to use to write. */
-  protected Uri getWriteContentUri() {
-    return requireNonNull(contentUri);
   }
 
   /**
@@ -253,12 +273,11 @@ abstract class BaseContentDelegate<MessageT extends MessageLite>
    * the {@code parentId}.
    */
   protected ContentValues createContentValues(
-      MessageT message, Object parentId, Collection<FieldTranslator<?>> fields) {
+      MessageT message, Collection<FieldTranslator<?>> fields) {
     ContentValues values = new ContentValues();
     for (FieldTranslator<?> field : fields) {
       field.messageToContent(message, values);
     }
-    addParentConstraint(values, parentId);
     return values;
   }
 

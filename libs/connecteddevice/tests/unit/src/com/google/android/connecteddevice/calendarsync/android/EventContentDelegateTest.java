@@ -7,6 +7,7 @@ import static com.google.android.connecteddevice.calendarsync.android.TestCalend
 import static com.google.android.connecteddevice.calendarsync.common.TimeProtoUtil.toTimestamp;
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertThrows;
 
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -70,7 +71,7 @@ public class EventContentDelegateTest {
           .put(Instances.END, END_TIME.toEpochMilli())
           .put(Instances.EVENT_TIMEZONE, ZONE_ID.getId())
           .put(Instances.EVENT_END_TIMEZONE, ZONE_ID.getId())
-          .put(Instances.ALL_DAY, ALL_DAY ? 1 : 0)
+          .put(Instances.ALL_DAY, 0)
           .put(Instances.EVENT_COLOR, COLOR_RGB)
           .put(Instances.ORGANIZER, ORGANIZER)
           .put(Instances.RRULE, NULL_VALUE)
@@ -117,22 +118,6 @@ public class EventContentDelegateTest {
     Content<Event> content = delegate.read(CALENDAR_ID, KEY);
 
     assertAllReadFields(content);
-  }
-
-  private void assertAllReadFields(Content<Event> content) {
-    assertThat(content.getId()).isEqualTo(ID);
-    assertThat(content.getMessage().getKey()).isEqualTo(KEY);
-    assertThat(content.getMessage().getStatus()).isEqualTo(Status.CONFIRMED);
-    assertThat(content.getMessage().getTitle()).isEqualTo(TITLE);
-    assertThat(content.getMessage().getDescription()).isEqualTo(DESCRIPTION);
-    assertThat(content.getMessage().getBeginTime().getSeconds())
-        .isEqualTo(BEGIN_TIME.getEpochSecond());
-    assertThat(content.getMessage().getEndTime().getSeconds()).isEqualTo(END_TIME.getEpochSecond());
-    assertThat(content.getMessage().getTimeZone().getName()).isEqualTo(ZONE_ID.getId());
-    assertThat(content.getMessage().getEndTimeZone().getName()).isEqualTo(ZONE_ID.getId());
-    assertThat(content.getMessage().getIsAllDay()).isEqualTo(ALL_DAY);
-    assertThat(content.getMessage().getColor().getArgb()).isEqualTo(COLOR_RGB);
-    assertThat(content.getMessage().getOrganizer()).isEqualTo(ORGANIZER);
   }
 
   @Test
@@ -183,27 +168,30 @@ public class EventContentDelegateTest {
     EventContentDelegate delegate = createEventContentDelegate(ContentOwnership.SOURCE);
     Event event = createTestEvent();
 
-    delegate.insert(CALENDAR_ID, event);
+    Object insertedId = delegate.insert(CALENDAR_ID, event);
 
+    assertThat(insertedId).isEqualTo(1); // Hard coded result from TestConProvider.
     ProviderCall expected = new ProviderCall(MethodType.INSERT, Events.CONTENT_URI);
-    addTestEventValues(ContentOwnership.SOURCE, expected.getValues());
-    ProviderCall onlyElement = getOnlyElement(testCalendarProvider.getCalls());
-    onlyElement.assertSameArgs(expected);
+    expected.setValues(createExpectedContentValues());
+    ProviderCall call = getOnlyElement(testCalendarProvider.getCalls());
+    call.assertSameArgs(expected);
   }
 
   @Test
   public void insert_replica_allFields() {
     EventContentDelegate delegate = createEventContentDelegate(ContentOwnership.REPLICA);
-
     Event event = createTestEvent();
 
-    delegate.insert(CALENDAR_ID, event);
+    Object insertedId = delegate.insert(CALENDAR_ID, event);
 
+    assertThat(insertedId).isEqualTo(1); // Hard coded result from TestConProvider.
     ProviderCall expected =
         new ProviderCall(MethodType.INSERT, addSyncAdapterParameters(Events.CONTENT_URI));
-    addTestEventValues(ContentOwnership.REPLICA, expected.getValues());
-    ProviderCall onlyElement = getOnlyElement(testCalendarProvider.getCalls());
-    onlyElement.assertSameArgs(expected);
+    ContentValues expectedContentValues = createExpectedContentValues();
+    expectedContentValues.put(Events._SYNC_ID, KEY);
+    expected.setValues(expectedContentValues);
+    ProviderCall call = getOnlyElement(testCalendarProvider.getCalls());
+    call.assertSameArgs(expected);
   }
 
   @Test
@@ -258,7 +246,7 @@ public class EventContentDelegateTest {
     expected.setSelection(
         "calendar_id = ? AND event_id = ?",
         new String[] {Long.toString(CALENDAR_ID), Long.toString(ID)});
-    addTestEventValues(SOURCE, expected.getValues());
+    expected.setValues(createExpectedContentValues());
     ProviderCall call = getOnlyElement(testCalendarProvider.getCalls());
     call.assertSameArgs(expected);
   }
@@ -274,7 +262,9 @@ public class EventContentDelegateTest {
         new ProviderCall(MethodType.UPDATE, addSyncAdapterParameters(Events.CONTENT_URI));
     expected.setSelection(
         "calendar_id = ? AND _sync_id = ?", new String[] {Long.toString(CALENDAR_ID), KEY});
-    addTestEventValues(REPLICA, expected.getValues());
+    ContentValues expectedContentValues = createExpectedContentValues();
+    expectedContentValues.put(Events._SYNC_ID, KEY);
+    expected.setValues(expectedContentValues);
     ProviderCall call = getOnlyElement(testCalendarProvider.getCalls());
     call.assertSameArgs(expected);
   }
@@ -282,9 +272,11 @@ public class EventContentDelegateTest {
   @Test
   public void find_source() {
     EventContentDelegate delegate = createEventContentDelegate(SOURCE);
+    testCalendarProvider.addRow(ImmutableMap.of(Instances.EVENT_ID, 123));
 
-    delegate.find(CALENDAR_ID, KEY);
+    Object id = delegate.find(CALENDAR_ID, KEY);
 
+    assertThat(id).isEqualTo(123);
     Uri.Builder builder = Instances.CONTENT_URI.buildUpon();
     ContentUris.appendId(builder, BEGIN_TIME.toEpochMilli());
     ContentUris.appendId(builder, END_TIME.toEpochMilli());
@@ -300,9 +292,11 @@ public class EventContentDelegateTest {
   @Test
   public void find_replica() {
     EventContentDelegate delegate = createEventContentDelegate(REPLICA);
+    testCalendarProvider.addRow(ImmutableMap.of(Instances.EVENT_ID, 123));
 
-    delegate.find(CALENDAR_ID, KEY);
+    Object id = delegate.find(CALENDAR_ID, KEY);
 
+    assertThat(id).isEqualTo(123);
     Uri.Builder builder = Instances.CONTENT_URI.buildUpon();
     ContentUris.appendId(builder, BEGIN_TIME.toEpochMilli());
     ContentUris.appendId(builder, END_TIME.toEpochMilli());
@@ -312,6 +306,143 @@ public class EventContentDelegateTest {
         "calendar_id = ? AND _sync_id = ?", new String[] {Long.toString(CALENDAR_ID), KEY});
     ProviderCall call = getOnlyElement(testCalendarProvider.getCalls());
     call.assertSameArgs(expected);
+  }
+
+  @Test
+  public void updateRecurringEvent_source_insertsException() {
+    EventContentDelegate delegate = createEventContentDelegate(SOURCE);
+    String recurringKey = EventContentDelegate.createRecurringKey(ID, BEGIN_TIME);
+    Event recurringEvent = createTestEvent().toBuilder().setKey(recurringKey).build();
+
+    delegate.update(CALENDAR_ID, recurringKey, recurringEvent);
+
+    Uri.Builder expectedUriBuilder = Events.CONTENT_EXCEPTION_URI.buildUpon();
+    ContentUris.appendId(expectedUriBuilder, ID);
+    Uri expectedUri = expectedUriBuilder.build();
+
+    ProviderCall expected = new ProviderCall(MethodType.INSERT, expectedUri);
+    ContentValues expectedContentValues = new ContentValues();
+    expectedContentValues.put(Events.ORIGINAL_INSTANCE_TIME, BEGIN_TIME.toEpochMilli());
+    expectedContentValues.put(Events.STATUS, Events.STATUS_CONFIRMED);
+    expectedContentValues.put(Events.TITLE, TITLE);
+    expectedContentValues.put(Events.DESCRIPTION, DESCRIPTION);
+    expectedContentValues.put(Events.EVENT_LOCATION, LOCATION);
+    expectedContentValues.put(Events.DTSTART, BEGIN_TIME.toEpochMilli());
+    expectedContentValues.put(Events.EVENT_TIMEZONE, ZONE_ID.getId());
+    expectedContentValues.put(Events.EVENT_END_TIMEZONE, ZONE_ID.getId());
+    expectedContentValues.put(Events.ALL_DAY, 0);
+    expectedContentValues.put(Events.EVENT_COLOR, COLOR_RGB);
+    expectedContentValues.put(Events.ORGANIZER, ORGANIZER);
+    expected.setValues(expectedContentValues);
+    ProviderCall call = getOnlyElement(testCalendarProvider.getCalls());
+    call.assertSameArgs(expected);
+  }
+
+  @Test
+  public void updateRecurringEvent_replica_normalUpdate() {
+    EventContentDelegate delegate = createEventContentDelegate(REPLICA);
+    String recurringKey = EventContentDelegate.createRecurringKey(ID, BEGIN_TIME);
+    Event recurringEvent = createTestEvent().toBuilder().setKey(recurringKey).build();
+
+    delegate.update(CALENDAR_ID, recurringKey, recurringEvent);
+
+    Uri expectedContentUri = addSyncAdapterParameters(Events.CONTENT_URI);
+    ProviderCall expected = new ProviderCall(MethodType.UPDATE, expectedContentUri);
+    expected.setSelection(
+        "calendar_id = ? AND sync_id = ?", new String[] {Long.toString(CALENDAR_ID), recurringKey});
+    ContentValues expectedContentValues = createExpectedContentValues();
+    expectedContentValues.put(Events._SYNC_ID, recurringKey);
+    expected.setValues(expectedContentValues);
+    ProviderCall call = getOnlyElement(testCalendarProvider.getCalls());
+    call.assertSameArgs(expected);
+  }
+
+  @Test
+  public void deleteRecurringEvent_source_insertsException() {
+    EventContentDelegate delegate = createEventContentDelegate(SOURCE);
+    String recurringKey = EventContentDelegate.createRecurringKey(ID, BEGIN_TIME);
+
+    boolean deleted = delegate.delete(CALENDAR_ID, recurringKey);
+
+    assertThat(deleted).isTrue();
+    Uri.Builder expectedUriBuilder = Events.CONTENT_EXCEPTION_URI.buildUpon();
+    ContentUris.appendId(expectedUriBuilder, ID);
+    Uri expectedUri = expectedUriBuilder.build();
+
+    ProviderCall expected = new ProviderCall(MethodType.INSERT, expectedUri);
+
+    ContentValues expectedContentValues = new ContentValues();
+    expectedContentValues.put(Events.STATUS, Events.STATUS_CANCELED);
+    expectedContentValues.put(Events.ORIGINAL_INSTANCE_TIME, BEGIN_TIME.toEpochMilli());
+    expected.setValues(expectedContentValues);
+    ProviderCall call = getOnlyElement(testCalendarProvider.getCalls());
+    call.assertSameArgs(expected);
+  }
+
+  @Test
+  public void deleteRecurringEvent_replica_normalDelete() {
+    EventContentDelegate delegate = createEventContentDelegate(REPLICA);
+    String recurringKey = EventContentDelegate.createRecurringKey(ID, BEGIN_TIME);
+
+    boolean deleted = delegate.delete(CALENDAR_ID, recurringKey);
+
+    assertThat(deleted).isTrue();
+    Uri expectedContentUri = addSyncAdapterParameters(Events.CONTENT_URI);
+    ProviderCall expected = new ProviderCall(MethodType.DELETE, expectedContentUri);
+    expected.setSelection(
+        "calendar_id = ? AND _sync_id = ?",
+        new String[] {Long.toString(CALENDAR_ID), recurringKey});
+    ProviderCall call = getOnlyElement(testCalendarProvider.getCalls());
+    call.assertSameArgs(expected);
+  }
+
+  @Test
+  public void insertExceptionEvent_replica_deletesRecurringInstance() {
+    EventContentDelegate delegate = createEventContentDelegate(REPLICA);
+    String recurringKey = EventContentDelegate.createRecurringKey(ID, BEGIN_TIME);
+    String exceptionKey = EventContentDelegate.createExceptionKey(ID, BEGIN_TIME);
+    Event exceptionEvent = createTestEvent().toBuilder().setKey(exceptionKey).build();
+
+    delegate.insert(CALENDAR_ID, exceptionEvent);
+
+    ProviderCall deleteCall = testCalendarProvider.getCalls().get(0);
+    Uri expectedDeleteUri = addSyncAdapterParameters(Events.CONTENT_URI);
+    ProviderCall expectedDeleteCall = new ProviderCall(MethodType.DELETE, expectedDeleteUri);
+    expectedDeleteCall.setSelection(
+        "calendar_id = ? AND _sync_id = ?",
+        new String[] {Long.toString(CALENDAR_ID), recurringKey});
+    deleteCall.assertSameArgs(expectedDeleteCall);
+    ProviderCall insertCall = testCalendarProvider.getCalls().get(1);
+    assertThat(insertCall.getType()).isEqualTo(MethodType.INSERT);
+  }
+
+  @Test
+  public void insertExceptionEvent_source_throws() {
+    EventContentDelegate delegate = createEventContentDelegate(SOURCE);
+    String exceptionKey = EventContentDelegate.createExceptionKey(ID, BEGIN_TIME);
+    Event exceptionEvent = createTestEvent().toBuilder().setKey(exceptionKey).build();
+
+    assertThrows(IllegalStateException.class, () -> delegate.insert(CALENDAR_ID, exceptionEvent));
+  }
+
+  @Test
+  public void findRecurringEvent_source_createsDuplicateException() {
+    EventContentDelegate delegate = createEventContentDelegate(SOURCE);
+    String recurringKey = EventContentDelegate.createRecurringKey(ID, BEGIN_TIME);
+    testCalendarProvider.addRow(TEST_COLUMN_VALUES);
+
+    Object id = delegate.find(CALENDAR_ID, recurringKey);
+
+    // The returned id is the dummy value returned by TestCalendarProvider.insert().
+    assertThat(id).isEqualTo(1);
+    Uri.Builder expectedInsertUriBuilder = Events.CONTENT_EXCEPTION_URI.buildUpon();
+    ContentUris.appendId(expectedInsertUriBuilder, ID);
+    Uri expectedInsertUri = expectedInsertUriBuilder.build();
+    ProviderCall readCall = testCalendarProvider.getCalls().get(0);
+    assertThat(readCall.getType()).isEqualTo(MethodType.QUERY);
+    ProviderCall insertCall = testCalendarProvider.getCalls().get(1);
+    assertThat(insertCall.getType()).isEqualTo(MethodType.INSERT);
+    assertThat(insertCall.getUri()).isEqualTo(expectedInsertUri);
   }
 
   private Event createTestEvent() {
@@ -331,7 +462,8 @@ public class EventContentDelegateTest {
         .build();
   }
 
-  private void addTestEventValues(ContentOwnership ownership, ContentValues values) {
+  private ContentValues createExpectedContentValues() {
+    ContentValues values = new ContentValues();
     values.put(Attendees.CALENDAR_ID, CALENDAR_ID);
     values.put(Events.STATUS, Events.STATUS_CONFIRMED);
     values.put(Events.TITLE, TITLE);
@@ -341,12 +473,10 @@ public class EventContentDelegateTest {
     values.put(Events.DTEND, END_TIME.toEpochMilli());
     values.put(Events.EVENT_TIMEZONE, ZONE_ID.getId());
     values.put(Events.EVENT_END_TIMEZONE, ZONE_ID.getId());
-    values.put(Events.ALL_DAY, ALL_DAY ? 1 : 0);
+    values.put(Events.ALL_DAY, 0);
     values.put(Events.EVENT_COLOR, COLOR_RGB);
     values.put(Events.ORGANIZER, ORGANIZER);
-    if (ownership == ContentOwnership.REPLICA) {
-      values.put(Events._SYNC_ID, KEY);
-    }
+    return values;
   }
 
   private Event next(Iterator<Content<Event>> contents) {
@@ -355,5 +485,21 @@ public class EventContentDelegateTest {
 
   private void addTestRowWithStatus(int status) {
     testCalendarProvider.addRowWithReplacement(TEST_COLUMN_VALUES, Events.STATUS, status);
+  }
+
+  private void assertAllReadFields(Content<Event> content) {
+    assertThat(content.getId()).isEqualTo(ID);
+    assertThat(content.getMessage().getKey()).isEqualTo(KEY);
+    assertThat(content.getMessage().getStatus()).isEqualTo(Status.CONFIRMED);
+    assertThat(content.getMessage().getTitle()).isEqualTo(TITLE);
+    assertThat(content.getMessage().getDescription()).isEqualTo(DESCRIPTION);
+    assertThat(content.getMessage().getBeginTime().getSeconds())
+        .isEqualTo(BEGIN_TIME.getEpochSecond());
+    assertThat(content.getMessage().getEndTime().getSeconds()).isEqualTo(END_TIME.getEpochSecond());
+    assertThat(content.getMessage().getTimeZone().getName()).isEqualTo(ZONE_ID.getId());
+    assertThat(content.getMessage().getEndTimeZone().getName()).isEqualTo(ZONE_ID.getId());
+    assertThat(content.getMessage().getIsAllDay()).isEqualTo(ALL_DAY);
+    assertThat(content.getMessage().getColor().getArgb()).isEqualTo(COLOR_RGB);
+    assertThat(content.getMessage().getOrganizer()).isEqualTo(ORGANIZER);
   }
 }

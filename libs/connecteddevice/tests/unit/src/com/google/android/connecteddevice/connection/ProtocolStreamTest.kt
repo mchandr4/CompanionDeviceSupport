@@ -6,6 +6,7 @@ import com.google.android.companionprotos.OperationProto.OperationType
 import com.google.android.companionprotos.PacketProto.Packet
 import com.google.android.connecteddevice.connection.ProtocolStream.DeviceDisconnectListener
 import com.google.android.connecteddevice.connection.ProtocolStream.MessageReceivedListener
+import com.google.android.connecteddevice.model.DeviceMessage
 import com.google.android.connecteddevice.transport.ConnectionProtocol
 import com.google.android.connecteddevice.util.ByteUtils
 import com.google.common.truth.Truth
@@ -40,7 +41,14 @@ class ProtocolStreamTest {
   fun sendMessage_smallMessageSendsSinglePacket() {
     val recipient = UUID.randomUUID()
     val message = ByteUtils.randomBytes(MAX_WRITE_SIZE / 2)
-    stream.sendMessage(DeviceMessage(recipient, /* isMessageEncrypted= */ false, message))
+    stream.sendMessage(
+      DeviceMessage(
+        recipient,
+        /* isMessageEncrypted= */ false,
+        DeviceMessage.OperationType.CLIENT_MESSAGE,
+        message
+      )
+    )
     verify(protocol).sendData(eq(PROTOCOL_ID), any(), any())
   }
 
@@ -48,7 +56,14 @@ class ProtocolStreamTest {
   fun sendMessage_largeMessageSendsMultiplePackets() {
     val recipient = UUID.randomUUID()
     val message = ByteUtils.randomBytes(MAX_WRITE_SIZE + 1)
-    stream.sendMessage(DeviceMessage(recipient, /* isMessageEncrypted= */ false, message))
+    stream.sendMessage(
+      DeviceMessage(
+        recipient,
+        /* isMessageEncrypted= */ false,
+        DeviceMessage.OperationType.CLIENT_MESSAGE,
+        message
+      )
+    )
     verify(protocol, times(2)).sendData(eq(PROTOCOL_ID), any(), any())
   }
 
@@ -56,7 +71,14 @@ class ProtocolStreamTest {
   fun sendMessage_serializesPayloadIntoPacket() {
     val recipient = UUID.randomUUID()
     val message = ByteUtils.randomBytes(MAX_WRITE_SIZE / 2)
-    stream.sendMessage(DeviceMessage(recipient, /* isMessageEncrypted= */ false, message))
+    stream.sendMessage(
+      DeviceMessage(
+        recipient,
+        /* isMessageEncrypted= */ false,
+        DeviceMessage.OperationType.CLIENT_MESSAGE,
+        message
+      )
+    )
     argumentCaptor<ByteArray>().apply {
       verify(protocol).sendData(eq(PROTOCOL_ID), capture(), any())
       val packet = Packet.parseFrom(firstValue, ExtensionRegistryLite.getEmptyRegistry())
@@ -73,7 +95,14 @@ class ProtocolStreamTest {
     protocol.disconnectDevice(PROTOCOL_ID)
     val recipient = UUID.randomUUID()
     val message = ByteUtils.randomBytes(MAX_WRITE_SIZE / 2)
-    stream.sendMessage(DeviceMessage(recipient, /* isMessageEncrypted= */ false, message))
+    stream.sendMessage(
+      DeviceMessage(
+        recipient,
+        /* isMessageEncrypted= */ false,
+        DeviceMessage.OperationType.CLIENT_MESSAGE,
+        message
+      )
+    )
     verify(protocol, never()).sendData(eq(PROTOCOL_ID), any(), any())
   }
 
@@ -91,7 +120,14 @@ class ProtocolStreamTest {
     val failingStream = ProtocolStream(failingProtocol, PROTOCOL_ID, directExecutor())
     val recipient = UUID.randomUUID()
     val message = ByteUtils.randomBytes(MAX_WRITE_SIZE / 2)
-    failingStream.sendMessage(DeviceMessage(recipient, /* isMessageEncrypted= */ false, message))
+    failingStream.sendMessage(
+      DeviceMessage(
+        recipient,
+        /* isMessageEncrypted= */ false,
+        DeviceMessage.OperationType.CLIENT_MESSAGE,
+        message
+      )
+    )
     verify(failingProtocol).disconnectDevice(PROTOCOL_ID)
   }
 

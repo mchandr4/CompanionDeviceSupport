@@ -210,7 +210,7 @@ public class TestCalendarProvider extends ContentProvider {
     ProviderCall call = new ProviderCall(MethodType.DELETE, uri);
     call.setSelection(selection, selectionArgs);
     calls.add(call);
-    return 0;
+    return 1;
   }
 
   @Override

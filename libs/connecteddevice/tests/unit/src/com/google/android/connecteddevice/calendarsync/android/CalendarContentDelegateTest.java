@@ -117,17 +117,7 @@ public class CalendarContentDelegateTest {
 
     Uri expectedUri = addSyncAdapterParameters(Calendars.CONTENT_URI);
     ProviderCall expected = new ProviderCall(MethodType.INSERT, expectedUri);
-    ContentValues values = expected.getValues();
-    values.put(Calendars._SYNC_ID, KEY);
-    values.put(Calendars.OWNER_ACCOUNT, ACCOUNT);
-    values.put(Calendars.CALENDAR_TIME_ZONE, ZONE_ID.getId());
-    values.put(Calendars.CAL_SYNC1, DEVICE_ID);
-    values.put(Calendars.SYNC_EVENTS, 1);
-    values.put(Calendars.VISIBLE, 1);
-    values.put(Calendars.ACCOUNT_NAME, BaseContentDelegate.ACCOUNT_NAME);
-    values.put(Calendars.ACCOUNT_TYPE, CalendarContract.ACCOUNT_TYPE_LOCAL);
-    values.put(Calendars.CALENDAR_DISPLAY_NAME, NAME);
-    values.put(Calendars.CALENDAR_COLOR, COLOR_RGB);
+    expected.setValues(createDefaultExpectedContent());
     ProviderCall call = getOnlyElement(testCalendarProvider.getCalls());
     call.assertSameArgs(expected);
   }
@@ -221,17 +211,7 @@ public class CalendarContentDelegateTest {
     String expectedSelect =
         "cal_sync1 = ? AND _sync_id = ? AND account_name = ? AND account_type = ?";
     expected.setSelection(expectedSelect, expectedArgs);
-    ContentValues values = expected.getValues();
-    values.put(Calendars._SYNC_ID, KEY);
-    values.put(Calendars.CALENDAR_COLOR, COLOR_RGB);
-    values.put(Calendars.CALENDAR_DISPLAY_NAME, NAME);
-    values.put(Calendars.OWNER_ACCOUNT, ACCOUNT);
-    values.put(Calendars.CALENDAR_TIME_ZONE, ZONE_ID.getId());
-    values.put(Calendars.CAL_SYNC1, DEVICE_ID);
-    values.put(Calendars.SYNC_EVENTS, 1);
-    values.put(Calendars.VISIBLE, 1);
-    values.put(Calendars.ACCOUNT_NAME, BaseContentDelegate.ACCOUNT_NAME);
-    values.put(Calendars.ACCOUNT_TYPE, CalendarContract.ACCOUNT_TYPE_LOCAL);
+    expected.setValues(createDefaultExpectedContent());
     ProviderCall call = getOnlyElement(testCalendarProvider.getCalls());
     call.assertSameArgs(expected);
   }
@@ -267,5 +247,21 @@ public class CalendarContentDelegateTest {
     Context context = ApplicationProvider.getApplicationContext();
     return new CalendarContentDelegate(
         new CommonLogger.NoOpLoggerFactory(), context.getContentResolver(), ownership);
+  }
+
+  private ContentValues createDefaultExpectedContent() {
+    ContentValues values = new ContentValues();
+    values.put(Calendars._SYNC_ID, KEY);
+    values.put(Calendars.OWNER_ACCOUNT, ACCOUNT);
+    values.put(Calendars.CALENDAR_TIME_ZONE, ZONE_ID.getId());
+    values.put(Calendars.CAL_SYNC1, DEVICE_ID);
+    values.put(Calendars.SYNC_EVENTS, 1);
+    values.put(Calendars.VISIBLE, 1);
+    values.put(Calendars.ACCOUNT_NAME, BaseContentDelegate.ACCOUNT_NAME);
+    values.put(Calendars.ACCOUNT_TYPE, CalendarContract.ACCOUNT_TYPE_LOCAL);
+    values.put(Calendars.CALENDAR_DISPLAY_NAME, NAME);
+    values.put(Calendars.CALENDAR_COLOR, COLOR_RGB);
+    values.put(Calendars.CALENDAR_ACCESS_LEVEL, Calendars.CAL_ACCESS_EDITOR);
+    return values;
   }
 }
