@@ -85,6 +85,7 @@ public class DeviceMessage implements Parcelable {
         in.readBoolean(),
         OperationType.fromValue(in.readInt()),
         in.createByteArray());
+    originalMessageSize = in.readInt();
   }
 
   /** Returns the recipient for this message. {@code null} if no recipient set. */
@@ -157,6 +158,7 @@ public class DeviceMessage implements Parcelable {
     parcel.writeBoolean(isMessageEncrypted);
     parcel.writeInt(operationType.getValue());
     parcel.writeByteArray(message);
+    parcel.writeInt(originalMessageSize);
   }
 
   public static final Parcelable.Creator<DeviceMessage> CREATOR =

@@ -34,6 +34,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -63,6 +65,10 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
 
   private static final Duration DISCOVERABLE_DURATION = Duration.ofMinutes(2);
 
+  private static final String TIMEOUT_HANDLER_THREAD_NAME = "bindingTimeoutThread";
+
+  private static final Duration BINDING_TIMEOUT_DURATION = Duration.ofSeconds(5);
+
   /** States of association process. */
   public enum AssociationState {
     NONE,
@@ -91,11 +97,23 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
   private final String bleDeviceNamePrefix;
   private final BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
+  private final HandlerThread timeoutHandlerThread;
+  private final Handler timeoutHandler;
+
+  private final Runnable timeoutRunnable =
+      () -> {
+        loge(TAG, "Timeout period expired without a successful service bind.");
+        associationState.postValue(AssociationState.ERROR);
+      };
+
   public AssociatedDeviceViewModel(
       @NonNull Application application, boolean isSppEnabled, String bleDeviceNamePrefix) {
     super(application);
     this.bleDeviceNamePrefix = bleDeviceNamePrefix;
     this.isSppEnabled = isSppEnabled;
+    timeoutHandlerThread = new HandlerThread(TIMEOUT_HANDLER_THREAD_NAME);
+    timeoutHandlerThread.start();
+    timeoutHandler = new Handler(timeoutHandlerThread.getLooper());
     bindService();
     if (bluetoothAdapter != null) {
       bluetoothState.postValue(bluetoothAdapter.getState());
@@ -112,6 +130,9 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
     this.isSppEnabled = isSppEnabled;
     this.bleDeviceNamePrefix = bleDeviceNamePrefix;
     this.associatedDeviceManager = associatedDeviceManager;
+    timeoutHandlerThread = new HandlerThread(TIMEOUT_HANDLER_THREAD_NAME);
+    timeoutHandlerThread.start();
+    timeoutHandler = new Handler(timeoutHandlerThread.getLooper());
     bluetoothState.postValue(BluetoothAdapter.STATE_ON);
     if (associatedDeviceManager == null) {
       return;
@@ -129,6 +150,7 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
   @Override
   protected void onCleared() {
     super.onCleared();
+    timeoutHandlerThread.quit();
     if (associatedDeviceManager == null) {
       return;
     }
@@ -362,13 +384,21 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
     logd(TAG, "Binding to ConnectedDeviceService.");
     Intent intent = new Intent(getApplication(), ConnectedDeviceService.class);
     intent.setAction(ACTION_BIND_ASSOCIATION);
-    getApplication().bindService(intent, connection, Context.BIND_AUTO_CREATE);
+    boolean success = getApplication().bindService(intent, connection, /* flags= */ 0);
+    if (!success) {
+      loge(TAG, "Unable to start binding process to service.");
+      associationState.postValue(AssociationState.ERROR);
+      return;
+    }
+
+    timeoutHandler.postDelayed(timeoutRunnable, BINDING_TIMEOUT_DURATION.toMillis());
   }
 
   private final ServiceConnection connection =
       new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
+          timeoutHandler.removeCallbacks(timeoutRunnable);
           associatedDeviceManager = IAssociatedDeviceManager.Stub.asInterface(service);
           isServiceConnected.postValue(true);
           try {

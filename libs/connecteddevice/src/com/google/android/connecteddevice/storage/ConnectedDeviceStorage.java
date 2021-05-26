@@ -324,19 +324,50 @@ public class ConnectedDeviceStorage {
    * Update the name for an associated device.
    *
    * @param deviceId The id of the associated device.
-   * @param name The name to replace with.
+   * @param name The name to replace with. Empty names are ignored.
    */
   public void updateAssociatedDeviceName(@NonNull String deviceId, @NonNull String name) {
-    AssociatedDeviceEntity entity = associatedDeviceDatabase.getAssociatedDevice(deviceId);
-    if (entity == null) {
-      logw(TAG, "Attempt to update name on an unrecognized device " + deviceId + ". Ignoring.");
+    if (name.isEmpty()) {
+      logw(TAG, "Attempted to update the device name to an empty string. Ignoring.");
       return;
     }
+    AssociatedDeviceEntity entity = associatedDeviceDatabase.getAssociatedDevice(deviceId);
+    if (entity == null) {
+      logw(TAG, "Attempted to update name on an unrecognized device " + deviceId + ". Ignoring.");
+      return;
+    }
+    updateName(entity, name);
+  }
+
+  /**
+   * Set the name for an associated device only if it does not already have a name populated.
+   *
+   * @param deviceId The id of the associated device.
+   * @param name The name to set on the associated device. Empty names are ignored.
+   */
+  public void setAssociatedDeviceName(@NonNull String deviceId, @NonNull String name) {
+    if (name.isEmpty()) {
+      logw(TAG, "Attempted to set the device name to an empty string. Ignoring.");
+      return;
+    }
+    AssociatedDeviceEntity entity = associatedDeviceDatabase.getAssociatedDevice(deviceId);
+    if (entity == null) {
+      logw(TAG, "Attempted to set name on an unrecognized device " + deviceId + ". Ignoring.");
+      return;
+    }
+    if (entity.name != null) {
+      logd(TAG, "Name was already set for device " + deviceId + ". No further action taken.");
+      return;
+    }
+    updateName(entity, name);
+  }
+
+  private void updateName(AssociatedDeviceEntity entity, String name) {
     entity.name = name;
     associatedDeviceDatabase.addOrReplaceAssociatedDevice(entity);
     if (associatedDeviceCallback != null) {
       associatedDeviceCallback.onAssociatedDeviceUpdated(
-          new AssociatedDevice(deviceId, entity.address, name, entity.isConnectionEnabled));
+          new AssociatedDevice(entity.id, entity.address, name, entity.isConnectionEnabled));
     }
   }
 

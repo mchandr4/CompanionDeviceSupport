@@ -23,7 +23,6 @@ import static com.google.android.connecteddevice.util.SafeLog.logw;
 import android.app.Service;
 import android.bluetooth.BluetoothDevice;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Handler;
@@ -177,7 +176,7 @@ public class SppService extends Service {
   private void bindToService() {
     Intent intent = new Intent(this, ConnectedDeviceService.class);
     intent.setAction(ConnectedDeviceSppDelegateBinder.ACTION_BIND_SPP);
-    boolean success = bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+    boolean success = bindService(intent, serviceConnection, /* flags= */ 0);
     if (success) {
       logd(TAG, "Successfully started bind attempt to ConnectedDeviceService.");
       return;

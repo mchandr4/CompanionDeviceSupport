@@ -179,7 +179,7 @@ class DeviceControllerTest {
     argumentCaptor<ConnectionProtocol.DiscoveryCallback>().apply {
       verify(testConnectionProtocol).startAssociationDiscovery(eq(DEVICE_NAME), capture())
       firstValue.onDeviceNameRetrieved(testProtocolId.toString(), REMOTE_DEVICE_NAME)
-      verify(spyStorage)?.updateAssociatedDeviceName(any(), eq(REMOTE_DEVICE_NAME))
+      verify(spyStorage)?.setAssociatedDeviceName(any(), eq(REMOTE_DEVICE_NAME))
     }
   }
 

@@ -16,10 +16,14 @@
 
 package com.google.android.connecteddevice.api;
 
+import static com.google.android.companionprotos.SystemQueryType.APP_NAME;
+import static com.google.android.connecteddevice.api.RemoteFeature.SYSTEM_FEATURE_ID;
 import static com.google.common.truth.Truth.assertThat;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -34,6 +38,8 @@ import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.google.android.companionprotos.Query;
 import com.google.android.companionprotos.QueryResponse;
+import com.google.android.companionprotos.SystemQuery;
+import com.google.android.connecteddevice.api.RemoteFeature.AppNameCallback;
 import com.google.android.connecteddevice.api.RemoteFeature.QueryCallback;
 import com.google.android.connecteddevice.model.AssociatedDevice;
 import com.google.android.connecteddevice.model.ConnectedDevice;
@@ -205,8 +211,7 @@ public class RemoteFeatureTest {
     when(mockConnectedDeviceManager.getActiveUserConnectedDevices())
         .thenReturn(ImmutableList.of(device));
     remoteFeature.start();
-    ArgumentCaptor<IDeviceCallback> callbackCaptor =
-        ArgumentCaptor.forClass(IDeviceCallback.class);
+    ArgumentCaptor<IDeviceCallback> callbackCaptor = ArgumentCaptor.forClass(IDeviceCallback.class);
     verify(mockConnectedDeviceManager)
         .registerDeviceCallback(eq(device), eq(featureId), callbackCaptor.capture());
     ConnectedDevice secureDevice = new ConnectedDevice(
@@ -242,8 +247,7 @@ public class RemoteFeatureTest {
     when(mockConnectedDeviceManager.getActiveUserConnectedDevices())
         .thenReturn(ImmutableList.of(device));
     remoteFeature.start();
-    ArgumentCaptor<IDeviceCallback> callbackCaptor =
-        ArgumentCaptor.forClass(IDeviceCallback.class);
+    ArgumentCaptor<IDeviceCallback> callbackCaptor = ArgumentCaptor.forClass(IDeviceCallback.class);
     verify(mockConnectedDeviceManager)
         .registerDeviceCallback(eq(device), eq(featureId), callbackCaptor.capture());
     int error = -1;
@@ -383,8 +387,7 @@ public class RemoteFeatureTest {
     when(mockConnectedDeviceManager.getActiveUserConnectedDevices())
         .thenReturn(ImmutableList.of(device));
     remoteFeature.start();
-    ArgumentCaptor<IDeviceCallback> callbackCaptor =
-        ArgumentCaptor.forClass(IDeviceCallback.class);
+    ArgumentCaptor<IDeviceCallback> callbackCaptor = ArgumentCaptor.forClass(IDeviceCallback.class);
     verify(mockConnectedDeviceManager)
         .registerDeviceCallback(eq(device), eq(featureId), callbackCaptor.capture());
     DeviceMessage deviceMessage =
@@ -469,8 +472,7 @@ public class RemoteFeatureTest {
     when(mockConnectedDeviceManager.getActiveUserConnectedDevices())
         .thenReturn(ImmutableList.of(device));
     remoteFeature.start();
-    ArgumentCaptor<IDeviceCallback> callbackCaptor =
-        ArgumentCaptor.forClass(IDeviceCallback.class);
+    ArgumentCaptor<IDeviceCallback> callbackCaptor = ArgumentCaptor.forClass(IDeviceCallback.class);
     verify(mockConnectedDeviceManager)
         .registerDeviceCallback(eq(device), eq(featureId), callbackCaptor.capture());
     byte[] request = ByteUtils.randomBytes(10);
@@ -510,8 +512,7 @@ public class RemoteFeatureTest {
     when(mockConnectedDeviceManager.getActiveUserConnectedDevices())
         .thenReturn(ImmutableList.of(device));
     remoteFeature.start();
-    ArgumentCaptor<IDeviceCallback> callbackCaptor =
-        ArgumentCaptor.forClass(IDeviceCallback.class);
+    ArgumentCaptor<IDeviceCallback> callbackCaptor = ArgumentCaptor.forClass(IDeviceCallback.class);
     verify(mockConnectedDeviceManager)
         .registerDeviceCallback(eq(device), eq(featureId), callbackCaptor.capture());
     byte[] request = ByteUtils.randomBytes(10);
@@ -551,8 +552,7 @@ public class RemoteFeatureTest {
     when(mockConnectedDeviceManager.getActiveUserConnectedDevices())
         .thenReturn(ImmutableList.of(device));
     remoteFeature.start();
-    ArgumentCaptor<IDeviceCallback> callbackCaptor =
-        ArgumentCaptor.forClass(IDeviceCallback.class);
+    ArgumentCaptor<IDeviceCallback> callbackCaptor = ArgumentCaptor.forClass(IDeviceCallback.class);
     verify(mockConnectedDeviceManager)
         .registerDeviceCallback(eq(device), eq(featureId), callbackCaptor.capture());
     byte[] request = ByteUtils.randomBytes(10);
@@ -656,8 +656,7 @@ public class RemoteFeatureTest {
     when(mockConnectedDeviceManager.getActiveUserConnectedDevices())
         .thenReturn(ImmutableList.of(device));
     remoteFeature.start();
-    ArgumentCaptor<IDeviceCallback> callbackCaptor =
-        ArgumentCaptor.forClass(IDeviceCallback.class);
+    ArgumentCaptor<IDeviceCallback> callbackCaptor = ArgumentCaptor.forClass(IDeviceCallback.class);
     verify(mockConnectedDeviceManager)
         .registerDeviceCallback(eq(device), eq(featureId), callbackCaptor.capture());
     int queryId = 1;
@@ -708,8 +707,7 @@ public class RemoteFeatureTest {
     when(mockConnectedDeviceManager.getActiveUserConnectedDevices())
         .thenReturn(ImmutableList.of(device));
     remoteFeature.start();
-    ArgumentCaptor<IDeviceCallback> callbackCaptor =
-        ArgumentCaptor.forClass(IDeviceCallback.class);
+    ArgumentCaptor<IDeviceCallback> callbackCaptor = ArgumentCaptor.forClass(IDeviceCallback.class);
     verify(mockConnectedDeviceManager)
         .registerDeviceCallback(eq(device), eq(featureId), callbackCaptor.capture());
     int queryId = 1;
@@ -755,8 +753,7 @@ public class RemoteFeatureTest {
     when(mockConnectedDeviceManager.getActiveUserConnectedDevices())
         .thenReturn(ImmutableList.of(device));
     remoteFeature.start();
-    ArgumentCaptor<IDeviceCallback> callbackCaptor =
-        ArgumentCaptor.forClass(IDeviceCallback.class);
+    ArgumentCaptor<IDeviceCallback> callbackCaptor = ArgumentCaptor.forClass(IDeviceCallback.class);
     verify(mockConnectedDeviceManager)
         .registerDeviceCallback(eq(device), eq(featureId), callbackCaptor.capture());
     ParcelUuid sender = new ParcelUuid(UUID.randomUUID());
@@ -804,6 +801,182 @@ public class RemoteFeatureTest {
     int queryId = 0;
     byte[] response = ByteUtils.randomBytes(10);
     disconnectedFeature.respondToQuerySecurely(device, queryId, /* success= */ true, response);
+  }
+
+  @Test
+  public void getCompanionApplicationName_sendsAppNameQueryToSystemFeature()
+      throws RemoteException, InvalidProtocolBufferException {
+    ConnectedDevice device = new ConnectedDevice(
+        UUID.randomUUID().toString(),
+        /* deviceName= */ "",
+        /* belongsToActiveUser= */ true,
+        /* hasSecureChannel= */ true);
+    when(mockConnectedDeviceManager.getActiveUserConnectedDevices())
+        .thenReturn(ImmutableList.of(device));
+    remoteFeature.start();
+
+    AppNameCallback callback = mock(AppNameCallback.class);
+    remoteFeature.getCompanionApplicationName(device, callback);
+    ArgumentCaptor<DeviceMessage> captor = ArgumentCaptor.forClass(DeviceMessage.class);
+    verify(mockConnectedDeviceManager).sendMessage(eq(device), captor.capture());
+
+    DeviceMessage deviceMessage = captor.getValue();
+    assertThat(deviceMessage.getRecipient()).isEqualTo(SYSTEM_FEATURE_ID.getUuid());
+
+    Query query =
+        Query.parseFrom(deviceMessage.getMessage(), ExtensionRegistryLite.getEmptyRegistry());
+    assertThat(query.getSender().toByteArray())
+        .isEqualTo(ByteUtils.uuidToBytes(featureId.getUuid()));
+
+    SystemQuery systemQuery =
+        SystemQuery.parseFrom(query.getRequest(), ExtensionRegistryLite.getEmptyRegistry());
+    assertThat(systemQuery.getType()).isEqualTo(APP_NAME);
+  }
+
+  @Test
+  public void getCompanionApplicationName_appNameCallbackOnNameReceivedInvokedWithName()
+      throws RemoteException, InvalidProtocolBufferException {
+    ConnectedDevice device = new ConnectedDevice(
+        UUID.randomUUID().toString(),
+        /* deviceName= */ "",
+        /* belongsToActiveUser= */ true,
+        /* hasSecureChannel= */ true);
+    when(mockConnectedDeviceManager.getActiveUserConnectedDevices())
+        .thenReturn(ImmutableList.of(device));
+    remoteFeature.start();
+    ArgumentCaptor<IDeviceCallback> callbackCaptor = ArgumentCaptor.forClass(IDeviceCallback.class);
+    verify(mockConnectedDeviceManager)
+        .registerDeviceCallback(eq(device), eq(featureId), callbackCaptor.capture());
+
+    AppNameCallback callback = mock(AppNameCallback.class);
+    remoteFeature.getCompanionApplicationName(device, callback);
+    ArgumentCaptor<DeviceMessage> captor = ArgumentCaptor.forClass(DeviceMessage.class);
+    verify(mockConnectedDeviceManager).sendMessage(eq(device), captor.capture());
+
+    Query query =
+        Query.parseFrom(captor.getValue().getMessage(), ExtensionRegistryLite.getEmptyRegistry());
+
+    String appName = "Companion";
+    byte[] response = appName.getBytes(UTF_8);
+    QueryResponse queryResponse =
+        QueryResponse
+            .newBuilder()
+            .setQueryId(query.getId())
+            .setSuccess(true)
+            .setResponse(ByteString.copyFrom(response))
+            .build();
+    DeviceMessage deviceMessage =
+        new DeviceMessage(
+            featureId.getUuid(),
+            /* isMessageEncrypted= */ true,
+            OperationType.QUERY_RESPONSE,
+            queryResponse.toByteArray());
+    callbackCaptor.getValue().onMessageReceived(device, deviceMessage);
+    verify(callback).onNameReceived(appName);
+  }
+
+  @Test
+  public void getCompanionApplicationName_appNameCallbackOnErrorInvokedWithEmptyResponse()
+      throws RemoteException, InvalidProtocolBufferException {
+    ConnectedDevice device = new ConnectedDevice(
+        UUID.randomUUID().toString(),
+        /* deviceName= */ "",
+        /* belongsToActiveUser= */ true,
+        /* hasSecureChannel= */ true);
+    when(mockConnectedDeviceManager.getActiveUserConnectedDevices())
+        .thenReturn(ImmutableList.of(device));
+    remoteFeature.start();
+    ArgumentCaptor<IDeviceCallback> callbackCaptor = ArgumentCaptor.forClass(IDeviceCallback.class);
+    verify(mockConnectedDeviceManager)
+        .registerDeviceCallback(eq(device), eq(featureId), callbackCaptor.capture());
+    IDeviceCallback deviceCallback = callbackCaptor.getValue();
+    assertThat(deviceCallback).isNotNull();
+
+    AppNameCallback callback = mock(AppNameCallback.class);
+    remoteFeature.getCompanionApplicationName(device, callback);
+    ArgumentCaptor<DeviceMessage> captor = ArgumentCaptor.forClass(DeviceMessage.class);
+    verify(mockConnectedDeviceManager).sendMessage(eq(device), captor.capture());
+    DeviceMessage sentMessage = captor.getValue();
+    assertThat(sentMessage).isNotNull();
+
+    Query query =
+        Query.parseFrom(sentMessage.getMessage(), ExtensionRegistryLite.getEmptyRegistry());
+
+    QueryResponse queryResponse =
+        QueryResponse
+            .newBuilder()
+            .setQueryId(query.getId())
+            .setSuccess(true)
+            .setResponse(ByteString.EMPTY)
+            .build();
+    DeviceMessage deviceMessage =
+        new DeviceMessage(
+            featureId.getUuid(),
+            /* isMessageEncrypted= */ true,
+            OperationType.QUERY_RESPONSE,
+            queryResponse.toByteArray());
+    deviceCallback.onMessageReceived(device, deviceMessage);
+    verify(callback).onError();
+  }
+
+  @Test
+  public void getCompanionApplicationName_appNameCallbackOnErrorInvokedWithErrorResponse()
+      throws RemoteException, InvalidProtocolBufferException {
+    ConnectedDevice device = new ConnectedDevice(
+        UUID.randomUUID().toString(),
+        /* deviceName= */ "",
+        /* belongsToActiveUser= */ true,
+        /* hasSecureChannel= */ true);
+    when(mockConnectedDeviceManager.getActiveUserConnectedDevices())
+        .thenReturn(ImmutableList.of(device));
+    remoteFeature.start();
+    ArgumentCaptor<IDeviceCallback> callbackCaptor = ArgumentCaptor.forClass(IDeviceCallback.class);
+    verify(mockConnectedDeviceManager)
+        .registerDeviceCallback(eq(device), eq(featureId), callbackCaptor.capture());
+
+    AppNameCallback callback = mock(AppNameCallback.class);
+    remoteFeature.getCompanionApplicationName(device, callback);
+    ArgumentCaptor<DeviceMessage> captor = ArgumentCaptor.forClass(DeviceMessage.class);
+    verify(mockConnectedDeviceManager).sendMessage(eq(device), captor.capture());
+
+    Query query =
+        Query.parseFrom(captor.getValue().getMessage(), ExtensionRegistryLite.getEmptyRegistry());
+
+    String appName = "Companion";
+    byte[] response = appName.getBytes(UTF_8);
+    QueryResponse queryResponse =
+        QueryResponse
+            .newBuilder()
+            .setQueryId(query.getId())
+            .setSuccess(false)
+            .setResponse(ByteString.copyFrom(response))
+            .build();
+    DeviceMessage deviceMessage =
+        new DeviceMessage(
+            featureId.getUuid(),
+            /* isMessageEncrypted= */ true,
+            OperationType.QUERY_RESPONSE,
+            queryResponse.toByteArray());
+    callbackCaptor.getValue().onMessageReceived(device, deviceMessage);
+    verify(callback).onError();
+  }
+
+  @Test
+  public void getCompanionApplicationName_appNameCallbackOnErrorInvokedWhenQueryFailedToSend()
+      throws RemoteException, InvalidProtocolBufferException {
+    ConnectedDevice device = new ConnectedDevice(
+        UUID.randomUUID().toString(),
+        /* deviceName= */ "",
+        /* belongsToActiveUser= */ true,
+        /* hasSecureChannel= */ true);
+    when(mockConnectedDeviceManager.getActiveUserConnectedDevices())
+        .thenReturn(ImmutableList.of(device));
+    when(mockConnectedDeviceManager.sendMessage(any(), any()))
+        .thenThrow(new RemoteException());
+    remoteFeature.start();
+    AppNameCallback callback = mock(AppNameCallback.class);
+    remoteFeature.getCompanionApplicationName(device, callback);
+    verify(callback).onError();
   }
 
   private RemoteFeature createRemoteFeature(

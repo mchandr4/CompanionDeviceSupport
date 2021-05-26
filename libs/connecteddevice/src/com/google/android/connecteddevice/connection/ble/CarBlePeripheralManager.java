@@ -501,7 +501,7 @@ public class CarBlePeripheralManager extends CarBluetoothManager {
           if (connectedDevice == null || connectedDevice.deviceId == null) {
             return;
           }
-          storage.updateAssociatedDeviceName(connectedDevice.deviceId, deviceName);
+          storage.setAssociatedDeviceName(connectedDevice.deviceId, deviceName);
         }
 
         @Override

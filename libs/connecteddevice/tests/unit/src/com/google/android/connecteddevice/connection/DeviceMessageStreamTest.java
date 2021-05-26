@@ -71,10 +71,14 @@ public class DeviceMessageStreamTest {
   public void processPacket_notifiesWithEntireMessageForSinglePacketMessage() {
     stream.setMessageReceivedListener(mockMessageReceivedListener);
     byte[] data = ByteUtils.randomBytes(5);
+
     processMessage(data);
     ArgumentCaptor<DeviceMessage> messageCaptor = ArgumentCaptor.forClass(DeviceMessage.class);
     verify(mockMessageReceivedListener).onMessageReceived(messageCaptor.capture());
-    assertThat(messageCaptor.getValue().getMessage()).isEqualTo(data);
+    DeviceMessage message = messageCaptor.getValue();
+
+    assertThat(message.getMessage()).isEqualTo(data);
+    assertThat(message.getOriginalMessageSize()).isEqualTo(data.length);
   }
 
   @Test
@@ -90,9 +94,10 @@ public class DeviceMessageStreamTest {
   @Test
   public void processPacket_receivingMultipleMessagesInParallelParsesSuccessfully() {
     stream.setMessageReceivedListener(mockMessageReceivedListener);
-    byte[] data = ByteUtils.randomBytes((int) (WRITE_SIZE * 1.5));
-    List<Packet> packets1 = createPackets(data);
-    List<Packet> packets2 = createPackets(data);
+    byte[] data1 = ByteUtils.randomBytes((int) (WRITE_SIZE * 1.5));
+    byte[] data2 = ByteUtils.randomBytes((int) (WRITE_SIZE * 1.5));
+    List<Packet> packets1 = createPackets(data1);
+    List<Packet> packets2 = createPackets(data2);
 
     for (int i = 0; i < packets1.size(); i++) {
       stream.processPacket(packets1.get(i));
@@ -103,12 +108,18 @@ public class DeviceMessageStreamTest {
     }
     ArgumentCaptor<DeviceMessage> messageCaptor = ArgumentCaptor.forClass(DeviceMessage.class);
     verify(mockMessageReceivedListener).onMessageReceived(messageCaptor.capture());
-    assertThat(Arrays.equals(data, messageCaptor.getValue().getMessage())).isTrue();
+    DeviceMessage message1 = messageCaptor.getValue();
+
+    assertThat(message1.getMessage()).isEqualTo(data1);
+    assertThat(message1.getOriginalMessageSize()).isEqualTo(data1.length);
 
     stream.setMessageReceivedListener(mockMessageReceivedListener);
     stream.processPacket(Iterables.getLast(packets2));
     verify(mockMessageReceivedListener, times(2)).onMessageReceived(messageCaptor.capture());
-    assertThat(Arrays.equals(data, messageCaptor.getValue().getMessage())).isTrue();
+    DeviceMessage message2 = messageCaptor.getValue();
+
+    assertThat(message2.getMessage()).isEqualTo(data2);
+    assertThat(message2.getOriginalMessageSize()).isEqualTo(data2.length);
   }
 
   @Test
@@ -167,6 +178,7 @@ public class DeviceMessageStreamTest {
           Message.newBuilder()
               .setPayload(ByteString.copyFrom(data))
               .setOperation(OperationType.CLIENT_MESSAGE)
+              .setOriginalSize(data.length)
               .build();
       return PacketFactory.makePackets(
           message.toByteArray(), ThreadLocalRandom.current().nextInt(), WRITE_SIZE);

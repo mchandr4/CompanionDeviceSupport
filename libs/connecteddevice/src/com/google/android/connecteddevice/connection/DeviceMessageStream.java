@@ -309,6 +309,7 @@ public abstract class DeviceMessageStream {
         message.getIsPayloadEncrypted(),
         DeviceMessage.OperationType.fromValue(message.getOperation().getNumber()),
         message.getPayload().toByteArray());
+    deviceMessage.setOriginalMessageSize(message.getOriginalSize());
     notifyMessageReceivedListener(deviceMessage);
   }
 

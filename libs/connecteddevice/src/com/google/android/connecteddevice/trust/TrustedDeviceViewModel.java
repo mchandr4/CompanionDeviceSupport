@@ -25,7 +25,6 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
@@ -76,7 +75,7 @@ public class TrustedDeviceViewModel extends AndroidViewModel {
   public TrustedDeviceViewModel(@NonNull Application application) {
     super(application);
     Intent intent = new Intent(application, TrustedDeviceManagerService.class);
-    getApplication().bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+    getApplication().bindService(intent, serviceConnection, /* flags= */ 0);
   }
 
   @VisibleForTesting

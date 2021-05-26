@@ -65,7 +65,7 @@ public class TrustedDeviceUiDelegateService extends MetaDataService {
   public void onCreate() {
     super.onCreate();
     Intent intent = new Intent(this, TrustedDeviceManagerService.class);
-    bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+    bindService(intent, serviceConnection, /* flags= */ 0);
     notificationManager =
         (NotificationManager) getBaseContext().getSystemService(Context.NOTIFICATION_SERVICE);
     String channelName = requireMetaString(META_NOTIFICATION_CHANNEL_NAME);

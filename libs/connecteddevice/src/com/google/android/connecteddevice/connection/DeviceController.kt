@@ -303,7 +303,7 @@ class DeviceController(
           else -> null
         }
         device?.name = name
-        storage.updateAssociatedDeviceName(deviceId.toString(), name)
+        storage.setAssociatedDeviceName(deviceId.toString(), name)
       }
     }
   }

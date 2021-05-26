@@ -63,8 +63,10 @@ interface ITrustedDeviceManager {
     /** Set a delegate for TrustAgent operation calls. */
     void setTrustedDeviceAgentDelegate(in ITrustedDeviceAgentDelegate trustAgentDelegate);
 
-    /** Remove a prevoiusly set delegate. */
-    void clearTrustedDeviceAgentDelegate(in ITrustedDeviceAgentDelegate trustAgentDelegate);
+    /** Remove a prevoiusly set delegate with device secure status. */
+    void clearTrustedDeviceAgentDelegate(
+             in ITrustedDeviceAgentDelegate trustAgentDelegate,
+             in boolean isDeviceSecure);
 
     /** Retrieves trusted devices for the active user. */
     void retrieveTrustedDevicesForActiveUser(in IOnTrustedDevicesRetrievedListener listener);

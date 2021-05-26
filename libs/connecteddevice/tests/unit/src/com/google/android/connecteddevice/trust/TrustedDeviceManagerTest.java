@@ -8,10 +8,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.robolectric.Shadows.shadowOf;
 
 import android.app.ActivityManager;
-import android.app.KeyguardManager;
 import androidx.room.Room;
 import android.content.Context;
 import android.os.IBinder;
@@ -73,13 +71,11 @@ public final class TrustedDeviceManagerTest {
   private TrustedDeviceManager manager;
   private TrustedDeviceFeature feature;
   private TrustedDeviceDatabase database;
-  private KeyguardManager keyguardManager;
 
   @Before
   public void setUp() throws RemoteException {
     MockitoAnnotations.initMocks(this);
     Context context = ApplicationProvider.getApplicationContext();
-    keyguardManager = context.getSystemService(KeyguardManager.class);
 
     // Required because ShadowRemoteCallbackList will invoke these methods and requires non-null
     // values.
@@ -96,7 +92,6 @@ public final class TrustedDeviceManagerTest {
 
     manager =
         new TrustedDeviceManager(
-            context,
             database,
             feature,
             /* databaseExecutor= */ directExecutor(),
@@ -261,7 +256,7 @@ public final class TrustedDeviceManagerTest {
     TrustedDevice device =
         new TrustedDevice(SECURE_CONNECTED_DEVICE.getDeviceId(), DEFAULT_USER_ID, FAKE_HANDLE);
 
-    manager.clearTrustedDeviceAgentDelegate(trustAgentDelegate);
+    manager.clearTrustedDeviceAgentDelegate(trustAgentDelegate, /* isDeviceSecure= */ false);
     List<TrustedDeviceEntity> invalidEntities =
         database.trustedDeviceDao().getInvalidTrustedDevicesForUser(DEFAULT_USER_ID);
     List<TrustedDeviceEntity> validEntities =
@@ -297,9 +292,8 @@ public final class TrustedDeviceManagerTest {
     triggerDeviceConnected(SECURE_CONNECTED_DEVICE);
 
     executeAndVerifyValidEnrollFlow();
-    shadowOf(keyguardManager).setIsDeviceSecure(false);
 
-    manager.clearTrustedDeviceAgentDelegate(trustAgentDelegate);
+    manager.clearTrustedDeviceAgentDelegate(trustAgentDelegate, /* isDeviceSecure= */ false);
     manager.retrieveTrustedDevicesForActiveUser(trustedDeviceListener);
     verify(trustedDeviceListener).onTrustedDevicesRetrieved(trustedDeviceListCaptor.capture());
 
@@ -312,9 +306,8 @@ public final class TrustedDeviceManagerTest {
     triggerDeviceConnected(SECURE_CONNECTED_DEVICE);
 
     executeAndVerifyValidEnrollFlow();
-    shadowOf(keyguardManager).setIsDeviceSecure(true);
 
-    manager.clearTrustedDeviceAgentDelegate(trustAgentDelegate);
+    manager.clearTrustedDeviceAgentDelegate(trustAgentDelegate, /* isDeviceSecure= */ true);
     manager.retrieveTrustedDevicesForActiveUser(trustedDeviceListener);
     verify(trustedDeviceListener).onTrustedDevicesRetrieved(trustedDeviceListCaptor.capture());
 

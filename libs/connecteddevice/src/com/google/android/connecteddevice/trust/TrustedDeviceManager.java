@@ -22,7 +22,6 @@ import static com.google.android.connecteddevice.util.SafeLog.logi;
 import static com.google.android.connecteddevice.util.SafeLog.logw;
 
 import android.app.ActivityManager;
-import android.app.KeyguardManager;
 import android.content.Context;
 import android.os.IInterface;
 import android.os.RemoteCallbackList;
@@ -98,8 +97,6 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
 
   private final TrustedDeviceDao database;
 
-  private final Context context;
-
   private ITrustedDeviceAgentDelegate trustAgentDelegate;
 
   private ConnectedDevice pendingDevice;
@@ -110,7 +107,6 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
 
   TrustedDeviceManager(@NonNull Context context) {
     this(
-        context,
         TrustedDeviceDatabaseProvider.get(context),
         new TrustedDeviceFeature(context),
         /* databaseExecutor= */ Executors.newSingleThreadExecutor(),
@@ -119,12 +115,10 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
 
   @VisibleForTesting
   TrustedDeviceManager(
-      @NonNull Context context,
       @NonNull TrustedDeviceDatabase database,
       @NonNull TrustedDeviceFeature trustedDeviceFeature,
       @NonNull Executor databaseExecutor,
       @NonNull Executor remoteCallbackExecutor) {
-    this.context = context;
     this.database = database.trustedDeviceDao();
     this.databaseExecutor = databaseExecutor;
     this.remoteCallbackExecutor = remoteCallbackExecutor;
@@ -398,7 +392,9 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
   }
 
   @Override
-  public void clearTrustedDeviceAgentDelegate(ITrustedDeviceAgentDelegate trustAgentDelegate) {
+  public void clearTrustedDeviceAgentDelegate(
+      ITrustedDeviceAgentDelegate trustAgentDelegate,
+      boolean isDeviceSecure) {
     if (trustAgentDelegate.asBinder() != this.trustAgentDelegate.asBinder()) {
       logd(
           TAG,
@@ -412,20 +408,11 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
     }
     logd(TAG, "Clear current TrustedDeviceAgentDelegate: " + trustAgentDelegate + ".");
     this.trustAgentDelegate = null;
-    if (isDeviceSecure()) {
+    if (isDeviceSecure) {
       return;
     }
     logd(TAG, "No lock screen credential set. Invalidating all enrolled trusted devices.");
     invalidateAllTrustedDevices();
-  }
-
-  /** Returns {@code true} if a lock screen credential was set. */
-  private boolean isDeviceSecure() {
-    KeyguardManager keyguardManager = context.getSystemService(KeyguardManager.class);
-    if (keyguardManager == null) {
-      return false;
-    }
-    return keyguardManager.isDeviceSecure();
   }
 
   private void invalidateAllTrustedDevices() {

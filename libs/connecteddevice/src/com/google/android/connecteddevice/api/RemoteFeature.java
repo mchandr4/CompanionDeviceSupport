@@ -16,12 +16,14 @@
 
 package com.google.android.connecteddevice.api;
 
+import static com.google.android.companionprotos.SystemQueryType.APP_NAME;
 import static com.google.android.connecteddevice.model.DeviceMessage.OperationType.CLIENT_MESSAGE;
 import static com.google.android.connecteddevice.model.DeviceMessage.OperationType.QUERY;
 import static com.google.android.connecteddevice.model.DeviceMessage.OperationType.QUERY_RESPONSE;
 import static com.google.android.connecteddevice.util.SafeLog.logd;
 import static com.google.android.connecteddevice.util.SafeLog.loge;
 import static com.google.android.connecteddevice.util.SafeLog.logw;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -39,6 +41,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.google.android.companionprotos.Query;
 import com.google.android.companionprotos.QueryResponse;
+import com.google.android.companionprotos.SystemQuery;
 import com.google.android.connecteddevice.model.AssociatedDevice;
 import com.google.android.connecteddevice.model.ConnectedDevice;
 import com.google.android.connecteddevice.model.DeviceMessage;
@@ -84,6 +87,10 @@ public abstract class RemoteFeature {
   /** Data name for associated device. */
   public static final String ASSOCIATED_DEVICE_DATA_NAME_EXTRA =
       "com.google.android.connecteddevice.api.ASSOCIATED_DEVICE";
+
+  /** Id for the system query feature. */
+  protected static final ParcelUuid SYSTEM_FEATURE_ID =
+      ParcelUuid.fromString("892ac5d9-e9a5-48dc-874a-c01e3cb00d5d");
 
   private static final long BIND_RETRY_DURATION_MS = 1000;
 
@@ -375,6 +382,40 @@ public abstract class RemoteFeature {
     return null;
   }
 
+  /** Query the {@link ConnectedDevice} for its companion application name. */
+  public void getCompanionApplicationName(ConnectedDevice device, AppNameCallback callback) {
+    SystemQuery systemQuery = SystemQuery.newBuilder().setType(APP_NAME).build();
+    sendQuerySecurelyInternal(
+        device,
+        SYSTEM_FEATURE_ID,
+        systemQuery.toByteArray(),
+        /* parameters= */ null,
+        new QueryCallback() {
+          @Override
+          public void onSuccess(@Nullable byte[] response) {
+            if (response == null || response.length == 0) {
+              loge(TAG, "Received a null or empty response for the application name.");
+              callback.onError();
+            }
+            String appName = new String(response, UTF_8);
+            logd(TAG, "Received successful app name query response of " + appName + ".");
+            callback.onNameReceived(appName);
+          }
+
+          @Override
+          public void onError(@Nullable byte[] response) {
+            loge(TAG, "Received an error response when querying for application name.");
+            callback.onError();
+          }
+
+          @Override
+          public void onQueryFailedToSend(boolean isTransient) {
+            loge(TAG, "Failed to send the query for the application name.");
+            callback.onError();
+          }
+        });
+  }
+
   // These can be overridden to perform custom actions.
 
   /** Called when a new {@link ConnectedDevice} is connected. */
@@ -443,7 +484,7 @@ public abstract class RemoteFeature {
     ResolveInfo service = services.get(0);
     intent.setComponent(
         new ComponentName(service.serviceInfo.packageName, service.serviceInfo.name));
-    boolean success = context.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+    boolean success = context.bindService(intent, serviceConnection, /* flag= */ 0);
     if (!success) {
       bindAttempts++;
       if (bindAttempts > MAX_BIND_ATTEMPTS) {
@@ -629,12 +670,12 @@ public abstract class RemoteFeature {
   }
 
   /** Callback for a query response. */
-  interface QueryCallback {
+  public interface QueryCallback {
     /** Invoked with a successful response to a query. */
-    default void onSuccess(byte[] response) {}
+    default void onSuccess(@Nullable byte[] response) {}
 
     /** Invoked with an unsuccessful response to a query. */
-    default void onError(byte[] response) {}
+    default void onError(@Nullable byte[] response) {}
 
     /**
      * Invoked when a query failed to send to the device. {@code isTransient} is set to {@code true}
@@ -642,5 +683,14 @@ public abstract class RemoteFeature {
      * permanent.
      */
     default void onQueryFailedToSend(boolean isTransient) {}
+  }
+
+  /** Callback for a query for the name of the companion application on the connected device. */
+  public interface AppNameCallback {
+    /** Invoked with the name of the companion application on the connected device. */
+    default void onNameReceived(@NonNull String appName) {}
+
+    /** Invoked when the name failed to be retrieved from the connected device. */
+    default void onError() {}
   }
 }

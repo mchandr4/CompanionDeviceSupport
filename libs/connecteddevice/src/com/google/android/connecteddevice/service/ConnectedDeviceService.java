@@ -39,6 +39,7 @@ import com.google.android.connecteddevice.logging.LoggingFeature;
 import com.google.android.connecteddevice.logging.LoggingManager;
 import com.google.android.connecteddevice.oob.BluetoothRfcommChannel;
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage;
+import com.google.android.connecteddevice.system.SystemFeature;
 import com.google.android.connecteddevice.transport.ble.BlePeripheralManager;
 import com.google.android.connecteddevice.transport.ble.OnDeviceBlePeripheralManager;
 import com.google.android.connecteddevice.transport.proxy.ProxyBlePeripheralManager;
@@ -193,7 +194,7 @@ public final class ConnectedDeviceService extends TrunkService {
     loggingManager = new LoggingManager(this);
     connectedDeviceManagerBinder =
         new ConnectedDeviceManagerBinder(connectedDeviceManager, loggingManager);
-    populateFeatures();
+    populateFeatures(storage);
     associationBinder = new AssociationBinder(connectedDeviceManager);
     registerReceiver(
         bleBroadcastReceiver, new IntentFilter(BluetoothAdapter.ACTION_BLE_STATE_CHANGED));
@@ -202,7 +203,7 @@ public final class ConnectedDeviceService extends TrunkService {
     }
   }
 
-  private void populateFeatures() {
+  private void populateFeatures(ConnectedDeviceStorage storage) {
     // TODO(b/187523735) Remove listener from here and place in LoggingManager
     Logger logger = Logger.getLogger();
     logd(TAG, "Registering listener for logger.");
@@ -211,6 +212,7 @@ public final class ConnectedDeviceService extends TrunkService {
         () -> loggingManager.prepareLocalLogRecords(logger.getLoggerId(), logger.toByteArray()),
         Executors.newSingleThreadExecutor());
     localFeatures.add(new LoggingFeature(this, connectedDeviceManagerBinder, loggingManager));
+    localFeatures.add(new SystemFeature(this, connectedDeviceManagerBinder, storage));
   }
 
   private CarBluetoothManager createSppManager(

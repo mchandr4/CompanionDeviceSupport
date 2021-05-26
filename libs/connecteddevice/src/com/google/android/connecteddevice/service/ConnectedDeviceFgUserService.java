@@ -105,7 +105,7 @@ public final class ConnectedDeviceFgUserService extends TrunkService {
     Intent intent = new Intent();
     intent.setComponent(new ComponentName(packageName, FULLY_QUALIFIED_SERVICE_NAME));
     intent.setAction(RemoteFeature.ACTION_BIND_REMOTE_FEATURE);
-    boolean success = bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+    boolean success = bindService(intent, serviceConnection, /* flags= */ 0);
     if (success) {
       return;
     }

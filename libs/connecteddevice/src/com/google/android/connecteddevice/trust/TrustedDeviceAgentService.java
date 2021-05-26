@@ -21,8 +21,8 @@ import static com.google.android.connecteddevice.util.SafeLog.loge;
 import static com.google.android.connecteddevice.util.SafeLog.logw;
 
 import android.app.ActivityManager;
+import android.app.KeyguardManager;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Handler;
@@ -63,7 +63,7 @@ public class TrustedDeviceAgentService extends TrustAgentService {
     logd(TAG, "Starting trust agent service.");
     TrustedDeviceEventLog.onTrustAgentStarted();
     Intent intent = new Intent(this, TrustedDeviceManagerService.class);
-    bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+    bindService(intent, serviceConnection, /* flags= */ 0);
     retryThread = new HandlerThread(RETRY_HANDLER_THREAD_NAME);
     retryThread.start();
     retryHandler = new Handler(retryThread.getLooper());
@@ -72,8 +72,13 @@ public class TrustedDeviceAgentService extends TrustAgentService {
   @Override
   public void onDestroy() {
     logd(TAG, "Destroying trust agent service.");
+    KeyguardManager keyguardManager = getSystemService(KeyguardManager.class);
+    boolean isDeviceSecure = keyguardManager != null && keyguardManager.isDeviceSecure();
+    logd(TAG, "Device secure status: " + isDeviceSecure + ".");
     try {
-      trustedDeviceManager.clearTrustedDeviceAgentDelegate(trustedDeviceAgentDelegate);
+      trustedDeviceManager.clearTrustedDeviceAgentDelegate(
+          trustedDeviceAgentDelegate,
+          isDeviceSecure);
     } catch (RemoteException e) {
       loge(TAG, "Error while disconnecting from TrustedDeviceManager.");
     }
@@ -87,6 +92,10 @@ public class TrustedDeviceAgentService extends TrustAgentService {
   @Override
   public void onEscrowTokenAdded(byte[] token, long handle, UserHandle user) {
     super.onEscrowTokenAdded(token, handle, user);
+    if (trustedDeviceManager == null) {
+      loge(TAG, "Manager is null when escrow token was added. Ignoring.");
+      return;
+    }
     try {
       trustedDeviceManager.onEscrowTokenAdded(user.getIdentifier(), handle);
     } catch (RemoteException e) {
@@ -97,6 +106,10 @@ public class TrustedDeviceAgentService extends TrustAgentService {
   @Override
   public void onEscrowTokenStateReceived(long handle, int tokenState) {
     super.onEscrowTokenStateReceived(handle, tokenState);
+    if (trustedDeviceManager == null) {
+      loge(TAG, "Manager was null when escrow token was received. Ignoring.");
+      return;
+    }
     if (tokenState == TrustAgentService.TOKEN_STATE_ACTIVE) {
       try {
         trustedDeviceManager.onEscrowTokenActivated(ActivityManager.getCurrentUser(), handle);
@@ -110,6 +123,10 @@ public class TrustedDeviceAgentService extends TrustAgentService {
   public void onDeviceUnlocked() {
     super.onDeviceUnlocked();
     TrustedDeviceEventLog.onUserUnlocked();
+    if (trustedDeviceManager == null) {
+      loge(TAG, "Manager was null when device was unlocked. Ignoring.");
+      return;
+    }
     try {
       trustedDeviceManager.onUserUnlocked();
     } catch (RemoteException e) {

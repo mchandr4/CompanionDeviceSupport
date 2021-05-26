@@ -19,6 +19,8 @@ package com.google.android.connecteddevice.storage;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.util.concurrent.MoreExecutors.directExecutor;
 import static org.junit.Assert.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import androidx.room.Room;
 import android.content.Context;
@@ -27,6 +29,7 @@ import android.util.Pair;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.google.android.connecteddevice.model.AssociatedDevice;
+import com.google.android.connecteddevice.storage.ConnectedDeviceStorage.AssociatedDeviceCallback;
 import com.google.android.connecteddevice.util.ByteUtils;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
@@ -36,6 +39,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 
 @RunWith(AndroidJUnit4.class)
 public final class ConnectedDeviceStorageTest {
@@ -141,6 +145,156 @@ public final class ConnectedDeviceStorageTest {
         () ->
             connectedDeviceStorage.saveChallengeSecret(
                 UUID.randomUUID().toString(), invalidSecret));
+  }
+
+  @Test
+  public void setAssociatedDeviceName_setsNameIfNull() {
+    AssociatedDevice device =
+        new AssociatedDevice(
+            UUID.randomUUID().toString(),
+            "00:00:00:00:00:00",
+            /* deviceName= */ null,
+            /* isConnectionEnabled= */ true);
+    addAssociatedDevice(ACTIVE_USER_ID, device, ByteUtils.randomBytes(16));
+
+    String newName = "NewDeviceName";
+    connectedDeviceStorage.setAssociatedDeviceName(device.getDeviceId(), newName);
+    AssociatedDevice updatedDevice =
+        connectedDeviceStorage.getAssociatedDevice(device.getDeviceId());
+
+    assertThat(updatedDevice).isNotNull();
+    assertThat(updatedDevice.getDeviceName()).isEqualTo(newName);
+  }
+
+  @Test
+  public void setAssociatedDeviceName_doesNotModifyNameIfDeviceAlreadyHasAName() {
+    AssociatedDevice device =
+        new AssociatedDevice(
+            UUID.randomUUID().toString(),
+            "00:00:00:00:00:00",
+            "TestName",
+            /* isConnectionEnabled= */ true);
+    addAssociatedDevice(ACTIVE_USER_ID, device, ByteUtils.randomBytes(16));
+
+    connectedDeviceStorage.setAssociatedDeviceName(device.getDeviceId(), "NewDeviceName");
+    AssociatedDevice updatedDevice =
+        connectedDeviceStorage.getAssociatedDevice(device.getDeviceId());
+
+    assertThat(updatedDevice).isNotNull();
+    assertThat(updatedDevice.getDeviceName()).isEqualTo(device.getDeviceName());
+  }
+
+  @Test
+  public void setAssociatedDeviceName_doesNotModifyNameIfNewNameIsEmpty() {
+    AssociatedDevice device =
+        new AssociatedDevice(
+            UUID.randomUUID().toString(),
+            "00:00:00:00:00:00",
+            /* deviceName= */ null,
+            /* isConnectionEnabled= */ true);
+    addAssociatedDevice(ACTIVE_USER_ID, device, ByteUtils.randomBytes(16));
+
+    connectedDeviceStorage.setAssociatedDeviceName(device.getDeviceId(), "");
+    AssociatedDevice updatedDevice =
+        connectedDeviceStorage.getAssociatedDevice(device.getDeviceId());
+
+    assertThat(updatedDevice).isNotNull();
+    assertThat(updatedDevice.getDeviceName()).isNull();
+  }
+
+  @Test
+  public void setAssociatedDeviceName_issuesCallbackOnNameChange() {
+    AssociatedDeviceCallback callback = mock(AssociatedDeviceCallback.class);
+    connectedDeviceStorage.setAssociatedDeviceCallback(callback);
+    AssociatedDevice device =
+        new AssociatedDevice(
+            UUID.randomUUID().toString(),
+            "00:00:00:00:00:00",
+            /* deviceName= */ null,
+            /* isConnectionEnabled= */ true);
+    addAssociatedDevice(ACTIVE_USER_ID, device, ByteUtils.randomBytes(16));
+
+    String newName = "NewDeviceName";
+    connectedDeviceStorage.setAssociatedDeviceName(device.getDeviceId(), newName);
+    ArgumentCaptor<AssociatedDevice> captor = ArgumentCaptor.forClass(AssociatedDevice.class);
+    verify(callback).onAssociatedDeviceUpdated(captor.capture());
+    AssociatedDevice callbackDevice = captor.getValue();
+
+    assertThat(callbackDevice.getDeviceId()).isEqualTo(device.getDeviceId());
+    assertThat(callbackDevice.getDeviceAddress()).isEqualTo(device.getDeviceAddress());
+    assertThat(callbackDevice.isConnectionEnabled()).isEqualTo(device.isConnectionEnabled());
+    assertThat(callbackDevice.getDeviceName()).isEqualTo(newName);
+  }
+
+  @Test
+  public void setAssociatedDeviceName_doesNotThrowOnUnrecognizedDeviceId() {
+    connectedDeviceStorage.setAssociatedDeviceName(UUID.randomUUID().toString(), "name");
+  }
+
+  @Test
+  public void updateAssociatedDeviceName_updatesWithNewName() {
+    AssociatedDevice device =
+        new AssociatedDevice(
+            UUID.randomUUID().toString(),
+            "00:00:00:00:00:00",
+            "OldDeviceName",
+            /* isConnectionEnabled= */ true);
+    addAssociatedDevice(ACTIVE_USER_ID, device, ByteUtils.randomBytes(16));
+
+    String newName = "NewDeviceName";
+    connectedDeviceStorage.updateAssociatedDeviceName(device.getDeviceId(), newName);
+    AssociatedDevice updatedDevice =
+        connectedDeviceStorage.getAssociatedDevice(device.getDeviceId());
+
+    assertThat(updatedDevice).isNotNull();
+    assertThat(updatedDevice.getDeviceName()).isEqualTo(newName);
+  }
+
+  @Test
+  public void updateAssociatedDeviceName_doesNotUpdateNameIfNewNameIsEmpty() {
+    AssociatedDevice device =
+        new AssociatedDevice(
+            UUID.randomUUID().toString(),
+            "00:00:00:00:00:00",
+            "OldDeviceName",
+            /* isConnectionEnabled= */ true);
+    addAssociatedDevice(ACTIVE_USER_ID, device, ByteUtils.randomBytes(16));
+
+    connectedDeviceStorage.updateAssociatedDeviceName(device.getDeviceId(), "");
+    AssociatedDevice updatedDevice =
+        connectedDeviceStorage.getAssociatedDevice(device.getDeviceId());
+
+    assertThat(updatedDevice).isNotNull();
+    assertThat(updatedDevice.getDeviceName()).isEqualTo(device.getDeviceName());
+  }
+
+  @Test
+  public void updateAssociatedDeviceName_issuesCallbackOnNameChange() {
+    AssociatedDeviceCallback callback = mock(AssociatedDeviceCallback.class);
+    connectedDeviceStorage.setAssociatedDeviceCallback(callback);
+    AssociatedDevice device =
+        new AssociatedDevice(
+            UUID.randomUUID().toString(),
+            "00:00:00:00:00:00",
+            /* deviceName= */ null,
+            /* isConnectionEnabled= */ true);
+    addAssociatedDevice(ACTIVE_USER_ID, device, ByteUtils.randomBytes(16));
+
+    String newName = "NewDeviceName";
+    connectedDeviceStorage.updateAssociatedDeviceName(device.getDeviceId(), newName);
+    ArgumentCaptor<AssociatedDevice> captor = ArgumentCaptor.forClass(AssociatedDevice.class);
+    verify(callback).onAssociatedDeviceUpdated(captor.capture());
+    AssociatedDevice callbackDevice = captor.getValue();
+
+    assertThat(callbackDevice.getDeviceId()).isEqualTo(device.getDeviceId());
+    assertThat(callbackDevice.getDeviceAddress()).isEqualTo(device.getDeviceAddress());
+    assertThat(callbackDevice.isConnectionEnabled()).isEqualTo(device.isConnectionEnabled());
+    assertThat(callbackDevice.getDeviceName()).isEqualTo(newName);
+  }
+
+  @Test
+  public void updateAssociatedDeviceName_doesNotThrowOnUnrecognizedDeviceId() {
+    connectedDeviceStorage.updateAssociatedDeviceName(UUID.randomUUID().toString(), "name");
   }
 
   private AssociatedDevice addRandomAssociatedDevice(int userId) {
