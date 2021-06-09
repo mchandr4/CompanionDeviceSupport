@@ -71,8 +71,7 @@ public class NotificationMsgFeature extends RemoteFeature {
   @Override
   protected void onMessageReceived(ConnectedDevice device, byte[] message) {
     if (secureDeviceForActiveUser == null
-        && device.hasSecureChannel()
-        && device.isAssociatedWithActiveUser()) {
+        && device.hasSecureChannel()) {
       logw(
           TAG,
           "stored secure device is null, but message was received on a"

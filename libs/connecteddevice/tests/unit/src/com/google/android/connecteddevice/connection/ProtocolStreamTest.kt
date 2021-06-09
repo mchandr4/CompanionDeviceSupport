@@ -4,8 +4,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.companionprotos.DeviceMessageProto.Message
 import com.google.android.companionprotos.OperationProto.OperationType
 import com.google.android.companionprotos.PacketProto.Packet
-import com.google.android.connecteddevice.connection.ProtocolStream.DeviceDisconnectListener
 import com.google.android.connecteddevice.connection.ProtocolStream.MessageReceivedListener
+import com.google.android.connecteddevice.connection.ProtocolStream.ProtocolDisconnectListener
 import com.google.android.connecteddevice.model.DeviceMessage
 import com.google.android.connecteddevice.transport.ConnectionProtocol
 import com.google.android.connecteddevice.util.ByteUtils
@@ -82,10 +82,10 @@ class ProtocolStreamTest {
     argumentCaptor<ByteArray>().apply {
       verify(protocol).sendData(eq(PROTOCOL_ID), capture(), any())
       val packet = Packet.parseFrom(firstValue, ExtensionRegistryLite.getEmptyRegistry())
-      val sentMessage = Message.parseFrom(
-        packet.payload.toByteArray(),
-        ExtensionRegistryLite.getEmptyRegistry()
-      ).payload.toByteArray()
+      val sentMessage =
+        Message.parseFrom(packet.payload.toByteArray(), ExtensionRegistryLite.getEmptyRegistry())
+          .payload
+          .toByteArray()
       assertThat(message).isEqualTo(sentMessage)
     }
   }
@@ -107,11 +107,11 @@ class ProtocolStreamTest {
   }
 
   @Test
-  fun protocolDisconnect_invokesDeviceDisconnectListener() {
-    val listener: DeviceDisconnectListener = mock()
-    stream.deviceDisconnectListener = listener
+  fun protocolDisconnect_invokesProtocolDisconnectListener() {
+    val listener: ProtocolDisconnectListener = mock()
+    stream.protocolDisconnectListener = listener
     protocol.disconnectDevice(PROTOCOL_ID)
-    verify(listener).onDeviceDisconnected()
+    verify(listener).onProtocolDisconnected()
   }
 
   @Test
@@ -137,11 +137,9 @@ class ProtocolStreamTest {
     stream.messageReceivedListener = listener
     val message = ByteUtils.randomBytes(MAX_WRITE_SIZE / 2)
     val packets = createPackets(message)
-    packets.forEach {
-      protocol.receiveData(it.toByteArray())
-    }
+    packets.forEach { protocol.receiveData(it.toByteArray()) }
     val captor = argumentCaptor<DeviceMessage>()
-    verify(listener).onMessageReceived(captor.capture(), any())
+    verify(listener).onMessageReceived(captor.capture())
     assertThat(message).isEqualTo(captor.firstValue.message)
   }
 
@@ -151,11 +149,9 @@ class ProtocolStreamTest {
     stream.messageReceivedListener = listener
     val message = ByteUtils.randomBytes(MAX_WRITE_SIZE + 1)
     val packets = createPackets(message)
-    packets.forEach {
-      protocol.receiveData(it.toByteArray())
-    }
+    packets.forEach { protocol.receiveData(it.toByteArray()) }
     val captor = argumentCaptor<DeviceMessage>()
-    verify(listener).onMessageReceived(captor.capture(), any())
+    verify(listener).onMessageReceived(captor.capture())
     assertThat(message).isEqualTo(captor.firstValue.message)
   }
 
@@ -170,7 +166,7 @@ class ProtocolStreamTest {
     protocol.receiveData(longPackets.first().toByteArray())
     protocol.receiveData(shortPackets.first().toByteArray())
     val captor = argumentCaptor<DeviceMessage>()
-    verify(listener).onMessageReceived(captor.capture(), any())
+    verify(listener).onMessageReceived(captor.capture())
     assertThat(shortMessage).isEqualTo(captor.firstValue.message)
   }
 
@@ -181,11 +177,9 @@ class ProtocolStreamTest {
     val message = ByteUtils.randomBytes(MAX_WRITE_SIZE + 1)
     val packets = createPackets(message)
     protocol.receiveData(packets.first().toByteArray())
-    packets.forEach {
-      protocol.receiveData(it.toByteArray())
-    }
+    packets.forEach { protocol.receiveData(it.toByteArray()) }
     val captor = argumentCaptor<DeviceMessage>()
-    verify(listener).onMessageReceived(captor.capture(), any())
+    verify(listener).onMessageReceived(captor.capture())
     assertThat(message).isEqualTo(captor.firstValue.message)
   }
 
@@ -210,10 +204,11 @@ class ProtocolStreamTest {
 
   private fun createPackets(data: ByteArray): List<Packet> {
     return try {
-      val message = Message.newBuilder()
-        .setPayload(ByteString.copyFrom(data))
-        .setOperation(OperationType.CLIENT_MESSAGE)
-        .build()
+      val message =
+        Message.newBuilder()
+          .setPayload(ByteString.copyFrom(data))
+          .setOperation(OperationType.CLIENT_MESSAGE)
+          .build()
       PacketFactory.makePackets(
         message.toByteArray(),
         ThreadLocalRandom.current().nextInt(),
@@ -231,21 +226,17 @@ class ProtocolStreamTest {
       deviceCallbacks[PROTOCOL_ID]?.invoke { it.onDataReceived(PROTOCOL_ID, data) }
     }
 
-    override fun startAssociationDiscovery(name: String, callback: DiscoveryCallback) {
-    }
+    override fun startAssociationDiscovery(name: String, callback: DiscoveryCallback) {}
 
     override fun startConnectionDiscovery(
       id: UUID,
       challenge: ConnectChallenge,
       callback: DiscoveryCallback
-    ) {
-    }
+    ) {}
 
-    override fun stopAssociationDiscovery() {
-    }
+    override fun stopAssociationDiscovery() {}
 
-    override fun stopConnectionDiscovery(id: UUID) {
-    }
+    override fun stopConnectionDiscovery(id: UUID) {}
 
     override fun sendData(protocolId: String, data: ByteArray, callback: DataSendCallback?) {
       callback?.onDataSentSuccessfully()
@@ -255,8 +246,7 @@ class ProtocolStreamTest {
       deviceCallbacks[protocolId]?.invoke { it.onDeviceDisconnected(protocolId) }
     }
 
-    override fun reset() {
-    }
+    override fun reset() {}
 
     override fun getMaxWriteSize(protocolId: String): Int {
       return MAX_WRITE_SIZE
@@ -265,31 +255,25 @@ class ProtocolStreamTest {
 
   open class FailingSendProtocol : ConnectionProtocol() {
 
-    override fun startAssociationDiscovery(name: String, callback: DiscoveryCallback) {
-    }
+    override fun startAssociationDiscovery(name: String, callback: DiscoveryCallback) {}
 
     override fun startConnectionDiscovery(
       id: UUID,
       challenge: ConnectChallenge,
       callback: DiscoveryCallback
-    ) {
-    }
+    ) {}
 
-    override fun stopAssociationDiscovery() {
-    }
+    override fun stopAssociationDiscovery() {}
 
-    override fun stopConnectionDiscovery(id: UUID) {
-    }
+    override fun stopConnectionDiscovery(id: UUID) {}
 
     override fun sendData(protocolId: String, data: ByteArray, callback: DataSendCallback?) {
       callback?.onDataFailedToSend()
     }
 
-    override fun disconnectDevice(protocolId: String) {
-    }
+    override fun disconnectDevice(protocolId: String) {}
 
-    override fun reset() {
-    }
+    override fun reset() {}
 
     override fun getMaxWriteSize(protocolId: String): Int {
       return MAX_WRITE_SIZE

@@ -29,7 +29,7 @@ public class ConnectedDevice implements Parcelable {
 
   private final String deviceName;
 
-  private final boolean belongsToActiveUser;
+  private final boolean belongsToDriver;
 
   private final boolean hasSecureChannel;
 
@@ -38,17 +38,17 @@ public class ConnectedDevice implements Parcelable {
    *
    * @param deviceId Id of the connected device.
    * @param deviceName Name of the connected device. {@code null} if not known.
-   * @param belongsToActiveUser User associated with this device is currently in the foreground.
+   * @param belongsToDriver User associated with current driver's user profile.
    * @param hasSecureChannel {@code true} if a secure channel is available for this device.
    */
   public ConnectedDevice(
       @NonNull String deviceId,
       @Nullable String deviceName,
-      boolean belongsToActiveUser,
+      boolean belongsToDriver,
       boolean hasSecureChannel) {
     this.deviceId = deviceId;
     this.deviceName = deviceName;
-    this.belongsToActiveUser = belongsToActiveUser;
+    this.belongsToDriver = belongsToDriver;
     this.hasSecureChannel = hasSecureChannel;
   }
 
@@ -77,15 +77,26 @@ public class ConnectedDevice implements Parcelable {
   public void writeToParcel(Parcel dest, int flags) {
     dest.writeString(deviceId);
     dest.writeString(deviceName);
-    dest.writeBoolean(belongsToActiveUser);
+    dest.writeBoolean(belongsToDriver);
     dest.writeBoolean(hasSecureChannel);
   }
 
   /**
+   * @deprecated Use {@link #isAssociatedWithDriver()} instead.
+   *
    * Returns {@code true} if this device is associated with the user currently in the foreground.
    */
+  @Deprecated
   public boolean isAssociatedWithActiveUser() {
-    return belongsToActiveUser;
+    return belongsToDriver;
+  }
+
+  /**
+   * Returns {@code true} if this device is associated with the current driver's user profile,
+   * {@code false} otherwise.
+   */
+  public boolean isAssociatedWithDriver() {
+    return belongsToDriver;
   }
 
   /** Returns {@code true} if this device has a secure channel available. */

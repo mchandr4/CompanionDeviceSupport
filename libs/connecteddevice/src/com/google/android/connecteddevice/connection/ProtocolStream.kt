@@ -37,10 +37,9 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
- * Data stream for a specified [protocol] and its corresponding device identified with
- * [protocolId].
+ * Data stream for a specified [protocol] and its corresponding device identified with [protocolId].
  */
-class ProtocolStream(
+open class ProtocolStream(
   private val protocol: ConnectionProtocol,
   private val protocolId: String,
   callbackExecutor: Executor = Executors.newSingleThreadExecutor()
@@ -49,10 +48,10 @@ class ProtocolStream(
   var messageReceivedListener: MessageReceivedListener? = null
 
   /**
-   * Listener which will be notified when the underlying protocol is disconnected and this
-   * stream can be discarded.
+   * Listener which will be notified when the underlying protocol is disconnected and this stream
+   * can be discarded.
    */
-  var deviceDisconnectListener: DeviceDisconnectListener? = null
+  var protocolDisconnectListener: ProtocolDisconnectListener? = null
 
   private val packetQueue = ArrayDeque<Packet>()
   // messageId  -> accumulated bytes
@@ -73,7 +72,7 @@ class ProtocolStream(
       object : ConnectionProtocol.DeviceCallback {
         override fun onDeviceDisconnected(protocolId: String) {
           isConnected.set(false)
-          deviceDisconnectListener?.onDeviceDisconnected()
+          protocolDisconnectListener?.onProtocolDisconnected()
         }
 
         override fun onDeviceMaxDataSizeChanged(protocolId: String, maxBytes: Int) {
@@ -94,7 +93,8 @@ class ProtocolStream(
       return
     }
     protocol.sendData(
-      protocolId, data,
+      protocolId,
+      data,
       object : ConnectionProtocol.DataSendCallback {
         override fun onDataSentSuccessfully() {
           isSendingInProgress.set(false)
@@ -114,32 +114,32 @@ class ProtocolStream(
    *
    * Note: This method will handle the chunking of messages based on the max write size.
    */
-  fun sendMessage(
-    deviceMessage: DeviceMessage,
-  ) {
+  open fun sendMessage(deviceMessage: DeviceMessage) {
     if (!isConnected.get()) {
       logw(TAG, "Unable to send message to disconnected device.")
       return
     }
-    val builder = DeviceMessageProto.Message.newBuilder()
-      .setOperation(
-        OperationType.forNumber(deviceMessage.operationType.value)
-          ?: OperationType.OPERATION_TYPE_UNKNOWN
-      )
-      .setIsPayloadEncrypted(deviceMessage.isMessageEncrypted)
-      .setPayload(ByteString.copyFrom(deviceMessage.message))
-      .setOriginalSize(deviceMessage.originalMessageSize)
+    val builder =
+      DeviceMessageProto.Message.newBuilder()
+        .setOperation(
+          OperationType.forNumber(deviceMessage.operationType.value)
+            ?: OperationType.OPERATION_TYPE_UNKNOWN
+        )
+        .setIsPayloadEncrypted(deviceMessage.isMessageEncrypted)
+        .setPayload(ByteString.copyFrom(deviceMessage.message))
+        .setOriginalSize(deviceMessage.originalMessageSize)
     deviceMessage.recipient?.let {
       builder.recipient = ByteString.copyFrom(ByteUtils.uuidToBytes(it))
     }
     val message = builder.build()
     val rawBytes = message.toByteArray()
-    val packets = try {
-      PacketFactory.makePackets(rawBytes, messageIdGenerator.next(), maxWriteSize)
-    } catch (e: PacketFactoryException) {
-      loge(TAG, "Error while creating message packets.", e)
-      return
-    }
+    val packets =
+      try {
+        PacketFactory.makePackets(rawBytes, messageIdGenerator.next(), maxWriteSize)
+      } catch (e: PacketFactoryException) {
+        loge(TAG, "Error while creating message packets.", e)
+        return
+      }
     packetQueue.addAll(packets)
     writeNextMessageInQueue()
   }
@@ -162,17 +162,18 @@ class ProtocolStream(
     send(packet.toByteArray())
   }
 
-  /** Process incoming data from stream.  */
+  /** Process incoming data from stream. */
   @Synchronized // Guarantee order for byte streams
   private fun onDataReceived(data: ByteArray) {
     logd(TAG, "Received ${data.size} bytes.")
-    val packet = try {
-      Packet.parseFrom(data, ExtensionRegistryLite.getEmptyRegistry())
-    } catch (e: IOException) {
-      loge(TAG, "Can not parse packet from client. Disconnecting.", e)
-      protocol.disconnectDevice(protocolId)
-      return
-    }
+    val packet =
+      try {
+        Packet.parseFrom(data, ExtensionRegistryLite.getEmptyRegistry())
+      } catch (e: IOException) {
+        loge(TAG, "Can not parse packet from client. Disconnecting.", e)
+        protocol.disconnectDevice(protocolId)
+        return
+      }
     processPacket(packet)
   }
 
@@ -220,10 +221,7 @@ class ProtocolStream(
     }
 
     if (packetNumber != expectedPacket) {
-      loge(
-        TAG,
-        "Received unexpected packet $packetNumber for message $messageId. Disconnecting."
-      )
+      loge(TAG, "Received unexpected packet $packetNumber for message $messageId. Disconnecting.")
       protocol.disconnectDevice(protocolId)
       return false
     }
@@ -234,17 +232,15 @@ class ProtocolStream(
 
   private fun receiveMessage(messageId: Int, messageBytes: ByteArray) {
     onMessageFullyReceived(messageId, messageBytes.size)
-    logd(
-      TAG,
-      "Received complete device message $messageId of ${messageBytes.size} bytes."
-    )
-    val message = try {
-      DeviceMessageProto.Message.parseFrom(messageBytes, ExtensionRegistryLite.getEmptyRegistry())
-    } catch (e: IOException) {
-      loge(TAG, "Cannot parse device message from client. Disconnecting.", e)
-      protocol.disconnectDevice(protocolId)
-      return
-    }
+    logd(TAG, "Received complete device message $messageId of ${messageBytes.size} bytes.")
+    val message =
+      try {
+        DeviceMessageProto.Message.parseFrom(messageBytes, ExtensionRegistryLite.getEmptyRegistry())
+      } catch (e: IOException) {
+        loge(TAG, "Cannot parse device message from client. Disconnecting.", e)
+        protocol.disconnectDevice(protocolId)
+        return
+      }
     val deviceMessage =
       DeviceMessage(
         ByteUtils.bytesToUUID(message.recipient.toByteArray()),
@@ -252,10 +248,10 @@ class ProtocolStream(
         DeviceMessage.OperationType.fromValue(message.operation.number),
         message.payload.toByteArray()
       )
-    messageReceivedListener?.onMessageReceived(deviceMessage, message.operation)
+    messageReceivedListener?.onMessageReceived(deviceMessage)
   }
 
-  /** A generator of unique IDs for messages.  */
+  /** A generator of unique IDs for messages. */
   private class MessageIdGenerator {
     private val messageId = AtomicInteger(0)
     fun next(): Int {
@@ -271,15 +267,14 @@ class ProtocolStream(
      * Called when a complete message is received from the client.
      *
      * @param deviceMessage The message received from the client.
-     * @param operationType The [OperationType] of the received message.
      */
-    fun onMessageReceived(deviceMessage: DeviceMessage, operationType: OperationType)
+    fun onMessageReceived(deviceMessage: DeviceMessage)
   }
 
-  /** Listener to be invoked when the device disconnects and the stream should be discarded. */
-  interface DeviceDisconnectListener {
-    /** Called when the underlying device has disconnected from the supplied protocol. */
-    fun onDeviceDisconnected()
+  /** Listener to be invoked when the protocol disconnects and the stream should be discarded. */
+  interface ProtocolDisconnectListener {
+    /** Called when the underlying protocol has disconnected from the remote device. */
+    fun onProtocolDisconnected()
   }
 
   companion object {

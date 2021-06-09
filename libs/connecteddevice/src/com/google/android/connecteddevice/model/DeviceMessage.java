@@ -105,7 +105,7 @@ public class DeviceMessage implements Parcelable {
   }
 
   /** Returns the message payload. */
-  @Nullable
+  @NonNull
   public byte[] getMessage() {
     return message;
   }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,29 +18,44 @@ package com.google.android.connecteddevice.api;
 
 import android.os.ParcelUuid;
 
+import com.google.android.connecteddevice.api.IAssociationCallback;
 import com.google.android.connecteddevice.api.IConnectionCallback;
 import com.google.android.connecteddevice.api.IDeviceAssociationCallback;
 import com.google.android.connecteddevice.api.IDeviceCallback;
+import com.google.android.connecteddevice.api.IOnAssociatedDevicesRetrievedListener;
 import com.google.android.connecteddevice.api.IOnLogRequestedListener;
 import com.google.android.connecteddevice.model.ConnectedDevice;
 import com.google.android.connecteddevice.model.DeviceMessage;
 
-/** Manager of devices connected to the car. */
-interface IConnectedDeviceManager {
+/** Coordinator between features and connected devices. */
+interface IFeatureCoordinator {
 
     /** Returns {@link List<ConnectedDevice>} of devices currently connected. */
-    List<ConnectedDevice> getActiveUserConnectedDevices();
+    List<ConnectedDevice> getConnectedDevicesForDriver();
 
     /**
-     * Register a callback for manager triggered connection events for only the currently active
-     * user's devices.
+     * Register a callback for connection events for only the driver's devices.
      *
      * @param callback {@link IConnectionCallback} to register.
      */
-    void registerActiveUserConnectionCallback(in IConnectionCallback callback);
+    void registerDriverConnectionCallback(in IConnectionCallback callback);
 
     /**
-     * Unregister a connection callback from manager.
+     * Register a callback for connection events for only passengers' devices.
+     *
+     * @param callback {@link IConnectionCallback} to register.
+     */
+    void registerPassengerConnectionCallback(in IConnectionCallback callback);
+
+    /**
+     * Register a callback for connection events for all devices.
+     *
+     * @param callback {@link IConnectionCallback} to register.
+     */
+    void registerAllConnectionCallback(in IConnectionCallback callback);
+
+    /**
+     * Unregister a connection callback.
      *
      * @param callback {@link IConnectionCallback} to unregister.
      */
@@ -76,14 +91,14 @@ interface IConnectedDeviceManager {
 
 
     /**
-     * Register a callback for associated device related events.
+     * Register a callback for associated devic related events.
      *
      * @param callback {@link IDeviceAssociationCallback} to register.
      */
     void registerDeviceAssociationCallback(in IDeviceAssociationCallback callback);
 
     /**
-     * Unregister a device association callback from manager.
+     * Unregister a device association callback.
      *
      * @param callback {@link IDeviceAssociationCallback} to unregister.
      */
@@ -111,4 +126,27 @@ interface IConnectedDeviceManager {
      * @param logRecords to process.
      */
     void processLogRecords(in int loggerId, in byte[] logRecords);
+
+    /** Starts the association with a new device. */
+    void startAssociation(in IAssociationCallback callback);
+
+    /**
+     * Retrieve the devices associated with the active user from the database.
+     *
+     * @param listener {@link IOnAssociatedDevicesRetrievedListener} that will
+     * be notified when the associated devices are retrieved.
+     */
+    void retrieveActiveUserAssociatedDevices(in IOnAssociatedDevicesRetrievedListener listener);
+
+    /** Confirm the paring code. */
+    void acceptVerification();
+
+    /** Remove the associated device of the given identifier for the active user. */
+    void removeAssociatedDevice(in String deviceId);
+
+    /** Enable connection on the associated device with the given identifier. */
+    void enableAssociatedDeviceConnection(in String deviceId);
+
+    /** Disable connection on the associated device with the given identifier. */
+    void disableAssociatedDeviceConnection(in String deviceId);
 }

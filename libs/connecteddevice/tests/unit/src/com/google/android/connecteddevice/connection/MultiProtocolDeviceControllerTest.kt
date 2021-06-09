@@ -5,6 +5,7 @@ import android.content.Context
 import android.util.Base64
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.google.android.connecteddevice.connection.DeviceController.Callback
 import com.google.android.connecteddevice.model.DeviceMessage
 import com.google.android.connecteddevice.model.DeviceMessage.OperationType
 import com.google.android.connecteddevice.storage.ConnectedDeviceDatabase
@@ -31,14 +32,14 @@ private const val DEVICE_NAME = "TestDeviceName"
 private const val REMOTE_DEVICE_NAME = "TestRemoteDeviceName"
 
 @RunWith(AndroidJUnit4::class)
-class DeviceControllerTest {
+class MultiProtocolDeviceControllerTest {
   private val context = ApplicationProvider.getApplicationContext<Context>()
   private val testConnectionProtocol: TestConnectionProtocol = spy(TestConnectionProtocol())
-  private val mockCallback: DeviceController.Callback = mock()
+  private val mockCallback: Callback = mock()
   private val mockAssociationCallback: AssociationCallback = mock()
   private val protocols = setOf(testConnectionProtocol)
-  private lateinit var deviceController: DeviceController
-  private lateinit var testConnectedDevice: DeviceController.ConnectedRemoteDevice
+  private lateinit var deviceController: MultiProtocolDeviceController
+  private lateinit var testConnectedDevice: MultiProtocolDeviceController.ConnectedRemoteDevice
   private val testUuid = UUID.randomUUID()
   private val testRecipientUuid = UUID.randomUUID()
   private val testProtocolId = UUID.randomUUID()
@@ -66,9 +67,9 @@ class DeviceControllerTest {
     val storage = spy(ConnectedDeviceStorage(context, Base64CryptoHelper(), database))
     whenever(storage.hashWithChallengeSecret(any(), any())).thenReturn(testChallenge)
     spyStorage = storage
-    deviceController = DeviceController(protocols, storage)
+    deviceController = MultiProtocolDeviceController(protocols, storage)
     deviceController.registerCallback(mockCallback, directExecutor())
-    testConnectedDevice = DeviceController.ConnectedRemoteDevice()
+    testConnectedDevice = MultiProtocolDeviceController.ConnectedRemoteDevice()
     deviceController.callbackExecutor = directExecutor()
   }
 
@@ -99,8 +100,8 @@ class DeviceControllerTest {
   }
 
   @Test
-  fun stop_invokeConnectionProtocolReset() {
-    deviceController.stop()
+  fun reset_invokeConnectionProtocolReset() {
+    deviceController.reset()
     verify(testConnectionProtocol).reset()
   }
 
