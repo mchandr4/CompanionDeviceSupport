@@ -20,7 +20,7 @@
   <string name="default_device_name">Saistītā ierīce</string>
   <string name="add_device_title">Pievienot saistīto ierīci</string>
   <string name="add_associated_device_title">Palīgierīces pievienošana</string>
-  <string name="add_associated_device_instruction">Varat izmantot savu tālruni kā palīgierīci braukšanas iespēju pārvaldībai.</string>
+  <string name="add_associated_device_subtitle">Varat izmantot savu tālruni kā palīgierīci braukšanas iespēju pārvaldībai.</string>
   <string name="associated_device_install_app">Jūsu tālrunī ir jābūt instalētai <b>palīglietotnei</b>.</string>
   <string name="associated_device_pairing_code_title">Koda apstiprināšana tālrunī</string>
   <string name="associated_device_pairing_message">Apstipriniet, ka šis kods atbilst jūsu tālrunī redzamajam kodam.</string>

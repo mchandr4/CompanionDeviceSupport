@@ -20,7 +20,7 @@
   <string name="default_device_name">Dispositivo asociado</string>
   <string name="add_device_title">Engadir dispositivo asociado</string>
   <string name="add_associated_device_title">Conectar un dispositivo complementario</string>
-  <string name="add_associated_device_instruction">Podes usar o teléfono como un complemento que che axude a xestionar a experiencia de condución</string>
+  <string name="add_associated_device_subtitle">Podes usar o teléfono como un complemento que che axude a xestionar a experiencia de condución</string>
   <string name="associated_device_install_app">Asegúrate de ter a <b>aplicación complementaria</b> no teléfono</string>
   <string name="associated_device_pairing_code_title">Confirmar o código do teléfono</string>
   <string name="associated_device_pairing_message">Confirma que este código coincide co que che aparece no teléfono</string>

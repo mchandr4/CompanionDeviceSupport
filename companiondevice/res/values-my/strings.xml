@@ -20,7 +20,7 @@
   <string name="default_device_name">တွဲဖက်စက်ပစ္စည်း</string>
   <string name="add_device_title">တွဲဖက်စက်ပစ္စည်းကို ထည့်ရန်</string>
   <string name="add_associated_device_title">တွဲဖက်စက်ပစ္စည်းကို ချိတ်ဆက်ခြင်း</string>
-  <string name="add_associated_device_instruction">ယာဉ်မောင်းခြင်းကို စီမံရာတွင် အထောက်အကူဖြစ်စေရန် သင့်ဖုန်းကို တွဲဖက်စက်ပစ္စည်းအဖြစ် သုံးနိုင်သည်</string>
+  <string name="add_associated_device_subtitle">ယာဉ်မောင်းခြင်းကို စီမံရာတွင် အထောက်အကူဖြစ်စေရန် သင့်ဖုန်းကို တွဲဖက်စက်ပစ္စည်းအဖြစ် သုံးနိုင်သည်</string>
   <string name="associated_device_install_app">သင့်ဖုန်းတွင် <b>တွဲဖက်အက်ပ်</b> ကို ထည့်သွင်းထားကြောင်း သေချာပါစေ</string>
   <string name="associated_device_pairing_code_title">ဖုန်းတွင် ကုဒ်ကိုအတည်ပြုပါ</string>
   <string name="associated_device_pairing_message">ဤကုဒ်သည် သင့်ဖုန်းတွင်ပြသည့်ကုဒ်နှင့် တူညီကြောင်း အတည်ပြုပါ</string>

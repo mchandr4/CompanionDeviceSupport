@@ -20,7 +20,7 @@
   <string name="default_device_name">Pajisja shoqëruese</string>
   <string name="add_device_title">Shto një pajisje shoqëruese</string>
   <string name="add_associated_device_title">Lidh një pajisje shoqëruese</string>
-  <string name="add_associated_device_instruction">Mund ta përdorësh telefonin si pajisje shoqëruese për të të ndihmuar gjatë drejtimit të makinës</string>
+  <string name="add_associated_device_subtitle">Mund ta përdorësh telefonin si pajisje shoqëruese për të të ndihmuar gjatë drejtimit të makinës</string>
   <string name="associated_device_install_app">Sigurohu që të kesh të instaluar <b>aplikacionin Companion</b> në telefon</string>
   <string name="associated_device_pairing_code_title">Konfirmo kodin në telefonin tënd</string>
   <string name="associated_device_pairing_message">Konfirmo që ky përputhet me kodin e shfaqur në telefonin tënd</string>

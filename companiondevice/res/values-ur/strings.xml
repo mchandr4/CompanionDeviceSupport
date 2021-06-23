@@ -20,7 +20,7 @@
   <string name="default_device_name">وابستہ آلہ</string>
   <string name="add_device_title">وابستہ آلہ شامل کریں</string>
   <string name="add_associated_device_title">ساتھی آلہ منسلک کریں</string>
-  <string name="add_associated_device_instruction">ڈرائیونگ کے تجربہ کا نظم کرنے میں مدد کے ليے آپ اپنے فون کو ساتھی آلے کے بطور استعمال کر سکتے ہیں</string>
+  <string name="add_associated_device_subtitle">ڈرائیونگ کے تجربہ کا نظم کرنے میں مدد کے ليے آپ اپنے فون کو ساتھی آلے کے بطور استعمال کر سکتے ہیں</string>
   <string name="associated_device_install_app">یقینی بنائیں کہ آپ نے اپنے فون پر<b>ساتھی ایپ</b> کو انسٹال کیا ہے</string>
   <string name="associated_device_pairing_code_title">فون پر کوڈ کی تصدیق کریں</string>
   <string name="associated_device_pairing_message">تصدیق کریں کہ یہ آپ کے فون پر دکھائے گئے کوڈ سے مماثل ہے</string>

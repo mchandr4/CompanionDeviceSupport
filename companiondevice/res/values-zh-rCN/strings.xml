@@ -20,7 +20,7 @@
   <string name="default_device_name">关联的设备</string>
   <string name="add_device_title">添加关联的设备</string>
   <string name="add_associated_device_title">连接配套设备</string>
-  <string name="add_associated_device_instruction">您可以将手机作为配套设备使用，帮助您管理驾驶体验</string>
+  <string name="add_associated_device_subtitle">您可以将手机作为配套设备使用，帮助您管理驾驶体验</string>
   <string name="associated_device_install_app">确保您在手机上安装了<b>配套应用</b></string>
   <string name="associated_device_pairing_code_title">确认手机上的配对码</string>
   <string name="associated_device_pairing_message">确认此配对码与手机上显示的配对码一致</string>

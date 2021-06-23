@@ -20,7 +20,7 @@
   <string name="default_device_name">İlişkilendirilmiş Cihaz</string>
   <string name="add_device_title">İlişkilendirilmiş Cihaz Ekle</string>
   <string name="add_associated_device_title">Tamamlayıcı cihaz bağlayın</string>
-  <string name="add_associated_device_instruction">Sürüş deneyiminizi daha iyi yönetmek için telefonunuzu tamamlayıcı cihaz olarak kullanabilirsiniz</string>
+  <string name="add_associated_device_subtitle">Sürüş deneyiminizi daha iyi yönetmek için telefonunuzu tamamlayıcı cihaz olarak kullanabilirsiniz</string>
   <string name="associated_device_install_app">Telefonda <b>Tamamlayıcı Uygulamanın</b> yüklü olduğundan emin olun</string>
   <string name="associated_device_pairing_code_title">Kodu telefonda onaylayın</string>
   <string name="associated_device_pairing_message">Bunun telefonunuzda gösterilen kodla aynı olduğunu onaylayın</string>

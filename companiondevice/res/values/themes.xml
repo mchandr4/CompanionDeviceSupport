@@ -16,5 +16,52 @@
   -->
 
 <resources>
-    <style name="CompanionDeviceSupportTheme" parent="Theme.CarUi.WithToolbar" />
+    <!-- Default Car Ui theme. -->
+    <style name="Theme.CompanionDevice.Car.CarUi.WithToolbar" parent="Theme.CarUi.WithToolbar">
+        <item name="pageMarginHorizontal">@dimen/settings_page_margin_horizontal</item>
+        <item name="pageMarginVertical">@dimen/settings_page_margin_vertical</item>
+        <item name="contentMarginVertical">@dimen/settings_content_margin</item>
+
+        <item name="companionPrimaryIconSize">@dimen/settings_primary_icon_size</item>
+        <item name="companionSecondaryIconSize">@dimen/settings_secondary_icon_size</item>
+
+        <item name="companionColorAccent">@color/settings_color_accent</item>
+        <item name="companionColorPrimary">@color/settings_color_primary</item>
+        <item name="companionColorSecondary">@color/settings_color_secondary</item>
+
+        <item name="companionTitleTextSize">@dimen/settings_title_text_size</item>
+        <item name="companionSubtitleTextSize">@dimen/settings_subtitle_text_size</item>
+
+        <item name="companionDividerMargin">@dimen/settings_divider_margin</item>
+
+        <item name="companionListItemTextMarginStart">@dimen/settings_list_item_text_margin_start</item>
+        <item name="companionListItemTextNoIconMarginStart">@dimen/settings_list_item_text_no_icon_margin_start</item>
+        <item name="companionListItemTextMarginEnd">@dimen/settings_list_item_text_margin_end</item>
+        <item name="companionListItemMinHeight">@dimen/settings_list_item_min_height</item>
+    </style>
+
+    <!-- Car Setup Wizard theme. Only used when activities are launched from car setup wizard.  -->
+    <style name="Theme.CompanionDevice.Car.SetupWizard.NoActionBar" parent="Theme.Car.SetupWizard.NoActionBar.Accent">
+        <item name="pageMarginHorizontal">@dimen/suw_page_margin_horizontal</item>
+        <item name="pageMarginVertical">@dimen/suw_page_margin_vertical</item>
+        <item name="contentMarginVertical">@dimen/suw_content_margin</item>
+
+        <item name="companionPrimaryIconSize">@dimen/suw_primary_icon_size</item>
+        <item name="companionSecondaryIconSize">@dimen/suw_secondary_icon_size</item>
+
+        <item name="companionColorAccent">@color/suw_color_accent</item>
+        <item name="companionColorPrimary">@color/suw_color_primary</item>
+        <item name="companionColorSecondary">@color/suw_color_secondary</item>
+
+        <item name="companionTitleTextSize">@dimen/suw_title_text_size</item>
+        <item name="companionSubtitleTextSize">@dimen/suw_subtitle_text_size</item>
+
+        <item name="android:listDivider">@color/suw_color_divider</item>
+        <item name="companionDividerMargin">@dimen/suw_divider_margin</item>
+
+        <item name="companionListItemTextMarginStart">@dimen/suw_list_item_text_margin_start</item>
+        <item name="companionListItemTextNoIconMarginStart">@dimen/suw_list_item_text_no_icon_margin_start</item>
+        <item name="companionListItemTextMarginEnd">@dimen/suw_list_item_text_margin_end</item>
+        <item name="companionListItemMinHeight">@dimen/suw_list_item_min_height</item>
+    </style>
 </resources>

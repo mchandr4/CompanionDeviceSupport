@@ -20,7 +20,7 @@
   <string name="default_device_name">Zugehöriges Gerät</string>
   <string name="add_device_title">Zugehöriges Gerät hinzufügen</string>
   <string name="add_associated_device_title">Begleitgerät verbinden</string>
-  <string name="add_associated_device_instruction">Du kannst dein Smartphone als Begleitgerät verwenden und darauf die Fahreinstellungen konfigurieren</string>
+  <string name="add_associated_device_subtitle">Du kannst dein Smartphone als Begleitgerät verwenden und darauf die Fahreinstellungen konfigurieren</string>
   <string name="associated_device_install_app">Die <b>Companion App</b> muss auf dem Smartphone installiert sein</string>
   <string name="associated_device_pairing_code_title">Code auf Smartphone bestätigen</string>
   <string name="associated_device_pairing_message">Bestätige, dass dieser Code dem Code auf deinem Smartphone entspricht</string>

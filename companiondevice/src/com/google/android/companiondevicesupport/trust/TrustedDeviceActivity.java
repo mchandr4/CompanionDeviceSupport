@@ -89,8 +89,9 @@ public class TrustedDeviceActivity extends FragmentActivity {
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
+    setTheme(R.style.Theme_CompanionDevice_Car_CarUi_WithToolbar);
     super.onCreate(savedInstanceState);
-    setContentView(R.layout.base_activity);
+    setContentView(R.layout.settings_base_activity);
     observeViewModel();
 
     // ActivityResultLauncher has to be registered before the activity state reaches STARTED.

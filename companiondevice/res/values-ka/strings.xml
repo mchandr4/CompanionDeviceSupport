@@ -20,7 +20,7 @@
   <string name="default_device_name">დაკავშირებული მოწყ.</string>
   <string name="add_device_title">დაკავშირებული მოწყობილობის დამატება</string>
   <string name="add_associated_device_title">კომპანიონი მოწყობილობის დაკავშირება</string>
-  <string name="add_associated_device_instruction">ტელეფონი შეგიძლიათ გამოიყენოთ, როგორც კომპანიონი მოწყობილობა, საავტომობილო გამოცდილების სამართავად</string>
+  <string name="add_associated_device_subtitle">ტელეფონი შეგიძლიათ გამოიყენოთ, როგორც კომპანიონი მოწყობილობა, საავტომობილო გამოცდილების სამართავად</string>
   <string name="associated_device_install_app">დარწმუნდით, რომ <b>კომპანიონი აპი</b> ინსტალირებული გაქვთ ტელეფონზე</string>
   <string name="associated_device_pairing_code_title">დაადასტურეთ კოდი ტელეფონზე</string>
   <string name="associated_device_pairing_message">დაადასტურეთ, რომ ეს ემთხვევა თქვენს ტელეფონზე ნაჩვენებ კოდს</string>

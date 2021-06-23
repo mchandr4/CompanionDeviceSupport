@@ -20,7 +20,7 @@
   <string name="default_device_name">อุปกรณ์ที่เชื่อมโยง</string>
   <string name="add_device_title">เพิ่มอุปกรณ์ที่เชื่อมโยง</string>
   <string name="add_associated_device_title">เชื่อมต่ออุปกรณ์ที่ใช้ร่วมกัน</string>
-  <string name="add_associated_device_instruction">คุณใช้โทรศัพท์เป็นอุปกรณ์ที่ใช้ร่วมกันเพื่อช่วยจัดการประสบการณ์การขับขี่ได้</string>
+  <string name="add_associated_device_subtitle">คุณใช้โทรศัพท์เป็นอุปกรณ์ที่ใช้ร่วมกันเพื่อช่วยจัดการประสบการณ์การขับขี่ได้</string>
   <string name="associated_device_install_app">ตรวจสอบว่าคุณมี<b>แอปที่ใช้ร่วมกัน</b>ติดตั้งอยู่ในโทรศัพท์</string>
   <string name="associated_device_pairing_code_title">ยืนยันรหัสในโทรศัพท์</string>
   <string name="associated_device_pairing_message">ยืนยันว่ารหัสนี้ตรงกับรหัสที่แสดงในโทรศัพท์</string>

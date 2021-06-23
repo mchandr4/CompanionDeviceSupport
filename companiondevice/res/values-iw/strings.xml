@@ -20,7 +20,7 @@
   <string name="default_device_name">מכשיר משויך</string>
   <string name="add_device_title">הוספת מכשיר משויך</string>
   <string name="add_associated_device_title">חיבור המכשיר הנלווה</string>
-  <string name="add_associated_device_instruction">אפשר להשתמש בטלפון כמכשיר נלווה לעזרה בניהול חוויית הנהיגה</string>
+  <string name="add_associated_device_subtitle">אפשר להשתמש בטלפון כמכשיר נלווה לעזרה בניהול חוויית הנהיגה</string>
   <string name="associated_device_install_app">יש לוודא ש<b>האפליקציה הנלווית</b> מותקנת בטלפון</string>
   <string name="associated_device_pairing_code_title">צריך לאשר את הקוד בטלפון</string>
   <string name="associated_device_pairing_message">יש לאשר שזה מתאים לקוד שמופיע בטלפון שלך</string>

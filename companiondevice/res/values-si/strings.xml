@@ -20,7 +20,7 @@
   <string name="default_device_name">ආශ්‍රිත උපාංගය</string>
   <string name="add_device_title">ආශ්‍රිත උපාංගය එක් කරන්න</string>
   <string name="add_associated_device_title">මිත්‍ර උපාංගයක් සම්බන්ධ කරන්න</string>
-  <string name="add_associated_device_instruction">ඔබට ඔබේ ධාවන අත්දැකීම කළමනාකරණය කිරීමට උදවු කිරීමට ඔබේ දුරකථනය මිත්‍ර උපාංගයක් ලෙස භාවිත කළ හැකිය</string>
+  <string name="add_associated_device_subtitle">ඔබට ඔබේ ධාවන අත්දැකීම කළමනාකරණය කිරීමට උදවු කිරීමට ඔබේ දුරකථනය මිත්‍ර උපාංගයක් ලෙස භාවිත කළ හැකිය</string>
   <string name="associated_device_install_app">ඔබ ඔබේ දුරකථනයේ <b>මිත්‍ර යෙදුම</b> ස්ථාපනය කර ඇති බව සහතික කර ගන්න</string>
   <string name="associated_device_pairing_code_title">දුරකථනයේ කේතය තහවුරු කරන්න</string>
   <string name="associated_device_pairing_message">මෙය ඔබේ දුරකථනයේ පෙන්වනු ලබන කේතයට ගැළපෙන බව තහවුරු කරන්න</string>

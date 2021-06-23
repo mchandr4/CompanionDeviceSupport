@@ -20,7 +20,7 @@
   <string name="default_device_name">Verwante toestel</string>
   <string name="add_device_title">Voeg geassosieerde toestel by</string>
   <string name="add_associated_device_title">Koppel \'n metgeseltoestel</string>
-  <string name="add_associated_device_instruction">Jy kan jou foon as \'n metgeseltoestel gebruik om jou ryervaring te help bestuur</string>
+  <string name="add_associated_device_subtitle">Jy kan jou foon as \'n metgeseltoestel gebruik om jou ryervaring te help bestuur</string>
   <string name="associated_device_install_app">Maak seker dat <b>metgeselprogram</b> op jou foon geïnstalleer is</string>
   <string name="associated_device_pairing_code_title">Bevestig kode op foon</string>
   <string name="associated_device_pairing_message">Maak seker dat dit ooreenstem met die kode wat op jou foon gewys word</string>

@@ -20,7 +20,7 @@
   <string name="default_device_name">Erlazionatutako gailua</string>
   <string name="add_device_title">Gehitu erlazionatutako gailu bat</string>
   <string name="add_associated_device_title">Konektatu gailu osagarri bat</string>
-  <string name="add_associated_device_instruction">Telefonoa gailu osagarri gisa erabil dezakezu, gidatzeko modua kudeatzeko</string>
+  <string name="add_associated_device_subtitle">Telefonoa gailu osagarri gisa erabil dezakezu, gidatzeko modua kudeatzeko</string>
   <string name="associated_device_install_app">Ziurtatu <b>Companion App</b> daukazula telefonoan</string>
   <string name="associated_device_pairing_code_title">Berretsi telefonoko kodea</string>
   <string name="associated_device_pairing_message">Berretsi telefonoko kodea horrekin bat datorrela</string>

@@ -20,7 +20,7 @@
   <string name="default_device_name">Spojené zariadenie</string>
   <string name="add_device_title">Pridať spojené zariadenie</string>
   <string name="add_associated_device_title">Pripojenie sprievodného zariadenia</string>
-  <string name="add_associated_device_instruction">Svoj telefón môžete používať ako sprievodné zariadenie, ktoré vám bude asistovať pri jazde</string>
+  <string name="add_associated_device_subtitle">Svoj telefón môžete používať ako sprievodné zariadenie, ktoré vám bude asistovať pri jazde</string>
   <string name="associated_device_install_app">Skontrolujte, či máte v telefóne <b>sprievodnú aplikáciu</b></string>
   <string name="associated_device_pairing_code_title">Potvrďte kód v telefóne</string>
   <string name="associated_device_pairing_message">Potvrďte, že sa tento kód zhoduje s kódom v telefóne</string>

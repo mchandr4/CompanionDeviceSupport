@@ -20,7 +20,7 @@
   <string name="default_device_name">Холбоотой төхөөрөмж</string>
   <string name="add_device_title">Холбоотой төхөөрөмж нэмэх</string>
   <string name="add_associated_device_title">Дэмжигч төхөөрөмж холбох</string>
-  <string name="add_associated_device_instruction">Та жолоо барих туршлагаа удирдахад туслах дэмжигч төхөөрөмжөөр утсаа ашиглах боломжтой</string>
+  <string name="add_associated_device_subtitle">Та жолоо барих туршлагаа удирдахад туслах дэмжигч төхөөрөмжөөр утсаа ашиглах боломжтой</string>
   <string name="associated_device_install_app">Та утсан дээрээ <b>Дэмжигч апп</b>-ыг суулгасан эсэхээ шалгана уу</string>
   <string name="associated_device_pairing_code_title">Утсан дээрх кодыг баталгаажуулна уу</string>
   <string name="associated_device_pairing_message">Энэ нь таны утсан дээр харуулсан кодтой таарч байгаа эсэхийг баталгаажуулна уу</string>

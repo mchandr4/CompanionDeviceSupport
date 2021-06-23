@@ -20,7 +20,7 @@
   <string name="default_device_name">అనుబంధించబడిన పరికరం</string>
   <string name="add_device_title">అనుబంధించబడిన పరికరాన్ని జోడించు</string>
   <string name="add_associated_device_title">సహచర పరికరాన్ని కనెక్ట్ చేయండి</string>
-  <string name="add_associated_device_instruction">మీ డ్రైవింగ్ అనుభవాన్ని మేనేజ్ చేయడంలో సహాయపడటానికి మీ ఫోన్‌ను మీరు సహచర పరికరంగా ఉపయోగించవచ్చు</string>
+  <string name="add_associated_device_subtitle">మీ డ్రైవింగ్ అనుభవాన్ని మేనేజ్ చేయడంలో సహాయపడటానికి మీ ఫోన్‌ను మీరు సహచర పరికరంగా ఉపయోగించవచ్చు</string>
   <string name="associated_device_install_app">మీ ఫోన్‌లో <b>సహచర యాప్</b> ఇన్‌స్టాల్ అయి ఉందని నిర్ధారించుకోండి</string>
   <string name="associated_device_pairing_code_title">ఫోన్‌లో కోడ్‌ను నిర్ధారించండి</string>
   <string name="associated_device_pairing_message">ఇది మీ ఫోన్‌లో చూపించిన కోడ్‌తో మ్యాచ్ అవుతున్నట్లు నిర్ధారించండి</string>

@@ -20,7 +20,7 @@
   <string name="default_device_name">Kifaa Kinachounganishwa</string>
   <string name="add_device_title">Weka Kifaa Kinachounganishwa</string>
   <string name="add_associated_device_title">Unganisha kifaa kisaidizi</string>
-  <string name="add_associated_device_instruction">Unaweza kutumia simu yako kama kifaa kisaidizi ili kukusaidia kudhibiti hali yako ya kuendesha gari</string>
+  <string name="add_associated_device_subtitle">Unaweza kutumia simu yako kama kifaa kisaidizi ili kukusaidia kudhibiti hali yako ya kuendesha gari</string>
   <string name="associated_device_install_app">Hakikisha kuwa umesakinisha <b>Programu Saidizi</b> kwenye simu</string>
   <string name="associated_device_pairing_code_title">Thibitisha msimbo kwenye simu</string>
   <string name="associated_device_pairing_message">Thibitisha kuwa msimbo huu unalingana na msimbo unaoonyeshwa kwenye simu yako</string>

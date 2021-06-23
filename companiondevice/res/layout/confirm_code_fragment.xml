@@ -17,43 +17,37 @@
 
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_marginHorizontal="?attr/pageMarginHorizontal"
+    android:layout_marginVertical="?attr/pageMarginVertical"
     android:orientation="vertical"
     android:gravity="center_horizontal">
     <ImageView
-        android:layout_width="@dimen/icon_size"
-        android:layout_height="@dimen/icon_size"
-        android:layout_marginTop="@dimen/instruction_margin_top"
-        android:layout_marginStart="@dimen/content_margin"
-        android:layout_marginEnd="@dimen/content_margin"
-        android:src="@drawable/ic_smartphone"
-        style="@style/AssociationTopIcon"/>
+        android:layout_width="?attr/companionPrimaryIconSize"
+        android:layout_height="?attr/companionPrimaryIconSize"
+        android:src="@drawable/ic_smartphone_24dp"
+        style="@style/SettingsTopIconStyle"
+        tools:ignore="ContentDescription" />
     <TextView
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
-        android:layout_marginTop="@dimen/instruction_detail_margin_top"
-        android:layout_marginStart="@dimen/content_margin"
-        android:layout_marginEnd="@dimen/content_margin"
-        android:gravity="center"
+        android:layout_marginTop="?attr/contentMarginVertical"
         android:text="@string/associated_device_pairing_code_title"
-        android:textAppearance="@style/AssociationTitle"/>
+        android:textAppearance="@style/CompanionTitleTextStyle"/>
     <TextView
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
-        android:layout_marginTop="@dimen/instruction_detail_margin_top"
-        android:layout_marginStart="@dimen/content_margin"
-        android:layout_marginEnd="@dimen/content_margin"
+        android:layout_marginTop="?attr/contentMarginVertical"
         android:gravity="center"
         android:text="@string/associated_device_pairing_message"
-        android:textAppearance="@style/AssociationMessage"/>
+        android:textAppearance="@style/CompanionSubtitleTextStyle"/>
     <TextView
         android:id="@+id/pairing_code"
-        android:layout_height="@dimen/list_item_height"
+        android:layout_height="wrap_content"
         android:layout_width="wrap_content"
         android:layout_marginTop="@dimen/pairing_code_margin_top"
-        android:layout_marginStart="@dimen/content_margin"
-        android:layout_marginEnd="@dimen/content_margin"
         android:gravity="center"
-        android:textAppearance="@style/AssociationPairingCode"/>
+        android:textAppearance="@style/PairingCodeTextStyle"/>
 </LinearLayout>

@@ -20,7 +20,7 @@
   <string name="default_device_name">Perangkat Terkait</string>
   <string name="add_device_title">Tambahkan Perangkat Terkait</string>
   <string name="add_associated_device_title">Hubungkan perangkat pendamping</string>
-  <string name="add_associated_device_instruction">Gunakan ponsel sebagai perangkat pendamping untuk mengatur pengalaman berkendara</string>
+  <string name="add_associated_device_subtitle">Gunakan ponsel sebagai perangkat pendamping untuk mengatur pengalaman berkendara</string>
   <string name="associated_device_install_app">Pastikan <b>Aplikasi Pendamping</b> telah diinstal di ponsel Anda</string>
   <string name="associated_device_pairing_code_title">Konfirmasi kode di ponsel</string>
   <string name="associated_device_pairing_message">Konfirmasi bahwa kode ini sesuai dengan kode yang ditampilkan di ponsel</string>

@@ -263,7 +263,7 @@ public class ConnectedDeviceSppDelegateBinder extends IConnectedDeviceSppDelegat
 
   /** Listener for when a message has been received on an open connection. */
   public interface OnMessageReceivedListener {
-    void onMessageReceived(byte[] message);
+    void onMessageReceived(@NonNull byte[] message);
   }
 
   /** Listener for when the remote callback is set by the remote service. */

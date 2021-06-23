@@ -20,7 +20,7 @@
   <string name="default_device_name">আনুষঙ্গিক ডিভাইস</string>
   <string name="add_device_title">আনুষঙ্গিক ডিভাইস যোগ করুন</string>
   <string name="add_associated_device_title">একটি কম্প্যানিয়ন ডিভাইসের সাথে কানেক্ট করুন</string>
-  <string name="add_associated_device_instruction">ড্রাইভিংয়ের অভিজ্ঞতা ম্যানেজ করতে আপনার ফোনকে কম্প্যানিয়ন ডিভাইস হিসেবে ব্যবহার করতে পারেন</string>
+  <string name="add_associated_device_subtitle">ড্রাইভিংয়ের অভিজ্ঞতা ম্যানেজ করতে আপনার ফোনকে কম্প্যানিয়ন ডিভাইস হিসেবে ব্যবহার করতে পারেন</string>
   <string name="associated_device_install_app"><b>কম্প্যানিয়ন অ্যাপ</b> আপনার ফোনে ইনস্টল করা আছে কিনা দেখে নিন</string>
   <string name="associated_device_pairing_code_title">ফোনে কোড কনফার্ম করুন</string>
   <string name="associated_device_pairing_message">আপনার ফোনে দেখানো কোডের সাথে এটি ম্যাচ করছে কিনা তা কনফার্ম করুন</string>

@@ -20,7 +20,7 @@
   <string name="default_device_name">Nauugnay na Device</string>
   <string name="add_device_title">Magdagdag ng Nauugnay na Device</string>
   <string name="add_associated_device_title">Magkonekta ng kasamang device</string>
-  <string name="add_associated_device_instruction">Puwede mong gamitin ang iyong telepono bilang kasamang device para tumulong sa pagmamaneho mo</string>
+  <string name="add_associated_device_subtitle">Puwede mong gamitin ang iyong telepono bilang kasamang device para tumulong sa pagmamaneho mo</string>
   <string name="associated_device_install_app">Tiyaking may naka-install kang <b>Kasamang App</b> sa telepono mo</string>
   <string name="associated_device_pairing_code_title">Kumpirmahin ang code sa telepono</string>
   <string name="associated_device_pairing_message">Kumpirmahing tumutugma ito sa code na ipinapakita sa telepono mo</string>

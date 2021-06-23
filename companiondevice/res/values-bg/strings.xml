@@ -20,7 +20,7 @@
   <string name="default_device_name">Свързано устройство</string>
   <string name="add_device_title">Добавяне на свързано устройство</string>
   <string name="add_associated_device_title">Свързване на придружаващо устройство</string>
-  <string name="add_associated_device_instruction">Използвайте телефона си като придружаващо у-во, за да подобрите практическата си работа при шофиране</string>
+  <string name="add_associated_device_subtitle">Използвайте телефона си като придружаващо у-во, за да подобрите практическата си работа при шофиране</string>
   <string name="associated_device_install_app">Уверете се, че <b>придр. приложение</b> е инсталирано на телефона</string>
   <string name="associated_device_pairing_code_title">Потвърждаване на кода за сдвояване на телефона</string>
   <string name="associated_device_pairing_message">Потвърдете, че кодът съвпада с този, показан на телефона ви</string>

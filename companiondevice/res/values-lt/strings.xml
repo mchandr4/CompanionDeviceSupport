@@ -20,7 +20,7 @@
   <string name="default_device_name">Susietas įrenginys</string>
   <string name="add_device_title">Pridėti susietą įrenginį</string>
   <string name="add_associated_device_title">Papildomo įrenginio susiejimas</string>
-  <string name="add_associated_device_instruction">Savo telefoną galite naudoti kaip papildomą įrenginį funkcijoms vairuojant valdyti</string>
+  <string name="add_associated_device_subtitle">Savo telefoną galite naudoti kaip papildomą įrenginį funkcijoms vairuojant valdyti</string>
   <string name="associated_device_install_app">Įsitikinkite, kad telefone įdiegėte <b>papildomą programą</b></string>
   <string name="associated_device_pairing_code_title">Kodo patvirtinimas telefonu</string>
   <string name="associated_device_pairing_message">Patvirtinkite, kad kodas atitinka telefone rodomą kodą</string>

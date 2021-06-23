@@ -18,6 +18,7 @@ package com.google.android.connecteddevice.connection
 import androidx.annotation.VisibleForTesting
 import com.google.android.connecteddevice.connection.DeviceController.Callback
 import com.google.android.connecteddevice.model.DeviceMessage
+import com.google.android.connecteddevice.model.DeviceMessage.OperationType
 import com.google.android.connecteddevice.model.Errors
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage
 import com.google.android.connecteddevice.transport.ConnectionProtocol
@@ -29,6 +30,8 @@ import com.google.android.connecteddevice.util.SafeLog.logd
 import com.google.android.connecteddevice.util.SafeLog.loge
 import com.google.android.connecteddevice.util.SafeLog.logw
 import com.google.android.connecteddevice.util.ThreadSafeCallbacks
+import java.security.InvalidParameterException
+import java.util.Arrays
 import java.util.UUID
 import java.util.concurrent.CopyOnWriteArraySet
 import java.util.concurrent.Executor
@@ -49,13 +52,13 @@ import java.util.concurrent.Executors
  */
 class MultiProtocolDeviceController(
   private val protocols: Set<ConnectionProtocol>,
-  private val storage: ConnectedDeviceStorage,
+  private val storage: ConnectedDeviceStorage
 ) : DeviceController {
   internal val connectedDevices = CopyOnWriteArraySet<ConnectedRemoteDevice>()
 
-  @VisibleForTesting
-  internal var callbackExecutor: Executor = Executors.newSingleThreadExecutor()
+  @VisibleForTesting internal var callbackExecutor: Executor = Executors.newSingleThreadExecutor()
   private val callbacks = ThreadSafeCallbacks<Callback>()
+  private var associationPendingDevice: ConnectedRemoteDevice? = null
 
   override fun reset() {
     for (protocol in protocols) {
@@ -65,20 +68,21 @@ class MultiProtocolDeviceController(
 
   override fun initiateConnectionToDevice(deviceId: UUID) {
     logd(TAG, "Start listening for device with id: $deviceId")
-    // Generate {challenge, concatencated challenge to advertise}.
+    // Generate {challenge, concatenated challenge to advertise}.
     val challenge = generateChallenge(deviceId)
     if (challenge == null) {
       loge(TAG, "Unable to create connect challenge. Aborting connection.")
       return
     }
     for (protocol in protocols) {
-      val discoveryCallback = generateDiscoveryCallback(
-        associationCallback = null,
-        deviceId,
-        nameForAssociation = null,
-        protocol,
-        challenge.challenge
-      )
+      val discoveryCallback =
+        generateDiscoveryCallback(
+          associationCallback = null,
+          deviceId,
+          nameForAssociation = null,
+          protocol,
+          challenge.challenge
+        )
       protocol.startConnectionDiscovery(deviceId, challenge, discoveryCallback)
     }
   }
@@ -86,23 +90,24 @@ class MultiProtocolDeviceController(
   override fun startAssociation(nameForAssociation: String, callback: AssociationCallback) {
     logd(TAG, "Start association with name $nameForAssociation")
     for (protocol in protocols) {
-      val discoveryCallback = generateDiscoveryCallback(
-        callback,
-        deviceId = null,
-        nameForAssociation,
-        protocol,
-        challenge = null
-      )
+      val discoveryCallback =
+        generateDiscoveryCallback(
+          callback,
+          deviceId = null,
+          nameForAssociation,
+          protocol,
+          challenge = null
+        )
       protocol.startAssociationDiscovery(nameForAssociation, discoveryCallback)
     }
   }
 
-  override fun notifyOutOfBandAccepted(deviceId: UUID) {
-    if (getConnectedDevice(deviceId) == null) {
+  override fun notifyVerificationCodeAccepted() {
+    if (associationPendingDevice == null) {
       loge(TAG, "Null connected device found when out-of-band confirmation received.")
       return
     }
-    val secureChannel = getConnectedDevice(deviceId)?.secureChannel
+    val secureChannel = associationPendingDevice?.secureChannel
     if (secureChannel == null) {
       loge(
         TAG,
@@ -111,11 +116,17 @@ class MultiProtocolDeviceController(
       )
       return
     }
-    if (secureChannel is AssociationSecureChannel) {
-      secureChannel.notifyOutOfBandAccepted()
-      return
-    }
-    loge(TAG, "Notified out of band accepted during a non-association process.")
+    secureChannel.notifyVerificationCodeAccepted()
+    val uniqueId = storage.getUniqueId()
+    logd(TAG, "Sending car's device id of $uniqueId to device.")
+    val deviceMessage =
+      DeviceMessage(
+        /* recipient= */ null,
+        true,
+        OperationType.CLIENT_MESSAGE,
+        ByteUtils.uuidToBytes(uniqueId)
+      )
+    secureChannel.sendClientMessage(deviceMessage)
   }
 
   /**
@@ -140,7 +151,7 @@ class MultiProtocolDeviceController(
       logw(TAG, "Attempted to send message to disconnected device $deviceId. Ignored.")
       return false
     }
-    logd(TAG, "Writing ${message.message?.size} bytes to $deviceId.")
+    logd(TAG, "Writing ${message.message.size} bytes to $deviceId.")
     if (device.secureChannel == null) {
       logw(
         TAG,
@@ -188,22 +199,23 @@ class MultiProtocolDeviceController(
    */
   private fun generateChallenge(id: UUID): ConnectChallenge? {
     val salt = ByteUtils.randomBytes(SALT_BYTES)
-    val zeroPadded = ByteUtils.concatByteArrays(salt, ByteArray(TOTAL_AD_DATA_BYTES - SALT_BYTES))
-      ?: return null
+    val zeroPadded =
+      ByteUtils.concatByteArrays(salt, ByteArray(TOTAL_AD_DATA_BYTES - SALT_BYTES)) ?: return null
     val challenge = storage.hashWithChallengeSecret(id.toString(), zeroPadded) ?: return null
     return ConnectChallenge(challenge, salt)
   }
 
   /**
-   *  Generate the [DiscoveryCallback] for device [deviceId] with advertisement name
-   *  [nameForAssociation] and reconnect [challenge], response will be patched through the
-   *  [associationCallback].
+   * Generate the [DiscoveryCallback] for device [deviceId] with advertisement name
+   * [nameForAssociation] and reconnect [challenge], response will be patched through the
+   * [associationCallback].
    */
   private fun generateDiscoveryCallback(
     associationCallback: AssociationCallback?,
     deviceId: UUID?,
     nameForAssociation: String?,
     protocol: ConnectionProtocol,
+    // TODO(b/180743873) pass challenge to ConnectionResolver if not null.
     challenge: ByteArray?,
   ): DiscoveryCallback {
     return object : DiscoveryCallback {
@@ -216,31 +228,36 @@ class MultiProtocolDeviceController(
         )
         // TODO(b/180743856): DeviceMessageStream uses protocol interface for communication
         // Each device only do version resolver for once
-        var device = when {
-          associationCallback != null -> getConnectedDevice(associationCallback)
-          deviceId != null -> getConnectedDevice(deviceId)
-          else -> null
-        }
+        var device =
+          when {
+            associationCallback != null -> getConnectedDevice(associationCallback)
+            deviceId != null -> getConnectedDevice(deviceId)
+            else -> null
+          }
 
         if (device != null) {
           logd(
             TAG,
-            "Certain connect protocol already exist, add id to current connected " +
-              "remote device."
+            "Certain connect protocol already exist, add id to current connected remote device."
           )
           // TODO(b/180743223): Add the stream to current secure channel
           device.protocolIdPairs.add(Pair(protocol, protocolId))
           return
         }
-        device = ConnectedRemoteDevice().apply {
-          this.deviceId = deviceId
-          protocolIdPairs.add(Pair(protocol, protocolId))
-          callback = associationCallback
-        }
+        device =
+          ConnectedRemoteDevice().apply {
+            this.deviceId = deviceId
+            protocolIdPairs.add(Pair(protocol, protocolId))
+            callback = associationCallback
+          }
         connectedDevices.add(device)
-        // Do version & capability exchange.
+        if (associationCallback != null) {
+          associationPendingDevice = device
+        }
+        // Do version & capability exchange if it is association.
         // TODO(b/180743873): Expand ConnectionResolver to resolve a SecureChannel, register the
-        //  secure channel callback and assign the secure channel to the device.
+        //  secure channel callback and verification code listener and assign the secure channel to
+        //  the device.
       }
 
       override fun onDiscoveryStartedSuccessfully() {
@@ -260,11 +277,12 @@ class MultiProtocolDeviceController(
       }
 
       override fun onDeviceNameRetrieved(protocolId: String, name: String) {
-        val device = when {
-          associationCallback != null -> getConnectedDevice(associationCallback)
-          deviceId != null -> getConnectedDevice(deviceId)
-          else -> null
-        }
+        val device =
+          when {
+            associationCallback != null -> getConnectedDevice(associationCallback)
+            deviceId != null -> getConnectedDevice(deviceId)
+            else -> null
+          }
         device?.name = name
         storage.setAssociatedDeviceName(deviceId.toString(), name)
       }
@@ -274,16 +292,17 @@ class MultiProtocolDeviceController(
   private fun generateDeviceCallback(
     callback: AssociationCallback?,
     deviceId: UUID?,
-    protocol: ConnectionProtocol
+    protocol: ConnectionProtocol,
   ): DeviceCallback {
     return object : DeviceCallback {
       override fun onDeviceDisconnected(protocolId: String) {
         logd(TAG, "Remote connect protocol disconnected, id: $protocolId, protocol: $protocol")
-        val device = when {
-          callback != null -> getConnectedDevice(callback)
-          deviceId != null -> getConnectedDevice(deviceId)
-          else -> null
-        }
+        val device =
+          when {
+            callback != null -> getConnectedDevice(callback)
+            deviceId != null -> getConnectedDevice(deviceId)
+            else -> null
+          }
         if (device == null) {
           loge(TAG, "Unrecognized device disconnected, ignore")
           return
@@ -298,60 +317,91 @@ class MultiProtocolDeviceController(
           connectedDevices.remove(device)
           callbacks.invoke { callback -> callback.onDeviceDisconnected(device.deviceId.toString()) }
         }
+
+        if (associationPendingDevice == device) {
+          associationPendingDevice = null
+        }
       }
 
       override fun onDeviceMaxDataSizeChanged(protocolId: String, maxBytes: Int) {
         // No implementation
       }
 
-      override fun onDataReceived(protocolId: String, data: ByteArray?) {
+      override fun onDataReceived(protocolId: String, data: ByteArray) {
         // No implementation
       }
     }
   }
 
-  private fun generateSecureChannelCallback(device: ConnectedRemoteDevice): SecureChannel.Callback {
-    return object : SecureChannel.Callback {
+  private fun generateSecureChannelCallback(
+    device: ConnectedRemoteDevice
+  ): MultiProtocolSecureChannel.Callback {
+    return object : MultiProtocolSecureChannel.Callback {
       override fun onSecureChannelEstablished() {
         device.callback?.onAssociationCompleted(device.deviceId.toString())
         callbacks.invoke { it.onSecureChannelEstablished(device.deviceId.toString()) }
       }
 
-      override fun onEstablishSecureChannelFailure(error: Int) {
+      override fun onEstablishSecureChannelFailure(error: MultiProtocolSecureChannel.ChannelError) {
+        device.callback?.onAssociationError(error.ordinal)
         callbacks.invoke { it.onSecureChannelError(device.deviceId.toString()) }
-        device.callback?.onAssociationError(error)
       }
 
       override fun onMessageReceived(deviceMessage: DeviceMessage) {
-        callbacks.invoke { it.onMessageReceived(device.deviceId.toString(), deviceMessage) }
+        handleSecureChannelMessage(deviceMessage, device)
       }
 
-      override fun onMessageReceivedError(exception: Exception?) {
-        loge(TAG, "Error while receiving message.", exception)
+      override fun onMessageReceivedError(error: MultiProtocolSecureChannel.MessageError) {
+        loge(TAG, "Error while receiving message.")
         device.callback?.onAssociationError(Errors.DEVICE_ERROR_INVALID_HANDSHAKE)
-      }
-
-      override fun onDeviceIdReceived(deviceId: String) {
-        device.deviceId = UUID.fromString(deviceId)
-        callbacks.invoke { it.onDeviceConnected(deviceId) }
       }
     }
   }
 
-  /** Container class to hold information about a connected device.  */
+  @VisibleForTesting
+  internal fun handleSecureChannelMessage(
+    deviceMessage: DeviceMessage,
+    device: ConnectedRemoteDevice
+  ) {
+    if (device.deviceId != null) {
+      callbacks.invoke { it.onMessageReceived(device.deviceId.toString(), deviceMessage) }
+      return
+    }
+    val deviceId = ByteUtils.bytesToUUID(Arrays.copyOf(deviceMessage.message, DEVICE_ID_BYTES))
+    if (deviceId == null) {
+      loge(TAG, "Received invalid device id. Aborting.")
+      callbacks.invoke { it.onSecureChannelError(deviceId.toString()) }
+      return
+    }
+    device.deviceId = deviceId
+    try {
+      storage.saveChallengeSecret(
+        deviceId.toString(),
+        Arrays.copyOfRange(deviceMessage.message, DEVICE_ID_BYTES, deviceMessage.message.size)
+      )
+    } catch (e: InvalidParameterException) {
+      loge(TAG, "Error saving challenge secret.", e)
+      callbacks.invoke { it.onSecureChannelError(device.deviceId.toString()) }
+      return
+    }
+    device.secureChannel?.setDeviceId(deviceId)
+    callbacks.invoke { it.onDeviceConnected(deviceId.toString()) }
+  }
+
+  /** Container class to hold information about a connected device. */
   internal data class ConnectedRemoteDevice(
-    val protocolIdPairs:
-    CopyOnWriteArraySet<Pair<ConnectionProtocol, String>> = CopyOnWriteArraySet()
+    val protocolIdPairs: CopyOnWriteArraySet<Pair<ConnectionProtocol, String>> =
+      CopyOnWriteArraySet()
   ) {
     var deviceId: UUID? = null
-    var secureChannel: SecureChannel? = null
+    var secureChannel: MultiProtocolSecureChannel? = null
     var callback: AssociationCallback? = null
     var name: String? = null
   }
-
   companion object {
-    private const val TAG = "DeviceController"
+    private const val TAG = "MultiProtocolDeviceController"
     private const val SALT_BYTES = 8
     private const val TOTAL_AD_DATA_BYTES = 16
+    @VisibleForTesting internal const val DEVICE_ID_BYTES = 16
   }
 }

@@ -79,8 +79,8 @@ open class ProtocolStream(
           maxWriteSize = maxBytes
         }
 
-        override fun onDataReceived(protocolId: String, data: ByteArray?) {
-          data?.let { onDataReceived(it) }
+        override fun onDataReceived(protocolId: String, data: ByteArray) {
+          onDataReceived(data)
         }
       },
       callbackExecutor

@@ -17,13 +17,7 @@
 
 <resources>
     <dimen name="icon_size">@dimen/car_ui_primary_icon_size</dimen>
-    <dimen name="title_margin_top">116dp</dimen>
-    <dimen name="message_margin_top">@dimen/car_ui_padding_3</dimen>
-    <dimen name="button_margin_top">48dp</dimen>
     <dimen name="content_margin">@dimen/car_ui_margin</dimen>
-
-    <dimen name="body1_size">@dimen/car_ui_body1_size</dimen>
-    <dimen name="body3_size">@dimen/car_ui_body3_size</dimen>
 
     <dimen name="list_item_height">@dimen/car_ui_list_item_height</dimen>
     <dimen name="list_item_icon_size">@dimen/car_ui_list_item_icon_size</dimen>
@@ -33,7 +27,6 @@
     <dimen name="list_item_text_no_icon_margin_start">@dimen/car_ui_list_item_text_no_icon_start_margin</dimen>
     <dimen name="list_item_content_margin_top">@dimen/car_ui_preference_content_margin_top</dimen>
     <dimen name="list_item_content_margin_bottom">@dimen/car_ui_preference_content_margin_bottom</dimen>
-    <dimen name="list_item_divider_width">@dimen/car_ui_divider_width</dimen>
 
     <dimen name="instruction_margin_top">48dp</dimen>
     <dimen name="instruction_detail_margin_top">@dimen/car_ui_padding_3</dimen>
@@ -44,14 +37,53 @@
     <dimen name="device_detail_button_margin_top">72dp</dimen>
     <dimen name="device_detail_divider_margin">@dimen/car_ui_padding_2</dimen>
 
-    <dimen name="pairing_code_margin_top">@dimen/car_ui_padding_5</dimen>
-    <item name="pairing_code_text_spacing" format="float" type="dimen">0.6</item>
-
-    <dimen name="connection_indicator_size">12dp</dimen>
-    <dimen name="connection_indicator_margin_end">12dp</dimen>
-
     <!-- Copied from common libraries for notificationmsg -->
     <dimen name="notification_contact_photo_size">300dp</dimen>
     <dimen name="contact_avatar_corner_radius_percent" format="float">0.5</dimen>
     <item name="letter_to_tile_ratio" format="fraction" type="fraction">67%</item>
+
+    <!-- Common -->
+    <dimen name="divider_height">1dp</dimen>
+    <dimen name="connection_indicator_size">12dp</dimen>
+    <dimen name="connection_indicator_margin_end">12dp</dimen>
+    <dimen name="button_margin_top">48dp</dimen>
+    <dimen name="pairing_code_margin_top">48dp</dimen>
+    <item name="pairing_code_text_spacing" format="float" type="dimen">0.6</item>
+
+    <!-- Settings -->
+    <dimen name="settings_page_margin_horizontal">@dimen/car_ui_margin</dimen>
+    <!-- car_ui_padding_7 not available in aosp/master car-ui-lib -->
+    <dimen name="car_ui_padding_7">64dp</dimen>
+    <dimen name="settings_page_margin_vertical">@dimen/car_ui_padding_7</dimen>
+    <dimen name="settings_content_margin">@dimen/car_ui_padding_4</dimen>
+    <dimen name="settings_divider_margin">@dimen/car_ui_padding_5</dimen>
+
+    <dimen name="settings_primary_icon_size">@dimen/car_ui_primary_icon_size</dimen>
+    <dimen name="settings_secondary_icon_size">@dimen/car_ui_list_item_icon_size</dimen>
+
+    <dimen name="settings_title_text_size">@dimen/car_ui_body1_size</dimen>
+    <dimen name="settings_subtitle_text_size">@dimen/car_ui_body3_size</dimen>
+
+    <dimen name="settings_list_item_text_margin_start">@dimen/car_ui_list_item_icon_container_width</dimen>
+    <dimen name="settings_list_item_text_no_icon_margin_start">@dimen/car_ui_list_item_text_no_icon_start_margin</dimen>
+    <dimen name="settings_list_item_text_margin_end">@dimen/car_ui_list_item_text_start_margin</dimen>
+    <dimen name="settings_list_item_min_height">@dimen/car_ui_list_item_height</dimen>
+    <dimen name="settings_list_item_content_margin_top">@dimen/car_ui_preference_content_margin_top</dimen>
+    <dimen name="settings_list_item_content_margin_bottom">@dimen/car_ui_preference_content_margin_bottom</dimen>
+
+    <!-- Car Setup Wizard -->
+    <dimen name="suw_page_margin_vertical">@dimen/suw_padding_7</dimen>
+    <dimen name="suw_content_margin">@dimen/suw_padding_4</dimen>
+    <dimen name="suw_divider_margin">@dimen/suw_padding_7</dimen>
+
+    <dimen name="suw_primary_icon_size">@dimen/car_primary_icon_size</dimen>
+    <dimen name="suw_secondary_icon_size">@dimen/car_secondary_icon_size</dimen>
+
+    <dimen name="suw_title_text_size">@dimen/car_display3_size</dimen>
+    <dimen name="suw_subtitle_text_size">@dimen/car_body3_size</dimen>
+
+    <dimen name="suw_list_item_text_margin_start">@dimen/car_keyline_2</dimen>
+    <dimen name="suw_list_item_text_no_icon_margin_start">@dimen/car_keyline_1</dimen>
+    <dimen name="suw_list_item_text_margin_end">@dimen/car_keyline_1</dimen>
+    <dimen name="suw_list_item_min_height">@dimen/car_single_line_list_item_height</dimen>
 </resources>

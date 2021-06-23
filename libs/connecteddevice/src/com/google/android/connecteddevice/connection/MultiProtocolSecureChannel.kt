@@ -18,14 +18,17 @@ package com.google.android.connecteddevice.connection
 import androidx.annotation.VisibleForTesting
 import com.google.android.connecteddevice.model.DeviceMessage
 import com.google.android.connecteddevice.model.DeviceMessage.OperationType
+import com.google.android.connecteddevice.storage.ConnectedDeviceStorage
 import com.google.android.connecteddevice.util.SafeConsumer
 import com.google.android.connecteddevice.util.SafeLog.logd
 import com.google.android.connecteddevice.util.SafeLog.loge
 import com.google.android.encryptionrunner.EncryptionRunner
 import com.google.android.encryptionrunner.HandshakeException
+import com.google.android.encryptionrunner.HandshakeMessage.HandshakeState
 import com.google.android.encryptionrunner.Key
 import java.security.SignatureException
 import java.util.Arrays
+import java.util.UUID
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicReference
 import java.util.zip.DataFormatException
@@ -36,9 +39,12 @@ import java.util.zip.Inflater
  * Establishes a secure channel with [EncryptionRunner] over [ProtocolStream]s as server side, sends
  * and receives messages securely after the secure channel has been established.
  */
-abstract class MultiProtocolSecureChannel(
+open class MultiProtocolSecureChannel(
   stream: ProtocolStream,
-  protected val encryptionRunner: EncryptionRunner,
+  private val storage: ConnectedDeviceStorage,
+  private val encryptionRunner: EncryptionRunner,
+  /** Should be set whenever the remote device id is available. */
+  private var deviceId: String? = null,
   @VisibleForTesting internal val inflater: Inflater = Inflater(),
   private val deflater: Deflater = Deflater(Deflater.BEST_COMPRESSION),
   private val isCompressionEnabled: Boolean = true
@@ -63,9 +69,6 @@ abstract class MultiProtocolSecureChannel(
     /** Failed to get a valid previous/new encryption key. */
     CHANNEL_ERROR_INVALID_ENCRYPTION_KEY,
 
-    /** Failed to save or retrieve security keys to or from storage. */
-    CHANNEL_ERROR_STORAGE_ERROR,
-
     /** Disconnected before secure channel is established. */
     CHANNEL_ERROR_DEVICE_DISCONNECTED
   }
@@ -81,8 +84,9 @@ abstract class MultiProtocolSecureChannel(
 
   private val encryptionKey = AtomicReference<Key>()
 
-  /** Should be set whenever the remote device id is available. */
-  protected var deviceId: String? = null
+  var showVerificationCodeListener: ShowVerificationCodeListener? = null
+
+  @HandshakeState private var state: Int = HandshakeState.UNKNOWN
 
   /** Callback that notifies secure channel events. */
   var callback: Callback? = null
@@ -92,11 +96,157 @@ abstract class MultiProtocolSecureChannel(
   }
 
   /** Logic for processing a handshake message from device. */
-  @Throws(HandshakeException::class) abstract fun processHandshake(message: ByteArray)
+  @Throws(HandshakeException::class)
+  fun processHandshake(message: ByteArray) {
+    when (state) {
+      HandshakeState.UNKNOWN -> processHandshakeInitialization(message)
+      HandshakeState.IN_PROGRESS -> processHandshakeInProgress(message)
+      HandshakeState.FINISHED ->
+        loge(TAG, "Received handshake message after handshake is completed. Ignored.")
+      HandshakeState.RESUMING_SESSION -> processHandshakeResumingSession(message)
+      else -> {
+        loge(TAG, "Encountered unexpected handshake state: $state.")
+        notifySecureChannelFailure(ChannelError.CHANNEL_ERROR_INVALID_STATE)
+      }
+    }
+  }
 
-  /** Set the encryption key that secures this channel. */
-  internal fun setEncryptionKey(encryptionKey: Key?) {
-    this.encryptionKey.set(encryptionKey)
+  @Throws(HandshakeException::class)
+  private fun processHandshakeInitialization(message: ByteArray) {
+    logd(TAG, "Responding to handshake init request.")
+    val handshakeMessage = encryptionRunner.respondToInitRequest(message)
+    state = handshakeMessage.getHandshakeState()
+    val nextMessage = handshakeMessage.getNextMessage()
+    if (nextMessage == null) {
+      loge(TAG, "Failed to get the next message after handshake initialization.")
+      notifySecureChannelFailure(ChannelError.CHANNEL_ERROR_INVALID_HANDSHAKE)
+      return
+    }
+    sendHandshakeMessage(nextMessage, /* isEncrypted= */ false)
+  }
+
+  @Throws(HandshakeException::class)
+  private fun processHandshakeInProgress(message: ByteArray) {
+    logd(TAG, "Continuing handshake.")
+    val handshakeMessage = encryptionRunner.continueHandshake(message)
+    state = handshakeMessage.getHandshakeState()
+    if (deviceId == null) {
+      if (state != HandshakeState.VERIFICATION_NEEDED) {
+        loge(TAG, "processHandshakeInProgress: Encountered unexpected handshake state: $state.")
+        notifySecureChannelFailure(ChannelError.CHANNEL_ERROR_INVALID_STATE)
+        return
+      }
+      val code = handshakeMessage.getVerificationCode()
+      if (code == null) {
+        loge(TAG, "Unable to get verification code.")
+        notifySecureChannelFailure(ChannelError.CHANNEL_ERROR_INVALID_VERIFICATION)
+        return
+      }
+      processVerificationCode(code)
+    }
+  }
+
+  private fun processVerificationCode(code: String) {
+    if (showVerificationCodeListener == null) {
+      loge(
+        TAG,
+        "No verification code callback has been set. Unable to display verification code " +
+          "to user."
+      )
+      notifySecureChannelFailure(ChannelError.CHANNEL_ERROR_INVALID_STATE)
+      return
+    }
+    logd(TAG, "Notify pairing code available: $code")
+    showVerificationCodeListener!!.showVerificationCode(code)
+  }
+
+  @Throws(HandshakeException::class)
+  private fun processHandshakeResumingSession(message: ByteArray) {
+    logd(TAG, "Process resuming session.")
+    if (deviceId == null) {
+      loge(TAG, "Reconnect with invalid device id.")
+      notifySecureChannelFailure(ChannelError.CHANNEL_ERROR_INVALID_DEVICE_ID)
+      return
+    }
+    logd(TAG, "Start reconnection authentication.")
+    val previousKey = storage.getEncryptionKey(deviceId.toString())
+    if (previousKey == null) {
+      loge(TAG, "Unable to resume session, previous key is null.")
+      notifySecureChannelFailure(ChannelError.CHANNEL_ERROR_INVALID_ENCRYPTION_KEY)
+      return
+    }
+    val handshakeMessage = encryptionRunner.authenticateReconnection(message, previousKey)
+    state = handshakeMessage.getHandshakeState()
+    if (state != HandshakeState.FINISHED) {
+      loge(TAG, "Unable to resume session, unexpected next handshake state: $state.")
+      notifySecureChannelFailure(ChannelError.CHANNEL_ERROR_INVALID_STATE)
+      return
+    }
+    val newKey = handshakeMessage.getKey()
+    if (newKey == null) {
+      loge(TAG, "Unable to resume session, new key is null.")
+      notifySecureChannelFailure(ChannelError.CHANNEL_ERROR_INVALID_ENCRYPTION_KEY)
+      return
+    }
+    storage.saveEncryptionKey(deviceId.toString(), newKey.asBytes())
+    logd(TAG, "Saved new key for reconnection.")
+    encryptionKey.set(newKey)
+    sendServerAuthToClient(handshakeMessage.getNextMessage())
+    notifyCallback { it.onSecureChannelEstablished() }
+  }
+
+  private fun sendServerAuthToClient(message: ByteArray?) {
+    if (message == null) {
+      loge(TAG, "Unable to send server authentication message to client, message is null.")
+      notifySecureChannelFailure(ChannelError.CHANNEL_ERROR_INVALID_MSG)
+      return
+    }
+    sendHandshakeMessage(message, /* isEncrypted= */ false)
+  }
+
+  /** Notify that the device id is received from remote device during association. */
+  fun setDeviceId(deviceId: UUID) {
+    this.deviceId = deviceId.toString()
+    if (encryptionKey.get() == null) {
+      loge(TAG, "Key is null when received client device id $deviceId.")
+      notifySecureChannelFailure(ChannelError.CHANNEL_ERROR_INVALID_ENCRYPTION_KEY)
+      return
+    }
+    storage.saveEncryptionKey(deviceId.toString(), encryptionKey.get().asBytes())
+  }
+
+  /**
+   * Called by the client to notify that the user has accepted a pairing code or any out-of-band
+   * confirmation, and send confirmation signals to remote bluetooth device.
+   */
+  fun notifyVerificationCodeAccepted() {
+    val message =
+      try {
+        encryptionRunner.notifyPinVerified()
+      } catch (e: HandshakeException) {
+        loge(TAG, "Error during PIN verification", e)
+        notifySecureChannelFailure(ChannelError.CHANNEL_ERROR_INVALID_VERIFICATION)
+        return
+      }
+    state = message.getHandshakeState()
+    if (state !== HandshakeState.FINISHED) {
+      loge(
+        TAG,
+        "Handshake not finished after calling verify PIN. Instead got state: " +
+          "${message.getHandshakeState()}."
+      )
+      notifySecureChannelFailure(ChannelError.CHANNEL_ERROR_INVALID_STATE)
+      return
+    }
+    val localKey = message.getKey()
+    if (localKey == null) {
+      loge(TAG, "Unable to finish association, generated key is null.")
+      notifySecureChannelFailure(ChannelError.CHANNEL_ERROR_INVALID_ENCRYPTION_KEY)
+      return
+    }
+    encryptionKey.set(localKey)
+    logd(TAG, "Pairing code successfully verified.")
+    notifyCallback { it.onSecureChannelEstablished() }
   }
 
   /** Add a protocol stream to this channel. */
@@ -123,7 +273,7 @@ abstract class MultiProtocolSecureChannel(
       }
   }
 
-  internal fun sendHandshakeMessage(message: ByteArray, isEncrypted: Boolean) {
+  private fun sendHandshakeMessage(message: ByteArray, isEncrypted: Boolean) {
     logd(TAG, "Sending handshake message.")
     val deviceMessage =
       DeviceMessage(/* recipient= */ null, isEncrypted, OperationType.ENCRYPTION_HANDSHAKE, message)
@@ -179,14 +329,14 @@ abstract class MultiProtocolSecureChannel(
   }
 
   /** Inform the secure channel related events through [callback]. */
-  protected fun notifyCallback(notification: SafeConsumer<Callback>) {
+  private fun notifyCallback(notification: SafeConsumer<Callback>) {
     if (callback != null) {
       notification.accept(callback)
     }
   }
 
   /** Notify callbacks that an error has occurred. */
-  protected fun notifySecureChannelFailure(error: ChannelError) {
+  private fun notifySecureChannelFailure(error: ChannelError) {
     loge(TAG, "Secure channel error: $error")
     notifyCallback { it.onEstablishSecureChannelFailure(error) }
   }
@@ -339,16 +489,15 @@ abstract class MultiProtocolSecureChannel(
      * @param error The message processing error.
      */
     fun onMessageReceivedError(error: MessageError) {}
+  }
 
-    /**
-     * Invoked when the device id was received from the client.
-     *
-     * @param deviceId The unique device id of client.
-     */
-    fun onDeviceIdReceived(deviceId: String) {}
+  /** Listener that will be invoked to display verification code. */
+  interface ShowVerificationCodeListener {
+    /** Invoked when a verification [code] needs to be displayed during device association. */
+    fun showVerificationCode(code: String)
   }
 
   companion object {
-    private const val TAG = "MultiProtocolsSecureChannel"
+    private const val TAG = "MultiProtocolSecureChannel"
   }
 }

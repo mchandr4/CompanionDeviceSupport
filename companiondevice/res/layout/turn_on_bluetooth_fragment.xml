@@ -19,27 +19,23 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_marginHorizontal="?attr/pageMarginHorizontal"
+    android:layout_marginVertical="?attr/pageMarginVertical"
     android:orientation="vertical"
     android:gravity="center_horizontal">
     <TextView
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
-        android:layout_marginTop="@dimen/title_margin_top"
-        android:layout_marginStart="@dimen/content_margin"
-        android:layout_marginEnd="@dimen/content_margin"
         android:gravity="center"
         android:text="@string/turn_on_bluetooth_title"
-        android:textSize="@dimen/body1_size"
-        android:textAppearance="@style/AssociationTitle"/>
+        android:textAppearance="@style/CompanionTitleTextStyle"/>
     <TextView
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
-        android:layout_marginTop="@dimen/message_margin_top"
-        android:layout_marginStart="@dimen/content_margin"
-        android:layout_marginEnd="@dimen/content_margin"
+        android:layout_marginTop="?attr/contentMarginVertical"
         android:gravity="center"
         android:text="@string/turn_on_bluetooth_message"
-        android:textAppearance="@style/AssociationMessage"/>
+        android:textAppearance="@style/CompanionSubtitleTextStyle"/>
     <Button
         android:id="@+id/turn_on_button"
         android:layout_marginTop="@dimen/button_margin_top"

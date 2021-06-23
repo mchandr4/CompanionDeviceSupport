@@ -20,7 +20,7 @@
   <string name="default_device_name">Tilknyttet enhed</string>
   <string name="add_device_title">Tilføj tilknyttet enhed</string>
   <string name="add_associated_device_title">Tilslut en ledsagende enhed</string>
-  <string name="add_associated_device_instruction">Du kan bruge din telefon som en ledsagende enhed, der kan hjælpe dig under kørsel</string>
+  <string name="add_associated_device_subtitle">Du kan bruge din telefon som en ledsagende enhed, der kan hjælpe dig under kørsel</string>
   <string name="associated_device_install_app">Sørg for, at <b>den medfølgende app</b> er installeret på telefonen</string>
   <string name="associated_device_pairing_code_title">Bekræft koden på telefonen</string>
   <string name="associated_device_pairing_message">Bekræft, at dette stemmer overens med den kode, der vises på din telefon</string>

@@ -20,7 +20,7 @@
   <string name="default_device_name">Appareil associé</string>
   <string name="add_device_title">Ajouter un appareil associé</string>
   <string name="add_associated_device_title">Connecter un appareil compagnon</string>
-  <string name="add_associated_device_instruction">Vous pouvez utiliser votre téléphone comme appareil compagnon pour vous aider à gérer votre expérience</string>
+  <string name="add_associated_device_subtitle">Vous pouvez utiliser votre téléphone comme appareil compagnon pour vous aider à gérer votre expérience</string>
   <string name="associated_device_install_app">Assurez-vous d\'avoir installé l\'<b>appli compagnon</b> sur votre tél.</string>
   <string name="associated_device_pairing_code_title">Confirmer le code sur votre téléphone</string>
   <string name="associated_device_pairing_message">Confirmez si ce code correspond à celui affiché sur votre téléphone</string>

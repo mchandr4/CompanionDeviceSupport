@@ -47,7 +47,7 @@ public class ConnectedDeviceStorage {
 
   private static final String CHALLENGE_HASHING_ALGORITHM = "HmacSHA256";
 
-  @VisibleForTesting static final int CHALLENGE_SECRET_BYTES = 32;
+  @VisibleForTesting public static final int CHALLENGE_SECRET_BYTES = 32;
 
   private final Context context;
 

@@ -20,7 +20,7 @@
   <string name="default_device_name">Kopplad enhet</string>
   <string name="add_device_title">Lägg till kopplad enhet</string>
   <string name="add_associated_device_title">Anslut en hjälpenhet</string>
-  <string name="add_associated_device_instruction">Du kan koppla in telefonen som hjälpenhet och använda den när du kör</string>
+  <string name="add_associated_device_subtitle">Du kan koppla in telefonen som hjälpenhet och använda den när du kör</string>
   <string name="associated_device_install_app">Kolla att den <b>tillhörande appen</b> är installerad på telefonen</string>
   <string name="associated_device_pairing_code_title">Kolla koden på telefonen</string>
   <string name="associated_device_pairing_message">Kontrollera att detta är samma kod som visas på telefonen</string>

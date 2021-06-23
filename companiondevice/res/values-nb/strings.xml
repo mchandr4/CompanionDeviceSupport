@@ -20,7 +20,7 @@
   <string name="default_device_name">Tilknyttet enhet</string>
   <string name="add_device_title">Legg til en tilknyttet enhet</string>
   <string name="add_associated_device_title">Koble til en følgeenhet</string>
-  <string name="add_associated_device_instruction">Du kan bruke telefonen som en følgeenhet for å få hjelp når du kjører</string>
+  <string name="add_associated_device_subtitle">Du kan bruke telefonen som en følgeenhet for å få hjelp når du kjører</string>
   <string name="associated_device_install_app">Pass på at du har installert <b>følgeappen</b> på telefonen</string>
   <string name="associated_device_pairing_code_title">Bekreft koden på telefonen</string>
   <string name="associated_device_pairing_message">Sjekk at den er lik koden som vises på telefonen</string>

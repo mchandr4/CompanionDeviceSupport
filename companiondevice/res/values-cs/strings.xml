@@ -20,7 +20,7 @@
   <string name="default_device_name">Přidružené zařízení</string>
   <string name="add_device_title">Přidat přidružené zařízení</string>
   <string name="add_associated_device_title">Připojení doprovodného zařízení</string>
-  <string name="add_associated_device_instruction">Telefon můžete použít jako doprovodné zařízení, které vám pomůže spravovat funkce řízení</string>
+  <string name="add_associated_device_subtitle">Telefon můžete použít jako doprovodné zařízení, které vám pomůže spravovat funkce řízení</string>
   <string name="associated_device_install_app">Ověřte, zda je v telefonu nainstalovaná <b>doprovodná aplikace</b></string>
   <string name="associated_device_pairing_code_title">Ověření kódu v telefonu</string>
   <string name="associated_device_pairing_message">Ověřte, zda se kód shoduje s kódem v telefonu</string>

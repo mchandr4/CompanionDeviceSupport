@@ -20,7 +20,7 @@
   <string name="default_device_name">Seotud seade</string>
   <string name="add_device_title">Lisa seotud seade</string>
   <string name="add_associated_device_title">Kaasseadme ühendamine</string>
-  <string name="add_associated_device_instruction">Sõidukogemuse haldamiseks saate oma telefoni kasutada kaasseadmena</string>
+  <string name="add_associated_device_subtitle">Sõidukogemuse haldamiseks saate oma telefoni kasutada kaasseadmena</string>
   <string name="associated_device_install_app">Veenduge, et <b>kaasrakendus</b> oleks teie telefoni installitud</string>
   <string name="associated_device_pairing_code_title">Kinnitage kood telefonis</string>
   <string name="associated_device_pairing_message">Veenduge, et see ühtiks teie telefonis kuvatud koodiga</string>

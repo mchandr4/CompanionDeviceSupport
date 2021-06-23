@@ -20,7 +20,7 @@
   <string name="default_device_name">कनेक्ट गरिएको यन्त्र</string>
   <string name="add_device_title">कनेक्ट गरिएको यन्त्र हाल्नुहोस्</string>
   <string name="add_associated_device_title">सहयोगी यन्त्र कनेक्ट गर्नुहोस्</string>
-  <string name="add_associated_device_instruction">तपाईं ड्राइभिङसम्बन्धी सुविधा व्यवस्थापन गर्न आफ्नो फोनलाई सहयोगी यन्त्रका रूपमा प्रयोग गर्न सक्नुहुन्छ</string>
+  <string name="add_associated_device_subtitle">तपाईं ड्राइभिङसम्बन्धी सुविधा व्यवस्थापन गर्न आफ्नो फोनलाई सहयोगी यन्त्रका रूपमा प्रयोग गर्न सक्नुहुन्छ</string>
   <string name="associated_device_install_app">आफ्नो फोनमा <b>सहयोगी एप</b> इन्स्टल गरिएको कुरा सुनिश्चित गर्नुहोस्</string>
   <string name="associated_device_pairing_code_title">फोनमा देखाइएको कोड पुष्टि गर्नुहोस्</string>
   <string name="associated_device_pairing_message">यो कोड तपाईंको फोनमा देखाइएको कोडसँग मिल्छ भन्ने कुरा पुष्टि गर्नुहोस्</string>

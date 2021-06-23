@@ -15,8 +15,8 @@ interface DeviceController {
   /** Start the association with a new device  */
   fun startAssociation(nameForAssociation: String, callback: AssociationCallback)
 
-  /** Notify that the user has accepted a pairing code or other out-of-band confirmation. */
-  fun notifyOutOfBandAccepted(deviceId: UUID)
+  /** Notify that the user has accepted a pairing code. */
+  fun notifyVerificationCodeAccepted()
 
   /**
    * Send the [message] to a connected device with id [deviceId] and returns `true` if the send was

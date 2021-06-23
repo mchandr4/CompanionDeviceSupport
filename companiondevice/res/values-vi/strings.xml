@@ -20,7 +20,7 @@
   <string name="default_device_name">Thiết bị được liên kết</string>
   <string name="add_device_title">Thêm thiết bị được liên kết</string>
   <string name="add_associated_device_title">Kết nối với thiết bị đồng hành</string>
-  <string name="add_associated_device_instruction">Bạn có thể dùng điện thoại làm một thiết bị đồng hành để quản lý trải nghiệm lái xe của mình</string>
+  <string name="add_associated_device_subtitle">Bạn có thể dùng điện thoại làm một thiết bị đồng hành để quản lý trải nghiệm lái xe của mình</string>
   <string name="associated_device_install_app">Hãy nhớ cài đặt <b>Ứng dụng đồng hành</b> trên điện thoại</string>
   <string name="associated_device_pairing_code_title">Xác nhận mã trên điện thoại</string>
   <string name="associated_device_pairing_message">Xác nhận rằng mã này khớp với mã hiện trên điện thoại của bạn</string>

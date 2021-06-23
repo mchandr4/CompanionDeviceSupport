@@ -16,9 +16,15 @@
   -->
 
 <resources>
-    <color name="connection_color_connected">@*android:color/car_green_500</color>
-    <color name="connection_color_disconnected">@*android:color/car_red_500</color>
-    <color name="connection_color_not_detected">#b7ffffff</color>
+    <color name="connection_color_connected">#34A853</color>
+    <color name="connection_color_disconnected">#EA4335</color>
+    <color name="connection_color_not_detected">#C4C4C4</color>
 
     <color name="car_red_300">@*android:color/car_red_300</color>
+    <color name="divider_color">#5F6368</color>
+
+    <!-- Settings -->
+    <color name="settings_color_accent">@color/car_ui_color_accent</color>
+    <color name="settings_color_primary">@color/car_ui_text_color_primary</color>
+    <color name="settings_color_secondary">@color/car_ui_text_color_secondary</color>
 </resources>

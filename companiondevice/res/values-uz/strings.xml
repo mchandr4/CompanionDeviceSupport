@@ -20,7 +20,7 @@
   <string name="default_device_name">Aloqador qurilma</string>
   <string name="add_device_title">Aloqador qurilmani kiritish</string>
   <string name="add_associated_device_title">Hamroh qurilmani ulang</string>
-  <string name="add_associated_device_instruction">Harakatlanishni boshqarishga telefoningizni hamroh qurilma sifatida ishlatishingiz mumkin</string>
+  <string name="add_associated_device_subtitle">Harakatlanishni boshqarishga telefoningizni hamroh qurilma sifatida ishlatishingiz mumkin</string>
   <string name="associated_device_install_app">Telefoningizda <b>hamroh ilova</b> oʻrnatilganini tekshiring</string>
   <string name="associated_device_pairing_code_title">Kodni telefoningizda tasdiqlang</string>
   <string name="associated_device_pairing_message">Bu kod telefoningizdagi bilan mos ekanini tasdiqlang</string>

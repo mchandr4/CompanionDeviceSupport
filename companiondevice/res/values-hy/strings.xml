@@ -20,7 +20,7 @@
   <string name="default_device_name">Կապված սարք</string>
   <string name="add_device_title">Ավելացնել կապված սարք</string>
   <string name="add_associated_device_title">Ուղեկցող սարքի միացում</string>
-  <string name="add_associated_device_instruction">Դուք կարող եք օգտագործել ձեր հեռախոսը որպես ուղեկցող սարք, որը կօգնի ձեզ մեքենան վարելիս։</string>
+  <string name="add_associated_device_subtitle">Դուք կարող եք օգտագործել ձեր հեռախոսը որպես ուղեկցող սարք, որը կօգնի ձեզ մեքենան վարելիս։</string>
   <string name="associated_device_install_app">Համոզվեք, որ ձեր հեռախոսում տեղադրված է <b>ուղեկցող հավելված</b></string>
   <string name="associated_device_pairing_code_title">Հաստատեք կոդը հեռախոսում</string>
   <string name="associated_device_pairing_message">Հաստատեք, որ հեռախոսում նույն կոդն է ցուցադրվում</string>

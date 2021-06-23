@@ -20,7 +20,7 @@
   <string name="default_device_name">Povezana naprava</string>
   <string name="add_device_title">Dodaj povezano napravo</string>
   <string name="add_associated_device_title">Povezava spremljevalne naprave</string>
-  <string name="add_associated_device_instruction">Telefon lahko uporabljate kot spremljevalno napravo za pomoč pri upravljanju vozne izkušnje.</string>
+  <string name="add_associated_device_subtitle">Telefon lahko uporabljate kot spremljevalno napravo za pomoč pri upravljanju vozne izkušnje.</string>
   <string name="associated_device_install_app">V telefonu morate imeti nameščeno <b>spremljevalno aplikacijo</b>.</string>
   <string name="associated_device_pairing_code_title">Potrditev kode v telefonu</string>
   <string name="associated_device_pairing_message">Potrdite, da se ujema s kodo, prikazano v telefonu.</string>

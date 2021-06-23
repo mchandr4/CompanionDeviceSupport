@@ -20,7 +20,7 @@
   <string name="default_device_name">関連付けしたデバイス</string>
   <string name="add_device_title">関連付けしたデバイスを追加</string>
   <string name="add_associated_device_title">コンパニオン デバイスの接続</string>
-  <string name="add_associated_device_instruction">スマートフォンを運転操作の管理に役立つコンパニオン デバイスとして使用できます</string>
+  <string name="add_associated_device_subtitle">スマートフォンを運転操作の管理に役立つコンパニオン デバイスとして使用できます</string>
   <string name="associated_device_install_app"><b>コンパニオン アプリ</b>をスマートフォンにインストールしてください</string>
   <string name="associated_device_pairing_code_title">スマートフォンでのコードの確認</string>
   <string name="associated_device_pairing_message">このコードがスマートフォンに表示されているコードと一致することをご確認ください</string>

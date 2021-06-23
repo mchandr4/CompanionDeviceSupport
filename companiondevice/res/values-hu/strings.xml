@@ -20,7 +20,7 @@
   <string name="default_device_name">Társított eszköz</string>
   <string name="add_device_title">Társított eszköz hozzáadása</string>
   <string name="add_associated_device_title">Társeszköz csatlakoztatása</string>
-  <string name="add_associated_device_instruction">Telefonját használhatja társeszközként, így segíthet a vezetési élmény kezelésében</string>
+  <string name="add_associated_device_subtitle">Telefonját használhatja társeszközként, így segíthet a vezetési élmény kezelésében</string>
   <string name="associated_device_install_app">Telepítse a telefonra a <b>társalkalmazást</b></string>
   <string name="associated_device_pairing_code_title">Kód ellenőrzése a telefonon</string>
   <string name="associated_device_pairing_message">Ellenőrizze, hogy ez egyezik-e a telefonon látható kóddal</string>

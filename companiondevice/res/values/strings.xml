@@ -23,13 +23,21 @@
     <!-- Default value for associated device list item [CHAR LIMIT=25] -->
     <string name="default_device_name">Associated Device</string>
     <!-- Label for button to add an associated device [CHAR LIMIT=50] -->
-    <string name="add_device_title">Add Associated Device</string>
+    <string name="add_device_title">Connect to companion app</string>
     <!-- title for adding associated device [CHAR LIMIT=50]-->
-    <string name="add_associated_device_title">Connect a companion device</string>
+    <string name="add_associated_device_title">Connect to MyCompanion</string>
     <!-- Instruction for adding associated device [CHAR LIMIT=100] -->
-    <string name="add_associated_device_instruction">You can use your phone as a companion device to help manage your driving experience</string>
+    <string name="add_associated_device_subtitle">You can use your phone as a companion device to help manage your driving experience</string>
     <!-- Instruction for opening Companion App [CHAR LIMIT=100] -->
     <string name="associated_device_install_app">Make sure you have <b>Companion App</b> installed on your phone</string>
+    <!-- Instruction for opening Companion App [CHAR LIMIT=100] -->
+    <string name="open_companion_app_instruction_text">Open the companion app</string>
+    <!-- Instruction for enabling Bluetooth Connection [CHAR LIMIT=100] -->
+    <string name="enable_bluetooth_instruction_text">Allow Bluetooth connection</string>
+    <!-- Instruction for connecting to car [CHAR LIMIT=100] -->
+    <string name="connect_to_targe_car_instruction_text">Connect to &lt;b><xliff:g id="car_name" example="MyVehicle">%1$s</xliff:g>&lt;/b></string>
+    <!-- Instruction for connecting to car [CHAR LIMIT=100] -->
+    <string name="connect_to_car_instruction_text">Connect to the car</string>
     <!-- Title for confirm pairing code fragment [CHAR LIMIT=60]-->
     <string name="associated_device_pairing_code_title">Confirm code on phone</string>
     <!-- Message text shown in confirm pairing code fragment [CHAR LIMIT=100]-->
@@ -93,6 +101,12 @@
     <string name="turn_on">Turn on</string>
     <!-- Not now button text [CHAR LIMIT=20]-->
     <string name="not_now">Not now</string>
+    <!-- Connect button text [CHAR LIMIT=20] -->
+    <string name="connect">Connect</string>
+    <!-- Disconnect button text [CHAR LIMIT=20] -->
+    <string name="disconnect">Disconnect</string>
+    <!-- Skip button text [CHAR LIMIT=20] -->
+    <string name="skip">Skip</string>
 
     <!-- Connected status text [CHAR LIMIT=20]-->
     <string name="connected">Connected</string>

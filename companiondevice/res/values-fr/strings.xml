@@ -20,7 +20,7 @@
   <string name="default_device_name">Appareil associé</string>
   <string name="add_device_title">Ajouter un appareil associé</string>
   <string name="add_associated_device_title">Connecter un appareil associé</string>
-  <string name="add_associated_device_instruction">Vous pouvez utiliser votre téléphone comme appareil associé pour gérer votre expérience de conduite</string>
+  <string name="add_associated_device_subtitle">Vous pouvez utiliser votre téléphone comme appareil associé pour gérer votre expérience de conduite</string>
   <string name="associated_device_install_app">Vérifiez que l\'<b>appli associée</b> est installée sur le téléphone</string>
   <string name="associated_device_pairing_code_title">Confirmer le code sur le téléphone</string>
   <string name="associated_device_pairing_message">Assurez-vous que ce code correspond bien à celui affiché sur votre téléphone</string>

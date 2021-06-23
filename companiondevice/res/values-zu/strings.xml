@@ -20,7 +20,7 @@
   <string name="default_device_name">Idivayisi ehlobene</string>
   <string name="add_device_title">Engeza Idivayisi ehlobene</string>
   <string name="add_associated_device_title">Xhuma idivayisi engumngane</string>
-  <string name="add_associated_device_instruction">Ungasebenzisa ifoni yakho njengedivayisi engumgane ukukusiza uphathe ukuzizwela kwakho kokushayela</string>
+  <string name="add_associated_device_subtitle">Ungasebenzisa ifoni yakho njengedivayisi engumgane ukukusiza uphathe ukuzizwela kwakho kokushayela</string>
   <string name="associated_device_install_app">Qiniseka ukuthi <b>Unohlelo lokusebenza elingumngane</b> olufakwe efonini yakho</string>
   <string name="associated_device_pairing_code_title">Qinisekisa ikhodi kufoni</string>
   <string name="associated_device_pairing_message">Qinisekisa ukuthi lokhu kufana nekhodi eboniswe kufoni yakho</string>

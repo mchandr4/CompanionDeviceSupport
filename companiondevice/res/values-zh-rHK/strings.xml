@@ -20,7 +20,7 @@
   <string name="default_device_name">關聯裝置</string>
   <string name="add_device_title">新增關聯裝置</string>
   <string name="add_associated_device_title">連接隨附裝置</string>
-  <string name="add_associated_device_instruction">您可利用手機作隨附裝置，幫助管理駕駛體驗</string>
+  <string name="add_associated_device_subtitle">您可利用手機作隨附裝置，幫助管理駕駛體驗</string>
   <string name="associated_device_install_app">請確保您的手機已安裝<b>隨附應用程式</b></string>
   <string name="associated_device_pairing_code_title">確認手機上的配對碼</string>
   <string name="associated_device_pairing_message">確認此代碼與手機上的配對碼相符</string>

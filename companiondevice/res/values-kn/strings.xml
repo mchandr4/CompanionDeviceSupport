@@ -20,7 +20,7 @@
   <string name="default_device_name">ಸಂಯೋಜಿತ ಸಾಧನ</string>
   <string name="add_device_title">ಸಂಯೋಜಿತ ಸಾಧನವನ್ನು ಸೇರಿಸಿ</string>
   <string name="add_associated_device_title">ಕಂಪ್ಯಾನಿಯನ್ ಸಾಧನವೊಂದನ್ನು ಕನೆಕ್ಟ್ ಮಾಡಿ</string>
-  <string name="add_associated_device_instruction">ನಿಮ್ಮ ಡ್ರೈವಿಂಗ್ ಅನುಭವವನ್ನು ನಿರ್ವಹಿಸಲು ನಿಮ್ಮ ಫೋನ್ ಅನ್ನು ನೀವು ಕಂಪ್ಯಾನಿಯನ್ ಸಾಧನವಾಗಿ ಬಳಸಬಹುದು</string>
+  <string name="add_associated_device_subtitle">ನಿಮ್ಮ ಡ್ರೈವಿಂಗ್ ಅನುಭವವನ್ನು ನಿರ್ವಹಿಸಲು ನಿಮ್ಮ ಫೋನ್ ಅನ್ನು ನೀವು ಕಂಪ್ಯಾನಿಯನ್ ಸಾಧನವಾಗಿ ಬಳಸಬಹುದು</string>
   <string name="associated_device_install_app">ನಿಮ್ಮ ಫೋನ್‌ನಲ್ಲಿ <b>ಕಂಪ್ಯಾನಿಯನ್ ಆ್ಯಪ್</b> ಇನ್‌ಸ್ಟಾಲ್ ಆಗಿದೆಯೇ ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ</string>
   <string name="associated_device_pairing_code_title">ಫೋನ್‌ನಲ್ಲಿ ಕೋಡ್ ಅನ್ನು ದೃಢೀಕರಿಸಿ</string>
   <string name="associated_device_pairing_message">ನಿಮ್ಮ ಫೋನ್‌ನಲ್ಲಿ ತೋರಿಸಲಾಗುವ ಕೋಡ್‌ಗೆ ಇದು ಹೊಂದಾಣಿಕೆಯಾಗುತ್ತಿದೆ ಎಂದು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ</string>

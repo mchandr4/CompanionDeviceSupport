@@ -20,7 +20,7 @@
   <string name="default_device_name">Peranti Dikaitkan</string>
   <string name="add_device_title">Tambah Peranti Dikaitkan</string>
   <string name="add_associated_device_title">Sambungkan peranti rakan</string>
-  <string name="add_associated_device_instruction">Anda boleh menggunakan telefon anda sebagai peranti rakan untuk mengurus pengalaman memandu anda.</string>
+  <string name="add_associated_device_subtitle">Anda boleh menggunakan telefon anda sebagai peranti rakan untuk mengurus pengalaman memandu anda.</string>
   <string name="associated_device_install_app">Pastikan anda telah memasang <b>Apl Rakan</b> pada telefon anda</string>
   <string name="associated_device_pairing_code_title">Sahkan kod pada telefon</string>
   <string name="associated_device_pairing_message">Sahkan kod ini sepadan dengan kod yang dipaparkan pada telefon anda</string>

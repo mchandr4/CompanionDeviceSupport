@@ -20,7 +20,7 @@
   <string name="default_device_name">የተጎዳኘ መሣሪያ</string>
   <string name="add_device_title">ተጓዳኝ መሣሪያ አክል</string>
   <string name="add_associated_device_title">አጃቢ መሣሪያ ያገናኙ</string>
-  <string name="add_associated_device_instruction">የመንዳት ተሞክሮዎን እንዲያቀናብሩ እንዲያግዝ ስልክዎን እንደ አጃቢ መሣሪያዎ ሊጠቀሙበት ይችላሉ</string>
+  <string name="add_associated_device_subtitle">የመንዳት ተሞክሮዎን እንዲያቀናብሩ እንዲያግዝ ስልክዎን እንደ አጃቢ መሣሪያዎ ሊጠቀሙበት ይችላሉ</string>
   <string name="associated_device_install_app">በስልክዎ ላይ <b>አጃቢ መተግበሪያ</b> መጫንዎን ያረጋግጡ</string>
   <string name="associated_device_pairing_code_title">በስልክ ላይ ኮድ ያረጋግጡ</string>
   <string name="associated_device_pairing_message">ይህ በስልክዎ ላይ ከሚታየው ኮድ ጋር እንደሚዛመድ ያረጋግጡ</string>

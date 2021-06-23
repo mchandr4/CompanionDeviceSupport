@@ -20,7 +20,7 @@
   <string name="default_device_name">ସମ୍ବନ୍ଧିତ ଡିଭାଇସ୍</string>
   <string name="add_device_title">ସମ୍ବନ୍ଧିତ ଡିଭାଇସ୍ ଯୋଗ କରନ୍ତୁ</string>
   <string name="add_associated_device_title">ଏକ ସହଯୋଗୀ ଡିଭାଇସ୍ ସଂଯୋଗ କରନ୍ତୁ</string>
-  <string name="add_associated_device_instruction">ଡ୍ରାଇଭିଂର ଅନୁଭୂତିକୁ ପରିଚାଳନା କରିବାରେ ସାହାଯ୍ୟ କରିବାକୁ ଆପଣ ଫୋନକୁ ସହଯୋଗୀ ଡିଭାଇସ୍ ଭାବେ ବ୍ୟବହାର କରିପାରିବେ</string>
+  <string name="add_associated_device_subtitle">ଡ୍ରାଇଭିଂର ଅନୁଭୂତିକୁ ପରିଚାଳନା କରିବାରେ ସାହାଯ୍ୟ କରିବାକୁ ଆପଣ ଫୋନକୁ ସହଯୋଗୀ ଡିଭାଇସ୍ ଭାବେ ବ୍ୟବହାର କରିପାରିବେ</string>
   <string name="associated_device_install_app">ଆପଣଙ୍କ ଫୋନରେ <b>ସହଯୋଗୀ ଆପ୍</b> ଇନଷ୍ଟଲ୍ କରାଯାଇଛି ବୋଲି ନିଶ୍ଚିତ କରନ୍ତୁ</string>
   <string name="associated_device_pairing_code_title">ଫୋନରେ କୋଡ୍ ସୁନିଶ୍ଚିତ କରନ୍ତୁ</string>
   <string name="associated_device_pairing_message">ଆପଣଙ୍କ ଫୋନରେ ଦେଖାଯାଉଥିବା କୋଡ୍ ସହିତ ଏହା ମେଳ ହେଉଛି ବୋଲି ସୁନିଶ୍ଚିତ କରନ୍ତୁ</string>

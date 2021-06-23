@@ -20,7 +20,7 @@
   <string name="default_device_name">Байланышкан түзмөк</string>
   <string name="add_device_title">Байланышкан түзмөктү кошуу</string>
   <string name="add_associated_device_title">Өнөктөш түзмөктү туташтыруу</string>
-  <string name="add_associated_device_instruction">Унаа айдаганда жардам алуу үчүн телефонуңузду өнөктөш түзмөк катары колдоно аласыз</string>
+  <string name="add_associated_device_subtitle">Унаа айдаганда жардам алуу үчүн телефонуңузду өнөктөш түзмөк катары колдоно аласыз</string>
   <string name="associated_device_install_app"><b>Өнөктөш колдонмо </b> телефонуңузга орнотулганын текшериңиз</string>
   <string name="associated_device_pairing_code_title">Телефондогу кодду ырастоо</string>
   <string name="associated_device_pairing_message">Бул телефонуңуздагы кодго дал келерин ырастаңыз</string>

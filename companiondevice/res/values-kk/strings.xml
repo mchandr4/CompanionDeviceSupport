@@ -20,7 +20,7 @@
   <string name="default_device_name">Байланысқан құрылғы</string>
   <string name="add_device_title">Байланысқан құрылғыны енгізу</string>
   <string name="add_associated_device_title">Көмекші құрылғыны байланыстырыңыз</string>
-  <string name="add_associated_device_instruction">Телефоныңызды көлік жүргізуге көмекші құрылғы ретінде пайдалана аласыз.</string>
+  <string name="add_associated_device_subtitle">Телефоныңызды көлік жүргізуге көмекші құрылғы ретінде пайдалана аласыз.</string>
   <string name="associated_device_install_app">Телефонда <b>қосымша қолданба</b> орнатылғанына көз жеткізіңіз.</string>
   <string name="associated_device_pairing_code_title">Кодты телефоннан растау</string>
   <string name="associated_device_pairing_message">Мұның телефонда көрсетілетін кодқа сәйкес келетінін растаңыз.</string>

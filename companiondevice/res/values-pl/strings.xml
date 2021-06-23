@@ -20,7 +20,7 @@
   <string name="default_device_name">Urządzenie powiązane</string>
   <string name="add_device_title">Dodaj urządzenie powiązane</string>
   <string name="add_associated_device_title">Połącz urządzenie towarzyszące</string>
-  <string name="add_associated_device_instruction">Telefon może służyć Ci jako urządzenie towarzyszące i ułatwiać prowadzenie samochodu</string>
+  <string name="add_associated_device_subtitle">Telefon może służyć Ci jako urządzenie towarzyszące i ułatwiać prowadzenie samochodu</string>
   <string name="associated_device_install_app">Na telefonie musi być zainstalowana <b>aplikacja towarzysząca</b></string>
   <string name="associated_device_pairing_code_title">Potwierdź kod na telefonie</string>
   <string name="associated_device_pairing_message">Potwierdź zgodność z kodem wyświetlanym na telefonie</string>

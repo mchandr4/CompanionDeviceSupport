@@ -30,8 +30,14 @@ public class FakeEncryptionRunner implements EncryptionRunner {
   private static final byte[] FAKE_MESSAGE = "Fake Message".getBytes();
 
   public static final byte[] INIT_MESSAGE = "init".getBytes();
+  public static final byte[] INIT_MESSAGE_EMPTY_RESPONSE = "initEmptyResponse".getBytes();
   public static final byte[] INIT_RESPONSE = "initResponse".getBytes();
   public static final byte[] CLIENT_RESPONSE = "clientResponse".getBytes();
+  public static final byte[] RECONNECTION_MESSAGE_STATE_ERROR =
+      "reconnectMessageStateError".getBytes();
+  public static final byte[] RECONNECTION_MESSAGE_KEY_ERROR = "reconnectMessageKeyError".getBytes();
+  public static final byte[] RECONNECTION_MESSAGE_EMPTY_RESPONSE =
+      "reconnectMessageEmptyResponse".getBytes();
   public static final String VERIFICATION_CODE = "1234";
 
   /** The role that this runner is playing. */
@@ -72,6 +78,13 @@ public class FakeEncryptionRunner implements EncryptionRunner {
     }
 
     mode = Mode.SERVER;
+
+    if (Arrays.equals(INIT_MESSAGE_EMPTY_RESPONSE, initializationRequest)) {
+      return HandshakeMessage.newBuilder()
+          .setHandshakeState(HandshakeMessage.HandshakeState.IN_PROGRESS)
+          .setNextMessage(null)
+          .build();
+    }
 
     if (!Arrays.equals(INIT_MESSAGE, initializationRequest)) {
       throw new HandshakeException("Unexpected initialization request");
@@ -134,6 +147,29 @@ public class FakeEncryptionRunner implements EncryptionRunner {
   @Override
   public HandshakeMessage authenticateReconnection(byte[] message, byte[] previousKey)
       throws HandshakeException {
+    if (Arrays.equals(RECONNECTION_MESSAGE_STATE_ERROR, message)) {
+      return HandshakeMessage.newBuilder()
+          .setHandshakeState(HandshakeMessage.HandshakeState.IN_PROGRESS)
+          .setKey(new FakeKey())
+          .setNextMessage(isInitReconnectVerification ? null : FAKE_MESSAGE)
+          .build();
+    }
+
+    if (Arrays.equals(RECONNECTION_MESSAGE_KEY_ERROR, message)) {
+      return HandshakeMessage.newBuilder()
+          .setHandshakeState(HandshakeMessage.HandshakeState.FINISHED)
+          .setNextMessage(isInitReconnectVerification ? null : FAKE_MESSAGE)
+          .build();
+    }
+
+    if (Arrays.equals(RECONNECTION_MESSAGE_EMPTY_RESPONSE, message)) {
+      return HandshakeMessage.newBuilder()
+          .setHandshakeState(HandshakeMessage.HandshakeState.FINISHED)
+          .setKey(new FakeKey())
+          .setNextMessage(null)
+          .build();
+    }
+
     // Blindly verify the reconnection because this is a fake encryption runner.
     return HandshakeMessage.newBuilder()
         .setHandshakeState(HandshakeMessage.HandshakeState.FINISHED)
@@ -162,7 +198,7 @@ public class FakeEncryptionRunner implements EncryptionRunner {
   @Override
   public HandshakeMessage notifyPinVerified() throws HandshakeException {
     if (state != HandshakeMessage.HandshakeState.VERIFICATION_NEEDED) {
-      throw new IllegalStateException("asking to verify pin, state = " + state);
+      throw new HandshakeException("asking to verify pin, state = " + state);
     }
 
     state = HandshakeMessage.HandshakeState.FINISHED;

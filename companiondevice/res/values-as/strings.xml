@@ -20,7 +20,7 @@
   <string name="default_device_name">জড়িত ডিভাইচ</string>
   <string name="add_device_title">জড়িত ডিভাইচটো যোগ দিয়ক</string>
   <string name="add_associated_device_title">এটা সহযোগী ডিভাইচ সংযোগ কৰক</string>
-  <string name="add_associated_device_instruction">গাড়ী চলোৱাৰ অভিজ্ঞতা পৰিচালনাত সহায়ৰ বাবে আপুনি নিজৰ ফ’নটো সহযোগী ডিভাইচ হিচাপে ব্যৱহাৰ কৰিব পাৰে</string>
+  <string name="add_associated_device_subtitle">গাড়ী চলোৱাৰ অভিজ্ঞতা পৰিচালনাত সহায়ৰ বাবে আপুনি নিজৰ ফ’নটো সহযোগী ডিভাইচ হিচাপে ব্যৱহাৰ কৰিব পাৰে</string>
   <string name="associated_device_install_app">আপোনাৰ ফ’নটোত <b>সহযোগী এপ্‌</b>টো ইনষ্টল হৈ থকাটো নিশ্চিত কৰক</string>
   <string name="associated_device_pairing_code_title">ক’ডটো ফ’নত নিশ্চিত কৰক</string>
   <string name="associated_device_pairing_message">এইটো আপোনাৰ ফ’নটোত দেখুওৱা ক’ডটোৰ সৈতে মিলাটো নিশ্চিত কৰক</string>

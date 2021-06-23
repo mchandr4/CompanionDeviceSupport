@@ -20,7 +20,7 @@
   <string name="default_device_name">Зв\'язаний пристрій</string>
   <string name="add_device_title">Додати зв\'язаний пристрій</string>
   <string name="add_associated_device_title">Підключити супутній пристрій</string>
-  <string name="add_associated_device_instruction">Щоб їхати за кермом було ще зручніше, ви можете використовувати телефон як супутній пристрій</string>
+  <string name="add_associated_device_subtitle">Щоб їхати за кермом було ще зручніше, ви можете використовувати телефон як супутній пристрій</string>
   <string name="associated_device_install_app">Переконайтеся, що на телефоні встановлено <b>супутній додаток</b></string>
   <string name="associated_device_pairing_code_title">Підтвердьте код на телефоні</string>
   <string name="associated_device_pairing_message">Підтвердьте, що на телефоні з\'явився такий самий код</string>

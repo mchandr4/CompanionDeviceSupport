@@ -29,11 +29,16 @@ import java.util.concurrent.Executor;
  */
 public class ThreadSafeCallbacks<T> {
 
-  private final ConcurrentHashMap<T, Executor> callbacks = new ConcurrentHashMap<>();
+  protected final ConcurrentHashMap<T, Executor> callbacks = new ConcurrentHashMap<>();
 
-  /** Add a callback to be notified on its executor. */
+  /**
+   * Add a callback to be notified on its {@link Executor}. Results in a no-op if the callback was
+   * already registered.
+   */
   public void add(@NonNull T callback, @NonNull Executor executor) {
-    callbacks.put(callback, executor);
+    if (!contains(callback)) {
+      callbacks.put(callback, executor);
+    }
   }
 
   /** Remove a callback from the collection. */
@@ -46,18 +51,18 @@ public class ThreadSafeCallbacks<T> {
     callbacks.clear();
   }
 
-  /** Return the number of callbacks in collection. */
+  /** Return the number of callbacks in the collection. */
   public int size() {
     return callbacks.size();
   }
 
-  /** Return {@code true} if the callback is in the collection. */
+  /** Returns {@code true} if the callback is in the collection. {@code false} otherwise. */
   public boolean contains(@NonNull T callback) {
     return callbacks.containsKey(callback);
   }
 
-  /** Invoke notification on all callbacks with their supplied {@link Executor}. */
-  public void invoke(SafeConsumer<T> notification) {
+  /** Invoke the provided notification on all callbacks with their supplied {@link Executor}. */
+  public void invoke(@NonNull SafeConsumer<T> notification) {
     Set<Map.Entry<T, Executor>> entries = callbacks.entrySet();
     for (Map.Entry<T, Executor> entry : entries) {
       T callback = entry.getKey();

@@ -20,7 +20,7 @@
   <string name="default_device_name">Tengt tæki</string>
   <string name="add_device_title">Bæta tengdu tæki við</string>
   <string name="add_associated_device_title">Tengja fylgitæki</string>
-  <string name="add_associated_device_instruction">Þú getur notað símann sem fylgitæki til að stjórna upplifun þinni við akstur</string>
+  <string name="add_associated_device_subtitle">Þú getur notað símann sem fylgitæki til að stjórna upplifun þinni við akstur</string>
   <string name="associated_device_install_app">Gættu þess að vera með <b>fylgiforrit</b> uppsett í símanum</string>
   <string name="associated_device_pairing_code_title">Staðfesta kóða í síma</string>
   <string name="associated_device_pairing_message">Staðfestu að hann stemmi við kóðann í símanum þínum</string>

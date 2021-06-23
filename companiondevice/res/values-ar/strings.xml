@@ -20,7 +20,7 @@
   <string name="default_device_name">جهاز مرتبط</string>
   <string name="add_device_title">إضافة جهاز مرتبط</string>
   <string name="add_associated_device_title">إنشاء اتصال بين جهاز مصاحب والسيارة</string>
-  <string name="add_associated_device_instruction">يمكنك استخدام هاتفك كجهاز مصاحب لمساعدتك في قيادة سيارتك.</string>
+  <string name="add_associated_device_subtitle">يمكنك استخدام هاتفك كجهاز مصاحب لمساعدتك في قيادة سيارتك.</string>
   <string name="associated_device_install_app">تأكّد من أن <b>التطبيق المصاحب</b> مُثبَّت على هاتفك.</string>
   <string name="associated_device_pairing_code_title">تأكيد الرمز على الهاتف</string>
   <string name="associated_device_pairing_message">أكِّد تطابق هذا الرمز مع الرمز الموضّح على هاتفك.</string>

@@ -20,7 +20,7 @@
   <string name="default_device_name">जोड़ा गया डिवाइस</string>
   <string name="add_device_title">जोड़ा गया डिवाइस जोड़ें</string>
   <string name="add_associated_device_title">साथी डिवाइस कनेक्ट करें</string>
-  <string name="add_associated_device_instruction">अपना ड्राइविंग अनुभव प्रबंधित करने के लिए, आप फ़ोन का इस्तेमाल साथी डिवाइस के तौर पर कर सकते हैं</string>
+  <string name="add_associated_device_subtitle">अपना ड्राइविंग अनुभव प्रबंधित करने के लिए, आप फ़ोन का इस्तेमाल साथी डिवाइस के तौर पर कर सकते हैं</string>
   <string name="associated_device_install_app">पक्का करें कि आपके फ़ोन पर <b>साथी ऐप्लिकेशन</b> इंस्टॉल किया गया हो</string>
   <string name="associated_device_pairing_code_title">फ़ोन पर कोड की पुष्टि करें</string>
   <string name="associated_device_pairing_message">पुष्टि करें कि यह कोड, आपके फ़ोन पर दिखाए गए कोड से मेल खाता है</string>

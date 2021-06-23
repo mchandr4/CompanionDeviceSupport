@@ -16,32 +16,64 @@
   -->
 
 <resources>
-    <style name="AssociationTopIcon">
-        <item name="android:tint">@color/car_ui_color_accent</item>
-        <item name="android:scaleType">fitCenter</item>
+    <!-- common -->
+    <style name="HorizontalDividerStyle">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/divider_height</item>
+        <item name="android:background">?android:attr/listDivider</item>
     </style>
 
-    <style name="AssociationTitle" parent="TextAppearance.CarUi.Body1"/>
+    <style name="CompanionTitleTextStyle">
+        <item name="android:textColor">?attr/companionColorPrimary</item>
+        <item name="android:textSize">?attr/companionTitleTextSize</item>
+    </style>
 
-    <style name="AssociationInstruction" parent="TextAppearance.CarUi.Body3"/>
+    <style name="CompanionSubtitleTextStyle">
+        <item name="android:textColor">?attr/companionColorSecondary</item>
+        <item name="android:textSize">?attr/companionSubtitleTextSize</item>
+    </style>
 
+    <style name="ItemButtonTextStyle" >
+        <item name="android:textColor">?attr/companionColorAccent</item>
+        <item name="android:textSize">?attr/companionSubtitleTextSize</item>
+        <item name="android:textFontWeight">500</item>
+    </style>
+
+    <style name="PairingCodeTextStyle">
+        <item name="android:textSize">52sp</item>
+        <item name="android:letterSpacing">@dimen/pairing_code_text_spacing</item>
+        <item name="android:textColor">?attr/companionColorAccent</item>
+    </style>
+
+    <!-- settings -->
     <style name="AssociationMessage" parent="TextAppearance.CarUi.Body3">
         <item name="android:textColor">?android:attr/textColorTertiary</item>
     </style>
 
-    <style name="AssociationPairingCode" parent="TextAppearance.CarUi">
-        <item name="android:textSize">56sp</item>
-        <item name="android:letterSpacing">@dimen/pairing_code_text_spacing</item>
-        <item name="android:textColor">@color/car_ui_color_accent</item>
+    <style name="SettingsFeatureButtonStyle" parent="TextAppearance.CarUi.Body1"/>
+
+    <style name="SettingsTopIconStyle">
+        <item name="android:tint">@color/car_ui_color_accent</item>
+        <item name="android:scaleType">fitCenter</item>
     </style>
 
+    <style name="SettingsItemButtonTextStyle" parent="TextAppearance.CarUi.Body3">
+        <item name="android:textColor">?attr/companionColorAccent</item>
+        <item name="android:textFontWeight">500</item>
+    </style>
+
+    <!-- suw -->
+    <style name="SuwVerticalDividerStyle">
+        <item name="android:layout_width">@dimen/divider_height</item>
+        <item name="android:layout_marginVertical">?attr/pageMarginVertical</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:background">?android:attr/listDivider</item>
+    </style>
+
+    <!-- trusted device -->
     <style name="TrustedDeviceTitle" parent="TextAppearance.CarUi.Body1"/>
 
     <style name="TrustedDeviceMessage" parent="TextAppearance.CarUi.Body3">
         <item name="android:textColor">?android:attr/textColorTertiary</item>
-    </style>
-
-    <style name="DeviceDetailDivider">
-        <item name="android:background">?android:attr/textColorPrimary</item>
     </style>
 </resources>

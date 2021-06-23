@@ -20,7 +20,7 @@
   <string name="default_device_name">Disposit. associado</string>
   <string name="add_device_title">Adicionar dispositivo associado</string>
   <string name="add_associated_device_title">Ligue um dispositivo associado</string>
-  <string name="add_associated_device_instruction">Pode utilizar o telemóvel como dispositivo associado para ajudar a gerir a experiência de condução.</string>
+  <string name="add_associated_device_subtitle">Pode utilizar o telemóvel como dispositivo associado para ajudar a gerir a experiência de condução.</string>
   <string name="associated_device_install_app">Garanta que tem a <b>app associada</b> instalada no telemóvel.</string>
   <string name="associated_device_pairing_code_title">Confirme o código no telemóvel</string>
   <string name="associated_device_pairing_message">Confirme se este código corresponde ao código apresentado no seu telemóvel.</string>

@@ -20,7 +20,7 @@
   <string name="default_device_name">Dispozitiv asociat</string>
   <string name="add_device_title">Adăugați un dispozitiv asociat</string>
   <string name="add_associated_device_title">Conectați un dispozitiv însoțitor</string>
-  <string name="add_associated_device_instruction">Puteți folosi telefonul ca dispozitiv însoțitor cu care să gestionați experiența de condus</string>
+  <string name="add_associated_device_subtitle">Puteți folosi telefonul ca dispozitiv însoțitor cu care să gestionați experiența de condus</string>
   <string name="associated_device_install_app">Verificați dacă ați instalat <b>aplicația parteneră</b> pe telefon</string>
   <string name="associated_device_pairing_code_title">Confirmați codul pe telefon</string>
   <string name="associated_device_pairing_message">Confirmați potrivirea cu codul afișat pe telefon</string>

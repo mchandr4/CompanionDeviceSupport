@@ -119,7 +119,7 @@ abstract class ConnectionProtocol {
     fun onDeviceMaxDataSizeChanged(protocolId: String, maxBytes: Int)
 
     /** Invoked when data has been received from a device. */
-    fun onDataReceived(protocolId: String, data: ByteArray?)
+    fun onDataReceived(protocolId: String, data: ByteArray)
   }
 
   /** Callback for the result of sending data. */

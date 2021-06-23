@@ -20,7 +20,7 @@
   <string name="default_device_name">ਸੰਬੰਧਿਤ ਡੀਵਾਈਸ</string>
   <string name="add_device_title">ਸੰਬੰਧਿਤ ਡੀਵਾਈਸ ਨੂੰ ਸ਼ਾਮਲ ਕਰੋ</string>
   <string name="add_associated_device_title">ਸੰਬੰਧੀ ਡੀਵਾਈਸ ਨੂੰ ਕਨੈਕਟ ਕਰੋ</string>
-  <string name="add_associated_device_instruction">ਤੁਸੀਂ ਆਪਣੇ ਡਰਾਈਵਿੰਗ ਅਨੁਭਵ ਦੇ ਪ੍ਰਬੰਧਨ ਵਿੱਚ ਮਦਦ ਲਈ ਆਪਣੇ ਫ਼ੋਨ ਨੂੰ ਸੰਬੰਧੀ ਡੀਵਾਈਸ ਵਜੋਂ ਵਰਤ ਸਕਦੇ ਹੋ</string>
+  <string name="add_associated_device_subtitle">ਤੁਸੀਂ ਆਪਣੇ ਡਰਾਈਵਿੰਗ ਅਨੁਭਵ ਦੇ ਪ੍ਰਬੰਧਨ ਵਿੱਚ ਮਦਦ ਲਈ ਆਪਣੇ ਫ਼ੋਨ ਨੂੰ ਸੰਬੰਧੀ ਡੀਵਾਈਸ ਵਜੋਂ ਵਰਤ ਸਕਦੇ ਹੋ</string>
   <string name="associated_device_install_app">ਪੱਕਾ ਕਰੋ ਕਿ ਤੁਹਾਡੇ ਫ਼ੋਨ \'ਤੇ <b>ਸੰਬੰਧੀ ਐਪ</b> ਸਥਾਪਤ ਹੈ</string>
   <string name="associated_device_pairing_code_title">ਫ਼ੋਨ \'ਤੇ ਕੋਡ ਦੀ ਤਸਦੀਕ ਕਰੋ</string>
   <string name="associated_device_pairing_message">ਤਸਦੀਕ ਕਰੋ ਕਿ ਇਹ ਤੁਹਾਡੇ ਫ਼ੋਨ \'ਤੇ ਦਿਖਾਏ ਜਾ ਰਹੇ ਕੋਡ ਨਾਲ ਮੇਲ ਖਾਂਦਾ ਹੈ</string>

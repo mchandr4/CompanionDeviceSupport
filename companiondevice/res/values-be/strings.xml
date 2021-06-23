@@ -20,7 +20,7 @@
   <string name="default_device_name">Звязаная прылада</string>
   <string name="add_device_title">Дадаць звязаную прыладу</string>
   <string name="add_associated_device_title">Падключэнне спадарожнай прылады</string>
-  <string name="add_associated_device_instruction">Тэлефон можна выкарыстоўваць у якасці спадарожнай прылады для кіравання функцыямі аўтамабіля</string>
+  <string name="add_associated_device_subtitle">Тэлефон можна выкарыстоўваць у якасці спадарожнай прылады для кіравання функцыямі аўтамабіля</string>
   <string name="associated_device_install_app">Праверце, ці ўсталявана на тэлефоне <b>спадарожная праграма</b></string>
   <string name="associated_device_pairing_code_title">Пацвердзіце код на тэлефоне</string>
   <string name="associated_device_pairing_message">Праверце, ці супадае гэты код з паказаным на тэлефоне</string>

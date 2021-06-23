@@ -20,7 +20,7 @@
   <string name="default_device_name">ອຸປະກອນທີ່ເຊື່ອມໂຍງ</string>
   <string name="add_device_title">ເພີ່ມອຸປະກອນທີ່ເຊື່ອມໂຍງ</string>
   <string name="add_associated_device_title">ເຊື່ອມຕໍ່ອຸປະກອນຊ່ວຍເຫຼືອ</string>
-  <string name="add_associated_device_instruction">ທ່ານສາມາດໃຊ້ໂທລະສັບຂອງທ່ານເປັນອຸປະກອນຊ່ວຍເຫຼືອເພື່ອຊ່ວຍຈັດການປະສົບການຂັບຂີ່ຂອງທ່ານໄດ້</string>
+  <string name="add_associated_device_subtitle">ທ່ານສາມາດໃຊ້ໂທລະສັບຂອງທ່ານເປັນອຸປະກອນຊ່ວຍເຫຼືອເພື່ອຊ່ວຍຈັດການປະສົບການຂັບຂີ່ຂອງທ່ານໄດ້</string>
   <string name="associated_device_install_app">ກວດໃຫ້ແນ່ໃຈວ່າທ່ານໄດ້ຕິດຕັ້ງ <b>ແອັບຊ່ວຍເຫຼືອ</b> ໃນໂທລະສັບຂອງທ່ານແລ້ວ</string>
   <string name="associated_device_pairing_code_title">ຢືນຢັນລະຫັດຜ່ານໃນໂທລະສັບ</string>
   <string name="associated_device_pairing_message">ຢືນຢັນວ່າລະຫັດນີ້ກົງກັບລະຫັດທີ່ສະແດງໃນໂທລະສັບຂອງທ່ານ</string>

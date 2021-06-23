@@ -24,16 +24,27 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 
 /** Fragment that displays the pairing code. */
 public class ConfirmPairingCodeFragment extends Fragment {
+  private static final String IS_STARTED_FOR_SUW_KEY = "isStartedForSuw";
   private static final String PAIRING_CODE_KEY = "pairingCodeKey";
   private static final String TAG = "ConfirmPairingCodeFragment";
 
-  static ConfirmPairingCodeFragment newInstance(@NonNull String pairingCode) {
+  /**
+   * Creates a new instance of {@link ConfirmPairingCodeFragment}.
+   *
+   * @param isStartedForSuw If the fragment is created for car setup wizard.
+   * @param pairingCode The pairing code.
+   * @return {@link ConfirmPairingCodeFragment} instance.
+   */
+  static ConfirmPairingCodeFragment newInstance(
+      boolean isStartedForSuw, @NonNull String pairingCode) {
     Bundle bundle = new Bundle();
     bundle.putString(PAIRING_CODE_KEY, pairingCode);
+    bundle.putBoolean(IS_STARTED_FOR_SUW_KEY, isStartedForSuw);
     ConfirmPairingCodeFragment fragment = new ConfirmPairingCodeFragment();
     fragment.setArguments(bundle);
     return fragment;
@@ -42,7 +53,12 @@ public class ConfirmPairingCodeFragment extends Fragment {
   @Override
   public View onCreateView(
       LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-    return inflater.inflate(R.layout.confirm_pairing_code_fragment, container, false);
+    @LayoutRes
+    int layout =
+        getArguments().getBoolean(IS_STARTED_FOR_SUW_KEY)
+            ? R.layout.suw_confirm_code_fragment
+            : R.layout.confirm_code_fragment;
+    return inflater.inflate(layout, container, false);
   }
 
   @Override

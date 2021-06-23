@@ -20,7 +20,7 @@
   <string name="default_device_name">સંકળાયેલું ડિવાઇસ</string>
   <string name="add_device_title">સંકળાયેલું ડિવાઇસ ઉમેરો</string>
   <string name="add_associated_device_title">સાથી ડિવાઇસને કનેક્ટ કરો</string>
-  <string name="add_associated_device_instruction">તમારા ડ્રાઇવિંગના અનુભવને મેનેજ કરવામાં સહાય મેળવવા તમે તમારા ફોનનો સાથી ડિવાઇસ તરીકે ઉપયોગ કરી શકો</string>
+  <string name="add_associated_device_subtitle">તમારા ડ્રાઇવિંગના અનુભવને મેનેજ કરવામાં સહાય મેળવવા તમે તમારા ફોનનો સાથી ડિવાઇસ તરીકે ઉપયોગ કરી શકો</string>
   <string name="associated_device_install_app">તમારા ફોનમાં <b>સાથી ઍપ</b> ઇન્સ્ટૉલ કરેલી હોવાની ખાતરી કરો</string>
   <string name="associated_device_pairing_code_title">ફોન પર કોડ કન્ફર્મ કરો</string>
   <string name="associated_device_pairing_message">તમારા ફોન પર બતાવેલા કોડ સાથે આનો મેળ બેસતો હોવાનું કન્ફર્મ કરો</string>

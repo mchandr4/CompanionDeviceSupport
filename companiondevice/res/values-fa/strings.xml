@@ -20,7 +20,7 @@
   <string name="default_device_name">دستگاه مرتبط</string>
   <string name="add_device_title">افزودن دستگاه مرتبط</string>
   <string name="add_associated_device_title">اتصال دستگاه همراه</string>
-  <string name="add_associated_device_instruction">برای کمک به مدیریت تجربه رانندگی‌تان، می‌توانید از تلفن خود به‌عنوان دستگاه همراه استفاده کنید</string>
+  <string name="add_associated_device_subtitle">برای کمک به مدیریت تجربه رانندگی‌تان، می‌توانید از تلفن خود به‌عنوان دستگاه همراه استفاده کنید</string>
   <string name="associated_device_install_app">مطمئن شوید <b>برنامه همراه</b> را در تلفنتان نصب کرده‌اید</string>
   <string name="associated_device_pairing_code_title">تأیید کد در تلفن</string>
   <string name="associated_device_pairing_message">تأیید کنید این کد با کدی است که در تلفنتان نشان داده شده است مطابقت دارد</string>

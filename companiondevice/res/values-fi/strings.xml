@@ -20,7 +20,7 @@
   <string name="default_device_name">Yhdistetty laite</string>
   <string name="add_device_title">Lisää yhdistetty laite</string>
   <string name="add_associated_device_title">Yhdistä kumppanilaite</string>
-  <string name="add_associated_device_instruction">Voit käyttää puhelintasi kumppanilaitteena ajokokemuksen apuna</string>
+  <string name="add_associated_device_subtitle">Voit käyttää puhelintasi kumppanilaitteena ajokokemuksen apuna</string>
   <string name="associated_device_install_app">Varmista, että puhelimeesi on asennettu <b>kumppanisovellus</b></string>
   <string name="associated_device_pairing_code_title">Vahvista koodi puhelimella</string>
   <string name="associated_device_pairing_message">Vahvista, että tämä vastaa puhelimessa näkyvää koodia</string>

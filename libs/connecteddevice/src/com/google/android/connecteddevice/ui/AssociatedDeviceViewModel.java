@@ -476,12 +476,6 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
         @Override
         public void onAssociatedDevicesRetrieved(List<AssociatedDevice> devices) {
           setAssociatedDevices(devices);
-          AssociationState state = associationState.getValue();
-          if (devices.isEmpty()
-              && state != AssociationState.STARTING
-              && state != AssociationState.STARTED) {
-            startAssociation();
-          }
         }
       };
 

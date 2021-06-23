@@ -20,7 +20,7 @@
   <string name="default_device_name">Povezani uređaj</string>
   <string name="add_device_title">Dodaj povezani uređaj</string>
   <string name="add_associated_device_title">Povežite pridruženi uređaj</string>
-  <string name="add_associated_device_instruction">Možete da koristite telefon kao pridruženi uređaj da biste upravljali doživljajem vožnje</string>
+  <string name="add_associated_device_subtitle">Možete da koristite telefon kao pridruženi uređaj da biste upravljali doživljajem vožnje</string>
   <string name="associated_device_install_app">Uverite se da ste instalirali <b>prateću aplikaciju</b> na telefonu</string>
   <string name="associated_device_pairing_code_title">Potvrdite kôd na telefonu</string>
   <string name="associated_device_pairing_message">Potvrdite da se ovo podudara sa kodom koji se prikazuje na telefonu</string>

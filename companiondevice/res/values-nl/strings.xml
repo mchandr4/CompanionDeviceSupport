@@ -20,7 +20,7 @@
   <string name="default_device_name">Bijbehorend apparaat</string>
   <string name="add_device_title">Gekoppeld apparaat toevoegen</string>
   <string name="add_associated_device_title">Een bijbehorend apparaat koppelen</string>
-  <string name="add_associated_device_instruction">Je kunt je telefoon als bijbehorend apparaat gebruiken om de functionaliteit van je auto te beheren</string>
+  <string name="add_associated_device_subtitle">Je kunt je telefoon als bijbehorend apparaat gebruiken om de functionaliteit van je auto te beheren</string>
   <string name="associated_device_install_app">Zorg dat de <b>bijbehorende app</b> op je telefoon is geïnstalleerd</string>
   <string name="associated_device_pairing_code_title">Bevestig de code op je telefoon</string>
   <string name="associated_device_pairing_message">Bevestig dat deze overeenkomt met de code die op je telefoon wordt weergegeven</string>

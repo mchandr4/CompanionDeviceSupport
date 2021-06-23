@@ -43,7 +43,7 @@ public class OobAssociationActivity extends FragmentActivity {
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    setContentView(R.layout.base_activity);
+    setContentView(R.layout.settings_base_activity);
 
     String deviceAddress = getIntent().getStringExtra(EXTRA_DEVICE_ADDRESS);
     if (Strings.isNullOrEmpty(deviceAddress)) {

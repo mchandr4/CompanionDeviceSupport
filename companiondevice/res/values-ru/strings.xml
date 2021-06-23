@@ -20,7 +20,7 @@
   <string name="default_device_name">Связанное устройство</string>
   <string name="add_device_title">Добавить связанное устройство</string>
   <string name="add_associated_device_title">Подключение вспомогательного устройства</string>
-  <string name="add_associated_device_instruction">В качестве вспомогательного устройства для удобства вождения можно использовать телефон.</string>
+  <string name="add_associated_device_subtitle">В качестве вспомогательного устройства для удобства вождения можно использовать телефон.</string>
   <string name="associated_device_install_app">Установите <b>сопутствующее приложение</b> на телефон.</string>
   <string name="associated_device_pairing_code_title">Подтверждение кода на телефоне</string>
   <string name="associated_device_pairing_message">Убедитесь, что коды на экранах автомобиля и телефона совпадают.</string>
