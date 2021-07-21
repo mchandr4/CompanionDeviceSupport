@@ -4,8 +4,8 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.util.concurrent.MoreExecutors.directExecutor;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import androidx.room.Room;
 import android.content.Context;
+import androidx.room.Room;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import java.util.List;

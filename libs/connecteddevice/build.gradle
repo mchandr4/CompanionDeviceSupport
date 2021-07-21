@@ -108,6 +108,8 @@ dependencies {
     testImplementation 'com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0'
     testImplementation 'org.mockito:mockito-core:3.6.0'
     testImplementation 'org.robolectric:robolectric:4.5.1'
+
+    implementation group: 'org.jetbrains.kotlin', name: 'kotlin-test', version: '1.5.10'
 }
 
 protobuf {

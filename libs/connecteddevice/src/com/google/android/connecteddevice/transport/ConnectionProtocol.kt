@@ -30,6 +30,12 @@ abstract class ConnectionProtocol {
   protected val deviceCallbacks: ConcurrentHashMap<String, ThreadSafeCallbacks<DeviceCallback>> =
     ConcurrentHashMap()
 
+  /**
+   * `true` if challenge exchange is required to verify the remote device for establishing a secure
+   * channel over this [ConnectionProtocol].
+   */
+  abstract val isDeviceVerificationRequired: Boolean
+
   /** Begin the discovery process with [name] for a new device to associate with. */
   abstract fun startAssociationDiscovery(name: String, callback: DiscoveryCallback)
 
@@ -68,25 +74,15 @@ abstract class ConnectionProtocol {
   abstract fun getMaxWriteSize(protocolId: String): Int
 
   /** Register a callback to be notified of events for a device on this protocol. */
-  fun registerCallback(
-    protocolId: String,
-    callback: DeviceCallback,
-    executor: Executor
-  ) {
+  open fun registerCallback(protocolId: String, callback: DeviceCallback, executor: Executor) {
     val callbacks = deviceCallbacks.computeIfAbsent(protocolId) { ThreadSafeCallbacks() }
     callbacks.add(callback, executor)
   }
 
   /** Unregister a previously registered callback. */
-  fun unregisterCallback(
-    protocolId: String,
-    callback: DeviceCallback
-  ) {
+  open fun unregisterCallback(protocolId: String, callback: DeviceCallback) {
     if (!deviceCallbacks.containsKey(protocolId)) {
-      SafeLog.logw(
-        TAG,
-        "Attempted to delete callback for device $protocolId that does not exist."
-      )
+      SafeLog.logw(TAG, "Attempted to delete callback for device $protocolId that does not exist.")
       return
     }
     deviceCallbacks[protocolId]?.remove(callback)
@@ -105,9 +101,6 @@ abstract class ConnectionProtocol {
 
     /** Invoked when a device connection is established in response to the discovery. */
     fun onDeviceConnected(protocolId: String)
-
-    /** Invoked when the name of a device is retrieved. */
-    fun onDeviceNameRetrieved(protocolId: String, name: String)
   }
 
   /** Event notifications for a device on the protocol. */

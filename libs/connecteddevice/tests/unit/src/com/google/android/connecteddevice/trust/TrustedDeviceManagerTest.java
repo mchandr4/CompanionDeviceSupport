@@ -10,10 +10,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
-import androidx.room.Room;
 import android.content.Context;
 import android.os.IBinder;
 import android.os.RemoteException;
+import androidx.room.Room;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.google.android.connecteddevice.api.IConnectedDeviceManager;

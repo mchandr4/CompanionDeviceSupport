@@ -16,9 +16,9 @@
 
 package com.google.android.connecteddevice.storage;
 
+import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
-import androidx.annotation.NonNull;
 
 /**
  * Table entity representing an challenge key for an associated device reconnection advertisement.

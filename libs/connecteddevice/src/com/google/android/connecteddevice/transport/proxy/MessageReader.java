@@ -106,6 +106,10 @@ class MessageReader implements CentralConnectionStatus.Callback {
         // Ignore the message.
         callback.onAdvertisingStarted();
         break;
+      case NOTIFY_CHARACTERISTIC_UPDATED:
+        // Ignore the message.
+        callback.onCharacteristicUpdated(FAKE_BLUETOOTH_DEVICE);
+        break;
       case NOTIFY_CENTRAL_SUBSCRIPTION_EVENT:
         handleNotifyCentralSubscriptionMessage(
             NotifyCentralSubscriptionMessage.parser().parseFrom(payload));
@@ -122,7 +126,8 @@ class MessageReader implements CentralConnectionStatus.Callback {
         handlePlainTextMessage(PlainTextMessage.parser().parseFrom(payload));
         break;
       default:
-        loge(TAG, "Received unrecognized payload type: " + payloadType.getNumber() + ". Ignored");
+        throw new UnsupportedOperationException(
+            "Received unrecognized payload type: " + payloadType.getNumber());
     }
   }
 
@@ -197,6 +202,8 @@ class MessageReader implements CentralConnectionStatus.Callback {
 
     void onCharacteristicWrite(
         @NonNull BluetoothDevice device, @NonNull BluetoothGattCharacteristic characteristic);
+
+    void onCharacteristicUpdated(@NonNull BluetoothDevice device);
 
     void onInputStreamFailure();
   }

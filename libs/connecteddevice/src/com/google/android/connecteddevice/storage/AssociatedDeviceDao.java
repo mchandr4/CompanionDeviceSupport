@@ -35,6 +35,10 @@ public interface AssociatedDeviceDao {
   @Query("SELECT * FROM associated_devices WHERE userId LIKE :userId")
   List<AssociatedDeviceEntity> getAssociatedDevicesForUser(int userId);
 
+  /** Get all {@link AssociatedDeviceEntity}s. */
+  @Query("SELECT * FROM associated_devices")
+  List<AssociatedDeviceEntity> getAllAssociatedDevices();
+
   /**
    * Add a {@link AssociatedDeviceEntity}. Replace if a device already exists with the same device
    * id.

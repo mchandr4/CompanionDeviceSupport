@@ -20,6 +20,7 @@ import static com.google.android.connecteddevice.util.SafeLog.loge;
 
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelStoreOwner;
+import android.bluetooth.BluetoothAdapter;
 import android.os.Bundle;
 import androidx.fragment.app.Fragment;
 import android.text.Html;
@@ -88,7 +89,14 @@ public class CompanionLandingFragment extends Fragment {
     if (carName == null) {
       return;
     }
-    String connectToCarText = getString(R.string.connect_to_targe_car_instruction_text, carName);
+    if (!carName.isEmpty()) {
+      // Embedded BLE name inside the parenthesis indicating it is just another representatives of
+      // the device.
+      carName = "(" + carName + ")";
+    }
+    String bluetoothName = BluetoothAdapter.getDefaultAdapter().getName();
+    String connectToCarText =
+        getString(R.string.connect_to_targe_car_instruction_text, bluetoothName, carName);
     Spanned styledConnectToCarText = Html.fromHtml(connectToCarText, Html.FROM_HTML_MODE_LEGACY);
     textView.setText(styledConnectToCarText);
   }

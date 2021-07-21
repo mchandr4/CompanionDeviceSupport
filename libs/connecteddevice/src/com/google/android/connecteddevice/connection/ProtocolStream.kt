@@ -20,6 +20,7 @@ import com.google.android.companionprotos.OperationProto.OperationType
 import com.google.android.companionprotos.PacketProto.Packet
 import com.google.android.connecteddevice.model.DeviceMessage
 import com.google.android.connecteddevice.transport.ConnectionProtocol
+import com.google.android.connecteddevice.transport.ProtocolDevice
 import com.google.android.connecteddevice.util.ByteUtils
 import com.google.android.connecteddevice.util.EventLog.onMessageFullyReceived
 import com.google.android.connecteddevice.util.EventLog.onMessageStarted
@@ -40,8 +41,7 @@ import java.util.concurrent.atomic.AtomicInteger
  * Data stream for a specified [protocol] and its corresponding device identified with [protocolId].
  */
 open class ProtocolStream(
-  private val protocol: ConnectionProtocol,
-  private val protocolId: String,
+  private val device: ProtocolDevice,
   callbackExecutor: Executor = Executors.newSingleThreadExecutor()
 ) {
   /** Listener which will be notified when there is new [DeviceMessage] received. */
@@ -66,9 +66,9 @@ open class ProtocolStream(
   private var maxWriteSize: Int
 
   init {
-    maxWriteSize = protocol.getMaxWriteSize(protocolId)
-    protocol.registerCallback(
-      protocolId,
+    maxWriteSize = device.protocol.getMaxWriteSize(device.protocolId)
+    device.protocol.registerCallback(
+      device.protocolId,
       object : ConnectionProtocol.DeviceCallback {
         override fun onDeviceDisconnected(protocolId: String) {
           isConnected.set(false)
@@ -92,8 +92,8 @@ open class ProtocolStream(
       logw(TAG, "Unable to send data to disconnected device.")
       return
     }
-    protocol.sendData(
-      protocolId,
+    device.protocol.sendData(
+      device.protocolId,
       data,
       object : ConnectionProtocol.DataSendCallback {
         override fun onDataSentSuccessfully() {
@@ -103,7 +103,7 @@ open class ProtocolStream(
 
         override fun onDataFailedToSend() {
           loge(TAG, "Data failed to send. Disconnecting.")
-          protocol.disconnectDevice(protocolId)
+          device.protocol.disconnectDevice(device.protocolId)
         }
       }
     )
@@ -171,7 +171,7 @@ open class ProtocolStream(
         Packet.parseFrom(data, ExtensionRegistryLite.getEmptyRegistry())
       } catch (e: IOException) {
         loge(TAG, "Can not parse packet from client. Disconnecting.", e)
-        protocol.disconnectDevice(protocolId)
+        device.protocol.disconnectDevice(device.protocolId)
         return
       }
     processPacket(packet)
@@ -188,7 +188,7 @@ open class ProtocolStream(
       currentPayloadStream.write(payload)
     } catch (e: IOException) {
       loge(TAG, "Error writing packet to stream. Disconnecting.", e)
-      protocol.disconnectDevice(protocolId)
+      device.protocol.disconnectDevice(device.protocolId)
       return
     }
     logd(
@@ -222,7 +222,7 @@ open class ProtocolStream(
 
     if (packetNumber != expectedPacket) {
       loge(TAG, "Received unexpected packet $packetNumber for message $messageId. Disconnecting.")
-      protocol.disconnectDevice(protocolId)
+      device.protocol.disconnectDevice(device.protocolId)
       return false
     }
 
@@ -238,7 +238,7 @@ open class ProtocolStream(
         DeviceMessageProto.Message.parseFrom(messageBytes, ExtensionRegistryLite.getEmptyRegistry())
       } catch (e: IOException) {
         loge(TAG, "Cannot parse device message from client. Disconnecting.", e)
-        protocol.disconnectDevice(protocolId)
+        device.protocol.disconnectDevice(device.protocolId)
         return
       }
     val deviceMessage =

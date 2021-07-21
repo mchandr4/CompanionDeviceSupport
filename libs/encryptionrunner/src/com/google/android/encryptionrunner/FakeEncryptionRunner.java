@@ -17,6 +17,7 @@
 package com.google.android.encryptionrunner;
 
 import androidx.annotation.IntDef;
+import com.google.common.primitives.Bytes;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
@@ -28,6 +29,7 @@ import java.util.Arrays;
 public class FakeEncryptionRunner implements EncryptionRunner {
 
   private static final byte[] FAKE_MESSAGE = "Fake Message".getBytes();
+  private static final byte[] TEST_ENCRYPT_PADDING = "padding".getBytes();
 
   public static final byte[] INIT_MESSAGE = "init".getBytes();
   public static final byte[] INIT_MESSAGE_EMPTY_RESPONSE = "initEmptyResponse".getBytes();
@@ -229,6 +231,19 @@ public class FakeEncryptionRunner implements EncryptionRunner {
     return mode;
   }
 
+  /**
+   * Encrypted the given byte array with schema defined in {@link FakeKey} class.
+   * @param data The byte array ready to be encrypted.
+   * @return The encrypted byt array.
+   */
+  public static byte[] encryptDataWithFakeKey(byte[] data) {
+    return Bytes.concat(TEST_ENCRYPT_PADDING, data);
+  }
+
+  private static byte[] decryptDataWithFakeKey(byte[] encryptedData) {
+    return Arrays.copyOfRange(encryptedData, TEST_ENCRYPT_PADDING.length, encryptedData.length);
+  }
+
   static class FakeKey implements Key {
     private static final byte[] KEY_BYTES = "key".getBytes();
     private static final byte[] UNIQUE_SESSION_BYTES = "unique_session".getBytes();
@@ -240,12 +255,12 @@ public class FakeEncryptionRunner implements EncryptionRunner {
 
     @Override
     public byte[] encryptData(byte[] data) {
-      return data;
+      return encryptDataWithFakeKey(data);
     }
 
     @Override
     public byte[] decryptData(byte[] encryptedData) {
-      return encryptedData;
+      return decryptDataWithFakeKey(encryptedData);
     }
 
     @Override

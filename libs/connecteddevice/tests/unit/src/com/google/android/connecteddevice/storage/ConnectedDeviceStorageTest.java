@@ -22,10 +22,10 @@ import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import androidx.room.Room;
 import android.content.Context;
 import android.util.Base64;
 import android.util.Pair;
+import androidx.room.Room;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.google.android.connecteddevice.model.AssociatedDevice;
@@ -51,14 +51,16 @@ public final class ConnectedDeviceStorageTest {
 
   private List<Pair<Integer, AssociatedDevice>> addedAssociatedDevices;
 
+  private ConnectedDeviceDatabase connectedDeviceDatabase;
+
   @Before
   public void setUp() {
-    AssociatedDeviceDao database =
+    connectedDeviceDatabase =
         Room.inMemoryDatabaseBuilder(context, ConnectedDeviceDatabase.class)
             .allowMainThreadQueries()
             .setQueryExecutor(directExecutor())
-            .build()
-            .associatedDeviceDao();
+            .build();
+    AssociatedDeviceDao database = connectedDeviceDatabase.associatedDeviceDao();
 
     connectedDeviceStorage = new ConnectedDeviceStorage(context, new FakeCryptoHelper(), database);
     addedAssociatedDevices = new ArrayList<>();
@@ -70,6 +72,7 @@ public final class ConnectedDeviceStorageTest {
     for (Pair<Integer, AssociatedDevice> device : addedAssociatedDevices) {
       connectedDeviceStorage.removeAssociatedDevice(device.first, device.second.getDeviceId());
     }
+    connectedDeviceDatabase.close();
   }
 
   @Test
@@ -120,6 +123,16 @@ public final class ConnectedDeviceStorageTest {
     List<AssociatedDevice> associatedDevices =
         connectedDeviceStorage.getAssociatedDevicesForUser(ACTIVE_USER_ID);
     assertThat(associatedDevices).isEmpty();
+  }
+
+  @Test
+  public void getAllAssociatedDevices_returnsDevicesForAllUsers() {
+    AssociatedDevice activeUserDevice = addRandomAssociatedDevice(ACTIVE_USER_ID);
+    AssociatedDevice otherUserDevice = addRandomAssociatedDevice(ACTIVE_USER_ID + 1);
+
+    List<AssociatedDevice> associatedDevices = connectedDeviceStorage.getAllAssociatedDevices();
+
+    assertThat(associatedDevices).containsExactly(activeUserDevice, otherUserDevice);
   }
 
   @Test

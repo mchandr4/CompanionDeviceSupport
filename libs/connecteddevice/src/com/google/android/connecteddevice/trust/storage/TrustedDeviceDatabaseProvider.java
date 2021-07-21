@@ -1,10 +1,10 @@
 package com.google.android.connecteddevice.trust.storage;
 
-import androidx.room.Room;
-import androidx.room.migration.Migration;
 import android.content.Context;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
+import androidx.room.Room;
+import androidx.room.migration.Migration;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
 /** Provider of the common database within this library. */

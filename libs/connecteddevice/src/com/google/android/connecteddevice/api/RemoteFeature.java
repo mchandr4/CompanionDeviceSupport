@@ -74,11 +74,26 @@ public abstract class RemoteFeature {
 
   /**
    * When a client calls {@link Context#bindService(Intent, ServiceConnection, int)} to get the
-   * IConnectedDeviceManager from a service running the foreground user. Any process that resides
+   * IConnectedDeviceManager from a service running in the foreground user. Any process that resides
    * outside of the service host application must use this action in its {@link Intent}.
    */
   public static final String ACTION_BIND_REMOTE_FEATURE_FG =
       "com.google.android.connecteddevice.api.BIND_REMOTE_FEATURE_FG";
+
+  /**
+   * When a client calls {@link Context#bindService(Intent, ServiceConnection, int)} to get the
+   * {@link IFeatureCoordinator}, this action is required in the param {@link Intent}.
+   */
+  public static final String ACTION_BIND_FEATURE_COORDINATOR =
+      "com.google.android.connecteddevice.api.BIND_FEATURE_COORDINATOR";
+
+  /**
+   * When a client calls {@link Context#bindService(Intent, ServiceConnection, int)} to get the
+   * {@link IFeatureCoordinator} from a service running in the foreground user. Any process that
+   * resides outside of the service host application must use this action in its {@link Intent}.
+   */
+  public static final String ACTION_BIND_FEATURE_COORDINATOR_FG =
+      "com.google.android.connecteddevice.api.BIND_FEATURE_COORDINATOR_FG";
 
   /** Intent action used to request a device be associated. */
   public static final String ACTION_ASSOCIATION_SETTING =
@@ -140,6 +155,13 @@ public abstract class RemoteFeature {
     this.forceFgUserBind = forceFgUserBind;
   }
 
+  /**
+   * Create a new RemoteFeature with an already initialized {@link IConnectedDeviceManager}.
+   *
+   * @param context {@link Context} of the application process
+   * @param featureId The id for this feature
+   * @param connectedDeviceManager {@link IConnectedDeviceManager} reference for API calls
+   */
   protected RemoteFeature(
       @NonNull Context context,
       @NonNull ParcelUuid featureId,
@@ -418,6 +440,12 @@ public abstract class RemoteFeature {
 
   // These can be overridden to perform custom actions.
 
+  /**
+   * Called when {@link #getConnectedDeviceManager()} will return a non-null reference and is ready
+   * for interaction.
+   */
+  protected void onReady() {}
+
   /** Called when a new {@link ConnectedDevice} is connected. */
   protected void onDeviceConnected(@NonNull ConnectedDevice device) {}
 
@@ -501,6 +529,7 @@ public abstract class RemoteFeature {
   }
 
   private void setupConnectedDeviceManager() {
+    onReady();
     try {
       connectedDeviceManager.registerActiveUserConnectionCallback(connectionCallback);
       connectedDeviceManager.registerDeviceAssociationCallback(deviceAssociationCallback);
@@ -580,6 +609,7 @@ public abstract class RemoteFeature {
       new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
+          logd(TAG, "Service " + name.flattenToString() + " connected.");
           connectedDeviceManager = IConnectedDeviceManager.Stub.asInterface(service);
           setupConnectedDeviceManager();
         }
@@ -599,6 +629,9 @@ public abstract class RemoteFeature {
           connectedDeviceManager.registerDeviceCallback(
               connectedDevice, featureId, deviceCallback);
           RemoteFeature.this.onDeviceConnected(connectedDevice);
+          if (connectedDevice.hasSecureChannel()) {
+            RemoteFeature.this.onSecureChannelEstablished(connectedDevice);
+          }
         }
 
         @Override

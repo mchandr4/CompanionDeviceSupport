@@ -43,12 +43,13 @@ class AidlThreadSafeCallbacks<T> : ThreadSafeCallbacks<T>() where T : IInterface
 
   override fun invoke(notification: SafeConsumer<T>) {
     for ((callback, executor) in callbacks.entries) {
-      if (!callback.asBinder().isBinderAlive) {
+      val aliveCallback = callback.aliveOrNull()
+      if (aliveCallback == null) {
         logw(TAG, "A binder has died. Removing from the registered callbacks.")
         callbacks.remove(callback)
         continue
       }
-      executor.execute { notification.accept(callback) }
+      executor.execute { notification.accept(aliveCallback) }
     }
   }
 

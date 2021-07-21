@@ -430,21 +430,12 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
         public void onAssociationStartSuccess(String deviceName) {
           associationState.postValue(AssociationState.STARTED);
           if (deviceName == null) {
-            deviceName = BluetoothAdapter.getDefaultAdapter().getName();
-            logd(
-                TAG,
-                "Association advertising started with null device name, falling back to "
-                    + "display bluetooth adapter name: "
-                    + deviceName
-                    + ".");
-          }
-
-          // Name prefix is only needed under BLE mode.
-          if (isSppEnabled) {
-            advertisedCarName.postValue(deviceName);
+            deviceName = "";
           } else {
-             advertisedCarName.postValue(bleDeviceNamePrefix + deviceName);
+            // Name prefix is only needed under BLE mode.
+            deviceName = bleDeviceNamePrefix + deviceName;
           }
+          advertisedCarName.postValue(deviceName);
         }
 
         @Override

@@ -17,6 +17,7 @@
 package com.google.android.connecteddevice.transport.proxy;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.verify;
 
@@ -31,7 +32,9 @@ import com.google.protos.aae.bleproxy.BlePeripheralMessage.Characteristic;
 import com.google.protos.aae.bleproxy.BlePeripheralMessage.NotifyCentralDidWriteValueMessage;
 import com.google.protos.aae.bleproxy.BlePeripheralMessage.NotifyCentralSubscriptionMessage;
 import com.google.protos.aae.bleproxy.BlePeripheralMessage.NotifyCentralSubscriptionMessage.Event;
+import com.google.protos.aae.bleproxy.BlePeripheralMessage.NotifyCharacteristicUpdatedMessage;
 import com.google.protos.aae.bleproxy.BlePeripheralMessage.NotifyStartedAdvertisingMessage;
+import com.google.protos.aae.bleproxy.BlePeripheralMessage.UpdateCharacteristicMessage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Arrays;
@@ -115,6 +118,29 @@ public final class MessageReaderTest {
     BluetoothGattCharacteristic gattCharacteristic = characteristicCaptor.getValue();
     assertThat(Arrays.equals(gattCharacteristic.getValue(), value)).isTrue();
     assertThat(gattCharacteristic.getUuid()).isEqualTo(characteristicUuid);
+  }
+
+  @Test
+  public void processMessageParcel_characteristicUpdated() throws IOException {
+    NotifyCharacteristicUpdatedMessage message =
+        NotifyCharacteristicUpdatedMessage.getDefaultInstance();
+
+    messageReader.processMessageParcel(
+        createParcel(message, PayloadType.NOTIFY_CHARACTERISTIC_UPDATED));
+
+    verify(mockCallback).onCharacteristicUpdated(any());
+  }
+
+  @Test
+  public void processMessageParcel_throwsException() {
+    // Create a message that should only be sent from IHU to proxy.
+    UpdateCharacteristicMessage message = UpdateCharacteristicMessage.getDefaultInstance();
+
+    assertThrows(
+        UnsupportedOperationException.class,
+        () ->
+            messageReader.processMessageParcel(
+                createParcel(message, PayloadType.UPDATE_CHARACTERISTIC)));
   }
 
   private static BlePeripheralMessageParcel createParcel(MessageLite message, PayloadType type) {

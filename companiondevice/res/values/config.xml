@@ -42,4 +42,5 @@
     <bool name="enable_proxy">false</bool>
     <bool name="enable_spp">false</bool>
     <bool name="enable_capabilities">false</bool>
+    <bool name="enable_feature_coordinator">false</bool>
 </resources>

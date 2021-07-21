@@ -23,6 +23,7 @@ option java_outer_classname = "BlePeripheralMessage";
 
 // Message packaged for sending a payload along with the type to identify the
 // payload.
+// Next Id: 11
 message BlePeripheralMessageParcel {
   int32 version = 1;
 
@@ -39,6 +40,10 @@ message BlePeripheralMessageParcel {
     // Type of payload from client to start advertising.
     START_ADVERTISING = 3;
 
+    // Type of payload from proxy indicating the peripheral started
+    // advertising.
+    NOTIFY_STARTED_ADVERTISING = 8;
+
     // Type of payload from client requesting to add a service.
     ADD_SERVICE = 4;
 
@@ -52,9 +57,9 @@ message BlePeripheralMessageParcel {
     // Type of payload from client to update a characteristic.
     UPDATE_CHARACTERISTIC = 7;
 
-    // Type of payload from proxy indicating the peripheral started
-    // advertising.
-    NOTIFY_STARTED_ADVERTISING = 8;
+    // Type of payload from proxy indicating a central having updated a
+    // characteristic.
+    NOTIFY_CHARACTERISTIC_UPDATED = 10;
 
     // Type of payload from proxy indicating a central subscription event.
     NOTIFY_CENTRAL_SUBSCRIPTION_EVENT = 9;
@@ -123,6 +128,9 @@ message UpdateCharacteristicMessage {
   // The characteristic that was updated.
   Characteristic characteristic = 1;
 }
+
+// Notification sent from the proxy that a central has updated a characteristic.
+message NotifyCharacteristicUpdatedMessage {}
 
 // BLE Service (maps to different implementations on the client and server).
 message Service {

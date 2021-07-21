@@ -34,6 +34,7 @@ open class SystemFeature internal constructor(
 
   @VisibleForTesting
   internal fun onSecureChannelEstablishedInternal(device: ConnectedDevice) {
+    logd(TAG, "Secure channel has been established. Issuing device name query.")
     val deviceNameQuery = SystemQuery.newBuilder().setType(DEVICE_NAME).build()
     sendQuerySecurely(
       device,

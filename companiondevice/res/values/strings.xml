@@ -35,7 +35,7 @@
     <!-- Instruction for enabling Bluetooth Connection [CHAR LIMIT=100] -->
     <string name="enable_bluetooth_instruction_text">Allow Bluetooth connection</string>
     <!-- Instruction for connecting to car [CHAR LIMIT=100] -->
-    <string name="connect_to_targe_car_instruction_text">Connect to &lt;b><xliff:g id="car_name" example="MyVehicle">%1$s</xliff:g>&lt;/b></string>
+    <string name="connect_to_targe_car_instruction_text">Connect to &lt;b><xliff:g id="car_name" example="MyVehicle">%1$s</xliff:g>&lt;/b> <xliff:g id="advertised_car_name" example="(Vehicle 0000)">%2$s</xliff:g></string>
     <!-- Instruction for connecting to car [CHAR LIMIT=100] -->
     <string name="connect_to_car_instruction_text">Connect to the car</string>
     <!-- Title for confirm pairing code fragment [CHAR LIMIT=60]-->

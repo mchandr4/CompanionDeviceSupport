@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2021 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.google.android.connecteddevice.transport.ble
 
 import android.bluetooth.BluetoothAdapter
@@ -29,12 +44,14 @@ class BlePeripheralProtocol(
   private val associationServiceUuid: UUID,
   private val reconnectServiceUuid: UUID,
   private val reconnectDataUuid: UUID,
-  private val advertiseDataCharacteristicUuid: UUID,
-  private val writeCharacteristicUuid: UUID,
-  private val readCharacteristicUuid: UUID,
+  advertiseDataCharacteristicUuid: UUID,
+  writeCharacteristicUuid: UUID,
+  readCharacteristicUuid: UUID,
   private val maxReconnectAdvertisementDuration: Duration,
-  private val defaultMtuSize: Int,
+  defaultMtuSize: Int,
 ) : ConnectionProtocol() {
+  override val isDeviceVerificationRequired = true
+
   private val writeCharacteristic =
     BluetoothGattCharacteristic(
       writeCharacteristicUuid,
@@ -74,6 +91,7 @@ class BlePeripheralProtocol(
         bluetoothDevice = device
         val currentProtocolId = createProtocolId()
         protocolId = currentProtocolId
+        stopAdvertising()
         discoveryCallback?.onDeviceConnected(currentProtocolId)
         blePeripheralManager.addOnCharacteristicWriteListener(
           this@BlePeripheralProtocol::onCharacteristicWrite
@@ -101,7 +119,7 @@ class BlePeripheralProtocol(
 
   private val timeoutRunnable: Runnable = Runnable {
     logd(TAG, "Timeout period expired without a connection. Restarting advertisement.")
-    advertiseCallback?.let { blePeripheralManager.stopAdvertising(it) }
+    stopAdvertising()
     val currentDeviceId = deviceId
     val currentDiscoveryCallback = discoveryCallback
     val currentChallenge = connectChallenge
@@ -160,7 +178,7 @@ class BlePeripheralProtocol(
     startAdvertising(
       associationServiceUuid,
       associationAdvertiseCallback,
-      scanResponse = name.toByteArray(),
+      scanResponse = ByteUtils.hexStringToByteArray(name),
       scanResponseUuid = reconnectDataUuid
     )
   }
@@ -183,7 +201,6 @@ class BlePeripheralProtocol(
     discoveryCallback = callback
     connectChallenge = challenge
     blePeripheralManager.registerCallback(peripheralCallback)
-    timeoutHandler?.removeCallbacks(timeoutRunnable)
     val connectionAdvertiseCallback =
       object : AdvertiseCallback() {
         override fun onStartSuccess(settingsInEffect: AdvertiseSettings?) {
@@ -265,8 +282,8 @@ class BlePeripheralProtocol(
   }
 
   override fun reset() {
-    logd(TAG, "Reset BlePeripheralProtocol.")
-    advertiseCallback.let { blePeripheralManager.stopAdvertising(it) }
+    logd(TAG, "Resetting protocol.")
+    stopAdvertising()
     timeoutHandler?.removeCallbacks(timeoutRunnable)
     blePeripheralManager.cleanup()
     deviceId = null
@@ -304,6 +321,7 @@ class BlePeripheralProtocol(
     scanResponse: ByteArray? = null,
     scanResponseUuid: UUID? = null
   ) {
+    logd(TAG, "Starting advertising for service $serviceUuid.")
     val gattService = BluetoothGattService(serviceUuid, BluetoothGattService.SERVICE_TYPE_PRIMARY)
     gattService.addCharacteristic(writeCharacteristic)
     gattService.addCharacteristic(readCharacteristic)
@@ -331,6 +349,13 @@ class BlePeripheralProtocol(
       scanResponseBuilder.build(),
       callback
     )
+  }
+
+  private fun stopAdvertising() {
+    logd(TAG, "Attempting to stop advertising.")
+    timeoutHandler?.removeCallbacks(timeoutRunnable)
+    advertiseCallback?.let { blePeripheralManager.stopAdvertising(it) }
+    advertiseCallback = null
   }
 
   private fun onCharacteristicRead(device: BluetoothDevice) {

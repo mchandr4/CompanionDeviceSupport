@@ -56,6 +56,13 @@ public class ThreadSafeCallbacks<T> {
     return callbacks.size();
   }
 
+  /**
+   * Returns {@code true} if the size of the collection is zero. Returns {@code false} otherwise.
+   */
+  public boolean isEmpty() {
+    return size() == 0;
+  }
+
   /** Returns {@code true} if the callback is in the collection. {@code false} otherwise. */
   public boolean contains(@NonNull T callback) {
     return callbacks.containsKey(callback);

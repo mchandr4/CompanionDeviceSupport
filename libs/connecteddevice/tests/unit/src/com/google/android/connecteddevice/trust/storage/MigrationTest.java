@@ -3,11 +3,11 @@ package com.google.android.connecteddevice.trust.storage;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.util.concurrent.MoreExecutors.directExecutor;
 
+import android.content.ContentValues;
+import android.database.sqlite.SQLiteDatabase;
 import androidx.room.Room;
 import androidx.room.migration.Migration;
 import androidx.room.testing.MigrationTestHelper;
-import android.content.ContentValues;
-import android.database.sqlite.SQLiteDatabase;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory;
 import androidx.test.core.app.ApplicationProvider;

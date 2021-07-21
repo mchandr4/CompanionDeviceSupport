@@ -63,6 +63,10 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <intent-filter>
+                <action android:name="com.google.android.connecteddevice.api.BIND_FEATURE_COORDINATOR" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <intent-filter>
                 <action android:name="com.google.android.connecteddevice.BIND_SPP" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
@@ -78,6 +82,8 @@
                 android:resource="@bool/enable_spp" />
             <meta-data android:name="com.google.android.connecteddevice.enable_capabilities_exchange"
                 android:resource="@bool/enable_capabilities" />
+            <meta-data android:name="com.google.android.connecteddevice.enable_feature_coordinator"
+                android:resource="@bool/enable_feature_coordinator" />
         </service>
         <service
             android:name="com.google.android.connecteddevice.service.ConnectedDeviceFgUserService"
@@ -86,10 +92,16 @@
                 <action android:name="com.google.android.connecteddevice.api.BIND_REMOTE_FEATURE_FG" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="com.google.android.connecteddevice.api.BIND_FEATURE_COORDINATOR_FG" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
             <meta-data android:name="com.google.android.connecteddevice.early_services"
                 android:resource="@array/early_fg_user_services"/>
             <meta-data android:name="com.google.android.connecteddevice.unlock_services"
                 android:resource="@array/unlock_fg_user_services"/>
+            <meta-data android:name="com.google.android.connecteddevice.enable_feature_coordinator"
+                android:resource="@bool/enable_feature_coordinator" />
         </service>
         <service
             android:name="com.google.android.connecteddevice.service.SppService"

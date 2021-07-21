@@ -979,6 +979,13 @@ public class RemoteFeatureTest {
     verify(callback).onError();
   }
 
+  @Test
+  public void onReady_invokedWhenManagerPopulated() {
+    remoteFeature.start();
+
+    verify(spyFeature).onReady();
+  }
+
   private RemoteFeature createRemoteFeature(
       @Nullable IConnectedDeviceManager connectedDeviceManager) {
     // Mockito.verify() will not work with inner classes. All callbacks internally use
@@ -1036,6 +1043,11 @@ public class RemoteFeatureTest {
       protected void onQueryReceived(@NonNull ConnectedDevice device, int queryId,
           @NonNull byte[] request, @NonNull byte[] parameters) {
         spyFeature.onQueryReceived(device, queryId, request, parameters);
+      }
+
+      @Override
+      protected void onReady() {
+        spyFeature.onReady();
       }
     };
   }

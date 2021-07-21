@@ -40,6 +40,8 @@ class SppProtocol(
   val associationServiceUuid: UUID,
   val maxWriteSize: Int
 ) : ConnectionProtocol() {
+  override val isDeviceVerificationRequired = false
+
   private val pendingConnections = mutableMapOf<UUID, PendingConnection>()
   private val connections = mutableMapOf<UUID, Connection>()
 
@@ -65,14 +67,13 @@ class SppProtocol(
       return
     }
     try {
-      val pendingConnection = sppBinder.connectAsServer(id, /* isSecure= */true)
+      val pendingConnection = sppBinder.connectAsServer(id, /* isSecure= */ true)
       if (pendingConnection == null) {
         callback.onDiscoveryFailedToStart()
         return
       }
       pendingConnections[id] = pendingConnection
-      pendingConnection
-        .setOnConnectedListener(generateOnConnectionListener(callback))
+      pendingConnection.setOnConnectedListener(generateOnConnectionListener(callback))
       callback.onDiscoveryStartedSuccessfully()
     } catch (e: RemoteException) {
       callback.onDiscoveryFailedToStart()
@@ -80,25 +81,24 @@ class SppProtocol(
     }
   }
 
-  private fun generateOnConnectionListener(
-    callback: DiscoveryCallback
-  ) = PendingConnection.OnConnectedListener { uuid, remoteDevice, isSecure, deviceName ->
-    val protocolId = UUID.randomUUID()
-    val connection = Connection(ParcelUuid(protocolId), remoteDevice, isSecure, deviceName)
-    pendingConnections.remove(uuid)
-    connections[protocolId] = connection
-    sppBinder.registerConnectionCallback(protocolId, generateOnErrorListener())
-    sppBinder.setOnMessageReceivedListener(
-      connection,
-      generateOnMessageReceivedListener(protocolId)
-    )
-    callback.onDeviceConnected(protocolId.toString())
-    logd(
-      TAG,
-      "Remote device $remoteDevice connected successfully with UUID $uuid, assigned " +
-        "connection id $protocolId"
-    )
-  }
+  private fun generateOnConnectionListener(callback: DiscoveryCallback) =
+    PendingConnection.OnConnectedListener { uuid, remoteDevice, isSecure, deviceName ->
+      val protocolId = UUID.randomUUID()
+      val connection = Connection(ParcelUuid(protocolId), remoteDevice, isSecure, deviceName)
+      pendingConnections.remove(uuid)
+      connections[protocolId] = connection
+      sppBinder.registerConnectionCallback(protocolId, generateOnErrorListener())
+      sppBinder.setOnMessageReceivedListener(
+        connection,
+        generateOnMessageReceivedListener(protocolId)
+      )
+      callback.onDeviceConnected(protocolId.toString())
+      logd(
+        TAG,
+        "Remote device $remoteDevice connected successfully with UUID $uuid, assigned " +
+          "connection id $protocolId"
+      )
+    }
 
   private fun generateOnMessageReceivedListener(protocolId: UUID): OnMessageReceivedListener {
     return OnMessageReceivedListener { message ->
@@ -169,9 +169,7 @@ class SppProtocol(
     disconnect(connection)
   }
 
-  /**
-   * Cancel all ongoing connection attempt and disconnect already connected devices.
-   */
+  /** Cancel all ongoing connection attempt and disconnect already connected devices. */
   override fun reset() {
     logd(TAG, "Reset: cancel all connection attempts and disconnect all devices.")
     pendingConnections.forEach { cancelPendingConnection(it.value) }
@@ -187,8 +185,7 @@ class SppProtocol(
     } catch (e: RemoteException) {
       loge(
         TAG,
-        "Error when try to stop discovery for remote device with id " +
-          "${pendingConnection.id}.",
+        "Error when try to stop discovery for remote device with id " + "${pendingConnection.id}.",
         e
       )
     }

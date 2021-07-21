@@ -25,18 +25,14 @@ import android.bluetooth.BluetoothGattService;
 import android.bluetooth.le.AdvertiseCallback;
 import android.bluetooth.le.AdvertiseData;
 import android.bluetooth.le.AdvertiseSettings;
-import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.Network;
 import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
 import com.google.android.connecteddevice.transport.ble.BlePeripheralManager;
 import com.google.protobuf.MessageLite;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.InetAddress;
 import java.net.Socket;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -48,15 +44,11 @@ public class ProxyBlePeripheralManager extends BlePeripheralManager {
   private static final String ADVERTISED_NAME = "EmulatorBleProxy";
   private static final String REMOTE_DEVICE_NAME = "BleProxyCompanionDevice";
 
-  // Pre-allocated address by Android emulator from
-  // https://developer.android.com/studio/run/emulator-networking
-  private static final byte[] HOST_LOOPBACK_ADDRESS = {10, 0, 2, 2};
-  // Ensure the host running the proxy service listens to the same port.
-  private static final int PORT = 12120;
+  private final SocketFactory socketFactory;
+  private final ScheduledExecutorService executor;
 
-  private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-
-  private final MessageReader.Callback messageReaderCallback =
+  @VisibleForTesting
+  final MessageReader.Callback messageReaderCallback =
       new MessageReader.Callback() {
         @Override
         public void onAdvertisingStarted() {
@@ -94,6 +86,14 @@ public class ProxyBlePeripheralManager extends BlePeripheralManager {
         }
 
         @Override
+        public void onCharacteristicUpdated(BluetoothDevice device) {
+          logi(TAG, "Characteristic has been updated.");
+          for (OnCharacteristicReadListener listener : readListeners) {
+            listener.onCharacteristicRead(connectedDevice);
+          }
+        }
+
+        @Override
         public void onInputStreamFailure() {
           loge(TAG, "MessageReader input stream failed. Closing connection.");
           cleanup();
@@ -105,9 +105,6 @@ public class ProxyBlePeripheralManager extends BlePeripheralManager {
         @Override
         public void onMessageSent(MessageLite message) {
           logi(TAG, "Succeeded sending message.");
-          for (OnCharacteristicReadListener listener : readListeners) {
-            listener.onCharacteristicRead(connectedDevice);
-          }
         }
 
         @Override
@@ -117,10 +114,6 @@ public class ProxyBlePeripheralManager extends BlePeripheralManager {
         }
       };
 
-  // Socket (used by proxy) depends on active network, which might not be available when the
-  // containing service is brought up on boot.
-  // This value being counted down to zero indicates an active network is ready.
-  private final CountDownLatch networkReadySignal = new CountDownLatch(1);
   private Socket socket;
   private MessageWriter messageWriter;
   private MessageReader messageReader;
@@ -129,28 +122,13 @@ public class ProxyBlePeripheralManager extends BlePeripheralManager {
   private BluetoothDevice connectedDevice;
   private AdvertiseCallback advertiseCallback;
 
-  public ProxyBlePeripheralManager(Context context) {
-    ensureNetworkIsReady(context.getSystemService(ConnectivityManager.class));
+  public ProxyBlePeripheralManager(SocketFactory socketFactory) {
+    this(socketFactory, Executors.newSingleThreadScheduledExecutor());
   }
 
-  /** Ensures networkReadySignal will be counted down to zero. */
-  private void ensureNetworkIsReady(ConnectivityManager connectivityManager) {
-    if (connectivityManager.getActiveNetwork() != null) {
-      logi(TAG, "Active network is already available.");
-      networkReadySignal.countDown();
-      return;
-    }
-
-    logi(TAG, "Waiting for active network.");
-    connectivityManager.registerDefaultNetworkCallback(
-        new ConnectivityManager.NetworkCallback() {
-          @Override
-          public void onAvailable(Network network) {
-            logi(TAG, "Received callback for active network:" + network);
-            networkReadySignal.countDown();
-            connectivityManager.unregisterNetworkCallback(this);
-          }
-        });
+  public ProxyBlePeripheralManager(SocketFactory socketFactory, ScheduledExecutorService executor) {
+    this.socketFactory = socketFactory;
+    this.executor = executor;
   }
 
   @Override
@@ -171,7 +149,6 @@ public class ProxyBlePeripheralManager extends BlePeripheralManager {
    * </ol>
    */
   @Override
-  @SuppressWarnings("FutureReturnValueIgnored")
   public void startAdvertising(
       BluetoothGattService service,
       AdvertiseData advertiseData,
@@ -182,10 +159,10 @@ public class ProxyBlePeripheralManager extends BlePeripheralManager {
     this.advertiseCallback = advertiseCallback;
 
     if (socket == null) {
-      createSocket();
+      initSocketAndMessageReaderWriter();
     }
 
-    executor.submit(
+    execute(
         () -> {
           messageWriter.sendText("Hello from the Emulator ProxyBlePeripheralManager.");
           messageWriter.addService(service, advertiseData);
@@ -193,25 +170,12 @@ public class ProxyBlePeripheralManager extends BlePeripheralManager {
         });
   }
 
-  @SuppressWarnings("FutureReturnValueIgnored")
-  private void createSocket() {
-    executor.submit(
+  private void initSocketAndMessageReaderWriter() {
+    execute(
         () -> {
-          logi(TAG, "Start waiting for active network.");
-          try {
-            networkReadySignal.await();
-          } catch (InterruptedException e) {
-            loge(TAG, "Thread interrupted waiting for active network. ", e);
-            return;
-          }
-
-          logi(TAG, "Setting up socket for proxy.");
-          try {
-            InetAddress address = InetAddress.getByAddress(HOST_LOOPBACK_ADDRESS);
-            socket = new Socket(address, PORT);
-            socket.setKeepAlive(true);
-          } catch (IOException e) {
-            loge(TAG, "Could not create new socket.", e);
+          socket = socketFactory.createSocket();
+          if (socket == null) {
+            loge(TAG, "Could not create new socket.");
             return;
           }
 
@@ -235,19 +199,19 @@ public class ProxyBlePeripheralManager extends BlePeripheralManager {
    * <p>This method ignores the parameter advertiseCallback, i.e. it will always request to stop.
    */
   @Override
-  @SuppressWarnings("FutureReturnValueIgnored")
   public void stopAdvertising(AdvertiseCallback advertiseCallback) {
     logi(TAG, "Request to stop advertising.");
     advertiseCallback = null;
-    executor.submit(
+    execute(
         () -> {
-          messageWriter.stopAdvertising();
+          if (messageWriter != null) {
+            messageWriter.stopAdvertising();
+          }
         });
   }
 
   /** Requests to update a characteristic. */
   @Override
-  @SuppressWarnings("FutureReturnValueIgnored")
   public void notifyCharacteristicChanged(
       @NonNull BluetoothDevice device,
       @NonNull BluetoothGattCharacteristic characteristic,
@@ -257,7 +221,7 @@ public class ProxyBlePeripheralManager extends BlePeripheralManager {
       return;
     }
 
-    executor.submit(
+    execute(
         () -> {
           messageWriter.updateCharacteristic(characteristic);
         });
@@ -273,7 +237,6 @@ public class ProxyBlePeripheralManager extends BlePeripheralManager {
 
   /** Closes the proxy socket and its dependent components. */
   @Override
-  @SuppressWarnings("FutureReturnValueIgnored")
   public void cleanup() {
     super.cleanup();
 
@@ -284,7 +247,7 @@ public class ProxyBlePeripheralManager extends BlePeripheralManager {
     }
     stopAdvertising(advertiseCallback);
     // Submit a task because stopAdvertising still needs the socket to send request.
-    executor.submit(
+    execute(
         () -> {
           messageReader.invalidate();
           messageReader = null;
@@ -299,5 +262,10 @@ public class ProxyBlePeripheralManager extends BlePeripheralManager {
           }
           socket = null;
         });
+  }
+
+  @SuppressWarnings("FutureReturnValueIgnored")
+  protected void execute(Runnable runnable) {
+    executor.submit(runnable);
   }
 }

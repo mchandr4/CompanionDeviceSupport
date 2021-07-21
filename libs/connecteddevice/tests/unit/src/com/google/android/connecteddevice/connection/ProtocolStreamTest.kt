@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2021 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.google.android.connecteddevice.connection
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -8,6 +23,7 @@ import com.google.android.connecteddevice.connection.ProtocolStream.MessageRecei
 import com.google.android.connecteddevice.connection.ProtocolStream.ProtocolDisconnectListener
 import com.google.android.connecteddevice.model.DeviceMessage
 import com.google.android.connecteddevice.transport.ConnectionProtocol
+import com.google.android.connecteddevice.transport.ProtocolDevice
 import com.google.android.connecteddevice.util.ByteUtils
 import com.google.common.truth.Truth
 import com.google.common.truth.Truth.assertThat
@@ -35,7 +51,7 @@ class ProtocolStreamTest {
 
   private val protocol = spy(TestProtocol())
 
-  private val stream = ProtocolStream(protocol, PROTOCOL_ID, directExecutor())
+  private val stream = ProtocolStream(ProtocolDevice(protocol, PROTOCOL_ID), directExecutor())
 
   @Test
   fun sendMessage_smallMessageSendsSinglePacket() {
@@ -117,7 +133,8 @@ class ProtocolStreamTest {
   @Test
   fun protocolOnDataFailedToSend_disconnectsProtocol() {
     val failingProtocol = spy(FailingSendProtocol())
-    val failingStream = ProtocolStream(failingProtocol, PROTOCOL_ID, directExecutor())
+    val failingStream =
+      ProtocolStream(ProtocolDevice(failingProtocol, PROTOCOL_ID), directExecutor())
     val recipient = UUID.randomUUID()
     val message = ByteUtils.randomBytes(MAX_WRITE_SIZE / 2)
     failingStream.sendMessage(
@@ -221,6 +238,7 @@ class ProtocolStreamTest {
   }
 
   open class TestProtocol : ConnectionProtocol() {
+    override val isDeviceVerificationRequired = false
 
     fun receiveData(data: ByteArray) {
       deviceCallbacks[PROTOCOL_ID]?.invoke { it.onDataReceived(PROTOCOL_ID, data) }
@@ -254,6 +272,7 @@ class ProtocolStreamTest {
   }
 
   open class FailingSendProtocol : ConnectionProtocol() {
+    override val isDeviceVerificationRequired = false
 
     override fun startAssociationDiscovery(name: String, callback: DiscoveryCallback) {}
 

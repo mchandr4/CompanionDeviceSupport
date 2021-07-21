@@ -62,11 +62,10 @@ public class TrustedDeviceAgentService extends TrustAgentService {
     super.onCreate();
     logd(TAG, "Starting trust agent service.");
     TrustedDeviceEventLog.onTrustAgentStarted();
-    Intent intent = new Intent(this, TrustedDeviceManagerService.class);
-    bindService(intent, serviceConnection, /* flags= */ 0);
     retryThread = new HandlerThread(RETRY_HANDLER_THREAD_NAME);
     retryThread.start();
     retryHandler = new Handler(retryThread.getLooper());
+    bindToService();
   }
 
   @Override
@@ -75,14 +74,16 @@ public class TrustedDeviceAgentService extends TrustAgentService {
     KeyguardManager keyguardManager = getSystemService(KeyguardManager.class);
     boolean isDeviceSecure = keyguardManager != null && keyguardManager.isDeviceSecure();
     logd(TAG, "Device secure status: " + isDeviceSecure + ".");
-    try {
-      trustedDeviceManager.clearTrustedDeviceAgentDelegate(
-          trustedDeviceAgentDelegate,
-          isDeviceSecure);
-    } catch (RemoteException e) {
-      loge(TAG, "Error while disconnecting from TrustedDeviceManager.");
+    if (trustedDeviceManager != null) {
+      try {
+        trustedDeviceManager.clearTrustedDeviceAgentDelegate(
+            trustedDeviceAgentDelegate,
+            isDeviceSecure);
+      } catch (RemoteException e) {
+        loge(TAG, "Error while disconnecting from TrustedDeviceManager.");
+      }
+      unbindService(serviceConnection);
     }
-    unbindService(serviceConnection);
     if (retryThread != null) {
       retryThread.quit();
     }
@@ -134,6 +135,11 @@ public class TrustedDeviceAgentService extends TrustAgentService {
     }
   }
 
+  private void bindToService() {
+    Intent intent = new Intent(this, TrustedDeviceManagerService.class);
+    bindService(intent, serviceConnection, /* flags= */ 0);
+  }
+
   private final ServiceConnection serviceConnection =
       new ServiceConnection() {
         @Override
@@ -148,7 +154,10 @@ public class TrustedDeviceAgentService extends TrustAgentService {
         }
 
         @Override
-        public void onServiceDisconnected(ComponentName name) {}
+        public void onServiceDisconnected(ComponentName name) {
+          trustedDeviceManager = null;
+          bindToService();
+        }
       };
 
   private final ITrustedDeviceAgentDelegate trustedDeviceAgentDelegate =

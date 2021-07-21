@@ -130,13 +130,16 @@ interface IFeatureCoordinator {
     /** Starts the association with a new device. */
     void startAssociation(in IAssociationCallback callback);
 
+    /** Stop the association process if it is still in progress. */
+    void stopAssociation();
+
     /**
-     * Retrieve the devices associated with the active user from the database.
+     * Retrieve all associated devices.
      *
      * @param listener {@link IOnAssociatedDevicesRetrievedListener} that will
      * be notified when the associated devices are retrieved.
      */
-    void retrieveActiveUserAssociatedDevices(in IOnAssociatedDevicesRetrievedListener listener);
+    void retrieveAssociatedDevices(in IOnAssociatedDevicesRetrievedListener listener);
 
     /** Confirm the paring code. */
     void acceptVerification();

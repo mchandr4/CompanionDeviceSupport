@@ -82,8 +82,9 @@ public final class AssociationSecureChannelTest {
 
     verify(channelCallback).onDeviceIdReceived(deviceIdCaptor.capture());
     verify(streamMock, times(2)).writeMessage(messageCaptor.capture());
-    byte[] deviceIdMessage = messageCaptor.getValue().getMessage();
-    assertThat(deviceIdMessage).isEqualTo(ByteUtils.uuidToBytes(SERVER_DEVICE_ID));
+    DeviceMessage deviceIdMessage = messageCaptor.getValue();
+    associationSecureChannel.processMessage(deviceIdMessage);
+    assertThat(deviceIdMessage.getMessage()).isEqualTo(ByteUtils.uuidToBytes(SERVER_DEVICE_ID));
     assertThat(deviceIdCaptor.getValue()).isEqualTo(CLIENT_DEVICE_ID.toString());
     verify(storageMock).saveEncryptionKey(eq(CLIENT_DEVICE_ID.toString()), any());
     verify(storageMock).saveChallengeSecret(CLIENT_DEVICE_ID.toString(), CLIENT_SECRET);
@@ -129,7 +130,9 @@ public final class AssociationSecureChannelTest {
             /* recipient= */ null,
             /* isMessageEncrypted= */ true,
             DeviceMessage.OperationType.ENCRYPTION_HANDSHAKE,
-            ByteUtils.concatByteArrays(ByteUtils.uuidToBytes(CLIENT_DEVICE_ID), CLIENT_SECRET));
+            FakeEncryptionRunner.encryptDataWithFakeKey(
+                ByteUtils.concatByteArrays(
+                    ByteUtils.uuidToBytes(CLIENT_DEVICE_ID), CLIENT_SECRET)));
     associationSecureChannel.onMessageReceived(message);
   }
 

@@ -14,6 +14,7 @@ import com.google.common.truth.Truth.assertThat
 import com.google.common.util.concurrent.MoreExecutors.directExecutor
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.argumentCaptor
+import com.nhaarman.mockitokotlin2.atLeastOnce
 import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.never
@@ -93,6 +94,27 @@ class BlePeripheralProtocolTest {
     blePeripheralProtocol.startAssociationDiscovery(TEST_DEVICE_NAME, mockDiscoveryCallback)
     // Should only be invoked once for establishing connection.
     verify(mockBlePeripheralManager).startAdvertising(any(), any(), any(), any())
+  }
+
+  @Test
+  fun startAssociationDiscovery_multipleTimesSucceed() {
+    blePeripheralProtocol.startAssociationDiscovery(TEST_DEVICE_NAME, mockDiscoveryCallback)
+    argumentCaptor<AdvertiseCallback>().apply {
+      verify(mockBlePeripheralManager, atLeastOnce())
+        .startAdvertising(any(), any(), any(), capture())
+      firstValue.onStartSuccess(/* settingsInEffect= */ null)
+    }
+    blePeripheralProtocol.stopAssociationDiscovery()
+    blePeripheralProtocol.startAssociationDiscovery(TEST_DEVICE_NAME, mockDiscoveryCallback)
+    argumentCaptor<AdvertiseCallback>().apply {
+      verify(mockBlePeripheralManager, atLeastOnce())
+        .startAdvertising(any(), any(), any(), capture())
+      firstValue.onStartSuccess(/* settingsInEffect= */ null)
+    }
+
+    verify(mockBlePeripheralManager, times(2)).startAdvertising(any(), any(), any(), any())
+    verify(mockBlePeripheralManager).stopAdvertising(any())
+    verify(mockDiscoveryCallback, times(2)).onDiscoveryStartedSuccessfully()
   }
 
   @Test
@@ -277,6 +299,13 @@ class BlePeripheralProtocolTest {
         eq(testProtocolId),
         eq(testMtuSize - BlePeripheralProtocol.ATT_PROTOCOL_BYTES)
       )
+  }
+
+  @Test
+  fun onDeviceConnected_stopsAdvertising() {
+    establishConnection(testBluetoothDevice)
+
+    verify(mockBlePeripheralManager).stopAdvertising(any())
   }
 
   private fun establishConnection(bluetoothDevice: BluetoothDevice): String {

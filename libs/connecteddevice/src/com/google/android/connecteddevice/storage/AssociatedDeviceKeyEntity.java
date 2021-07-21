@@ -16,9 +16,9 @@
 
 package com.google.android.connecteddevice.storage;
 
+import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
-import androidx.annotation.NonNull;
 
 /** Table entity representing a key for an associated device. */
 @Entity(tableName = "associated_device_keys")

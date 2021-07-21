@@ -21,12 +21,12 @@ import static com.google.android.connecteddevice.util.SafeLog.loge;
 import static com.google.android.connecteddevice.util.SafeLog.logw;
 
 import android.app.ActivityManager;
-import androidx.room.Room;
 import android.content.Context;
 import android.content.SharedPreferences;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
+import androidx.room.Room;
 import com.google.android.connecteddevice.model.AssociatedDevice;
 import java.security.InvalidKeyException;
 import java.security.InvalidParameterException;
@@ -223,6 +223,22 @@ public class ConnectedDeviceStorage {
     }
 
     return uniqueId;
+  }
+
+  /** Get a list of all the associated devices. */
+  @NonNull
+  public List<AssociatedDevice> getAllAssociatedDevices() {
+    List<AssociatedDeviceEntity> entities = associatedDeviceDatabase.getAllAssociatedDevices();
+    if (entities == null) {
+      return new ArrayList<>();
+    }
+
+    ArrayList<AssociatedDevice> associatedDevices = new ArrayList<>();
+    for (AssociatedDeviceEntity entity : entities) {
+      associatedDevices.add(entity.toAssociatedDevice());
+    }
+
+    return associatedDevices;
   }
 
   /**

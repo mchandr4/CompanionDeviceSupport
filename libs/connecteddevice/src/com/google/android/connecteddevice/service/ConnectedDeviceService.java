@@ -27,21 +27,40 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.os.ParcelUuid;
+import android.os.RemoteException;
 import androidx.annotation.NonNull;
 import com.google.android.connecteddevice.ConnectedDeviceManager;
 import com.google.android.connecteddevice.api.ConnectedDeviceManagerBinder;
 import com.google.android.connecteddevice.api.IAssociatedDeviceManager;
+import com.google.android.connecteddevice.api.IAssociationCallback;
+import com.google.android.connecteddevice.api.IConnectedDeviceManager;
+import com.google.android.connecteddevice.api.IConnectionCallback;
+import com.google.android.connecteddevice.api.IDeviceAssociationCallback;
+import com.google.android.connecteddevice.api.IDeviceCallback;
+import com.google.android.connecteddevice.api.IFeatureCoordinator;
+import com.google.android.connecteddevice.api.IOnAssociatedDevicesRetrievedListener;
+import com.google.android.connecteddevice.api.IOnLogRequestedListener;
 import com.google.android.connecteddevice.api.RemoteFeature;
 import com.google.android.connecteddevice.connection.CarBluetoothManager;
 import com.google.android.connecteddevice.connection.ble.CarBlePeripheralManager;
 import com.google.android.connecteddevice.connection.spp.CarSppManager;
+import com.google.android.connecteddevice.core.DeviceController;
+import com.google.android.connecteddevice.core.FeatureCoordinator;
+import com.google.android.connecteddevice.core.MultiProtocolDeviceController;
 import com.google.android.connecteddevice.logging.LoggingFeature;
 import com.google.android.connecteddevice.logging.LoggingManager;
+import com.google.android.connecteddevice.model.ConnectedDevice;
+import com.google.android.connecteddevice.model.DeviceMessage;
+import com.google.android.connecteddevice.model.OobEligibleDevice;
 import com.google.android.connecteddevice.oob.BluetoothRfcommChannel;
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage;
 import com.google.android.connecteddevice.system.SystemFeature;
+import com.google.android.connecteddevice.transport.ConnectionProtocol;
 import com.google.android.connecteddevice.transport.ble.BlePeripheralManager;
+import com.google.android.connecteddevice.transport.ble.BlePeripheralProtocol;
 import com.google.android.connecteddevice.transport.ble.OnDeviceBlePeripheralManager;
+import com.google.android.connecteddevice.transport.proxy.NetworkSocketFactory;
 import com.google.android.connecteddevice.transport.proxy.ProxyBlePeripheralManager;
 import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelegateBinder;
 import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelegateBinder.OnRemoteCallbackSetListener;
@@ -49,9 +68,12 @@ import com.google.android.connecteddevice.util.EventLog;
 import com.google.android.connecteddevice.util.Logger;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -102,6 +124,11 @@ public final class ConnectedDeviceService extends TrunkService {
   /** {@code boolean} Enable a capabilities exchange during association. */
   private static final String META_ENABLE_CAPABILITIES_EXCHANGE =
       "com.google.android.connecteddevice.enable_capabilities_exchange";
+  /**
+   * {@code boolean} Use the {@link IFeatureCoordinator} instead of {@link IConnectedDeviceManager}
+   */
+  private static final String META_ENABLE_FEATURE_COORDINATOR =
+      "com.google.android.connecteddevice.enable_feature_coordinator";
 
   private static final boolean SPP_ENABLED_BY_DEFAULT = false;
 
@@ -126,6 +153,8 @@ public final class ConnectedDeviceService extends TrunkService {
   private static final boolean ENABLE_COMPRESSION_BY_DEFAULT = true;
 
   private static final boolean ENABLE_CAPABILITIES_EXCHANGE_BY_DEFAULT = false;
+
+  private static final boolean ENABLE_FEATURE_COORDINATOR_BY_DEFAULT = false;
 
   /**
    * When a client calls {@link Context#bindService(Intent, ServiceConnection, int)} to get the
@@ -158,26 +187,93 @@ public final class ConnectedDeviceService extends TrunkService {
         isSppServiceBound.set(isSet);
       };
 
+  private final ScheduledExecutorService scheduledExecutorService =
+      Executors.newSingleThreadScheduledExecutor();
+
   private ConnectedDeviceManager connectedDeviceManager;
 
   private LoggingManager loggingManager;
 
+  private FeatureCoordinator featureCoordinator;
+
+  private ConnectedDeviceStorage storage;
+
   private boolean isSppSupported;
 
-  private ConnectedDeviceManagerBinder connectedDeviceManagerBinder;
+  private IConnectedDeviceManager.Stub connectedDeviceManagerBinder;
 
-  private AssociationBinder associationBinder;
+  private IAssociatedDeviceManager.Stub associationBinder;
 
   private ConnectedDeviceSppDelegateBinder sppDelegateBinder;
+
+  private boolean useFeatureCoordinator;
 
   @Override
   public void onCreate() {
     super.onCreate();
     logd(TAG, "Service created.");
+
     EventLog.onServiceStarted();
     isSppSupported = getMetaBoolean(META_ENABLE_SPP, SPP_ENABLED_BY_DEFAULT);
+    useFeatureCoordinator =
+        getMetaBoolean(META_ENABLE_FEATURE_COORDINATOR, ENABLE_FEATURE_COORDINATOR_BY_DEFAULT);
 
-    ConnectedDeviceStorage storage = new ConnectedDeviceStorage(this);
+    loggingManager = new LoggingManager(this);
+    storage = new ConnectedDeviceStorage(this);
+    if (useFeatureCoordinator) {
+      initializeFeatureCoordinator();
+    } else {
+      initializeConnectedDeviceManager();
+    }
+
+    populateFeatures();
+
+    registerReceiver(
+        bleBroadcastReceiver, new IntentFilter(BluetoothAdapter.ACTION_BLE_STATE_CHANGED));
+    if (!isSppSupported && BluetoothAdapter.getDefaultAdapter().isLeEnabled()) {
+      initializeFeatures();
+    }
+  }
+
+  private void initializeFeatureCoordinator() {
+    logd(TAG, "Initializing FeatureCoordinator version of the platform.");
+    UUID associationUuid = UUID.fromString(requireMetaString(META_ASSOCIATION_SERVICE_UUID));
+    UUID reconnectUuid =
+        UUID.fromString(getMetaString(META_RECONNECT_SERVICE_UUID, DEFAULT_RECONNECT_UUID));
+    UUID reconnectDataUuid =
+        UUID.fromString(getMetaString(META_RECONNECT_DATA_UUID, DEFAULT_RECONNECT_DATA_UUID));
+    UUID advertiseDataCharacteristicUuid =
+        UUID.fromString(
+            getMetaString(
+                META_ADVERTISE_DATA_CHARACTERISTIC_UUID,
+                DEFAULT_ADVERTISE_DATA_CHARACTERISTIC_UUID));
+    UUID writeUuid = UUID.fromString(getMetaString(META_WRITE_UUID, DEFAULT_WRITE_UUID));
+    UUID readUuid = UUID.fromString(getMetaString(META_READ_UUID, DEFAULT_READ_UUID));
+    int defaultMtuSize = getMetaInt(META_DEFAULT_MTU_BYTES, DEFAULT_MTU_SIZE);
+    boolean isProxyEnabled = getMetaBoolean(META_ENABLE_PROXY, PROXY_ENABLED_BY_DEFAULT);
+    BlePeripheralManager blePeripheralManager;
+    if (isProxyEnabled) {
+      logi(TAG, "Initializing with ProxyBlePeripheralManager");
+      blePeripheralManager =
+          new ProxyBlePeripheralManager(new NetworkSocketFactory(this), scheduledExecutorService);
+    } else {
+      blePeripheralManager = new OnDeviceBlePeripheralManager(this);
+    }
+    Set<ConnectionProtocol> protocols = new HashSet<>();
+    protocols.add(
+        new BlePeripheralProtocol(blePeripheralManager, associationUuid, reconnectUuid,
+            reconnectDataUuid, advertiseDataCharacteristicUuid, writeUuid, readUuid,
+            MAX_ADVERTISEMENT_DURATION, defaultMtuSize));
+    DeviceController deviceController =
+        new MultiProtocolDeviceController(protocols, storage);
+    featureCoordinator = new FeatureCoordinator(deviceController, storage);
+    logd(TAG, "Wrapping FeatureCoordinator in legacy binders for backwards compatibility.");
+    connectedDeviceManagerBinder = createConnectedDeviceManagerWrapper();
+    associationBinder = createAssociatedDeviceManagerWrapper();
+  }
+
+  private void initializeConnectedDeviceManager() {
+    logd(TAG, "Initializing ConnectedDeviceManager version of the platform.");
     boolean isCompressionEnabled =
         getMetaBoolean(META_COMPRESS_OUTGOING_MESSAGES, ENABLE_COMPRESSION_BY_DEFAULT);
     boolean isCapabilitiesEligible =
@@ -191,26 +287,20 @@ public final class ConnectedDeviceService extends TrunkService {
     }
     connectedDeviceManager =
         new ConnectedDeviceManager(carBluetoothManager, storage, sppDelegateBinder);
-    loggingManager = new LoggingManager(this);
     connectedDeviceManagerBinder =
         new ConnectedDeviceManagerBinder(connectedDeviceManager, loggingManager);
-    populateFeatures(storage);
     associationBinder = new AssociationBinder(connectedDeviceManager);
-    registerReceiver(
-        bleBroadcastReceiver, new IntentFilter(BluetoothAdapter.ACTION_BLE_STATE_CHANGED));
-    if (!isSppSupported && BluetoothAdapter.getDefaultAdapter().isLeEnabled()) {
-      initializeFeatures();
-    }
+
   }
 
-  private void populateFeatures(ConnectedDeviceStorage storage) {
+  private void populateFeatures() {
     // TODO(b/187523735) Remove listener from here and place in LoggingManager
+    logd(TAG, "Populating features.");
     Logger logger = Logger.getLogger();
-    logd(TAG, "Registering listener for logger.");
     loggingManager.addOnLogRequestedListener(
         logger.getLoggerId(),
         () -> loggingManager.prepareLocalLogRecords(logger.getLoggerId(), logger.toByteArray()),
-        Executors.newSingleThreadExecutor());
+        scheduledExecutorService);
     localFeatures.add(new LoggingFeature(this, connectedDeviceManagerBinder, loggingManager));
     localFeatures.add(new SystemFeature(this, connectedDeviceManagerBinder, storage));
   }
@@ -251,7 +341,8 @@ public final class ConnectedDeviceService extends TrunkService {
     BlePeripheralManager blePeripheralManager;
     if (isProxyEnabled) {
       logi(TAG, "Initializing with ProxyBlePeripheralManager");
-      blePeripheralManager = new ProxyBlePeripheralManager(this);
+      blePeripheralManager =
+          new ProxyBlePeripheralManager(new NetworkSocketFactory(this), scheduledExecutorService);
     } else {
       blePeripheralManager = new OnDeviceBlePeripheralManager(this);
     }
@@ -285,6 +376,8 @@ public final class ConnectedDeviceService extends TrunkService {
         return connectedDeviceManagerBinder;
       case ConnectedDeviceSppDelegateBinder.ACTION_BIND_SPP:
         return sppDelegateBinder;
+      case RemoteFeature.ACTION_BIND_FEATURE_COORDINATOR:
+        return featureCoordinator;
       default:
         loge(TAG, "Unexpected action found while binding: " + action);
         return null;
@@ -293,7 +386,9 @@ public final class ConnectedDeviceService extends TrunkService {
 
   @Override
   public void onDestroy() {
-    logd(TAG, "Service destroyed.");
+    logd(TAG, "Service was destroyed.");
+
+    scheduledExecutorService.shutdown();
     unregisterReceiver(bleBroadcastReceiver);
     cleanup();
     super.onDestroy();
@@ -322,7 +417,11 @@ public final class ConnectedDeviceService extends TrunkService {
       logd(TAG, "Features are already cleaned up. No need to clean up again.");
       return;
     }
-    connectedDeviceManager.reset();
+    if (useFeatureCoordinator) {
+      featureCoordinator.reset();
+    } else {
+      connectedDeviceManager.reset();
+    }
     loggingManager.reset();
     for (RemoteFeature feature : localFeatures) {
       feature.stop();
@@ -340,7 +439,11 @@ public final class ConnectedDeviceService extends TrunkService {
                 logd(TAG, "Features are already initialized. No need to initialize again.");
                 return;
               }
-              connectedDeviceManager.start();
+              if (useFeatureCoordinator) {
+                featureCoordinator.start();
+              } else {
+                connectedDeviceManager.start();
+              }
               for (RemoteFeature feature : localFeatures) {
                 feature.start();
               }
@@ -352,5 +455,177 @@ public final class ConnectedDeviceService extends TrunkService {
   /** Returns the service's instance of {@link ConnectedDeviceManager}. */
   protected ConnectedDeviceManager getConnectedDeviceManager() {
     return connectedDeviceManager;
+  }
+
+  private IConnectedDeviceManager.Stub createConnectedDeviceManagerWrapper() {
+    return new IConnectedDeviceManager.Stub() {
+      @Override
+      public List<ConnectedDevice> getActiveUserConnectedDevices() {
+        return featureCoordinator.getConnectedDevicesForDriver();
+      }
+
+      @Override
+      public void registerActiveUserConnectionCallback(IConnectionCallback callback) {
+        featureCoordinator.registerDriverConnectionCallback(callback);
+      }
+
+      @Override
+      public void unregisterConnectionCallback(IConnectionCallback callback) {
+        featureCoordinator.unregisterConnectionCallback(callback);
+      }
+
+      @Override
+      public void registerDeviceCallback(ConnectedDevice connectedDevice, ParcelUuid recipientId,
+          IDeviceCallback callback) {
+        featureCoordinator.registerDeviceCallback(connectedDevice, recipientId, callback);
+      }
+
+      @Override
+      public void unregisterDeviceCallback(ConnectedDevice connectedDevice, ParcelUuid recipientId,
+          IDeviceCallback callback) {
+        featureCoordinator.unregisterDeviceCallback(connectedDevice, recipientId, callback);
+      }
+
+      @Override
+      public boolean sendMessage(ConnectedDevice connectedDevice, DeviceMessage message) {
+        return featureCoordinator.sendMessage(connectedDevice, message);
+      }
+
+      @Override
+      public void registerDeviceAssociationCallback(IDeviceAssociationCallback callback) {
+        featureCoordinator.registerDeviceAssociationCallback(callback);
+      }
+
+      @Override
+      public void unregisterDeviceAssociationCallback(IDeviceAssociationCallback callback) {
+        featureCoordinator.unregisterDeviceAssociationCallback(callback);
+      }
+
+      @Override
+      public void registerOnLogRequestedListener(int loggerId, IOnLogRequestedListener listener) {
+        featureCoordinator.registerOnLogRequestedListener(loggerId, listener);
+      }
+
+      @Override
+      public void unregisterOnLogRequestedListener(int loggerId, IOnLogRequestedListener listener) {
+        featureCoordinator.unregisterOnLogRequestedListener(loggerId, listener);
+      }
+
+      @Override
+      public void processLogRecords(int loggerId, byte[] logRecords) {
+        featureCoordinator.processLogRecords(loggerId, logRecords);
+      }
+    };
+  }
+
+  private IAssociatedDeviceManager.Stub createAssociatedDeviceManagerWrapper() {
+    return new IAssociatedDeviceManager.Stub() {
+      private IAssociationCallback associationCallback;
+      private IDeviceAssociationCallback deviceAssociationCallback;
+      private IConnectionCallback connectionCallback;
+
+      @Override
+      public void setAssociationCallback(IAssociationCallback callback) {
+        associationCallback = callback;
+      }
+
+      @Override
+      public void clearAssociationCallback() {
+        associationCallback = null;
+      }
+
+      @Override
+      public void startAssociation() {
+        if (associationCallback == null) {
+          logd(TAG, "Unable to start association with a null callback. Ignoring.");
+          return;
+        }
+        featureCoordinator.startAssociation(associationCallback);
+      }
+
+      @Override
+      public void startOobAssociation(OobEligibleDevice eligibleDevice) {
+        // TODO(b/190648869) Implement once OOB is supported in FeatureCoordinator flow
+      }
+
+      @Override
+      public void stopAssociation() {
+        featureCoordinator.stopAssociation();
+      }
+
+      @Override
+      public void retrievedActiveUserAssociatedDevices(
+          IOnAssociatedDevicesRetrievedListener listener) {
+        Executors.newSingleThreadExecutor().execute(
+            () -> {
+              try {
+                listener.onAssociatedDevicesRetrieved(storage.getActiveUserAssociatedDevices());
+              } catch (RemoteException e) {
+                loge(TAG, "Unable to send associated devices to listener.");
+              }
+            });
+      }
+
+      @Override
+      public void acceptVerification() {
+        featureCoordinator.acceptVerification();
+      }
+
+      @Override
+      public void removeAssociatedDevice(String deviceId) {
+        featureCoordinator.removeAssociatedDevice(deviceId);
+      }
+
+      @Override
+      public void setDeviceAssociationCallback(IDeviceAssociationCallback callback) {
+        if (deviceAssociationCallback != null) {
+          featureCoordinator.unregisterDeviceAssociationCallback(deviceAssociationCallback);
+        }
+        deviceAssociationCallback = callback;
+        featureCoordinator.registerDeviceAssociationCallback(callback);
+      }
+
+      @Override
+      public void clearDeviceAssociationCallback() {
+        if (deviceAssociationCallback == null) {
+          return;
+        }
+        featureCoordinator.unregisterDeviceAssociationCallback(deviceAssociationCallback);
+        deviceAssociationCallback = null;
+      }
+
+      @Override
+      public List<ConnectedDevice> getActiveUserConnectedDevices() {
+        return featureCoordinator.getConnectedDevicesForDriver();
+      }
+
+      @Override
+      public void setConnectionCallback(IConnectionCallback callback) {
+        if (connectionCallback != null) {
+          featureCoordinator.unregisterConnectionCallback(connectionCallback);
+        }
+        connectionCallback = callback;
+        featureCoordinator.registerDriverConnectionCallback(callback);
+      }
+
+      @Override
+      public void clearConnectionCallback() {
+        if (connectionCallback == null) {
+          return;
+        }
+        featureCoordinator.unregisterConnectionCallback(connectionCallback);
+        connectionCallback = null;
+      }
+
+      @Override
+      public void enableAssociatedDeviceConnection(String deviceId) {
+        featureCoordinator.enableAssociatedDeviceConnection(deviceId);
+      }
+
+      @Override
+      public void disableAssociatedDeviceConnection(String deviceId) {
+        featureCoordinator.disableAssociatedDeviceConnection(deviceId);
+      }
+    };
   }
 }

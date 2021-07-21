@@ -1,8 +1,8 @@
 package com.google.android.connecteddevice.trust.storage;
 
+import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
-import androidx.annotation.NonNull;
 import java.util.Arrays;
 import java.util.Objects;
 
