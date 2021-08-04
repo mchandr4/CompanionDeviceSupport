@@ -16,6 +16,7 @@
 
 package com.google.android.connecteddevice.transport.spp
 
+import android.bluetooth.BluetoothAdapter
 import android.os.RemoteException
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.connecteddevice.transport.ConnectionProtocol.ConnectChallenge
@@ -56,14 +57,13 @@ class SppProtocolTest {
   private val testMessage = "TestMessage".toByteArray()
   private val testChallenge =
     ConnectChallenge("TestChallenge".toByteArray(), "TestSalt".toByteArray())
-  private val sppProtocol =
-    SppProtocol(mockSppBinder, testServiceUuid, testMaxSize)
-  private val invalidSppProtocol =
-    SppProtocol(invalidMockSppBinder, testServiceUuid, testMaxSize)
+  private val sppProtocol = SppProtocol(mockSppBinder, testServiceUuid, testMaxSize)
+  private val invalidSppProtocol = SppProtocol(invalidMockSppBinder, testServiceUuid, testMaxSize)
 
   @Test
   fun startAssociationDiscovery_startedSuccessfully() {
     sppProtocol.startAssociationDiscovery(testName, mockDiscoveryCallback)
+
     verify(mockSppBinder).connectAsServer(eq(testServiceUuid), any())
     verify(mockDiscoveryCallback).onDiscoveryStartedSuccessfully()
   }
@@ -78,7 +78,9 @@ class SppProtocolTest {
   @Test
   fun startConnectionDiscovery_startedSuccessfully() {
     val testDeviceId = UUID.randomUUID()
+
     sppProtocol.startConnectionDiscovery(testDeviceId, testChallenge, mockDiscoveryCallback)
+
     verify(mockSppBinder).connectAsServer(eq(testDeviceId), any())
     verify(mockDiscoveryCallback).onDiscoveryStartedSuccessfully()
   }
@@ -93,8 +95,10 @@ class SppProtocolTest {
   @Test
   fun stopConnectionDiscovery_stopSuccessfully() {
     val testDeviceId = UUID.randomUUID()
+
     sppProtocol.startConnectionDiscovery(testDeviceId, testChallenge, mockDiscoveryCallback)
     sppProtocol.stopConnectionDiscovery(testDeviceId)
+
     verify(mockSppBinder).cancelConnectionAttempt(mockPendingConnection)
   }
 
@@ -102,7 +106,7 @@ class SppProtocolTest {
   fun sendData_sendSuccessfully() {
     val protocolId = establishConnection()
 
-    sppProtocol.sendData(protocolId!!, testMessage, mockDataSendCallback)
+    sppProtocol.sendData(protocolId, testMessage, mockDataSendCallback)
 
     verify(mockSppBinder).sendMessage(any(), eq(testMessage))
     verify(mockDataSendCallback).onDataSentSuccessfully()
@@ -120,7 +124,7 @@ class SppProtocolTest {
   fun disconnectDevice_disconnectSuccessfully() {
     val protocolId = establishConnection()
 
-    sppProtocol.disconnectDevice(protocolId!!)
+    sppProtocol.disconnectDevice(protocolId)
 
     verify(mockSppBinder).disconnect(any())
   }
@@ -149,7 +153,7 @@ class SppProtocolTest {
   @Test
   fun onMessageReceived_informCallback() {
     val protocolId = establishConnection()
-    sppProtocol.registerCallback(protocolId!!, mockDeviceCallback, directExecutor())
+    sppProtocol.registerCallback(protocolId, mockDeviceCallback, directExecutor())
 
     argumentCaptor<OnMessageReceivedListener>().apply {
       verify(mockSppBinder).setOnMessageReceivedListener(any(), capture())
@@ -160,13 +164,24 @@ class SppProtocolTest {
   }
 
   @Test
+  fun onDeviceConnected_registersConnectionCallbackForServiceUuid() {
+    establishConnection()
+
+    argumentCaptor<UUID>().apply {
+      verify(mockSppBinder).registerConnectionCallback(capture(), any())
+      assertThat(firstValue).isEqualTo(testServiceUuid)
+    }
+  }
+
+  @Test
   fun onDeviceDisconnected_informCallback() {
     val protocolId = establishConnection()
-    sppProtocol.registerCallback(protocolId!!, mockDeviceCallback, directExecutor())
+    sppProtocol.registerCallback(protocolId, mockDeviceCallback, directExecutor())
 
-    val connection = argumentCaptor<Connection>().apply {
-      verify(mockSppBinder).setOnMessageReceivedListener(capture(), any())
-    }.firstValue
+    val connection =
+      argumentCaptor<Connection>()
+        .apply { verify(mockSppBinder).setOnMessageReceivedListener(capture(), any()) }
+        .firstValue
 
     argumentCaptor<OnErrorListener>().apply {
       verify(mockSppBinder).registerConnectionCallback(any(), capture())
@@ -188,19 +203,55 @@ class SppProtocolTest {
   fun sendData_throwException_onDataFailedToSend() {
     doThrow(RemoteException()).`when`(mockSppBinder).sendMessage(any(), any())
     val protocolId = establishConnection()
-    sppProtocol.sendData(protocolId!!, testMessage, mockDataSendCallback)
+    sppProtocol.sendData(protocolId, testMessage, mockDataSendCallback)
 
     verify(mockDataSendCallback).onDataFailedToSend()
   }
 
-  private fun establishConnection(): String? {
+  @Test
+  fun getBluetoothDevice_returnNonNullDeviceWithCorrectProtocolId() {
+    val protocolId = establishConnection()
+    assertThat(sppProtocol.getBluetoothDeviceById(protocolId)).isNotNull()
+  }
+
+  @Test
+  fun getBluetoothDevice_returnNullWhenDeviceDisconnected() {
+    val protocolId = establishConnection()
+    val connection =
+      argumentCaptor<Connection>()
+        .apply { verify(mockSppBinder).setOnMessageReceivedListener(capture(), any()) }
+        .firstValue
+
+    argumentCaptor<OnErrorListener>().apply {
+      verify(mockSppBinder).registerConnectionCallback(any(), capture())
+      firstValue.onError(connection)
+    }
+
+    assertThat(sppProtocol.getBluetoothDeviceById(protocolId)).isNull()
+  }
+
+  @Test
+  fun getBluetoothDevice_returnNullWithIncorrectFormatProtocolId() {
+    establishConnection()
+    assertThat(sppProtocol.getBluetoothDeviceById("RandomProtocolId")).isNull()
+  }
+
+  @Test
+  fun getBluetoothDevice_returnNullWhenProtocolIdMismatch() {
+    establishConnection()
+    assertThat(sppProtocol.getBluetoothDeviceById(UUID.randomUUID().toString())).isNull()
+  }
+
+  private fun establishConnection(): String {
+    val testMacAddress = "00:11:22:33:AA:BB"
+    val testBluetoothDevice = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(testMacAddress)
     sppProtocol.startAssociationDiscovery(testName, mockDiscoveryCallback)
     argumentCaptor<OnConnectedListener>().apply {
       verify(mockPendingConnection).setOnConnectedListener(capture())
-      firstValue.onConnected(testServiceUuid, any(), any(), testName)
+      firstValue.onConnected(testServiceUuid, testBluetoothDevice, false, testName)
     }
-    return argumentCaptor<String>().apply {
-      verify(mockDiscoveryCallback).onDeviceConnected(capture())
-    }.firstValue
+    return argumentCaptor<String>()
+      .apply { verify(mockDiscoveryCallback).onDeviceConnected(capture()) }
+      .firstValue
   }
 }

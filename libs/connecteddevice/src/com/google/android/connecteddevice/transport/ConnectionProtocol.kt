@@ -15,6 +15,7 @@
  */
 package com.google.android.connecteddevice.transport
 
+import androidx.annotation.CallSuper
 import com.google.android.connecteddevice.util.SafeLog
 import com.google.android.connecteddevice.util.ThreadSafeCallbacks
 import java.util.UUID
@@ -65,7 +66,10 @@ abstract class ConnectionProtocol {
    * Disconnect all active connections, cancel any discoveries in progress, and clean up to a
    * neutral state.
    */
-  abstract fun reset()
+  @CallSuper
+  open fun reset() {
+    deviceCallbacks.clear()
+  }
 
   /**
    * Returns the maximum number of bytes that can be written in a single message for the device
@@ -86,6 +90,9 @@ abstract class ConnectionProtocol {
       return
     }
     deviceCallbacks[protocolId]?.remove(callback)
+    if (deviceCallbacks[protocolId]?.isEmpty == true) {
+      deviceCallbacks.remove(protocolId)
+    }
   }
 
   /** Container class to hold the connect challenge the salt that generated the challenge. */

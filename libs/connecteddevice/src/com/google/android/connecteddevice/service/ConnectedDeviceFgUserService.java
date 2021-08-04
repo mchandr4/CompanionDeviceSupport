@@ -124,7 +124,7 @@ public final class ConnectedDeviceFgUserService extends TrunkService {
       }
     } else if (action.equals(RemoteFeature.ACTION_BIND_FEATURE_COORDINATOR_FG)
         && useFeatureCoordinator) {
-      return connectedDeviceServiceBinder;
+      return featureCoordinator.asBinder();
     }
 
     return null;

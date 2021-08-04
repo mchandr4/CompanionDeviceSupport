@@ -16,7 +16,7 @@
 
 package com.google.android.connecteddevice.connection;
 
-import static com.google.android.companionprotos.CapabilitiesExchangeProto.CapabilitiesExchange.OobChannel.BT_RFCOMM;
+import static com.google.android.companionprotos.CapabilitiesExchangeProto.CapabilitiesExchange.OobChannelType.BT_RFCOMM;
 import static com.google.android.connecteddevice.model.Errors.DEVICE_ERROR_INVALID_HANDSHAKE;
 import static com.google.android.connecteddevice.util.SafeLog.logd;
 import static com.google.android.connecteddevice.util.SafeLog.loge;
@@ -28,7 +28,7 @@ import androidx.annotation.CallSuper;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
-import com.google.android.companionprotos.CapabilitiesExchangeProto.CapabilitiesExchange;
+import com.google.android.companionprotos.CapabilitiesExchangeProto.CapabilitiesExchange.OobChannelType;
 import com.google.android.connecteddevice.model.AssociatedDevice;
 import com.google.android.connecteddevice.model.DeviceMessage;
 import com.google.android.connecteddevice.model.OobEligibleDevice;
@@ -48,7 +48,7 @@ public abstract class CarBluetoothManager {
 
   private static final String TAG = "CarBluetoothManager";
 
-  private static final ImmutableList<CapabilitiesExchange.OobChannel> SUPPORTED_OOB_CAPABILITIES =
+  private static final ImmutableList<OobChannelType> SUPPORTED_OOB_CAPABILITIES =
       ImmutableList.of(BT_RFCOMM);
 
   protected final ConnectedDeviceStorage storage;
@@ -338,8 +338,7 @@ public abstract class CarBluetoothManager {
       DeviceMessageStream secureStream, ConnectedRemoteDevice connectedDevice) {
 
     BluetoothDevice device = connectedDevice.device;
-    ImmutableList<CapabilitiesExchange.OobChannel> supportedOobCapabilities =
-        SUPPORTED_OOB_CAPABILITIES;
+    ImmutableList<OobChannelType> supportedOobCapabilities = SUPPORTED_OOB_CAPABILITIES;
     if (!isCapabilitiesEligible) {
       supportedOobCapabilities = ImmutableList.of();
     }
@@ -355,10 +354,7 @@ public abstract class CarBluetoothManager {
 
     connectionResolver.resolveConnection(
         resolvedConnection -> {
-          ImmutableList<
-                  com.google.android.companionprotos.CapabilitiesExchangeProto.CapabilitiesExchange
-                      .OobChannel>
-              oobChannels = resolvedConnection.oobChannels();
+          ImmutableList<OobChannelType> oobChannels = resolvedConnection.oobChannelTypes();
 
           if (oobChannel == null || oobChannels == null || !oobChannels.contains(BT_RFCOMM)) {
             logd(TAG, "Oob channels list are empty, fallback to normal association " + "flow.");

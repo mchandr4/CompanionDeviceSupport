@@ -22,9 +22,8 @@ option java_package = "com.google.android.companionprotos";
 option java_outer_classname = "CapabilitiesExchangeProto";
 
 message CapabilitiesExchange {
-
   // Supported OOB channel types
-  enum OobChannel {
+  enum OobChannelType {
     // The OOB channel is unknown.
     //
     // Note, this enum name is prefixed. See
@@ -36,7 +35,7 @@ message CapabilitiesExchange {
   }
 
   // All supported OOB channels
-  repeated OobChannel supported_oob_channels = 1;
+  repeated OobChannelType supported_oob_channels = 1;
 
   // Avaialble OSs for a mobile device
   enum MobileOs {

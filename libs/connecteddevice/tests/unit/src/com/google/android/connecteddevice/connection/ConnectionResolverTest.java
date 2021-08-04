@@ -120,7 +120,7 @@ public final class ConnectionResolverTest {
         .isEqualTo(ConnectionResolver.MESSAGING_VERSION);
     assertThat(resolvedConnection.securityVersion())
         .isEqualTo(2);
-    assertThat(resolvedConnection.oobChannels()).isNull();
+    assertThat(resolvedConnection.oobChannelTypes()).isNull();
   }
 
   @Test
@@ -141,7 +141,7 @@ public final class ConnectionResolverTest {
         .isEqualTo(ConnectionResolver.MESSAGING_VERSION);
     assertThat(resolvedConnection.securityVersion())
         .isEqualTo(ConnectionResolver.MAX_SECURITY_VERSION);
-    assertThat(resolvedConnection.oobChannels()).isNull();
+    assertThat(resolvedConnection.oobChannelTypes()).isNull();
   }
 
   @Test
@@ -166,7 +166,7 @@ public final class ConnectionResolverTest {
         .isEqualTo(ConnectionResolver.MESSAGING_VERSION);
     assertThat(resolvedConnection.securityVersion())
         .isEqualTo(ConnectionResolver.MAX_SECURITY_VERSION);
-    assertThat(resolvedConnection.oobChannels()).isNotNull();
+    assertThat(resolvedConnection.oobChannelTypes()).isNotNull();
   }
 
   @Test

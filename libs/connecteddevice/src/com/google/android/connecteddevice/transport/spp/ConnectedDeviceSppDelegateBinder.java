@@ -17,6 +17,7 @@
 package com.google.android.connecteddevice.transport.spp;
 
 import static com.google.android.connecteddevice.util.SafeLog.logd;
+import static com.google.android.connecteddevice.util.SafeLog.loge;
 import static com.google.android.connecteddevice.util.SafeLog.logw;
 
 import android.bluetooth.BluetoothDevice;
@@ -118,10 +119,14 @@ public class ConnectedDeviceSppDelegateBinder extends IConnectedDeviceSppDelegat
    */
   @Override
   public void notifyMessageReceived(@NonNull Connection connection, @NonNull byte[] message) {
+    logd(TAG, "Notifying listeners of a new message.");
     OnMessageReceivedListener listener = onMessageReceivedListeners.get(connection);
-    if (listener != null) {
-      listener.onMessageReceived(message);
+    if (listener == null) {
+      loge(TAG, "There are no listeners registered for connection " + connection.getServiceUuid()
+          + ". This message is being dropped on the floor!");
+      return;
     }
+    listener.onMessageReceived(message);
   }
 
   /** Notify the system user that an error occurred on an active connection. */
@@ -165,8 +170,9 @@ public class ConnectedDeviceSppDelegateBinder extends IConnectedDeviceSppDelegat
   @Nullable
   public PendingConnection connectAsServer(@NonNull UUID serviceUuid, boolean isSecure)
       throws RemoteException {
+    logd(TAG, "Connecting as server.");
     if (remoteCallback == null) {
-      logw(TAG, "Remote callback is null when trying to establish connection");
+      logw(TAG, "Remote callback is null when trying to establish connection as a server.");
       return null;
     }
 
@@ -191,8 +197,9 @@ public class ConnectedDeviceSppDelegateBinder extends IConnectedDeviceSppDelegat
   public PendingConnection connectAsClient(
       @NonNull UUID serviceUuid, @NonNull BluetoothDevice remoteDevice, boolean isSecure)
       throws RemoteException {
+    logd(TAG, "Connecting as client.");
     if (remoteCallback == null) {
-      logw(TAG, "connectAsClient: remoteCallback is null, returning null connection");
+      logw(TAG, "Remote callback is null when trying to establish connection as a client.");
       return null;
     }
     remoteCallback.onStartConnectionAsClientRequested(
@@ -249,10 +256,12 @@ public class ConnectedDeviceSppDelegateBinder extends IConnectedDeviceSppDelegat
   public void setOnMessageReceivedListener(
       @NonNull Connection connection,
       @Nullable OnMessageReceivedListener onMessageReceivedListener) {
+    logd(TAG, "Registering a new message listener for " + connection.getServiceUuid() + ".");
     onMessageReceivedListeners.put(connection, onMessageReceivedListener);
   }
 
   public void clearOnMessageReceivedListener(@NonNull Connection connection) {
+    logd(TAG, "Removing message listener for " + connection.getServiceUuid() + ".");
     onMessageReceivedListeners.remove(connection);
   }
 

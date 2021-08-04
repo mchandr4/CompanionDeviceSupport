@@ -16,8 +16,10 @@
 package com.google.android.connecteddevice.transport.spp
 
 import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
 import android.os.ParcelUuid
 import android.os.RemoteException
+import com.google.android.connecteddevice.transport.BluetoothDeviceProvider
 import com.google.android.connecteddevice.transport.ConnectionProtocol
 import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelegateBinder.OnErrorListener
 import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelegateBinder.OnMessageReceivedListener
@@ -36,14 +38,15 @@ import java.util.UUID
  * @property maxWriteSize Maximum size in bytes to write in one packet.
  */
 class SppProtocol(
-  val sppBinder: ConnectedDeviceSppDelegateBinder,
-  val associationServiceUuid: UUID,
-  val maxWriteSize: Int
-) : ConnectionProtocol() {
+  private val sppBinder: ConnectedDeviceSppDelegateBinder,
+  private val associationServiceUuid: UUID,
+  private val maxWriteSize: Int,
+) : ConnectionProtocol(), BluetoothDeviceProvider {
   override val isDeviceVerificationRequired = false
 
   private val pendingConnections = mutableMapOf<UUID, PendingConnection>()
   private val connections = mutableMapOf<UUID, Connection>()
+  private val connectedDevices = mutableMapOf<UUID, BluetoothDevice>()
 
   override fun startAssociationDiscovery(name: String, callback: DiscoveryCallback) {
     logd(TAG, "Start association discovery for association with UUID $associationServiceUuid")
@@ -55,7 +58,7 @@ class SppProtocol(
     challenge: ConnectChallenge,
     callback: DiscoveryCallback
   ) {
-    logd(TAG, "Start connection discovery for association with UUID $id")
+    logd(TAG, "Starting connection discovery for device $id")
     startConnection(id, callback)
   }
 
@@ -84,10 +87,12 @@ class SppProtocol(
   private fun generateOnConnectionListener(callback: DiscoveryCallback) =
     PendingConnection.OnConnectedListener { uuid, remoteDevice, isSecure, deviceName ->
       val protocolId = UUID.randomUUID()
-      val connection = Connection(ParcelUuid(protocolId), remoteDevice, isSecure, deviceName)
+      val connection = Connection(ParcelUuid(uuid), remoteDevice, isSecure, deviceName)
+      connectedDevices.put(protocolId, remoteDevice)
+
       pendingConnections.remove(uuid)
       connections[protocolId] = connection
-      sppBinder.registerConnectionCallback(protocolId, generateOnErrorListener())
+      sppBinder.registerConnectionCallback(uuid, generateOnErrorListener())
       sppBinder.setOnMessageReceivedListener(
         connection,
         generateOnMessageReceivedListener(protocolId)
@@ -106,8 +111,7 @@ class SppProtocol(
       callbacks?.invoke { it.onDataReceived(protocolId.toString(), message) }
       logd(
         TAG,
-        "Inform message received with connection $protocolId to " +
-          "${callbacks?.size()} listeners."
+        "Informed message received with connection $protocolId to ${callbacks?.size()} listeners."
       )
     }
   }
@@ -117,6 +121,7 @@ class SppProtocol(
       val protocolId = connections.entries.first { it.value == currentConnection }.key
       val callbacks = deviceCallbacks[protocolId.toString()]
       callbacks?.invoke { it.onDeviceDisconnected(protocolId.toString()) }
+      connectedDevices.remove(protocolId)
       logd(
         TAG,
         "Inform device connection error with connection $protocolId to " +
@@ -171,6 +176,7 @@ class SppProtocol(
 
   /** Cancel all ongoing connection attempt and disconnect already connected devices. */
   override fun reset() {
+    super.reset()
     logd(TAG, "Reset: cancel all connection attempts and disconnect all devices.")
     pendingConnections.forEach { cancelPendingConnection(it.value) }
     pendingConnections.clear()
@@ -178,6 +184,14 @@ class SppProtocol(
     connections.forEach { disconnect(it.value) }
     connections.clear()
   }
+
+  override fun getBluetoothDeviceById(protocolId: String) =
+    try {
+      connectedDevices[UUID.fromString(protocolId)]
+    } catch (e: IllegalArgumentException) {
+      loge(TAG, "Invalid protocol Id passed.", e)
+      null
+    }
 
   private fun cancelPendingConnection(pendingConnection: PendingConnection) {
     try {

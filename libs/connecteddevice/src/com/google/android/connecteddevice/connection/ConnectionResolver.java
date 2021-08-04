@@ -23,7 +23,7 @@ import static java.lang.Math.min;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import com.google.android.companionprotos.CapabilitiesExchangeProto.CapabilitiesExchange;
-import com.google.android.companionprotos.CapabilitiesExchangeProto.CapabilitiesExchange.OobChannel;
+import com.google.android.companionprotos.CapabilitiesExchangeProto.CapabilitiesExchange.OobChannelType;
 import com.google.android.companionprotos.VersionExchangeProto.VersionExchange;
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
@@ -47,7 +47,7 @@ public final class ConnectionResolver {
   @VisibleForTesting public static final int MESSAGING_VERSION = 3;
   @VisibleForTesting public static final int MIN_SECURITY_VERSION = 2;
   @VisibleForTesting public static final int MAX_SECURITY_VERSION = 3;
-  private final ImmutableList<OobChannel> supportedOobChannels;
+  private final ImmutableList<OobChannelType> supportedOobChannels;
 
   private enum State {
     UNKNOWN,
@@ -68,13 +68,13 @@ public final class ConnectionResolver {
   public ConnectionResolver(
       DeviceMessageStream deviceMessageStream,
       boolean isCapabilitiesEligible) {
-    this(deviceMessageStream, isCapabilitiesEligible, ImmutableList.of());
+    this(deviceMessageStream, isCapabilitiesEligible, ImmutableList.of(OobChannelType.BT_RFCOMM));
   }
 
   public ConnectionResolver(
       DeviceMessageStream deviceMessageStream,
       boolean isCapabilitiesEligible,
-      ImmutableList<OobChannel> supportedOobChannels) {
+      ImmutableList<OobChannelType> supportedOobChannels) {
     listeners = new ArrayList<>();
     this.deviceMessageStream = deviceMessageStream;
     this.isCapabilitiesEligible = isCapabilitiesEligible;
@@ -85,7 +85,7 @@ public final class ConnectionResolver {
     setErrorListener(deviceMessageStream::notifyDataReceivedErrorListener);
     registerListener((resolvedConnection) -> deviceMessageStream.setConnectionResolved(true));
 
-    logd(TAG, "Setting datareceivedlistener");
+    logd(TAG, "Setting data received listener");
     deviceMessageStream.setDataReceivedListener(this::onMessageReceived);
   }
 
@@ -183,7 +183,8 @@ public final class ConnectionResolver {
       state = State.WAITING_FOR_CAPABILITIES_EXCHANGE;
     } else {
       notifyConnectionResolved(
-          ResolvedConnection.create(messagingVersion, securityVersion, /* oobChannels= */ null));
+          ResolvedConnection.create(
+              messagingVersion, securityVersion, /* oobChannelTypes= */ null));
     }
   }
 
@@ -205,7 +206,7 @@ public final class ConnectionResolver {
 
     // Must wrap in an ArrayList to prevent retainAll from throwing an
     // UnsupportedOperationException.
-    List<OobChannel> sharedSupportedOobChannels =
+    List<OobChannelType> sharedSupportedOobChannels =
         new ArrayList<>(capabilitiesExchange.getSupportedOobChannelsList());
     logd(
         TAG,
@@ -255,9 +256,9 @@ public final class ConnectionResolver {
     public static ResolvedConnection create(
         int messagingVersion,
         int securityVersion,
-        @Nullable ImmutableList<OobChannel> oobChannels) {
+        @Nullable ImmutableList<OobChannelType> oobChannelTypes) {
       return new AutoValue_ConnectionResolver_ResolvedConnection(
-          messagingVersion, securityVersion, oobChannels);
+          messagingVersion, securityVersion, oobChannelTypes);
     }
 
     public abstract int messagingVersion();
@@ -265,6 +266,6 @@ public final class ConnectionResolver {
     public abstract int securityVersion();
 
     @Nullable
-    public abstract ImmutableList<OobChannel> oobChannels();
+    public abstract ImmutableList<OobChannelType> oobChannelTypes();
   }
 }

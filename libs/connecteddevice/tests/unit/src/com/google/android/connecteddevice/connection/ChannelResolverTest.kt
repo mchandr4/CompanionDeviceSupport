@@ -21,7 +21,7 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.companionprotos.CapabilitiesExchangeProto.CapabilitiesExchange
-import com.google.android.companionprotos.CapabilitiesExchangeProto.CapabilitiesExchange.OobChannel
+import com.google.android.companionprotos.CapabilitiesExchangeProto.CapabilitiesExchange.OobChannelType
 import com.google.android.companionprotos.VersionExchangeProto
 import com.google.android.connecteddevice.model.DeviceMessage
 import com.google.android.connecteddevice.model.DeviceMessage.OperationType
@@ -56,7 +56,7 @@ private const val TEST_PROTOCOL_ID_2 = "testDevice2"
 private val TEST_DEVICE_ID = UUID.randomUUID()
 private val TEST_CHALLENGE = "test Challenge".toByteArray()
 private val TEST_CHALLENGE_RESPONSE = "test Challenge response".toByteArray()
-private val SUPPORTED_OOB_CAPABILITIES = listOf(OobChannel.BT_RFCOMM)
+private val SUPPORTED_OOB_CAPABILITIES = listOf(OobChannelType.BT_RFCOMM)
 
 @RunWith(AndroidJUnit4::class)
 class ChannelResolverTest {

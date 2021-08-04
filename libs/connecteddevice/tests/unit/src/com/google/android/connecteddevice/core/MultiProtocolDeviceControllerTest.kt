@@ -30,6 +30,7 @@ import com.google.android.connecteddevice.model.ConnectedDevice
 import com.google.android.connecteddevice.model.DeviceMessage
 import com.google.android.connecteddevice.model.DeviceMessage.OperationType
 import com.google.android.connecteddevice.model.Errors
+import com.google.android.connecteddevice.oob.OobChannelFactory
 import com.google.android.connecteddevice.oob.OobConnectionManager
 import com.google.android.connecteddevice.storage.ConnectedDeviceDatabase
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage
@@ -69,6 +70,7 @@ class MultiProtocolDeviceControllerTest {
   private val mockStream: ProtocolStream = mock()
   private val mockSecureChannel: MultiProtocolSecureChannel = mock()
   private val mockOobManager: OobConnectionManager = mock()
+  private val mockOobChannelFactory: OobChannelFactory = mock()
   private val mockAssociationCallback: IAssociationCallback = mockToBeAlive()
   private val protocols = setOf(testConnectionProtocol)
   private lateinit var deviceController: MultiProtocolDeviceController
@@ -87,7 +89,13 @@ class MultiProtocolDeviceControllerTest {
     spyStorage = spy(ConnectedDeviceStorage(context, Base64CryptoHelper(), database))
     whenever(spyStorage.hashWithChallengeSecret(any(), any())).thenReturn(TEST_CHALLENGE)
     deviceController =
-      MultiProtocolDeviceController(protocols, spyStorage, mockOobManager, directExecutor())
+      MultiProtocolDeviceController(
+        protocols,
+        spyStorage,
+        mockOobChannelFactory,
+        mockOobManager,
+        directExecutor()
+      )
     deviceController.registerCallback(mockCallback, directExecutor())
     secureChannel =
       spy(
@@ -486,7 +494,13 @@ class MultiProtocolDeviceControllerTest {
       .thenReturn(listOf(activeUserDevice, otherUserDevice, disconnectedDevice))
     // Recreate controller after registering mock returns since they are used in the constructor.
     deviceController =
-      MultiProtocolDeviceController(protocols, spyStorage, mockOobManager, directExecutor())
+      MultiProtocolDeviceController(
+        protocols,
+        spyStorage,
+        mockOobChannelFactory,
+        mockOobManager,
+        directExecutor()
+      )
     deviceController.registerCallback(mockCallback, directExecutor())
 
     deviceController.initiateConnectionToDevice(activeUserDeviceId)
@@ -577,6 +591,7 @@ class MultiProtocolDeviceControllerTest {
       MultiProtocolDeviceController(
           setOf(protocol1, protocol2),
           spyStorage,
+          mockOobChannelFactory,
           mockOobManager,
           directExecutor()
         )
@@ -610,7 +625,13 @@ class MultiProtocolDeviceControllerTest {
     val testProtocolId = UUID.randomUUID().toString()
     val protocol = spy(TestConnectionProtocol())
     deviceController =
-      MultiProtocolDeviceController(setOf(protocol), spyStorage, mockOobManager, directExecutor())
+      MultiProtocolDeviceController(
+          setOf(protocol),
+          spyStorage,
+          mockOobChannelFactory,
+          mockOobManager,
+          directExecutor()
+        )
         .apply { registerCallback(mockCallback, directExecutor()) }
     deviceController.initiateConnectionToDevice(deviceId)
     argumentCaptor<ConnectionProtocol.DiscoveryCallback>().apply {
@@ -641,7 +662,13 @@ class MultiProtocolDeviceControllerTest {
     whenever(spyStorage.activeUserAssociatedDevices).thenReturn(listOf(associatedDevice))
     whenever(spyStorage.allAssociatedDevices).thenReturn(listOf(associatedDevice))
     deviceController =
-      MultiProtocolDeviceController(setOf(protocol), spyStorage, mockOobManager, directExecutor())
+      MultiProtocolDeviceController(
+          setOf(protocol),
+          spyStorage,
+          mockOobChannelFactory,
+          mockOobManager,
+          directExecutor()
+        )
         .apply { registerCallback(mockCallback, directExecutor()) }
     deviceController.initiateConnectionToDevice(deviceId)
     argumentCaptor<ConnectionProtocol.DiscoveryCallback>().apply {

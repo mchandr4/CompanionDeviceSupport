@@ -16,7 +16,7 @@
 package com.google.android.connecteddevice.connection
 
 import com.google.android.companionprotos.CapabilitiesExchangeProto.CapabilitiesExchange
-import com.google.android.companionprotos.CapabilitiesExchangeProto.CapabilitiesExchange.OobChannel
+import com.google.android.companionprotos.CapabilitiesExchangeProto.CapabilitiesExchange.OobChannelType
 import com.google.android.companionprotos.VersionExchangeProto.VersionExchange
 import com.google.android.connecteddevice.model.DeviceMessage
 import com.google.android.connecteddevice.model.DeviceMessage.OperationType.ENCRYPTION_HANDSHAKE
@@ -82,7 +82,7 @@ class ChannelResolver(
   private var isReconnect by Delegates.notNull<Boolean>()
   private var deviceId: UUID? = null
   private var challenge: ByteArray? = null
-  private var supportedOobChannels = listOf<OobChannel>()
+  private var supportedOobTypes = listOf<OobChannelType>()
   private var encryptionRunner: EncryptionRunner = newRunner(EncryptionRunnerType.UKEY2)
 
   /** Resolves the [MultiProtocolSecureChannel] for a reconnect with [deviceId] and [challenge]. */
@@ -94,11 +94,11 @@ class ChannelResolver(
     addProtocolDevice(protocolDevice)
   }
 
-  /** Resolves the [MultiProtocolSecureChannel] for association with supported [OobChannel]s. */
-  fun resolveAssociation(supportedOobChannels: List<OobChannel>) {
+  /** Resolves the [MultiProtocolSecureChannel] for association with supported [OobChannelType]s. */
+  fun resolveAssociation(supportedOobTypes: List<OobChannelType>) {
     logd(TAG, "Resolving channel with a new association.")
     isReconnect = false
-    this.supportedOobChannels = supportedOobChannels
+    this.supportedOobTypes = supportedOobTypes
     addProtocolDevice(protocolDevice)
   }
 
@@ -201,7 +201,7 @@ class ChannelResolver(
       }
     val sharedOobChannels = capabilities.supportedOobChannelsList.toMutableList()
     logd(TAG, "Received ${sharedOobChannels.size} OOB channels from device.")
-    sharedOobChannels.retainAll(supportedOobChannels)
+    sharedOobChannels.retainAll(supportedOobTypes)
     logd(TAG, "Found ${sharedOobChannels.size} common OOB channels.")
     val carCapabilities =
       CapabilitiesExchange.newBuilder().addAllSupportedOobChannels(sharedOobChannels).build()

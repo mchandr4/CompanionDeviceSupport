@@ -27,6 +27,7 @@ import android.os.Handler
 import android.os.HandlerThread
 import android.os.ParcelUuid
 import androidx.annotation.VisibleForTesting
+import com.google.android.connecteddevice.transport.BluetoothDeviceProvider
 import com.google.android.connecteddevice.transport.ConnectionProtocol
 import com.google.android.connecteddevice.util.ByteUtils
 import com.google.android.connecteddevice.util.SafeLog.logd
@@ -49,7 +50,7 @@ class BlePeripheralProtocol(
   readCharacteristicUuid: UUID,
   private val maxReconnectAdvertisementDuration: Duration,
   defaultMtuSize: Int,
-) : ConnectionProtocol() {
+) : ConnectionProtocol(), BluetoothDeviceProvider {
   override val isDeviceVerificationRequired = true
 
   private val writeCharacteristic =
@@ -282,6 +283,7 @@ class BlePeripheralProtocol(
   }
 
   override fun reset() {
+    super.reset()
     logd(TAG, "Resetting protocol.")
     stopAdvertising()
     timeoutHandler?.removeCallbacks(timeoutRunnable)
@@ -312,6 +314,9 @@ class BlePeripheralProtocol(
     }
     return true
   }
+
+  override fun getBluetoothDeviceById(protocolId: String) =
+    if (protocolId == this.protocolId) bluetoothDevice else null
 
   private fun startAdvertising(
     serviceUuid: UUID,

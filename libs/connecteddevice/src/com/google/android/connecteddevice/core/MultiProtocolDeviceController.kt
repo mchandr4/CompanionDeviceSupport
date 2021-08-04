@@ -16,7 +16,7 @@
 package com.google.android.connecteddevice.core
 
 import androidx.annotation.VisibleForTesting
-import com.google.android.companionprotos.CapabilitiesExchangeProto.CapabilitiesExchange.OobChannel
+import com.google.android.companionprotos.CapabilitiesExchangeProto.CapabilitiesExchange.OobChannelType
 import com.google.android.connecteddevice.api.IAssociationCallback
 import com.google.android.connecteddevice.connection.ChannelResolver
 import com.google.android.connecteddevice.connection.MultiProtocolSecureChannel
@@ -29,6 +29,7 @@ import com.google.android.connecteddevice.model.ConnectedDevice
 import com.google.android.connecteddevice.model.DeviceMessage
 import com.google.android.connecteddevice.model.DeviceMessage.OperationType
 import com.google.android.connecteddevice.model.Errors
+import com.google.android.connecteddevice.oob.OobChannelFactory
 import com.google.android.connecteddevice.oob.OobConnectionManager
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage
 import com.google.android.connecteddevice.transport.ConnectionProtocol
@@ -70,6 +71,7 @@ class MultiProtocolDeviceController
 constructor(
   private val protocols: Set<ConnectionProtocol>,
   private val storage: ConnectedDeviceStorage,
+  private val oobChannelFactory: OobChannelFactory,
   private val oobConnectionManager: OobConnectionManager = OobConnectionManager(),
   private val callbackExecutor: Executor = Executors.newSingleThreadExecutor()
 ) : DeviceController {
@@ -289,8 +291,8 @@ constructor(
     deviceId: UUID,
     protocol: ConnectionProtocol,
     challenge: ConnectChallenge
-  ): DiscoveryCallback {
-    return object : DiscoveryCallback {
+  ) =
+    object : DiscoveryCallback {
       override fun onDeviceConnected(protocolId: String) {
         logd(TAG, "New connection protocol connected, id: $protocolId, protocol: $protocol")
         protocol.registerCallback(
@@ -333,7 +335,6 @@ constructor(
         loge(TAG, "Connection discovery failed to start.")
       }
     }
-  }
 
   /**
    * Generate the [DiscoveryCallback] for associating with device with advertisement name
@@ -343,8 +344,8 @@ constructor(
     protocol: ConnectionProtocol,
     associationCallback: IAssociationCallback,
     nameForAssociation: String
-  ): DiscoveryCallback {
-    return object : DiscoveryCallback {
+  ) =
+    object : DiscoveryCallback {
       override fun onDeviceConnected(protocolId: String) {
         logd(TAG, "New connection protocol connected, id: $protocolId, protocol: $protocol")
         val protocolDevice = ProtocolDevice(protocol, protocolId)
@@ -395,12 +396,9 @@ constructor(
           }
       }
     }
-  }
 
-  private fun createShowVerificationCodeListener(
-    callback: IAssociationCallback
-  ): ShowVerificationCodeListener {
-    return object : ShowVerificationCodeListener {
+  private fun createShowVerificationCodeListener(callback: IAssociationCallback) =
+    object : ShowVerificationCodeListener {
       override fun showVerificationCode(code: String) {
         callback.aliveOrNull()?.onVerificationCodeAvailable(code)
           ?: run {
@@ -408,14 +406,13 @@ constructor(
           }
       }
     }
-  }
 
   private fun generateChannelResolver(
     protocolDevice: ProtocolDevice,
     device: ConnectedRemoteDevice,
     associationCallback: IAssociationCallback? = null
-  ): ChannelResolver {
-    return ChannelResolver(
+  ) =
+    ChannelResolver(
       protocolDevice,
       storage,
       object : ChannelResolver.Callback {
@@ -447,14 +444,13 @@ constructor(
         }
       }
     )
-  }
 
   private fun generateDeviceCallback(
     callback: IAssociationCallback?,
     deviceId: UUID?,
     protocol: ConnectionProtocol,
-  ): DeviceCallback {
-    return object : DeviceCallback {
+  ) =
+    object : DeviceCallback {
       override fun onDeviceDisconnected(protocolId: String) {
         logd(TAG, "Remote connect protocol disconnected, id: $protocolId, protocol: $protocol")
         val device =
@@ -498,7 +494,6 @@ constructor(
         // No implementation
       }
     }
-  }
 
   private fun onLastProtocolDisconnected(device: ConnectedRemoteDevice) {
     logd(
@@ -531,10 +526,8 @@ constructor(
     }
   }
 
-  private fun generateSecureChannelCallback(
-    device: ConnectedRemoteDevice
-  ): MultiProtocolSecureChannel.Callback {
-    return object : MultiProtocolSecureChannel.Callback {
+  private fun generateSecureChannelCallback(device: ConnectedRemoteDevice) =
+    object : MultiProtocolSecureChannel.Callback {
       override fun onOobVerificationCodeAvailable(oobCode: ByteArray) {
         encryptAndSendOobVerificationCode(oobCode, device)
       }
@@ -568,7 +561,6 @@ constructor(
         device.callback?.onAssociationError(Errors.DEVICE_ERROR_INVALID_HANDSHAKE)
       }
     }
-  }
 
   @VisibleForTesting
   internal fun encryptAndSendOobVerificationCode(code: ByteArray, device: ConnectedRemoteDevice) {
@@ -707,6 +699,6 @@ constructor(
     private const val TOTAL_AD_DATA_BYTES = 16
     private const val DEVICE_ID_BYTES = 16
     // TODO(b/193057171) Update capabilities when Oob is supported.
-    private val SUPPORTED_OOB_CAPABILITIES = emptyList<OobChannel>()
+    private val SUPPORTED_OOB_CAPABILITIES = emptyList<OobChannelType>()
   }
 }

@@ -390,6 +390,7 @@ public class SppManager {
       new ReadMessageTask.Callback() {
         @Override
         public void onMessageReceived(byte[] message) {
+          logd(TAG, "Received a new message.");
           if (receivedListeners.size() == 0) {
             missedMessages.add(message);
             logw(

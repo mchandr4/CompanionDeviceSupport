@@ -54,6 +54,7 @@ import com.google.android.connecteddevice.model.ConnectedDevice;
 import com.google.android.connecteddevice.model.DeviceMessage;
 import com.google.android.connecteddevice.model.OobEligibleDevice;
 import com.google.android.connecteddevice.oob.BluetoothRfcommChannel;
+import com.google.android.connecteddevice.oob.OobChannelFactory;
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage;
 import com.google.android.connecteddevice.system.SystemFeature;
 import com.google.android.connecteddevice.transport.ConnectionProtocol;
@@ -64,10 +65,12 @@ import com.google.android.connecteddevice.transport.proxy.NetworkSocketFactory;
 import com.google.android.connecteddevice.transport.proxy.ProxyBlePeripheralManager;
 import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelegateBinder;
 import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelegateBinder.OnRemoteCallbackSetListener;
+import com.google.android.connecteddevice.transport.spp.SppProtocol;
 import com.google.android.connecteddevice.util.EventLog;
 import com.google.android.connecteddevice.util.Logger;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -129,6 +132,9 @@ public final class ConnectedDeviceService extends TrunkService {
    */
   private static final String META_ENABLE_FEATURE_COORDINATOR =
       "com.google.android.connecteddevice.enable_feature_coordinator";
+
+  private static final String META_SUPPORTED_OOB_CHANNELS =
+      "com.google.android.connecteddevice.supported_oob_channels";
 
   private static final boolean SPP_ENABLED_BY_DEFAULT = false;
 
@@ -220,6 +226,7 @@ public final class ConnectedDeviceService extends TrunkService {
 
     loggingManager = new LoggingManager(this);
     storage = new ConnectedDeviceStorage(this);
+    sppDelegateBinder = new ConnectedDeviceSppDelegateBinder(onRemoteCallbackSetListener);
     if (useFeatureCoordinator) {
       initializeFeatureCoordinator();
     } else {
@@ -237,6 +244,30 @@ public final class ConnectedDeviceService extends TrunkService {
 
   private void initializeFeatureCoordinator() {
     logd(TAG, "Initializing FeatureCoordinator version of the platform.");
+    ConnectionProtocol protocol;
+    if (isSppSupported) {
+      protocol = createSppProtocol();
+    } else {
+      protocol = createBlePeripheralProtocol();
+    }
+
+    Set<ConnectionProtocol> protocols = new HashSet<>();
+    protocols.add(protocol);
+    OobChannelFactory oobChannelFactory =
+        new OobChannelFactory(
+            sppDelegateBinder,
+            Arrays.asList(
+                getMetaStringArray(
+                    META_SUPPORTED_OOB_CHANNELS, /* defaultValue= */ new String[0])));
+    DeviceController deviceController =
+        new MultiProtocolDeviceController(protocols, storage, oobChannelFactory);
+    featureCoordinator = new FeatureCoordinator(deviceController, storage);
+    logd(TAG, "Wrapping FeatureCoordinator in legacy binders for backwards compatibility.");
+    connectedDeviceManagerBinder = createConnectedDeviceManagerWrapper();
+    associationBinder = createAssociatedDeviceManagerWrapper();
+  }
+
+  private BlePeripheralProtocol createBlePeripheralProtocol() {
     UUID associationUuid = UUID.fromString(requireMetaString(META_ASSOCIATION_SERVICE_UUID));
     UUID reconnectUuid =
         UUID.fromString(getMetaString(META_RECONNECT_SERVICE_UUID, DEFAULT_RECONNECT_UUID));
@@ -259,17 +290,22 @@ public final class ConnectedDeviceService extends TrunkService {
     } else {
       blePeripheralManager = new OnDeviceBlePeripheralManager(this);
     }
-    Set<ConnectionProtocol> protocols = new HashSet<>();
-    protocols.add(
-        new BlePeripheralProtocol(blePeripheralManager, associationUuid, reconnectUuid,
-            reconnectDataUuid, advertiseDataCharacteristicUuid, writeUuid, readUuid,
-            MAX_ADVERTISEMENT_DURATION, defaultMtuSize));
-    DeviceController deviceController =
-        new MultiProtocolDeviceController(protocols, storage);
-    featureCoordinator = new FeatureCoordinator(deviceController, storage);
-    logd(TAG, "Wrapping FeatureCoordinator in legacy binders for backwards compatibility.");
-    connectedDeviceManagerBinder = createConnectedDeviceManagerWrapper();
-    associationBinder = createAssociatedDeviceManagerWrapper();
+    return new BlePeripheralProtocol(
+        blePeripheralManager,
+        associationUuid,
+        reconnectUuid,
+        reconnectDataUuid,
+        advertiseDataCharacteristicUuid,
+        writeUuid,
+        readUuid,
+        MAX_ADVERTISEMENT_DURATION,
+        defaultMtuSize);
+  }
+
+  private SppProtocol createSppProtocol() {
+    UUID sppServiceUuid = UUID.fromString(requireMetaString(META_SPP_SERVICE_UUID));
+    int maxSppPacketSize = getMetaInt(META_SPP_PACKET_BYTES, DEFAULT_SPP_PACKET_SIZE);
+    return new SppProtocol(sppDelegateBinder, sppServiceUuid, maxSppPacketSize);
   }
 
   private void initializeConnectedDeviceManager() {
@@ -278,7 +314,6 @@ public final class ConnectedDeviceService extends TrunkService {
         getMetaBoolean(META_COMPRESS_OUTGOING_MESSAGES, ENABLE_COMPRESSION_BY_DEFAULT);
     boolean isCapabilitiesEligible =
         getMetaBoolean(META_ENABLE_CAPABILITIES_EXCHANGE, ENABLE_CAPABILITIES_EXCHANGE_BY_DEFAULT);
-    sppDelegateBinder = new ConnectedDeviceSppDelegateBinder(onRemoteCallbackSetListener);
     CarBluetoothManager carBluetoothManager;
     if (isSppSupported) {
       carBluetoothManager = createSppManager(storage, isCompressionEnabled, isCapabilitiesEligible);
@@ -290,7 +325,6 @@ public final class ConnectedDeviceService extends TrunkService {
     connectedDeviceManagerBinder =
         new ConnectedDeviceManagerBinder(connectedDeviceManager, loggingManager);
     associationBinder = new AssociationBinder(connectedDeviceManager);
-
   }
 
   private void populateFeatures() {
@@ -475,14 +509,14 @@ public final class ConnectedDeviceService extends TrunkService {
       }
 
       @Override
-      public void registerDeviceCallback(ConnectedDevice connectedDevice, ParcelUuid recipientId,
-          IDeviceCallback callback) {
+      public void registerDeviceCallback(
+          ConnectedDevice connectedDevice, ParcelUuid recipientId, IDeviceCallback callback) {
         featureCoordinator.registerDeviceCallback(connectedDevice, recipientId, callback);
       }
 
       @Override
-      public void unregisterDeviceCallback(ConnectedDevice connectedDevice, ParcelUuid recipientId,
-          IDeviceCallback callback) {
+      public void unregisterDeviceCallback(
+          ConnectedDevice connectedDevice, ParcelUuid recipientId, IDeviceCallback callback) {
         featureCoordinator.unregisterDeviceCallback(connectedDevice, recipientId, callback);
       }
 
@@ -556,14 +590,15 @@ public final class ConnectedDeviceService extends TrunkService {
       @Override
       public void retrievedActiveUserAssociatedDevices(
           IOnAssociatedDevicesRetrievedListener listener) {
-        Executors.newSingleThreadExecutor().execute(
-            () -> {
-              try {
-                listener.onAssociatedDevicesRetrieved(storage.getActiveUserAssociatedDevices());
-              } catch (RemoteException e) {
-                loge(TAG, "Unable to send associated devices to listener.");
-              }
-            });
+        Executors.newSingleThreadExecutor()
+            .execute(
+                () -> {
+                  try {
+                    listener.onAssociatedDevicesRetrieved(storage.getActiveUserAssociatedDevices());
+                  } catch (RemoteException e) {
+                    loge(TAG, "Unable to send associated devices to listener.");
+                  }
+                });
       }
 
       @Override
