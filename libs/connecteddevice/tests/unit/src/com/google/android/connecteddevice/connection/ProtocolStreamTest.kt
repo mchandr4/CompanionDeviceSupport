@@ -241,7 +241,7 @@ class ProtocolStreamTest {
     override val isDeviceVerificationRequired = false
 
     fun receiveData(data: ByteArray) {
-      deviceCallbacks[PROTOCOL_ID]?.invoke { it.onDataReceived(PROTOCOL_ID, data) }
+      dataReceivedListeners[PROTOCOL_ID]?.invoke { it.onDataReceived(PROTOCOL_ID, data) }
     }
 
     override fun startAssociationDiscovery(name: String, callback: DiscoveryCallback) {}
@@ -261,7 +261,7 @@ class ProtocolStreamTest {
     }
 
     override fun disconnectDevice(protocolId: String) {
-      deviceCallbacks[protocolId]?.invoke { it.onDeviceDisconnected(protocolId) }
+      deviceDisconnectedListeners[protocolId]?.invoke { it.onDeviceDisconnected(protocolId) }
     }
 
     override fun reset() {}

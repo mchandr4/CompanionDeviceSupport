@@ -93,20 +93,6 @@ public class OobAssociationSecureChannel extends AssociationSecureChannel {
       notifySecureChannelFailure(CHANNEL_ERROR_INVALID_VERIFICATION);
       return;
     }
-
-    byte[] encryptedCode;
-    try {
-      encryptedCode = oobConnectionManager.encryptVerificationCode(oobCode);
-    } catch (InvalidKeyException
-        | InvalidAlgorithmParameterException
-        | IllegalBlockSizeException
-        | BadPaddingException e) {
-      loge(TAG, "Encryption failed for verification code exchange.", e);
-      notifySecureChannelFailure(CHANNEL_ERROR_INVALID_HANDSHAKE);
-      return;
-    }
-
-    sendHandshakeMessage(encryptedCode, /* isEncrypted= */ false);
   }
 
   private void processHandshakeOobVerificationNeeded(@NonNull byte[] message) {
@@ -122,11 +108,26 @@ public class OobAssociationSecureChannel extends AssociationSecureChannel {
       return;
     }
 
-    if (!Arrays.equals(oobCode, decryptedCode)) {
+    if (oobCode == null || !Arrays.equals(oobCode, decryptedCode)) {
       loge(TAG, "Exchanged verification codes do not match. Aborting secure channel.");
       notifySecureChannelFailure(CHANNEL_ERROR_INVALID_VERIFICATION);
       return;
     }
+
+    byte[] encryptedCode;
+    try {
+      encryptedCode = oobConnectionManager.encryptVerificationCode(oobCode);
+    } catch (InvalidKeyException
+        | InvalidAlgorithmParameterException
+        | IllegalBlockSizeException
+        | BadPaddingException e) {
+      loge(TAG, "Encryption failed for verification code exchange.", e);
+      notifySecureChannelFailure(CHANNEL_ERROR_INVALID_HANDSHAKE);
+      return;
+    }
+
+    loge(TAG, "OOB accespted send encrpted code.");
+    sendHandshakeMessage(encryptedCode, /* isEncrypted= */ false);
 
     notifyOutOfBandAccepted();
   }

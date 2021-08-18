@@ -141,6 +141,14 @@ interface IFeatureCoordinator {
      */
     void retrieveAssociatedDevices(in IOnAssociatedDevicesRetrievedListener listener);
 
+    /**
+     * Retrieve associated devices belonging to the driver.
+     *
+     * @param listener {@link IOnAssociatedDevicesRetrievedListener} that will
+     * be notified when the associated devices are retrieved.
+     */
+    void retrieveAssociatedDevicesForDriver(in IOnAssociatedDevicesRetrievedListener listener);
+
     /** Confirm the paring code. */
     void acceptVerification();
 

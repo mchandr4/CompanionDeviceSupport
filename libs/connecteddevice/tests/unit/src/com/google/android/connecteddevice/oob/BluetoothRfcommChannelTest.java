@@ -32,6 +32,9 @@ import android.bluetooth.BluetoothDevice;
 import android.os.RemoteException;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.google.android.connecteddevice.model.OobEligibleDevice;
+import com.google.android.connecteddevice.transport.BluetoothDeviceProvider;
+import com.google.android.connecteddevice.transport.ConnectionProtocol;
+import com.google.android.connecteddevice.transport.ProtocolDevice;
 import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelegateBinder;
 import com.google.android.connecteddevice.transport.spp.PendingConnection;
 import com.google.android.connecteddevice.transport.spp.PendingSentMessage;
@@ -59,6 +62,8 @@ public class BluetoothRfcommChannelTest {
 
   private BluetoothRfcommChannel bluetoothRfcommChannel;
   @Mock private OobChannel.Callback mockCallback;
+  @Mock private TestConnectionProtocol mockValidProtocol;
+  @Mock private ConnectionProtocol mockInvalidProtocol;
   @Mock private ConnectedDeviceSppDelegateBinder mockSppDelegateBinder;
 
   @Before
@@ -182,6 +187,34 @@ public class BluetoothRfcommChannelTest {
     verify(mockCallback, never()).onOobExchangeFailure();
   }
 
+  @Test
+  public void interrupt_cancelConnectionAttempt() throws Exception {
+    PendingConnection connection = establishConnection();
+    bluetoothRfcommChannel.interrupt();
+    verify(mockSppDelegateBinder).disconnect(connection.toConnection(TEST_BLUETOOTH_DEVICE));
+  }
+
+  @Test
+  public void completeOobDataExchange_supportedProtocol_returnTrue() {
+    String protocolId = "testProtocolId";
+    when(mockValidProtocol.getBluetoothDeviceById(protocolId)).thenReturn(TEST_BLUETOOTH_DEVICE);
+
+    assertThat(
+            bluetoothRfcommChannel.completeOobDataExchange(
+                new ProtocolDevice(mockValidProtocol, protocolId), mockCallback))
+        .isTrue();
+  }
+
+  @Test
+  public void completeOobDataExchange_unsupportedProtocol_returnFalse() {
+    String protocolId = "testProtocolId";
+
+    assertThat(
+            bluetoothRfcommChannel.completeOobDataExchange(
+                new ProtocolDevice(mockInvalidProtocol, protocolId), mockCallback))
+        .isFalse();
+  }
+
   private PendingConnection establishConnection() throws Exception {
     PendingConnection connection = requestConnection();
     connection.notifyConnected(TEST_BLUETOOTH_DEVICE, TEST_BLUETOOTH_DEVICE.getName());
@@ -216,6 +249,44 @@ public class BluetoothRfcommChannelTest {
       boolean isSecure = invocationOnMock.getArgument(2);
       result = new PendingConnection(uuid, isSecure);
       return result;
+    }
+  }
+
+  private static class TestConnectionProtocol extends ConnectionProtocol
+      implements BluetoothDeviceProvider {
+
+    @Override
+    public BluetoothDevice getBluetoothDeviceById(String protocolId) {
+      return null;
+    }
+
+    @Override
+    public boolean isDeviceVerificationRequired() {
+      return false;
+    }
+
+    @Override
+    public void startAssociationDiscovery(String name, DiscoveryCallback callback) {}
+
+    @Override
+    public void startConnectionDiscovery(
+        UUID id, ConnectChallenge challenge, DiscoveryCallback callback) {}
+
+    @Override
+    public void stopAssociationDiscovery() {}
+
+    @Override
+    public void stopConnectionDiscovery(UUID id) {}
+
+    @Override
+    public void sendData(String protocolId, byte[] data, DataSendCallback callback) {}
+
+    @Override
+    public void disconnectDevice(String protocolId) {}
+
+    @Override
+    public int getMaxWriteSize(String protocolId) {
+      return 0;
     }
   }
 }

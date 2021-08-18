@@ -72,10 +72,10 @@ public class OnDeviceBlePeripheralManager extends BlePeripheralManager {
   private final AtomicReference<BluetoothGatt> bluetoothGatt = new AtomicReference<>();
   private final AtomicReference<BluetoothLeAdvertiser> advertiser = new AtomicReference<>();
   private final AtomicInteger connectionState = new AtomicInteger(DEFAULT_CONNECTION_STATE);
+  private final BluetoothManager bluetoothManager;
 
   private int mtuSize = 20;
 
-  private BluetoothManager bluetoothManager;
   private int advertiserStartCount;
   private int gattServerRetryStartCount;
   private BluetoothGattService bluetoothGattService;
@@ -86,6 +86,7 @@ public class OnDeviceBlePeripheralManager extends BlePeripheralManager {
   public OnDeviceBlePeripheralManager(Context context) {
     this.context = context;
     handler = new Handler(this.context.getMainLooper());
+    bluetoothManager = context.getSystemService(BluetoothManager.class);
   }
 
   /**
@@ -116,8 +117,9 @@ public class OnDeviceBlePeripheralManager extends BlePeripheralManager {
       AdvertiseData scanResponse,
       AdvertiseCallback advertiseCallback) {
     logd(TAG, "Request to start advertising with service " + service.getUuid() + ".");
-    if (!context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
-      loge(TAG, "Attempted start advertising, but system does not support BLE. Ignoring.");
+    if (!context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)
+        || !bluetoothManager.getAdapter().isMultipleAdvertisementSupported()) {
+      loge(TAG, "Attempted to start advertising, but system does not fully support BLE. Aborting.");
       return;
     }
     // Clears previous session before starting advertising.
@@ -127,7 +129,6 @@ public class OnDeviceBlePeripheralManager extends BlePeripheralManager {
     this.advertiseData = advertiseData;
     this.scanResponse = scanResponse;
     gattServerRetryStartCount = 0;
-    bluetoothManager = context.getSystemService(BluetoothManager.class);
     gattServer.set(bluetoothManager.openGattServer(context, gattServerCallback));
     openGattServer();
   }

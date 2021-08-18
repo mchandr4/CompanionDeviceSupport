@@ -20,12 +20,17 @@ import com.google.android.companionprotos.CapabilitiesExchangeProto.Capabilities
 import com.google.android.companionprotos.VersionExchangeProto.VersionExchange
 import com.google.android.connecteddevice.model.DeviceMessage
 import com.google.android.connecteddevice.model.DeviceMessage.OperationType.ENCRYPTION_HANDSHAKE
+import com.google.android.connecteddevice.oob.OobChannel
+import com.google.android.connecteddevice.oob.OobChannelFactory
+import com.google.android.connecteddevice.oob.OobConnectionManager
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage
 import com.google.android.connecteddevice.transport.ConnectionProtocol
+import com.google.android.connecteddevice.transport.ConnectionProtocol.DataReceivedListener
 import com.google.android.connecteddevice.transport.ProtocolDevice
 import com.google.android.connecteddevice.util.ByteUtils
 import com.google.android.connecteddevice.util.SafeLog.logd
 import com.google.android.connecteddevice.util.SafeLog.loge
+import com.google.android.connecteddevice.util.SafeLog.logw
 import com.google.android.encryptionrunner.EncryptionRunner
 import com.google.android.encryptionrunner.EncryptionRunnerFactory.EncryptionRunnerType
 import com.google.android.encryptionrunner.EncryptionRunnerFactory.newRunner
@@ -74,16 +79,16 @@ class ChannelResolver(
   private val currentDevice: AtomicReference<ProtocolDevice?> =
     AtomicReference<ProtocolDevice?>(null)
   private val capabilityExchanged = AtomicBoolean(false)
-  // protocol device -> callback. This map tracks callbacks for channel resolving on connected
-  // protocols.
   private val executor: Executor = directExecutor()
-  private val protocolDevices =
-    ConcurrentHashMap<ProtocolDevice, ConnectionProtocol.DeviceCallback>()
+  // protocol device -> listeners. This map tracks listeners for channel resolving on connected
+  // protocols.
+  private val protocolDevices = ConcurrentHashMap<ProtocolDevice, DataReceivedListener>()
   private var isReconnect by Delegates.notNull<Boolean>()
   private var deviceId: UUID? = null
   private var challenge: ByteArray? = null
-  private var supportedOobTypes = listOf<OobChannelType>()
+  private var oobChannelFactory: OobChannelFactory? = null
   private var encryptionRunner: EncryptionRunner = newRunner(EncryptionRunnerType.UKEY2)
+  private var oobConnectionManager: OobConnectionManager? = null
 
   /** Resolves the [MultiProtocolSecureChannel] for a reconnect with [deviceId] and [challenge]. */
   fun resolveReconnect(deviceId: UUID, challenge: ByteArray) {
@@ -94,11 +99,12 @@ class ChannelResolver(
     addProtocolDevice(protocolDevice)
   }
 
-  /** Resolves the [MultiProtocolSecureChannel] for association with supported [OobChannelType]s. */
-  fun resolveAssociation(supportedOobTypes: List<OobChannelType>) {
+  /** Resolves the [MultiProtocolSecureChannel] for association with supported [OobChannel]s. */
+  fun resolveAssociation(oobChannelFactory: OobChannelFactory, oobManager: OobConnectionManager) {
     logd(TAG, "Resolving channel with a new association.")
     isReconnect = false
-    this.supportedOobTypes = supportedOobTypes
+    this.oobChannelFactory = oobChannelFactory
+    this.oobConnectionManager = oobManager
     addProtocolDevice(protocolDevice)
   }
 
@@ -109,9 +115,9 @@ class ChannelResolver(
    * before a [MultiProtocolSecureChannel] has been established for the remote device.
    */
   fun addProtocolDevice(device: ProtocolDevice) {
-    logd(TAG, "Registering protocol callback.")
-    val deviceCallback =
-      object : ConnectionProtocol.DeviceCallback {
+    logd(TAG, "Registering listener for received data received.")
+    val dataReceivedListener =
+      object : DataReceivedListener {
         override fun onDataReceived(protocolId: String, data: ByteArray) {
           if (currentDevice.compareAndSet(null, device)) {
             processVersionMessage(data, device)
@@ -127,25 +133,9 @@ class ChannelResolver(
           }
           processCapabilityMessage(data, device)
         }
-
-        override fun onDeviceDisconnected(protocolId: String) {
-          if (protocolId == currentDevice.get()?.protocolId) {
-            onError("Device disconnected on the main protocol during channel resolving.")
-            return
-          }
-          device.protocol.unregisterCallback(device.protocolId, this)
-          protocolDevices.remove(device)
-          if (protocolDevices.isEmpty()) {
-            onError("No connected protocol available for channel resolving.")
-          }
-        }
-
-        override fun onDeviceMaxDataSizeChanged(protocolId: String, maxBytes: Int) {
-          // Ignore as the stream handles this.
-        }
       }
-    device.protocol.registerCallback(device.protocolId, deviceCallback, executor)
-    protocolDevices[device] = deviceCallback
+    device.protocol.registerDataReceivedListener(device.protocolId, dataReceivedListener, executor)
+    protocolDevices[device] = dataReceivedListener
   }
 
   private fun processVersionMessage(message: ByteArray, device: ProtocolDevice) {
@@ -201,18 +191,81 @@ class ChannelResolver(
       }
     val sharedOobChannels = capabilities.supportedOobChannelsList.toMutableList()
     logd(TAG, "Received ${sharedOobChannels.size} OOB channels from device.")
-    sharedOobChannels.retainAll(supportedOobTypes)
+    var onDeviceChannels = emptyList<OobChannelType>()
+    val factory = this.oobChannelFactory
+    if (factory == null) {
+      logw(TAG, "OOB channel factory not set during capabilities exchange. Sending empty list.")
+    } else {
+      onDeviceChannels = factory.supportedTypes.map { it.asOobChannelType() }
+    }
+
+    logd(TAG, "Car supported ${onDeviceChannels.size} OOB channels.")
+    sharedOobChannels.retainAll(onDeviceChannels.toMutableList())
     logd(TAG, "Found ${sharedOobChannels.size} common OOB channels.")
     val carCapabilities =
       CapabilitiesExchange.newBuilder().addAllSupportedOobChannels(sharedOobChannels).build()
     device.protocol.sendData(device.protocolId, carCapabilities.toByteArray())
-    // TODO(b/193057171) Complete out of band exchange.
+
+    factory?.let { establishOobChannel(factory, sharedOobChannels, device) }
+  }
+
+  private fun String.asOobChannelType(): OobChannelType =
+    OobChannelType.values().firstOrNull { it.name.equals(this) }
+      ?: OobChannelType.OOB_CHANNEL_UNKNOWN
+
+  private fun establishOobChannel(
+    oobChannelFactory: OobChannelFactory,
+    sharedOobChannels: List<OobChannelType>,
+    device: ProtocolDevice
+  ) {
+    for (oobChannelType in sharedOobChannels) {
+      val alternativeChannels =
+        sharedOobChannels.toMutableList().apply { this.remove(oobChannelType) }
+
+      val oobChannel = oobChannelFactory.createOobChannel(oobChannelType.name)
+      val success =
+        oobChannel.completeOobDataExchange(
+          protocolDevice,
+          generateOobCallback(oobChannelFactory, oobChannel, device, alternativeChannels)
+        )
+      if (success) {
+        logd(TAG, "Out of band data exchange started successfully, waiting for OOB callback.")
+        return
+      }
+    }
+    logw(TAG, "Out of band exchange failed to start, falling back to numeric comparison.")
     resolveStream(device)
   }
 
+  private fun generateOobCallback(
+    oobChannelFactory: OobChannelFactory,
+    oobChannel: OobChannel,
+    device: ProtocolDevice,
+    alternativeChannels: List<OobChannelType>
+  ) =
+    object : OobChannel.Callback {
+      override fun onOobExchangeSuccess() {
+        logd(TAG, "Oob data exchange completed successfully.")
+        encryptionRunner = newRunner(EncryptionRunnerType.OOB_UKEY2)
+        oobConnectionManager?.startOobExchange(oobChannel)
+        resolveStream(device)
+      }
+
+      override fun onOobExchangeFailure() {
+        if (alternativeChannels.isEmpty()) {
+          logw(TAG, "Out of band exchange failed, fallback to numeric comparison.")
+          resolveStream(device)
+          return
+        }
+
+        logw(TAG, "Out of band exchange failed, fallback to try another OOB channels.")
+        establishOobChannel(oobChannelFactory, alternativeChannels, device)
+      }
+    }
+
   private fun resolveStream(device: ProtocolDevice) {
-    protocolDevices.remove(device)?.let { deviceCallback ->
-      device.protocol.unregisterCallback(device.protocolId, deviceCallback)
+    protocolDevices.remove(device)?.let { listener ->
+      device.protocol.unregisterDataReceivedListener(device.protocolId, listener)
     }
     val stream = streamFactory.createProtocolStream(device, executor)
     if (isReconnect && device.protocol.isDeviceVerificationRequired) {
@@ -281,19 +334,19 @@ class ChannelResolver(
     val channel =
       MultiProtocolSecureChannel(stream, storage, encryptionRunner, deviceId?.toString())
     protocolDevices.keys.forEach { channel.addStream(ProtocolStream(it)) }
-    clearDeviceCallbacks()
+    clearDataReceivedListeners()
     callback.onChannelResolved(channel)
   }
 
   private fun onError(message: String, exception: Exception? = null) {
     loge(TAG, message, exception)
-    clearDeviceCallbacks()
+    clearDataReceivedListeners()
     callback.onChannelResolutionError()
   }
 
-  private fun clearDeviceCallbacks() {
-    protocolDevices.forEach { (device, deviceCallback) ->
-      device.protocol.unregisterCallback(device.protocolId, deviceCallback)
+  private fun clearDataReceivedListeners() {
+    protocolDevices.forEach { (device, listener) ->
+      device.protocol.unregisterDataReceivedListener(device.protocolId, listener)
     }
     protocolDevices.clear()
   }

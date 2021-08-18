@@ -28,6 +28,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 import java.time.Duration;
@@ -40,12 +41,14 @@ public abstract class TrunkService extends MetaDataService {
   private static final String TAG = "TrunkService";
 
   /** {@code string-array} List of services to start early. */
-  private static final String META_EARLY_SERVICES =
+  @VisibleForTesting
+  static final String META_EARLY_SERVICES =
       "com.google.android.connecteddevice.early_services";
 
-  private static final Duration BIND_RETRY_DURATION = Duration.ofSeconds(1);
+  @VisibleForTesting
+  static final int MAX_BIND_ATTEMPTS = 3;
 
-  private static final int MAX_BIND_ATTEMPTS = 3;
+  private static final Duration BIND_RETRY_DURATION = Duration.ofSeconds(1);
 
   private final Multiset<String> bindAttempts = HashMultiset.create();
 
@@ -56,6 +59,12 @@ public abstract class TrunkService extends MetaDataService {
   public void onCreate() {
     super.onCreate();
     startBranchServices(META_EARLY_SERVICES);
+  }
+
+  @Override
+  public void onDestroy() {
+    stopBranchServices();
+    super.onDestroy();
   }
 
   /**

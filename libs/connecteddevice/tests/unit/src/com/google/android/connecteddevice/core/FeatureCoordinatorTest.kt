@@ -742,6 +742,31 @@ class FeatureCoordinatorTest {
   }
 
   @Test
+  fun retrieveAssociatedDevicesForDriver_returnsOnlyDriverDevicesInStorage() {
+    val driverDevices =
+      listOf(
+        AssociatedDevice(
+          UUID.randomUUID().toString(),
+          /* deviceAddress= */ "",
+          /* deviceName= */ null,
+          /* isConnectionEnabled= */ true
+        ),
+        AssociatedDevice(
+          UUID.randomUUID().toString(),
+          /* deviceAddress= */ "",
+          /* deviceName= */ null,
+          /* isConnectionEnabled= */ false
+        )
+      )
+    val listener: IOnAssociatedDevicesRetrievedListener = mockToBeAlive()
+    whenever(mockStorage.activeUserAssociatedDevices).thenReturn(driverDevices)
+
+    coordinator.retrieveAssociatedDevicesForDriver(listener)
+
+    verify(listener).onAssociatedDevicesRetrieved(driverDevices)
+  }
+
+  @Test
   fun stopAssociation_directCallIntoDeviceController() {
     coordinator.stopAssociation()
 

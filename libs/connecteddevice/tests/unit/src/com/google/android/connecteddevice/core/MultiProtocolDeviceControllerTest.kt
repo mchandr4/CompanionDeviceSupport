@@ -53,7 +53,6 @@ import com.nhaarman.mockitokotlin2.validateMockitoUsage
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import java.util.UUID
-import java.util.concurrent.ConcurrentHashMap
 import kotlin.test.fail
 import org.junit.After
 import org.junit.Before
@@ -151,7 +150,7 @@ class MultiProtocolDeviceControllerTest {
   }
 
   @Test
-  fun onDeviceConnected_registerCallback() {
+  fun onDeviceConnected_registerDeviceDisconnectedListener() {
     val testUuid = UUID.randomUUID()
     deviceController.initiateConnectionToDevice(testUuid)
     argumentCaptor<ConnectionProtocol.DiscoveryCallback>().apply {
@@ -159,11 +158,11 @@ class MultiProtocolDeviceControllerTest {
       firstValue.onDeviceConnected(UUID.randomUUID().toString())
     }
 
-    assertThat(testConnectionProtocol.callbackList).hasSize(1)
+    assertThat(testConnectionProtocol.deviceDisconnectedListenerList).hasSize(1)
   }
 
   @Test
-  fun onDeviceDisconnected_invokesCallback() {
+  fun onDeviceDisconnected_invokesDisconnectCallback() {
     val deviceId = UUID.randomUUID()
     val testProtocolId = UUID.randomUUID()
     whenever(spyStorage.allAssociatedDevices)
@@ -183,12 +182,62 @@ class MultiProtocolDeviceControllerTest {
       firstValue.onDeviceConnected(testProtocolId.toString())
     }
 
-    val callbacks =
-      testConnectionProtocol.callbackList[testProtocolId.toString()]
-        ?: fail("Failed to find callbacks.")
-    callbacks.invoke { callback -> callback.onDeviceDisconnected(testProtocolId.toString()) }
+    val listeners =
+      testConnectionProtocol.deviceDisconnectedListenerList[testProtocolId.toString()]
+        ?: fail("Failed to find listeners.")
+    listeners.invoke { listener -> listener.onDeviceDisconnected(testProtocolId.toString()) }
 
     verify(mockCallback).onDeviceDisconnected(any())
+  }
+
+  @Test
+  fun onDeviceDisconnected_duringAssociation_invokesAssociationErrorCallback() {
+    val testProtocolId = UUID.randomUUID()
+    deviceController.startAssociation("deviceName", mockAssociationCallback)
+    argumentCaptor<ConnectionProtocol.DiscoveryCallback>().apply {
+      verify(testConnectionProtocol).startAssociationDiscovery(any(), capture())
+      firstValue.onDeviceConnected(testProtocolId.toString())
+    }
+
+    val listeners =
+      testConnectionProtocol.deviceDisconnectedListenerList[testProtocolId.toString()]
+        ?: fail("Failed to find listeners.")
+    listeners.invoke { listener -> listener.onDeviceDisconnected(testProtocolId.toString()) }
+
+    verify(mockAssociationCallback).onAssociationError(Errors.DEVICE_ERROR_UNEXPECTED_DISCONNECTION)
+  }
+
+  @Test
+  fun onDeviceDisconnected_afterAssociationCompleted_doNotInvokesAssociationErrorCallback() {
+    val deviceId = UUID.randomUUID()
+    val testProtocolId = UUID.randomUUID()
+    val secret = ByteUtils.randomBytes(CHALLENGE_SECRET_BYTES)
+    val testDeviceMessage =
+      DeviceMessage(
+        null,
+        true,
+        OperationType.CLIENT_MESSAGE,
+        ByteUtils.uuidToBytes(deviceId) + secret
+      )
+    deviceController.startAssociation("deviceName", mockAssociationCallback)
+    argumentCaptor<ConnectionProtocol.DiscoveryCallback>().apply {
+      verify(testConnectionProtocol).startAssociationDiscovery(any(), capture())
+      firstValue.onDeviceConnected(testProtocolId.toString())
+    }
+
+    deviceController.handleSecureChannelMessage(
+      testDeviceMessage,
+      deviceController.getConnectedDevice(mockAssociationCallback)
+        ?: fail("Failed to find the device.")
+    )
+
+    val listeners =
+      testConnectionProtocol.deviceDisconnectedListenerList[testProtocolId.toString()]
+        ?: fail("Failed to find listeners.")
+    listeners.invoke { listener -> listener.onDeviceDisconnected(testProtocolId.toString()) }
+
+    verify(mockAssociationCallback, never())
+      .onAssociationError(Errors.DEVICE_ERROR_UNEXPECTED_DISCONNECTION)
   }
 
   @Test
@@ -209,10 +258,10 @@ class MultiProtocolDeviceControllerTest {
       firstValue.onDeviceConnected(testProtocolId.toString())
     }
 
-    val callbacks =
-      testConnectionProtocol.callbackList[testProtocolId.toString()]
-        ?: fail("Failed to find callbacks.")
-    callbacks.invoke { callback -> callback.onDeviceDisconnected(testProtocolId.toString()) }
+    val listeners =
+      testConnectionProtocol.deviceDisconnectedListenerList[testProtocolId.toString()]
+        ?: fail("Failed to find listeners.")
+    listeners.invoke { listener -> listener.onDeviceDisconnected(testProtocolId.toString()) }
 
     verify(testConnectionProtocol, times(2)).startConnectionDiscovery(eq(deviceId), any(), any())
   }
@@ -239,10 +288,10 @@ class MultiProtocolDeviceControllerTest {
       deviceId.toString(),
       /* isConnectionEnabled= */ false
     )
-    val callbacks =
-      testConnectionProtocol.callbackList[testProtocolId.toString()]
-        ?: fail("Failed to find callbacks.")
-    callbacks.invoke { callback -> callback.onDeviceDisconnected(testProtocolId.toString()) }
+    val listeners =
+      testConnectionProtocol.deviceDisconnectedListenerList[testProtocolId.toString()]
+        ?: fail("Failed to find listeners.")
+    listeners.invoke { listener -> listener.onDeviceDisconnected(testProtocolId.toString()) }
 
     verify(testConnectionProtocol).startConnectionDiscovery(eq(deviceId), any(), any())
   }
@@ -709,16 +758,28 @@ class MultiProtocolDeviceControllerTest {
   }
 
   @Test
-  fun confirmOobVerificationCode_decryptedAndConfirmedSuccessfully_notifySecureChannel() {
-    val testConnectedDevice = MultiProtocolDeviceController.ConnectedRemoteDevice()
+  fun confirmOobVerificationCode_confirmedSuccessfully_sendEncryptedCodeAndnotifySecureChannel() {
+    val testProtocolId = UUID.randomUUID()
+
+    deviceController.startAssociation("testName", mockAssociationCallback)
+    argumentCaptor<ConnectionProtocol.DiscoveryCallback>().apply {
+      verify(testConnectionProtocol).startAssociationDiscovery(any(), capture())
+      firstValue.onDeviceConnected(testProtocolId.toString())
+    }
+
+    val connectedDevice =
+      deviceController.getConnectedDevice(mockAssociationCallback)
+        ?: fail("Failed to find the device.")
+    connectedDevice.secureChannel = mockSecureChannel
     val testOobCode = "encryptedTestCode".toByteArray()
     val decryptedTestOobCode = "decryptedTestCode".toByteArray()
-    testConnectedDevice.secureChannel = mockSecureChannel
+
+    deviceController.oobCode = decryptedTestOobCode
+    whenever(mockOobManager.encryptVerificationCode(decryptedTestOobCode)).thenReturn(testOobCode)
     whenever(mockOobManager.decryptVerificationCode(testOobCode)).thenReturn(decryptedTestOobCode)
-    deviceController.encryptAndSendOobVerificationCode(decryptedTestOobCode, testConnectedDevice)
+    deviceController.confirmOobVerificationCode(testOobCode, connectedDevice)
 
-    deviceController.confirmOobVerificationCode(testOobCode, testConnectedDevice)
-
+    verify(mockSecureChannel).sendOobEncryptedCode(testOobCode)
     verify(mockSecureChannel).notifyVerificationCodeAccepted()
   }
 
@@ -801,8 +862,9 @@ class MultiProtocolDeviceControllerTest {
   }
 
   open class TestConnectionProtocol : ConnectionProtocol() {
-    val callbackList: ConcurrentHashMap<String, ThreadSafeCallbacks<DeviceCallback>> =
-      deviceCallbacks
+    val deviceDisconnectedListenerList:
+      MutableMap<String, ThreadSafeCallbacks<DeviceDisconnectedListener>> =
+      deviceDisconnectedListeners
 
     override val isDeviceVerificationRequired = false
 

@@ -22,18 +22,9 @@ import static com.google.android.connecteddevice.model.DeviceMessage.OperationTy
 import static com.google.android.connecteddevice.model.DeviceMessage.OperationType.QUERY_RESPONSE;
 import static com.google.android.connecteddevice.util.SafeLog.logd;
 import static com.google.android.connecteddevice.util.SafeLog.loge;
-import static com.google.android.connecteddevice.util.SafeLog.logw;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
-import android.os.Handler;
-import android.os.IBinder;
-import android.os.Looper;
 import android.os.ParcelUuid;
 import android.os.RemoteException;
 import androidx.annotation.CallSuper;
@@ -65,36 +56,6 @@ public abstract class RemoteFeature {
 
   private static final String TAG = "RemoteFeature";
 
-  /**
-   * When a client calls {@link Context#bindService(Intent, ServiceConnection, int)} to get the
-   * IConnectedDeviceManager, this action is required in the param {@link Intent}.
-   */
-  public static final String ACTION_BIND_REMOTE_FEATURE =
-      "com.google.android.connecteddevice.api.BIND_REMOTE_FEATURE";
-
-  /**
-   * When a client calls {@link Context#bindService(Intent, ServiceConnection, int)} to get the
-   * IConnectedDeviceManager from a service running in the foreground user. Any process that resides
-   * outside of the service host application must use this action in its {@link Intent}.
-   */
-  public static final String ACTION_BIND_REMOTE_FEATURE_FG =
-      "com.google.android.connecteddevice.api.BIND_REMOTE_FEATURE_FG";
-
-  /**
-   * When a client calls {@link Context#bindService(Intent, ServiceConnection, int)} to get the
-   * {@link IFeatureCoordinator}, this action is required in the param {@link Intent}.
-   */
-  public static final String ACTION_BIND_FEATURE_COORDINATOR =
-      "com.google.android.connecteddevice.api.BIND_FEATURE_COORDINATOR";
-
-  /**
-   * When a client calls {@link Context#bindService(Intent, ServiceConnection, int)} to get the
-   * {@link IFeatureCoordinator} from a service running in the foreground user. Any process that
-   * resides outside of the service host application must use this action in its {@link Intent}.
-   */
-  public static final String ACTION_BIND_FEATURE_COORDINATOR_FG =
-      "com.google.android.connecteddevice.api.BIND_FEATURE_COORDINATOR_FG";
-
   /** Intent action used to request a device be associated. */
   public static final String ACTION_ASSOCIATION_SETTING =
       "com.google.android.connecteddevice.api.ASSOCIATION_ACTIVITY";
@@ -106,10 +67,6 @@ public abstract class RemoteFeature {
   /** Id for the system query feature. */
   protected static final ParcelUuid SYSTEM_FEATURE_ID =
       ParcelUuid.fromString("892ac5d9-e9a5-48dc-874a-c01e3cb00d5d");
-
-  private static final long BIND_RETRY_DURATION_MS = 1000;
-
-  private static final int MAX_BIND_ATTEMPTS = 3;
 
   private final QueryIdGenerator queryIdGenerator = new QueryIdGenerator();
 
@@ -123,11 +80,9 @@ public abstract class RemoteFeature {
 
   private final ParcelUuid featureId;
 
-  private final boolean forceFgUserBind;
+  private final CompanionConnector connector;
 
   private IConnectedDeviceManager connectedDeviceManager;
-
-  private int bindAttempts;
 
   /**
    * Create a new RemoteFeature.
@@ -152,7 +107,31 @@ public abstract class RemoteFeature {
       boolean forceFgUserBind) {
     this.context = context;
     this.featureId = featureId;
-    this.forceFgUserBind = forceFgUserBind;
+    connector =
+        new CompanionConnector(
+            context,
+            new CompanionConnector.Callback() {
+              @Override
+              public void onConnected() {
+                logd(TAG, "Successfully connected. Initializing feature.");
+                connectedDeviceManager = connector.getConnectedDeviceManager();
+                setupConnectedDeviceManager();
+              }
+
+              @Override
+              public void onDisconnected() {
+                logd(TAG, "Disconnected from companion. Stopping feature.");
+                connectedDeviceManager = null;
+                stop();
+              }
+
+              @Override
+              public void onFailedToConnect() {
+                loge(TAG, "Failed to connect. Stopping feature.");
+                stop();
+              }
+            },
+            forceFgUserBind);
   }
 
   /**
@@ -174,8 +153,7 @@ public abstract class RemoteFeature {
   @CallSuper
   public void start() {
     if (connectedDeviceManager == null) {
-      bindAttempts = 0;
-      bindToService();
+      connector.connect();
       return;
     }
     setupConnectedDeviceManager();
@@ -198,11 +176,10 @@ public abstract class RemoteFeature {
     } catch (RemoteException e) {
       loge(TAG, "Error while stopping remote feature.", e);
     }
-    try {
-      context.unbindService(serviceConnection);
-    } catch (IllegalArgumentException e) {
-      logw(TAG, "Tried to unbind an unbound service.");
+    if (connector != null) {
+      connector.disconnect();
     }
+    connectedDeviceManager = null;
   }
 
   /** Return the {@link Context} registered with the feature. */
@@ -490,44 +467,6 @@ public abstract class RemoteFeature {
   /** Called when an {@link AssociatedDevice} is updated for the given user. */
   protected void onAssociatedDeviceUpdated(@NonNull AssociatedDevice device) {}
 
-  private void bindToService() {
-    PackageManager packageManager = context.getPackageManager();
-    String action;
-    if (forceFgUserBind) {
-      action = ACTION_BIND_REMOTE_FEATURE_FG;
-    } else {
-      action = ACTION_BIND_REMOTE_FEATURE;
-    }
-    Intent intent = new Intent(action);
-    List<ResolveInfo> services =
-        packageManager.queryIntentServices(intent, PackageManager.MATCH_DEFAULT_ONLY);
-    if (services.isEmpty()) {
-      logw(
-          TAG,
-          "No service supporting the "
-              + action
-              + " action is installed on this device. Aborting binding.");
-      return;
-    }
-    ResolveInfo service = services.get(0);
-    intent.setComponent(
-        new ComponentName(service.serviceInfo.packageName, service.serviceInfo.name));
-    boolean success = context.bindService(intent, serviceConnection, /* flag= */ 0);
-    if (!success) {
-      bindAttempts++;
-      if (bindAttempts > MAX_BIND_ATTEMPTS) {
-        loge(
-            TAG,
-            "Failed to bind to ConnectedDeviceService after "
-                + bindAttempts
-                + " attempts. Aborting.");
-        return;
-      }
-      logw(TAG, "Unable to bind to ConnectedDeviceService. Trying again.");
-      new Handler(Looper.getMainLooper()).postDelayed(this::bindToService, BIND_RETRY_DURATION_MS);
-    }
-  }
-
   private void setupConnectedDeviceManager() {
     onReady();
     try {
@@ -535,7 +474,7 @@ public abstract class RemoteFeature {
       connectedDeviceManager.registerDeviceAssociationCallback(deviceAssociationCallback);
       connectedDeviceManager.registerOnLogRequestedListener(
           Logger.getLogger().getLoggerId(), onLogRequestedListener);
-      logd(TAG, "Successfully bound to ConnectedDeviceManager.");
+      logd(TAG, "Setting up ConnectedDeviceManager.");
       List<ConnectedDevice> activeUserConnectedDevices =
           connectedDeviceManager.getActiveUserConnectedDevices();
       for (ConnectedDevice device : activeUserConnectedDevices) {
@@ -604,23 +543,6 @@ public abstract class RemoteFeature {
       callback.onError(response.getResponse().toByteArray());
     }
   }
-
-  private final ServiceConnection serviceConnection =
-      new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-          logd(TAG, "Service " + name.flattenToString() + " connected.");
-          connectedDeviceManager = IConnectedDeviceManager.Stub.asInterface(service);
-          setupConnectedDeviceManager();
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-          logd(TAG, "Disconnected from ConnectedDeviceManager.");
-          connectedDeviceManager = null;
-          stop();
-        }
-      };
 
   private final IConnectionCallback connectionCallback =
       new IConnectionCallback.Stub() {

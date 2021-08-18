@@ -6,8 +6,10 @@ import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.le.AdvertiseCallback
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.connecteddevice.transport.ConnectionProtocol.ConnectChallenge
+import com.google.android.connecteddevice.transport.ConnectionProtocol.DataReceivedListener
 import com.google.android.connecteddevice.transport.ConnectionProtocol.DataSendCallback
-import com.google.android.connecteddevice.transport.ConnectionProtocol.DeviceCallback
+import com.google.android.connecteddevice.transport.ConnectionProtocol.DeviceDisconnectedListener
+import com.google.android.connecteddevice.transport.ConnectionProtocol.DeviceMaxDataSizeChangedListener
 import com.google.android.connecteddevice.transport.ConnectionProtocol.DiscoveryCallback
 import com.google.android.connecteddevice.util.ByteUtils
 import com.google.common.truth.Truth.assertThat
@@ -48,7 +50,10 @@ class BlePeripheralProtocolTest {
   private val mockBlePeripheralManager: BlePeripheralManager = mock()
   private val mockDiscoveryCallback: DiscoveryCallback = mock()
   private val mockDataSendCallback: DataSendCallback = mock()
-  private val mockDeviceCallback: DeviceCallback = mock()
+  private val mockSecondDataSendCallback: DataSendCallback = mock()
+  private val mockDisconnectedListener: DeviceDisconnectedListener = mock()
+  private val mockDataReceivedListener: DataReceivedListener = mock()
+  private val mockMaxDataSizeChangedListener: DeviceMaxDataSizeChangedListener = mock()
 
   private lateinit var blePeripheralProtocol: BlePeripheralProtocol
 
@@ -187,7 +192,7 @@ class BlePeripheralProtocolTest {
   }
 
   @Test
-  fun sendData_sendSuccessfully() {
+  fun sendData_oneMessage_sendSuccessfully() {
     val testProtocolId = establishConnection(testBluetoothDevice)
     blePeripheralProtocol.sendData(testProtocolId, testMessage, mockDataSendCallback)
     val writeCharacteristic =
@@ -204,6 +209,22 @@ class BlePeripheralProtocolTest {
     assertThat(writeCharacteristic.uuid).isEqualTo(testWriteCharacteristicUuid)
     assertThat(writeCharacteristic.value).isEqualTo(testMessage)
     verify(mockDataSendCallback).onDataSentSuccessfully()
+  }
+
+  @Test
+  fun sendData_twoMessages_invokeCallbackSuccessfully() {
+    val testProtocolId = establishConnection(testBluetoothDevice)
+    val onCharacteristicReadListener =
+      argumentCaptor<BlePeripheralManager.OnCharacteristicReadListener>()
+        .apply { verify(mockBlePeripheralManager).addOnCharacteristicReadListener(capture()) }
+        .firstValue
+    blePeripheralProtocol.sendData(testProtocolId, testMessage, mockDataSendCallback)
+    onCharacteristicReadListener.onCharacteristicRead(testBluetoothDevice)
+    blePeripheralProtocol.sendData(testProtocolId, testMessage, mockSecondDataSendCallback)
+    onCharacteristicReadListener.onCharacteristicRead(testBluetoothDevice)
+
+    verify(mockDataSendCallback).onDataSentSuccessfully()
+    verify(mockSecondDataSendCallback).onDataSentSuccessfully()
   }
 
   @Test
@@ -266,35 +287,47 @@ class BlePeripheralProtocolTest {
         BluetoothGattCharacteristic.PERMISSION_WRITE
       )
     val testProtocolId = establishConnection(testBluetoothDevice)
-    blePeripheralProtocol.registerCallback(testProtocolId, mockDeviceCallback, directExecutor())
+    blePeripheralProtocol.registerDataReceivedListener(
+      testProtocolId,
+      mockDataReceivedListener,
+      directExecutor()
+    )
     argumentCaptor<BlePeripheralManager.OnCharacteristicWriteListener>().apply {
       verify(mockBlePeripheralManager).addOnCharacteristicWriteListener(capture())
       firstValue.onCharacteristicWrite(testBluetoothDevice, testReadCharacteristic, testMessage)
     }
-    verify(mockDeviceCallback).onDataReceived(testProtocolId, testMessage)
+    verify(mockDataReceivedListener).onDataReceived(testProtocolId, testMessage)
   }
 
   @Test
   fun onDeviceDisconnected_callbackInvoked() {
     val testProtocolId = establishConnection(testBluetoothDevice)
-    blePeripheralProtocol.registerCallback(testProtocolId, mockDeviceCallback, directExecutor())
+    blePeripheralProtocol.registerDeviceDisconnectedListener(
+      testProtocolId,
+      mockDisconnectedListener,
+      directExecutor()
+    )
     argumentCaptor<BlePeripheralManager.Callback>().apply {
       verify(mockBlePeripheralManager).registerCallback(capture())
       firstValue.onRemoteDeviceDisconnected(testBluetoothDevice)
     }
-    verify(mockDeviceCallback).onDeviceDisconnected(eq(testProtocolId))
+    verify(mockDisconnectedListener).onDeviceDisconnected(eq(testProtocolId))
   }
 
   @Test
   fun onDeviceMaxDataSizeChanged_callbackInvoked() {
     val testProtocolId = establishConnection(testBluetoothDevice)
     val testMtuSize = 20
-    blePeripheralProtocol.registerCallback(testProtocolId, mockDeviceCallback, directExecutor())
+    blePeripheralProtocol.registerDeviceMaxDataSizeChangedListener(
+      testProtocolId,
+      mockMaxDataSizeChangedListener,
+      directExecutor()
+    )
     argumentCaptor<BlePeripheralManager.Callback>().apply {
       verify(mockBlePeripheralManager).registerCallback(capture())
       firstValue.onMtuSizeChanged(testMtuSize)
     }
-    verify(mockDeviceCallback)
+    verify(mockMaxDataSizeChangedListener)
       .onDeviceMaxDataSizeChanged(
         eq(testProtocolId),
         eq(testMtuSize - BlePeripheralProtocol.ATT_PROTOCOL_BYTES)

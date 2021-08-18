@@ -30,6 +30,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import com.google.android.connecteddevice.model.OobEligibleDevice;
+import com.google.android.connecteddevice.transport.BluetoothDeviceProvider;
+import com.google.android.connecteddevice.transport.ConnectionProtocol;
+import com.google.android.connecteddevice.transport.ProtocolDevice;
 import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelegateBinder;
 import com.google.android.connecteddevice.transport.spp.Connection;
 import com.google.android.connecteddevice.transport.spp.PendingConnection;
@@ -48,11 +51,29 @@ public class BluetoothRfcommChannel implements OobChannel {
   private final AtomicBoolean isInterrupted = new AtomicBoolean();
   private final ConnectedDeviceSppDelegateBinder sppDelegateBinder;
   private Connection activeConnection;
+  private PendingConnection activePendingConnection;
 
   @VisibleForTesting Callback callback;
 
   public BluetoothRfcommChannel(ConnectedDeviceSppDelegateBinder sppDelegateBinder) {
     this.sppDelegateBinder = sppDelegateBinder;
+  }
+
+  @Override
+  public boolean completeOobDataExchange(
+      @NonNull ProtocolDevice device, @NonNull Callback callback) {
+    ConnectionProtocol protocol = device.getProtocol();
+    if (!(protocol instanceof BluetoothDeviceProvider)) {
+      logw(TAG, "Protocol is not supported by current OOB channel, ignored.");
+      return false;
+    }
+    BluetoothDevice remoteDevice =
+        ((BluetoothDeviceProvider) protocol).getBluetoothDeviceById(device.getProtocolId());
+    completeOobDataExchange(
+        new OobEligibleDevice(remoteDevice.getAddress(), OobEligibleDevice.OOB_TYPE_BLUETOOTH),
+        callback,
+        () -> BluetoothAdapter.getDefaultAdapter().getBondedDevices());
+    return true;
   }
 
   @Override
@@ -86,6 +107,7 @@ public class BluetoothRfcommChannel implements OobChannel {
         return;
       }
 
+      activePendingConnection = connection;
       Handler handler = new Handler(Looper.getMainLooper());
       handler.postDelayed(
           () -> {
@@ -104,6 +126,7 @@ public class BluetoothRfcommChannel implements OobChannel {
           .setOnConnectedListener(
               (uuid, btDevice, isSecure, deviceName) -> {
                 handler.removeCallbacksAndMessages(null);
+                activePendingConnection = null;
                 activeConnection =
                     new Connection(new ParcelUuid(uuid), btDevice, isSecure, deviceName);
                 notifySuccess();
@@ -169,7 +192,10 @@ public class BluetoothRfcommChannel implements OobChannel {
       sppDelegateBinder.disconnect(activeConnection);
       activeConnection = null;
     }
-    // TODO(b/169876111): Call to sppDelegateBinder.cancelConnectionAttempt
+    if (activePendingConnection != null) {
+      sppDelegateBinder.cancelConnectionAttempt(activePendingConnection);
+      activePendingConnection = null;
+    }
   }
 
   private void notifyFailure(@NonNull String message, @Nullable Exception exception) {

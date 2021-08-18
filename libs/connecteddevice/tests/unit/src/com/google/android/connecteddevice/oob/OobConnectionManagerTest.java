@@ -23,6 +23,7 @@ import static org.junit.Assert.assertThrows;
 import android.security.keystore.KeyProperties;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.google.android.connecteddevice.model.OobEligibleDevice;
+import com.google.android.connecteddevice.transport.ProtocolDevice;
 import com.google.common.primitives.Bytes;
 import java.security.InvalidKeyException;
 import java.security.SecureRandom;
@@ -157,6 +158,11 @@ public class OobConnectionManagerTest {
 
   private static class TestChannel implements OobChannel {
     byte[] sentOobData = null;
+
+    @Override
+    public boolean completeOobDataExchange(ProtocolDevice protocolDevice, Callback callback) {
+      return false;
+    }
 
     @Override
     public void completeOobDataExchange(OobEligibleDevice device, Callback callback) {}

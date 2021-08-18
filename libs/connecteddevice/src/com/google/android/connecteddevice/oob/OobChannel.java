@@ -18,6 +18,7 @@ package com.google.android.connecteddevice.oob;
 
 import androidx.annotation.NonNull;
 import com.google.android.connecteddevice.model.OobEligibleDevice;
+import com.google.android.connecteddevice.transport.ProtocolDevice;
 
 /**
  * An interface for handling out of band data exchange. This interface should be implemented for
@@ -27,10 +28,21 @@ import com.google.android.connecteddevice.model.OobEligibleDevice;
  *
  * <pre>
  *     1. Define success and failure responses in {@link Callback}
- *     2. Call {@link OobChannel#completeOobDataExchange(OobEligibleDevice, Callback)}
+ *     2. Call {@link OobChannel#completeOobDataExchange(ProtocolDevice, Callback)}
  * </pre>
  */
 public interface OobChannel {
+  /**
+   * Exchange out of band data with a remote device. This must be done prior to the start of the
+   * association with that device.
+   *
+   * @param protocolDevice The remote device to exchange out of band data with
+   * @return {@code true} if the data exchange is started successfully, otherwise return {@code
+   *     false}
+   */
+  boolean completeOobDataExchange(
+      @NonNull ProtocolDevice protocolDevice, @NonNull Callback callback);
+
   /**
    * Exchange out of band data with a remote device. This must be done prior to the start of the
    * association with that device.

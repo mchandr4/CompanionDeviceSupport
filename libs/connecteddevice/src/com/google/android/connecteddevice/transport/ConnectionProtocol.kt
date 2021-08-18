@@ -16,10 +16,12 @@
 package com.google.android.connecteddevice.transport
 
 import androidx.annotation.CallSuper
-import com.google.android.connecteddevice.util.SafeLog
+import com.google.android.connecteddevice.util.SafeLog.logd
+import com.google.android.connecteddevice.util.SafeLog.logw
 import com.google.android.connecteddevice.util.ThreadSafeCallbacks
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.Executor
 
 /**
@@ -27,9 +29,19 @@ import java.util.concurrent.Executor
  * interacting with devices.
  */
 abstract class ConnectionProtocol {
-  // protocolId -> callbacks
-  protected val deviceCallbacks: ConcurrentHashMap<String, ThreadSafeCallbacks<DeviceCallback>> =
+  protected val dataReceivedListeners:
+    MutableMap<String, ThreadSafeCallbacks<DataReceivedListener>> =
     ConcurrentHashMap()
+
+  protected val deviceDisconnectedListeners:
+    MutableMap<String, ThreadSafeCallbacks<DeviceDisconnectedListener>> =
+    ConcurrentHashMap()
+
+  protected val maxDataSizeChangedListeners:
+    MutableMap<String, ThreadSafeCallbacks<DeviceMaxDataSizeChangedListener>> =
+    ConcurrentHashMap()
+
+  protected val missedData: MutableMap<String, MutableList<ByteArray>> = ConcurrentHashMap()
 
   /**
    * `true` if challenge exchange is required to verify the remote device for establishing a secure
@@ -68,7 +80,10 @@ abstract class ConnectionProtocol {
    */
   @CallSuper
   open fun reset() {
-    deviceCallbacks.clear()
+    deviceDisconnectedListeners.clear()
+    dataReceivedListeners.clear()
+    maxDataSizeChangedListeners.clear()
+    missedData.clear()
   }
 
   /**
@@ -77,22 +92,123 @@ abstract class ConnectionProtocol {
    */
   abstract fun getMaxWriteSize(protocolId: String): Int
 
-  /** Register a callback to be notified of events for a device on this protocol. */
-  open fun registerCallback(protocolId: String, callback: DeviceCallback, executor: Executor) {
-    val callbacks = deviceCallbacks.computeIfAbsent(protocolId) { ThreadSafeCallbacks() }
-    callbacks.add(callback, executor)
+  /** Register a listener to be notified when data has been received on protocol [protocolId]. */
+  open fun registerDataReceivedListener(
+    protocolId: String,
+    listener: DataReceivedListener,
+    executor: Executor
+  ) {
+    val listeners = dataReceivedListeners.computeIfAbsent(protocolId) { ThreadSafeCallbacks() }
+    listeners.add(listener, executor)
+    missedData.remove(protocolId)?.forEach { data ->
+      listeners.invoke { it.onDataReceived(protocolId, data) }
+    }
   }
 
-  /** Unregister a previously registered callback. */
-  open fun unregisterCallback(protocolId: String, callback: DeviceCallback) {
-    if (!deviceCallbacks.containsKey(protocolId)) {
-      SafeLog.logw(TAG, "Attempted to delete callback for device $protocolId that does not exist.")
-      return
+  /** Register a listener to be notified when device has disconnected on protocol [protocolId]. */
+  open fun registerDeviceDisconnectedListener(
+    protocolId: String,
+    listener: DeviceDisconnectedListener,
+    executor: Executor
+  ) {
+    deviceDisconnectedListeners
+      .computeIfAbsent(protocolId) { ThreadSafeCallbacks() }
+      .add(listener, executor)
+  }
+
+  /**
+   * Register a listener to be notified when the protocol [protocolId] has negotiated a new maximum
+   * data size.
+   */
+  open fun registerDeviceMaxDataSizeChangedListener(
+    protocolId: String,
+    listener: DeviceMaxDataSizeChangedListener,
+    executor: Executor
+  ) {
+    maxDataSizeChangedListeners
+      .computeIfAbsent(protocolId) { ThreadSafeCallbacks() }
+      .add(listener, executor)
+  }
+
+  /** Unregister a previously registered [DataReceivedListener]. */
+  open fun unregisterDataReceivedListener(protocolId: String, listener: DataReceivedListener) {
+    val listeners =
+      dataReceivedListeners.getOrElse(protocolId) {
+        logw(
+          TAG,
+          "Attempted to delete data received listener for device $protocolId that does not exist."
+        )
+        return
+      }
+    listeners.remove(listener)
+    if (listeners.isEmpty) {
+      dataReceivedListeners.remove(protocolId)
     }
-    deviceCallbacks[protocolId]?.remove(callback)
-    if (deviceCallbacks[protocolId]?.isEmpty == true) {
-      deviceCallbacks.remove(protocolId)
+  }
+
+  /** Unregister a previously registered [DeviceDisconnectedListener]. */
+  open fun unregisterDeviceDisconnectListener(
+    protocolId: String,
+    listener: DeviceDisconnectedListener
+  ) {
+    val listeners =
+      deviceDisconnectedListeners.getOrElse(protocolId) {
+        logw(
+          TAG,
+          "Attempted to delete disconnect listener for device $protocolId that does not exist."
+        )
+        return
+      }
+    listeners.remove(listener)
+    if (listeners.isEmpty) {
+      deviceDisconnectedListeners.remove(protocolId)
     }
+  }
+
+  /** Unregister a previously registered [DeviceMaxDataSizeChangedListener]. */
+  open fun unregisterDeviceMaxDataSizeChangedListener(
+    protocolId: String,
+    listener: DeviceMaxDataSizeChangedListener
+  ) {
+    val listeners =
+      maxDataSizeChangedListeners.getOrElse(protocolId) {
+        logw(
+          TAG,
+          "Attempted to delete maxDataSizeChangedListener for device $protocolId that does not " +
+            "exist."
+        )
+        return
+      }
+    listeners.remove(listener)
+    if (listeners.isEmpty) {
+      maxDataSizeChangedListeners.remove(protocolId)
+    }
+  }
+
+  /** Removes registered listeners for connection [protocolId]. */
+  fun removeListeners(protocolId: String) {
+    deviceDisconnectedListeners.remove(protocolId)
+    dataReceivedListeners.remove(protocolId)
+    maxDataSizeChangedListeners.remove(protocolId)
+  }
+
+  /**
+   * Notifies that [data] has been received from connected device.
+   *
+   * If there's no registered dataReceivedListener to notify, the data will be cached for the
+   * listeners registered later.
+   */
+  fun notifyDataReceived(protocolId: String, data: ByteArray) {
+    dataReceivedListeners[protocolId]?.takeUnless { it.isEmpty }?.invoke {
+      it.onDataReceived(protocolId, data)
+    }
+      ?: run {
+        logd(
+          TAG,
+          "No callback has been registered for connection $protocolId, cached received message."
+        )
+        missedData.computeIfAbsent(protocolId) { CopyOnWriteArrayList() }.add(data)
+      }
   }
 
   /** Container class to hold the connect challenge the salt that generated the challenge. */
@@ -110,18 +226,6 @@ abstract class ConnectionProtocol {
     fun onDeviceConnected(protocolId: String)
   }
 
-  /** Event notifications for a device on the protocol. */
-  interface DeviceCallback {
-    /** Invoked when a device has disconnected. */
-    fun onDeviceDisconnected(protocolId: String)
-
-    /** Invoked when the protocol has negotiated a new maximum data size. */
-    fun onDeviceMaxDataSizeChanged(protocolId: String, maxBytes: Int)
-
-    /** Invoked when data has been received from a device. */
-    fun onDataReceived(protocolId: String, data: ByteArray)
-  }
-
   /** Callback for the result of sending data. */
   interface DataSendCallback {
     /** Invoked when the data was successfully sent. */
@@ -129,6 +233,24 @@ abstract class ConnectionProtocol {
 
     /** Invoked when the data failed to send. */
     fun onDataFailedToSend()
+  }
+
+  /** Listener to be invoked when a device has disconnected. */
+  interface DeviceDisconnectedListener {
+    /** Called when the device has disconnected on protocol [protocolId]. */
+    fun onDeviceDisconnected(protocolId: String)
+  }
+
+  /** Listener to be invoked when data has been received from a device. */
+  interface DataReceivedListener {
+    /** Called when [data] is received from the remote device on protocol [protocolId]. */
+    fun onDataReceived(protocolId: String, data: ByteArray)
+  }
+
+  /** Listener to be invoked when the protocol has negotiated a new maximum data size. */
+  interface DeviceMaxDataSizeChangedListener {
+    /** Called when the protocol [protocolId] has negotiated a new maximum data size [maxBytes]. */
+    fun onDeviceMaxDataSizeChanged(protocolId: String, maxBytes: Int)
   }
 
   companion object {

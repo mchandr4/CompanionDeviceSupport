@@ -83,7 +83,9 @@ class BlePeripheralProtocol(
       override fun onMtuSizeChanged(size: Int) {
         maxWriteSize = size - ATT_PROTOCOL_BYTES
         protocolId?.let { id ->
-          deviceCallbacks[id]?.invoke { it.onDeviceMaxDataSizeChanged(id, maxWriteSize) }
+          maxDataSizeChangedListeners[id]?.invoke {
+            it.onDeviceMaxDataSizeChanged(id, maxWriteSize)
+          }
         }
       }
 
@@ -113,7 +115,9 @@ class BlePeripheralProtocol(
           )
           return
         }
-        protocolId?.let { id -> deviceCallbacks[id]?.invoke { it.onDeviceDisconnected(id) } }
+        protocolId?.let { id ->
+          deviceDisconnectedListeners[id]?.invoke { it.onDeviceDisconnected(id) }
+        }
         reset()
       }
     }
@@ -372,8 +376,10 @@ class BlePeripheralProtocol(
       )
       return
     }
-    dataSendCallback?.onDataSentSuccessfully()
+    // Clear the callback first because it may be set inside the callback's method call.
+    val callback = dataSendCallback
     dataSendCallback = null
+    callback?.onDataSentSuccessfully()
   }
 
   private fun onCharacteristicWrite(
@@ -398,7 +404,7 @@ class BlePeripheralProtocol(
       )
       return
     }
-    protocolId?.let { id -> deviceCallbacks[id]?.invoke { it.onDataReceived(id, value) } }
+    protocolId?.let { id -> notifyDataReceived(id, value) }
   }
 
   private fun createBluetoothGattDescriptor(): BluetoothGattDescriptor {

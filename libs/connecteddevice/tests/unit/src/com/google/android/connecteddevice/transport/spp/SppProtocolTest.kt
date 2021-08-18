@@ -20,8 +20,9 @@ import android.bluetooth.BluetoothAdapter
 import android.os.RemoteException
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.connecteddevice.transport.ConnectionProtocol.ConnectChallenge
+import com.google.android.connecteddevice.transport.ConnectionProtocol.DataReceivedListener
 import com.google.android.connecteddevice.transport.ConnectionProtocol.DataSendCallback
-import com.google.android.connecteddevice.transport.ConnectionProtocol.DeviceCallback
+import com.google.android.connecteddevice.transport.ConnectionProtocol.DeviceDisconnectedListener
 import com.google.android.connecteddevice.transport.ConnectionProtocol.DiscoveryCallback
 import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelegateBinder.OnErrorListener
 import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelegateBinder.OnMessageReceivedListener
@@ -45,7 +46,8 @@ class SppProtocolTest {
   private val mockPendingConnection: PendingConnection = mock()
   private val mockDiscoveryCallback: DiscoveryCallback = mock()
   private val mockDataSendCallback: DataSendCallback = mock()
-  private val mockDeviceCallback: DeviceCallback = mock()
+  private val mockDisconnectedListener: DeviceDisconnectedListener = mock()
+  private val mockDataReceivedListener: DataReceivedListener = mock()
   private val mockSppBinder: ConnectedDeviceSppDelegateBinder = mock {
     on { connectAsServer(any(), any()) } doReturn mockPendingConnection
   }
@@ -153,14 +155,14 @@ class SppProtocolTest {
   @Test
   fun onMessageReceived_informCallback() {
     val protocolId = establishConnection()
-    sppProtocol.registerCallback(protocolId, mockDeviceCallback, directExecutor())
+    sppProtocol.registerDataReceivedListener(protocolId, mockDataReceivedListener, directExecutor())
 
     argumentCaptor<OnMessageReceivedListener>().apply {
       verify(mockSppBinder).setOnMessageReceivedListener(any(), capture())
       firstValue.onMessageReceived(testMessage)
     }
 
-    verify(mockDeviceCallback).onDataReceived(protocolId, testMessage)
+    verify(mockDataReceivedListener).onDataReceived(protocolId, testMessage)
   }
 
   @Test
@@ -176,7 +178,11 @@ class SppProtocolTest {
   @Test
   fun onDeviceDisconnected_informCallback() {
     val protocolId = establishConnection()
-    sppProtocol.registerCallback(protocolId, mockDeviceCallback, directExecutor())
+    sppProtocol.registerDeviceDisconnectedListener(
+      protocolId,
+      mockDisconnectedListener,
+      directExecutor()
+    )
 
     val connection =
       argumentCaptor<Connection>()
@@ -188,7 +194,7 @@ class SppProtocolTest {
       firstValue.onError(connection)
     }
 
-    verify(mockDeviceCallback).onDeviceDisconnected(protocolId)
+    verify(mockDisconnectedListener).onDeviceDisconnected(protocolId)
   }
 
   @Test

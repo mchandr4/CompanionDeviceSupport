@@ -294,6 +294,7 @@ public class AssociationActivity extends FragmentActivity {
 
   private void showAssociationErrorFragment() {
     dismissButtons();
+    showSkipButton();
     showProgressBar();
     AssociationErrorFragment fragment = new AssociationErrorFragment();
     launchFragment(fragment, ASSOCIATION_ERROR_FRAGMENT_TAG);

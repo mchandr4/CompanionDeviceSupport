@@ -18,31 +18,17 @@ package com.google.android.connecteddevice.service;
 
 import static com.google.android.connecteddevice.util.SafeLog.logd;
 import static com.google.android.connecteddevice.util.SafeLog.loge;
-import static com.google.android.connecteddevice.util.SafeLog.logw;
 
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
-import android.os.ParcelUuid;
-import android.os.RemoteException;
 import android.os.UserManager;
 import androidx.annotation.Nullable;
+import com.google.android.connecteddevice.api.CompanionConnector;
 import com.google.android.connecteddevice.api.IConnectedDeviceManager;
-import com.google.android.connecteddevice.api.IConnectionCallback;
-import com.google.android.connecteddevice.api.IDeviceAssociationCallback;
-import com.google.android.connecteddevice.api.IDeviceCallback;
 import com.google.android.connecteddevice.api.IFeatureCoordinator;
-import com.google.android.connecteddevice.api.IOnLogRequestedListener;
-import com.google.android.connecteddevice.api.RemoteFeature;
-import com.google.android.connecteddevice.model.ConnectedDevice;
-import com.google.android.connecteddevice.model.DeviceMessage;
-import java.util.List;
 
 /**
  * Service responsible for starting services that must be run in the active foreground user.
@@ -57,30 +43,21 @@ public final class ConnectedDeviceFgUserService extends TrunkService {
   private static final String META_UNLOCK_SERVICES =
       "com.google.android.connecteddevice.unlock_services";
 
-  private static final String FULLY_QUALIFIED_SERVICE_NAME =
-      "com.google.android.connecteddevice.service.ConnectedDeviceService";
-
   /**
    * {@code boolean} Use the {@link IFeatureCoordinator} instead of {@link IConnectedDeviceManager}
    */
   private static final String META_ENABLE_FEATURE_COORDINATOR =
       "com.google.android.connecteddevice.enable_feature_coordinator";
 
-  private static final long BIND_RETRY_DURATION_MS = 1000;
-
-  private static final int MAX_BIND_ATTEMPTS = 3;
-
   private boolean receiversRegistered = true;
-
-  private int bindAttempts;
-
-  private IBinder connectedDeviceServiceBinder;
 
   private IFeatureCoordinator featureCoordinator;
 
-  private IConnectedDeviceManager.Stub featureCoordinatorWrapper;
+  private IConnectedDeviceManager connectedDeviceManager;
 
   private boolean useFeatureCoordinator;
+
+  private CompanionConnector connector;
 
   @Override
   public void onCreate() {
@@ -92,7 +69,26 @@ public final class ConnectedDeviceFgUserService extends TrunkService {
     registerReceiver(userUnlockedReceiver, new IntentFilter(Intent.ACTION_USER_UNLOCKED));
     // Listen for user going to the background so we can clean up.
     registerReceiver(userBackgroundReceiver, new IntentFilter(Intent.ACTION_USER_BACKGROUND));
-    bindToService();
+    connector = new CompanionConnector(this,
+        new CompanionConnector.Callback() {
+          @Override
+          public void onConnected() {
+            featureCoordinator = connector.getFeatureCoordinator();
+            connectedDeviceManager = connector.getConnectedDeviceManager();
+          }
+
+          @Override
+          public void onDisconnected() {
+            loge(TAG, "Lost connection to companion. Stopping service.");
+            stopSelf();
+          }
+
+          @Override
+          public void onFailedToConnect() {
+            loge(TAG, "Unable to establish connection with companion. Stopping service.");
+            stopSelf();
+          }
+        });
     UserManager userManager = getSystemService(UserManager.class);
     if (userManager.isUserUnlocked()) {
       logd(TAG, "User was already unlocked on service start.");
@@ -102,6 +98,7 @@ public final class ConnectedDeviceFgUserService extends TrunkService {
 
   @Override
   public void onDestroy() {
+    connector.disconnect();
     unregisterReceivers();
     logd(TAG, "Service was destroyed.");
     super.onDestroy();
@@ -116,44 +113,14 @@ public final class ConnectedDeviceFgUserService extends TrunkService {
 
     String action = intent.getAction();
     logd(TAG, "Service bound. Action: " + action);
-    if (action.equals(RemoteFeature.ACTION_BIND_REMOTE_FEATURE_FG)) {
-      if (useFeatureCoordinator) {
-        return featureCoordinatorWrapper;
-      } else {
-        return connectedDeviceServiceBinder;
-      }
-    } else if (action.equals(RemoteFeature.ACTION_BIND_FEATURE_COORDINATOR_FG)
+    if (action.equals(CompanionConnector.ACTION_BIND_REMOTE_FEATURE_FG)) {
+        return connectedDeviceManager.asBinder();
+    } else if (action.equals(CompanionConnector.ACTION_BIND_FEATURE_COORDINATOR_FG)
         && useFeatureCoordinator) {
       return featureCoordinator.asBinder();
     }
 
     return null;
-  }
-
-  private void bindToService() {
-    String packageName = getApplicationContext().getPackageName();
-    Intent intent = new Intent();
-    intent.setComponent(new ComponentName(packageName, FULLY_QUALIFIED_SERVICE_NAME));
-    if (useFeatureCoordinator) {
-      intent.setAction(RemoteFeature.ACTION_BIND_FEATURE_COORDINATOR);
-    } else {
-      intent.setAction(RemoteFeature.ACTION_BIND_REMOTE_FEATURE);
-    }
-    boolean success = bindService(intent, serviceConnection, /* flags= */ 0);
-    if (success) {
-      return;
-    }
-    bindAttempts++;
-    if (bindAttempts > MAX_BIND_ATTEMPTS) {
-      loge(
-          TAG,
-          "Failed to bind to ConnectedDeviceService after "
-              + bindAttempts
-              + " attempts. Aborting.");
-      return;
-    }
-    logw(TAG, "Unable to bind to ConnectedDeviceService. Trying again.");
-    new Handler(Looper.getMainLooper()).postDelayed(this::bindToService, BIND_RETRY_DURATION_MS);
   }
 
   private void onUserUnlocked() {
@@ -168,93 +135,6 @@ public final class ConnectedDeviceFgUserService extends TrunkService {
       unregisterReceiver(userBackgroundReceiver);
     }
   }
-
-  private IConnectedDeviceManager.Stub createFeatureCoordinatorWrapper() {
-    return new IConnectedDeviceManager.Stub() {
-      @Override
-      public List<ConnectedDevice> getActiveUserConnectedDevices() throws RemoteException {
-        return featureCoordinator.getConnectedDevicesForDriver();
-      }
-
-      @Override
-      public void registerActiveUserConnectionCallback(IConnectionCallback callback)
-          throws RemoteException {
-        featureCoordinator.registerDriverConnectionCallback(callback);
-      }
-
-      @Override
-      public void unregisterConnectionCallback(IConnectionCallback callback)
-          throws RemoteException {
-        featureCoordinator.unregisterConnectionCallback(callback);
-      }
-
-      @Override
-      public void registerDeviceCallback(ConnectedDevice connectedDevice, ParcelUuid recipientId,
-          IDeviceCallback callback) throws RemoteException {
-        featureCoordinator.registerDeviceCallback(connectedDevice, recipientId, callback);
-      }
-
-      @Override
-      public void unregisterDeviceCallback(ConnectedDevice connectedDevice, ParcelUuid recipientId,
-          IDeviceCallback callback) throws RemoteException {
-        featureCoordinator.unregisterDeviceCallback(connectedDevice, recipientId, callback);
-      }
-
-      @Override
-      public boolean sendMessage(ConnectedDevice connectedDevice, DeviceMessage message)
-          throws RemoteException {
-        return featureCoordinator.sendMessage(connectedDevice, message);
-      }
-
-      @Override
-      public void registerDeviceAssociationCallback(IDeviceAssociationCallback callback)
-          throws RemoteException {
-        featureCoordinator.registerDeviceAssociationCallback(callback);
-      }
-
-      @Override
-      public void unregisterDeviceAssociationCallback(IDeviceAssociationCallback callback)
-          throws RemoteException {
-        featureCoordinator.unregisterDeviceAssociationCallback(callback);
-      }
-
-      @Override
-      public void registerOnLogRequestedListener(int loggerId, IOnLogRequestedListener listener)
-          throws RemoteException {
-        featureCoordinator.registerOnLogRequestedListener(loggerId, listener);
-      }
-
-      @Override
-      public void unregisterOnLogRequestedListener(int loggerId, IOnLogRequestedListener listener)
-          throws RemoteException {
-        featureCoordinator.unregisterOnLogRequestedListener(loggerId, listener);
-      }
-
-      @Override
-      public void processLogRecords(int loggerId, byte[] logRecords) throws RemoteException {
-        featureCoordinator.processLogRecords(loggerId, logRecords);
-      }
-    };
-  }
-
-  private final ServiceConnection serviceConnection =
-      new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-          logd(TAG, "Successfully bound to ConnectedDeviceService.");
-          if (useFeatureCoordinator) {
-           featureCoordinator = IFeatureCoordinator.Stub.asInterface(service);
-           featureCoordinatorWrapper = createFeatureCoordinatorWrapper();
-          } else {
-            connectedDeviceServiceBinder = service;
-          }
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-          logd(TAG, "Disconnected from ConnectedDeviceService.");
-        }
-      };
 
   private final BroadcastReceiver userUnlockedReceiver =
       new BroadcastReceiver() {

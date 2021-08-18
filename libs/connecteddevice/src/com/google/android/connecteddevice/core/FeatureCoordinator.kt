@@ -175,9 +175,7 @@ constructor(
     }
     logd(TAG, "Notifying $recipientId of missed messages.")
     callbackExecutor.execute {
-      missedMessages.forEach {
-        callback.onMessageReceived(connectedDevice, it)
-      }
+      missedMessages.forEach { callback.onMessageReceived(connectedDevice, it) }
     }
   }
 
@@ -234,6 +232,12 @@ constructor(
 
   override fun retrieveAssociatedDevices(listener: IOnAssociatedDevicesRetrievedListener) {
     callbackExecutor.execute { listener.onAssociatedDevicesRetrieved(storage.allAssociatedDevices) }
+  }
+
+  override fun retrieveAssociatedDevicesForDriver(listener: IOnAssociatedDevicesRetrievedListener) {
+    callbackExecutor.execute {
+      listener.onAssociatedDevicesRetrieved(storage.activeUserAssociatedDevices)
+    }
   }
 
   override fun acceptVerification() {

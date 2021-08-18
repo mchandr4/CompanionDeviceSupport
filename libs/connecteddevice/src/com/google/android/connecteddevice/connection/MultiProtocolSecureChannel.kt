@@ -517,14 +517,14 @@ open class MultiProtocolSecureChannel(
      * Invoked when out of band verification code is available and is ready to be encrypted and sent
      * to the remote device.
      */
-    fun onOobVerificationCodeAvailable(oobCode: ByteArray)
+    fun onOobVerificationCodeAvailable(code: ByteArray)
 
     /**
      * Invoked when encrypted out of band verification code is received from remote device, the
      * caller is expected to decrypt the [oobCode] and confirm it maches the code from
      * [onOobVerificationCodeAvailable].
      */
-    fun onOobVerificationCodeReceived(oobCode: ByteArray)
+    fun onOobVerificationCodeReceived(code: ByteArray)
 
     /** Invoked when secure channel has been established successfully. */
     fun onSecureChannelEstablished() {}

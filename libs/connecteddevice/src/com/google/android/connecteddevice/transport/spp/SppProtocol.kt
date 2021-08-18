@@ -107,11 +107,11 @@ class SppProtocol(
 
   private fun generateOnMessageReceivedListener(protocolId: UUID): OnMessageReceivedListener {
     return OnMessageReceivedListener { message ->
-      val callbacks = deviceCallbacks[protocolId.toString()]
-      callbacks?.invoke { it.onDataReceived(protocolId.toString(), message) }
+      notifyDataReceived(protocolId.toString(), message)
+      val listeners = dataReceivedListeners[protocolId.toString()]
       logd(
         TAG,
-        "Informed message received with connection $protocolId to ${callbacks?.size()} listeners."
+        "Informed message received with connection $protocolId to ${listeners?.size()} listeners."
       )
     }
   }
@@ -119,14 +119,15 @@ class SppProtocol(
   private fun generateOnErrorListener(): OnErrorListener {
     return OnErrorListener { currentConnection ->
       val protocolId = connections.entries.first { it.value == currentConnection }.key
-      val callbacks = deviceCallbacks[protocolId.toString()]
-      callbacks?.invoke { it.onDeviceDisconnected(protocolId.toString()) }
+      val listeners = deviceDisconnectedListeners[protocolId.toString()]
+      listeners?.invoke { it.onDeviceDisconnected(protocolId.toString()) }
       connectedDevices.remove(protocolId)
       logd(
         TAG,
         "Inform device connection error with connection $protocolId to " +
-          "${callbacks?.size()} listeners."
+          "${listeners?.size()} listeners."
       )
+      removeListeners(protocolId.toString())
     }
   }
 

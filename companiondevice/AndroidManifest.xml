@@ -114,6 +114,9 @@
                   android:launchMode="singleInstance">
             <intent-filter>
                 <action android:name="com.google.android.connecteddevice.api.ASSOCIATION_ACTIVITY" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <intent-filter>
                 <action android:name="com.android.settings.action.EXTRA_SETTINGS" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>

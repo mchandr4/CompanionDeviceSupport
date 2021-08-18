@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
@@ -34,7 +35,7 @@ public class MetaDataServiceTest {
 
   private static final String CORRECT_NAME = "CorrectMetaDataKey";
 
-  private static final int RESOURCE_ID = 1;
+  private static final int RESOURCE_ID = 2;
 
   private static final String INVALID_NAME = "InvalidMetaDataKey";
 
@@ -51,6 +52,15 @@ public class MetaDataServiceTest {
   private final Context context = ApplicationProvider.getApplicationContext();
 
   private final MetaDataService metaDataService = new MetaDataService() {
+
+    @NonNull
+    @Override
+    protected Bundle retrieveMetaDataBundle() {
+      Bundle bundle = new Bundle();
+      bundle.putInt(CORRECT_NAME, RESOURCE_ID);
+      return bundle;
+    }
+
     @Override
     public Resources getResources() {
       return new Resources(
@@ -105,8 +115,8 @@ public class MetaDataServiceTest {
 
   @Before
   public void setUp() {
-    metaDataService.bundle = new Bundle();
-    metaDataService.bundle.putInt(CORRECT_NAME, RESOURCE_ID);
+    // Load the meta-data for the service.
+    metaDataService.onCreate();
   }
 
   @Test
@@ -170,12 +180,12 @@ public class MetaDataServiceTest {
 
   @Test
   public void getMetaResourceId_returnsValueIfInBundle() {
-    assertThat(metaDataService.getMetaInt(CORRECT_NAME, /* defaultValue= */ 0))
+    assertThat(metaDataService.getMetaResourceId(CORRECT_NAME, /* defaultValue= */ 0))
         .isEqualTo(RESOURCE_ID);
   }
 
   @Test
-  public void getMetaResource_returnsDefaultValueIfNameNotInBundle() {
+  public void getMetaResourceId_returnsDefaultValueIfNameNotInBundle() {
     int defaultValue = -1;
     assertThat(metaDataService.getMetaResourceId(INVALID_NAME, defaultValue))
         .isEqualTo(defaultValue);
@@ -210,7 +220,7 @@ public class MetaDataServiceTest {
 
   @Test
   public void requireMetaResourceId_returnsValueIfInBundle() {
-    assertThat(metaDataService.requireMetaInt(CORRECT_NAME)).isEqualTo(RESOURCE_ID);
+    assertThat(metaDataService.requireMetaResourceId(CORRECT_NAME)).isEqualTo(RESOURCE_ID);
   }
 
   @Test
@@ -252,5 +262,10 @@ public class MetaDataServiceTest {
   public void requireMetaResourceId_throwsIfNameNotInBundle() {
     assertThrows(
         IllegalArgumentException.class, () -> metaDataService.requireMetaResourceId(INVALID_NAME));
+  }
+
+  @Test
+  public void onBind_returnsNullByDefault() {
+    assertThat(metaDataService.onBind(new Intent())).isNull();
   }
 }

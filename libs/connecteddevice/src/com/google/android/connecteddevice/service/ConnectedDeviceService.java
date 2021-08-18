@@ -28,9 +28,9 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.os.ParcelUuid;
-import android.os.RemoteException;
 import androidx.annotation.NonNull;
 import com.google.android.connecteddevice.ConnectedDeviceManager;
+import com.google.android.connecteddevice.api.CompanionConnector;
 import com.google.android.connecteddevice.api.ConnectedDeviceManagerBinder;
 import com.google.android.connecteddevice.api.IAssociatedDeviceManager;
 import com.google.android.connecteddevice.api.IAssociationCallback;
@@ -406,11 +406,11 @@ public final class ConnectedDeviceService extends TrunkService {
     switch (action) {
       case ACTION_BIND_ASSOCIATION:
         return associationBinder;
-      case RemoteFeature.ACTION_BIND_REMOTE_FEATURE:
+      case CompanionConnector.ACTION_BIND_REMOTE_FEATURE:
         return connectedDeviceManagerBinder;
       case ConnectedDeviceSppDelegateBinder.ACTION_BIND_SPP:
         return sppDelegateBinder;
-      case RemoteFeature.ACTION_BIND_FEATURE_COORDINATOR:
+      case CompanionConnector.ACTION_BIND_FEATURE_COORDINATOR:
         return featureCoordinator;
       default:
         loge(TAG, "Unexpected action found while binding: " + action);
@@ -590,15 +590,7 @@ public final class ConnectedDeviceService extends TrunkService {
       @Override
       public void retrievedActiveUserAssociatedDevices(
           IOnAssociatedDevicesRetrievedListener listener) {
-        Executors.newSingleThreadExecutor()
-            .execute(
-                () -> {
-                  try {
-                    listener.onAssociatedDevicesRetrieved(storage.getActiveUserAssociatedDevices());
-                  } catch (RemoteException e) {
-                    loge(TAG, "Unable to send associated devices to listener.");
-                  }
-                });
+        featureCoordinator.retrieveAssociatedDevicesForDriver(listener);
       }
 
       @Override

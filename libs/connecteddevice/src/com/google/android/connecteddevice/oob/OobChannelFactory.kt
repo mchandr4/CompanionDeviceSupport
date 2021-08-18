@@ -22,7 +22,7 @@ import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelega
 /** Factory that creates [OobChannel]. */
 open class OobChannelFactory(
   private val sppBinder: ConnectedDeviceSppDelegateBinder,
-  val supportedTypes: List<String>
+  open val supportedTypes: List<String>
 ) {
   /**
    * Returns [OobChannel] of the type [oobChannelType].
@@ -30,7 +30,7 @@ open class OobChannelFactory(
    * Please make sure the [oobChannelType] passed is contained in [supportedTypes], otherwise
    * [IllegalArgumentException] will be thrown.
    */
-  fun createOobChannel(oobChannelType: String): OobChannel =
+  open fun createOobChannel(oobChannelType: String): OobChannel =
     when (oobChannelType) {
       OobChannelType.BT_RFCOMM.name -> BluetoothRfcommChannel(sppBinder)
       else -> throw IllegalArgumentException("Unknown OOB channel type: $oobChannelType")

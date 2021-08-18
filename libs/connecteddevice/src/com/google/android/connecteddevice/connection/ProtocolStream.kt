@@ -66,25 +66,35 @@ open class ProtocolStream(
   private var maxWriteSize: Int
 
   init {
-    maxWriteSize = device.protocol.getMaxWriteSize(device.protocolId)
-    device.protocol.registerCallback(
+    device.protocol.registerDataReceivedListener(
       device.protocolId,
-      object : ConnectionProtocol.DeviceCallback {
-        override fun onDeviceDisconnected(protocolId: String) {
-          isConnected.set(false)
-          protocolDisconnectListener?.onProtocolDisconnected()
-        }
-
-        override fun onDeviceMaxDataSizeChanged(protocolId: String, maxBytes: Int) {
-          maxWriteSize = maxBytes
-        }
-
+      object : ConnectionProtocol.DataReceivedListener {
         override fun onDataReceived(protocolId: String, data: ByteArray) {
           onDataReceived(data)
         }
       },
       callbackExecutor
     )
+    device.protocol.registerDeviceDisconnectedListener(
+      device.protocolId,
+      object : ConnectionProtocol.DeviceDisconnectedListener {
+        override fun onDeviceDisconnected(protocolId: String) {
+          isConnected.set(false)
+          protocolDisconnectListener?.onProtocolDisconnected()
+        }
+      },
+      callbackExecutor
+    )
+    device.protocol.registerDeviceMaxDataSizeChangedListener(
+      device.protocolId,
+      object : ConnectionProtocol.DeviceMaxDataSizeChangedListener {
+        override fun onDeviceMaxDataSizeChanged(protocolId: String, maxBytes: Int) {
+          maxWriteSize = maxBytes
+        }
+      },
+      callbackExecutor
+    )
+    maxWriteSize = device.protocol.getMaxWriteSize(device.protocolId)
   }
 
   private fun send(data: ByteArray) {
@@ -92,11 +102,13 @@ open class ProtocolStream(
       logw(TAG, "Unable to send data to disconnected device.")
       return
     }
+    logd(TAG, "Send data with callback.")
     device.protocol.sendData(
       device.protocolId,
       data,
       object : ConnectionProtocol.DataSendCallback {
         override fun onDataSentSuccessfully() {
+          logd(TAG, "Data sent successfully. Sending next message in queue.")
           isSendingInProgress.set(false)
           writeNextMessageInQueue()
         }

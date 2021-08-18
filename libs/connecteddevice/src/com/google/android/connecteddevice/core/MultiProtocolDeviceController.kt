@@ -16,7 +16,6 @@
 package com.google.android.connecteddevice.core
 
 import androidx.annotation.VisibleForTesting
-import com.google.android.companionprotos.CapabilitiesExchangeProto.CapabilitiesExchange.OobChannelType
 import com.google.android.connecteddevice.api.IAssociationCallback
 import com.google.android.connecteddevice.connection.ChannelResolver
 import com.google.android.connecteddevice.connection.MultiProtocolSecureChannel
@@ -34,7 +33,6 @@ import com.google.android.connecteddevice.oob.OobConnectionManager
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage
 import com.google.android.connecteddevice.transport.ConnectionProtocol
 import com.google.android.connecteddevice.transport.ConnectionProtocol.ConnectChallenge
-import com.google.android.connecteddevice.transport.ConnectionProtocol.DeviceCallback
 import com.google.android.connecteddevice.transport.ConnectionProtocol.DiscoveryCallback
 import com.google.android.connecteddevice.transport.ProtocolDevice
 import com.google.android.connecteddevice.util.ByteUtils
@@ -44,7 +42,6 @@ import com.google.android.connecteddevice.util.SafeLog.logw
 import com.google.android.connecteddevice.util.ThreadSafeCallbacks
 import com.google.android.connecteddevice.util.aliveOrNull
 import java.security.InvalidParameterException
-import java.util.Arrays
 import java.util.Objects
 import java.util.UUID
 import java.util.concurrent.CopyOnWriteArrayList
@@ -84,7 +81,7 @@ constructor(
    * The out of band verification code get from the [EncryptionRunner], will be set during out of
    * band association.
    */
-  private var oobCode: ByteArray? = null
+  @VisibleForTesting internal var oobCode: ByteArray? = null
 
   private val associatedDevices = CopyOnWriteArrayList<AssociatedDevice>()
   private val driverDevices = CopyOnWriteArrayList<AssociatedDevice>()
@@ -132,6 +129,7 @@ constructor(
     for (protocol in protocols) {
       protocol.reset()
     }
+    oobCode = null
   }
 
   override fun initiateConnectionToDevice(deviceId: UUID) {
@@ -150,6 +148,7 @@ constructor(
 
   override fun startAssociation(nameForAssociation: String, callback: IAssociationCallback) {
     logd(TAG, "Start association with name $nameForAssociation")
+    oobCode = null
     for (protocol in protocols) {
       val discoveryCallback =
         generateAssociationDiscoveryCallback(protocol, callback, nameForAssociation)
@@ -295,9 +294,9 @@ constructor(
     object : DiscoveryCallback {
       override fun onDeviceConnected(protocolId: String) {
         logd(TAG, "New connection protocol connected, id: $protocolId, protocol: $protocol")
-        protocol.registerCallback(
+        protocol.registerDeviceDisconnectedListener(
           protocolId,
-          generateDeviceCallback(null, deviceId, protocol),
+          generateDeviceDisconnectedListener(callback = null, deviceId, protocol),
           callbackExecutor
         )
         val protocolDevice = ProtocolDevice(protocol, protocolId)
@@ -349,9 +348,9 @@ constructor(
       override fun onDeviceConnected(protocolId: String) {
         logd(TAG, "New connection protocol connected, id: $protocolId, protocol: $protocol")
         val protocolDevice = ProtocolDevice(protocol, protocolId)
-        protocol.registerCallback(
+        protocol.registerDeviceDisconnectedListener(
           protocolId,
-          generateDeviceCallback(associationCallback, deviceId = null, protocol),
+          generateDeviceDisconnectedListener(associationCallback, deviceId = null, protocol),
           callbackExecutor
         )
         // The channel only needs to be resolved once for all protocols connected to one remote
@@ -374,7 +373,7 @@ constructor(
             channelResolver =
               generateChannelResolver(protocolDevice, device = this, associationCallback)
           }
-        device.channelResolver?.resolveAssociation(SUPPORTED_OOB_CAPABILITIES)
+        device.channelResolver?.resolveAssociation(oobChannelFactory, oobConnectionManager)
         connectedRemoteDevices.add(device)
         associationPendingDevice = device
       }
@@ -445,12 +444,12 @@ constructor(
       }
     )
 
-  private fun generateDeviceCallback(
+  private fun generateDeviceDisconnectedListener(
     callback: IAssociationCallback?,
     deviceId: UUID?,
     protocol: ConnectionProtocol,
   ) =
-    object : DeviceCallback {
+    object : ConnectionProtocol.DeviceDisconnectedListener {
       override fun onDeviceDisconnected(protocolId: String) {
         logd(TAG, "Remote connect protocol disconnected, id: $protocolId, protocol: $protocol")
         val device =
@@ -484,14 +483,6 @@ constructor(
               "A disconnect callback will not be issued."
           )
         }
-      }
-
-      override fun onDeviceMaxDataSizeChanged(protocolId: String, maxBytes: Int) {
-        // No implementation
-      }
-
-      override fun onDataReceived(protocolId: String, data: ByteArray) {
-        // No implementation
       }
     }
 
@@ -528,16 +519,15 @@ constructor(
 
   private fun generateSecureChannelCallback(device: ConnectedRemoteDevice) =
     object : MultiProtocolSecureChannel.Callback {
-      override fun onOobVerificationCodeAvailable(oobCode: ByteArray) {
-        encryptAndSendOobVerificationCode(oobCode, device)
+      override fun onOobVerificationCodeAvailable(code: ByteArray) {
+        oobCode = code
       }
 
-      override fun onOobVerificationCodeReceived(oobCode: ByteArray) {
-        confirmOobVerificationCode(oobCode, device)
+      override fun onOobVerificationCodeReceived(code: ByteArray) {
+        confirmOobVerificationCode(code, device)
       }
 
       override fun onSecureChannelEstablished() {
-        device.callback?.onAssociationCompleted()
         logd(
           TAG,
           "Notifying callbacks that a secure channel has been established with " +
@@ -564,7 +554,6 @@ constructor(
 
   @VisibleForTesting
   internal fun encryptAndSendOobVerificationCode(code: ByteArray, device: ConnectedRemoteDevice) {
-    oobCode = code
     val encryptedCode: ByteArray =
       try {
         oobConnectionManager.encryptVerificationCode(code)
@@ -586,13 +575,14 @@ constructor(
         device.callback?.aliveOrNull()?.onAssociationError(Errors.DEVICE_ERROR_INVALID_VERIFICATION)
         return
       }
-
-    if (!Arrays.equals(oobCode, decryptedCode)) {
+    val code = oobCode
+    if (code == null || !decryptedCode.contentEquals(code)) {
       loge(TAG, "Exchanged verification codes do not match. Notify callback of failure.")
       device.callback?.aliveOrNull()?.onAssociationError(Errors.DEVICE_ERROR_INVALID_VERIFICATION)
       return
     }
-    device.secureChannel?.notifyVerificationCodeAccepted()
+    encryptAndSendOobVerificationCode(code, device)
+    notifyVerificationCodeAccepted()
   }
 
   @VisibleForTesting
@@ -643,6 +633,8 @@ constructor(
       )
     storage.addAssociatedDeviceForActiveUser(associatedDevice)
     driverDevices.add(associatedDevice)
+    associationPendingDevice = null
+    device.callback?.onAssociationCompleted()
     invokeCallbacksWithDevice(device) { connectedDevice, callback ->
       callback.onDeviceConnected(connectedDevice)
     }
@@ -698,7 +690,5 @@ constructor(
     private const val SALT_BYTES = 8
     private const val TOTAL_AD_DATA_BYTES = 16
     private const val DEVICE_ID_BYTES = 16
-    // TODO(b/193057171) Update capabilities when Oob is supported.
-    private val SUPPORTED_OOB_CAPABILITIES = emptyList<OobChannelType>()
   }
 }

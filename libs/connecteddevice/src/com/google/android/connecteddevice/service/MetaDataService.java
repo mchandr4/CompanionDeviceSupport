@@ -16,6 +16,7 @@
 
 package com.google.android.connecteddevice.service;
 
+import static com.google.android.connecteddevice.util.SafeLog.logd;
 import static com.google.android.connecteddevice.util.SafeLog.loge;
 
 import android.app.Service;
@@ -27,22 +28,27 @@ import android.os.Bundle;
 import android.os.IBinder;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
 
 /** Service with convenience methods for using meta-data configuration. */
 public abstract class MetaDataService extends Service {
 
   private static final String TAG = "MetaDataService";
 
-  @VisibleForTesting
-  Bundle bundle;
+  private Bundle bundle;
 
   @Override
   public void onCreate() {
     super.onCreate();
+    bundle = retrieveMetaDataBundle();
+  }
+
+  /** Return the meta-data bundle defined in the manifest for this service. */
+  @NonNull
+  protected Bundle retrieveMetaDataBundle() {
+    logd(TAG, "Retrieving meta-data from service definition.");
     ComponentName service = new ComponentName(this, this.getClass());
     try {
-      bundle = getPackageManager().getServiceInfo(service, PackageManager.GET_META_DATA).metaData;
+      return getPackageManager().getServiceInfo(service, PackageManager.GET_META_DATA).metaData;
     } catch (NameNotFoundException e) {
       throw new IllegalStateException("Unable to read meta-data for service.", e);
     }
