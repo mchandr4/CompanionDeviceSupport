@@ -21,6 +21,7 @@ import static com.google.android.connecteddevice.util.SafeLog.loge;
 import static com.google.android.connecteddevice.util.SafeLog.logw;
 
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanFilter;
@@ -52,6 +53,8 @@ public class BleCentralManager {
 
   private final AtomicInteger scannerState = new AtomicInteger(STOPPED);
 
+  private final BluetoothManager bluetoothManager;
+
   private List<ScanFilter> scanFilters;
 
   private ScanSettings scanSettings;
@@ -74,6 +77,7 @@ public class BleCentralManager {
   public BleCentralManager(@NonNull Context context) {
     this.context = context;
     handler = new Handler(context.getMainLooper());
+    bluetoothManager = context.getSystemService(BluetoothManager.class);
   }
 
   /**
@@ -124,8 +128,9 @@ public class BleCentralManager {
 
   private void startScanningInternally() {
     logd(TAG, "Attempting to start scanning");
-    if (scanner == null && BluetoothAdapter.getDefaultAdapter() != null) {
-      scanner = BluetoothAdapter.getDefaultAdapter().getBluetoothLeScanner();
+    BluetoothAdapter adapter = bluetoothManager.getAdapter();
+    if (scanner == null && adapter != null) {
+      scanner = adapter.getBluetoothLeScanner();
     }
     if (scanner != null) {
       scanner.startScan(scanFilters, scanSettings, internalScanCallback);

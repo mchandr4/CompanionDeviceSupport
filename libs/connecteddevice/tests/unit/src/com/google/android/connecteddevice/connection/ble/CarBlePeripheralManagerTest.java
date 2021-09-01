@@ -24,15 +24,16 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGattService;
+import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.AdvertiseCallback;
 import android.bluetooth.le.AdvertiseData;
 import android.bluetooth.le.AdvertiseSettings;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelUuid;
+import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.google.android.companionprotos.VersionExchangeProto.VersionExchange;
 import com.google.android.connecteddevice.connection.AssociationCallback;
@@ -252,7 +253,10 @@ public class CarBlePeripheralManagerTest {
     BlePeripheralManager.Callback bleManagerCallback =
         startAssociation(callback, getNameForAssociation());
     BluetoothDevice bluetoothDevice =
-        BluetoothAdapter.getDefaultAdapter().getRemoteDevice(TEST_REMOTE_DEVICE_ADDRESS);
+        ApplicationProvider.getApplicationContext()
+            .getSystemService(BluetoothManager.class)
+            .getAdapter()
+            .getRemoteDevice(TEST_REMOTE_DEVICE_ADDRESS);
     bleManagerCallback.onRemoteDeviceConnected(bluetoothDevice);
     ArgumentCaptor<BlePeripheralManager.OnCharacteristicWriteListener> listenerCaptor =
         ArgumentCaptor.forClass(BlePeripheralManager.OnCharacteristicWriteListener.class);

@@ -15,7 +15,6 @@
  */
 package com.google.android.connecteddevice.transport.ble
 
-import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattDescriptor
@@ -157,11 +156,6 @@ class BlePeripheralProtocol(
     if (!isReadyToStartDiscovery()) {
       return
     }
-    if (BluetoothAdapter.getDefaultAdapter() == null) {
-      loge(TAG, "Bluetooth is unavailable on this device. Unable to start associating.")
-      callback.onDiscoveryFailedToStart()
-      return
-    }
     reset()
     discoveryCallback = callback
     blePeripheralManager.registerCallback(peripheralCallback)
@@ -194,11 +188,6 @@ class BlePeripheralProtocol(
     callback: DiscoveryCallback
   ) {
     if (!isReadyToStartDiscovery()) {
-      return
-    }
-    if (BluetoothAdapter.getDefaultAdapter() == null) {
-      loge(TAG, "Bluetooth is unavailable on this device. Unable to start connection.")
-      callback.onDiscoveryFailedToStart()
       return
     }
     reset()

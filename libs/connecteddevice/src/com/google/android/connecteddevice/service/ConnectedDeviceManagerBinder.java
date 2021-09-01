@@ -293,7 +293,7 @@ public class ConnectedDeviceManagerBinder extends IConnectedDeviceManager.Stub {
           }
         };
 
-    loggingManager.addOnLogRequestedListener(loggerId, onLogRequestedListener, callbackExecutor);
+    loggingManager.registerLogRequestedListener(loggerId, onLogRequestedListener, callbackExecutor);
     IBinder listenerBinder = listener.asBinder();
     RemoteCallbackBinder remoteBinder =
         new RemoteCallbackBinder(
@@ -324,7 +324,7 @@ public class ConnectedDeviceManagerBinder extends IConnectedDeviceManager.Stub {
               + " is not previously registered.");
       return;
     }
-    loggingManager.removeOnLogRequestedListener(loggerId, onLogRequestedListener);
+    loggingManager.unregisterLogRequestedListener(loggerId, onLogRequestedListener);
     remoteBinder.cleanUp();
     callbackBinders.remove(listenerBinder);
   }

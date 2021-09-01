@@ -21,6 +21,8 @@ import static org.mockito.Mockito.verify;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothManager;
+import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.google.android.connecteddevice.transport.spp.PendingConnection.OnConnectedListener;
 import com.google.android.connecteddevice.transport.spp.PendingConnection.OnConnectionErrorListener;
@@ -38,7 +40,10 @@ public class PendingConnectionTest {
 
   private final UUID testServiceUuid = UUID.randomUUID();
   private final BluetoothDevice testRemoteDevice =
-      BluetoothAdapter.getDefaultAdapter().getRemoteDevice("00:11:22:33:44:55");
+      ApplicationProvider.getApplicationContext()
+          .getSystemService(BluetoothManager.class)
+          .getAdapter()
+          .getRemoteDevice("00:11:22:33:44:55");
   private static final boolean TEST_IS_SECURE = true;
 
   @Mock private OnConnectedListener mockOnConnectedListener;

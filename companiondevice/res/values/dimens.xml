@@ -48,7 +48,8 @@
     <dimen name="connection_indicator_margin_end">12dp</dimen>
     <dimen name="button_margin_top">48dp</dimen>
     <dimen name="pairing_code_margin_top">48dp</dimen>
-    <item name="pairing_code_text_spacing" format="float" type="dimen">0.6</item>
+    <dimen name="pairing_code_text_size">44dp</dimen>
+    <item name="pairing_code_text_spacing" format="float" type="dimen">0.23</item>
 
     <!-- Settings -->
     <dimen name="settings_page_margin_horizontal">@dimen/car_ui_margin</dimen>

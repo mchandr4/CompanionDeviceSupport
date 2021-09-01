@@ -124,7 +124,7 @@ public class ConnectedDeviceManagerBinderTest {
     int testLoggerId = 1;
     binder.registerOnLogRequestedListener(testLoggerId, listener);
     verify(mockLoggingManager)
-        .addOnLogRequestedListener(
+        .registerLogRequestedListener(
             eq(testLoggerId), any(OnLogRequestedListener.class), any(Executor.class));
   }
 
@@ -135,7 +135,7 @@ public class ConnectedDeviceManagerBinderTest {
     binder.registerOnLogRequestedListener(testLoggerId, listener);
     binder.unregisterOnLogRequestedListener(testLoggerId, listener);
     verify(mockLoggingManager)
-        .removeOnLogRequestedListener(eq(testLoggerId), any(OnLogRequestedListener.class));
+        .unregisterLogRequestedListener(eq(testLoggerId), any(OnLogRequestedListener.class));
   }
 
   @Test

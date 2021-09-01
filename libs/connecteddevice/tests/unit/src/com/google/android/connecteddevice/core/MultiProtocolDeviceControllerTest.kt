@@ -30,8 +30,7 @@ import com.google.android.connecteddevice.model.ConnectedDevice
 import com.google.android.connecteddevice.model.DeviceMessage
 import com.google.android.connecteddevice.model.DeviceMessage.OperationType
 import com.google.android.connecteddevice.model.Errors
-import com.google.android.connecteddevice.oob.OobChannelFactory
-import com.google.android.connecteddevice.oob.OobConnectionManager
+import com.google.android.connecteddevice.oob.OobRunner
 import com.google.android.connecteddevice.storage.ConnectedDeviceDatabase
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage.CHALLENGE_SECRET_BYTES
@@ -68,8 +67,7 @@ class MultiProtocolDeviceControllerTest {
   private val mockCallback: Callback = mock()
   private val mockStream: ProtocolStream = mock()
   private val mockSecureChannel: MultiProtocolSecureChannel = mock()
-  private val mockOobManager: OobConnectionManager = mock()
-  private val mockOobChannelFactory: OobChannelFactory = mock()
+  private val mockOobRunner: OobRunner = mock()
   private val mockAssociationCallback: IAssociationCallback = mockToBeAlive()
   private val protocols = setOf(testConnectionProtocol)
   private lateinit var deviceController: MultiProtocolDeviceController
@@ -88,13 +86,7 @@ class MultiProtocolDeviceControllerTest {
     spyStorage = spy(ConnectedDeviceStorage(context, Base64CryptoHelper(), database))
     whenever(spyStorage.hashWithChallengeSecret(any(), any())).thenReturn(TEST_CHALLENGE)
     deviceController =
-      MultiProtocolDeviceController(
-        protocols,
-        spyStorage,
-        mockOobChannelFactory,
-        mockOobManager,
-        directExecutor()
-      )
+      MultiProtocolDeviceController(protocols, spyStorage, mockOobRunner, directExecutor())
     deviceController.registerCallback(mockCallback, directExecutor())
     secureChannel =
       spy(
@@ -117,6 +109,8 @@ class MultiProtocolDeviceControllerTest {
       verify(testConnectionProtocol).startAssociationDiscovery(eq(deviceName), capture())
       firstValue.onDiscoveryStartedSuccessfully()
     }
+
+    verify(mockOobRunner).generateOobData()
     verify(mockAssociationCallback).onAssociationStartSuccess(deviceName)
   }
 
@@ -543,13 +537,7 @@ class MultiProtocolDeviceControllerTest {
       .thenReturn(listOf(activeUserDevice, otherUserDevice, disconnectedDevice))
     // Recreate controller after registering mock returns since they are used in the constructor.
     deviceController =
-      MultiProtocolDeviceController(
-        protocols,
-        spyStorage,
-        mockOobChannelFactory,
-        mockOobManager,
-        directExecutor()
-      )
+      MultiProtocolDeviceController(protocols, spyStorage, mockOobRunner, directExecutor())
     deviceController.registerCallback(mockCallback, directExecutor())
 
     deviceController.initiateConnectionToDevice(activeUserDeviceId)
@@ -640,8 +628,7 @@ class MultiProtocolDeviceControllerTest {
       MultiProtocolDeviceController(
           setOf(protocol1, protocol2),
           spyStorage,
-          mockOobChannelFactory,
-          mockOobManager,
+          mockOobRunner,
           directExecutor()
         )
         .apply { registerCallback(mockCallback, directExecutor()) }
@@ -674,13 +661,7 @@ class MultiProtocolDeviceControllerTest {
     val testProtocolId = UUID.randomUUID().toString()
     val protocol = spy(TestConnectionProtocol())
     deviceController =
-      MultiProtocolDeviceController(
-          setOf(protocol),
-          spyStorage,
-          mockOobChannelFactory,
-          mockOobManager,
-          directExecutor()
-        )
+      MultiProtocolDeviceController(setOf(protocol), spyStorage, mockOobRunner, directExecutor())
         .apply { registerCallback(mockCallback, directExecutor()) }
     deviceController.initiateConnectionToDevice(deviceId)
     argumentCaptor<ConnectionProtocol.DiscoveryCallback>().apply {
@@ -711,13 +692,7 @@ class MultiProtocolDeviceControllerTest {
     whenever(spyStorage.activeUserAssociatedDevices).thenReturn(listOf(associatedDevice))
     whenever(spyStorage.allAssociatedDevices).thenReturn(listOf(associatedDevice))
     deviceController =
-      MultiProtocolDeviceController(
-          setOf(protocol),
-          spyStorage,
-          mockOobChannelFactory,
-          mockOobManager,
-          directExecutor()
-        )
+      MultiProtocolDeviceController(setOf(protocol), spyStorage, mockOobRunner, directExecutor())
         .apply { registerCallback(mockCallback, directExecutor()) }
     deviceController.initiateConnectionToDevice(deviceId)
     argumentCaptor<ConnectionProtocol.DiscoveryCallback>().apply {
@@ -736,7 +711,7 @@ class MultiProtocolDeviceControllerTest {
     val testConnectedDevice = MultiProtocolDeviceController.ConnectedRemoteDevice()
     val testOobCode = "testCode".toByteArray()
     val encryptedCode = "encryptedCode".toByteArray()
-    whenever(mockOobManager.encryptVerificationCode(testOobCode)).thenReturn(encryptedCode)
+    whenever(mockOobRunner.encryptData(testOobCode)).thenReturn(encryptedCode)
     testConnectedDevice.secureChannel = mockSecureChannel
 
     deviceController.encryptAndSendOobVerificationCode(testOobCode, testConnectedDevice)
@@ -750,7 +725,7 @@ class MultiProtocolDeviceControllerTest {
     val testOobCode = "testCode".toByteArray()
     testConnectedDevice.secureChannel = mockSecureChannel
     testConnectedDevice.callback = mockAssociationCallback
-    whenever(mockOobManager.encryptVerificationCode(testOobCode)).then { throw Exception() }
+    whenever(mockOobRunner.encryptData(testOobCode)).then { throw Exception() }
 
     deviceController.encryptAndSendOobVerificationCode(testOobCode, testConnectedDevice)
 
@@ -775,8 +750,8 @@ class MultiProtocolDeviceControllerTest {
     val decryptedTestOobCode = "decryptedTestCode".toByteArray()
 
     deviceController.oobCode = decryptedTestOobCode
-    whenever(mockOobManager.encryptVerificationCode(decryptedTestOobCode)).thenReturn(testOobCode)
-    whenever(mockOobManager.decryptVerificationCode(testOobCode)).thenReturn(decryptedTestOobCode)
+    whenever(mockOobRunner.encryptData(decryptedTestOobCode)).thenReturn(testOobCode)
+    whenever(mockOobRunner.decryptData(testOobCode)).thenReturn(decryptedTestOobCode)
     deviceController.confirmOobVerificationCode(testOobCode, connectedDevice)
 
     verify(mockSecureChannel).sendOobEncryptedCode(testOobCode)
@@ -789,7 +764,7 @@ class MultiProtocolDeviceControllerTest {
     val testOobCode = "encryptedTestCode".toByteArray()
     testConnectedDevice.secureChannel = mockSecureChannel
     testConnectedDevice.callback = mockAssociationCallback
-    whenever(mockOobManager.decryptVerificationCode(testOobCode)).then { throw Exception() }
+    whenever(mockOobRunner.decryptData(testOobCode)).then { throw Exception() }
     deviceController.confirmOobVerificationCode(testOobCode, testConnectedDevice)
 
     verify(mockAssociationCallback).onAssociationError(Errors.DEVICE_ERROR_INVALID_VERIFICATION)
@@ -802,9 +777,8 @@ class MultiProtocolDeviceControllerTest {
     val encryptedTestOobCode = "encryptedTestCode".toByteArray()
     testConnectedDevice.secureChannel = mockSecureChannel
     testConnectedDevice.callback = mockAssociationCallback
-    whenever(mockOobManager.encryptVerificationCode(any())).thenReturn(encryptedTestOobCode)
-    whenever(mockOobManager.decryptVerificationCode(encryptedTestOobCode))
-      .thenReturn(originalOobCode)
+    whenever(mockOobRunner.encryptData(any())).thenReturn(encryptedTestOobCode)
+    whenever(mockOobRunner.decryptData(encryptedTestOobCode)).thenReturn(originalOobCode)
     // Set an incorrect oob code.
     deviceController.encryptAndSendOobVerificationCode(encryptedTestOobCode, testConnectedDevice)
 
@@ -814,7 +788,7 @@ class MultiProtocolDeviceControllerTest {
   }
 
   @Test
-  fun stopAssociation_disconnectPendingDevice() {
+  fun stopAssociation_disconnectPendingDeviceAndClearOobRunner() {
     val deviceName = "TestDeviceName"
     val testProtocolId = UUID.randomUUID().toString()
     deviceController.startAssociation(deviceName, mockAssociationCallback)
@@ -825,6 +799,7 @@ class MultiProtocolDeviceControllerTest {
     deviceController.stopAssociation()
     verify(testConnectionProtocol).disconnectDevice(testProtocolId)
     verify(testConnectionProtocol).stopAssociationDiscovery()
+    verify(mockOobRunner).reset()
   }
 
   @Test

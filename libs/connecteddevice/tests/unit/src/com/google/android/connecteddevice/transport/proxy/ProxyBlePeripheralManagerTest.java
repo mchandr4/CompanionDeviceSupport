@@ -25,8 +25,10 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
+import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.AdvertiseCallback;
 import android.bluetooth.le.AdvertiseData;
+import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.google.android.connecteddevice.transport.ble.BlePeripheralManager;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -62,13 +64,18 @@ public final class ProxyBlePeripheralManagerTest {
   // Sufficiently large buffer for proto messages.
   private static final int BUFFER_SIZE = 2000;
 
-  private ProxyBlePeripheralManager manager;
+  private final BluetoothAdapter adapter =
+      ApplicationProvider.getApplicationContext()
+          .getSystemService(BluetoothManager.class)
+          .getAdapter();
 
   @Mock private BlePeripheralManager.Callback mockCallback;
   @Mock private AdvertiseCallback mockAdvertiseCallback;
   @Mock private Socket mockSocket;
+
   private ByteArrayInputStream inputStream;
   private ByteArrayOutputStream outputStream;
+  private ProxyBlePeripheralManager manager;
 
   @Before
   public void setUp() throws IOException {
@@ -137,8 +144,7 @@ public final class ProxyBlePeripheralManagerTest {
 
   @Test
   public void onRemoteDeviceConnected_notfiesCallback() {
-    BluetoothDevice device =
-        BluetoothAdapter.getDefaultAdapter().getRemoteDevice("00:11:22:33:AA:BB");
+    BluetoothDevice device = adapter.getRemoteDevice("00:11:22:33:AA:BB");
     manager.messageReaderCallback.onRemoteDeviceConnected(device);
 
     verify(mockCallback).onRemoteDeviceConnected(eq(device));
@@ -148,10 +154,8 @@ public final class ProxyBlePeripheralManagerTest {
   public void notifyCharacteristicChanged_deviceDoesNotMatch_ignored()
       throws InvalidProtocolBufferException {
     // First connect to a device.
-    BluetoothDevice connectedDevice =
-        BluetoothAdapter.getDefaultAdapter().getRemoteDevice("00:11:22:33:AA:BB");
-    BluetoothDevice unknownDevice =
-        BluetoothAdapter.getDefaultAdapter().getRemoteDevice("AA:BB:00:11:22:33");
+    BluetoothDevice connectedDevice = adapter.getRemoteDevice("00:11:22:33:AA:BB");
+    BluetoothDevice unknownDevice = adapter.getRemoteDevice("AA:BB:00:11:22:33");
     manager.messageReaderCallback.onRemoteDeviceConnected(connectedDevice);
 
     BluetoothGattCharacteristic characteristic =
@@ -171,8 +175,7 @@ public final class ProxyBlePeripheralManagerTest {
     startAdvertising(
         UUID.fromString("29383942-34e2-4886-994b-973702b15f9d"), mockAdvertiseCallback);
     // Connect to a device.
-    BluetoothDevice connectedDevice =
-        BluetoothAdapter.getDefaultAdapter().getRemoteDevice("00:11:22:33:AA:BB");
+    BluetoothDevice connectedDevice = adapter.getRemoteDevice("00:11:22:33:AA:BB");
     manager.messageReaderCallback.onRemoteDeviceConnected(connectedDevice);
 
     BluetoothGattCharacteristic characteristic =

@@ -1,6 +1,7 @@
 package com.google.android.connecteddevice.system
 
 import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothManager
 import android.content.Context
 import androidx.annotation.VisibleForTesting
 import com.google.android.companionprotos.SystemQuery
@@ -16,18 +17,14 @@ import com.google.protobuf.InvalidProtocolBufferException
 import java.nio.charset.StandardCharsets
 
 /** Feature responsible for system queries. */
-open class SystemFeature internal constructor(
+open class SystemFeature(
   context: Context,
   manager: IConnectedDeviceManager,
-  private val storage: ConnectedDeviceStorage,
-  private val nameProvider: () -> String?
+  private val storage: ConnectedDeviceStorage
 ) : RemoteFeature(context, SYSTEM_FEATURE_ID, manager) {
 
-  constructor(
-    context: Context,
-    manager: IConnectedDeviceManager,
-    storage: ConnectedDeviceStorage
-  ) : this(context, manager, storage, { BluetoothAdapter.getDefaultAdapter()?.name })
+  private val bluetoothAdapter: BluetoothAdapter =
+    context.getSystemService(BluetoothManager::class.java).adapter
 
   override fun onSecureChannelEstablished(device: ConnectedDevice) =
     onSecureChannelEstablishedInternal(device)
@@ -85,7 +82,7 @@ open class SystemFeature internal constructor(
   }
 
   private fun respondWithDeviceName(device: ConnectedDevice, queryId: Int) {
-    val deviceName = nameProvider()
+    val deviceName = bluetoothAdapter.name
     logd(TAG, "Responding to query for device name with $deviceName.")
     respondToQuerySecurely(
       device,

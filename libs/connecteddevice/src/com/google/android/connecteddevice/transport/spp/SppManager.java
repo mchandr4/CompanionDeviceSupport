@@ -22,7 +22,9 @@ import static com.google.android.connecteddevice.util.SafeLog.logw;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothSocket;
+import android.content.Context;
 import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -54,7 +56,7 @@ public class SppManager {
   private static final String TAG = "SppManager";
   // Service names and UUIDs of SDP(Service Discovery Protocol) record, need to keep it consistent
   // among client and server.
-  private final BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+  private final BluetoothAdapter adapter;
   private final boolean isSecure;
   private final Object lock = new Object();
   /** Task to listen to secure RFCOMM channel. */
@@ -79,14 +81,15 @@ public class SppManager {
   private final ThreadSafeCallbacks<OnMessageReceivedListener> receivedListeners =
       new ThreadSafeCallbacks<>();
 
-  public SppManager(@NonNull boolean isSecure) {
-    this(isSecure, Executors.newSingleThreadExecutor());
+  public SppManager(@NonNull Context context, boolean isSecure) {
+    this(context, isSecure, Executors.newSingleThreadExecutor());
   }
 
   @VisibleForTesting
-  SppManager(@NonNull boolean isSecure, @NonNull Executor executor) {
+  SppManager(@NonNull Context context, boolean isSecure, @NonNull Executor executor) {
     this.isSecure = isSecure;
     taskCallbackExecutor = executor;
+    adapter = context.getSystemService(BluetoothManager.class).getAdapter();
   }
 
   @VisibleForTesting

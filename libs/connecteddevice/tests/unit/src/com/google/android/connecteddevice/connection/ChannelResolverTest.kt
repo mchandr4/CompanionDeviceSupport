@@ -25,9 +25,7 @@ import com.google.android.companionprotos.CapabilitiesExchangeProto.Capabilities
 import com.google.android.companionprotos.VersionExchangeProto
 import com.google.android.connecteddevice.model.DeviceMessage
 import com.google.android.connecteddevice.model.DeviceMessage.OperationType
-import com.google.android.connecteddevice.oob.OobChannel
-import com.google.android.connecteddevice.oob.OobChannelFactory
-import com.google.android.connecteddevice.oob.OobConnectionManager
+import com.google.android.connecteddevice.oob.OobRunner
 import com.google.android.connecteddevice.storage.ConnectedDeviceDatabase
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage
 import com.google.android.connecteddevice.storage.CryptoHelper
@@ -35,6 +33,7 @@ import com.google.android.connecteddevice.transport.ConnectionProtocol
 import com.google.android.connecteddevice.transport.ConnectionProtocol.DataReceivedListener
 import com.google.android.connecteddevice.transport.ProtocolDevice
 import com.google.android.connecteddevice.util.ThreadSafeCallbacks
+import com.google.android.encryptionrunner.FakeEncryptionRunner
 import com.google.common.truth.Truth.assertThat
 import com.google.common.util.concurrent.MoreExecutors.directExecutor
 import com.google.protobuf.ExtensionRegistryLite
@@ -50,6 +49,7 @@ import com.nhaarman.mockitokotlin2.spy
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.validateMockitoUsage
 import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.verifyZeroInteractions
 import com.nhaarman.mockitokotlin2.whenever
 import java.util.UUID
 import kotlin.test.fail
@@ -64,9 +64,7 @@ private val TEST_DEVICE_ID = UUID.randomUUID()
 private val TEST_CHALLENGE = "test Challenge".toByteArray()
 private val TEST_CHALLENGE_RESPONSE = "test Challenge response".toByteArray()
 private val BT_RFCOMM_CHANNEL = OobChannelType.BT_RFCOMM
-private val ALTERNATIVE_OOB_CHANNEL = OobChannelType.OOB_CHANNEL_UNKNOWN
-private val SUPPORTED_OOB_CAPABILITIES =
-  listOf(BT_RFCOMM_CHANNEL.name, ALTERNATIVE_OOB_CHANNEL.name)
+private val SUPPORTED_OOB_CAPABILITIES = listOf(BT_RFCOMM_CHANNEL.name)
 
 @RunWith(AndroidJUnit4::class)
 class ChannelResolverTest {
@@ -76,11 +74,10 @@ class ChannelResolverTest {
   private val mockCallback: ChannelResolver.Callback = mock()
   private val mockStreamFactory: ProtocolStreamFactory = mock()
   private val mockStream: ProtocolStream = mock()
-  private val mockOobChannelFactory: OobChannelFactory = mock {
+  private val mockOobRunner: OobRunner = mock {
     on { supportedTypes } doReturn SUPPORTED_OOB_CAPABILITIES
   }
-  private val mockOobChannel: OobChannel = mock()
-  private val mockOobConnectionManager: OobConnectionManager = mock()
+  private var mockEncryptionRunner: FakeEncryptionRunner = mock()
   private val testDevice1 = ProtocolDevice(testProtocol1, TEST_PROTOCOL_ID_1)
   private val testDevice2 = ProtocolDevice(testProtocol2, TEST_PROTOCOL_ID_2)
   private lateinit var spyStorage: ConnectedDeviceStorage
@@ -97,9 +94,15 @@ class ChannelResolverTest {
     val database = connectedDeviceDatabase.associatedDeviceDao()
     spyStorage = spy(ConnectedDeviceStorage(context, Base64CryptoHelper(), database))
     whenever(mockStreamFactory.createProtocolStream(any(), any())).thenReturn(mockStream)
-    whenever(mockOobChannelFactory.createOobChannel(any())).thenReturn(mockOobChannel)
     whenever(spyStorage.hashWithChallengeSecret(any(), any())).thenReturn(TEST_CHALLENGE_RESPONSE)
-    channelResolver = ChannelResolver(testDevice1, spyStorage, mockCallback, mockStreamFactory)
+    channelResolver =
+      ChannelResolver(
+        testDevice1,
+        spyStorage,
+        mockCallback,
+        mockStreamFactory,
+        mockEncryptionRunner
+      )
   }
 
   @After
@@ -111,7 +114,7 @@ class ChannelResolverTest {
 
   @Test
   fun resolveAssociation_dataReceivedListenerRegistered() {
-    channelResolver.resolveAssociation(mockOobChannelFactory, mockOobConnectionManager)
+    channelResolver.resolveAssociation(mockOobRunner)
     assertThat(testProtocol1.dataReceivedListenerList).hasSize(1)
   }
 
@@ -123,7 +126,7 @@ class ChannelResolverTest {
 
   @Test
   fun addDeviceProtocol_dataReceivedListenerRegistered() {
-    channelResolver.resolveAssociation(mockOobChannelFactory, mockOobConnectionManager)
+    channelResolver.resolveAssociation(mockOobRunner)
     channelResolver.addProtocolDevice(testDevice2)
     assertThat(testProtocol2.dataReceivedListenerList).hasSize(1)
   }
@@ -138,7 +141,7 @@ class ChannelResolverTest {
         .setMinSupportedSecurityVersion(ChannelResolver.MAX_SECURITY_VERSION + 1)
         .build()
         .toByteArray()
-    channelResolver.resolveAssociation(mockOobChannelFactory, mockOobConnectionManager)
+    channelResolver.resolveAssociation(mockOobRunner)
     argumentCaptor<DataReceivedListener>().apply {
       verify(testProtocol1).registerDataReceivedListener(eq(TEST_PROTOCOL_ID_1), capture(), any())
       firstValue.onDataReceived(TEST_PROTOCOL_ID_1, unsupportedVersion)
@@ -148,7 +151,7 @@ class ChannelResolverTest {
 
   @Test
   fun receivedSupportedVersion_sendVersionMessage() {
-    channelResolver.resolveAssociation(mockOobChannelFactory, mockOobConnectionManager)
+    channelResolver.resolveAssociation(mockOobRunner)
     argumentCaptor<DataReceivedListener>().apply {
       verify(testProtocol1).registerDataReceivedListener(eq(TEST_PROTOCOL_ID_1), capture(), any())
       firstValue.onDataReceived(TEST_PROTOCOL_ID_1, createVersionMessage())
@@ -172,7 +175,7 @@ class ChannelResolverTest {
         .setMinSupportedSecurityVersion(ChannelResolver.MIN_SECURITY_VERSION)
         .build()
         .toByteArray()
-    channelResolver.resolveAssociation(mockOobChannelFactory, mockOobConnectionManager)
+    channelResolver.resolveAssociation(mockOobRunner)
 
     argumentCaptor<DataReceivedListener>().apply {
       verify(testProtocol1).registerDataReceivedListener(eq(TEST_PROTOCOL_ID_1), capture(), any())
@@ -184,7 +187,7 @@ class ChannelResolverTest {
   @Test
   fun receivedCapabilityExchangeSupportedVersion_sendCapabilityMessage() {
     val supportedOobChannelTypes = listOf(BT_RFCOMM_CHANNEL)
-    channelResolver.resolveAssociation(mockOobChannelFactory, mockOobConnectionManager)
+    channelResolver.resolveAssociation(mockOobRunner)
     val deviceCallback =
       argumentCaptor<DataReceivedListener>().apply {
         verify(testProtocol1).registerDataReceivedListener(eq(TEST_PROTOCOL_ID_1), capture(), any())
@@ -284,11 +287,12 @@ class ChannelResolverTest {
   }
 
   @Test
-  fun onOobExchangeSuccess_sendOobDataAndResolveStream() {
+  fun onOobExchangeSuccess_updateEncryptionRunnerAndResolveStream() {
     val testProtocolDevice = ProtocolDevice(testProtocol1, TEST_PROTOCOL_ID_1)
     val testOobChannels = listOf(BT_RFCOMM_CHANNEL)
-    whenever(mockOobChannel.completeOobDataExchange(eq(testProtocolDevice), any())).thenReturn(true)
-    channelResolver.resolveAssociation(mockOobChannelFactory, mockOobConnectionManager)
+    whenever(mockOobRunner.startOobDataExchange(eq(testProtocolDevice), any(), any()))
+      .thenReturn(true)
+    channelResolver.resolveAssociation(mockOobRunner)
     val deviceCallback =
       argumentCaptor<DataReceivedListener>().apply {
         verify(testProtocol1).registerDataReceivedListener(eq(TEST_PROTOCOL_ID_1), capture(), any())
@@ -300,48 +304,22 @@ class ChannelResolverTest {
         .build()
         .toByteArray()
     deviceCallback.firstValue.onDataReceived(TEST_PROTOCOL_ID_1, capabilities)
-    argumentCaptor<OobChannel.Callback>().apply {
-      verify(mockOobChannel).completeOobDataExchange(eq(testProtocolDevice), capture())
-      firstValue.onOobExchangeSuccess()
+    argumentCaptor<OobRunner.Callback>().apply {
+      verify(mockOobRunner).startOobDataExchange(eq(testProtocolDevice), any(), capture())
+      firstValue.onOobDataExchangeSuccess()
     }
 
-    verify(mockOobConnectionManager).startOobExchange(mockOobChannel)
+    verifyZeroInteractions(mockEncryptionRunner)
     verify(mockStreamFactory).createProtocolStream(eq(testProtocolDevice), any())
   }
 
   @Test
-  fun onOobExchangeFailure_alternativeOobChannelIsNotEmpty_continueTryAlternativeChannels() {
-    val testProtocolDevice = ProtocolDevice(testProtocol1, TEST_PROTOCOL_ID_1)
-    val testOobChannels = listOf(BT_RFCOMM_CHANNEL, ALTERNATIVE_OOB_CHANNEL)
-    whenever(mockOobChannel.completeOobDataExchange(eq(testProtocolDevice), any())).thenReturn(true)
-    channelResolver.resolveAssociation(mockOobChannelFactory, mockOobConnectionManager)
-    val deviceCallback =
-      argumentCaptor<DataReceivedListener>().apply {
-        verify(testProtocol1).registerDataReceivedListener(eq(TEST_PROTOCOL_ID_1), capture(), any())
-        firstValue.onDataReceived(TEST_PROTOCOL_ID_1, createVersionMessage())
-      }
-    val capabilities =
-      CapabilitiesExchange.newBuilder()
-        .addAllSupportedOobChannels(testOobChannels)
-        .build()
-        .toByteArray()
-    deviceCallback.firstValue.onDataReceived(TEST_PROTOCOL_ID_1, capabilities)
-    verify(mockOobChannelFactory).createOobChannel(BT_RFCOMM_CHANNEL.name)
-    argumentCaptor<OobChannel.Callback>().apply {
-      verify(mockOobChannel).completeOobDataExchange(eq(testProtocolDevice), capture())
-      firstValue.onOobExchangeFailure()
-    }
-
-    verify(mockOobChannelFactory).createOobChannel(ALTERNATIVE_OOB_CHANNEL.name)
-    verify(mockStreamFactory, never()).createProtocolStream(eq(testProtocolDevice), any())
-  }
-
-  @Test
-  fun onOobExchangeFailure_alternativeOobChannelIsEmpty_directlyResolveStream() {
+  fun onOobExchangeFailure_directlyResolveStream() {
     val testProtocolDevice = ProtocolDevice(testProtocol1, TEST_PROTOCOL_ID_1)
     val testOobChannels = listOf(BT_RFCOMM_CHANNEL)
-    whenever(mockOobChannel.completeOobDataExchange(eq(testProtocolDevice), any())).thenReturn(true)
-    channelResolver.resolveAssociation(mockOobChannelFactory, mockOobConnectionManager)
+    whenever(mockOobRunner.startOobDataExchange(eq(testProtocolDevice), any(), any()))
+      .thenReturn(true)
+    channelResolver.resolveAssociation(mockOobRunner)
     val deviceCallback =
       argumentCaptor<DataReceivedListener>().apply {
         verify(testProtocol1).registerDataReceivedListener(eq(TEST_PROTOCOL_ID_1), capture(), any())
@@ -353,13 +331,12 @@ class ChannelResolverTest {
         .build()
         .toByteArray()
     deviceCallback.firstValue.onDataReceived(TEST_PROTOCOL_ID_1, capabilities)
-    verify(mockOobChannelFactory).createOobChannel(BT_RFCOMM_CHANNEL.name)
-    argumentCaptor<OobChannel.Callback>().apply {
-      verify(mockOobChannel).completeOobDataExchange(eq(testProtocolDevice), capture())
-      firstValue.onOobExchangeFailure()
+    argumentCaptor<OobRunner.Callback>().apply {
+      verify(mockOobRunner).startOobDataExchange(eq(testProtocolDevice), any(), capture())
+      firstValue.onOobDataExchangeFailure()
     }
 
-    verify(mockOobChannelFactory, times(1)).createOobChannel(any())
+    verify(mockEncryptionRunner).setIsReconnect(false)
     verify(mockStreamFactory).createProtocolStream(eq(testProtocolDevice), any())
   }
 
@@ -367,8 +344,9 @@ class ChannelResolverTest {
   fun receivedCapabilityExchangeSupportedVersion_createOobChannelSuccessfully_waitForOobCallback() {
     val supportedOobChannelTypes = listOf(BT_RFCOMM_CHANNEL)
     val testProtocolDevice = ProtocolDevice(testProtocol1, TEST_PROTOCOL_ID_1)
-    whenever(mockOobChannel.completeOobDataExchange(eq(testProtocolDevice), any())).thenReturn(true)
-    channelResolver.resolveAssociation(mockOobChannelFactory, mockOobConnectionManager)
+    whenever(mockOobRunner.startOobDataExchange(eq(testProtocolDevice), any(), any()))
+      .thenReturn(true)
+    channelResolver.resolveAssociation(mockOobRunner)
     val deviceCallback =
       argumentCaptor<DataReceivedListener>().apply {
         verify(testProtocol1).registerDataReceivedListener(eq(TEST_PROTOCOL_ID_1), capture(), any())
@@ -390,7 +368,7 @@ class ChannelResolverTest {
   fun receivedCapabilityExchangeSupportedVersion_createOobChannelFailed_directlyResolveStream() {
     val supportedOobChannelTypes = listOf(BT_RFCOMM_CHANNEL)
     val testProtocolDevice = ProtocolDevice(testProtocol1, TEST_PROTOCOL_ID_1)
-    channelResolver.resolveAssociation(mockOobChannelFactory, mockOobConnectionManager)
+    channelResolver.resolveAssociation(mockOobRunner)
     val deviceCallback =
       argumentCaptor<DataReceivedListener>().apply {
         verify(testProtocol1).registerDataReceivedListener(eq(TEST_PROTOCOL_ID_1), capture(), any())
@@ -406,6 +384,7 @@ class ChannelResolverTest {
     deviceCallback.firstValue.onDataReceived(TEST_PROTOCOL_ID_1, capabilities)
 
     verify(mockStreamFactory).createProtocolStream(eq(testProtocolDevice), any())
+    verify(mockEncryptionRunner).setIsReconnect(false)
   }
 
   private fun createVersionMessage(): ByteArray {

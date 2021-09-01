@@ -28,11 +28,11 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class OobChannelFactoryTest {
   private val mockSppBinder: ConnectedDeviceSppDelegateBinder = mock()
+  private val factory = OobChannelFactory(mockSppBinder)
 
   @Test
   fun createOobChannel_supportedType_returnCorrectChannelType() {
-    val supportedType = OobChannelType.BT_RFCOMM.name
-    val factory = OobChannelFactory(mockSppBinder, listOf(supportedType))
+    val supportedType = OobChannelType.BT_RFCOMM
     val oobChannel = factory.createOobChannel(supportedType)
 
     assertThat(oobChannel).isInstanceOf(BluetoothRfcommChannel::class.java)
@@ -40,9 +40,8 @@ class OobChannelFactoryTest {
 
   @Test
   fun createOobChannel_unsupportedChannelType_throwException() {
-    val factory = OobChannelFactory(mockSppBinder, emptyList())
     try {
-      factory.createOobChannel("UnsupportedChannel")
+      factory.createOobChannel(OobChannelType.OOB_CHANNEL_UNKNOWN)
       fail("Expected exception did not throw.")
     } catch (e: IllegalArgumentException) {}
   }

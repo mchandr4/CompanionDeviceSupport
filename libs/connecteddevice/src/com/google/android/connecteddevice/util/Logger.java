@@ -23,6 +23,7 @@ import com.google.android.connecteddevice.logging.model.LogRecord;
 import com.google.android.connecteddevice.logging.model.LogRecord.Level;
 import com.google.android.connecteddevice.logging.util.LoggingUtils;
 import com.google.common.collect.EvictingQueue;
+import com.google.common.collect.Queues;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
@@ -33,7 +34,8 @@ public class Logger {
   private static final int MAX_LOG_SIZE = 500;
 
   private static final AtomicReference<Logger> loggerReference = new AtomicReference<>(null);
-  private final Queue<LogRecord> logRecordQueue = EvictingQueue.create(MAX_LOG_SIZE);
+  private final Queue<LogRecord> logRecordQueue =
+      Queues.synchronizedQueue(EvictingQueue.create(MAX_LOG_SIZE));
 
   private Logger() {}
 

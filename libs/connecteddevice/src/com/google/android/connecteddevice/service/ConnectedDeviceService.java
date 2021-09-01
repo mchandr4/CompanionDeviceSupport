@@ -21,6 +21,7 @@ import static com.google.android.connecteddevice.util.SafeLog.loge;
 import static com.google.android.connecteddevice.util.SafeLog.logi;
 
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -52,9 +53,9 @@ import com.google.android.connecteddevice.logging.LoggingFeature;
 import com.google.android.connecteddevice.logging.LoggingManager;
 import com.google.android.connecteddevice.model.ConnectedDevice;
 import com.google.android.connecteddevice.model.DeviceMessage;
-import com.google.android.connecteddevice.model.OobEligibleDevice;
 import com.google.android.connecteddevice.oob.BluetoothRfcommChannel;
 import com.google.android.connecteddevice.oob.OobChannelFactory;
+import com.google.android.connecteddevice.oob.OobRunner;
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage;
 import com.google.android.connecteddevice.system.SystemFeature;
 import com.google.android.connecteddevice.transport.ConnectionProtocol;
@@ -67,7 +68,6 @@ import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelega
 import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelegateBinder.OnRemoteCallbackSetListener;
 import com.google.android.connecteddevice.transport.spp.SppProtocol;
 import com.google.android.connecteddevice.util.EventLog;
-import com.google.android.connecteddevice.util.Logger;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -185,14 +185,6 @@ public final class ConnectedDeviceService extends TrunkService {
 
   private final AtomicBoolean isEveryFeatureInitialized = new AtomicBoolean(false);
 
-  private final OnRemoteCallbackSetListener onRemoteCallbackSetListener =
-      isSet -> {
-        if (BluetoothAdapter.getDefaultAdapter().isEnabled()) {
-          initializeFeatures();
-        }
-        isSppServiceBound.set(isSet);
-      };
-
   private final ScheduledExecutorService scheduledExecutorService =
       Executors.newSingleThreadScheduledExecutor();
 
@@ -220,6 +212,13 @@ public final class ConnectedDeviceService extends TrunkService {
     logd(TAG, "Service created.");
 
     EventLog.onServiceStarted();
+    BluetoothManager bluetoothManager = getSystemService(BluetoothManager.class);
+    OnRemoteCallbackSetListener onRemoteCallbackSetListener = isSet -> {
+      if (bluetoothManager.getAdapter().isEnabled()) {
+        initializeFeatures();
+      }
+      isSppServiceBound.set(isSet);
+    };
     isSppSupported = getMetaBoolean(META_ENABLE_SPP, SPP_ENABLED_BY_DEFAULT);
     useFeatureCoordinator =
         getMetaBoolean(META_ENABLE_FEATURE_COORDINATOR, ENABLE_FEATURE_COORDINATOR_BY_DEFAULT);
@@ -253,15 +252,15 @@ public final class ConnectedDeviceService extends TrunkService {
 
     Set<ConnectionProtocol> protocols = new HashSet<>();
     protocols.add(protocol);
-    OobChannelFactory oobChannelFactory =
-        new OobChannelFactory(
-            sppDelegateBinder,
+    OobRunner oobRunner =
+        new OobRunner(
+            new OobChannelFactory(sppDelegateBinder),
             Arrays.asList(
                 getMetaStringArray(
                     META_SUPPORTED_OOB_CHANNELS, /* defaultValue= */ new String[0])));
     DeviceController deviceController =
-        new MultiProtocolDeviceController(protocols, storage, oobChannelFactory);
-    featureCoordinator = new FeatureCoordinator(deviceController, storage);
+        new MultiProtocolDeviceController(protocols, storage, oobRunner);
+    featureCoordinator = new FeatureCoordinator(deviceController, storage, loggingManager);
     logd(TAG, "Wrapping FeatureCoordinator in legacy binders for backwards compatibility.");
     connectedDeviceManagerBinder = createConnectedDeviceManagerWrapper();
     associationBinder = createAssociatedDeviceManagerWrapper();
@@ -320,21 +319,14 @@ public final class ConnectedDeviceService extends TrunkService {
     } else {
       carBluetoothManager = createBleManager(storage, isCompressionEnabled, isCapabilitiesEligible);
     }
-    connectedDeviceManager =
-        new ConnectedDeviceManager(carBluetoothManager, storage, sppDelegateBinder);
+    connectedDeviceManager = new ConnectedDeviceManager(carBluetoothManager, storage);
     connectedDeviceManagerBinder =
         new ConnectedDeviceManagerBinder(connectedDeviceManager, loggingManager);
     associationBinder = new AssociationBinder(connectedDeviceManager);
   }
 
   private void populateFeatures() {
-    // TODO(b/187523735) Remove listener from here and place in LoggingManager
     logd(TAG, "Populating features.");
-    Logger logger = Logger.getLogger();
-    loggingManager.addOnLogRequestedListener(
-        logger.getLoggerId(),
-        () -> loggingManager.prepareLocalLogRecords(logger.getLoggerId(), logger.toByteArray()),
-        scheduledExecutorService);
     localFeatures.add(new LoggingFeature(this, connectedDeviceManagerBinder, loggingManager));
     localFeatures.add(new SystemFeature(this, connectedDeviceManagerBinder, storage));
   }
@@ -469,6 +461,7 @@ public final class ConnectedDeviceService extends TrunkService {
         .newThread(
             () -> {
               logd(TAG, "Initializing features.");
+              loggingManager.start();
               if (isEveryFeatureInitialized.get()) {
                 logd(TAG, "Features are already initialized. No need to initialize again.");
                 return;
@@ -554,32 +547,10 @@ public final class ConnectedDeviceService extends TrunkService {
 
   private IAssociatedDeviceManager.Stub createAssociatedDeviceManagerWrapper() {
     return new IAssociatedDeviceManager.Stub() {
-      private IAssociationCallback associationCallback;
-      private IDeviceAssociationCallback deviceAssociationCallback;
-      private IConnectionCallback connectionCallback;
 
       @Override
-      public void setAssociationCallback(IAssociationCallback callback) {
-        associationCallback = callback;
-      }
-
-      @Override
-      public void clearAssociationCallback() {
-        associationCallback = null;
-      }
-
-      @Override
-      public void startAssociation() {
-        if (associationCallback == null) {
-          logd(TAG, "Unable to start association with a null callback. Ignoring.");
-          return;
-        }
-        featureCoordinator.startAssociation(associationCallback);
-      }
-
-      @Override
-      public void startOobAssociation(OobEligibleDevice eligibleDevice) {
-        // TODO(b/190648869) Implement once OOB is supported in FeatureCoordinator flow
+      public void startAssociation(IAssociationCallback callback) {
+        featureCoordinator.startAssociation(callback);
       }
 
       @Override
@@ -604,21 +575,13 @@ public final class ConnectedDeviceService extends TrunkService {
       }
 
       @Override
-      public void setDeviceAssociationCallback(IDeviceAssociationCallback callback) {
-        if (deviceAssociationCallback != null) {
-          featureCoordinator.unregisterDeviceAssociationCallback(deviceAssociationCallback);
-        }
-        deviceAssociationCallback = callback;
+      public void registerDeviceAssociationCallback(IDeviceAssociationCallback callback) {
         featureCoordinator.registerDeviceAssociationCallback(callback);
       }
 
       @Override
-      public void clearDeviceAssociationCallback() {
-        if (deviceAssociationCallback == null) {
-          return;
-        }
-        featureCoordinator.unregisterDeviceAssociationCallback(deviceAssociationCallback);
-        deviceAssociationCallback = null;
+      public void unregisterDeviceAssociationCallback(IDeviceAssociationCallback callback) {
+        featureCoordinator.unregisterDeviceAssociationCallback(callback);
       }
 
       @Override
@@ -627,21 +590,13 @@ public final class ConnectedDeviceService extends TrunkService {
       }
 
       @Override
-      public void setConnectionCallback(IConnectionCallback callback) {
-        if (connectionCallback != null) {
-          featureCoordinator.unregisterConnectionCallback(connectionCallback);
-        }
-        connectionCallback = callback;
+      public void registerConnectionCallback(IConnectionCallback callback) {
         featureCoordinator.registerDriverConnectionCallback(callback);
       }
 
       @Override
-      public void clearConnectionCallback() {
-        if (connectionCallback == null) {
-          return;
-        }
-        featureCoordinator.unregisterConnectionCallback(connectionCallback);
-        connectionCallback = null;
+      public void unregisterConnectionCallback(IConnectionCallback callback) {
+        featureCoordinator.unregisterConnectionCallback(callback);
       }
 
       @Override

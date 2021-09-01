@@ -127,13 +127,6 @@
             <meta-data android:name="com.android.settings.category"
                        android:value="com.android.settings.category.personal" />
         </activity>
-        <activity android:name=".OobAssociationActivity"
-                  android:exported="true">
-            <intent-filter>
-                <action android:name="com.google.android.companiondevicesupport.OOB_ASSOCIATION_ACTIVITY" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
 
         <!-- Feature specific elements below here -->
 

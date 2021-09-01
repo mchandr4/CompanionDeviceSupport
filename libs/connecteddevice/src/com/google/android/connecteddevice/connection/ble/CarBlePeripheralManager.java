@@ -21,7 +21,6 @@ import static com.google.android.connecteddevice.util.SafeLog.logd;
 import static com.google.android.connecteddevice.util.SafeLog.loge;
 import static com.google.android.connecteddevice.util.SafeLog.logw;
 
-import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
@@ -309,12 +308,6 @@ public class CarBlePeripheralManager extends CarBluetoothManager {
   @Override
   public void startAssociation(
       @NonNull byte[] nameForAssociation, @NonNull AssociationCallback callback) {
-    BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-    if (adapter == null) {
-      loge(TAG, "Bluetooth is unavailable on this device. Unable to start associating.");
-      return;
-    }
-
     reset();
     setAssociationCallback(callback);
     blePeripheralManager.unregisterCallback(reconnectPeripheralCallback);
@@ -443,8 +436,7 @@ public class CarBlePeripheralManager extends CarBluetoothManager {
   private void setMtuSize(int mtuSize) {
     ConnectedRemoteDevice connectedDevice = getConnectedDevice();
     if (connectedDevice != null
-        && connectedDevice.secureChannel != null
-        && connectedDevice.secureChannel.getStream() != null) {
+        && connectedDevice.secureChannel != null) {
       connectedDevice.secureChannel.getStream().setMaxWriteSize(mtuSize - ATT_PROTOCOL_BYTES);
     }
   }

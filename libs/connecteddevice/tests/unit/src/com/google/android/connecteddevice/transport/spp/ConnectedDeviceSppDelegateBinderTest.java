@@ -30,9 +30,11 @@ import static org.mockito.Mockito.when;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothManager;
 import android.os.IBinder;
 import android.os.ParcelUuid;
 import android.os.RemoteException;
+import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelegateBinder.OnErrorListener;
 import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelegateBinder.OnMessageReceivedListener;
@@ -52,7 +54,10 @@ import org.mockito.junit.MockitoTestRule;
 public class ConnectedDeviceSppDelegateBinderTest {
   private static final UUID TEST_UUID = UUID.randomUUID();
   private static final BluetoothDevice TEST_BLUETOOTH_DEVICE =
-      BluetoothAdapter.getDefaultAdapter().getRemoteDevice("00:11:22:33:44:55");
+      ApplicationProvider.getApplicationContext()
+          .getSystemService(BluetoothManager.class)
+          .getAdapter()
+          .getRemoteDevice("00:11:22:33:44:55");
   private static final boolean TEST_IS_SECURE = true;
   private static final byte[] TEST_MESSAGE = "testMessage".getBytes(UTF_8);
   private static final PendingConnection TEST_PENDING_CONNECTION =

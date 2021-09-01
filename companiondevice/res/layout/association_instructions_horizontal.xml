@@ -32,6 +32,7 @@
         android:layout_height="?attr/companionSecondaryIconSize"
         android:scaleType="fitXY"
         android:src="@drawable/ic_smartphone_24dp"
+        android:tint="?attr/companionColorListIcon"
         tools:ignore="ContentDescription"/>
     <TextView
         android:id="@+id/install_app_text"
@@ -55,6 +56,7 @@
         android:layout_height="?attr/companionSecondaryIconSize"
         android:scaleType="fitXY"
         android:src="@drawable/ic_bluetooth_drive_24dp"
+        android:tint="?attr/companionColorListIcon"
         tools:ignore="ContentDescription"/>
     <TextView
         android:id="@+id/enable_bluetooth_text"
@@ -78,6 +80,7 @@
         android:layout_height="?attr/companionSecondaryIconSize"
         android:scaleType="fitXY"
         android:src="@drawable/ic_directions_car_24dp"
+        android:tint="?attr/companionColorListIcon"
         tools:ignore="ContentDescription"/>
     <TextView
         android:id="@+id/connect_to_car_text"

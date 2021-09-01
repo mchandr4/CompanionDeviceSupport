@@ -202,7 +202,7 @@ public class SppService extends Service {
   private boolean startConnectionAsServer(ParcelUuid serviceUuid, boolean isSecure) {
     logd(TAG, "startConnectionAsServer for uuid: " + serviceUuid);
 
-    SppManager manager = new SppManager(isSecure);
+    SppManager manager = new SppManager(this, isSecure);
     PendingConnection pendingConnection = new PendingConnection(serviceUuid.getUuid(), isSecure);
     pendingConnections.put(pendingConnection.getId(), manager);
     manager.registerCallback(
@@ -212,7 +212,7 @@ public class SppService extends Service {
 
   private void startConnectionAsClient(
       ParcelUuid serviceUuid, BluetoothDevice device, boolean isSecure) {
-    SppManager manager = new SppManager(isSecure);
+    SppManager manager = new SppManager(this, isSecure);
     PendingConnection pendingConnection =
         new PendingConnection(serviceUuid.getUuid(), device, isSecure);
     pendingConnections.put(pendingConnection.getId(), manager);

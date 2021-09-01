@@ -62,8 +62,8 @@ public final class ConnectedDeviceFgUserService extends TrunkService {
   @Override
   public void onCreate() {
     super.onCreate();
-    logd(TAG, "Starting service.");
     useFeatureCoordinator = getMetaBoolean(META_ENABLE_FEATURE_COORDINATOR, false);
+    logd(TAG, "Starting service with feature coordinator: " + useFeatureCoordinator + ".");
     // Listen to the unlock event to know when a new user has come to the foreground and storage is
     // unlocked.
     registerReceiver(userUnlockedReceiver, new IntentFilter(Intent.ACTION_USER_UNLOCKED));
@@ -73,6 +73,7 @@ public final class ConnectedDeviceFgUserService extends TrunkService {
         new CompanionConnector.Callback() {
           @Override
           public void onConnected() {
+            logd(TAG, "Successfully bound to platform.");
             featureCoordinator = connector.getFeatureCoordinator();
             connectedDeviceManager = connector.getConnectedDeviceManager();
           }
@@ -89,6 +90,7 @@ public final class ConnectedDeviceFgUserService extends TrunkService {
             stopSelf();
           }
         });
+    connector.connect();
     UserManager userManager = getSystemService(UserManager.class);
     if (userManager.isUserUnlocked()) {
       logd(TAG, "User was already unlocked on service start.");

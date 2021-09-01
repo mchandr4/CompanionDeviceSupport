@@ -9,7 +9,6 @@ import android.os.Bundle
 import android.os.Looper
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.google.android.connecteddevice.service.TrunkService.META_EARLY_SERVICES
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
 import kotlin.test.fail

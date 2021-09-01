@@ -20,7 +20,6 @@ import static com.google.android.connecteddevice.model.Errors.DEVICE_ERROR_UNEXP
 import static com.google.android.connecteddevice.util.SafeLog.logd;
 import static com.google.android.connecteddevice.util.SafeLog.loge;
 
-import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.os.ParcelUuid;
 import android.os.RemoteException;
@@ -156,11 +155,6 @@ public class CarSppManager extends CarBluetoothManager {
   @Override
   public void startAssociation(
       @NonNull byte[] nameForAssociation, @NonNull AssociationCallback callback) {
-    BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-    if (adapter == null) {
-      loge(TAG, "Bluetooth is unavailable on this device. Unable to start associating.");
-      return;
-    }
     if (reconnectDeviceId != null) {
       sppServiceBinder.unregisterConnectionCallback(UUID.fromString(reconnectDeviceId));
     }

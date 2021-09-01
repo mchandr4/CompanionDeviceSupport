@@ -28,6 +28,7 @@
         <item name="companionColorAccent">@color/settings_color_accent</item>
         <item name="companionColorPrimary">@color/settings_color_primary</item>
         <item name="companionColorSecondary">@color/settings_color_secondary</item>
+        <item name="companionColorListIcon">@color/settings_color_primary</item>
 
         <item name="companionTitleTextSize">@dimen/settings_title_text_size</item>
         <item name="companionSubtitleTextSize">@dimen/settings_subtitle_text_size</item>
@@ -52,6 +53,7 @@
         <item name="companionColorAccent">@color/suw_color_accent</item>
         <item name="companionColorPrimary">@color/suw_color_primary</item>
         <item name="companionColorSecondary">@color/suw_color_secondary</item>
+        <item name="companionColorListIcon">@color/suw_color_list_icon</item>
 
         <item name="companionTitleTextSize">@dimen/suw_title_text_size</item>
         <item name="companionSubtitleTextSize">@dimen/suw_subtitle_text_size</item>

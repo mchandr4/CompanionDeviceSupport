@@ -41,7 +41,6 @@ import com.google.android.connecteddevice.model.DeviceMessage.OperationType;
 import com.google.android.connecteddevice.model.Errors;
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage;
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage.AssociatedDeviceCallback;
-import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelegateBinder;
 import com.google.android.connecteddevice.util.ByteUtils;
 import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
@@ -76,7 +75,6 @@ public class ConnectedDeviceManagerTest {
   @Mock private ConnectionCallback mockConnectionCallback;
   @Mock private DeviceCallback mockDeviceCallback;
   @Mock private DeviceAssociationCallback mockDeviceAssociationCallback;
-  @Mock private ConnectedDeviceSppDelegateBinder mockDelegateBinder;
 
   private ConnectedDeviceManager connectedDeviceManager;
 
@@ -91,7 +89,6 @@ public class ConnectedDeviceManagerTest {
         new ConnectedDeviceManager(
             mockCarBluetoothManager,
             mockStorage,
-            mockDelegateBinder,
             directExecutor,
             directExecutor,
             directExecutor);

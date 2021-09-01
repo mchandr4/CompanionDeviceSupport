@@ -28,8 +28,7 @@ import com.google.android.connecteddevice.model.ConnectedDevice
 import com.google.android.connecteddevice.model.DeviceMessage
 import com.google.android.connecteddevice.model.DeviceMessage.OperationType
 import com.google.android.connecteddevice.model.Errors
-import com.google.android.connecteddevice.oob.OobChannelFactory
-import com.google.android.connecteddevice.oob.OobConnectionManager
+import com.google.android.connecteddevice.oob.OobRunner
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage
 import com.google.android.connecteddevice.transport.ConnectionProtocol
 import com.google.android.connecteddevice.transport.ConnectionProtocol.ConnectChallenge
@@ -68,8 +67,7 @@ class MultiProtocolDeviceController
 constructor(
   private val protocols: Set<ConnectionProtocol>,
   private val storage: ConnectedDeviceStorage,
-  private val oobChannelFactory: OobChannelFactory,
-  private val oobConnectionManager: OobConnectionManager = OobConnectionManager(),
+  private val oobRunner: OobRunner,
   private val callbackExecutor: Executor = Executors.newSingleThreadExecutor()
 ) : DeviceController {
   private val connectedRemoteDevices = CopyOnWriteArraySet<ConnectedRemoteDevice>()
@@ -253,6 +251,7 @@ constructor(
       it.protocol.disconnectDevice(it.protocolId)
     }
     associationPendingDevice = null
+    oobRunner.reset()
   }
 
   override fun registerCallback(callback: Callback, executor: Executor) {
@@ -373,12 +372,14 @@ constructor(
             channelResolver =
               generateChannelResolver(protocolDevice, device = this, associationCallback)
           }
-        device.channelResolver?.resolveAssociation(oobChannelFactory, oobConnectionManager)
+        device.channelResolver?.resolveAssociation(oobRunner)
         connectedRemoteDevices.add(device)
         associationPendingDevice = device
       }
 
       override fun onDiscoveryStartedSuccessfully() {
+        // TODO(b/197692697): Pass the OOB data to UI
+        oobRunner.generateOobData()
         associationCallback.aliveOrNull()?.let {
           logd(TAG, "Association started successfully with name $nameForAssociation")
           it.onAssociationStartSuccess(nameForAssociation)
@@ -556,7 +557,7 @@ constructor(
   internal fun encryptAndSendOobVerificationCode(code: ByteArray, device: ConnectedRemoteDevice) {
     val encryptedCode: ByteArray =
       try {
-        oobConnectionManager.encryptVerificationCode(code)
+        oobRunner.encryptData(code)
       } catch (e: Exception) {
         loge(TAG, "Encryption failed for verification code exchange.", e)
         device.callback?.aliveOrNull()?.onAssociationError(Errors.DEVICE_ERROR_INVALID_VERIFICATION)
@@ -569,7 +570,7 @@ constructor(
   internal fun confirmOobVerificationCode(encryptedCode: ByteArray, device: ConnectedRemoteDevice) {
     val decryptedCode: ByteArray =
       try {
-        oobConnectionManager.decryptVerificationCode(encryptedCode)
+        oobRunner.decryptData(encryptedCode)
       } catch (e: Exception) {
         loge(TAG, "Decryption failed for verification code exchange", e)
         device.callback?.aliveOrNull()?.onAssociationError(Errors.DEVICE_ERROR_INVALID_VERIFICATION)

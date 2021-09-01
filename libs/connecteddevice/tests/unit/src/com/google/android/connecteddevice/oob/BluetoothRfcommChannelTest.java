@@ -27,9 +27,10 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothManager;
 import android.os.RemoteException;
+import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.google.android.connecteddevice.model.OobEligibleDevice;
 import com.google.android.connecteddevice.transport.BluetoothDeviceProvider;
@@ -42,25 +43,32 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.primitives.Bytes;
 import java.util.UUID;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 import org.mockito.stubbing.Answer;
 import org.robolectric.shadows.ShadowLooper;
 
 @RunWith(AndroidJUnit4.class)
 public class BluetoothRfcommChannelTest {
+  private static final String DEVICE_ADDRESS = "00:11:22:33:AA:BB";
   private static final OobEligibleDevice OOB_ELIGIBLE_DEVICE =
-      new OobEligibleDevice("00:11:22:33:AA:BB", OOB_TYPE_BLUETOOTH);
-  private static final BluetoothAdapter BLUETOOTH_ADAPTER = BluetoothAdapter.getDefaultAdapter();
+      new OobEligibleDevice(DEVICE_ADDRESS, OOB_TYPE_BLUETOOTH);
   private static final byte[] TEST_MESSAGE = "someData".getBytes(UTF_8);
   private static final BluetoothDevice TEST_BLUETOOTH_DEVICE =
-      BLUETOOTH_ADAPTER.getRemoteDevice(OOB_ELIGIBLE_DEVICE.getDeviceAddress());
+      ApplicationProvider.getApplicationContext()
+          .getSystemService(BluetoothManager.class)
+          .getAdapter()
+          .getRemoteDevice(DEVICE_ADDRESS);
 
-  private BluetoothRfcommChannel bluetoothRfcommChannel;
+  @Rule public final MockitoRule mockito = MockitoJUnit.rule();
+
+  @Mock private BluetoothRfcommChannel bluetoothRfcommChannel;
   @Mock private OobChannel.Callback mockCallback;
   @Mock private TestConnectionProtocol mockValidProtocol;
   @Mock private ConnectionProtocol mockInvalidProtocol;
@@ -68,8 +76,6 @@ public class BluetoothRfcommChannelTest {
 
   @Before
   public void setUp() {
-    MockitoAnnotations.initMocks(this);
-
     bluetoothRfcommChannel = new BluetoothRfcommChannel(mockSppDelegateBinder);
   }
 
@@ -128,7 +134,11 @@ public class BluetoothRfcommChannelTest {
 
   @Test
   public void completeOobExchange_bondedToTheWrongDevice_callOnFailed() throws Exception {
-    BluetoothDevice otherBtDevice = BLUETOOTH_ADAPTER.getRemoteDevice("BB:AA:33:22:11:00");
+    BluetoothDevice otherBtDevice =
+        ApplicationProvider.getApplicationContext()
+            .getSystemService(BluetoothManager.class)
+            .getAdapter()
+            .getRemoteDevice("BB:AA:33:22:11:00");
     bluetoothRfcommChannel.completeOobDataExchange(
         OOB_ELIGIBLE_DEVICE, mockCallback, () -> ImmutableSet.of(otherBtDevice));
 

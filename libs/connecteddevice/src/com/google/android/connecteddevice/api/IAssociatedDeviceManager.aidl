@@ -26,21 +26,12 @@ import com.google.android.connecteddevice.model.OobEligibleDevice;
 
 /** Manager of devices associated with the car. */
 interface IAssociatedDeviceManager {
-
     /**
-     * Set a callback for association.
-     * @param callback {@link IAssociationCallback} to set.
+     * Starts the association with a new device.
+     *
+     * @param callback {@link IAssociationCallback} to be notified for association event.
      */
-    void setAssociationCallback(in IAssociationCallback callback);
-
-    /** Clear the association callback from manager. */
-    void clearAssociationCallback();
-
-    /** Starts the association with a new device. */
-    void startAssociation();
-
-    /** Start an out-of-band association with the given device. */
-    void startOobAssociation(in OobEligibleDevice eligibleDevice);
+    void startAssociation(in IAssociationCallback callback);
 
     /** Stops the association with current device. */
     void stopAssociation();
@@ -60,27 +51,34 @@ interface IAssociatedDeviceManager {
     void removeAssociatedDevice(in String deviceId);
 
     /**
-     * Set a callback for associated device related events.
+     * Register a callback for associated device related events.
      *
-     * @param callback {@link IDeviceAssociationCallback} to set.
+     * @param callback {@link IDeviceAssociationCallback} to register.
      */
-    void setDeviceAssociationCallback(in IDeviceAssociationCallback callback);
+    void registerDeviceAssociationCallback(in IDeviceAssociationCallback callback);
 
-    /** Clear the device association callback from manager. */
-    void clearDeviceAssociationCallback();
+    /** Unregister the device association callback from manager.
+     *
+     * @param callback {@link IDeviceAssociationCallback} to unregister.
+     */
+    void unregisterDeviceAssociationCallback(in IDeviceAssociationCallback callback);
 
     /** Returns {@link List<ConnectedDevice>} of devices currently connected. */
     List<ConnectedDevice> getActiveUserConnectedDevices();
 
     /**
-     * Set a callback for connection events for only the currently active user's devices.
+     * Register a callback for connection events for only the currently active user's devices.
      *
-     * @param callback {@link IConnectionCallback} to set.
+     * @param callback {@link IConnectionCallback} to register.
      */
-    void setConnectionCallback(in IConnectionCallback callback);
+    void registerConnectionCallback(in IConnectionCallback callback);
 
-    /** Clear the connection callback from manager. */
-    void clearConnectionCallback();
+    /**
+     * Unregister the connection callback from manager.
+     *
+     * @param callback {@link IConnectionCallback} to unregister.
+     */
+    void unregisterConnectionCallback(in IConnectionCallback callback);
 
     /** Enable connection on the associated device with the given identifier. */
     void enableAssociatedDeviceConnection(in String deviceId);

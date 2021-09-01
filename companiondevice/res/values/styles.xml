@@ -40,7 +40,7 @@
     </style>
 
     <style name="PairingCodeTextStyle">
-        <item name="android:textSize">52sp</item>
+        <item name="android:textSize">@dimen/pairing_code_text_size</item>
         <item name="android:letterSpacing">@dimen/pairing_code_text_spacing</item>
         <item name="android:textColor">?attr/companionColorAccent</item>
     </style>

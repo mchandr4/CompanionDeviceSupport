@@ -26,6 +26,7 @@
   <attr name="companionColorAccent" format="reference|color" />
   <attr name="companionColorPrimary" format="reference|color" />
   <attr name="companionColorSecondary" format="reference|color" />
+  <attr name="companionColorListIcon" format="reference|color" />
 
   <attr name="companionTitleTextSize" format="reference|dimension" />
   <attr name="companionSubtitleTextSize" format="reference|dimension" />

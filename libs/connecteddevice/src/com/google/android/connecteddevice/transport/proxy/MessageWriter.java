@@ -33,6 +33,7 @@ import com.google.protos.aae.bleproxy.BlePeripheralMessage.StopAdvertisingMessag
 import com.google.protos.aae.bleproxy.BlePeripheralMessage.UpdateCharacteristicMessage;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Writes Android platform Bluetooth API objects into output stream as BLE proxy proto messages.
@@ -46,6 +47,7 @@ class MessageWriter {
 
   private OutputStream outputStream;
   private Callback callback;
+  private final ReentrantLock lock = new ReentrantLock();
 
   public MessageWriter(@NonNull OutputStream outputStream, @NonNull Callback callback) {
     // output stream will be closed on invalidate().
@@ -97,13 +99,16 @@ class MessageWriter {
             .setType(type)
             .setPayload(payload.toByteString())
             .build();
-
-    logi(TAG, "MessageWriter: sending message of type: " + type.getNumber());
+    lock.lock();
     try {
+      logi(TAG, "MessageWriter: sending message of type: " + type.getNumber());
       parcel.writeDelimitedTo(outputStream);
       callback.onMessageSent(payload);
     } catch (IOException exception) {
+      loge(TAG, "MessageWriter: failed to write to stream.", exception);
       callback.onWriteMessageFailed();
+    } finally {
+      lock.unlock();
     }
   }
 

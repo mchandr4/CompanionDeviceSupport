@@ -22,10 +22,10 @@ import android.os.IInterface
 import com.google.android.connecteddevice.util.SafeLog.logw
 
 /**
- * An AIDL-specific implementation of [ThreadSafeCallbacks] that handles [IBinder]
- * lifecycles and guards against those pesky [DeadObjectException]s.
+ * An AIDL-specific implementation of [ThreadSafeCallbacks] that handles [IBinder] lifecycles and
+ * guards against those pesky [DeadObjectException]s.
  */
-class AidlThreadSafeCallbacks<T> : ThreadSafeCallbacks<T>() where T : IInterface {
+open class AidlThreadSafeCallbacks<T> : ThreadSafeCallbacks<T>() where T : IInterface {
 
   override fun contains(callback: T): Boolean {
     return callbacks.any { callback.asBinder() == it.key.asBinder() }
@@ -33,10 +33,11 @@ class AidlThreadSafeCallbacks<T> : ThreadSafeCallbacks<T>() where T : IInterface
 
   override fun remove(callback: T) {
     val registeredCallback =
-      callbacks.keys.firstOrNull { callback.asBinder() == it.asBinder() } ?: run {
-        logw(TAG, "Unable to find a matching binder to the callback. Ignoring request to remove.")
-        return
-      }
+      callbacks.keys.firstOrNull { callback.asBinder() == it.asBinder() }
+        ?: run {
+          logw(TAG, "Unable to find a matching binder to the callback. Ignoring request to remove.")
+          return
+        }
 
     callbacks.remove(registeredCallback)
   }

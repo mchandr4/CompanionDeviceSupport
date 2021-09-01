@@ -22,22 +22,29 @@ import static com.google.android.connecteddevice.util.SafeLog.logw;
 
 import android.content.Context;
 import android.os.Build;
+import android.os.IInterface;
+import android.os.RemoteException;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
+import com.google.android.connecteddevice.api.IOnLogRequestedListener;
 import com.google.android.connecteddevice.logging.util.LoggingUtils;
 import com.google.android.connecteddevice.model.ConnectedDevice;
+import com.google.android.connecteddevice.util.AidlThreadSafeCallbacks;
 import com.google.android.connecteddevice.util.Logger;
+import com.google.android.connecteddevice.util.SafeConsumer;
 import com.google.android.connecteddevice.util.ThreadSafeCallbacks;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -55,14 +62,12 @@ public class LoggingManager {
   private static final String UNKNOWN_DEVICE_NAME = "UNKNOWN";
   private static final int LOG_FILES_MAX_NUM = 10;
 
-  private final ThreadSafeCallbacks<OnLogRequestedListener> logRequestedListeners =
-      new ThreadSafeCallbacks<>();
+  private final Map<Integer, ThreadSafeLoggingCallbacks<OnLogRequestedListener>>
+      registeredLogRequestedListeners = new ConcurrentHashMap<>();
+  private final Map<Integer, AidlThreadSafeLoggingCallbacks<IOnLogRequestedListener>>
+      registeredRemoteLogRequestedListeners = new ConcurrentHashMap<>();
   private final ThreadSafeCallbacks<LoggingEventCallback> loggingEventCallbacks =
       new ThreadSafeCallbacks<>();
-  private final Map<Integer, ArrayDeque<OnLogRequestedListener>> registeredLoggers =
-      new ConcurrentHashMap<>();
-  private final Map<OnLogRequestedListener, Executor> backupLogRequestedListeners =
-      new ConcurrentHashMap<>();
   private final ThreadSafeCallbacks<LogFileCallback> logFileCallbacks = new ThreadSafeCallbacks<>();
 
   private final Context context;
@@ -78,6 +83,20 @@ public class LoggingManager {
 
   public LoggingManager(@NonNull Context context) {
     this.context = context;
+  }
+
+  /** Start setup process. */
+  public void start() {
+    Logger logger = Logger.getLogger();
+    start(
+        logger,
+        () -> prepareLocalLogRecords(logger.getLoggerId(), logger.toByteArray()),
+        Executors.newSingleThreadScheduledExecutor());
+  }
+
+  @VisibleForTesting
+  void start(@NonNull Logger logger, @NonNull OnLogRequestedListener listener, Executor executor) {
+    registerLogRequestedListener(logger.getLoggerId(), listener, executor);
   }
 
   /** Loads generated log files. */
@@ -100,7 +119,7 @@ public class LoggingManager {
     }
     resetSession();
     isCollectingLogRecordsToGenerateLogFile.set(true);
-    logRequestedListeners.invoke(OnLogRequestedListener::onLogRecordsRequested);
+    notifyLogRequested();
   }
 
   /** Sends request for log file to connected devices. */
@@ -116,7 +135,7 @@ public class LoggingManager {
     }
     resetSession();
     isCollectingLogRecordsToSendLocalLog.set(true);
-    logRequestedListeners.invoke(OnLogRequestedListener::onLogRecordsRequested);
+    notifyLogRequested();
   }
 
   /**
@@ -131,9 +150,12 @@ public class LoggingManager {
       logw(TAG, "Aborted preparing local log records, not collecting log records.");
       return;
     }
-    loggerLogRecords.put(loggerId, logRecordsInLogger);
+    if (loggerLogRecords.putIfAbsent(loggerId, logRecordsInLogger) != null) {
+      logd(TAG, "Logs have been collected from logger " + loggerId + ", Ignoring.");
+      return;
+    }
     int processedLoggerNum = loggerLogRecords.size();
-    int totalLoggerNum = logRequestedListeners.size();
+    int totalLoggerNum = getRegisteredLoggerIds().size();
     String progressLog =
         String.format(
             Locale.getDefault(),
@@ -153,7 +175,7 @@ public class LoggingManager {
     byte[] localLog = fileHelper.mergeLogsIntoLogRecordFile(currentLoggerLogRecords).toByteArray();
 
     // Write the logs into a file if the logs are collected to generate a log file.
-    if (isCollectingLogRecordsToGenerateLogFile.get()) {
+    if (isCollectingLogRecordsToGenerateLogFile.compareAndSet(true, false)) {
       if (!writeLogFile(getLogFileNameForDevice(Build.MODEL), localLog)) {
         logFileCallbacks.invoke(LogFileCallback::onLogFileError);
         resetSession();
@@ -162,7 +184,7 @@ public class LoggingManager {
     }
     // Notify the callbacks that car logs are ready if the logs are collected to send to a
     // connected device.
-    if (isCollectingLogRecordsToSendLocalLog.get()) {
+    if (isCollectingLogRecordsToSendLocalLog.compareAndSet(true, false)) {
       loggingEventCallbacks.invoke(callback -> callback.onLocalLogAvailable(localLog));
     }
     resetSession();
@@ -190,26 +212,28 @@ public class LoggingManager {
    * @param listener The listener to register.
    * @param executor The executor that the callback will be executed on.
    */
-  public void addOnLogRequestedListener(
+  public void registerLogRequestedListener(
       int loggerId, @NonNull OnLogRequestedListener listener, @NonNull Executor executor) {
     logd(TAG, "registerOnLogRequestedListener called for logger: " + loggerId);
-    ArrayDeque<OnLogRequestedListener> listeners = registeredLoggers.get(loggerId);
+    ThreadSafeLoggingCallbacks<OnLogRequestedListener> listeners =
+        registeredLogRequestedListeners.get(loggerId);
     if (listeners == null) {
-      listeners = new ArrayDeque<>();
+      listeners = new ThreadSafeLoggingCallbacks<>();
     }
-    if (listeners.contains(listener)) {
-      logd(TAG, "Listener has already been registered. Ignoring.");
-      return;
+    listeners.add(listener, executor);
+    registeredLogRequestedListeners.put(loggerId, listeners);
+  }
+
+  public void registerLogRequestedListener(
+      int loggerId, @NonNull IOnLogRequestedListener listener, @NonNull Executor executor) {
+    logd(TAG, "registerOnLogRequestedListener called for logger: " + loggerId);
+    AidlThreadSafeLoggingCallbacks<IOnLogRequestedListener> listeners =
+        registeredRemoteLogRequestedListeners.get(loggerId);
+    if (listeners == null) {
+      listeners = new AidlThreadSafeLoggingCallbacks<>();
     }
-    if (listeners.isEmpty()) {
-      logRequestedListeners.add(listener, executor);
-      logd(TAG, "Registered listener " + listener + " for Logger " + loggerId + ".");
-    } else {
-      logd(TAG, "Registered backup listener" + listener + " for Logger " + loggerId + ".");
-      backupLogRequestedListeners.put(listener, executor);
-    }
-    listeners.add(listener);
-    registeredLoggers.put(loggerId, listeners);
+    listeners.add(listener, executor);
+    registeredRemoteLogRequestedListeners.put(loggerId, listeners);
   }
 
   /**
@@ -219,32 +243,44 @@ public class LoggingManager {
    * @param loggerId The id of the {@link Logger}.
    * @param listener The listener to unregister.
    */
-  public void removeOnLogRequestedListener(int loggerId, @NonNull OnLogRequestedListener listener) {
-    ArrayDeque<OnLogRequestedListener> listeners = registeredLoggers.get(loggerId);
-    if (listeners == null || !listeners.contains(listener)) {
-      logw(TAG, "Unable to unregister listener " + listener + ". It has not been registered.");
+  public void unregisterLogRequestedListener(
+      int loggerId, @NonNull OnLogRequestedListener listener) {
+    ThreadSafeLoggingCallbacks<OnLogRequestedListener> listeners =
+        registeredLogRequestedListeners.get(loggerId);
+    if (listeners == null) {
+      logw(
+          TAG,
+          String.format(
+              Locale.US,
+              "Unable to unregister listener %s. No listener has been registered for logger %d.",
+              listener,
+              loggerId));
       return;
     }
     listeners.remove(listener);
-    if (backupLogRequestedListeners.containsKey(listener)) {
-      backupLogRequestedListeners.remove(listener);
-      logd(TAG, "Unregistered backup listener " + listener + " for Logger " + loggerId + ".");
-      return;
-    }
-    if (!logRequestedListeners.contains(listener)) {
-      return;
-    }
-    logRequestedListeners.remove(listener);
-    logd(TAG, "Unregistered listener " + listener + " for Logger " + loggerId + ".");
     if (listeners.isEmpty()) {
-      registeredLoggers.remove(loggerId);
+      registeredLogRequestedListeners.remove(loggerId);
+    }
+  }
+
+  public void unregisterLogRequestedListener(
+      int loggerId, @NonNull IOnLogRequestedListener listener) {
+    AidlThreadSafeLoggingCallbacks<IOnLogRequestedListener> listeners =
+        registeredRemoteLogRequestedListeners.get(loggerId);
+    if (listeners == null) {
+      logw(
+          TAG,
+          String.format(
+              Locale.US,
+              "Unable to unregister listener %s. No listener has been registered for logger %d.",
+              listener,
+              loggerId));
       return;
     }
-    OnLogRequestedListener backupListener = listeners.peek();
-    Executor executor = backupLogRequestedListeners.remove(backupListener);
-    logRequestedListeners.add(backupListener, executor);
-    logd(
-        TAG, "Backup listener " + backupListener + " is now listening to Logger " + loggerId + ".");
+    listeners.remove(listener);
+    if (listeners.isEmpty()) {
+      registeredRemoteLogRequestedListeners.remove(loggerId);
+    }
   }
 
   /**
@@ -278,18 +314,23 @@ public class LoggingManager {
     logFileCallbacks.add(callback, executor);
   }
 
-  /** Reset internal processes. */
+  /** Resets internal processes and cleans up all registered callbacks. */
   public void reset() {
     resetSession();
-    registeredLoggers.clear();
-    logRequestedListeners.clear();
-    backupLogRequestedListeners.clear();
+    registeredLogRequestedListeners.clear();
+    registeredRemoteLogRequestedListeners.clear();
     loggingEventCallbacks.clear();
   }
 
   @VisibleForTesting
   void setFileHelper(FileHelper fileHelper) {
     this.fileHelper = fileHelper;
+  }
+
+  private Set<Integer> getRegisteredLoggerIds() {
+    Set<Integer> loggerIds = new CopyOnWriteArraySet<>(registeredLogRequestedListeners.keySet());
+    loggerIds.addAll(registeredRemoteLogRequestedListeners.keySet());
+    return loggerIds;
   }
 
   private boolean isCollectingLogRecords() {
@@ -323,6 +364,31 @@ public class LoggingManager {
     for (int i = 0; i < files.size() - LOG_FILES_MAX_NUM; i++) {
       files.get(i).delete();
     }
+  }
+
+  private void notifyLogRequested() {
+    Set<Integer> loggerIds = getRegisteredLoggerIds();
+    registeredRemoteLogRequestedListeners.forEach(
+        (id, listeners) -> {
+          boolean success =
+              listeners.invokeOne(
+                  listener -> {
+                    try {
+                      listener.onLogRecordsRequested();
+                    } catch (RemoteException e) {
+                      loge(TAG, "Failed to request log records.", e);
+                    }
+                  });
+          if (success) {
+            loggerIds.remove(id);
+          }
+        });
+    registeredLogRequestedListeners.forEach(
+        (id, listeners) -> {
+          if (loggerIds.remove(id)) {
+            listeners.invokeOne(OnLogRequestedListener::onLogRecordsRequested);
+          }
+        });
   }
 
   @NonNull
@@ -360,5 +426,43 @@ public class LoggingManager {
 
     /** Triggered when generating log file failed. */
     void onLogFileError();
+  }
+
+  /** An implementation of {@link ThreadSafeCallbacks} that handles notification for logging. */
+  public static class ThreadSafeLoggingCallbacks<T> extends ThreadSafeCallbacks<T> {
+    /**
+     * Invokes the provided notification on one of the callbacks with their supplied {@link
+     * Executor}. Returns {@code true} if a callback has been invoked.
+     */
+    public boolean invokeOne(@NonNull SafeConsumer<T> notification) {
+      for (Map.Entry<T, Executor> entry : callbacks.entrySet()) {
+        T callback = entry.getKey();
+        Executor executor = entry.getValue();
+        executor.execute(() -> notification.accept(callback));
+        return true;
+      }
+      return false;
+    }
+  }
+
+  /** An implementation of {@link AidlThreadSafeCallbacks} that handles notification for logging. */
+  public static class AidlThreadSafeLoggingCallbacks<T extends IInterface>
+      extends AidlThreadSafeCallbacks<T> {
+    /**
+     * Invokes the provided notification on one of the callbacks with their supplied {@link
+     * Executor}. Returns {@code true} if a callback has been invoked.
+     */
+    public boolean invokeOne(@NonNull SafeConsumer<T> notification) {
+      for (Map.Entry<T, Executor> entry : callbacks.entrySet()) {
+        T callback = entry.getKey();
+        if (callback.asBinder().isBinderAlive()) {
+          entry.getValue().execute(() -> notification.accept(callback));
+          return true;
+        }
+        logw(TAG, "A binder has died. Removing from the registered callbacks.");
+        callbacks.remove(callback);
+      }
+      return false;
+    }
   }
 }

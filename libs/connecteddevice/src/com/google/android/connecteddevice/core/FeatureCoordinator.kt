@@ -24,6 +24,7 @@ import com.google.android.connecteddevice.api.IDeviceCallback
 import com.google.android.connecteddevice.api.IFeatureCoordinator
 import com.google.android.connecteddevice.api.IOnAssociatedDevicesRetrievedListener
 import com.google.android.connecteddevice.api.IOnLogRequestedListener
+import com.google.android.connecteddevice.logging.LoggingManager
 import com.google.android.connecteddevice.model.AssociatedDevice
 import com.google.android.connecteddevice.model.ConnectedDevice
 import com.google.android.connecteddevice.model.DeviceMessage
@@ -46,6 +47,7 @@ class FeatureCoordinator
 constructor(
   private val controller: DeviceController,
   private val storage: ConnectedDeviceStorage,
+  private val loggingManager: LoggingManager,
   private val callbackExecutor: Executor = Executors.newCachedThreadPool()
 ) : IFeatureCoordinator.Stub() {
 
@@ -208,15 +210,15 @@ constructor(
   }
 
   override fun registerOnLogRequestedListener(loggerId: Int, listener: IOnLogRequestedListener) {
-    // TODO(b/190730752) Implement logging logic.
+    loggingManager.registerLogRequestedListener(loggerId, listener, callbackExecutor)
   }
 
   override fun unregisterOnLogRequestedListener(loggerId: Int, listener: IOnLogRequestedListener) {
-    // TODO(b/190730752) Implement logging logic.
+    loggingManager.unregisterLogRequestedListener(loggerId, listener)
   }
 
   override fun processLogRecords(loggerId: Int, logRecords: ByteArray) {
-    // TODO(b/190730752) Implement logging logic.
+    loggingManager.prepareLocalLogRecords(loggerId, logRecords)
   }
 
   override fun startAssociation(callback: IAssociationCallback) {

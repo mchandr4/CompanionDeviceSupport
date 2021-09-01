@@ -18,18 +18,22 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.Invocation;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 import org.mockito.stubbing.Answer;
 
 /** {@link SourceCalendarSync} is a superset of functionality in {@link ReplicaCalendarSync}. */
 @RunWith(JUnit4.class)
 public class ReplicaCalendarSyncTest {
   private static final String DEVICE_ID = "The device id";
+
+  @Rule public final MockitoRule mockito = MockitoJUnit.rule();
 
   @Mock private CommonLogger.Factory mockLoggerFactory;
   @Mock private RemoteSender mockRemoteSender;
@@ -43,7 +47,6 @@ public class ReplicaCalendarSyncTest {
 
   @Before
   public void setUp() {
-    MockitoAnnotations.initMocks(this);
     when(mockLoggerFactory.create(anyString())).thenReturn(mock(CommonLogger.class));
 
     CalendarManagerFactory mockCalendarManagerFactory = mock(CalendarManagerFactory.class);

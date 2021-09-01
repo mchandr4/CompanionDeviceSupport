@@ -25,9 +25,11 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.robolectric.Shadows.shadowOf;
 
-import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothSocket;
+import android.content.Context;
+import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.google.android.connecteddevice.transport.spp.SppManager.ConnectionState;
 import java.io.IOException;
@@ -48,9 +50,9 @@ import org.robolectric.shadow.api.Shadow;
 public class SppManagerTest {
   private static final UUID TEST_SERVICE_UUID = UUID.randomUUID();
   private static final boolean IS_SECURE_RFCOMM_CHANNEL = true;
+  private static final String DEVICE_ADDRESS = "00:11:22:33:44:55";
   private final byte[] testData = "testData".getBytes(UTF_8);
-  private final BluetoothDevice testBluetoothDevice =
-      BluetoothAdapter.getDefaultAdapter().getRemoteDevice("00:11:22:33:44:55");
+  private BluetoothDevice testBluetoothDevice;
   private SppManager sppManager;
   private final Executor callbackExecutor = directExecutor();
   private final BluetoothSocket shadowBluetoothSocket = Shadow.newInstanceOf(BluetoothSocket.class);
@@ -62,7 +64,13 @@ public class SppManagerTest {
 
   @Before
   public void setUp() {
-    sppManager = new SppManager(IS_SECURE_RFCOMM_CHANNEL, callbackExecutor);
+    Context context = ApplicationProvider.getApplicationContext();
+    testBluetoothDevice =
+        context
+            .getSystemService(BluetoothManager.class)
+            .getAdapter()
+            .getRemoteDevice(DEVICE_ADDRESS);
+    sppManager = new SppManager(context, IS_SECURE_RFCOMM_CHANNEL, callbackExecutor);
     sppManager.connectedSocket = shadowBluetoothSocket;
     sppManager.registerCallback(mockConnectionCallback, callbackExecutor);
   }

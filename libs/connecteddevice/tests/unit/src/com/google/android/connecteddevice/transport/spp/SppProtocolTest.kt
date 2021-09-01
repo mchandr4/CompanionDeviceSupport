@@ -16,8 +16,10 @@
 
 package com.google.android.connecteddevice.transport.spp
 
-import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothManager
+import android.content.Context
 import android.os.RemoteException
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.connecteddevice.transport.ConnectionProtocol.ConnectChallenge
 import com.google.android.connecteddevice.transport.ConnectionProtocol.DataReceivedListener
@@ -250,7 +252,9 @@ class SppProtocolTest {
 
   private fun establishConnection(): String {
     val testMacAddress = "00:11:22:33:AA:BB"
-    val testBluetoothDevice = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(testMacAddress)
+    val bluetoothManager = ApplicationProvider.getApplicationContext<Context>()
+      .getSystemService(BluetoothManager::class.java)
+    val testBluetoothDevice = bluetoothManager.adapter.getRemoteDevice(testMacAddress)
     sppProtocol.startAssociationDiscovery(testName, mockDiscoveryCallback)
     argumentCaptor<OnConnectedListener>().apply {
       verify(mockPendingConnection).setOnConnectedListener(capture())

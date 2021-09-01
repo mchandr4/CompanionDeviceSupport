@@ -29,13 +29,10 @@ import com.google.android.connecteddevice.model.AssociatedDevice;
 import com.google.android.connecteddevice.model.ConnectedDevice;
 import com.google.android.connecteddevice.model.DeviceMessage;
 import com.google.android.connecteddevice.model.Errors;
-import com.google.android.connecteddevice.model.OobEligibleDevice;
-import com.google.android.connecteddevice.oob.BluetoothRfcommChannel;
 import com.google.android.connecteddevice.oob.OobChannel;
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage;
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage.AssociatedDeviceCallback;
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage.OnAssociatedDevicesRetrievedListener;
-import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelegateBinder;
 import com.google.android.connecteddevice.util.ByteUtils;
 import com.google.android.connecteddevice.util.EventLog;
 import com.google.android.connecteddevice.util.SafeConsumer;
@@ -72,8 +69,6 @@ public class ConnectedDeviceManager {
   private final ConnectedDeviceStorage storage;
 
   private final CarBluetoothManager carBluetoothManager;
-
-  private final ConnectedDeviceSppDelegateBinder sppDelegateBinder;
 
   /**
    * The {@link Executor} that will handle tasks linked with connecting to a remote device; this
@@ -122,13 +117,10 @@ public class ConnectedDeviceManager {
   private OobChannel oobChannel;
 
   public ConnectedDeviceManager(
-      @NonNull CarBluetoothManager carBluetoothManager,
-      @NonNull ConnectedDeviceStorage storage,
-      @NonNull ConnectedDeviceSppDelegateBinder sppDelegateBinder) {
+      @NonNull CarBluetoothManager carBluetoothManager, @NonNull ConnectedDeviceStorage storage) {
     this(
         carBluetoothManager,
         storage,
-        sppDelegateBinder,
         Executors.newCachedThreadPool(),
         Executors.newSingleThreadExecutor(),
         Executors.newSingleThreadExecutor());
@@ -138,7 +130,6 @@ public class ConnectedDeviceManager {
   ConnectedDeviceManager(
       @NonNull CarBluetoothManager carBluetoothManager,
       @NonNull ConnectedDeviceStorage storage,
-      @NonNull ConnectedDeviceSppDelegateBinder sppDelegateBinder,
       @NonNull Executor connectionExecutor,
       @NonNull Executor callbackExecutor,
       @NonNull Executor storageExecutor) {
@@ -147,7 +138,6 @@ public class ConnectedDeviceManager {
     this.connectionExecutor = connectionExecutor;
     this.carBluetoothManager.registerCallback(generateCarManagerCallback(), callbackExecutor);
     this.storage.setAssociatedDeviceCallback(associatedDeviceCallback);
-    this.sppDelegateBinder = sppDelegateBinder;
     this.storageExecutor = storageExecutor;
   }
 
@@ -186,7 +176,7 @@ public class ConnectedDeviceManager {
   public List<ConnectedDevice> getActiveUserConnectedDevices() {
     List<ConnectedDevice> activeUserConnectedDevices = new ArrayList<>();
     for (ConnectedDevice device : connectedDevices.values()) {
-      if (device.isAssociatedWithActiveUser()) {
+      if (device.isAssociatedWithDriver()) {
         activeUserConnectedDevices.add(device);
       }
     }
@@ -292,42 +282,6 @@ public class ConnectedDeviceManager {
           logd(TAG, "Received request to start association.");
           carBluetoothManager.startAssociation(
               getNameForAssociation(), internalAssociationCallback);
-        });
-  }
-
-  /**
-   * Start association with an out of band device.
-   *
-   * @param device The out of band eligible device.
-   * @param callback Callback for association events.
-   */
-  public void startOutOfBandAssociation(
-      @NonNull OobEligibleDevice device, @NonNull AssociationCallback callback) {
-    logd(TAG, "Received request to start out of band association.");
-    associationCallback = callback;
-    oobChannel = new BluetoothRfcommChannel(sppDelegateBinder);
-
-    oobChannel.completeOobDataExchange(
-        device,
-        new OobChannel.Callback() {
-          @Override
-          public void onOobExchangeSuccess() {
-            logd(TAG, "Out of band exchange succeeded. Proceeding to association with device.");
-            connectionExecutor.execute(
-                () -> {
-                  carBluetoothManager.startOutOfBandAssociation(
-                      getNameForAssociation(), oobChannel, internalAssociationCallback);
-                });
-          }
-
-          @Override
-          public void onOobExchangeFailure() {
-            loge(TAG, "Out of band exchange failed.");
-            internalAssociationCallback.onAssociationError(
-                Errors.DEVICE_ERROR_INVALID_ENCRYPTION_KEY);
-            oobChannel = null;
-            associationCallback = null;
-          }
         });
   }
 
@@ -635,7 +589,7 @@ public class ConnectedDeviceManager {
 
     connectedDevices.put(deviceId, connectedDevice);
     invokeConnectionCallbacks(
-        connectedDevice.isAssociatedWithActiveUser(),
+        connectedDevice.isAssociatedWithDriver(),
         callback -> callback.onDeviceConnected(connectedDevice));
   }
 
@@ -647,7 +601,7 @@ public class ConnectedDeviceManager {
     boolean isAssociated = false;
     if (connectedDevice != null) {
       connectedDevices.remove(deviceId);
-      isAssociated = connectedDevice.isAssociatedWithActiveUser();
+      isAssociated = connectedDevice.isAssociatedWithDriver();
       invokeConnectionCallbacks(
           isAssociated, callback -> callback.onDeviceDisconnected(connectedDevice));
     }
@@ -669,7 +623,7 @@ public class ConnectedDeviceManager {
         new ConnectedDevice(
             connectedDevice.getDeviceId(),
             getConnectedDeviceName(deviceId),
-            connectedDevice.isAssociatedWithActiveUser(),
+            connectedDevice.isAssociatedWithDriver(),
             /* hasSecureChannel= */ true);
 
     boolean notifyCallbacks = connectedDevices.get(deviceId) != null;
@@ -766,7 +720,7 @@ public class ConnectedDeviceManager {
 
     // The previous device is now obsolete and should be replaced with a new one properly
     // reflecting the state of belonging to the active user and notify features.
-    if (connectedDevice.isAssociatedWithActiveUser()) {
+    if (connectedDevice.isAssociatedWithDriver()) {
       // Device was already marked as belonging to active user. No need to reissue callbacks.
       return;
     }

@@ -17,12 +17,15 @@
 package com.google.android.connecteddevice.ui;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import android.app.Application;
 import androidx.lifecycle.Observer;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothManager;
 import android.os.RemoteException;
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule;
 import androidx.test.core.app.ApplicationProvider;
@@ -61,6 +64,11 @@ public final class AssociatedDeviceViewModelTest {
   @Rule
   public final InstantTaskExecutorRule instantTaskExecutorRule = new InstantTaskExecutorRule();
 
+  private final Application application = ApplicationProvider.getApplicationContext();
+
+  private final BluetoothAdapter adapter =
+      application.getSystemService(BluetoothManager.class).getAdapter();
+
   @Mock private IAssociatedDeviceManager mockAssociatedDeviceManager;
   @Mock private Observer<AssociationState> mockAssociationStateObserver;
   @Mock private Observer<AssociatedDeviceDetails> mockDeviceDetailsObserver;
@@ -79,11 +87,11 @@ public final class AssociatedDeviceViewModelTest {
   public void setUp() throws RemoteException {
     viewModel =
         new AssociatedDeviceViewModel(
-            ApplicationProvider.getApplicationContext(),
+            application,
             mockAssociatedDeviceManager,
             /* isSppEnabled= */ false,
             TEST_BLE_DEVICE_NAME_PREFIX);
-    BluetoothAdapter.getDefaultAdapter().enable();
+    adapter.enable();
     captureCallbacks();
   }
 
@@ -121,11 +129,11 @@ public final class AssociatedDeviceViewModelTest {
 
   @Test
   public void startAssociation_deviceNotReady() throws RemoteException {
-    BluetoothAdapter.getDefaultAdapter().disable();
+    adapter.disable();
     viewModel.startAssociation();
     viewModel.getAssociationState().observeForever(mockAssociationStateObserver);
     verify(mockAssociationStateObserver).onChanged(AssociationState.PENDING);
-    verify(mockAssociatedDeviceManager, never()).startAssociation();
+    verify(mockAssociatedDeviceManager, never()).startAssociation(any());
   }
 
   @Test
@@ -133,12 +141,13 @@ public final class AssociatedDeviceViewModelTest {
     viewModel.startAssociation();
     viewModel.getAssociationState().observeForever(mockAssociationStateObserver);
     verify(mockAssociationStateObserver).onChanged(AssociationState.STARTING);
-    verify(mockAssociatedDeviceManager).startAssociation();
+    verify(mockAssociatedDeviceManager).startAssociation(any());
   }
 
   @Test
   public void startAssociation_inProgress() throws RemoteException {
     viewModel.startAssociation();
+    captureAssociationCallback();
     associationCallback.onAssociationStartSuccess(TEST_CAR_NAME);
     viewModel.getAssociationState().observeForever(mockAssociationStateObserver);
     viewModel.getAdvertisedCarName().observeForever(mockCarNameObserver);
@@ -149,6 +158,7 @@ public final class AssociatedDeviceViewModelTest {
   @Test
   public void startAssociation_waitingForVerification() throws RemoteException {
     viewModel.startAssociation();
+    captureAssociationCallback();
     associationCallback.onAssociationStartSuccess(TEST_CAR_NAME);
     associationCallback.onVerificationCodeAvailable(TEST_VERIFICATION_CODE);
     viewModel.getAssociationState().observeForever(mockAssociationStateObserver);
@@ -160,6 +170,7 @@ public final class AssociatedDeviceViewModelTest {
   @Test
   public void startAssociation_associationCompleted() throws RemoteException {
     viewModel.startAssociation();
+    captureAssociationCallback();
     associationCallback.onAssociationStartSuccess(TEST_CAR_NAME);
     associationCallback.onVerificationCodeAvailable(TEST_VERIFICATION_CODE);
     associationCallback.onAssociationCompleted();
@@ -251,21 +262,24 @@ public final class AssociatedDeviceViewModelTest {
     associatedDeviceViewModel.onCleared();
   }
 
-  private void captureCallbacks() throws RemoteException {
+  private void captureAssociationCallback() throws RemoteException {
     ArgumentCaptor<IAssociationCallback> associationCallbackCaptor =
         ArgumentCaptor.forClass(IAssociationCallback.class);
-    verify(mockAssociatedDeviceManager).setAssociationCallback(associationCallbackCaptor.capture());
+    verify(mockAssociatedDeviceManager).startAssociation(associationCallbackCaptor.capture());
     associationCallback = associationCallbackCaptor.getValue();
+  }
 
+  private void captureCallbacks() throws RemoteException {
     ArgumentCaptor<IDeviceAssociationCallback> deviceAssociationCallbackCaptor =
         ArgumentCaptor.forClass(IDeviceAssociationCallback.class);
     verify(mockAssociatedDeviceManager)
-        .setDeviceAssociationCallback(deviceAssociationCallbackCaptor.capture());
+        .registerDeviceAssociationCallback(deviceAssociationCallbackCaptor.capture());
     deviceAssociationCallback = deviceAssociationCallbackCaptor.getValue();
 
     ArgumentCaptor<IConnectionCallback> connectionCallbackCaptor =
         ArgumentCaptor.forClass(IConnectionCallback.class);
-    verify(mockAssociatedDeviceManager).setConnectionCallback(connectionCallbackCaptor.capture());
+    verify(mockAssociatedDeviceManager)
+        .registerConnectionCallback(connectionCallbackCaptor.capture());
     connectionCallback = connectionCallbackCaptor.getValue();
 
     ArgumentCaptor<IOnAssociatedDevicesRetrievedListener> devicesRetrievedListenerCaptor =

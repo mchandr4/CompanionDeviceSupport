@@ -24,10 +24,9 @@ import static com.google.android.connecteddevice.util.SafeLog.loge;
 import android.app.ActivityManager;
 import android.app.Application;
 import androidx.lifecycle.AndroidViewModel;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -42,6 +41,8 @@ import android.os.UserHandle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import com.google.android.connecteddevice.api.IAssociatedDeviceManager;
 import com.google.android.connecteddevice.api.IAssociationCallback;
 import com.google.android.connecteddevice.api.IConnectionCallback;
@@ -95,7 +96,7 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
   private final MutableLiveData<Boolean> isServiceConnected = new MutableLiveData<>(false);
   private final boolean isSppEnabled;
   private final String bleDeviceNamePrefix;
-  private final BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+  private final BluetoothAdapter bluetoothAdapter;
 
   private final HandlerThread timeoutHandlerThread;
   private final Handler timeoutHandler;
@@ -115,6 +116,8 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
     timeoutHandlerThread.start();
     timeoutHandler = new Handler(timeoutHandlerThread.getLooper());
     bindService();
+    bluetoothAdapter =
+        application.getApplicationContext().getSystemService(BluetoothManager.class).getAdapter();
     if (bluetoothAdapter != null) {
       bluetoothState.postValue(bluetoothAdapter.getState());
     }
@@ -130,6 +133,8 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
     this.isSppEnabled = isSppEnabled;
     this.bleDeviceNamePrefix = bleDeviceNamePrefix;
     this.associatedDeviceManager = associatedDeviceManager;
+    bluetoothAdapter =
+        application.getApplicationContext().getSystemService(BluetoothManager.class).getAdapter();
     timeoutHandlerThread = new HandlerThread(TIMEOUT_HANDLER_THREAD_NAME);
     timeoutHandlerThread.start();
     timeoutHandler = new Handler(timeoutHandlerThread.getLooper());
@@ -298,7 +303,7 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
                 discoverableIntent, UserHandle.of(ActivityManager.getCurrentUser()));
       }
 
-      associatedDeviceManager.startAssociation();
+      associatedDeviceManager.startAssociation(associationCallback);
 
     } catch (RemoteException e) {
       loge(TAG, "Failed to start association .", e);
@@ -366,18 +371,16 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
     if (associatedDeviceManager == null) {
       return;
     }
-    associatedDeviceManager.setAssociationCallback(associationCallback);
-    associatedDeviceManager.setDeviceAssociationCallback(deviceAssociationCallback);
-    associatedDeviceManager.setConnectionCallback(connectionCallback);
+    associatedDeviceManager.registerDeviceAssociationCallback(deviceAssociationCallback);
+    associatedDeviceManager.registerConnectionCallback(connectionCallback);
   }
 
   private void unregisterCallbacks() throws RemoteException {
     if (associatedDeviceManager == null) {
       return;
     }
-    associatedDeviceManager.clearDeviceAssociationCallback();
-    associatedDeviceManager.clearAssociationCallback();
-    associatedDeviceManager.clearConnectionCallback();
+    associatedDeviceManager.unregisterDeviceAssociationCallback(deviceAssociationCallback);
+    associatedDeviceManager.unregisterConnectionCallback(connectionCallback);
   }
 
   private void bindService() {

@@ -15,7 +15,6 @@
  */
 package com.google.android.connecteddevice.transport.spp
 
-import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.os.ParcelUuid
 import android.os.RemoteException
@@ -63,12 +62,6 @@ class SppProtocol(
   }
 
   private fun startConnection(id: UUID, callback: DiscoveryCallback) {
-    val adapter = BluetoothAdapter.getDefaultAdapter()
-    if (adapter == null) {
-      loge(TAG, "Bluetooth is unavailable on this device. Unable to start discovery.")
-      callback.onDiscoveryFailedToStart()
-      return
-    }
     try {
       val pendingConnection = sppBinder.connectAsServer(id, /* isSecure= */ true)
       if (pendingConnection == null) {
@@ -88,7 +81,7 @@ class SppProtocol(
     PendingConnection.OnConnectedListener { uuid, remoteDevice, isSecure, deviceName ->
       val protocolId = UUID.randomUUID()
       val connection = Connection(ParcelUuid(uuid), remoteDevice, isSecure, deviceName)
-      connectedDevices.put(protocolId, remoteDevice)
+      connectedDevices[protocolId] = remoteDevice
 
       pendingConnections.remove(uuid)
       connections[protocolId] = connection
@@ -101,7 +94,7 @@ class SppProtocol(
       logd(
         TAG,
         "Remote device $remoteDevice connected successfully with UUID $uuid, assigned " +
-          "connection id $protocolId"
+          "connection id $protocolId."
       )
     }
 

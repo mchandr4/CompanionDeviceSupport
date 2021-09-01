@@ -226,9 +226,9 @@ public class OnDeviceBlePeripheralManager extends BlePeripheralManager {
       AdvertiseData advertisement,
       AdvertiseData scanResponse,
       AdvertiseCallback advertiseCallback) {
-    if (BluetoothAdapter.getDefaultAdapter() != null) {
-      advertiser.compareAndSet(
-          null, BluetoothAdapter.getDefaultAdapter().getBluetoothLeAdvertiser());
+    BluetoothAdapter adapter = bluetoothManager.getAdapter();
+    if (adapter != null) {
+      advertiser.compareAndSet(null, adapter.getBluetoothLeAdvertiser());
     }
     BluetoothLeAdvertiser advertiser = this.advertiser.get();
     if (advertiser != null) {

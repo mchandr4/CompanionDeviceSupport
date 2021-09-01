@@ -28,13 +28,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.Invocation;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 import org.mockito.stubbing.Answer;
 
 /** {@link SourceCalendarSync} is a superset of functionality in {@link ReplicaCalendarSync}. */
@@ -52,6 +54,8 @@ public class SourceCalendarSyncTest {
   private static final TimeWindow TIME_WINDOW =
       TimeWindow.create(FROM_INSTANT, TO_INSTANT, REFRESH_INSTANT);
 
+  @Rule public final MockitoRule mockito = MockitoJUnit.rule();
+
   // Suppress use of parameter "days" as it does not make sense to pass a Duration here.
   @SuppressWarnings("GoodTime")
   @Mock private CommonLogger.Factory mockLoggerFactory;
@@ -65,7 +69,6 @@ public class SourceCalendarSyncTest {
 
   @Before
   public void setUp() {
-    MockitoAnnotations.initMocks(this);
     when(mockLoggerFactory.create(anyString())).thenReturn(mock(CommonLogger.class));
 
     CalendarManagerFactory mockCalendarManagerFactory = mock(CalendarManagerFactory.class);

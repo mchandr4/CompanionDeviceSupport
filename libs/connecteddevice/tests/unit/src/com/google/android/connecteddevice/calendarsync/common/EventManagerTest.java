@@ -17,11 +17,13 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 @RunWith(JUnit4.class)
 public class EventManagerTest {
@@ -34,6 +36,8 @@ public class EventManagerTest {
   private static final Object CALENDAR_KEY = "a calendar id";
   private static final String EVENT_KEY = "an event id";
 
+  @Rule public final MockitoRule mockito = MockitoJUnit.rule();
+
   @Mock private CommonLogger.Factory mockLoggerFactory;
   @Mock private PlatformContentDelegate<Event> mockEventContent;
   @Mock private EventContentDelegateFactory mockEventContentDelegateFactory;
@@ -43,7 +47,6 @@ public class EventManagerTest {
 
   @Before
   public void setUp() {
-    MockitoAnnotations.initMocks(this);
     when(mockLoggerFactory.create(anyString())).thenReturn(mock(CommonLogger.class));
 
     when(mockEventContent.read(CALENDAR_KEY, EVENT_KEY))

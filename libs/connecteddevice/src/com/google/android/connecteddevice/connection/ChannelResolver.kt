@@ -21,8 +21,7 @@ import com.google.android.companionprotos.VersionExchangeProto.VersionExchange
 import com.google.android.connecteddevice.model.DeviceMessage
 import com.google.android.connecteddevice.model.DeviceMessage.OperationType.ENCRYPTION_HANDSHAKE
 import com.google.android.connecteddevice.oob.OobChannel
-import com.google.android.connecteddevice.oob.OobChannelFactory
-import com.google.android.connecteddevice.oob.OobConnectionManager
+import com.google.android.connecteddevice.oob.OobRunner
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage
 import com.google.android.connecteddevice.transport.ConnectionProtocol
 import com.google.android.connecteddevice.transport.ConnectionProtocol.DataReceivedListener
@@ -74,7 +73,8 @@ class ChannelResolver(
   private val protocolDevice: ProtocolDevice,
   private val storage: ConnectedDeviceStorage,
   private val callback: Callback,
-  private val streamFactory: ProtocolStreamFactory = ProtocolStreamFactoryImpl()
+  private val streamFactory: ProtocolStreamFactory = ProtocolStreamFactoryImpl(),
+  private var encryptionRunner: EncryptionRunner = newRunner(EncryptionRunnerType.UKEY2)
 ) {
   private val currentDevice: AtomicReference<ProtocolDevice?> =
     AtomicReference<ProtocolDevice?>(null)
@@ -86,9 +86,7 @@ class ChannelResolver(
   private var isReconnect by Delegates.notNull<Boolean>()
   private var deviceId: UUID? = null
   private var challenge: ByteArray? = null
-  private var oobChannelFactory: OobChannelFactory? = null
-  private var encryptionRunner: EncryptionRunner = newRunner(EncryptionRunnerType.UKEY2)
-  private var oobConnectionManager: OobConnectionManager? = null
+  private var oobRunner: OobRunner? = null
 
   /** Resolves the [MultiProtocolSecureChannel] for a reconnect with [deviceId] and [challenge]. */
   fun resolveReconnect(deviceId: UUID, challenge: ByteArray) {
@@ -100,11 +98,10 @@ class ChannelResolver(
   }
 
   /** Resolves the [MultiProtocolSecureChannel] for association with supported [OobChannel]s. */
-  fun resolveAssociation(oobChannelFactory: OobChannelFactory, oobManager: OobConnectionManager) {
+  fun resolveAssociation(oobRunner: OobRunner) {
     logd(TAG, "Resolving channel with a new association.")
     isReconnect = false
-    this.oobChannelFactory = oobChannelFactory
-    this.oobConnectionManager = oobManager
+    this.oobRunner = oobRunner
     addProtocolDevice(protocolDevice)
   }
 
@@ -182,6 +179,14 @@ class ChannelResolver(
   }
 
   private fun processCapabilityMessage(message: ByteArray, device: ProtocolDevice) {
+    val oobRunner = this.oobRunner
+    if (oobRunner == null) {
+      logw(TAG, "OOB runner not set during capabilities exchange. Sending empty list.")
+      sendCapabilities(emptyList<OobChannelType>(), device)
+      resolveStream(device)
+      return
+    }
+
     val capabilities =
       try {
         CapabilitiesExchange.parseFrom(message, ExtensionRegistryLite.getEmptyRegistry())
@@ -191,77 +196,45 @@ class ChannelResolver(
       }
     val sharedOobChannels = capabilities.supportedOobChannelsList.toMutableList()
     logd(TAG, "Received ${sharedOobChannels.size} OOB channels from device.")
-    var onDeviceChannels = emptyList<OobChannelType>()
-    val factory = this.oobChannelFactory
-    if (factory == null) {
-      logw(TAG, "OOB channel factory not set during capabilities exchange. Sending empty list.")
-    } else {
-      onDeviceChannels = factory.supportedTypes.map { it.asOobChannelType() }
-    }
-
+    val onDeviceChannels = oobRunner.supportedTypes.map { it.asOobChannelType() }
     logd(TAG, "Car supported ${onDeviceChannels.size} OOB channels.")
     sharedOobChannels.retainAll(onDeviceChannels.toMutableList())
+    sendCapabilities(sharedOobChannels, device)
+
+    if (!oobRunner.startOobDataExchange(
+        device,
+        sharedOobChannels,
+        generateOobRunnerCallback(device)
+      )
+    ) {
+      logw(TAG, "Failed to start OOB data exchange, fallback to numeric comparison.")
+      resolveStream(device)
+    }
+  }
+
+  private fun generateOobRunnerCallback(device: ProtocolDevice) =
+    object : OobRunner.Callback {
+      override fun onOobDataExchangeSuccess() {
+        logd(TAG, "OOB data exchange completed successfully.")
+        encryptionRunner = newRunner(EncryptionRunnerType.OOB_UKEY2)
+        resolveStream(device)
+      }
+
+      override fun onOobDataExchangeFailure() {
+        logw(TAG, "Failed to exchange OOB data, fallback to numeric comparison.")
+        resolveStream(device)
+      }
+    }
+  private fun sendCapabilities(sharedOobChannels: List<OobChannelType>, device: ProtocolDevice) {
     logd(TAG, "Found ${sharedOobChannels.size} common OOB channels.")
     val carCapabilities =
       CapabilitiesExchange.newBuilder().addAllSupportedOobChannels(sharedOobChannels).build()
     device.protocol.sendData(device.protocolId, carCapabilities.toByteArray())
-
-    factory?.let { establishOobChannel(factory, sharedOobChannels, device) }
   }
 
   private fun String.asOobChannelType(): OobChannelType =
     OobChannelType.values().firstOrNull { it.name.equals(this) }
       ?: OobChannelType.OOB_CHANNEL_UNKNOWN
-
-  private fun establishOobChannel(
-    oobChannelFactory: OobChannelFactory,
-    sharedOobChannels: List<OobChannelType>,
-    device: ProtocolDevice
-  ) {
-    for (oobChannelType in sharedOobChannels) {
-      val alternativeChannels =
-        sharedOobChannels.toMutableList().apply { this.remove(oobChannelType) }
-
-      val oobChannel = oobChannelFactory.createOobChannel(oobChannelType.name)
-      val success =
-        oobChannel.completeOobDataExchange(
-          protocolDevice,
-          generateOobCallback(oobChannelFactory, oobChannel, device, alternativeChannels)
-        )
-      if (success) {
-        logd(TAG, "Out of band data exchange started successfully, waiting for OOB callback.")
-        return
-      }
-    }
-    logw(TAG, "Out of band exchange failed to start, falling back to numeric comparison.")
-    resolveStream(device)
-  }
-
-  private fun generateOobCallback(
-    oobChannelFactory: OobChannelFactory,
-    oobChannel: OobChannel,
-    device: ProtocolDevice,
-    alternativeChannels: List<OobChannelType>
-  ) =
-    object : OobChannel.Callback {
-      override fun onOobExchangeSuccess() {
-        logd(TAG, "Oob data exchange completed successfully.")
-        encryptionRunner = newRunner(EncryptionRunnerType.OOB_UKEY2)
-        oobConnectionManager?.startOobExchange(oobChannel)
-        resolveStream(device)
-      }
-
-      override fun onOobExchangeFailure() {
-        if (alternativeChannels.isEmpty()) {
-          logw(TAG, "Out of band exchange failed, fallback to numeric comparison.")
-          resolveStream(device)
-          return
-        }
-
-        logw(TAG, "Out of band exchange failed, fallback to try another OOB channels.")
-        establishOobChannel(oobChannelFactory, alternativeChannels, device)
-      }
-    }
 
   private fun resolveStream(device: ProtocolDevice) {
     protocolDevices.remove(device)?.let { listener ->

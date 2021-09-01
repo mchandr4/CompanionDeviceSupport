@@ -1,5 +1,7 @@
 package com.google.android.connecteddevice.system
 
+import android.bluetooth.BluetoothManager
+import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.companionprotos.SystemQuery
@@ -45,13 +47,15 @@ class SystemFeatureTest {
 
   @Before
   fun setUp() {
+    val context = ApplicationProvider.getApplicationContext<Context>()
+    context.getSystemService(BluetoothManager::class.java).adapter.name = TEST_DEVICE_NAME
     systemFeature =
       spy(
         SystemFeature(
-          ApplicationProvider.getApplicationContext(),
+          context,
           mockManager,
           mockStorage
-        ) { TEST_DEVICE_NAME }
+        )
       )
   }
 
@@ -140,13 +144,15 @@ class SystemFeatureTest {
 
   @Test
   fun onQueryReceived_nullNameFromNameProviderRespondsWithError() {
+    val context = ApplicationProvider.getApplicationContext<Context>()
+    context.getSystemService(BluetoothManager::class.java).adapter.name = null
     systemFeature =
       spy(
         SystemFeature(
-          ApplicationProvider.getApplicationContext(),
+          context,
           mockManager,
           mockStorage
-        ) { null }
+        )
       )
     val query = SystemQuery
       .newBuilder()

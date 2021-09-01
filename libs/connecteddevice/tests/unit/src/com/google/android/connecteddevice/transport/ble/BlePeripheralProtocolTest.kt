@@ -1,9 +1,11 @@
 package com.google.android.connecteddevice.transport.ble
 
-import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGattCharacteristic
+import android.bluetooth.BluetoothManager
 import android.bluetooth.le.AdvertiseCallback
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.connecteddevice.transport.ConnectionProtocol.ConnectChallenge
 import com.google.android.connecteddevice.transport.ConnectionProtocol.DataReceivedListener
@@ -44,8 +46,6 @@ class BlePeripheralProtocolTest {
   private val testMessage = "TestMessage".toByteArray()
   private val testChallenge =
     ConnectChallenge("TestChallenge".toByteArray(), "TestSalt".toByteArray())
-  private val testBluetoothDevice =
-    BluetoothAdapter.getDefaultAdapter().getRemoteDevice(TEST_REMOTE_DEVICE_ADDRESS)
 
   private val mockBlePeripheralManager: BlePeripheralManager = mock()
   private val mockDiscoveryCallback: DiscoveryCallback = mock()
@@ -56,9 +56,13 @@ class BlePeripheralProtocolTest {
   private val mockMaxDataSizeChangedListener: DeviceMaxDataSizeChangedListener = mock()
 
   private lateinit var blePeripheralProtocol: BlePeripheralProtocol
+  private lateinit var testBluetoothDevice: BluetoothDevice
 
   @Before
   fun setUp() {
+    val bluetoothManager = ApplicationProvider.getApplicationContext<Context>()
+      .getSystemService(BluetoothManager::class.java)
+    testBluetoothDevice = bluetoothManager.adapter.getRemoteDevice(TEST_REMOTE_DEVICE_ADDRESS)
     blePeripheralProtocol =
       BlePeripheralProtocol(
         mockBlePeripheralManager,

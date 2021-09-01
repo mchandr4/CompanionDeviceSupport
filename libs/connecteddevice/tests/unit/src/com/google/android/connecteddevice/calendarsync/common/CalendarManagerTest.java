@@ -26,13 +26,15 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 @RunWith(JUnit4.class)
 public class CalendarManagerTest {
@@ -46,6 +48,8 @@ public class CalendarManagerTest {
   private static final String CALENDAR_KEY = "a calendar id";
   private static final long CALENDAR_ID = 1L;
 
+  @Rule public final MockitoRule mockito = MockitoJUnit.rule();
+
   @Mock private CommonLogger.Factory mockLoggerFactory;
   @Mock private PlatformContentDelegate<Calendar> mockCalendarContentDelegate;
   @Mock private EventManagerFactory mockEventManagerFactory;
@@ -55,7 +59,6 @@ public class CalendarManagerTest {
 
   @Before
   public void setUp() {
-    MockitoAnnotations.initMocks(this);
     when(mockLoggerFactory.create(anyString())).thenReturn(mock(CommonLogger.class));
 
     when(mockCalendarContentDelegate.read(DEVICE_ID, CALENDAR_KEY))

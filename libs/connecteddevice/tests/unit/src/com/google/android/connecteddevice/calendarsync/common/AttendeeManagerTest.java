@@ -9,14 +9,18 @@ import com.google.android.connecteddevice.calendarsync.Attendee;
 import com.google.android.connecteddevice.calendarsync.common.PlatformContentDelegate.Content;
 import com.google.common.collect.ImmutableList;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 @RunWith(JUnit4.class)
 public class AttendeeManagerTest {
+  @Rule public final MockitoRule mockito = MockitoJUnit.rule();
+
   private static final Object EVENT_ID = "an event id";
   private static final String ATTENDEE_EMAIL = "a attendee email";
 
@@ -27,7 +31,6 @@ public class AttendeeManagerTest {
 
   @Before
   public void setUp() {
-    MockitoAnnotations.initMocks(this);
     when(mockLoggerFactory.create(anyString())).thenReturn(mock(CommonLogger.class));
 
     Attendee attendee = Attendee.newBuilder().setEmail(ATTENDEE_EMAIL).build();

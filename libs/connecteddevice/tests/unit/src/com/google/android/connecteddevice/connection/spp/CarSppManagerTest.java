@@ -26,9 +26,10 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothManager;
 import android.os.RemoteException;
+import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.google.android.companionprotos.VersionExchangeProto.VersionExchange;
 import com.google.android.connecteddevice.connection.AssociationCallback;
@@ -70,7 +71,10 @@ public class CarSppManagerTest {
   private static final boolean COMPRESSION_ENABLED = true;
   private static final boolean EXCHANGE_CAPABILITIES = false;
   private static final BluetoothDevice TEST_BLUETOOTH_DEVICE =
-      BluetoothAdapter.getDefaultAdapter().getRemoteDevice(TEST_REMOTE_DEVICE_ADDRESS);
+      ApplicationProvider.getApplicationContext()
+          .getSystemService(BluetoothManager.class)
+          .getAdapter()
+          .getRemoteDevice(TEST_REMOTE_DEVICE_ADDRESS);
 
   @Rule public final MockitoRule mockito = MockitoJUnit.rule();
   private final Executor callbackExecutor = directExecutor();

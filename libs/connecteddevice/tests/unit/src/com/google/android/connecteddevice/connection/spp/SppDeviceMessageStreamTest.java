@@ -22,9 +22,10 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
-import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothManager;
 import android.os.ParcelUuid;
 import android.os.RemoteException;
+import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.google.android.connecteddevice.connection.DeviceMessageStream.DataReceivedListener;
 import com.google.android.connecteddevice.connection.DeviceMessageStream.MessageReceivedErrorListener;
@@ -49,7 +50,10 @@ public class SppDeviceMessageStreamTest {
   private static final Connection TEST_CONNECTION =
       new Connection(
           new ParcelUuid(TEST_UUID),
-          BluetoothAdapter.getDefaultAdapter().getRemoteDevice("00:11:22:33:44:55"),
+          ApplicationProvider.getApplicationContext()
+              .getSystemService(BluetoothManager.class)
+              .getAdapter()
+              .getRemoteDevice("00:11:22:33:44:55"),
           IS_SECURE,
           "testName");
   @Rule public final MockitoRule mockito = MockitoJUnit.rule();

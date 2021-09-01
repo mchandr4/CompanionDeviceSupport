@@ -7,8 +7,10 @@ import com.google.android.connecteddevice.api.IConnectionCallback
 import com.google.android.connecteddevice.api.IDeviceAssociationCallback
 import com.google.android.connecteddevice.api.IDeviceCallback
 import com.google.android.connecteddevice.api.IOnAssociatedDevicesRetrievedListener
+import com.google.android.connecteddevice.api.IOnLogRequestedListener
 import com.google.android.connecteddevice.core.FeatureCoordinator.Companion.DEVICE_NAME_LENGTH
 import com.google.android.connecteddevice.core.util.mockToBeAlive
+import com.google.android.connecteddevice.logging.LoggingManager
 import com.google.android.connecteddevice.model.AssociatedDevice
 import com.google.android.connecteddevice.model.ConnectedDevice
 import com.google.android.connecteddevice.model.DeviceMessage
@@ -35,7 +37,10 @@ class FeatureCoordinatorTest {
 
   private val mockStorage: ConnectedDeviceStorage = mock()
 
-  private val coordinator = FeatureCoordinator(mockController, mockStorage, directExecutor())
+  private val mockLoggingManager: LoggingManager = mock()
+
+  private val coordinator =
+    FeatureCoordinator(mockController, mockStorage, mockLoggingManager, directExecutor())
 
   @Test
   fun getConnectedDevicesForDriver_returnsOnlyDriverDevices() {
@@ -764,6 +769,36 @@ class FeatureCoordinatorTest {
     coordinator.retrieveAssociatedDevicesForDriver(listener)
 
     verify(listener).onAssociatedDevicesRetrieved(driverDevices)
+  }
+
+  @Test
+  fun registerOnLogRequestedListener() {
+    val testLoggerId = 0
+    val listener: IOnLogRequestedListener = mockToBeAlive()
+
+    coordinator.registerOnLogRequestedListener(testLoggerId, listener)
+
+    verify(mockLoggingManager).registerLogRequestedListener(eq(testLoggerId), eq(listener), any())
+  }
+
+  @Test
+  fun unregisterOnLogRequestedListener() {
+    val testLoggerId = 0
+    val listener: IOnLogRequestedListener = mockToBeAlive()
+
+    coordinator.unregisterOnLogRequestedListener(testLoggerId, listener)
+
+    verify(mockLoggingManager).unregisterLogRequestedListener(eq(testLoggerId), eq(listener))
+  }
+
+  @Test
+  fun processLogRecords() {
+    val testLoggerId = 0
+    val testLogs = "test logs".toByteArray()
+
+    coordinator.processLogRecords(testLoggerId, testLogs)
+
+    verify(mockLoggingManager).prepareLocalLogRecords(eq(testLoggerId), eq(testLogs))
   }
 
   @Test
