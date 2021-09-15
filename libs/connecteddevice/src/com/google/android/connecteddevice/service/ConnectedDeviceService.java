@@ -19,6 +19,7 @@ package com.google.android.connecteddevice.service;
 import static com.google.android.connecteddevice.util.SafeLog.logd;
 import static com.google.android.connecteddevice.util.SafeLog.loge;
 import static com.google.android.connecteddevice.util.SafeLog.logi;
+import static java.util.Objects.requireNonNull;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
@@ -53,6 +54,7 @@ import com.google.android.connecteddevice.logging.LoggingFeature;
 import com.google.android.connecteddevice.logging.LoggingManager;
 import com.google.android.connecteddevice.model.ConnectedDevice;
 import com.google.android.connecteddevice.model.DeviceMessage;
+import com.google.android.connecteddevice.model.TransportProtocols;
 import com.google.android.connecteddevice.oob.BluetoothRfcommChannel;
 import com.google.android.connecteddevice.oob.OobChannelFactory;
 import com.google.android.connecteddevice.oob.OobRunner;
@@ -91,8 +93,13 @@ public final class ConnectedDeviceService extends TrunkService {
   // reconnect advertisement every 6 minutes to avoid crossing a rotation.
   private static final Duration MAX_ADVERTISEMENT_DURATION = Duration.ofMinutes(6);
 
-  /** {@code boolean} Enable SPP. */
-  private static final String META_ENABLE_SPP = "com.google.android.connecteddevice.enable_spp";
+  /**
+   * {@code string-array} Supported transport protocols. If the {@link FeatureCoordinator} is not
+   * enabled, the first protocol in the list will be selected to initialize the
+   * {@link ConnectedDeviceManager}.
+   */
+  private static final String META_SUPPORTED_TRANSPORT_PROTOCOLS =
+      "com.google.android.connecteddevice.transport_protocols";
   /** {@code String} UUID for SPP server. */
   private static final String META_SPP_SERVICE_UUID =
       "com.google.android.connecteddevice.spp_service_uuid";
@@ -136,8 +143,6 @@ public final class ConnectedDeviceService extends TrunkService {
   private static final String META_SUPPORTED_OOB_CHANNELS =
       "com.google.android.connecteddevice.supported_oob_channels";
 
-  private static final boolean SPP_ENABLED_BY_DEFAULT = false;
-
   private static final boolean PROXY_ENABLED_BY_DEFAULT = false;
 
   private static final String DEFAULT_RECONNECT_UUID = "000000e0-0000-1000-8000-00805f9b34fb";
@@ -151,8 +156,7 @@ public final class ConnectedDeviceService extends TrunkService {
 
   private static final String DEFAULT_READ_UUID = "5e2a68a6-27be-43f9-8d1e-4546976fabd7";
 
-  /** Max allowed for iOS. */
-  private static final int DEFAULT_MTU_SIZE = 185;
+  private static final int DEFAULT_MTU_SIZE = 185; // Max allowed for iOS.
 
   private static final int DEFAULT_SPP_PACKET_SIZE = 700;
 
@@ -161,6 +165,9 @@ public final class ConnectedDeviceService extends TrunkService {
   private static final boolean ENABLE_CAPABILITIES_EXCHANGE_BY_DEFAULT = false;
 
   private static final boolean ENABLE_FEATURE_COORDINATOR_BY_DEFAULT = false;
+
+  private static final String[] DEFAULT_TRANSPORT_PROTOCOLS =
+      { TransportProtocols.PROTOCOL_BLE_PERIPHERAL };
 
   /**
    * When a client calls {@link Context#bindService(Intent, ServiceConnection, int)} to get the
@@ -196,8 +203,6 @@ public final class ConnectedDeviceService extends TrunkService {
 
   private ConnectedDeviceStorage storage;
 
-  private boolean isSppSupported;
-
   private IConnectedDeviceManager.Stub connectedDeviceManagerBinder;
 
   private IAssociatedDeviceManager.Stub associationBinder;
@@ -205,6 +210,8 @@ public final class ConnectedDeviceService extends TrunkService {
   private ConnectedDeviceSppDelegateBinder sppDelegateBinder;
 
   private boolean useFeatureCoordinator;
+
+  private List<String> supportedTransportProtocols;
 
   @Override
   public void onCreate() {
@@ -219,7 +226,18 @@ public final class ConnectedDeviceService extends TrunkService {
       }
       isSppServiceBound.set(isSet);
     };
-    isSppSupported = getMetaBoolean(META_ENABLE_SPP, SPP_ENABLED_BY_DEFAULT);
+    supportedTransportProtocols =
+        Arrays.asList(
+            requireNonNull(
+                getMetaStringArray(
+                    META_SUPPORTED_TRANSPORT_PROTOCOLS,
+                    DEFAULT_TRANSPORT_PROTOCOLS)));
+    if (supportedTransportProtocols.isEmpty()) {
+      loge(TAG,
+          "Transport protocols are empty. There must be at least one protocol provided to start "
+              + "this service. Reverting to default values.");
+      supportedTransportProtocols = Arrays.asList(DEFAULT_TRANSPORT_PROTOCOLS);
+    }
     useFeatureCoordinator =
         getMetaBoolean(META_ENABLE_FEATURE_COORDINATOR, ENABLE_FEATURE_COORDINATOR_BY_DEFAULT);
 
@@ -236,28 +254,37 @@ public final class ConnectedDeviceService extends TrunkService {
 
     registerReceiver(
         bleBroadcastReceiver, new IntentFilter(BluetoothAdapter.ACTION_BLE_STATE_CHANGED));
-    if (!isSppSupported && BluetoothAdapter.getDefaultAdapter().isLeEnabled()) {
+    if (isTransportSupported(TransportProtocols.PROTOCOL_BLE_PERIPHERAL)
+        && BluetoothAdapter.getDefaultAdapter().isLeEnabled()) {
       initializeFeatures();
     }
   }
 
   private void initializeFeatureCoordinator() {
     logd(TAG, "Initializing FeatureCoordinator version of the platform.");
-    ConnectionProtocol protocol;
-    if (isSppSupported) {
-      protocol = createSppProtocol();
-    } else {
-      protocol = createBlePeripheralProtocol();
+    Set<ConnectionProtocol> protocols = new HashSet<>();
+    for (String protocol : supportedTransportProtocols) {
+      logd(TAG, "Adding protocol " + protocol + " to supported protocols.");
+      switch (protocol) {
+        case TransportProtocols.PROTOCOL_BLE_PERIPHERAL:
+          protocols.add(createBlePeripheralProtocol());
+          break;
+        case TransportProtocols.PROTOCOL_SPP:
+          protocols.add(createSppProtocol());
+          break;
+        default:
+          loge(TAG, "Protocol type " + protocol + " is not recognized. Ignoring.");
+      }
     }
 
-    Set<ConnectionProtocol> protocols = new HashSet<>();
-    protocols.add(protocol);
     OobRunner oobRunner =
         new OobRunner(
             new OobChannelFactory(sppDelegateBinder),
             Arrays.asList(
-                getMetaStringArray(
-                    META_SUPPORTED_OOB_CHANNELS, /* defaultValue= */ new String[0])));
+                requireNonNull(
+                    getMetaStringArray(
+                      META_SUPPORTED_OOB_CHANNELS,
+                      /* defaultValue= */ new String[0]))));
     DeviceController deviceController =
         new MultiProtocolDeviceController(protocols, storage, oobRunner);
     featureCoordinator = new FeatureCoordinator(deviceController, storage, loggingManager);
@@ -314,10 +341,17 @@ public final class ConnectedDeviceService extends TrunkService {
     boolean isCapabilitiesEligible =
         getMetaBoolean(META_ENABLE_CAPABILITIES_EXCHANGE, ENABLE_CAPABILITIES_EXCHANGE_BY_DEFAULT);
     CarBluetoothManager carBluetoothManager;
-    if (isSppSupported) {
-      carBluetoothManager = createSppManager(storage, isCompressionEnabled, isCapabilitiesEligible);
-    } else {
-      carBluetoothManager = createBleManager(storage, isCompressionEnabled, isCapabilitiesEligible);
+    String defaultProtocol = supportedTransportProtocols.get(0);
+    logd(TAG, "Setting " + defaultProtocol + " as the transport.");
+    switch (defaultProtocol) {
+      case TransportProtocols.PROTOCOL_SPP:
+        carBluetoothManager =
+            createSppManager(storage, isCompressionEnabled, isCapabilitiesEligible);
+        break;
+      case TransportProtocols.PROTOCOL_BLE_PERIPHERAL:
+      default:
+        carBluetoothManager =
+            createBleManager(storage, isCompressionEnabled, isCapabilitiesEligible);
     }
     connectedDeviceManager = new ConnectedDeviceManager(carBluetoothManager, storage);
     connectedDeviceManagerBinder =
@@ -425,7 +459,8 @@ public final class ConnectedDeviceService extends TrunkService {
     switch (state) {
       case BluetoothAdapter.STATE_ON:
         EventLog.onBleOn();
-        if (!isSppSupported || isSppServiceBound.get()) {
+        if (isTransportSupported(TransportProtocols.PROTOCOL_BLE_PERIPHERAL)
+            || isSppServiceBound.get()) {
           initializeFeatures();
         }
         break;
@@ -477,6 +512,10 @@ public final class ConnectedDeviceService extends TrunkService {
               isEveryFeatureInitialized.set(true);
             })
         .start();
+  }
+
+  private boolean isTransportSupported(@NonNull String protocol) {
+    return supportedTransportProtocols.contains(protocol);
   }
 
   /** Returns the service's instance of {@link ConnectedDeviceManager}. */

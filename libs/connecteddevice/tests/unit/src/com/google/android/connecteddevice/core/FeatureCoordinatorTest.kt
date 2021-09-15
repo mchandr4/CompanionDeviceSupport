@@ -10,6 +10,7 @@ import com.google.android.connecteddevice.api.IOnAssociatedDevicesRetrievedListe
 import com.google.android.connecteddevice.api.IOnLogRequestedListener
 import com.google.android.connecteddevice.core.FeatureCoordinator.Companion.DEVICE_NAME_LENGTH
 import com.google.android.connecteddevice.core.util.mockToBeAlive
+import com.google.android.connecteddevice.core.util.mockToBeDead
 import com.google.android.connecteddevice.logging.LoggingManager
 import com.google.android.connecteddevice.model.AssociatedDevice
 import com.google.android.connecteddevice.model.ConnectedDevice
@@ -358,7 +359,7 @@ class FeatureCoordinatorTest {
   }
 
   @Test
-  fun registerDeviceCallback_blocksRecipientAndPreviousRegistererIfIdAlreadyRegistered() {
+  fun registerDeviceCallback_blocksRecipientAndAlivePreviousRegistererIfIdAlreadyRegistered() {
     val deviceCallback: IDeviceCallback = mockToBeAlive()
     val duplicateDeviceCallback: IDeviceCallback = mockToBeAlive()
     val recipientId = ParcelUuid(UUID.randomUUID())
@@ -376,6 +377,26 @@ class FeatureCoordinatorTest {
     verify(deviceCallback)
       .onDeviceError(connectedDevice, DEVICE_ERROR_INSECURE_RECIPIENT_ID_DETECTED)
     verify(duplicateDeviceCallback)
+      .onDeviceError(connectedDevice, DEVICE_ERROR_INSECURE_RECIPIENT_ID_DETECTED)
+  }
+
+  @Test
+  fun registerDeviceCallback_ignoreDeadPreviousRegistererIfIdAlreadyRegistered() {
+    val deadDeviceCallback: IDeviceCallback = mockToBeDead()
+    val duplicateDeviceCallback: IDeviceCallback = mockToBeAlive()
+    val recipientId = ParcelUuid(UUID.randomUUID())
+    val connectedDevice =
+      ConnectedDevice(
+        UUID.randomUUID().toString(),
+        "testDeviceName",
+        /* belongsToDriver= */ true,
+        /* hasSecureChannel= */ true
+      )
+
+    coordinator.registerDeviceCallback(connectedDevice, recipientId, deadDeviceCallback)
+    coordinator.registerDeviceCallback(connectedDevice, recipientId, duplicateDeviceCallback)
+
+    verify(duplicateDeviceCallback, never())
       .onDeviceError(connectedDevice, DEVICE_ERROR_INSECURE_RECIPIENT_ID_DETECTED)
   }
 
@@ -693,7 +714,7 @@ class FeatureCoordinatorTest {
     coordinator.removeAssociatedDevice(deviceId.toString())
 
     verify(mockController).disconnectDevice(deviceId)
-    verify(mockStorage).removeAssociatedDeviceForActiveUser(deviceId.toString())
+    verify(mockStorage).removeAssociatedDevice(deviceId.toString())
   }
 
   @Test
@@ -764,11 +785,36 @@ class FeatureCoordinatorTest {
         )
       )
     val listener: IOnAssociatedDevicesRetrievedListener = mockToBeAlive()
-    whenever(mockStorage.activeUserAssociatedDevices).thenReturn(driverDevices)
+    whenever(mockStorage.driverAssociatedDevices).thenReturn(driverDevices)
 
     coordinator.retrieveAssociatedDevicesForDriver(listener)
 
     verify(listener).onAssociatedDevicesRetrieved(driverDevices)
+  }
+
+  @Test
+  fun retrieveAssociatedDevicesForPassengers_returnsOnlyPassengerDevicesInStorage() {
+    val passengerDevices =
+      listOf(
+        AssociatedDevice(
+          UUID.randomUUID().toString(),
+          /* deviceAddress= */ "",
+          /* deviceName= */ null,
+          /* isConnectionEnabled= */ true
+        ),
+        AssociatedDevice(
+          UUID.randomUUID().toString(),
+          /* deviceAddress= */ "",
+          /* deviceName= */ null,
+          /* isConnectionEnabled= */ false
+        )
+      )
+    val listener: IOnAssociatedDevicesRetrievedListener = mockToBeAlive()
+    whenever(mockStorage.passengerAssociatedDevices).thenReturn(passengerDevices)
+
+    coordinator.retrieveAssociatedDevicesForPassengers(listener)
+
+    verify(listener).onAssociatedDevicesRetrieved(passengerDevices)
   }
 
   @Test
@@ -806,5 +852,17 @@ class FeatureCoordinatorTest {
     coordinator.stopAssociation()
 
     verify(mockController).stopAssociation()
+  }
+
+  @Test
+  fun start_startsController() {
+    coordinator.start()
+    verify(mockController).start()
+  }
+
+  @Test
+  fun reset_resetsController() {
+    coordinator.reset()
+    verify(mockController).reset()
   }
 }

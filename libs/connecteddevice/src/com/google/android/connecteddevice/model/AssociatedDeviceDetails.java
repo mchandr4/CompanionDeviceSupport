@@ -21,45 +21,36 @@ import androidx.annotation.Nullable;
 
 /** Class that contains the details of an associated device. */
 public class AssociatedDeviceDetails {
-  private final String deviceId;
-
-  private final String deviceAddress;
-
-  private final String deviceName;
-
-  private final boolean isConnectionEnabled;
+  private final AssociatedDevice device;
 
   private final boolean isConnected;
 
   public AssociatedDeviceDetails(@NonNull AssociatedDevice device, boolean isConnected) {
-    deviceId = device.getDeviceId();
-    deviceAddress = device.getDeviceAddress();
-    deviceName = device.getDeviceName();
-    isConnectionEnabled = device.isConnectionEnabled();
+    this.device = device;
     this.isConnected = isConnected;
   }
 
   /** Get the device id. */
   @NonNull
   public String getDeviceId() {
-    return deviceId;
+    return device.getDeviceId();
   }
 
   /** Get the name of the associated device. */
   @Nullable
   public String getDeviceName() {
-    return deviceName;
+    return device.getDeviceName();
   }
 
   /** Get the device address. */
   @NonNull
   public String getDeviceAddress() {
-    return deviceAddress;
+    return device.getDeviceAddress();
   }
 
   /** {@code true} if the connection is enabled for the device. */
   public boolean isConnectionEnabled() {
-    return isConnectionEnabled;
+    return device.isConnectionEnabled();
   }
 
   /** {@code true} if the device is connected. */
@@ -67,9 +58,14 @@ public class AssociatedDeviceDetails {
     return isConnected;
   }
 
+  /** Returns the claiming user id, or {@value AssociatedDevice#UNCLAIMED_USER_ID} if unclaimed. */
+  public int getUserId() {
+    return device.getUserId();
+  }
+
   /** Get {@link AssociatedDevice}. */
   @NonNull
   public AssociatedDevice getAssociatedDevice() {
-    return new AssociatedDevice(deviceId, deviceAddress, deviceName, isConnectionEnabled);
+    return device;
   }
 }

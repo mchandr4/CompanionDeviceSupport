@@ -388,13 +388,6 @@ public class CarBlePeripheralManager extends CarBluetoothManager {
       timeoutHandler.removeCallbacks(timeoutRunnable);
     }
 
-    if (device.getName() == null) {
-      logd(
-          TAG, "Device connected, but name is null; issuing request to retrieve device " + "name.");
-      blePeripheralManager.retrieveDeviceName(device);
-    } else {
-      setClientDeviceName(device.getName());
-    }
     setClientDeviceAddress(device.getAddress());
 
     DeviceMessageStream secureStream =
@@ -443,12 +436,6 @@ public class CarBlePeripheralManager extends CarBluetoothManager {
 
   private final BlePeripheralManager.Callback reconnectPeripheralCallback =
       new BlePeripheralManager.Callback() {
-
-        @Override
-        public void onDeviceNameRetrieved(String deviceName) {
-          // Ignored.
-        }
-
         @Override
         public void onMtuSizeChanged(int size) {
           setMtuSize(size);
@@ -483,19 +470,6 @@ public class CarBlePeripheralManager extends CarBluetoothManager {
 
   private final BlePeripheralManager.Callback associationPeripheralCallback =
       new BlePeripheralManager.Callback() {
-        @Override
-        public void onDeviceNameRetrieved(String deviceName) {
-          if (deviceName == null) {
-            return;
-          }
-          setClientDeviceName(deviceName);
-          ConnectedRemoteDevice connectedDevice = getConnectedDevice();
-          if (connectedDevice == null || connectedDevice.deviceId == null) {
-            return;
-          }
-          storage.setAssociatedDeviceName(connectedDevice.deviceId, deviceName);
-        }
-
         @Override
         public void onMtuSizeChanged(int size) {
           setMtuSize(size);

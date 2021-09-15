@@ -182,7 +182,7 @@ public class CarBlePeripheralManagerTest {
     channelCallback.onDeviceIdReceived(TEST_REMOTE_DEVICE_ID.toString());
     channelCallback.onSecureChannelEstablished();
     ArgumentCaptor<AssociatedDevice> deviceCaptor = ArgumentCaptor.forClass(AssociatedDevice.class);
-    verify(mockConnectedDeviceStorage).addAssociatedDeviceForActiveUser(deviceCaptor.capture());
+    verify(mockConnectedDeviceStorage).addAssociatedDeviceForDriver(deviceCaptor.capture());
     AssociatedDevice device = deviceCaptor.getValue();
     assertThat(device.getDeviceId()).isEqualTo(TEST_REMOTE_DEVICE_ID.toString());
     verify(mockAssociationCallback).onAssociationCompleted(eq(TEST_REMOTE_DEVICE_ID.toString()));

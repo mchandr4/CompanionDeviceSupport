@@ -28,10 +28,12 @@ import com.google.android.connecteddevice.util.SafeLog.logw
 open class AidlThreadSafeCallbacks<T> : ThreadSafeCallbacks<T>() where T : IInterface {
 
   override fun contains(callback: T): Boolean {
+    removeDeadCallbacks()
     return callbacks.any { callback.asBinder() == it.key.asBinder() }
   }
 
   override fun remove(callback: T) {
+    removeDeadCallbacks()
     val registeredCallback =
       callbacks.keys.firstOrNull { callback.asBinder() == it.asBinder() }
         ?: run {
@@ -40,6 +42,11 @@ open class AidlThreadSafeCallbacks<T> : ThreadSafeCallbacks<T>() where T : IInte
         }
 
     callbacks.remove(registeredCallback)
+  }
+
+  override fun size(): Int {
+    removeDeadCallbacks()
+    return super.size()
   }
 
   override fun invoke(notification: SafeConsumer<T>) {
@@ -51,6 +58,20 @@ open class AidlThreadSafeCallbacks<T> : ThreadSafeCallbacks<T>() where T : IInte
         continue
       }
       executor.execute { notification.accept(aliveCallback) }
+    }
+  }
+
+  override fun isEmpty(): Boolean {
+    removeDeadCallbacks()
+    return super.isEmpty()
+  }
+
+  private fun removeDeadCallbacks() {
+    for (callback in callbacks.keys()) {
+      if (callback.aliveOrNull() == null) {
+        logw(TAG, "A binder has died. Removing from the registered callbacks.")
+        callbacks.remove(callback)
+      }
     }
   }
 

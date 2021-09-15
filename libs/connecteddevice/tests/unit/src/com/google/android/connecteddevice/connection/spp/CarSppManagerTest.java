@@ -155,7 +155,7 @@ public class CarSppManagerTest {
     channelCallback.onSecureChannelEstablished();
 
     ArgumentCaptor<AssociatedDevice> deviceCaptor = ArgumentCaptor.forClass(AssociatedDevice.class);
-    verify(mockStorage).addAssociatedDeviceForActiveUser(deviceCaptor.capture());
+    verify(mockStorage).addAssociatedDeviceForDriver(deviceCaptor.capture());
     AssociatedDevice device = deviceCaptor.getValue();
 
     assertThat(device.getDeviceId()).isEqualTo(TEST_REMOTE_DEVICE_ID.toString());

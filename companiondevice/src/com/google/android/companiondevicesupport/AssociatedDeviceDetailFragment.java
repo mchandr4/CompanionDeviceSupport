@@ -36,9 +36,12 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import com.google.android.connecteddevice.model.AssociatedDeviceDetails;
+import com.google.android.connecteddevice.model.TransportProtocols;
 import com.google.android.connecteddevice.trust.TrustedDeviceConstants;
 import com.google.android.connecteddevice.ui.AssociatedDeviceViewModel;
 import com.google.android.connecteddevice.ui.AssociatedDeviceViewModelFactory;
+import java.util.Arrays;
+import java.util.List;
 
 /** Fragment that shows the details of an associated device. */
 public class AssociatedDeviceDetailFragment extends Fragment {
@@ -64,13 +67,14 @@ public class AssociatedDeviceDetailFragment extends Fragment {
     connectionText = view.findViewById(R.id.connection_button_text);
     connectionStatusText = view.findViewById(R.id.connection_status_text);
     connectionStatusIndicator = view.findViewById(R.id.connection_status_indicator);
-
+    List<String> transportProtocols =
+        Arrays.asList(getResources().getStringArray(R.array.transport_protocols));
     model =
         new ViewModelProvider(
                 (ViewModelStoreOwner) requireActivity(),
                 new AssociatedDeviceViewModelFactory(
                     requireActivity().getApplication(),
-                    getResources().getBoolean(R.bool.enable_spp),
+                    transportProtocols.contains(TransportProtocols.PROTOCOL_SPP),
                     getResources().getString(R.string.ble_device_name_prefix)))
             .get(AssociatedDeviceViewModel.class);
     model.getCurrentDeviceDetails().observe(this, this::setDeviceDetails);

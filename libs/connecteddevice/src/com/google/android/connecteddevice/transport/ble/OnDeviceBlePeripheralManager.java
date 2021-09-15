@@ -23,7 +23,6 @@ import static com.google.android.connecteddevice.util.SafeLog.logw;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
-import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattServer;
@@ -40,8 +39,6 @@ import android.content.pm.PackageManager;
 import android.os.Handler;
 import androidx.annotation.NonNull;
 import com.google.android.connecteddevice.util.ByteUtils;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 /** An implementation that uses Android platform API for BLE peripheral operations. */
@@ -54,24 +51,12 @@ public class OnDeviceBlePeripheralManager extends BlePeripheralManager {
   private static final int GATT_SERVER_RETRY_LIMIT = 20;
   private static final int GATT_SERVER_RETRY_DELAY_MS = 200;
 
-  private static final int DEFAULT_CONNECTION_STATE = -1;
-
-  // https://www.bluetooth.com/specifications/gatt/viewer?attributeXmlFile=org.bluetooth
-  // .service.generic_access.xml
-  private static final UUID GENERIC_ACCESS_PROFILE_UUID =
-      UUID.fromString("00001800-0000-1000-8000-00805f9b34fb");
-  // https://www.bluetooth.com/specifications/gatt/viewer?attributeXmlFile=org.bluetooth
-  // .characteristic.gap.device_name.xml
-  private static final UUID DEVICE_NAME_UUID =
-      UUID.fromString("00002a00-0000-1000-8000-00805f9b34fb");
-
   private final Handler handler;
 
   private final Context context;
   private final AtomicReference<BluetoothGattServer> gattServer = new AtomicReference<>();
-  private final AtomicReference<BluetoothGatt> bluetoothGatt = new AtomicReference<>();
   private final AtomicReference<BluetoothLeAdvertiser> advertiser = new AtomicReference<>();
-  private final AtomicInteger connectionState = new AtomicInteger(DEFAULT_CONNECTION_STATE);
+  private final AtomicReference<BluetoothDevice> connectedDevice = new AtomicReference<>();
   private final BluetoothManager bluetoothManager;
 
   private int mtuSize = 20;
@@ -129,7 +114,6 @@ public class OnDeviceBlePeripheralManager extends BlePeripheralManager {
     this.advertiseData = advertiseData;
     this.scanResponse = scanResponse;
     gattServerRetryStartCount = 0;
-    gattServer.set(bluetoothManager.openGattServer(context, gattServerCallback));
     openGattServer();
   }
 
@@ -163,12 +147,6 @@ public class OnDeviceBlePeripheralManager extends BlePeripheralManager {
     }
   }
 
-  /** Connect the Gatt server of the remote device to retrieve device name. */
-  @Override
-  public void retrieveDeviceName(BluetoothDevice device) {
-    bluetoothGatt.compareAndSet(null, device.connectGatt(context, false, gattCallback));
-  }
-
   /** Cleans up the BLE GATT server state. */
   @Override
   public void cleanup() {
@@ -180,29 +158,34 @@ public class OnDeviceBlePeripheralManager extends BlePeripheralManager {
 
     BluetoothGattServer gattServer = this.gattServer.getAndSet(null);
     if (gattServer == null) {
+      loge(TAG, "BluetoothGattServer was null. Connection has already been cleaned up.");
       return;
     }
-
-    logd(TAG, "Stopping gatt server.");
-    BluetoothGatt bluetoothGatt = this.bluetoothGatt.getAndSet(null);
-    if (bluetoothGatt != null) {
-      gattServer.cancelConnection(bluetoothGatt.getDevice());
-      logd(TAG, "Disconnecting gatt.");
-      bluetoothGatt.disconnect();
-      bluetoothGatt.close();
+    BluetoothDevice device = connectedDevice.getAndSet(null);
+    if (device != null) {
+      logd(TAG, "Canceling connection on currently connected device.");
+      gattServer.cancelConnection(device);
+      for (Callback callback : callbacks) {
+        callback.onRemoteDeviceDisconnected(device);
+      }
+    } else {
+      logd(TAG, "No device currently connected.");
     }
+    logd(TAG, "Closing gatt server.");
     gattServer.clearServices();
     gattServer.close();
-    connectionState.set(DEFAULT_CONNECTION_STATE);
   }
 
   private void openGattServer() {
     // Only open one Gatt server.
-    BluetoothGattServer gattServer = this.gattServer.get();
-    if (gattServer != null) {
+    boolean isNew =
+        gattServer.compareAndSet(
+            null, bluetoothManager.openGattServer(context, gattServerCallback));
+    if (!isNew) {
+      BluetoothGattServer server = gattServer.get();
       logd(TAG, "Gatt Server created, retry count: " + gattServerRetryStartCount);
-      gattServer.clearServices();
-      gattServer.addService(bluetoothGattService);
+      server.clearServices();
+      server.addService(bluetoothGattService);
       AdvertiseSettings settings =
           new AdvertiseSettings.Builder()
               .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY)
@@ -213,7 +196,6 @@ public class OnDeviceBlePeripheralManager extends BlePeripheralManager {
       startAdvertisingInternally(settings, advertiseData, scanResponse, advertiseCallback);
       gattServerRetryStartCount = 0;
     } else if (gattServerRetryStartCount < GATT_SERVER_RETRY_LIMIT) {
-      this.gattServer.set(bluetoothManager.openGattServer(context, gattServerCallback));
       gattServerRetryStartCount++;
       handler.postDelayed(this::openGattServer, GATT_SERVER_RETRY_DELAY_MS);
     } else {
@@ -250,9 +232,14 @@ public class OnDeviceBlePeripheralManager extends BlePeripheralManager {
       new BluetoothGattServerCallback() {
         @Override
         public void onConnectionStateChange(BluetoothDevice device, int status, int newState) {
-          int oldState = connectionState.getAndSet(newState);
-          if (oldState == newState) {
-            logw(TAG, "Received duplicate state change to " + newState + ". Ignoring.");
+          if (status != BluetoothGatt.GATT_SUCCESS) {
+            logd(
+                TAG,
+                "Received a connection state of "
+                    + newState
+                    + " with unsuccessful status "
+                    + status
+                    + ". Ignoring.");
             return;
           }
           switch (newState) {
@@ -263,15 +250,18 @@ public class OnDeviceBlePeripheralManager extends BlePeripheralManager {
                 return;
               }
               gattServer.connect(device, /* autoConnect= */ false);
+              boolean isNew = connectedDevice.compareAndSet(null, device);
+              if (!isNew) {
+                logd(TAG, "This device has already connected. No further action required.");
+                return;
+              }
               for (Callback callback : callbacks) {
                 callback.onRemoteDeviceConnected(device);
               }
               break;
             case BluetoothProfile.STATE_DISCONNECTED:
               logd(TAG, "BLE Connection State Change: DISCONNECTED");
-              for (Callback callback : callbacks) {
-                callback.onRemoteDeviceDisconnected(device);
-              }
+              cleanup();
               break;
             default:
               logw(TAG, "Connection state not connecting or disconnecting; ignoring: " + newState);
@@ -351,65 +341,6 @@ public class OnDeviceBlePeripheralManager extends BlePeripheralManager {
             }
           } else {
             loge(TAG, "Notification failed. Device: " + device + ", Status: " + status);
-          }
-        }
-      };
-
-  private final BluetoothGattCallback gattCallback =
-      new BluetoothGattCallback() {
-        @Override
-        public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
-          logd(TAG, "Gatt Connection State Change: " + newState);
-          switch (newState) {
-            case BluetoothProfile.STATE_CONNECTED:
-              logd(TAG, "Gatt connected");
-              BluetoothGatt bluetoothGatt = OnDeviceBlePeripheralManager.this.bluetoothGatt.get();
-              if (bluetoothGatt == null) {
-                break;
-              }
-              bluetoothGatt.discoverServices();
-              break;
-            case BluetoothProfile.STATE_DISCONNECTED:
-              logd(TAG, "Gatt Disconnected");
-              break;
-            default:
-              logd(TAG, "Connection state not connecting or disconnecting; ignoring: " + newState);
-          }
-        }
-
-        @Override
-        public void onServicesDiscovered(BluetoothGatt gatt, int status) {
-          logd(TAG, "Gatt Services Discovered");
-          BluetoothGatt bluetoothGatt = OnDeviceBlePeripheralManager.this.bluetoothGatt.get();
-          if (bluetoothGatt == null) {
-            return;
-          }
-          BluetoothGattService gapService = bluetoothGatt.getService(GENERIC_ACCESS_PROFILE_UUID);
-          if (gapService == null) {
-            loge(TAG, "Generic Access Service is null.");
-            return;
-          }
-          BluetoothGattCharacteristic deviceNameCharacteristic =
-              gapService.getCharacteristic(DEVICE_NAME_UUID);
-          if (deviceNameCharacteristic == null) {
-            loge(TAG, "Device Name Characteristic is null.");
-            return;
-          }
-          bluetoothGatt.readCharacteristic(deviceNameCharacteristic);
-        }
-
-        @Override
-        public void onCharacteristicRead(
-            BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
-          if (status == BluetoothGatt.GATT_SUCCESS) {
-            String deviceName = characteristic.getStringValue(0);
-            logd(TAG, "BLE Device Name: " + deviceName);
-
-            for (Callback callback : callbacks) {
-              callback.onDeviceNameRetrieved(deviceName);
-            }
-          } else {
-            loge(TAG, "Reading GAP Failed: " + status);
           }
         }
       };

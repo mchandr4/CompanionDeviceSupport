@@ -9,8 +9,8 @@ import static org.robolectric.Shadows.shadowOf;
 
 import android.app.Application;
 import android.app.KeyguardManager;
-import androidx.lifecycle.Observer;
 import android.os.RemoteException;
+import androidx.lifecycle.Observer;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.google.android.connecteddevice.model.AssociatedDevice;

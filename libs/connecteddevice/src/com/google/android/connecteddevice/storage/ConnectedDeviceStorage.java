@@ -248,7 +248,7 @@ public class ConnectedDeviceStorage {
    * @return Associated device list.
    */
   @NonNull
-  public List<AssociatedDevice> getAssociatedDevicesForUser(@NonNull int userId) {
+  public List<AssociatedDevice> getAssociatedDevicesForUser(int userId) {
     List<AssociatedDeviceEntity> entities =
         associatedDeviceDatabase.getAssociatedDevicesForUser(userId);
 
@@ -265,13 +265,41 @@ public class ConnectedDeviceStorage {
   }
 
   /**
-   * Get a list of associated devices for the current user.
+   * Get a list of associated devices for the current driver.
    *
    * @return Associated device list.
    */
   @NonNull
-  public List<AssociatedDevice> getActiveUserAssociatedDevices() {
+  public List<AssociatedDevice> getDriverAssociatedDevices() {
     return getAssociatedDevicesForUser(ActivityManager.getCurrentUser());
+  }
+
+  /**
+   * Get a list of associated devices for all passengers.
+   *
+   * @return Associated device list.
+   */
+  @NonNull
+  public List<AssociatedDevice> getPassengerAssociatedDevices() {
+    return getAssociatedDevicesNotBelongingToUser(ActivityManager.getCurrentUser());
+  }
+
+  @VisibleForTesting
+  @NonNull
+  List<AssociatedDevice> getAssociatedDevicesNotBelongingToUser(int userId) {
+    List<AssociatedDeviceEntity> entities = associatedDeviceDatabase.getAllAssociatedDevices();
+    if (entities == null) {
+      return new ArrayList<>();
+    }
+    ArrayList<AssociatedDevice> notUserDevices = new ArrayList<>();
+    for (AssociatedDeviceEntity entity : entities) {
+      if (entity.userId == userId) {
+        continue;
+      }
+      notUserDevices.add(entity.toAssociatedDevice());
+    }
+
+    return notUserDevices;
   }
 
   /**
@@ -281,7 +309,7 @@ public class ConnectedDeviceStorage {
    * @return List of device ids.
    */
   @NonNull
-  public List<String> getAssociatedDeviceIdsForUser(@NonNull int userId) {
+  public List<String> getAssociatedDeviceIdsForUser(int userId) {
     List<AssociatedDevice> userDevices = getAssociatedDevicesForUser(userId);
     ArrayList<String> userDeviceIds = new ArrayList<>();
 
@@ -293,35 +321,50 @@ public class ConnectedDeviceStorage {
   }
 
   /**
-   * Retrieves devices associated with the active user.
-   *
-   * @param listener {@link OnAssociatedDevicesRetrievedListener} that will be notified when devices
-   *     are retrieved.
-   */
-  public void retrieveForActiveUserAssociatedDevice(OnAssociatedDevicesRetrievedListener listener) {
-    listener.onAssociatedDevicesRetrieved(getActiveUserAssociatedDevices());
-  }
-
-  /**
-   * Returns a list of device ids of associated devices for the current user.
+   * Returns a list of device ids of associated devices for the current driver.
    *
    * @return List of device ids.
    */
   @NonNull
-  public List<String> getActiveUserAssociatedDeviceIds() {
+  public List<String> getDriverAssociatedDeviceIds() {
     return getAssociatedDeviceIdsForUser(ActivityManager.getCurrentUser());
   }
 
   /**
-   * Add the associated device of the given deviceId for the currently active user.
+   * Returns a list of device ids of associated devices for all passengers.
+   *
+   * @return List of device ids.
+   */
+  @NonNull
+  public List<String> getPassengerAssociatedDeviceIds() {
+    return getAssociatedDeviceIdsNotBelongingToUser(ActivityManager.getCurrentUser());
+  }
+
+  @VisibleForTesting
+  @NonNull
+  List<String> getAssociatedDeviceIdsNotBelongingToUser(int userId) {
+    List<AssociatedDeviceEntity> entities = associatedDeviceDatabase.getAllAssociatedDevices();
+    if (entities == null) {
+      return new ArrayList<>();
+    }
+    ArrayList<String> notUserDeviceIds = new ArrayList<>();
+    for (AssociatedDeviceEntity entity : entities) {
+      if (entity.userId == userId) {
+        continue;
+      }
+      notUserDeviceIds.add(entity.id);
+    }
+
+    return notUserDeviceIds;
+  }
+
+  /**
+   * Add the associated device of the given deviceId for the current driver.
    *
    * @param device New associated device to be added.
    */
-  public void addAssociatedDeviceForActiveUser(@NonNull AssociatedDevice device) {
+  public void addAssociatedDeviceForDriver(@NonNull AssociatedDevice device) {
     addAssociatedDeviceForUser(ActivityManager.getCurrentUser(), device);
-    if (associatedDeviceCallback != null) {
-      associatedDeviceCallback.onAssociatedDeviceAdded(device);
-    }
   }
 
   /**
@@ -334,6 +377,9 @@ public class ConnectedDeviceStorage {
     AssociatedDeviceEntity entity =
         new AssociatedDeviceEntity(userId, device, /* isConnectionEnabled= */ true);
     associatedDeviceDatabase.addOrReplaceAssociatedDevice(entity);
+    if (associatedDeviceCallback != null) {
+      associatedDeviceCallback.onAssociatedDeviceAdded(device);
+    }
   }
 
   /**
@@ -382,36 +428,24 @@ public class ConnectedDeviceStorage {
     entity.name = name;
     associatedDeviceDatabase.addOrReplaceAssociatedDevice(entity);
     if (associatedDeviceCallback != null) {
-      associatedDeviceCallback.onAssociatedDeviceUpdated(
-          new AssociatedDevice(entity.id, entity.address, name, entity.isConnectionEnabled));
+      associatedDeviceCallback.onAssociatedDeviceUpdated(entity.toAssociatedDevice());
     }
   }
 
   /**
    * Remove the associated device of the given deviceId for the given user.
    *
-   * @param userId The identifier of the user.
    * @param deviceId The identifier of the device to be cleared.
    */
-  public void removeAssociatedDevice(int userId, @NonNull String deviceId) {
+  public void removeAssociatedDevice(@NonNull String deviceId) {
     AssociatedDeviceEntity entity = associatedDeviceDatabase.getAssociatedDevice(deviceId);
-    if (entity == null || entity.userId != userId) {
+    if (entity == null) {
       return;
     }
     associatedDeviceDatabase.removeAssociatedDevice(entity);
     if (associatedDeviceCallback != null) {
-      associatedDeviceCallback.onAssociatedDeviceRemoved(
-          new AssociatedDevice(deviceId, entity.address, entity.name, entity.isConnectionEnabled));
+      associatedDeviceCallback.onAssociatedDeviceRemoved(entity.toAssociatedDevice());
     }
-  }
-
-  /**
-   * Clear the associated device of the given deviceId for the current user.
-   *
-   * @param deviceId The identifier of the device to be cleared.
-   */
-  public void removeAssociatedDeviceForActiveUser(@NonNull String deviceId) {
-    removeAssociatedDevice(ActivityManager.getCurrentUser(), deviceId);
   }
 
   /**
@@ -437,8 +471,7 @@ public class ConnectedDeviceStorage {
     entity.isConnectionEnabled = isConnectionEnabled;
     associatedDeviceDatabase.addOrReplaceAssociatedDevice(entity);
     if (associatedDeviceCallback != null) {
-      associatedDeviceCallback.onAssociatedDeviceUpdated(
-          new AssociatedDevice(deviceId, entity.address, entity.name, isConnectionEnabled));
+      associatedDeviceCallback.onAssociatedDeviceUpdated(entity.toAssociatedDevice());
     }
   }
 
@@ -455,7 +488,7 @@ public class ConnectedDeviceStorage {
       logw(TAG, "No device has been associated with device id " + deviceId + ". Returning null");
       return null;
     }
-    return new AssociatedDevice(deviceId, entity.address, entity.name, entity.isConnectionEnabled);
+    return entity.toAssociatedDevice();
   }
 
   /** Callback for association device related events. */

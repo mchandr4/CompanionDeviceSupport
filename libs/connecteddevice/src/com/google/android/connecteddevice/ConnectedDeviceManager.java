@@ -246,7 +246,7 @@ public class ConnectedDeviceManager {
               + "Ignoring redundant request.");
       return;
     }
-    List<AssociatedDevice> userDevices = storage.getActiveUserAssociatedDevices();
+    List<AssociatedDevice> userDevices = storage.getDriverAssociatedDevices();
     if (userDevices.isEmpty()) {
       logw(TAG, "No devices associated with active user. Ignoring.");
       isConnectingToUserDevice.set(false);
@@ -305,7 +305,8 @@ public class ConnectedDeviceManager {
    * OnAssociatedDevicesRetrievedListener}.
    */
   public void retrieveActiveUserAssociatedDevices(OnAssociatedDevicesRetrievedListener listener) {
-    storageExecutor.execute(() -> storage.retrieveForActiveUserAssociatedDevice(listener));
+    storageExecutor.execute(
+        () -> listener.onAssociatedDevicesRetrieved(storage.getDriverAssociatedDevices()));
   }
 
   /** Notify that the user has accepted a pairing code or any out-of-band confirmation. */
@@ -319,7 +320,7 @@ public class ConnectedDeviceManager {
    * @param deviceId Device identifier.
    */
   public void removeActiveUserAssociatedDevice(@NonNull String deviceId) {
-    storageExecutor.execute(() -> storage.removeAssociatedDeviceForActiveUser(deviceId));
+    storageExecutor.execute(() -> storage.removeAssociatedDevice(deviceId));
     disconnectDevice(deviceId);
   }
 
@@ -584,7 +585,7 @@ public class ConnectedDeviceManager {
         new ConnectedDevice(
             deviceId,
             /* deviceName= */ null,
-            storage.getActiveUserAssociatedDeviceIds().contains(deviceId),
+            storage.getDriverAssociatedDeviceIds().contains(deviceId),
             /* hasSecureChannel= */ false);
 
     connectedDevices.put(deviceId, connectedDevice);

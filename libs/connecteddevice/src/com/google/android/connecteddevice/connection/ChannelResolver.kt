@@ -26,7 +26,6 @@ import com.google.android.connecteddevice.storage.ConnectedDeviceStorage
 import com.google.android.connecteddevice.transport.ConnectionProtocol
 import com.google.android.connecteddevice.transport.ConnectionProtocol.DataReceivedListener
 import com.google.android.connecteddevice.transport.ProtocolDevice
-import com.google.android.connecteddevice.util.ByteUtils
 import com.google.android.connecteddevice.util.SafeLog.logd
 import com.google.android.connecteddevice.util.SafeLog.loge
 import com.google.android.connecteddevice.util.SafeLog.logw
@@ -282,7 +281,7 @@ class ChannelResolver(
             onError("Failed to resolve channel, received invalid challenge.")
             return
           }
-          logd(TAG, "Responding to challenge ${ByteUtils.byteArrayToHexString(deviceChallenge)}.")
+          logd(TAG, "Responding to challenge.")
           val deviceChallengeResponse =
             storage.hashWithChallengeSecret(id.toString(), deviceChallenge)
           if (deviceChallengeResponse == null) {

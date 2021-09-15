@@ -43,10 +43,12 @@ import com.google.android.connecteddevice.util.aliveOrNull
 import java.security.InvalidParameterException
 import java.util.Objects
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CopyOnWriteArraySet
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
+import java.util.concurrent.atomic.AtomicReference
 
 /**
  * The controller to manage all the connected devices and connected protocols of each connected
@@ -70,10 +72,11 @@ constructor(
   private val oobRunner: OobRunner,
   private val callbackExecutor: Executor = Executors.newSingleThreadExecutor()
 ) : DeviceController {
-  private val connectedRemoteDevices = CopyOnWriteArraySet<ConnectedRemoteDevice>()
+  private val connectedRemoteDevices = ConcurrentHashMap<UUID, ConnectedRemoteDevice>()
 
   private val callbacks = ThreadSafeCallbacks<Callback>()
-  private var associationPendingDevice: ConnectedRemoteDevice? = null
+
+  @VisibleForTesting internal val associationPendingDeviceId = AtomicReference<UUID?>(null)
 
   /**
    * The out of band verification code get from the [EncryptionRunner], will be set during out of
@@ -87,9 +90,17 @@ constructor(
   override val connectedDevices: List<ConnectedDevice>
     get() {
       val devices = mutableListOf<ConnectedDevice>()
-      for (device in connectedRemoteDevices) {
+      for (device in connectedRemoteDevices.values) {
         val associatedDevice =
-          associatedDevices.firstOrNull { it.deviceId == device.deviceId?.toString() } ?: continue
+          associatedDevices.firstOrNull { it.deviceId == device.deviceId.toString() }
+        if (associatedDevice == null) {
+          logd(
+            TAG,
+            "Unable to find a device with id ${device.deviceId} in associated devices. Skipped " +
+              "mapping."
+          )
+          continue
+        }
         val belongsToDriver = driverDevices.any { it.deviceId == associatedDevice.deviceId }
         val hasSecureChannel = device.secureChannel != null
         devices.add(
@@ -108,14 +119,15 @@ constructor(
   init {
     callbackExecutor.execute {
       associatedDevices.addAll(storage.allAssociatedDevices)
-      driverDevices.addAll(storage.activeUserAssociatedDevices)
+      driverDevices.addAll(storage.driverAssociatedDevices)
     }
 
     // TODO(b/192656006) Add registration for updates to associated devices to keep in sync
   }
 
   override fun start() {
-    val associatedDevices = storage.activeUserAssociatedDevices
+    logd(TAG, "Starting controller.")
+    val associatedDevices = storage.driverAssociatedDevices
     for (device in associatedDevices) {
       if (device.isConnectionEnabled) {
         initiateConnectionToDevice(UUID.fromString(device.deviceId))
@@ -124,10 +136,18 @@ constructor(
   }
 
   override fun reset() {
+    val callbackDevices = connectedDevices
+    logd(TAG, "Resetting controller and disconnecting ${callbackDevices.size} devices.")
+    // Current devices must be cleared prior to issuing callbacks to avoid race conditions.
+    connectedRemoteDevices.clear()
     for (protocol in protocols) {
       protocol.reset()
     }
     oobCode = null
+    associationPendingDeviceId.set(null)
+    for (device in callbackDevices) {
+      callbacks.invoke { it.onDeviceDisconnected(device) }
+    }
   }
 
   override fun initiateConnectionToDevice(deviceId: UUID) {
@@ -146,6 +166,11 @@ constructor(
 
   override fun startAssociation(nameForAssociation: String, callback: IAssociationCallback) {
     logd(TAG, "Start association with name $nameForAssociation")
+    val isAbleToStartAssociation = associationPendingDeviceId.compareAndSet(null, UUID.randomUUID())
+    if (!isAbleToStartAssociation) {
+      loge(TAG, "Attempted to start association when there is already an association in progress.")
+      return
+    }
     oobCode = null
     for (protocol in protocols) {
       val discoveryCallback =
@@ -155,11 +180,12 @@ constructor(
   }
 
   override fun notifyVerificationCodeAccepted() {
-    if (associationPendingDevice == null) {
+    val deviceId = associationPendingDeviceId.get()
+    if (deviceId == null) {
       loge(TAG, "Null connected device found when out-of-band confirmation received.")
       return
     }
-    val secureChannel = associationPendingDevice?.secureChannel
+    val secureChannel = connectedRemoteDevices[deviceId]?.secureChannel
     if (secureChannel == null) {
       loge(
         TAG,
@@ -187,20 +213,11 @@ constructor(
    */
   @VisibleForTesting
   internal fun getConnectedDevice(deviceId: UUID): ConnectedRemoteDevice? {
-    return connectedRemoteDevices.firstOrNull { it.deviceId == deviceId }
-  }
-
-  /**
-   * Returns a [ConnectedRemoteDevice] with matching association callback if it is currently
-   * connected or `null` otherwise.
-   */
-  @VisibleForTesting
-  internal fun getConnectedDevice(callback: IAssociationCallback): ConnectedRemoteDevice? {
-    return connectedRemoteDevices.firstOrNull { it.callback == callback }
+    return connectedRemoteDevices[deviceId]
   }
 
   override fun sendMessage(deviceId: UUID, message: DeviceMessage): Boolean {
-    val device = getConnectedDevice(deviceId)
+    val device = connectedRemoteDevices[deviceId]
     if (device == null) {
       logw(TAG, "Attempted to send message to disconnected device $deviceId. Ignored.")
       return false
@@ -219,19 +236,19 @@ constructor(
   }
 
   override fun isReadyToSendMessage(deviceId: UUID): Boolean =
-    getConnectedDevice(deviceId)?.secureChannel != null
+    connectedRemoteDevices[deviceId]?.secureChannel != null
 
   override fun disconnectDevice(deviceId: UUID) {
     logd(TAG, "Disconnecting device with id $deviceId.")
     for (protocol in protocols) {
       protocol.stopConnectionDiscovery(deviceId)
     }
-    val device = getConnectedDevice(deviceId)
+    val device = connectedRemoteDevices.remove(deviceId)
     if (device == null) {
       loge(TAG, "Attempted to disconnect an unrecognized device. Ignored.")
       return
     }
-    connectedRemoteDevices.remove(device)
+
     for ((protocol, protocolId) in device.protocolDevices) {
       protocol.disconnectDevice(protocolId)
     }
@@ -243,15 +260,27 @@ constructor(
 
   /** Stop the association process with any device. */
   override fun stopAssociation() {
+    logd(TAG, "Stopping association.")
+    oobRunner.reset()
     for (protocol in protocols) {
       protocol.stopAssociationDiscovery()
     }
-
-    associationPendingDevice?.protocolDevices?.forEach {
-      it.protocol.disconnectDevice(it.protocolId)
+    val pendingDeviceId = associationPendingDeviceId.getAndSet(null)
+    if (pendingDeviceId == null) {
+      logd(TAG, "Association was not in progress. No further action required.")
+      return
     }
-    associationPendingDevice = null
-    oobRunner.reset()
+    val pendingDevice = connectedRemoteDevices.remove(pendingDeviceId)
+    if (pendingDevice == null) {
+      logw(
+        TAG,
+        "Unable to find a matching connected device matching the pending id. Nothing to disconnect."
+      )
+      return
+    }
+    for (protocolDevice in pendingDevice.protocolDevices) {
+      protocolDevice.protocol.disconnectDevice(protocolDevice.protocolId)
+    }
   }
 
   override fun registerCallback(callback: Callback, executor: Executor) {
@@ -292,34 +321,37 @@ constructor(
   ) =
     object : DiscoveryCallback {
       override fun onDeviceConnected(protocolId: String) {
-        logd(TAG, "New connection protocol connected, id: $protocolId, protocol: $protocol")
+        logd(
+          TAG,
+          "New connection protocol connected for $deviceId. id: $protocolId, protocol: $protocol"
+        )
         protocol.registerDeviceDisconnectedListener(
           protocolId,
-          generateDeviceDisconnectedListener(callback = null, deviceId, protocol),
+          generateDeviceDisconnectedListener(deviceId, protocol),
           callbackExecutor
         )
         val protocolDevice = ProtocolDevice(protocol, protocolId)
-        var device = getConnectedDevice(deviceId)
-        if (device != null) {
-          logd(
-            TAG,
-            "Certain connect protocol already exist, add id $protocolId to current " +
-              "connected remote device."
-          )
-          device.secureChannel?.addStream(ProtocolStream(protocolDevice))
-          device.channelResolver?.addProtocolDevice(protocolDevice)
-          device.protocolDevices.add(protocolDevice)
-          return
-        }
-        device =
-          ConnectedRemoteDevice().apply {
-            this.deviceId = deviceId
-            protocolDevices.add(protocolDevice)
-            channelResolver = generateChannelResolver(protocolDevice, device = this)
-          }
-        device.channelResolver?.resolveReconnect(deviceId, challenge.challenge)
-        connectedRemoteDevices.add(device)
+        val device =
+          connectedRemoteDevices.compute(deviceId) { _, device ->
+            if (device != null) {
+              logd(
+                TAG,
+                "Certain connect protocol already exist, add id $protocolId to current " +
+                  "connected remote device."
+              )
+              device.secureChannel?.addStream(ProtocolStream(protocolDevice))
+              device.channelResolver?.addProtocolDevice(protocolDevice)
+              device.protocolDevices.add(protocolDevice)
+              return@compute device
+            }
 
+            ConnectedRemoteDevice(deviceId).apply {
+              protocolDevices.add(protocolDevice)
+              channelResolver = generateChannelResolver(protocolDevice, device = this)
+              channelResolver?.resolveReconnect(deviceId, challenge.challenge)
+            }
+          }
+            ?: return
         invokeCallbacksWithDevice(device) { connectedDevice, callback ->
           callback.onDeviceConnected(connectedDevice)
         }
@@ -347,34 +379,47 @@ constructor(
       override fun onDeviceConnected(protocolId: String) {
         logd(TAG, "New connection protocol connected, id: $protocolId, protocol: $protocol")
         val protocolDevice = ProtocolDevice(protocol, protocolId)
+        val pendingId = associationPendingDeviceId.get()
+        if (pendingId == null) {
+          loge(
+            TAG,
+            "Device connected for association when there was no association in progress. " +
+              "Disconnecting."
+          )
+          protocol.disconnectDevice(protocolId)
+          return
+        }
         protocol.registerDeviceDisconnectedListener(
           protocolId,
-          generateDeviceDisconnectedListener(associationCallback, deviceId = null, protocol),
+          generateDeviceDisconnectedListener(pendingId, protocol),
           callbackExecutor
         )
         // The channel only needs to be resolved once for all protocols connected to one remote
         // device.
-        var device = getConnectedDevice(associationCallback)
-        if (device != null) {
-          logd(
-            TAG,
-            "Certain connect protocol already exist, add id to current connected remote device."
-          )
-          device.secureChannel?.addStream(ProtocolStream(protocolDevice))
-          device.channelResolver?.addProtocolDevice(protocolDevice)
-          device.protocolDevices.add(protocolDevice)
-          return
-        }
-        device =
-          ConnectedRemoteDevice().apply {
+        val newDevice =
+          ConnectedRemoteDevice(pendingId).apply {
             protocolDevices.add(protocolDevice)
             callback = associationCallback
             channelResolver =
               generateChannelResolver(protocolDevice, device = this, associationCallback)
           }
-        device.channelResolver?.resolveAssociation(oobRunner)
-        connectedRemoteDevices.add(device)
-        associationPendingDevice = device
+        val existingDevice = connectedRemoteDevices.putIfAbsent(pendingId, newDevice)
+        if (existingDevice != null) {
+          logd(
+            TAG,
+            "Certain connect protocol already exist, add id to current connected remote device."
+          )
+          connectedRemoteDevices.compute(pendingId) { _, device ->
+            device?.apply {
+              secureChannel?.addStream(ProtocolStream(protocolDevice))
+              channelResolver?.addProtocolDevice(protocolDevice)
+              protocolDevices.add(protocolDevice)
+            }
+          }
+          return
+        }
+
+        newDevice.channelResolver?.resolveAssociation(oobRunner)
       }
 
       override fun onDiscoveryStartedSuccessfully() {
@@ -446,75 +491,69 @@ constructor(
     )
 
   private fun generateDeviceDisconnectedListener(
-    callback: IAssociationCallback?,
-    deviceId: UUID?,
+    deviceId: UUID,
     protocol: ConnectionProtocol,
   ) =
     object : ConnectionProtocol.DeviceDisconnectedListener {
       override fun onDeviceDisconnected(protocolId: String) {
         logd(TAG, "Remote connect protocol disconnected, id: $protocolId, protocol: $protocol")
-        val device =
-          when {
-            callback != null -> getConnectedDevice(callback)
-            deviceId != null -> getConnectedDevice(deviceId)
-            else -> null
+        connectedRemoteDevices.compute(deviceId) { deviceId, device ->
+          if (device == null) {
+            loge(TAG, "Unrecognized device disconnected. Ignoring.")
+            return@compute null
           }
-        if (device == null) {
-          loge(TAG, "Unrecognized device disconnected. Ignoring.")
-          return
-        }
-        for (protocolDevice in device.protocolDevices) {
-          if (protocolDevice.protocol == protocol && protocolDevice.protocolId == protocolId) {
-            device.protocolDevices.remove(protocolDevice)
-            break
+          for (protocolDevice in device.protocolDevices) {
+            if (protocolDevice.protocol == protocol && protocolDevice.protocolId == protocolId) {
+              device.protocolDevices.remove(protocolDevice)
+              break
+            }
           }
-        }
-        if (device.protocolDevices.isEmpty()) {
-          onLastProtocolDisconnected(device)
-          if (associationPendingDevice == device) {
-            callback
-              ?.aliveOrNull()
-              ?.onAssociationError(Errors.DEVICE_ERROR_UNEXPECTED_DISCONNECTION)
-            associationPendingDevice = null
+          if (device.protocolDevices.isEmpty()) {
+            onLastProtocolDisconnected(device)
+            if (associationPendingDeviceId.compareAndSet(deviceId, null)) {
+              device
+                .callback
+                ?.aliveOrNull()
+                ?.onAssociationError(Errors.DEVICE_ERROR_UNEXPECTED_DISCONNECTION)
+            }
+          } else {
+            logd(
+              TAG,
+              "There are still ${device.protocolDevices.size} connected protocols for $deviceId. " +
+                "A disconnect callback will not be issued."
+            )
           }
-        } else {
-          logd(
-            TAG,
-            "There are still ${device.protocolDevices.size} connected protocols for $deviceId. " +
-              "A disconnect callback will not be issued."
-          )
+          device
         }
       }
     }
 
   private fun onLastProtocolDisconnected(device: ConnectedRemoteDevice) {
+    val disconnectedDeviceId = device.deviceId
     logd(
       TAG,
-      "Device ${device.deviceId} has no more protocols connected. Issuing disconnect callback."
+      "Device $disconnectedDeviceId has no more protocols connected. Issuing disconnect callback."
     )
-    connectedRemoteDevices.remove(device)
+    connectedRemoteDevices.remove(disconnectedDeviceId)
 
     invokeCallbacksWithDevice(device) { connectedDevice, callback ->
       callback.onDeviceDisconnected(connectedDevice)
     }
-    device.deviceId?.let { disconnectedDeviceId ->
-      callbackExecutor.execute {
-        val associatedDevice = storage.getAssociatedDevice(disconnectedDeviceId.toString())
-        if (associatedDevice == null) {
-          loge(
-            TAG,
-            "Unable to find recently disconnected device $disconnectedDeviceId. " +
-              "Cannot proceed."
-          )
-          return@execute
-        }
-        if (!associatedDevice.isConnectionEnabled) {
-          logd(TAG, "$disconnectedDeviceId is disabled and will not attempt to reconnect.")
-          return@execute
-        }
-        logd(TAG, "Attempting to reconnect to recently disconnected device $disconnectedDeviceId.")
-        initiateConnectionToDevice(disconnectedDeviceId)
+    callbackExecutor.execute {
+      val associatedDevice = storage.getAssociatedDevice(disconnectedDeviceId.toString())
+      if (associatedDevice == null) {
+        loge(
+          TAG,
+          "Unable to find recently disconnected device $disconnectedDeviceId. " + "Cannot proceed."
+        )
+        return@execute
       }
+      if (!associatedDevice.isConnectionEnabled) {
+        logd(TAG, "$disconnectedDeviceId is disabled and will not attempt to reconnect.")
+        return@execute
+      }
+      logd(TAG, "Attempting to reconnect to recently disconnected device $disconnectedDeviceId.")
+      initiateConnectionToDevice(disconnectedDeviceId)
     }
   }
 
@@ -591,8 +630,8 @@ constructor(
     deviceMessage: DeviceMessage,
     device: ConnectedRemoteDevice
   ) {
-    if (device.deviceId == null) {
-      handleAssociationMessage(deviceMessage, device)
+    if (device.deviceId == associationPendingDeviceId.get()) {
+      handleAssociationMessage(deviceMessage)
       return
     }
 
@@ -602,46 +641,83 @@ constructor(
     }
   }
 
-  private fun handleAssociationMessage(
-    deviceMessage: DeviceMessage,
-    device: ConnectedRemoteDevice
-  ) {
+  private fun handleAssociationMessage(deviceMessage: DeviceMessage) {
+    val pendingDeviceId = associationPendingDeviceId.getAndSet(null)
+    if (pendingDeviceId == null) {
+      loge(TAG, "Received an association message with no pending association device. Ignoring.")
+      return
+    }
+    val device = connectedRemoteDevices.remove(pendingDeviceId)
+    if (device == null) {
+      loge(TAG, "Received an association message and the device was missing!.")
+      return
+    }
     val deviceId = ByteUtils.bytesToUUID(deviceMessage.message.copyOf(DEVICE_ID_BYTES))
     if (deviceId == null) {
       loge(TAG, "Received invalid device id. Aborting.")
       device.callback?.onAssociationError(ChannelError.CHANNEL_ERROR_INVALID_DEVICE_ID.ordinal)
       return
     }
-    device.deviceId = deviceId
-    logd(TAG, "Received device id and secret from $deviceId.")
-    try {
-      storage.saveChallengeSecret(
-        deviceId.toString(),
-        deviceMessage.message.copyOfRange(DEVICE_ID_BYTES, deviceMessage.message.size)
-      )
-    } catch (e: InvalidParameterException) {
-      loge(TAG, "Error saving challenge secret.", e)
-      device.callback?.onAssociationError(ChannelError.CHANNEL_ERROR_INVALID_ENCRYPTION_KEY.ordinal)
-      return
+
+    connectedRemoteDevices.computeIfAbsent(deviceId) {
+      logd(TAG, "Assigning newly-associated device to its real device id.")
+      val newDevice = convertTempAssociationDeviceToRealDevice(device, deviceId)
+      logd(TAG, "Received device id and secret from $deviceId.")
+      try {
+        storage.saveChallengeSecret(
+          deviceId.toString(),
+          deviceMessage.message.copyOfRange(DEVICE_ID_BYTES, deviceMessage.message.size)
+        )
+      } catch (e: InvalidParameterException) {
+        loge(TAG, "Error saving challenge secret.", e)
+        // Call on old device since it had the original association callback.
+        device.callback?.onAssociationError(
+          ChannelError.CHANNEL_ERROR_INVALID_ENCRYPTION_KEY.ordinal
+        )
+        return@computeIfAbsent newDevice
+      }
+      newDevice.secureChannel?.setDeviceIdDuringAssociation(deviceId)
+      persistAssociatedDevice(deviceId.toString())
+      newDevice.callback?.onAssociationCompleted()
+      invokeCallbacksWithDevice(newDevice) { connectedDevice, callback ->
+        callback.onDeviceConnected(connectedDevice)
+      }
+      invokeCallbacksWithDevice(newDevice) { connectedDevice, callback ->
+        callback.onSecureChannelEstablished(connectedDevice)
+      }
+      newDevice
     }
-    device.secureChannel?.setDeviceIdDuringAssociation(deviceId)
+  }
+
+  private fun convertTempAssociationDeviceToRealDevice(
+    device: ConnectedRemoteDevice,
+    deviceId: UUID
+  ): ConnectedRemoteDevice {
+    val newDevice =
+      device.copyWithNewDeviceId(deviceId).apply {
+        secureChannel?.callback = generateSecureChannelCallback(this)
+      }
+    for (protocolDevice in newDevice.protocolDevices) {
+      protocolDevice.protocol.registerDeviceDisconnectedListener(
+        protocolDevice.protocolId,
+        generateDeviceDisconnectedListener(deviceId, protocolDevice.protocol),
+        callbackExecutor
+      )
+    }
+    return newDevice
+  }
+
+  private fun persistAssociatedDevice(deviceId: String) {
     val associatedDevice =
       AssociatedDevice(
-        deviceId.toString(),
+        deviceId,
         /* deviceAddress= */ "",
         /* deviceName= */ null,
         /* isConnectionEnabled= */ true
       )
-    storage.addAssociatedDeviceForActiveUser(associatedDevice)
+    storage.addAssociatedDeviceForDriver(associatedDevice)
     driverDevices.add(associatedDevice)
-    associationPendingDevice = null
-    device.callback?.onAssociationCompleted()
-    invokeCallbacksWithDevice(device) { connectedDevice, callback ->
-      callback.onDeviceConnected(connectedDevice)
-    }
-    invokeCallbacksWithDevice(device) { connectedDevice, callback ->
-      callback.onSecureChannelEstablished(connectedDevice)
-    }
+    associatedDevices.add(associatedDevice)
   }
 
   /**
@@ -653,30 +729,24 @@ constructor(
     onCallback: (ConnectedDevice, Callback) -> Unit
   ) {
     val connectedDevice = device.toConnectedDevice(driverDevices)
-    if (connectedDevice == null) {
-      loge(TAG, "Unable to convert to connected device. Callbacks were not invoked!")
-      return
-    }
     callbacks.invoke { onCallback(connectedDevice, it) }
   }
 
   /** Container class to hold information about a connected device. */
   internal data class ConnectedRemoteDevice(
+    val deviceId: UUID,
     val protocolDevices: CopyOnWriteArraySet<ProtocolDevice> = CopyOnWriteArraySet()
   ) {
-    var deviceId: UUID? = null
     var secureChannel: MultiProtocolSecureChannel? = null
     var callback: IAssociationCallback? = null
     var name: String? = null
     var channelResolver: ChannelResolver? = null
 
     /** Returns the [ConnectedDevice] equivalent or `null` if the conversion failed. */
-    fun toConnectedDevice(driverDevices: List<AssociatedDevice>): ConnectedDevice? {
-      return deviceId?.let {
-        val belongsToDriver = driverDevices.any { device -> device.deviceId == it.toString() }
-        val hasSecureChannel = secureChannel != null
-        ConnectedDevice(it.toString(), name, belongsToDriver, hasSecureChannel)
-      }
+    fun toConnectedDevice(driverDevices: List<AssociatedDevice>): ConnectedDevice {
+      val belongsToDriver = driverDevices.any { device -> device.deviceId == deviceId.toString() }
+      val hasSecureChannel = secureChannel != null
+      return ConnectedDevice(deviceId.toString(), name, belongsToDriver, hasSecureChannel)
     }
 
     override fun equals(other: Any?): Boolean =
@@ -684,6 +754,14 @@ constructor(
 
     override fun hashCode(): Int {
       return Objects.hashCode(deviceId)
+    }
+
+    fun copyWithNewDeviceId(newDeviceId: UUID): ConnectedRemoteDevice {
+      val newDevice = ConnectedRemoteDevice(newDeviceId, protocolDevices)
+      newDevice.secureChannel = secureChannel
+      newDevice.name = name
+      newDevice.channelResolver = channelResolver
+      return newDevice
     }
   }
   companion object {

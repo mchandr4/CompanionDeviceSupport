@@ -28,7 +28,7 @@ import com.google.android.encryptionrunner.HandshakeMessage.HandshakeState
 import com.google.android.encryptionrunner.Key
 import java.security.SignatureException
 import java.util.UUID
-import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicReference
 import java.util.zip.DataFormatException
 import java.util.zip.Deflater
@@ -80,7 +80,7 @@ open class MultiProtocolSecureChannel(
     MESSAGE_ERROR_DECOMPRESSION_FAILURE
   }
 
-  private val streams = CopyOnWriteArrayList<ProtocolStream>()
+  private val streams = ConcurrentHashMap.newKeySet<ProtocolStream>()
 
   private val encryptionKey = AtomicReference<Key>()
 
@@ -295,18 +295,19 @@ open class MultiProtocolSecureChannel(
     stream.messageReceivedListener =
       object : ProtocolStream.MessageReceivedListener {
         override fun onMessageReceived(deviceMessage: DeviceMessage) {
-          logd(TAG, "Message received from stream $stream")
+          logd(TAG, "A new message was received from the stream.")
           onDeviceMessageReceived(deviceMessage)
         }
       }
     stream.protocolDisconnectListener =
       object : ProtocolStream.ProtocolDisconnectListener {
         override fun onProtocolDisconnected() {
-          logd(TAG, "Protocol of stream $stream disconnected. Removing from secure channel.")
+          logd(TAG, "The stream's protocol has disconnected. Removing from secure channel.")
           streams.remove(stream)
           // Notify secure channel error during association if device get disconnected before secure
           // channel is established.
           if (streams.isEmpty() && deviceId == null) {
+            loge(TAG, "There are no more streams to complete association.")
             notifySecureChannelFailure(ChannelError.CHANNEL_ERROR_DEVICE_DISCONNECTED)
           }
         }

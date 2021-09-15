@@ -44,8 +44,12 @@
         <item>BT_RFCOMM</item>
     </string-array>
 
+    <!-- Supported transport protocols. -->
+    <string-array name="transport_protocols" translatable="false">
+        <item>ble_peripheral</item>
+    </string-array>
+
     <bool name="enable_proxy">false</bool>
-    <bool name="enable_spp">false</bool>
     <bool name="enable_capabilities">false</bool>
     <bool name="enable_feature_coordinator">false</bool>
 </resources>

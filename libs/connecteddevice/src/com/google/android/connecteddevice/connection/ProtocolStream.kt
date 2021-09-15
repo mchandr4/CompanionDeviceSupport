@@ -66,6 +66,7 @@ open class ProtocolStream(
   private var maxWriteSize: Int
 
   init {
+    logd(TAG, "Creating new ProtocolStream for protocol device ${device.protocolId}.")
     device.protocol.registerDataReceivedListener(
       device.protocolId,
       object : ConnectionProtocol.DataReceivedListener {

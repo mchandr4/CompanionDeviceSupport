@@ -240,15 +240,7 @@ public class CarSppManager extends CarBluetoothManager {
             return;
           }
           currentConnection = null;
-          ConnectedRemoteDevice connectedDevice = getConnectedDevice(connection.getRemoteDevice());
-          // Reset before invoking callbacks to avoid a race condition with reconnect
-          // logic.
           reset();
-          String deviceId = connectedDevice == null ? reconnectDeviceId : connectedDevice.deviceId;
-          if (deviceId != null) {
-            logd(TAG, "Connected device " + deviceId + " disconnected.");
-            callbacks.invoke(callback -> callback.onDeviceDisconnected(deviceId));
-          }
         }
       };
 
@@ -301,13 +293,7 @@ public class CarSppManager extends CarBluetoothManager {
           } else {
             loge(TAG, "Encounter association error with no association callback registered.");
           }
-          ConnectedRemoteDevice connectedDevice = getConnectedDevice(connection.getRemoteDevice());
-          // Reset before invoking callbacks to avoid a race condition with reconnect
-          // logic.
           reset();
-          if (connectedDevice != null && connectedDevice.deviceId != null) {
-            callbacks.invoke(callback -> callback.onDeviceDisconnected(connectedDevice.deviceId));
-          }
         }
       };
 }

@@ -74,11 +74,6 @@ class BlePeripheralProtocol(
 
   private val peripheralCallback: BlePeripheralManager.Callback =
     object : BlePeripheralManager.Callback {
-      override fun onDeviceNameRetrieved(deviceName: String?) {
-        // TODO(b/187092343): Retrieve device name with query request
-        // This callback will be removed
-      }
-
       override fun onMtuSizeChanged(size: Int) {
         maxWriteSize = size - ATT_PROTOCOL_BYTES
         protocolId?.let { id ->

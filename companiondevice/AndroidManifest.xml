@@ -78,8 +78,8 @@
                 android:resource="@string/car_association_service_uuid" />
             <meta-data android:name="com.google.android.connecteddevice.enable_proxy"
                 android:resource="@bool/enable_proxy" />
-            <meta-data android:name="com.google.android.connecteddevice.enable_spp"
-                android:resource="@bool/enable_spp" />
+            <meta-data android:name="com.google.android.connecteddevice.transport_protocols"
+                android:resource="@array/transport_protocols" />
             <meta-data android:name="com.google.android.connecteddevice.enable_capabilities_exchange"
                 android:resource="@bool/enable_capabilities" />
             <meta-data android:name="com.google.android.connecteddevice.enable_feature_coordinator"

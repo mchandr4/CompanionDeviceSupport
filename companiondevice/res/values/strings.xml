@@ -37,7 +37,7 @@
     <!-- Instruction for connecting to car [CHAR LIMIT=100] -->
     <string name="connect_to_targe_car_instruction_text">Connect to &lt;b><xliff:g id="car_name" example="MyVehicle">%1$s</xliff:g>&lt;/b> <xliff:g id="advertised_car_name" example="(Vehicle 0000)">%2$s</xliff:g></string>
     <!-- Instruction for connecting to car [CHAR LIMIT=100] -->
-    <string name="connect_to_car_instruction_text">Connect to the car</string>
+    <string name="connect_to_car_instruction_text">Connect to the&#160;car</string>
     <!-- Title for confirm pairing code fragment [CHAR LIMIT=60]-->
     <string name="associated_device_pairing_code_title">Confirm code on phone</string>
     <!-- Message text shown in confirm pairing code fragment [CHAR LIMIT=100]-->

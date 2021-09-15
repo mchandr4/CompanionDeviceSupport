@@ -334,7 +334,7 @@ public class CalendarManagerTest {
     calendarKeyToTimeRange.put(CALENDAR_KEY, TIME_RANGE);
     CalendarManager manager = createCalendarManager(calendarKeyToTimeRange);
     Calendar calendarUpdate =
-        Calendar.newBuilder().addEvents(Event.newBuilder()).setKey(CALENDAR_KEY).build();
+        Calendar.newBuilder().addEvents(Event.getDefaultInstance()).setKey(CALENDAR_KEY).build();
 
     manager.applyUpdateMessages(DEVICE_ID, ImmutableSet.of(calendarUpdate));
 

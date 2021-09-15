@@ -70,7 +70,7 @@ public final class ConnectedDeviceStorageTest {
   public void tearDown() {
     // Clear any associated devices added during tests.
     for (Pair<Integer, AssociatedDevice> device : addedAssociatedDevices) {
-      connectedDeviceStorage.removeAssociatedDevice(device.first, device.second.getDeviceId());
+      connectedDeviceStorage.removeAssociatedDevice(device.second.getDeviceId());
     }
     connectedDeviceDatabase.close();
   }
@@ -94,10 +94,15 @@ public final class ConnectedDeviceStorageTest {
   @Test
   public void getAssociatedDeviceIdsForUser_excludesRemovedDevice() {
     AssociatedDevice addedDevice = addRandomAssociatedDevice(ACTIVE_USER_ID);
-    connectedDeviceStorage.removeAssociatedDevice(ACTIVE_USER_ID, addedDevice.getDeviceId());
+    connectedDeviceStorage.removeAssociatedDevice(addedDevice.getDeviceId());
     List<String> associatedDevices =
         connectedDeviceStorage.getAssociatedDeviceIdsForUser(ACTIVE_USER_ID);
     assertThat(associatedDevices).isEmpty();
+  }
+
+  @Test
+  public void getAssociatedDeviceIdsForUser_returnsEmptyListIfNoDevicesFound() {
+    assertThat(connectedDeviceStorage.getAssociatedDeviceIdsForUser(ACTIVE_USER_ID)).isEmpty();
   }
 
   @Test
@@ -119,10 +124,15 @@ public final class ConnectedDeviceStorageTest {
   @Test
   public void getAssociatedDevicesForUser_excludesRemovedDevice() {
     AssociatedDevice addedDevice = addRandomAssociatedDevice(ACTIVE_USER_ID);
-    connectedDeviceStorage.removeAssociatedDevice(ACTIVE_USER_ID, addedDevice.getDeviceId());
+    connectedDeviceStorage.removeAssociatedDevice(addedDevice.getDeviceId());
     List<AssociatedDevice> associatedDevices =
         connectedDeviceStorage.getAssociatedDevicesForUser(ACTIVE_USER_ID);
     assertThat(associatedDevices).isEmpty();
+  }
+
+  @Test
+  public void getAssociatedDevicesForUser_returnsEmptyListIfNoDevicesFound() {
+    assertThat(connectedDeviceStorage.getAssociatedDevicesForUser(ACTIVE_USER_ID)).isEmpty();
   }
 
   @Test
@@ -133,6 +143,11 @@ public final class ConnectedDeviceStorageTest {
     List<AssociatedDevice> associatedDevices = connectedDeviceStorage.getAllAssociatedDevices();
 
     assertThat(associatedDevices).containsExactly(activeUserDevice, otherUserDevice);
+  }
+
+  @Test
+  public void getAllAssociatedDevices_returnsEmptyListIfNoDevicesFound() {
+    assertThat(connectedDeviceStorage.getAllAssociatedDevices()).isEmpty();
   }
 
   @Test
@@ -308,6 +323,85 @@ public final class ConnectedDeviceStorageTest {
   @Test
   public void updateAssociatedDeviceName_doesNotThrowOnUnrecognizedDeviceId() {
     connectedDeviceStorage.updateAssociatedDeviceName(UUID.randomUUID().toString(), "name");
+  }
+
+  @Test
+  public void getAssociatedDevicesNotBelongingToUser_includesDevicesNotMatchingUser() {
+    AssociatedDevice device = addRandomAssociatedDevice(ACTIVE_USER_ID + 1);
+    List<AssociatedDevice> associatedDevices =
+        connectedDeviceStorage.getAssociatedDevicesNotBelongingToUser(ACTIVE_USER_ID);
+    assertThat(associatedDevices).containsExactly(device);
+  }
+
+  @Test
+  public void getAssociatedDevicesNotBelongingToUser_excludesDevicesMatchingUser() {
+    addRandomAssociatedDevice(ACTIVE_USER_ID);
+    List<AssociatedDevice> associatedDevices =
+        connectedDeviceStorage.getAssociatedDevicesNotBelongingToUser(ACTIVE_USER_ID);
+    assertThat(associatedDevices).isEmpty();
+  }
+
+  @Test
+  public void getAssociatedDevicesNotBelongingToUser_returnsEmptyListIfNoDevicesFound() {
+    assertThat(connectedDeviceStorage.getAssociatedDevicesNotBelongingToUser(ACTIVE_USER_ID))
+        .isEmpty();
+  }
+
+  @Test
+  public void getAssociatedDeviceIdsNotBelongingToUser_includesDevicesNotMatchingUser() {
+    AssociatedDevice device = addRandomAssociatedDevice(ACTIVE_USER_ID + 1);
+    List<String> associatedDevices =
+        connectedDeviceStorage.getAssociatedDeviceIdsNotBelongingToUser(ACTIVE_USER_ID);
+    assertThat(associatedDevices).containsExactly(device.getDeviceId());
+  }
+
+  @Test
+  public void getAssociatedDeviceIdsNotBelongingToUser_excludesDevicesMatchingUser() {
+    addRandomAssociatedDevice(ACTIVE_USER_ID);
+    List<String> associatedDevices =
+        connectedDeviceStorage.getAssociatedDeviceIdsNotBelongingToUser(ACTIVE_USER_ID);
+    assertThat(associatedDevices).isEmpty();
+  }
+
+  @Test
+  public void getAssociatedDeviceIdsNotBelongingToUser_returnsEmptyListIfNoDevicesFound() {
+    assertThat(connectedDeviceStorage.getAssociatedDeviceIdsNotBelongingToUser(ACTIVE_USER_ID))
+        .isEmpty();
+  }
+
+  @Test
+  public void addAssociatedDeviceForUser_invokesCallback() {
+    AssociatedDeviceCallback callback = mock(AssociatedDeviceCallback.class);
+    connectedDeviceStorage.setAssociatedDeviceCallback(callback);
+
+    AssociatedDevice device = addRandomAssociatedDevice(ACTIVE_USER_ID);
+
+    verify(callback).onAssociatedDeviceAdded(device);
+  }
+
+  @Test
+  public void removeAssociatedDeviceForUser_invokesCallback() {
+    AssociatedDeviceCallback callback = mock(AssociatedDeviceCallback.class);
+    connectedDeviceStorage.setAssociatedDeviceCallback(callback);
+    AssociatedDevice device = addRandomAssociatedDevice(ACTIVE_USER_ID);
+
+    connectedDeviceStorage.removeAssociatedDevice(device.getDeviceId());
+
+    verify(callback).onAssociatedDeviceRemoved(device);
+  }
+
+  @Test
+  public void updateAssociatedDeviceName_invokesCallback() {
+    AssociatedDeviceCallback callback = mock(AssociatedDeviceCallback.class);
+    connectedDeviceStorage.setAssociatedDeviceCallback(callback);
+    AssociatedDevice device = addRandomAssociatedDevice(ACTIVE_USER_ID);
+    String newName = "New Name";
+
+    connectedDeviceStorage.updateAssociatedDeviceName(device.getDeviceId(), newName);
+
+    ArgumentCaptor<AssociatedDevice> captor = ArgumentCaptor.forClass(AssociatedDevice.class);
+    verify(callback).onAssociatedDeviceUpdated(captor.capture());
+    assertThat(captor.getValue().getDeviceName()).isEqualTo(newName);
   }
 
   private AssociatedDevice addRandomAssociatedDevice(int userId) {

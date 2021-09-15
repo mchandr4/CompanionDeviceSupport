@@ -58,6 +58,6 @@ public class AssociatedDeviceEntity {
 
   /** Return a new {@link AssociatedDevice} of this entity. */
   public AssociatedDevice toAssociatedDevice() {
-    return new AssociatedDevice(id, address, name, isConnectionEnabled);
+    return new AssociatedDevice(id, address, name, isConnectionEnabled, userId);
   }
 }

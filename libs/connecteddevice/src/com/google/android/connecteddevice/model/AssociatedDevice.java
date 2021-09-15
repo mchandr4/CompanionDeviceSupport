@@ -24,6 +24,8 @@ import java.util.Objects;
 
 /** Contains basic info of an associated device. */
 public class AssociatedDevice implements Parcelable {
+  /** Default placeholder userId value for an unclaimed device. */
+  public static final int UNCLAIMED_USER_ID = -1;
 
   private final String deviceId;
 
@@ -32,6 +34,8 @@ public class AssociatedDevice implements Parcelable {
   private final String deviceName;
 
   private final boolean isConnectionEnabled;
+
+  private final int userId;
 
   /**
    * Create a new AssociatedDevice.
@@ -45,15 +49,35 @@ public class AssociatedDevice implements Parcelable {
       @NonNull String deviceId,
       @NonNull String deviceAddress,
       @Nullable String deviceName,
-      boolean isConnectionEnabled) {
+      boolean isConnectionEnabled
+  ) {
+    this(deviceId, deviceAddress, deviceName, isConnectionEnabled, UNCLAIMED_USER_ID);
+  }
+
+  /**
+   * Create a new AssociatedDevice.
+   *
+   * @param deviceId Id of the associated device.
+   * @param deviceAddress Address of the associated device.
+   * @param deviceName Name of the associated device. {@code null} if not known.
+   * @param isConnectionEnabled If connection is enabled for this device.
+   * @param userId Id of the claiming user, or {@value #UNCLAIMED_USER_ID} if unclaimed.
+   */
+  public AssociatedDevice(
+      @NonNull String deviceId,
+      @NonNull String deviceAddress,
+      @Nullable String deviceName,
+      boolean isConnectionEnabled,
+      int userId) {
     this.deviceId = deviceId;
     this.deviceAddress = deviceAddress;
     this.deviceName = deviceName;
     this.isConnectionEnabled = isConnectionEnabled;
+    this.userId = userId;
   }
 
   private AssociatedDevice(Parcel in) {
-    this(in.readString(), in.readString(), in.readString(), in.readBoolean());
+    this(in.readString(), in.readString(), in.readString(), in.readBoolean(), in.readInt());
   }
 
   /** Returns the id for this device. */
@@ -77,6 +101,11 @@ public class AssociatedDevice implements Parcelable {
   /** Return if connection is enabled for this device. */
   public boolean isConnectionEnabled() {
     return isConnectionEnabled;
+  }
+
+  /** Returns the id of the claiming user, or {@value #UNCLAIMED_USER_ID} if not claimed. */
+  public int getUserId() {
+    return userId;
   }
 
   @Override
@@ -107,10 +136,11 @@ public class AssociatedDevice implements Parcelable {
     dest.writeString(deviceAddress);
     dest.writeString(deviceName);
     dest.writeBoolean(isConnectionEnabled);
+    dest.writeInt(userId);
   }
 
   public static final Parcelable.Creator<AssociatedDevice> CREATOR =
-      new Parcelable.Creator<AssociatedDevice>() {
+      new Parcelable.Creator<>() {
         @Override
         public AssociatedDevice createFromParcel(Parcel source) {
           return new AssociatedDevice(source);

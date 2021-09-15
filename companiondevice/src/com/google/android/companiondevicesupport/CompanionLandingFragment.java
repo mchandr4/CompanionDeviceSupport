@@ -19,7 +19,6 @@ package com.google.android.companiondevicesupport;
 import static com.google.android.connecteddevice.util.SafeLog.loge;
 
 import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelStoreOwner;
 import android.bluetooth.BluetoothAdapter;
 import android.os.Bundle;
 import androidx.fragment.app.Fragment;
@@ -30,8 +29,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.LayoutRes;
+import com.google.android.connecteddevice.model.TransportProtocols;
 import com.google.android.connecteddevice.ui.AssociatedDeviceViewModel;
 import com.google.android.connecteddevice.ui.AssociatedDeviceViewModelFactory;
+import java.util.Arrays;
+import java.util.List;
 
 /** Fragment that provides association instructions. */
 public class CompanionLandingFragment extends Fragment {
@@ -65,12 +67,14 @@ public class CompanionLandingFragment extends Fragment {
 
   @Override
   public void onViewCreated(View view, Bundle bundle) {
+    List<String> transportProtocols =
+        Arrays.asList(getResources().getStringArray(R.array.transport_protocols));
     AssociatedDeviceViewModel model =
         new ViewModelProvider(
-                (ViewModelStoreOwner) requireActivity(),
+                requireActivity(),
                 new AssociatedDeviceViewModelFactory(
                     requireActivity().getApplication(),
-                    getResources().getBoolean(R.bool.enable_spp),
+                    transportProtocols.contains(TransportProtocols.PROTOCOL_SPP),
                     getResources().getString(R.string.ble_device_name_prefix)))
             .get(AssociatedDeviceViewModel.class);
     TextView connectToCarTextView = view.findViewById(R.id.connect_to_car_text);

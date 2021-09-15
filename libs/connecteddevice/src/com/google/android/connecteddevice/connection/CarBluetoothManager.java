@@ -37,9 +37,12 @@ import com.google.android.connecteddevice.oob.OobConnectionManager;
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage;
 import com.google.android.connecteddevice.util.ThreadSafeCallbacks;
 import com.google.common.collect.ImmutableList;
+import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executor;
+import java.util.stream.Collectors;
 
 /**
  * Generic manager for a car that keeps track of connected devices and their associated callbacks.
@@ -241,11 +244,21 @@ public abstract class CarBluetoothManager {
   /** Clean manager status and callbacks. */
   @CallSuper
   public void reset() {
+    // Clean up state prior to issuing callbacks to avoid race conditions.
+    List<String> callbackIds =
+        connectedDevices
+            .stream()
+            .map((device) -> device.deviceId)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
     clientDeviceAddress = null;
     clientDeviceName = null;
     connectedDevices.clear();
     oobConnectionManager.reset();
     associationCallback = null;
+    for (String deviceId : callbackIds) {
+      callbacks.invoke(callback -> callback.onDeviceDisconnected(deviceId));
+    }
   }
 
   /** Notify that the user has accepted a pairing code or other out-of-band confirmation. */
@@ -340,6 +353,7 @@ public abstract class CarBluetoothManager {
     BluetoothDevice device = connectedDevice.device;
     ImmutableList<OobChannelType> supportedOobCapabilities = SUPPORTED_OOB_CAPABILITIES;
     if (!isCapabilitiesEligible) {
+      logd(TAG, "Capabilities exchange is not supported.");
       supportedOobCapabilities = ImmutableList.of();
     }
 
@@ -486,7 +500,7 @@ public abstract class CarBluetoothManager {
                 TAG,
                 "Secure channel established for un-associated device. Saving "
                     + "association of that device for current user.");
-            storage.addAssociatedDeviceForActiveUser(
+            storage.addAssociatedDeviceForDriver(
                 new AssociatedDevice(
                     deviceId,
                     clientDeviceAddress,

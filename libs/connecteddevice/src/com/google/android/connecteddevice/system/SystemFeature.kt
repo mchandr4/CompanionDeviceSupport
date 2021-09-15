@@ -26,6 +26,11 @@ open class SystemFeature(
   private val bluetoothAdapter: BluetoothAdapter =
     context.getSystemService(BluetoothManager::class.java).adapter
 
+  override fun start() {
+    super.start()
+    logd(TAG, "Starting SystemFeature $SYSTEM_FEATURE_ID.")
+  }
+
   override fun onSecureChannelEstablished(device: ConnectedDevice) =
     onSecureChannelEstablishedInternal(device)
 

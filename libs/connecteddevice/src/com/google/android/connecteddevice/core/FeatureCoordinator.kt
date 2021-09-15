@@ -126,28 +126,31 @@ constructor(
     }
 
     val recipientCallbacks =
-      deviceCallbacks.getOrPut(connectedDevice.deviceId) { ConcurrentHashMap() }
+      deviceCallbacks.computeIfAbsent(connectedDevice.deviceId) { ConcurrentHashMap() }
+    val newCallbacks =
+      AidlThreadSafeCallbacks<IDeviceCallback>().apply { add(callback, callbackExecutor) }
+    recipientCallbacks.computeIfPresent(recipientId) { _, callbacks ->
+      if (callbacks.isEmpty) null else callbacks
+    }
+    val previousCallbacks = recipientCallbacks.putIfAbsent(recipientId, newCallbacks)
 
     // Device already has a callback registered with this recipient UUID. For the
     // protection of the user, this UUID is now deny listed from future subscriptions
     // and the original subscription is notified and removed.
-    if (recipientCallbacks.containsKey(recipientId)) {
+    if (previousCallbacks != null) {
       blockedRecipients.add(recipientId)
-      val conflictingCallbacks = recipientCallbacks.remove(recipientId)
-      conflictingCallbacks?.invoke {
+      recipientCallbacks.remove(recipientId)
+      previousCallbacks.invoke {
         it.onDeviceError(connectedDevice, DEVICE_ERROR_INSECURE_RECIPIENT_ID_DETECTED)
       }
       notifyRecipientBlocked(connectedDevice, recipientId, callback)
       return
     }
+
     logd(
       TAG,
-      "New callback registered on device ${connectedDevice.getDeviceId()} for recipient " +
-        "$recipientId."
+      "New callback registered on device ${connectedDevice.deviceId} for recipient $recipientId."
     )
-    val newCallbacks =
-      AidlThreadSafeCallbacks<IDeviceCallback>().apply { add(callback, callbackExecutor) }
-    recipientCallbacks[recipientId] = newCallbacks
     notifyOfMissedMessages(connectedDevice, recipientId, callback)
   }
 
@@ -222,6 +225,7 @@ constructor(
   }
 
   override fun startAssociation(callback: IAssociationCallback) {
+    logd(TAG, "Received request to start association.")
     controller.startAssociation(
       ByteUtils.byteArrayToHexString(ByteUtils.randomBytes(DEVICE_NAME_LENGTH)),
       callback
@@ -229,6 +233,7 @@ constructor(
   }
 
   override fun stopAssociation() {
+    logd(TAG, "Received request to stop association.")
     controller.stopAssociation()
   }
 
@@ -238,7 +243,15 @@ constructor(
 
   override fun retrieveAssociatedDevicesForDriver(listener: IOnAssociatedDevicesRetrievedListener) {
     callbackExecutor.execute {
-      listener.onAssociatedDevicesRetrieved(storage.activeUserAssociatedDevices)
+      listener.onAssociatedDevicesRetrieved(storage.driverAssociatedDevices)
+    }
+  }
+
+  override fun retrieveAssociatedDevicesForPassengers(
+    listener: IOnAssociatedDevicesRetrievedListener
+  ) {
+    callbackExecutor.execute {
+      listener.onAssociatedDevicesRetrieved(storage.passengerAssociatedDevices)
     }
   }
 
@@ -248,7 +261,7 @@ constructor(
 
   override fun removeAssociatedDevice(deviceId: String) {
     controller.disconnectDevice(UUID.fromString(deviceId))
-    storage.removeAssociatedDeviceForActiveUser(deviceId)
+    storage.removeAssociatedDevice(deviceId)
   }
 
   override fun enableAssociatedDeviceConnection(deviceId: String) {
@@ -269,6 +282,7 @@ constructor(
 
   @VisibleForTesting
   internal fun onDeviceConnectedInternal(connectedDevice: ConnectedDevice) {
+    logd(TAG, "Connected device has a secure channel ${connectedDevice.hasSecureChannel()}")
     if (connectedDevice.isAssociatedWithDriver) {
       logd(TAG, "Notifying callbacks that a new device has connected for the driver.")
       driverConnectionCallbacks.invoke { it.onDeviceConnected(connectedDevice) }
@@ -312,7 +326,7 @@ constructor(
       )
       return
     }
-    logd(TAG, "Received a new message for ${message.recipient}.")
+    logd(TAG, "Received a new message for ${message.recipient} from ${connectedDevice.deviceId}.")
     val callback = deviceCallbacks[connectedDevice.deviceId]?.get(ParcelUuid(message.recipient))
 
     if (callback == null) {

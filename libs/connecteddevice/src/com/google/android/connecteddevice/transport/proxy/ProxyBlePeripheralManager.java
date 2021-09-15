@@ -42,7 +42,6 @@ public class ProxyBlePeripheralManager extends BlePeripheralManager {
 
   private static final int MTU_SIZE = 20;
   private static final String ADVERTISED_NAME = "EmulatorBleProxy";
-  private static final String REMOTE_DEVICE_NAME = "BleProxyCompanionDevice";
 
   private final SocketFactory socketFactory;
   private final ScheduledExecutorService executor;
@@ -225,14 +224,6 @@ public class ProxyBlePeripheralManager extends BlePeripheralManager {
         () -> {
           messageWriter.updateCharacteristic(characteristic);
         });
-  }
-
-  /** Invokes callbacks with a fixed name for remote device. */
-  @Override
-  public void retrieveDeviceName(BluetoothDevice device) {
-    for (Callback callback : callbacks) {
-      callback.onDeviceNameRetrieved(REMOTE_DEVICE_NAME);
-    }
   }
 
   /** Closes the proxy socket and its dependent components. */

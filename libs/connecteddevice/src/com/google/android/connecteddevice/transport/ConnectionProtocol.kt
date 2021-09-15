@@ -98,6 +98,7 @@ abstract class ConnectionProtocol {
     listener: DataReceivedListener,
     executor: Executor
   ) {
+    logd(TAG, "Registering a new DataReceivedListener.")
     val listeners = dataReceivedListeners.computeIfAbsent(protocolId) { ThreadSafeCallbacks() }
     listeners.add(listener, executor)
     missedData.remove(protocolId)?.forEach { data ->
@@ -132,6 +133,7 @@ abstract class ConnectionProtocol {
 
   /** Unregister a previously registered [DataReceivedListener]. */
   open fun unregisterDataReceivedListener(protocolId: String, listener: DataReceivedListener) {
+    logd(TAG, "Removing data DataReceivedListener.")
     val listeners =
       dataReceivedListeners.getOrElse(protocolId) {
         logw(

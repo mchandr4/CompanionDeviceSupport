@@ -93,8 +93,8 @@ public class ConnectedDeviceManagerTest {
             directExecutor,
             directExecutor);
     verify(mockStorage).setAssociatedDeviceCallback(callbackCaptor.capture());
-    when(mockStorage.getActiveUserAssociatedDevices()).thenReturn(userDevices);
-    when(mockStorage.getActiveUserAssociatedDeviceIds()).thenReturn(userDeviceIds);
+    when(mockStorage.getDriverAssociatedDevices()).thenReturn(userDevices);
+    when(mockStorage.getDriverAssociatedDeviceIds()).thenReturn(userDeviceIds);
     associatedDeviceCallback = callbackCaptor.getValue();
     connectedDeviceManager.start();
   }
@@ -122,7 +122,7 @@ public class ConnectedDeviceManagerTest {
   public void getActiveUserConnectedDevices_excludesDevicesNotBelongingToActiveUser() {
     String deviceId = UUID.randomUUID().toString();
     String otherUserDeviceId = UUID.randomUUID().toString();
-    when(mockStorage.getActiveUserAssociatedDeviceIds())
+    when(mockStorage.getDriverAssociatedDeviceIds())
         .thenReturn(ImmutableList.of(otherUserDeviceId));
     connectedDeviceManager.addConnectedDevice(deviceId);
     assertThat(connectedDeviceManager.getActiveUserConnectedDevices()).isEmpty();
@@ -234,7 +234,7 @@ public class ConnectedDeviceManagerTest {
         mockConnectionCallback, directExecutor);
     String deviceId = UUID.randomUUID().toString();
     String otherUserDeviceId = UUID.randomUUID().toString();
-    when(mockStorage.getActiveUserAssociatedDeviceIds())
+    when(mockStorage.getDriverAssociatedDeviceIds())
         .thenReturn(ImmutableList.of(otherUserDeviceId));
     connectedDeviceManager.addConnectedDevice(deviceId);
   }
@@ -474,7 +474,7 @@ public class ConnectedDeviceManagerTest {
     connectedDeviceManager.addConnectedDevice(deviceId);
     connectedDeviceManager.registerActiveUserConnectionCallback(
         mockConnectionCallback, directExecutor);
-    when(mockStorage.getActiveUserAssociatedDeviceIds()).thenReturn(ImmutableList.of(deviceId));
+    when(mockStorage.getDriverAssociatedDeviceIds()).thenReturn(ImmutableList.of(deviceId));
     connectedDeviceManager.onAssociationCompleted(deviceId);
   }
 
@@ -517,11 +517,11 @@ public class ConnectedDeviceManagerTest {
   @Test
   public void removeConnectedDevice_startsAdvertisingForActiveUserDeviceOnActiveUserDisconnect() {
     String deviceId = UUID.randomUUID().toString();
-    when(mockStorage.getActiveUserAssociatedDeviceIds()).thenReturn(ImmutableList.of(deviceId));
+    when(mockStorage.getDriverAssociatedDeviceIds()).thenReturn(ImmutableList.of(deviceId));
     AssociatedDevice device =
         new AssociatedDevice(
             deviceId, TEST_DEVICE_ADDRESS, TEST_DEVICE_NAME, /* isConnectionEnabled= */ true);
-    when(mockStorage.getActiveUserAssociatedDevices()).thenReturn(ImmutableList.of(device));
+    when(mockStorage.getDriverAssociatedDevices()).thenReturn(ImmutableList.of(device));
     connectedDeviceManager.addConnectedDevice(deviceId);
     connectedDeviceManager.removeConnectedDevice(deviceId);
     verify(mockCarBluetoothManager).connectToDevice(eq(UUID.fromString(deviceId)));
@@ -531,11 +531,11 @@ public class ConnectedDeviceManagerTest {
   public void removeConnectedDevice_startsAdvertisingForActiveUserDeviceOnLastDeviceDisconnect() {
     String deviceId = UUID.randomUUID().toString();
     String userDeviceId = UUID.randomUUID().toString();
-    when(mockStorage.getActiveUserAssociatedDeviceIds()).thenReturn(ImmutableList.of(userDeviceId));
+    when(mockStorage.getDriverAssociatedDeviceIds()).thenReturn(ImmutableList.of(userDeviceId));
     AssociatedDevice userDevice =
         new AssociatedDevice(
             userDeviceId, TEST_DEVICE_ADDRESS, TEST_DEVICE_NAME, /* isConnectionEnabled= */ true);
-    when(mockStorage.getActiveUserAssociatedDevices()).thenReturn(ImmutableList.of(userDevice));
+    when(mockStorage.getDriverAssociatedDevices()).thenReturn(ImmutableList.of(userDevice));
     connectedDeviceManager.addConnectedDevice(deviceId);
     connectedDeviceManager.removeConnectedDevice(deviceId);
     verify(mockCarBluetoothManager).connectToDevice(eq(UUID.fromString(userDeviceId)));
@@ -545,11 +545,11 @@ public class ConnectedDeviceManagerTest {
   public void removeConnectedDevice_doesNotAdvertiseForNonActiveUserDeviceNotLastDevice() {
     String deviceId = UUID.randomUUID().toString();
     String userDeviceId = UUID.randomUUID().toString();
-    when(mockStorage.getActiveUserAssociatedDeviceIds()).thenReturn(ImmutableList.of(userDeviceId));
+    when(mockStorage.getDriverAssociatedDeviceIds()).thenReturn(ImmutableList.of(userDeviceId));
     AssociatedDevice userDevice =
         new AssociatedDevice(
             userDeviceId, TEST_DEVICE_ADDRESS, TEST_DEVICE_NAME, /* isConnectionEnabled= */ true);
-    when(mockStorage.getActiveUserAssociatedDevices()).thenReturn(ImmutableList.of(userDevice));
+    when(mockStorage.getDriverAssociatedDevices()).thenReturn(ImmutableList.of(userDevice));
     connectedDeviceManager.addConnectedDevice(deviceId);
     connectedDeviceManager.addConnectedDevice(userDeviceId);
     connectedDeviceManager.removeConnectedDevice(deviceId);
@@ -559,11 +559,11 @@ public class ConnectedDeviceManagerTest {
   @Test
   public void removeConnectedDevice_startsAdvertisingForActiveUserDeviceWithNullDevice() {
     String deviceId = UUID.randomUUID().toString();
-    when(mockStorage.getActiveUserAssociatedDeviceIds()).thenReturn(ImmutableList.of(deviceId));
+    when(mockStorage.getDriverAssociatedDeviceIds()).thenReturn(ImmutableList.of(deviceId));
     AssociatedDevice device =
         new AssociatedDevice(
             deviceId, TEST_DEVICE_ADDRESS, TEST_DEVICE_NAME, /* isConnectionEnabled= */ true);
-    when(mockStorage.getActiveUserAssociatedDevices()).thenReturn(ImmutableList.of(device));
+    when(mockStorage.getDriverAssociatedDevices()).thenReturn(ImmutableList.of(device));
     connectedDeviceManager.removeConnectedDevice(deviceId);
     verify(mockCarBluetoothManager).connectToDevice(eq(UUID.fromString(deviceId)));
   }
@@ -572,7 +572,7 @@ public class ConnectedDeviceManagerTest {
   public void removeActiveUserAssociatedDevice_deletesAssociatedDeviceFromStorage() {
     String deviceId = UUID.randomUUID().toString();
     connectedDeviceManager.removeActiveUserAssociatedDevice(deviceId);
-    verify(mockStorage).removeAssociatedDeviceForActiveUser(deviceId);
+    verify(mockStorage).removeAssociatedDevice(deviceId);
   }
 
   @Test
@@ -592,7 +592,7 @@ public class ConnectedDeviceManagerTest {
   @Test
   public void enableAssociatedDeviceConnection_startsDiscoveryAfterBeingDisabled() {
     UUID deviceId = UUID.randomUUID();
-    when(mockStorage.getActiveUserAssociatedDeviceIds())
+    when(mockStorage.getDriverAssociatedDeviceIds())
         .thenReturn(ImmutableList.of(deviceId.toString()));
     AssociatedDevice device =
         new AssociatedDevice(
@@ -600,7 +600,7 @@ public class ConnectedDeviceManagerTest {
             TEST_DEVICE_ADDRESS,
             TEST_DEVICE_NAME,
             /* isConnectionEnabled= */ true);
-    when(mockStorage.getActiveUserAssociatedDevices()).thenReturn(ImmutableList.of(device));
+    when(mockStorage.getDriverAssociatedDevices()).thenReturn(ImmutableList.of(device));
     connectedDeviceManager.connectToActiveUserDevice();
     connectedDeviceManager.disableAssociatedDeviceConnection(deviceId.toString());
     connectedDeviceManager.enableAssociatedDeviceConnection(deviceId.toString());

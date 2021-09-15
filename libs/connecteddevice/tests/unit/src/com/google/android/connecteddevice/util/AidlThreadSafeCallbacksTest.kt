@@ -35,12 +35,14 @@ class AidlThreadSafeCallbacksTest {
 
   @Test
   fun add_callbacksWithDifferentBindersAdded() {
-    val binder1: IBinder = mock()
-    val binder2: IBinder = mock()
-    val callback1: IInterface = mock()
-    val callback2: IInterface = mock()
+    val binder1 = mock<IBinder>()
+    val binder2 = mock<IBinder>()
+    val callback1 = mock<IInterface>()
+    val callback2 = mock<IInterface>()
     whenever(callback1.asBinder()).thenReturn(binder1)
+    whenever(binder1.isBinderAlive).thenReturn(true)
     whenever(callback2.asBinder()).thenReturn(binder2)
+    whenever(binder2.isBinderAlive).thenReturn(true)
 
     callbacks.add(callback1, directExecutor())
     callbacks.add(callback2, directExecutor())
@@ -50,11 +52,12 @@ class AidlThreadSafeCallbacksTest {
 
   @Test
   fun add_duplicateBindersResultInOnlyOneRegisteredCallback() {
-    val mockBinder: IBinder = mock()
-    val callback: IInterface = mock()
-    val callbackWithSameBinder: IInterface = mock()
+    val mockBinder = mock<IBinder>()
+    val callback = mock<IInterface>()
+    val callbackWithSameBinder = mock<IInterface>()
     whenever(callback.asBinder()).thenReturn(mockBinder)
     whenever(callbackWithSameBinder.asBinder()).thenReturn(mockBinder)
+    whenever(mockBinder.isBinderAlive).thenReturn(true)
 
     callbacks.add(callback, directExecutor())
     callbacks.add(callbackWithSameBinder, directExecutor())
@@ -63,23 +66,70 @@ class AidlThreadSafeCallbacksTest {
   }
 
   @Test
-  fun contains_matchesOnBinder() {
-    val mockBinder: IBinder = mock()
-    val callback: IInterface = mock()
-    val callbackWithSameBinder: IInterface = mock()
-    whenever(callback.asBinder()).thenReturn(mockBinder)
-    whenever(callbackWithSameBinder.asBinder()).thenReturn(mockBinder)
+  fun contains_matchesOnAliveBinder() {
+    val aliveBinder = mock<IBinder>()
+    val aliveCallback = mock<IInterface>()
+    val callbackWithSameAliveBinder = mock<IInterface>()
+    val deadBinder = mock<IBinder>()
+    val deadCallback = mock<IInterface>()
+    val callbackWithSameDeadBinder = mock<IInterface>()
+    whenever(aliveCallback.asBinder()).thenReturn(aliveBinder)
+    whenever(callbackWithSameAliveBinder.asBinder()).thenReturn(aliveBinder)
+    whenever(aliveBinder.isBinderAlive).thenReturn(true)
+    whenever(deadCallback.asBinder()).thenReturn(deadBinder)
+    whenever(callbackWithSameDeadBinder.asBinder()).thenReturn(deadBinder)
+    whenever(deadBinder.isBinderAlive).thenReturn(false)
 
-    callbacks.add(callback, directExecutor())
+    callbacks.add(aliveCallback, directExecutor())
+    callbacks.add(deadCallback, directExecutor())
 
-    assertThat(callbacks.contains(callbackWithSameBinder)).isTrue()
+    assertThat(callbacks.contains(callbackWithSameAliveBinder)).isTrue()
+    assertThat(callbacks.contains(callbackWithSameDeadBinder)).isFalse()
+  }
+
+  @Test
+  fun contains_removeDeadBinders() {
+    val aliveBinder = mock<IBinder>()
+    val aliveCallback = mock<IInterface>()
+    val callbackWithSameAliveBinder = mock<IInterface>()
+    val deadBinder = mock<IBinder>()
+    val deadCallback = mock<IInterface>()
+    whenever(aliveCallback.asBinder()).thenReturn(aliveBinder)
+    whenever(callbackWithSameAliveBinder.asBinder()).thenReturn(aliveBinder)
+    whenever(aliveBinder.isBinderAlive).thenReturn(true)
+    whenever(deadCallback.asBinder()).thenReturn(deadBinder)
+    whenever(deadBinder.isBinderAlive).thenReturn(false)
+
+    callbacks.add(aliveCallback, directExecutor())
+    callbacks.add(deadCallback, directExecutor())
+
+    assertThat(callbacks.contains(callbackWithSameAliveBinder)).isTrue()
+    assertThat(callbacks.callbacks).hasSize(1)
+  }
+
+  @Test
+  fun size_countCallbackIfBinderIsAlive() {
+    val aliveBinder = mock<IBinder>()
+    val aliveCallback = mock<IInterface>()
+    val deadBinder = mock<IBinder>()
+    val deadCallback = mock<IInterface>()
+    whenever(aliveCallback.asBinder()).thenReturn(aliveBinder)
+    whenever(aliveBinder.isBinderAlive).thenReturn(true)
+    whenever(deadCallback.asBinder()).thenReturn(deadBinder)
+    whenever(deadBinder.isBinderAlive).thenReturn(false)
+
+    callbacks.add(aliveCallback, directExecutor())
+    callbacks.add(deadCallback, directExecutor())
+
+    assertThat(callbacks.size()).isEqualTo(1)
+    assertThat(callbacks.callbacks).hasSize(1)
   }
 
   @Test
   fun remove_removesMatchingBinder() {
-    val mockBinder: IBinder = mock()
-    val callback: IInterface = mock()
-    val callbackWithSameBinder: IInterface = mock()
+    val mockBinder = mock<IBinder>()
+    val callback = mock<IInterface>()
+    val callbackWithSameBinder = mock<IInterface>()
     whenever(callback.asBinder()).thenReturn(mockBinder)
     whenever(callbackWithSameBinder.asBinder()).thenReturn(mockBinder)
 
@@ -91,8 +141,8 @@ class AidlThreadSafeCallbacksTest {
 
   @Test
   fun remove_unrecognizedBinderDoesNotThrow() {
-    val mockBinder: IBinder = mock()
-    val callback: IInterface = mock()
+    val mockBinder = mock<IBinder>()
+    val callback = mock<IInterface>()
     whenever(callback.asBinder()).thenReturn(mockBinder)
 
     callbacks.remove(callback)
@@ -100,12 +150,12 @@ class AidlThreadSafeCallbacksTest {
 
   @Test
   fun invoke_invokesCallbackIfBinderIsAlive() {
-    val aliveBinder: IBinder = mock()
-    val deadBinder: IBinder = mock()
+    val aliveBinder = mock<IBinder>()
+    val deadBinder = mock<IBinder>()
     whenever(aliveBinder.isBinderAlive).thenReturn(true)
     whenever(deadBinder.isBinderAlive).thenReturn(false)
-    val aliveCallback: TestCallback = mock()
-    val deadCallback: TestCallback = mock()
+    val aliveCallback = mock<TestCallback>()
+    val deadCallback = mock<TestCallback>()
     whenever(aliveCallback.asBinder()).thenReturn(aliveBinder)
     whenever(deadCallback.asBinder()).thenReturn(deadBinder)
     val callbacks = AidlThreadSafeCallbacks<TestCallback>()
@@ -120,12 +170,12 @@ class AidlThreadSafeCallbacksTest {
 
   @Test
   fun invoke_removesDeadBinders() {
-    val aliveBinder: IBinder = mock()
-    val deadBinder: IBinder = mock()
+    val aliveBinder = mock<IBinder>()
+    val deadBinder = mock<IBinder>()
     whenever(aliveBinder.isBinderAlive).thenReturn(true)
     whenever(deadBinder.isBinderAlive).thenReturn(false)
-    val aliveCallback: TestCallback = mock()
-    val deadCallback: TestCallback = mock()
+    val aliveCallback = mock<TestCallback>()
+    val deadCallback = mock<TestCallback>()
     whenever(aliveCallback.asBinder()).thenReturn(aliveBinder)
     whenever(deadCallback.asBinder()).thenReturn(deadBinder)
     val callbacks = AidlThreadSafeCallbacks<TestCallback>()
@@ -134,7 +184,7 @@ class AidlThreadSafeCallbacksTest {
     callbacks.add(deadCallback, directExecutor())
     callbacks.invoke { it.testCallbackMethod() }
 
-    assertThat(callbacks.size()).isEqualTo(1)
+    assertThat(callbacks.callbacks).hasSize(1)
   }
 
   private open class TestCallback() : IInterface {

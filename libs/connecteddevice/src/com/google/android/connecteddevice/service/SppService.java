@@ -165,10 +165,12 @@ public class SppService extends Service {
     if (delegate == null) {
       return;
     }
-    try {
-      delegate.clearCallback(sppCallback);
-    } catch (RemoteException e) {
-      loge(TAG, "Error while clear callback of delegate.", e);
+    if (delegate.asBinder().isBinderAlive()) {
+      try {
+        delegate.clearCallback(sppCallback);
+      } catch (RemoteException e) {
+        loge(TAG, "Error while clear callback of delegate.", e);
+      }
     }
     delegate = null;
   }

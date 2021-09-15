@@ -22,7 +22,7 @@
     android:layout_marginHorizontal="?attr/pageMarginHorizontal"
     android:layout_marginVertical="?attr/pageMarginVertical"
     android:orientation="vertical"
-    android:gravity="center_horizontal">
+    android:gravity="center">
     <TextView
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
@@ -41,5 +41,6 @@
         android:layout_marginTop="@dimen/button_margin_top"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
+        android:backgroundTint="?attr/companionColorAccent"
         android:text="@string/turn_on"/>
 </LinearLayout>

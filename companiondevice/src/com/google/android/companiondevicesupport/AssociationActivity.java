@@ -38,9 +38,11 @@ import com.android.car.ui.toolbar.MenuItem;
 import com.android.car.ui.toolbar.ToolbarController;
 import com.google.android.connecteddevice.api.RemoteFeature;
 import com.google.android.connecteddevice.model.AssociatedDevice;
+import com.google.android.connecteddevice.model.TransportProtocols;
 import com.google.android.connecteddevice.ui.AssociatedDeviceViewModel;
 import com.google.android.connecteddevice.ui.AssociatedDeviceViewModelFactory;
 import java.util.Arrays;
+import java.util.List;
 
 /** Activity class for association */
 public class AssociationActivity extends FragmentActivity {
@@ -141,12 +143,14 @@ public class AssociationActivity extends FragmentActivity {
   }
 
   private void observeViewModel() {
+    List<String> transportProtocols =
+        Arrays.asList(getResources().getStringArray(R.array.transport_protocols));
     model =
         new ViewModelProvider(
                 (ViewModelStoreOwner) this,
                 new AssociatedDeviceViewModelFactory(
                     getApplication(),
-                    getResources().getBoolean(R.bool.enable_spp),
+                    transportProtocols.contains(TransportProtocols.PROTOCOL_SPP),
                     getResources().getString(R.string.ble_device_name_prefix)))
             .get(AssociatedDeviceViewModel.class);
 
@@ -420,7 +424,11 @@ public class AssociationActivity extends FragmentActivity {
           .setTitle(getString(R.string.turn_on_bluetooth_dialog_title))
           .setMessage(getString(R.string.turn_on_bluetooth_dialog_message))
           .setPositiveButton(
-              getString(R.string.turn_on), (d, w) -> BluetoothAdapter.getDefaultAdapter().enable())
+              getString(R.string.turn_on),
+              (d, w) -> {
+                BluetoothAdapter.getDefaultAdapter().enable();
+                TurnOnBluetoothDialogFragment.this.dismiss();
+              })
           .setNegativeButton(getString(R.string.not_now), null)
           .setCancelable(true)
           .create();

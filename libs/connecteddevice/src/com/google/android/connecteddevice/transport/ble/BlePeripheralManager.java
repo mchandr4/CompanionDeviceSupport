@@ -24,7 +24,6 @@ import android.bluetooth.le.AdvertiseCallback;
 import android.bluetooth.le.AdvertiseData;
 import androidx.annotation.CallSuper;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -135,9 +134,6 @@ public abstract class BlePeripheralManager {
       @NonNull BluetoothGattCharacteristic characteristic,
       boolean confirm);
 
-  /** Connects the Gatt server of the remote device to retrieve device name. */
-  public abstract void retrieveDeviceName(BluetoothDevice device);
-
   /** Cleans up the BLE GATT server state. */
   @CallSuper
   public void cleanup() {
@@ -148,13 +144,6 @@ public abstract class BlePeripheralManager {
 
   /** Interface to be notified of various events within the {@link BlePeripheralManager}. */
   public interface Callback {
-    /**
-     * Triggered when the name of the remote device is retrieved.
-     *
-     * @param deviceName Name of the remote device.
-     */
-    void onDeviceNameRetrieved(@Nullable String deviceName);
-
     /**
      * Triggered if a remote client has requested to change the MTU for a given connection.
      *
