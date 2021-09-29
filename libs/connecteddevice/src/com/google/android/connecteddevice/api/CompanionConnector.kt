@@ -40,11 +40,9 @@ import java.util.concurrent.atomic.AtomicBoolean
  *
  * @property context [Context] of the hosting process.
  * @property isForegroundProcess Set to `true` if running from outside of the companion application.
- * @property callback [Callback] for connection events.
  */
 class CompanionConnector @JvmOverloads constructor(
   private val context: Context,
-  private val callback: Callback,
   private val isForegroundProcess: Boolean = false
 ) {
   private val isLegacyOnly = AtomicBoolean(false)
@@ -78,7 +76,11 @@ class CompanionConnector @JvmOverloads constructor(
       this@CompanionConnector.onNullBinding()
     }
   }
+
   private var bindAttempts = 0
+
+  /** [Callback] for connection events. */
+  var callback: Callback? = null
 
   /**
    * [IFeatureCoordinator] retrieved after connecting to service. Will be `null` if the platform
@@ -108,7 +110,7 @@ class CompanionConnector @JvmOverloads constructor(
 
     if (intent == null) {
       loge(TAG, "No services found supporting companion device. Aborting.")
-      callback.onFailedToConnect()
+      callback?.onFailedToConnect()
       return
     }
 
@@ -121,7 +123,7 @@ class CompanionConnector @JvmOverloads constructor(
     bindAttempts++
     if (bindAttempts > MAX_BIND_ATTEMPTS) {
       loge(TAG, "Failed to bind to service after $bindAttempts attempts. Aborting.")
-      callback.onFailedToConnect()
+      callback?.onFailedToConnect()
       return
     }
     logw(TAG, "Unable to bind to service with action ${intent.action}. Trying again.")
@@ -132,7 +134,7 @@ class CompanionConnector @JvmOverloads constructor(
   fun disconnect() {
     logd(TAG, "Disconnecting from the companion platform.")
     if (connectedDeviceManager != null || featureCoordinator != null) {
-      callback.onDisconnected()
+      callback?.onDisconnected()
     }
     connectedDeviceManager = null
     featureCoordinator = null
@@ -158,7 +160,7 @@ class CompanionConnector @JvmOverloads constructor(
         ?: throw IllegalStateException("Cannot create wrapper of a null feature coordinator.")
       connectedDeviceManager = createConnectedDeviceManagerWrapper(coordinator)
     }
-    callback.onConnected()
+    callback?.onConnected()
   }
 
   private fun onServiceDisconnected() {
@@ -169,7 +171,7 @@ class CompanionConnector @JvmOverloads constructor(
   private fun onNullBinding() {
     if (!isLegacyOnly.compareAndSet(false, true)) {
       loge(TAG, "Received a null binding. Alerting callbacks of failed connection.")
-      callback.onFailedToConnect()
+      callback?.onFailedToConnect()
       return
     }
     logd(

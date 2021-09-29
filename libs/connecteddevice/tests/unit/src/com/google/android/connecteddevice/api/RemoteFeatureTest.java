@@ -18,6 +18,9 @@ package com.google.android.connecteddevice.api;
 
 import static com.google.android.companionprotos.SystemQueryType.APP_NAME;
 import static com.google.android.connecteddevice.api.RemoteFeature.SYSTEM_FEATURE_ID;
+import static com.google.android.connecteddevice.api.RemoteFeature.USER_TYPE_ALL;
+import static com.google.android.connecteddevice.api.RemoteFeature.USER_TYPE_DRIVER;
+import static com.google.android.connecteddevice.api.RemoteFeature.USER_TYPE_PASSENGER;
 import static com.google.common.truth.Truth.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.mockito.ArgumentMatchers.any;
@@ -96,11 +99,12 @@ public class RemoteFeatureTest {
 
   @Test
   public void start_registersDeviceCallbacksForAlreadyConnectedDevices() throws RemoteException {
-    ConnectedDevice device = new ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToActiveUser= */ true,
-        /* hasSecureChannel= */ false);
+    ConnectedDevice device =
+        new ConnectedDevice(
+            UUID.randomUUID().toString(),
+            /* deviceName= */ "",
+            /* belongsToDriver= */ true,
+            /* hasSecureChannel= */ false);
     when(mockConnectedDeviceManager.getActiveUserConnectedDevices())
         .thenReturn(ImmutableList.of(device));
     remoteFeature.start();
@@ -109,11 +113,12 @@ public class RemoteFeatureTest {
 
   @Test
   public void stop_unregistersCallbacks() throws RemoteException {
-    ConnectedDevice device = new ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToActiveUser= */ true,
-        /* hasSecureChannel= */ false);
+    ConnectedDevice device =
+        new ConnectedDevice(
+            UUID.randomUUID().toString(),
+            /* deviceName= */ "",
+            /* belongsToDriver= */ true,
+            /* hasSecureChannel= */ false);
     when(mockConnectedDeviceManager.getActiveUserConnectedDevices())
         .thenReturn(ImmutableList.of(device));
     remoteFeature.stop();
@@ -125,11 +130,12 @@ public class RemoteFeatureTest {
 
   @Test
   public void onDeviceConnected_registersDeviceCallback() throws RemoteException {
-    ConnectedDevice device = new ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToActiveUser= */ true,
-        /* hasSecureChannel= */ false);
+    ConnectedDevice device =
+        new ConnectedDevice(
+            UUID.randomUUID().toString(),
+            /* deviceName= */ "",
+            /* belongsToDriver= */ true,
+            /* hasSecureChannel= */ false);
     remoteFeature.start();
     ArgumentCaptor<IConnectionCallback> callbackCaptor =
         ArgumentCaptor.forClass(IConnectionCallback.class);
@@ -140,57 +146,372 @@ public class RemoteFeatureTest {
   }
 
   @Test
-  public void onDeviceConnected_invokedWhenDeviceConnects() throws RemoteException {
-    ConnectedDevice device = new ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToActiveUser= */ true,
-        /* hasSecureChannel= */ false);
+  public void onDeviceConnected_userTypeDriverInvokedOnDriverDeviceConnected()
+      throws RemoteException {
+    ConnectedDevice device =
+        new ConnectedDevice(
+            UUID.randomUUID().toString(),
+            /* deviceName= */ "",
+            /* belongsToDriver= */ true,
+            /* hasSecureChannel= */ false);
     remoteFeature.start();
+    remoteFeature.setUserType(USER_TYPE_DRIVER);
     ArgumentCaptor<IConnectionCallback> callbackCaptor =
         ArgumentCaptor.forClass(IConnectionCallback.class);
     verify(mockConnectedDeviceManager)
         .registerActiveUserConnectionCallback(callbackCaptor.capture());
+
     callbackCaptor.getValue().onDeviceConnected(device);
+
     verify(spyFeature).onDeviceConnected(device);
   }
 
   @Test
-  public void onDeviceConnected_invokedOnStartupIfDeviceAlreadyConnected() throws RemoteException {
-    ConnectedDevice device = new ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToActiveUser= */ true,
-        /* hasSecureChannel= */ false);
-    when(mockConnectedDeviceManager.getActiveUserConnectedDevices())
-        .thenReturn(ImmutableList.of(device));
+  public void onDeviceConnected_userTypePassengerInvokedOnPassengerDeviceConnected()
+      throws RemoteException {
+    ConnectedDevice device =
+        new ConnectedDevice(
+            UUID.randomUUID().toString(),
+            /* deviceName= */ "",
+            /* belongsToDriver= */ false,
+            /* hasSecureChannel= */ false);
     remoteFeature.start();
-    verify(spyFeature).onDeviceConnected(eq(device));
-  }
-
-  @Test
-  public void onDeviceDisconnected_invokedWhenDeviceDisconnects() throws RemoteException {
-    ConnectedDevice device = new ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToActiveUser= */ true,
-        /* hasSecureChannel= */ false);
-    remoteFeature.start();
+    remoteFeature.setUserType(USER_TYPE_PASSENGER);
     ArgumentCaptor<IConnectionCallback> callbackCaptor =
         ArgumentCaptor.forClass(IConnectionCallback.class);
     verify(mockConnectedDeviceManager)
         .registerActiveUserConnectionCallback(callbackCaptor.capture());
+
+    callbackCaptor.getValue().onDeviceConnected(device);
+
+    verify(spyFeature).onDeviceConnected(device);
+  }
+
+  @Test
+  public void onDeviceConnected_userTypeAllInvokedOnDriverDeviceConnected() throws RemoteException {
+    ConnectedDevice device =
+        new ConnectedDevice(
+            UUID.randomUUID().toString(),
+            /* deviceName= */ "",
+            /* belongsToDriver= */ true,
+            /* hasSecureChannel= */ false);
+    remoteFeature.start();
+    remoteFeature.setUserType(USER_TYPE_ALL);
+    ArgumentCaptor<IConnectionCallback> callbackCaptor =
+        ArgumentCaptor.forClass(IConnectionCallback.class);
+    verify(mockConnectedDeviceManager)
+        .registerActiveUserConnectionCallback(callbackCaptor.capture());
+
+    callbackCaptor.getValue().onDeviceConnected(device);
+
+    verify(spyFeature).onDeviceConnected(device);
+  }
+
+  @Test
+  public void onDeviceConnected_userTypeAllInvokedOnPassengerDeviceConnected()
+      throws RemoteException {
+    ConnectedDevice device =
+        new ConnectedDevice(
+            UUID.randomUUID().toString(),
+            /* deviceName= */ "",
+            /* belongsToDriver= */ false,
+            /* hasSecureChannel= */ false);
+    remoteFeature.start();
+    remoteFeature.setUserType(USER_TYPE_ALL);
+    ArgumentCaptor<IConnectionCallback> callbackCaptor =
+        ArgumentCaptor.forClass(IConnectionCallback.class);
+    verify(mockConnectedDeviceManager)
+        .registerActiveUserConnectionCallback(callbackCaptor.capture());
+
+    callbackCaptor.getValue().onDeviceConnected(device);
+
+    verify(spyFeature).onDeviceConnected(device);
+  }
+
+  @Test
+  public void onDeviceConnected_userTypeDriverNotInvokedOnPassengerDeviceConnected()
+      throws RemoteException {
+    ConnectedDevice device =
+        new ConnectedDevice(
+            UUID.randomUUID().toString(),
+            /* deviceName= */ "",
+            /* belongsToDriver= */ false,
+            /* hasSecureChannel= */ false);
+    remoteFeature.start();
+    remoteFeature.setUserType(USER_TYPE_DRIVER);
+    ArgumentCaptor<IConnectionCallback> callbackCaptor =
+        ArgumentCaptor.forClass(IConnectionCallback.class);
+    verify(mockConnectedDeviceManager)
+        .registerActiveUserConnectionCallback(callbackCaptor.capture());
+
+    callbackCaptor.getValue().onDeviceConnected(device);
+
+    verify(spyFeature, never()).onDeviceConnected(device);
+  }
+
+  @Test
+  public void onDeviceConnected_userTypePassengerNotInvokedOnDriverDeviceConnected()
+      throws RemoteException {
+    ConnectedDevice device =
+        new ConnectedDevice(
+            UUID.randomUUID().toString(),
+            /* deviceName= */ "",
+            /* belongsToDriver= */ true,
+            /* hasSecureChannel= */ false);
+    remoteFeature.start();
+    remoteFeature.setUserType(USER_TYPE_PASSENGER);
+    ArgumentCaptor<IConnectionCallback> callbackCaptor =
+        ArgumentCaptor.forClass(IConnectionCallback.class);
+    verify(mockConnectedDeviceManager)
+        .registerActiveUserConnectionCallback(callbackCaptor.capture());
+
+    callbackCaptor.getValue().onDeviceConnected(device);
+
+    verify(spyFeature, never()).onDeviceConnected(device);
+  }
+
+  @Test
+  public void onDeviceConnected_userTypeDriverInvokedOnStartupIfDriverDeviceAlreadyConnected()
+      throws RemoteException {
+    ConnectedDevice device =
+        new ConnectedDevice(
+            UUID.randomUUID().toString(),
+            /* deviceName= */ "",
+            /* belongsToDriver= */ true,
+            /* hasSecureChannel= */ false);
+    when(mockConnectedDeviceManager.getActiveUserConnectedDevices())
+        .thenReturn(ImmutableList.of(device));
+    remoteFeature.setUserType(USER_TYPE_DRIVER);
+
+    remoteFeature.start();
+
+    verify(spyFeature).onDeviceConnected(eq(device));
+  }
+
+  @Test
+  public void onDeviceConnected_userTypeDriverNotInvokedOnStartupIfPassengerDeviceAlreadyConnected()
+      throws RemoteException {
+    ConnectedDevice device =
+        new ConnectedDevice(
+            UUID.randomUUID().toString(),
+            /* deviceName= */ "",
+            /* belongsToDriver= */ false,
+            /* hasSecureChannel= */ false);
+    when(mockConnectedDeviceManager.getActiveUserConnectedDevices())
+        .thenReturn(ImmutableList.of(device));
+    remoteFeature.setUserType(USER_TYPE_DRIVER);
+
+    remoteFeature.start();
+
+    verify(spyFeature, never()).onDeviceConnected(eq(device));
+  }
+
+  @Test
+  public void onDeviceConnected_userTypePassengerInvokedOnStartupIfPassengerDeviceAlreadyConnected()
+      throws RemoteException {
+    ConnectedDevice device =
+        new ConnectedDevice(
+            UUID.randomUUID().toString(),
+            /* deviceName= */ "",
+            /* belongsToDriver= */ false,
+            /* hasSecureChannel= */ false);
+    when(mockConnectedDeviceManager.getActiveUserConnectedDevices())
+        .thenReturn(ImmutableList.of(device));
+    remoteFeature.setUserType(USER_TYPE_PASSENGER);
+
+    remoteFeature.start();
+
+    verify(spyFeature).onDeviceConnected(eq(device));
+  }
+
+  @Test
+  public void onDeviceConnected_userTypePassengerNotInvokedOnStartupIfDriverDeviceAlreadyConnected()
+      throws RemoteException {
+    ConnectedDevice device =
+        new ConnectedDevice(
+            UUID.randomUUID().toString(),
+            /* deviceName= */ "",
+            /* belongsToDriver= */ true,
+            /* hasSecureChannel= */ false);
+    when(mockConnectedDeviceManager.getActiveUserConnectedDevices())
+        .thenReturn(ImmutableList.of(device));
+    remoteFeature.setUserType(USER_TYPE_PASSENGER);
+
+    remoteFeature.start();
+
+    verify(spyFeature, never()).onDeviceConnected(eq(device));
+  }
+
+  @Test
+  public void onDeviceConnected_userTypeAllInvokedOnStartupIfDriverDeviceAlreadyConnected()
+      throws RemoteException {
+    ConnectedDevice device =
+        new ConnectedDevice(
+            UUID.randomUUID().toString(),
+            /* deviceName= */ "",
+            /* belongsToDriver= */ true,
+            /* hasSecureChannel= */ false);
+    when(mockConnectedDeviceManager.getActiveUserConnectedDevices())
+        .thenReturn(ImmutableList.of(device));
+    remoteFeature.setUserType(USER_TYPE_ALL);
+
+    remoteFeature.start();
+
+    verify(spyFeature).onDeviceConnected(eq(device));
+  }
+
+  @Test
+  public void onDeviceConnected_userTypeAllInvokedOnStartupIfPassengerDeviceAlreadyConnected()
+      throws RemoteException {
+    ConnectedDevice device =
+        new ConnectedDevice(
+            UUID.randomUUID().toString(),
+            /* deviceName= */ "",
+            /* belongsToDriver= */ false,
+            /* hasSecureChannel= */ false);
+    when(mockConnectedDeviceManager.getActiveUserConnectedDevices())
+        .thenReturn(ImmutableList.of(device));
+    remoteFeature.setUserType(USER_TYPE_ALL);
+
+    remoteFeature.start();
+
+    verify(spyFeature).onDeviceConnected(eq(device));
+  }
+
+  @Test
+  public void onDeviceDisconnected_userTypeDriverInvokedWhenDriverDeviceDisconnects()
+      throws RemoteException {
+    ConnectedDevice device =
+        new ConnectedDevice(
+            UUID.randomUUID().toString(),
+            /* deviceName= */ "",
+            /* belongsToDriver= */ true,
+            /* hasSecureChannel= */ false);
+    remoteFeature.setUserType(USER_TYPE_DRIVER);
+    remoteFeature.start();
+    ArgumentCaptor<IConnectionCallback> callbackCaptor =
+        ArgumentCaptor.forClass(IConnectionCallback.class);
+
+    verify(mockConnectedDeviceManager)
+        .registerActiveUserConnectionCallback(callbackCaptor.capture());
     callbackCaptor.getValue().onDeviceDisconnected(device);
+
     verify(spyFeature).onDeviceDisconnected(device);
   }
 
   @Test
+  public void onDeviceDisconnected_userTypePassengerInvokedWhenPassengerDeviceDisconnects()
+      throws RemoteException {
+    ConnectedDevice device =
+        new ConnectedDevice(
+            UUID.randomUUID().toString(),
+            /* deviceName= */ "",
+            /* belongsToDriver= */ false,
+            /* hasSecureChannel= */ false);
+    remoteFeature.setUserType(USER_TYPE_PASSENGER);
+    remoteFeature.start();
+    ArgumentCaptor<IConnectionCallback> callbackCaptor =
+        ArgumentCaptor.forClass(IConnectionCallback.class);
+
+    verify(mockConnectedDeviceManager)
+        .registerActiveUserConnectionCallback(callbackCaptor.capture());
+    callbackCaptor.getValue().onDeviceDisconnected(device);
+
+    verify(spyFeature).onDeviceDisconnected(device);
+  }
+
+  @Test
+  public void onDeviceDisconnected_userTypeAllInvokedWhenDriverDeviceDisconnects()
+      throws RemoteException {
+    ConnectedDevice device =
+        new ConnectedDevice(
+            UUID.randomUUID().toString(),
+            /* deviceName= */ "",
+            /* belongsToDriver= */ true,
+            /* hasSecureChannel= */ false);
+    remoteFeature.setUserType(USER_TYPE_ALL);
+    remoteFeature.start();
+    ArgumentCaptor<IConnectionCallback> callbackCaptor =
+        ArgumentCaptor.forClass(IConnectionCallback.class);
+
+    verify(mockConnectedDeviceManager)
+        .registerActiveUserConnectionCallback(callbackCaptor.capture());
+    callbackCaptor.getValue().onDeviceDisconnected(device);
+
+    verify(spyFeature).onDeviceDisconnected(device);
+  }
+
+  @Test
+  public void onDeviceDisconnected_userTypeAllInvokedWhenPassengerDeviceDisconnects()
+      throws RemoteException {
+    ConnectedDevice device =
+        new ConnectedDevice(
+            UUID.randomUUID().toString(),
+            /* deviceName= */ "",
+            /* belongsToDriver= */ false,
+            /* hasSecureChannel= */ false);
+    remoteFeature.setUserType(USER_TYPE_ALL);
+    remoteFeature.start();
+    ArgumentCaptor<IConnectionCallback> callbackCaptor =
+        ArgumentCaptor.forClass(IConnectionCallback.class);
+
+    verify(mockConnectedDeviceManager)
+        .registerActiveUserConnectionCallback(callbackCaptor.capture());
+    callbackCaptor.getValue().onDeviceDisconnected(device);
+
+    verify(spyFeature).onDeviceDisconnected(device);
+  }
+
+  @Test
+  public void onDeviceDisconnected_userTypeDriverNotInvokedWhenPassengerDeviceDisconnects()
+      throws RemoteException {
+    ConnectedDevice device =
+        new ConnectedDevice(
+            UUID.randomUUID().toString(),
+            /* deviceName= */ "",
+            /* belongsToDriver= */ false,
+            /* hasSecureChannel= */ false);
+    remoteFeature.setUserType(USER_TYPE_DRIVER);
+    remoteFeature.start();
+    ArgumentCaptor<IConnectionCallback> callbackCaptor =
+        ArgumentCaptor.forClass(IConnectionCallback.class);
+
+    verify(mockConnectedDeviceManager)
+        .registerActiveUserConnectionCallback(callbackCaptor.capture());
+    callbackCaptor.getValue().onDeviceDisconnected(device);
+
+    verify(spyFeature, never()).onDeviceDisconnected(device);
+  }
+
+  @Test
+  public void onDeviceDisconnected_userTypePassengerNotInvokedWhenDriverDeviceDisconnects()
+      throws RemoteException {
+    ConnectedDevice device =
+        new ConnectedDevice(
+            UUID.randomUUID().toString(),
+            /* deviceName= */ "",
+            /* belongsToDriver= */ true,
+            /* hasSecureChannel= */ false);
+    remoteFeature.setUserType(USER_TYPE_PASSENGER);
+    remoteFeature.start();
+    ArgumentCaptor<IConnectionCallback> callbackCaptor =
+        ArgumentCaptor.forClass(IConnectionCallback.class);
+
+    verify(mockConnectedDeviceManager)
+        .registerActiveUserConnectionCallback(callbackCaptor.capture());
+    callbackCaptor.getValue().onDeviceDisconnected(device);
+
+    verify(spyFeature, never()).onDeviceDisconnected(device);
+  }
+
+  @Test
   public void onDeviceDisconnected_unregistersCallback() throws RemoteException {
-    ConnectedDevice device = new ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToActiveUser= */ true,
-        /* hasSecureChannel= */ false);
+    ConnectedDevice device =
+        new ConnectedDevice(
+            UUID.randomUUID().toString(),
+            /* deviceName= */ "",
+            /* belongsToDriver= */ true,
+            /* hasSecureChannel= */ false);
     remoteFeature.start();
     ArgumentCaptor<IConnectionCallback> callbackCaptor =
         ArgumentCaptor.forClass(IConnectionCallback.class);
@@ -203,22 +524,24 @@ public class RemoteFeatureTest {
 
   @Test
   public void onSecureChannelEstablished_invokedWhenChannelEstablished() throws RemoteException {
-    ConnectedDevice device = new ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToActiveUser= */ true,
-        /* hasSecureChannel= */ false);
+    ConnectedDevice device =
+        new ConnectedDevice(
+            UUID.randomUUID().toString(),
+            /* deviceName= */ "",
+            /* belongsToDriver= */ true,
+            /* hasSecureChannel= */ false);
     when(mockConnectedDeviceManager.getActiveUserConnectedDevices())
         .thenReturn(ImmutableList.of(device));
     remoteFeature.start();
     ArgumentCaptor<IDeviceCallback> callbackCaptor = ArgumentCaptor.forClass(IDeviceCallback.class);
     verify(mockConnectedDeviceManager)
         .registerDeviceCallback(eq(device), eq(featureId), callbackCaptor.capture());
-    ConnectedDevice secureDevice = new ConnectedDevice(
-        device.getDeviceId(),
-        /* deviceName= */ "",
-        /* belongsToActiveUser= */ true,
-        /* hasSecureChannel= */ true);
+    ConnectedDevice secureDevice =
+        new ConnectedDevice(
+            device.getDeviceId(),
+            /* deviceName= */ "",
+            /* belongsToDriver= */ true,
+            /* hasSecureChannel= */ true);
     callbackCaptor.getValue().onSecureChannelEstablished(secureDevice);
     verify(spyFeature).onSecureChannelEstablished(secureDevice);
   }
@@ -226,11 +549,12 @@ public class RemoteFeatureTest {
   @Test
   public void onSecureChannelEstablished_invokedOnStartupIfChannelAlreadyEstablished()
       throws RemoteException {
-    ConnectedDevice device = new ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToActiveUser= */ true,
-        /* hasSecureChannel= */ true);
+    ConnectedDevice device =
+        new ConnectedDevice(
+            UUID.randomUUID().toString(),
+            /* deviceName= */ "",
+            /* belongsToDriver= */ true,
+            /* hasSecureChannel= */ true);
     when(mockConnectedDeviceManager.getActiveUserConnectedDevices())
         .thenReturn(ImmutableList.of(device));
     remoteFeature.start();
@@ -238,12 +562,33 @@ public class RemoteFeatureTest {
   }
 
   @Test
+  public void onSecureChannelEstablished_invokedOnDeviceConnectedIfChannelAlreadyEstablished()
+      throws RemoteException {
+    ConnectedDevice device =
+        new ConnectedDevice(
+            UUID.randomUUID().toString(),
+            /* deviceName= */ "",
+            /* belongsToDriver= */ true,
+            /* hasSecureChannel= */ true);
+    remoteFeature.start();
+    ArgumentCaptor<IConnectionCallback> callbackCaptor =
+        ArgumentCaptor.forClass(IConnectionCallback.class);
+
+    verify(mockConnectedDeviceManager)
+        .registerActiveUserConnectionCallback(callbackCaptor.capture());
+    callbackCaptor.getValue().onDeviceConnected(device);
+
+    verify(spyFeature).onSecureChannelEstablished(device);
+  }
+
+  @Test
   public void onDeviceError_invokedOnError() throws RemoteException {
-    ConnectedDevice device = new ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToActiveUser= */ true,
-        /* hasSecureChannel= */ false);
+    ConnectedDevice device =
+        new ConnectedDevice(
+            UUID.randomUUID().toString(),
+            /* deviceName= */ "",
+            /* belongsToDriver= */ true,
+            /* hasSecureChannel= */ false);
     when(mockConnectedDeviceManager.getActiveUserConnectedDevices())
         .thenReturn(ImmutableList.of(device));
     remoteFeature.start();
@@ -307,11 +652,12 @@ public class RemoteFeatureTest {
 
   @Test
   public void sendMessageSecurely_sendsMessageSecurelyToDevice() throws RemoteException {
-    ConnectedDevice device = new ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToActiveUser= */ true,
-        /* hasSecureChannel= */ false);
+    ConnectedDevice device =
+        new ConnectedDevice(
+            UUID.randomUUID().toString(),
+            /* deviceName= */ "",
+            /* belongsToDriver= */ true,
+            /* hasSecureChannel= */ false);
     when(mockConnectedDeviceManager.getActiveUserConnectedDevices())
         .thenReturn(ImmutableList.of(device));
     remoteFeature.start();
@@ -328,7 +674,7 @@ public class RemoteFeatureTest {
   }
 
   @Test
-  public void onMessageFailedToSend_invokedWhenDeviceNotFound() throws RemoteException {
+  public void onMessageFailedToSend_invokedWhenDeviceNotFound() {
     String deviceId = UUID.randomUUID().toString();
     byte[] message = ByteUtils.randomBytes(10);
     remoteFeature.start();
@@ -338,11 +684,12 @@ public class RemoteFeatureTest {
 
   @Test
   public void onMessageFailedToSend_invokedWhenRemoteExceptionThrown() throws RemoteException {
-    ConnectedDevice device = new ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToActiveUser= */ true,
-        /* hasSecureChannel= */ false);
+    ConnectedDevice device =
+        new ConnectedDevice(
+            UUID.randomUUID().toString(),
+            /* deviceName= */ "",
+            /* belongsToDriver= */ true,
+            /* hasSecureChannel= */ false);
     when(mockConnectedDeviceManager.getActiveUserConnectedDevices())
         .thenReturn(ImmutableList.of(device));
     when(mockConnectedDeviceManager.sendMessage(any(), any()))
@@ -367,8 +714,7 @@ public class RemoteFeatureTest {
   }
 
   @Test
-  public void onMessageFailedToSend_invokedWhenSendMessageCalledBeforeServiceConnection()
-      throws RemoteException{
+  public void onMessageFailedToSend_invokedWhenSendMessageCalledBeforeServiceConnection() {
     RemoteFeature disconnectedFeature = createRemoteFeature(/* connectedDeviceManager= */ null);
     String deviceId = UUID.randomUUID().toString();
     byte[] message = ByteUtils.randomBytes(10);
@@ -378,11 +724,12 @@ public class RemoteFeatureTest {
 
   @Test
   public void onMessageReceived_invokedWhenGenericMessageReceived() throws RemoteException {
-    ConnectedDevice device = new ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToActiveUser= */ true,
-        /* hasSecureChannel= */ true);
+    ConnectedDevice device =
+        new ConnectedDevice(
+            UUID.randomUUID().toString(),
+            /* deviceName= */ "",
+            /* belongsToDriver= */ true,
+            /* hasSecureChannel= */ true);
     byte[] message = ByteUtils.randomBytes(10);
     when(mockConnectedDeviceManager.getActiveUserConnectedDevices())
         .thenReturn(ImmutableList.of(device));
@@ -402,11 +749,12 @@ public class RemoteFeatureTest {
 
   @Test
   public void getConnectedDeviceById_returnsDeviceWhenConnected() throws RemoteException {
-    ConnectedDevice device = new ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToActiveUser= */ true,
-        /* hasSecureChannel= */ false);
+    ConnectedDevice device =
+        new ConnectedDevice(
+            UUID.randomUUID().toString(),
+            /* deviceName= */ "",
+            /* belongsToDriver= */ true,
+            /* hasSecureChannel= */ false);
     when(mockConnectedDeviceManager.getActiveUserConnectedDevices())
         .thenReturn(ImmutableList.of(device));
     assertThat(remoteFeature.getConnectedDeviceById(device.getDeviceId())).isEqualTo(device);
@@ -414,11 +762,12 @@ public class RemoteFeatureTest {
 
   @Test
   public void getConnectedDeviceById_returnsNullWhenNotConnected() throws RemoteException {
-    ConnectedDevice device = new ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToActiveUser= */ true,
-        /* hasSecureChannel= */ false);
+    ConnectedDevice device =
+        new ConnectedDevice(
+            UUID.randomUUID().toString(),
+            /* deviceName= */ "",
+            /* belongsToDriver= */ true,
+            /* hasSecureChannel= */ false);
     when(mockConnectedDeviceManager.getActiveUserConnectedDevices())
         .thenReturn(ImmutableList.of(device));
     assertThat(remoteFeature.getConnectedDeviceById(UUID.randomUUID().toString())).isNull();
@@ -440,11 +789,12 @@ public class RemoteFeatureTest {
   @Test
   public void sendQuerySecurely_sendsQueryToOwnFeatureId()
       throws RemoteException, InvalidProtocolBufferException {
-    ConnectedDevice device = new ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToActiveUser= */ true,
-        /* hasSecureChannel= */ false);
+    ConnectedDevice device =
+        new ConnectedDevice(
+            UUID.randomUUID().toString(),
+            /* deviceName= */ "",
+            /* belongsToDriver= */ true,
+            /* hasSecureChannel= */ false);
     when(mockConnectedDeviceManager.getActiveUserConnectedDevices())
         .thenReturn(ImmutableList.of(device));
     remoteFeature.start();
@@ -464,11 +814,12 @@ public class RemoteFeatureTest {
   @Test
   public void sendQuery_queryCallbackOnSuccessInvoked()
       throws RemoteException, InvalidProtocolBufferException {
-    ConnectedDevice device = new ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToActiveUser= */ true,
-        /* hasSecureChannel= */ false);
+    ConnectedDevice device =
+        new ConnectedDevice(
+            UUID.randomUUID().toString(),
+            /* deviceName= */ "",
+            /* belongsToDriver= */ true,
+            /* hasSecureChannel= */ false);
     when(mockConnectedDeviceManager.getActiveUserConnectedDevices())
         .thenReturn(ImmutableList.of(device));
     remoteFeature.start();
@@ -504,11 +855,12 @@ public class RemoteFeatureTest {
   @Test
   public void sendQuery_queryCallbackOnErrorInvoked()
       throws RemoteException, InvalidProtocolBufferException {
-    ConnectedDevice device = new ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToActiveUser= */ true,
-        /* hasSecureChannel= */ false);
+    ConnectedDevice device =
+        new ConnectedDevice(
+            UUID.randomUUID().toString(),
+            /* deviceName= */ "",
+            /* belongsToDriver= */ true,
+            /* hasSecureChannel= */ false);
     when(mockConnectedDeviceManager.getActiveUserConnectedDevices())
         .thenReturn(ImmutableList.of(device));
     remoteFeature.start();
@@ -544,11 +896,12 @@ public class RemoteFeatureTest {
   @Test
   public void sendQuery_queryCallbackNotInvokedOnDifferentQueryIdResponse()
       throws RemoteException, InvalidProtocolBufferException {
-    ConnectedDevice device = new ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToActiveUser= */ true,
-        /* hasSecureChannel= */ false);
+    ConnectedDevice device =
+        new ConnectedDevice(
+            UUID.randomUUID().toString(),
+            /* deviceName= */ "",
+            /* belongsToDriver= */ true,
+            /* hasSecureChannel= */ false);
     when(mockConnectedDeviceManager.getActiveUserConnectedDevices())
         .thenReturn(ImmutableList.of(device));
     remoteFeature.start();
@@ -596,11 +949,12 @@ public class RemoteFeatureTest {
   @Test
   public void sendQuery_queryCallbackOnQueryNotSentInvokedBeforeServiceConnectionWithDevice() {
     RemoteFeature disconnectedFeature = createRemoteFeature(/* connectedDeviceManager= */ null);
-    ConnectedDevice device = new ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToActiveUser= */ true,
-        /* hasSecureChannel= */ false);
+    ConnectedDevice device =
+        new ConnectedDevice(
+            UUID.randomUUID().toString(),
+            /* deviceName= */ "",
+            /* belongsToDriver= */ true,
+            /* hasSecureChannel= */ false);
     byte[] request = ByteUtils.randomBytes(10);
     byte[] parameters = ByteUtils.randomBytes(10);
     QueryCallback callback = spy(new QueryCallback() {});
@@ -611,11 +965,12 @@ public class RemoteFeatureTest {
   @Test
   public void sendQuery_queryCallbackOnQueryNotSentInvokedIfSendMessageThrowsRemoteException()
       throws RemoteException {
-    ConnectedDevice device = new ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToActiveUser= */ true,
-        /* hasSecureChannel= */ false);
+    ConnectedDevice device =
+        new ConnectedDevice(
+            UUID.randomUUID().toString(),
+            /* deviceName= */ "",
+            /* belongsToDriver= */ true,
+            /* hasSecureChannel= */ false);
     when(mockConnectedDeviceManager.getActiveUserConnectedDevices())
         .thenReturn(ImmutableList.of(device));
     when(mockConnectedDeviceManager.sendMessage(any(), any()))
@@ -630,13 +985,13 @@ public class RemoteFeatureTest {
   }
 
   @Test
-  public void sendQuery_queryCallbackOnQueryNotSentInvokedIfDeviceNotFound()
-      throws RemoteException {
-    ConnectedDevice device = new ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToActiveUser= */ true,
-        /* hasSecureChannel= */ false);
+  public void sendQuery_queryCallbackOnQueryNotSentInvokedIfDeviceNotFound() {
+    ConnectedDevice device =
+        new ConnectedDevice(
+            UUID.randomUUID().toString(),
+            /* deviceName= */ "",
+            /* belongsToDriver= */ true,
+            /* hasSecureChannel= */ false);
     remoteFeature.start();
 
     byte[] request = ByteUtils.randomBytes(10);
@@ -648,11 +1003,12 @@ public class RemoteFeatureTest {
 
   @Test
   public void onQueryReceived_invokedWithQueryFields() throws RemoteException {
-    ConnectedDevice device = new ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToActiveUser= */ true,
-        /* hasSecureChannel= */ false);
+    ConnectedDevice device =
+        new ConnectedDevice(
+            UUID.randomUUID().toString(),
+            /* deviceName= */ "",
+            /* belongsToDriver= */ true,
+            /* hasSecureChannel= */ false);
     when(mockConnectedDeviceManager.getActiveUserConnectedDevices())
         .thenReturn(ImmutableList.of(device));
     remoteFeature.start();
@@ -682,11 +1038,12 @@ public class RemoteFeatureTest {
 
   @Test
   public void respondToQuery_doesNotSendResponseWithUnrecognizedQueryId() throws RemoteException {
-    ConnectedDevice device = new ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToActiveUser= */ true,
-        /* hasSecureChannel= */ false);
+    ConnectedDevice device =
+        new ConnectedDevice(
+            UUID.randomUUID().toString(),
+            /* deviceName= */ "",
+            /* belongsToDriver= */ true,
+            /* hasSecureChannel= */ false);
     when(mockConnectedDeviceManager.getActiveUserConnectedDevices())
         .thenReturn(ImmutableList.of(device));
     remoteFeature.start();
@@ -699,11 +1056,12 @@ public class RemoteFeatureTest {
   @Test
   public void respondToQuery_sendsResponseToSenderIfSameFeatureId()
       throws RemoteException, InvalidProtocolBufferException {
-    ConnectedDevice device = new ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToActiveUser= */ true,
-        /* hasSecureChannel= */ false);
+    ConnectedDevice device =
+        new ConnectedDevice(
+            UUID.randomUUID().toString(),
+            /* deviceName= */ "",
+            /* belongsToDriver= */ true,
+            /* hasSecureChannel= */ false);
     when(mockConnectedDeviceManager.getActiveUserConnectedDevices())
         .thenReturn(ImmutableList.of(device));
     remoteFeature.start();
@@ -745,11 +1103,12 @@ public class RemoteFeatureTest {
   @Test
   public void respondToQuery_sendResponseToSenderIfDifferentFeatureId()
       throws RemoteException, InvalidProtocolBufferException {
-    ConnectedDevice device = new ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToActiveUser= */ true,
-        /* hasSecureChannel= */ false);
+    ConnectedDevice device =
+        new ConnectedDevice(
+            UUID.randomUUID().toString(),
+            /* deviceName= */ "",
+            /* belongsToDriver= */ true,
+            /* hasSecureChannel= */ false);
     when(mockConnectedDeviceManager.getActiveUserConnectedDevices())
         .thenReturn(ImmutableList.of(device));
     remoteFeature.start();
@@ -793,11 +1152,12 @@ public class RemoteFeatureTest {
   @Test
   public void respondToQuery_doesNotThrowBeforeServiceConnectionWithDevice() {
     RemoteFeature disconnectedFeature = createRemoteFeature(/* connectedDeviceManager= */ null);
-    ConnectedDevice device = new ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToActiveUser= */ true,
-        /* hasSecureChannel= */ false);
+    ConnectedDevice device =
+        new ConnectedDevice(
+            UUID.randomUUID().toString(),
+            /* deviceName= */ "",
+            /* belongsToDriver= */ true,
+            /* hasSecureChannel= */ false);
     int queryId = 0;
     byte[] response = ByteUtils.randomBytes(10);
     disconnectedFeature.respondToQuerySecurely(device, queryId, /* success= */ true, response);
@@ -806,11 +1166,12 @@ public class RemoteFeatureTest {
   @Test
   public void getCompanionApplicationName_sendsAppNameQueryToSystemFeature()
       throws RemoteException, InvalidProtocolBufferException {
-    ConnectedDevice device = new ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToActiveUser= */ true,
-        /* hasSecureChannel= */ true);
+    ConnectedDevice device =
+        new ConnectedDevice(
+            UUID.randomUUID().toString(),
+            /* deviceName= */ "",
+            /* belongsToDriver= */ true,
+            /* hasSecureChannel= */ true);
     when(mockConnectedDeviceManager.getActiveUserConnectedDevices())
         .thenReturn(ImmutableList.of(device));
     remoteFeature.start();
@@ -836,11 +1197,12 @@ public class RemoteFeatureTest {
   @Test
   public void getCompanionApplicationName_appNameCallbackOnNameReceivedInvokedWithName()
       throws RemoteException, InvalidProtocolBufferException {
-    ConnectedDevice device = new ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToActiveUser= */ true,
-        /* hasSecureChannel= */ true);
+    ConnectedDevice device =
+        new ConnectedDevice(
+            UUID.randomUUID().toString(),
+            /* deviceName= */ "",
+            /* belongsToDriver= */ true,
+            /* hasSecureChannel= */ true);
     when(mockConnectedDeviceManager.getActiveUserConnectedDevices())
         .thenReturn(ImmutableList.of(device));
     remoteFeature.start();
@@ -878,11 +1240,12 @@ public class RemoteFeatureTest {
   @Test
   public void getCompanionApplicationName_appNameCallbackOnErrorInvokedWithEmptyResponse()
       throws RemoteException, InvalidProtocolBufferException {
-    ConnectedDevice device = new ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToActiveUser= */ true,
-        /* hasSecureChannel= */ true);
+    ConnectedDevice device =
+        new ConnectedDevice(
+            UUID.randomUUID().toString(),
+            /* deviceName= */ "",
+            /* belongsToDriver= */ true,
+            /* hasSecureChannel= */ true);
     when(mockConnectedDeviceManager.getActiveUserConnectedDevices())
         .thenReturn(ImmutableList.of(device));
     remoteFeature.start();
@@ -922,11 +1285,12 @@ public class RemoteFeatureTest {
   @Test
   public void getCompanionApplicationName_appNameCallbackOnErrorInvokedWithErrorResponse()
       throws RemoteException, InvalidProtocolBufferException {
-    ConnectedDevice device = new ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToActiveUser= */ true,
-        /* hasSecureChannel= */ true);
+    ConnectedDevice device =
+        new ConnectedDevice(
+            UUID.randomUUID().toString(),
+            /* deviceName= */ "",
+            /* belongsToDriver= */ true,
+            /* hasSecureChannel= */ true);
     when(mockConnectedDeviceManager.getActiveUserConnectedDevices())
         .thenReturn(ImmutableList.of(device));
     remoteFeature.start();
@@ -963,12 +1327,13 @@ public class RemoteFeatureTest {
 
   @Test
   public void getCompanionApplicationName_appNameCallbackOnErrorInvokedWhenQueryFailedToSend()
-      throws RemoteException, InvalidProtocolBufferException {
-    ConnectedDevice device = new ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToActiveUser= */ true,
-        /* hasSecureChannel= */ true);
+      throws RemoteException {
+    ConnectedDevice device =
+        new ConnectedDevice(
+            UUID.randomUUID().toString(),
+            /* deviceName= */ "",
+            /* belongsToDriver= */ true,
+            /* hasSecureChannel= */ true);
     when(mockConnectedDeviceManager.getActiveUserConnectedDevices())
         .thenReturn(ImmutableList.of(device));
     when(mockConnectedDeviceManager.sendMessage(any(), any()))

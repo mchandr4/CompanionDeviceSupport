@@ -45,7 +45,7 @@ class CompanionConnectorTest {
   @Test
   fun connect_bindsWithFgActionWhenIsForegroundProcessIsTrue() {
     whenever(mockPackageManager.queryIntentServices(any(), any())).thenAnswer(defaultServiceAnswer)
-    val connector = CompanionConnector(context, mockCallback, isForegroundProcess = true)
+    val connector = CompanionConnector(context, isForegroundProcess = true)
 
     connector.connect()
 
@@ -55,7 +55,7 @@ class CompanionConnectorTest {
   @Test
   fun connect_bindsWithBgActionWhenIsForegroundProcessIsFalse() {
     whenever(mockPackageManager.queryIntentServices(any(), any())).thenAnswer(defaultServiceAnswer)
-    val connector = CompanionConnector(context, mockCallback, isForegroundProcess = false)
+    val connector = CompanionConnector(context, isForegroundProcess = false)
 
     connector.connect()
 
@@ -65,7 +65,7 @@ class CompanionConnectorTest {
   @Test
   fun connect_fgRetriesBindWithRemoteFeatureActionIfFeatureCoordinatorReturnsNullBinding() {
     whenever(mockPackageManager.queryIntentServices(any(), any())).thenAnswer(defaultServiceAnswer)
-    val connector = CompanionConnector(context, mockCallback, isForegroundProcess = true)
+    val connector = CompanionConnector(context, isForegroundProcess = true)
 
     connector.connect()
     context.serviceConnection?.onNullBinding(ComponentName(PACKAGE_NAME, FG_NAME))
@@ -77,7 +77,7 @@ class CompanionConnectorTest {
   @Test
   fun connect_bgRetriesBindWithRemoteFeatureActionIfFeatureCoordinatorReturnsNullBinding() {
     whenever(mockPackageManager.queryIntentServices(any(), any())).thenAnswer(defaultServiceAnswer)
-    val connector = CompanionConnector(context, mockCallback, isForegroundProcess = false)
+    val connector = CompanionConnector(context, isForegroundProcess = false)
 
     connector.connect()
     context.serviceConnection?.onNullBinding(ComponentName(PACKAGE_NAME, BG_NAME))
@@ -90,7 +90,7 @@ class CompanionConnectorTest {
   fun connect_fgRetriesBindWithRemoteFeatureActionIfFeatureCoordinatorActionMissing() {
     whenever(mockPackageManager.queryIntentServices(any(), any()))
       .thenAnswer(connectedDeviceManagerOnlyAnswer)
-    val connector = CompanionConnector(context, mockCallback, isForegroundProcess = true)
+    val connector = CompanionConnector(context, isForegroundProcess = true)
 
     connector.connect()
     context.serviceConnection?.onNullBinding(ComponentName(PACKAGE_NAME, BG_NAME))
@@ -103,7 +103,7 @@ class CompanionConnectorTest {
   fun connect_bgRetriesBindWithRemoteFeatureActionIfFeatureCoordinatorActionMissing() {
     whenever(mockPackageManager.queryIntentServices(any(), any()))
       .thenAnswer(connectedDeviceManagerOnlyAnswer)
-    val connector = CompanionConnector(context, mockCallback, isForegroundProcess = false)
+    val connector = CompanionConnector(context, isForegroundProcess = false)
 
     connector.connect()
     context.serviceConnection?.onNullBinding(ComponentName(PACKAGE_NAME, BG_NAME))
@@ -115,7 +115,9 @@ class CompanionConnectorTest {
   @Test
   fun disconnect_invokesOnDisconnectedWhenFeatureCoordinatorConnected() {
     whenever(mockPackageManager.queryIntentServices(any(), any())).thenAnswer(defaultServiceAnswer)
-    val connector = CompanionConnector(context, mockCallback, isForegroundProcess = false)
+    val connector = CompanionConnector(context, isForegroundProcess = false).apply {
+      callback = mockCallback
+    }
 
     connector.connect()
     context
@@ -129,7 +131,9 @@ class CompanionConnectorTest {
   @Test
   fun disconnect_invokesOnDisconnectedWhenConnectedDeviceManagerConnected() {
     whenever(mockPackageManager.queryIntentServices(any(), any())).thenAnswer(defaultServiceAnswer)
-    val connector = CompanionConnector(context, mockCallback, isForegroundProcess = false)
+    val connector = CompanionConnector(context, isForegroundProcess = false).apply {
+      callback = mockCallback
+    }
 
     connector.connect()
     context
@@ -143,7 +147,9 @@ class CompanionConnectorTest {
   @Test
   fun disconnect_notInvokedWithNoBoundService() {
     whenever(mockPackageManager.queryIntentServices(any(), any())).thenAnswer(defaultServiceAnswer)
-    val connector = CompanionConnector(context, mockCallback, isForegroundProcess = false)
+    val connector = CompanionConnector(context, isForegroundProcess = false).apply {
+      callback = mockCallback
+    }
 
     connector.connect()
     connector.disconnect()
@@ -154,7 +160,7 @@ class CompanionConnectorTest {
   @Test
   fun disconnect_nullsOutFeatureCoordinatorAndConnectedDeviceManager() {
     whenever(mockPackageManager.queryIntentServices(any(), any())).thenAnswer(defaultServiceAnswer)
-    val connector = CompanionConnector(context, mockCallback, isForegroundProcess = false)
+    val connector = CompanionConnector(context, isForegroundProcess = false)
 
     connector.connect()
     context
@@ -170,11 +176,9 @@ class CompanionConnectorTest {
   fun disconnect_doesNotThrowWhileUnbindingUnboundService() {
     whenever(mockPackageManager.queryIntentServices(any(), any())).thenAnswer(defaultServiceAnswer)
     val connector =
-      CompanionConnector(
-        FailingContext(mockPackageManager),
-        mockCallback,
-        isForegroundProcess = false
-      )
+      CompanionConnector(FailingContext(mockPackageManager), isForegroundProcess = false).apply {
+        callback = mockCallback
+      }
 
     connector.disconnect()
   }
@@ -182,7 +186,9 @@ class CompanionConnectorTest {
   @Test
   fun onConnected_invokedWhenBindingSucceeds() {
     whenever(mockPackageManager.queryIntentServices(any(), any())).thenAnswer(defaultServiceAnswer)
-    val connector = CompanionConnector(context, mockCallback, isForegroundProcess = false)
+    val connector = CompanionConnector(context, isForegroundProcess = false).apply {
+      callback = mockCallback
+    }
 
     connector.connect()
     context
@@ -195,7 +201,9 @@ class CompanionConnectorTest {
   @Test
   fun onDisconnected_invokedWhenServiceDisconnects() {
     whenever(mockPackageManager.queryIntentServices(any(), any())).thenAnswer(defaultServiceAnswer)
-    val connector = CompanionConnector(context, mockCallback, isForegroundProcess = false)
+    val connector = CompanionConnector(context, isForegroundProcess = false).apply {
+      callback = mockCallback
+    }
 
     connector.connect()
     val componentName = ComponentName(PACKAGE_NAME, BG_NAME)
@@ -210,7 +218,9 @@ class CompanionConnectorTest {
   fun onFailedToConnect_invokedWhenServiceIsNotFound() {
     whenever(mockPackageManager.queryIntentServices(any(), any()))
       .thenAnswer(featureCoordinatorOnlyAnswer)
-    val connector = CompanionConnector(context, mockCallback, isForegroundProcess = false)
+    val connector = CompanionConnector(context, isForegroundProcess = false).apply {
+      callback = mockCallback
+    }
 
     connector.connect()
     context.serviceConnection?.onNullBinding(ComponentName(PACKAGE_NAME, BG_NAME))
@@ -221,7 +231,9 @@ class CompanionConnectorTest {
   @Test
   fun onFailedToConnect_invokedWithNullBindingFromFeatureCoordinatorAndNoCDMService() {
     whenever(mockPackageManager.queryIntentServices(any(), any())).thenAnswer(notFoundAnswer)
-    val connector = CompanionConnector(context, mockCallback, isForegroundProcess = false)
+    val connector = CompanionConnector(context, isForegroundProcess = false).apply {
+      callback = mockCallback
+    }
 
     connector.connect()
 
@@ -232,7 +244,9 @@ class CompanionConnectorTest {
   fun onFailedToConnect_invokedAfterBindingRetryLimitExceeded() {
     whenever(mockPackageManager.queryIntentServices(any(), any())).thenAnswer(defaultServiceAnswer)
     val failingContext = FailingContext(mockPackageManager)
-    val connector = CompanionConnector(failingContext, mockCallback, isForegroundProcess = false)
+    val connector = CompanionConnector(failingContext, isForegroundProcess = false).apply {
+      callback = mockCallback
+    }
     val shadowLooper = Shadows.shadowOf(Looper.getMainLooper())
 
     connector.connect()
@@ -247,7 +261,7 @@ class CompanionConnectorTest {
   @Test
   fun featureCoordinatorAndConnectedDeviceManager_areNotNullAfterServiceConnection() {
     whenever(mockPackageManager.queryIntentServices(any(), any())).thenAnswer(defaultServiceAnswer)
-    val connector = CompanionConnector(context, mockCallback, isForegroundProcess = false)
+    val connector = CompanionConnector(context, isForegroundProcess = false)
 
     connector.connect()
     context
@@ -262,7 +276,7 @@ class CompanionConnectorTest {
   fun connectedDeviceManager_isNotNullAfterServiceConnectionWhenLegacy() {
     whenever(mockPackageManager.queryIntentServices(any(), any()))
       .thenAnswer(connectedDeviceManagerOnlyAnswer)
-    val connector = CompanionConnector(context, mockCallback, isForegroundProcess = false)
+    val connector = CompanionConnector(context, isForegroundProcess = false)
 
     connector.connect()
     context

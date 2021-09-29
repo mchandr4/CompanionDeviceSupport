@@ -18,7 +18,6 @@ package com.google.android.companiondevicesupport.trust;
 
 import static com.google.android.connecteddevice.util.SafeLog.loge;
 
-import androidx.lifecycle.ViewModelProvider;
 import android.os.Bundle;
 import androidx.fragment.app.Fragment;
 import android.text.Html;
@@ -29,6 +28,7 @@ import android.view.ViewGroup;
 import android.widget.Switch;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.lifecycle.ViewModelProvider;
 import com.google.android.companiondevicesupport.R;
 import com.google.android.connecteddevice.model.AssociatedDevice;
 import com.google.android.connecteddevice.trust.TrustedDeviceViewModel;

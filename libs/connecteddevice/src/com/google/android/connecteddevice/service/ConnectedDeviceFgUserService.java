@@ -69,27 +69,27 @@ public final class ConnectedDeviceFgUserService extends TrunkService {
     registerReceiver(userUnlockedReceiver, new IntentFilter(Intent.ACTION_USER_UNLOCKED));
     // Listen for user going to the background so we can clean up.
     registerReceiver(userBackgroundReceiver, new IntentFilter(Intent.ACTION_USER_BACKGROUND));
-    connector = new CompanionConnector(this,
-        new CompanionConnector.Callback() {
-          @Override
-          public void onConnected() {
-            logd(TAG, "Successfully bound to platform.");
-            featureCoordinator = connector.getFeatureCoordinator();
-            connectedDeviceManager = connector.getConnectedDeviceManager();
-          }
+    connector = new CompanionConnector(this);
+    connector.setCallback(new CompanionConnector.Callback() {
+      @Override
+      public void onConnected() {
+        logd(TAG, "Successfully bound to platform.");
+        featureCoordinator = connector.getFeatureCoordinator();
+        connectedDeviceManager = connector.getConnectedDeviceManager();
+      }
 
-          @Override
-          public void onDisconnected() {
-            loge(TAG, "Lost connection to companion. Stopping service.");
-            stopSelf();
-          }
+      @Override
+      public void onDisconnected() {
+        loge(TAG, "Lost connection to companion. Stopping service.");
+        stopSelf();
+      }
 
-          @Override
-          public void onFailedToConnect() {
-            loge(TAG, "Unable to establish connection with companion. Stopping service.");
-            stopSelf();
-          }
-        });
+      @Override
+      public void onFailedToConnect() {
+        loge(TAG, "Unable to establish connection with companion. Stopping service.");
+        stopSelf();
+      }
+    });
     connector.connect();
     UserManager userManager = getSystemService(UserManager.class);
     if (userManager.isUserUnlocked()) {

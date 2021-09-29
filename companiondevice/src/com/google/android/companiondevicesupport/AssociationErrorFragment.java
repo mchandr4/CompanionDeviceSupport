@@ -16,12 +16,12 @@
 
 package com.google.android.companiondevicesupport;
 
-import androidx.lifecycle.ViewModelProvider;
 import android.os.Bundle;
 import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import androidx.lifecycle.ViewModelProvider;
 import com.google.android.connecteddevice.model.TransportProtocols;
 import com.google.android.connecteddevice.ui.AssociatedDeviceViewModel;
 import com.google.android.connecteddevice.ui.AssociatedDeviceViewModelFactory;

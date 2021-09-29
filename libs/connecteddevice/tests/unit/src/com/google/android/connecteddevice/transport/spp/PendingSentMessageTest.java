@@ -17,7 +17,7 @@
 package com.google.android.connecteddevice.transport.spp;
 
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import org.junit.Rule;
@@ -50,6 +50,6 @@ public class PendingSentMessageTest {
 
     pendingSentMessage.notifyMessageSent();
     // This test is primarily meant to verify there are no crashes when the listener is null
-    verifyZeroInteractions(mockOnSuccessListener);
+    verifyNoMoreInteractions(mockOnSuccessListener);
   }
 }

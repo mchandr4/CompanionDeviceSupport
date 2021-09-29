@@ -25,7 +25,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import android.bluetooth.BluetoothAdapter;
@@ -200,14 +199,14 @@ public class ConnectedDeviceSppDelegateBinderTest {
   public void unregisterConnectionCallback() {
     testPendingConnection.setOnConnectedListener(null);
     testPendingConnection.notifyConnected(TEST_BLUETOOTH_DEVICE, TEST_BLUETOOTH_DEVICE.getName());
-    verifyZeroInteractions(mockOnConnectedListener);
+    verifyNoMoreInteractions(mockOnConnectedListener);
   }
 
   @Test
   public void unregisterConnectionErrorCallback() {
     testPendingConnection.setOnConnectionErrorListener(null);
     testPendingConnection.notifyConnectionError();
-    verifyZeroInteractions(mockOnConnectionErrorListener);
+    verifyNoMoreInteractions(mockOnConnectionErrorListener);
   }
 
   @Test
@@ -220,7 +219,7 @@ public class ConnectedDeviceSppDelegateBinderTest {
   public void clearOnMessageReceivedListener() {
     connectedDeviceSppDelegateBinder.clearOnMessageReceivedListener(testConnection);
     connectedDeviceSppDelegateBinder.notifyMessageReceived(testConnection, TEST_MESSAGE);
-    verifyZeroInteractions(mockOnErrorListener);
+    verifyNoMoreInteractions(mockOnErrorListener);
   }
 
   @Test
@@ -239,7 +238,7 @@ public class ConnectedDeviceSppDelegateBinderTest {
 
     connectedDeviceSppDelegateBinder.notifyMessageReceived(testConnection, TEST_MESSAGE);
     verify(mockOnMessageReceivedListener).onMessageReceived(TEST_MESSAGE);
-    verifyZeroInteractions(mockOnMessageReceivedListener2);
+    verifyNoMoreInteractions(mockOnMessageReceivedListener2);
 
     connectedDeviceSppDelegateBinder.notifyMessageReceived(testConnection2, testMessage2);
     verify(mockOnMessageReceivedListener2).onMessageReceived(testMessage2);

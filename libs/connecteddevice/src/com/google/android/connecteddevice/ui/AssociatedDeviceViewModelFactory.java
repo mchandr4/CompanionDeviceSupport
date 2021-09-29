@@ -17,9 +17,9 @@
 package com.google.android.connecteddevice.ui;
 
 import android.app.Application;
+import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.annotation.NonNull;
 
 /** Factory class for an {@link AssociatedDeviceViewModel}. */
 public class AssociatedDeviceViewModelFactory implements ViewModelProvider.Factory {

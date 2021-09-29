@@ -28,6 +28,7 @@ import android.content.Context;
 import android.os.ParcelUuid;
 import android.os.RemoteException;
 import androidx.annotation.CallSuper;
+import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.google.android.companionprotos.Query;
@@ -42,6 +43,10 @@ import com.google.android.connecteddevice.util.Logger;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -64,6 +69,21 @@ public abstract class RemoteFeature {
   public static final String ASSOCIATED_DEVICE_DATA_NAME_EXTRA =
       "com.google.android.connecteddevice.api.ASSOCIATED_DEVICE";
 
+  /** Type associated with a driver's device. */
+  public static final int USER_TYPE_DRIVER = 1 << 0;
+
+  /** Type associated with a passenger's device. */
+  public static final int USER_TYPE_PASSENGER = 1 << 1;
+
+  /** Type associated with all user types. */
+  public static final int USER_TYPE_ALL =  USER_TYPE_DRIVER | USER_TYPE_PASSENGER;
+
+  /** User types that can be associated with a connected device. */
+  @IntDef({USER_TYPE_DRIVER, USER_TYPE_PASSENGER, USER_TYPE_ALL})
+  @Retention(RetentionPolicy.SOURCE)
+  @Target(ElementType.TYPE_USE)
+  public @interface UserType {}
+
   /** Id for the system query feature. */
   protected static final ParcelUuid SYSTEM_FEATURE_ID =
       ParcelUuid.fromString("892ac5d9-e9a5-48dc-874a-c01e3cb00d5d");
@@ -83,6 +103,9 @@ public abstract class RemoteFeature {
   private final CompanionConnector connector;
 
   private IConnectedDeviceManager connectedDeviceManager;
+
+  // Default to driver to retain backwards compatible behavior.
+  private @UserType int userType = USER_TYPE_DRIVER;
 
   /**
    * Create a new RemoteFeature.
@@ -107,31 +130,28 @@ public abstract class RemoteFeature {
       boolean forceFgUserBind) {
     this.context = context;
     this.featureId = featureId;
-    connector =
-        new CompanionConnector(
-            context,
-            new CompanionConnector.Callback() {
-              @Override
-              public void onConnected() {
-                logd(TAG, "Successfully connected. Initializing feature.");
-                connectedDeviceManager = connector.getConnectedDeviceManager();
-                setupConnectedDeviceManager();
-              }
+    connector = new CompanionConnector(context, forceFgUserBind);
+    connector.setCallback(new CompanionConnector.Callback() {
+      @Override
+      public void onConnected() {
+        logd(TAG, "Successfully connected. Initializing feature.");
+        connectedDeviceManager = connector.getConnectedDeviceManager();
+        setupConnectedDeviceManager();
+      }
 
-              @Override
-              public void onDisconnected() {
-                logd(TAG, "Disconnected from companion. Stopping feature.");
-                connectedDeviceManager = null;
-                stop();
-              }
+      @Override
+      public void onDisconnected() {
+        logd(TAG, "Disconnected from companion. Stopping feature.");
+        connectedDeviceManager = null;
+        stop();
+      }
 
-              @Override
-              public void onFailedToConnect() {
-                loge(TAG, "Failed to connect. Stopping feature.");
-                stop();
-              }
-            },
-            forceFgUserBind);
+      @Override
+      public void onFailedToConnect() {
+        loge(TAG, "Failed to connect. Stopping feature.");
+        stop();
+      }
+    });
   }
 
   /**
@@ -180,6 +200,16 @@ public abstract class RemoteFeature {
       connector.disconnect();
     }
     connectedDeviceManager = null;
+  }
+
+  /**
+   * Sets the type of user devices this feature would like to subscribe to. Non-matching connections
+   * will not invoke callbacks. The default value is {@link #USER_TYPE_DRIVER}.
+   *
+   * <p>Must be called before {@link #start()}.</p>
+   */
+  public void setUserType(@UserType int userType) {
+    this.userType = userType;
   }
 
   /** Return the {@link Context} registered with the feature. */
@@ -478,6 +508,9 @@ public abstract class RemoteFeature {
       List<ConnectedDevice> activeUserConnectedDevices =
           connectedDeviceManager.getActiveUserConnectedDevices();
       for (ConnectedDevice device : activeUserConnectedDevices) {
+        if (!isDeviceIncludedInUserType(device)) {
+          continue;
+        }
         onDeviceConnected(device);
         if (device.hasSecureChannel()) {
           onSecureChannelEstablished(device);
@@ -544,12 +577,20 @@ public abstract class RemoteFeature {
     }
   }
 
+  private boolean isDeviceIncludedInUserType(ConnectedDevice device) {
+    return (device.isAssociatedWithDriver()
+        ? (userType & USER_TYPE_DRIVER) != 0
+        : (userType & USER_TYPE_PASSENGER) != 0);
+  }
+
   private final IConnectionCallback connectionCallback =
       new IConnectionCallback.Stub() {
         @Override
         public void onDeviceConnected(ConnectedDevice connectedDevice) throws RemoteException {
-          connectedDeviceManager.registerDeviceCallback(
-              connectedDevice, featureId, deviceCallback);
+          if (!isDeviceIncludedInUserType(connectedDevice)) {
+            return;
+          }
+          connectedDeviceManager.registerDeviceCallback(connectedDevice, featureId, deviceCallback);
           RemoteFeature.this.onDeviceConnected(connectedDevice);
           if (connectedDevice.hasSecureChannel()) {
             RemoteFeature.this.onSecureChannelEstablished(connectedDevice);
@@ -558,6 +599,9 @@ public abstract class RemoteFeature {
 
         @Override
         public void onDeviceDisconnected(ConnectedDevice connectedDevice) throws RemoteException {
+          if (!isDeviceIncludedInUserType(connectedDevice)) {
+            return;
+          }
           connectedDeviceManager.unregisterDeviceCallback(
               connectedDevice, featureId, deviceCallback);
           RemoteFeature.this.onDeviceDisconnected(connectedDevice);

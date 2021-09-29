@@ -23,8 +23,6 @@ import static com.google.android.connecteddevice.util.SafeLog.logd;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelStoreOwner;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.os.Bundle;
@@ -33,6 +31,8 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import android.view.View;
 import android.widget.Toast;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelStoreOwner;
 import com.android.car.setupwizardlib.CarSetupWizardCompatLayout;
 import com.android.car.ui.toolbar.MenuItem;
 import com.android.car.ui.toolbar.ToolbarController;

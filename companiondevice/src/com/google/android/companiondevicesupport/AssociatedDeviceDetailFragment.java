@@ -18,8 +18,6 @@ package com.google.android.companiondevicesupport;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelStoreOwner;
 import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -35,6 +33,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelStoreOwner;
 import com.google.android.connecteddevice.model.AssociatedDeviceDetails;
 import com.google.android.connecteddevice.model.TransportProtocols;
 import com.google.android.connecteddevice.trust.TrustedDeviceConstants;

@@ -21,7 +21,6 @@ import static com.google.android.connecteddevice.util.SafeLog.loge;
 
 import android.app.Application;
 import android.app.KeyguardManager;
-import androidx.lifecycle.AndroidViewModel;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -30,6 +29,7 @@ import android.os.RemoteException;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
+import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import com.google.android.connecteddevice.api.IDeviceAssociationCallback;

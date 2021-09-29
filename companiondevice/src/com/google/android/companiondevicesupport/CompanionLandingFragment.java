@@ -18,7 +18,6 @@ package com.google.android.companiondevicesupport;
 
 import static com.google.android.connecteddevice.util.SafeLog.loge;
 
-import androidx.lifecycle.ViewModelProvider;
 import android.bluetooth.BluetoothAdapter;
 import android.os.Bundle;
 import androidx.fragment.app.Fragment;
@@ -29,6 +28,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.LayoutRes;
+import androidx.lifecycle.ViewModelProvider;
 import com.google.android.connecteddevice.model.TransportProtocols;
 import com.google.android.connecteddevice.ui.AssociatedDeviceViewModel;
 import com.google.android.connecteddevice.ui.AssociatedDeviceViewModelFactory;
