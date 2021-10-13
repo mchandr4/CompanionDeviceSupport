@@ -30,39 +30,51 @@ import com.google.android.connecteddevice.model.DeviceMessage;
 /** Coordinator between features and connected devices. */
 interface IFeatureCoordinator {
 
-    /** Returns {@link List<ConnectedDevice>} of devices currently connected. */
+    /**
+     * Returns {@link List<ConnectedDevice>} of devices currently connected that
+     * belong to the current driver.
+     */
     List<ConnectedDevice> getConnectedDevicesForDriver();
 
     /**
-     * Register a callback for connection events for only the driver's devices.
+     * Returns {@link List<ConnectedDevice>} of devices currently connected that
+     * belong to any of the passengers.
+     */
+    List<ConnectedDevice> getConnectedDevicesForPassengers();
+
+    /** Returns {@link List<ConnectedDevice>} of all devices currently connected. */
+    List<ConnectedDevice> getAllConnectedDevices();
+
+    /**
+     * Registers a callback for connection events for only the driver's devices.
      *
      * @param callback {@link IConnectionCallback} to register.
      */
     void registerDriverConnectionCallback(in IConnectionCallback callback);
 
     /**
-     * Register a callback for connection events for only passengers' devices.
+     * Registers a callback for connection events for only passengers' devices.
      *
      * @param callback {@link IConnectionCallback} to register.
      */
     void registerPassengerConnectionCallback(in IConnectionCallback callback);
 
     /**
-     * Register a callback for connection events for all devices.
+     * Registers a callback for connection events for all devices.
      *
      * @param callback {@link IConnectionCallback} to register.
      */
     void registerAllConnectionCallback(in IConnectionCallback callback);
 
     /**
-     * Unregister a connection callback.
+     * Unregisters a connection callback.
      *
      * @param callback {@link IConnectionCallback} to unregister.
      */
     void unregisterConnectionCallback(in IConnectionCallback callback);
 
     /**
-     * Register a callback for a specific connectedDevice and recipient.
+     * Registers a callback for a specific connectedDevice and recipient.
      *
      * @param connectedDevice {@link ConnectedDevice} to register triggers on.
      * @param recipientId {@link ParcelUuid} to register as recipient of.
@@ -72,7 +84,7 @@ interface IFeatureCoordinator {
             in IDeviceCallback callback);
 
     /**
-     * Unregister callback from connectedDevice events.
+     * Unregisters callback from connectedDevice events.
      *
      * @param connectedDevice {@link ConnectedDevice} callback was registered on.
      * @param recipientId {@link ParcelUuid} callback was registered under.
@@ -82,7 +94,7 @@ interface IFeatureCoordinator {
             in IDeviceCallback callback);
 
     /**
-     * Send a message to a connected device.
+     * Sends a message to a connected device.
      *
      * @param connectedDevice {@link ConnectedDevice} to send the message to.
      * @param message Message to send.
@@ -91,35 +103,35 @@ interface IFeatureCoordinator {
 
 
     /**
-     * Register a callback for associated devic related events.
+     * Registers a callback for associated devic related events.
      *
      * @param callback {@link IDeviceAssociationCallback} to register.
      */
     void registerDeviceAssociationCallback(in IDeviceAssociationCallback callback);
 
     /**
-     * Unregister a device association callback.
+     * Unregisters a device association callback.
      *
      * @param callback {@link IDeviceAssociationCallback} to unregister.
      */
     void unregisterDeviceAssociationCallback(in IDeviceAssociationCallback callback);
 
     /**
-     * Register listener for the log request with the given logger identifier.
+     * Registers listener for the log request with the given logger identifier.
      *
      * @param listener {@link IOnLogRequestedListener} to register.
      */
     void registerOnLogRequestedListener(in int loggerId, in IOnLogRequestedListener listener);
 
     /**
-     * Unregister listener from the log request.
+     * Unregisters listener from the log request.
      *
      * @param listener {@link IOnLogRequestedListener} to unregister.
      */
     void unregisterOnLogRequestedListener(in int loggerId, in IOnLogRequestedListener listener);
 
     /**
-     * Process log records in the logger with given id so it can be combined with log records
+     * Processes log records in the logger with given id so it can be combined with log records
      * from other loggers.
      *
      * @param loggerId of the logger.
@@ -134,7 +146,7 @@ interface IFeatureCoordinator {
     void stopAssociation();
 
     /**
-     * Retrieve all associated devices.
+     * Retrieves all associated devices.
      *
      * @param listener {@link IOnAssociatedDevicesRetrievedListener} that will
      * be notified when the associated devices are retrieved.
@@ -142,7 +154,7 @@ interface IFeatureCoordinator {
     void retrieveAssociatedDevices(in IOnAssociatedDevicesRetrievedListener listener);
 
     /**
-     * Retrieve associated devices belonging to the driver.
+     * Retrieves associated devices belonging to the driver.
      *
      * @param listener {@link IOnAssociatedDevicesRetrievedListener} that will
      * be notified when the associated devices are retrieved.
@@ -150,22 +162,29 @@ interface IFeatureCoordinator {
     void retrieveAssociatedDevicesForDriver(in IOnAssociatedDevicesRetrievedListener listener);
 
     /**
-     * Retrieve associated devices belonging to all of the passengers.
+     * Retrieves associated devices belonging to all of the passengers.
      *
      * @param listener {@link IOnAssociatedDevicesRetrievedListener} that will
      * be notified when the associated devices are retrieved.
      */
     void retrieveAssociatedDevicesForPassengers(in IOnAssociatedDevicesRetrievedListener listener);
 
-    /** Confirm the paring code. */
+    /** Confirms the paring code. */
     void acceptVerification();
 
-    /** Remove the associated device of the given identifier for the active user. */
+    /** Removes the associated device of the given identifier for the active user. */
     void removeAssociatedDevice(in String deviceId);
 
-    /** Enable connection on the associated device with the given identifier. */
+    /** Enables connection on the associated device with the given identifier. */
     void enableAssociatedDeviceConnection(in String deviceId);
 
-    /** Disable connection on the associated device with the given identifier. */
+    /** Disables connection on the associated device with the given identifier. */
     void disableAssociatedDeviceConnection(in String deviceId);
+
+    /** Starts the association with a new device.
+     *
+     * @param callback {@link IAssociationCallback} that will be notified for assocaition events.
+     * @param identifier {@link ParcelUuid} to identify the association.
+     */
+    void startAssociationWithIdentifier(in IAssociationCallback callback, in ParcelUuid identifier);
 }

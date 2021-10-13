@@ -255,11 +255,12 @@ open class ProtocolStream(
         return
       }
     val deviceMessage =
-      DeviceMessage(
+      DeviceMessage.createIncomingMessage(
         ByteUtils.bytesToUUID(message.recipient.toByteArray()),
         message.isPayloadEncrypted,
         DeviceMessage.OperationType.fromValue(message.operation.number),
-        message.payload.toByteArray()
+        message.payload.toByteArray(),
+        message.originalSize
       )
     messageReceivedListener?.onMessageReceived(deviceMessage)
   }

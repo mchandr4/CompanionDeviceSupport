@@ -51,6 +51,7 @@ import com.google.android.connecteddevice.api.IOnAssociatedDevicesRetrievedListe
 import com.google.android.connecteddevice.model.AssociatedDevice;
 import com.google.android.connecteddevice.model.AssociatedDeviceDetails;
 import com.google.android.connecteddevice.model.ConnectedDevice;
+import com.google.android.connecteddevice.model.StartAssociationResponse;
 import com.google.android.connecteddevice.service.ConnectedDeviceService;
 import java.time.Duration;
 import java.util.List;
@@ -430,11 +431,11 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
   private final IAssociationCallback associationCallback =
       new IAssociationCallback.Stub() {
         @Override
-        public void onAssociationStartSuccess(String deviceName) {
+        public void onAssociationStartSuccess(StartAssociationResponse response) {
+          // TODO(b/197868405) Generate QR code according to the [response].
           associationState.postValue(AssociationState.STARTED);
-          if (deviceName == null) {
-            deviceName = "";
-          } else {
+          String deviceName = response.getDeviceName();
+          if (!deviceName.isEmpty()) {
             // Name prefix is only needed under BLE mode.
             deviceName = bleDeviceNamePrefix + deviceName;
           }

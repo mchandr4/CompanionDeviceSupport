@@ -32,13 +32,10 @@ import java.util.UUID
  * [ConnectedDeviceSppDelegateBinder] to handle connection related actions.
  *
  * @property sppBinder [ConnectedDeviceSppDelegateBinder] for communication with [SppService].
- * @property associationServiceUuid UUID of SDP(Service Discovery Protocol) record, need to keep it
- * consistent among client and server.
  * @property maxWriteSize Maximum size in bytes to write in one packet.
  */
 class SppProtocol(
   private val sppBinder: ConnectedDeviceSppDelegateBinder,
-  private val associationServiceUuid: UUID,
   private val maxWriteSize: Int,
 ) : ConnectionProtocol(), BluetoothDeviceProvider {
   override val isDeviceVerificationRequired = false
@@ -46,10 +43,16 @@ class SppProtocol(
   private val pendingConnections = mutableMapOf<UUID, PendingConnection>()
   private val connections = mutableMapOf<UUID, Connection>()
   private val connectedDevices = mutableMapOf<UUID, BluetoothDevice>()
+  private var associationIdentifier: UUID? = null
 
-  override fun startAssociationDiscovery(name: String, callback: DiscoveryCallback) {
-    logd(TAG, "Start association discovery for association with UUID $associationServiceUuid")
-    startConnection(associationServiceUuid, callback)
+  override fun startAssociationDiscovery(
+    name: String,
+    callback: DiscoveryCallback,
+    identifier: UUID
+  ) {
+    associationIdentifier = identifier
+    logd(TAG, "Start association discovery for association with UUID $identifier")
+    startConnection(identifier, callback)
   }
 
   override fun startConnectionDiscovery(
@@ -125,8 +128,14 @@ class SppProtocol(
   }
 
   override fun stopAssociationDiscovery() {
-    logd(TAG, "Stop association discovery with UUID $associationServiceUuid.")
-    stopDiscovery(associationServiceUuid)
+    val id = associationIdentifier
+    if (id == null) {
+      logd(TAG, "No association discovery is happening, ignoring.")
+      return
+    }
+    logd(TAG, "Stop association discovery with UUID $id.")
+    stopDiscovery(id)
+    associationIdentifier = null
   }
 
   override fun stopConnectionDiscovery(id: UUID) {
@@ -172,6 +181,7 @@ class SppProtocol(
   override fun reset() {
     super.reset()
     logd(TAG, "Reset: cancel all connection attempts and disconnect all devices.")
+    associationIdentifier = null
     pendingConnections.forEach { cancelPendingConnection(it.value) }
     pendingConnections.clear()
 

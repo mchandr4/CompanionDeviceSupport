@@ -123,11 +123,9 @@ public abstract class SecureChannel {
     }
 
     logd(TAG, "Sending handshake message.");
-    DeviceMessage deviceMessage = new DeviceMessage(
-        /* recipient= */ null,
-        isEncrypted,
-        ENCRYPTION_HANDSHAKE,
-        message);
+    DeviceMessage deviceMessage =
+        DeviceMessage.createOutgoingMessage(
+            /* recipient= */ null, isEncrypted, ENCRYPTION_HANDSHAKE, message);
     sendMessage(deviceMessage);
   }
 

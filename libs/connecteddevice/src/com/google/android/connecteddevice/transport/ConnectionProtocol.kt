@@ -49,8 +49,14 @@ abstract class ConnectionProtocol {
    */
   abstract val isDeviceVerificationRequired: Boolean
 
-  /** Begin the discovery process with [name] for a new device to associate with. */
-  abstract fun startAssociationDiscovery(name: String, callback: DiscoveryCallback)
+  /**
+   * Begin the discovery process with [name] and [identifier] for a new device to associate with.
+   */
+  abstract fun startAssociationDiscovery(
+    name: String,
+    callback: DiscoveryCallback,
+    identifier: UUID
+  )
 
   /**
    * Begin the discovery process for a device that will respond to the supplied [id] with

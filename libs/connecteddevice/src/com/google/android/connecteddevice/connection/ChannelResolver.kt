@@ -289,7 +289,7 @@ class ChannelResolver(
             return
           }
           val challengeResponseMessage =
-            DeviceMessage(
+            DeviceMessage.createOutgoingMessage(
               /* recipient= */ null,
               /* isMessageEncrypted= */ false,
               ENCRYPTION_HANDSHAKE,
@@ -304,7 +304,7 @@ class ChannelResolver(
   private fun resolveChannel(stream: ProtocolStream) {
     encryptionRunner.setIsReconnect(isReconnect)
     val channel =
-      MultiProtocolSecureChannel(stream, storage, encryptionRunner, deviceId?.toString())
+      MultiProtocolSecureChannel(stream, storage, encryptionRunner, oobRunner, deviceId?.toString())
     protocolDevices.keys.forEach { channel.addStream(ProtocolStream(it)) }
     clearDataReceivedListeners()
     callback.onChannelResolved(channel)

@@ -20,8 +20,6 @@
     <!-- Platform values -->
     <string name="car_association_service_uuid" translatable="false">5e2a68a4-27be-43f9-8d1e-4546976fabd7</string>
 
-    <string name="car_spp_service_uuid_secure" translatable="false">32a0e1c6-bbd2-11ea-b3de-0242ac130004</string>
-
     <!-- Services to start early in the single user (user 0). -->
     <string-array name="early_single_user_services" translatable="false">
         <item>com.google.android.companiondevicesupport/com.google.android.connecteddevice.trust.TrustedDeviceManagerService</item>
@@ -51,5 +49,5 @@
 
     <bool name="enable_proxy">false</bool>
     <bool name="enable_capabilities">false</bool>
-    <bool name="enable_feature_coordinator">false</bool>
+    <bool name="enable_feature_coordinator">true</bool>
 </resources>

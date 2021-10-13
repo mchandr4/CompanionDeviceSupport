@@ -29,6 +29,7 @@ import com.google.android.connecteddevice.model.AssociatedDevice;
 import com.google.android.connecteddevice.model.ConnectedDevice;
 import com.google.android.connecteddevice.model.DeviceMessage;
 import com.google.android.connecteddevice.model.Errors;
+import com.google.android.connecteddevice.model.StartAssociationResponse;
 import com.google.android.connecteddevice.oob.OobChannel;
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage;
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage.AssociatedDeviceCallback;
@@ -820,9 +821,9 @@ public class ConnectedDeviceManager {
   private final AssociationCallback internalAssociationCallback =
       new AssociationCallback() {
         @Override
-        public void onAssociationStartSuccess(String deviceName) {
+        public void onAssociationStartSuccess(StartAssociationResponse response) {
           if (associationCallback != null) {
-            associationCallback.onAssociationStartSuccess(deviceName);
+            associationCallback.onAssociationStartSuccess(response);
           }
         }
 

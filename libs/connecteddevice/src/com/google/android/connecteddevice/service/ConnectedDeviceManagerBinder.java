@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.android.connecteddevice.api;
+package com.google.android.connecteddevice.service;
 
 import static com.google.android.connecteddevice.util.SafeLog.loge;
 
@@ -27,6 +27,11 @@ import com.google.android.connecteddevice.ConnectedDeviceManager;
 import com.google.android.connecteddevice.ConnectedDeviceManager.ConnectionCallback;
 import com.google.android.connecteddevice.ConnectedDeviceManager.DeviceAssociationCallback;
 import com.google.android.connecteddevice.ConnectedDeviceManager.DeviceCallback;
+import com.google.android.connecteddevice.api.IConnectedDeviceManager;
+import com.google.android.connecteddevice.api.IConnectionCallback;
+import com.google.android.connecteddevice.api.IDeviceAssociationCallback;
+import com.google.android.connecteddevice.api.IDeviceCallback;
+import com.google.android.connecteddevice.api.IOnLogRequestedListener;
 import com.google.android.connecteddevice.logging.LoggingManager;
 import com.google.android.connecteddevice.logging.LoggingManager.OnLogRequestedListener;
 import com.google.android.connecteddevice.model.AssociatedDevice;

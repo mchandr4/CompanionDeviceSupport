@@ -25,6 +25,7 @@ import com.google.android.connecteddevice.connection.MultiProtocolSecureChannel.
 import com.google.android.connecteddevice.connection.MultiProtocolSecureChannel.ShowVerificationCodeListener
 import com.google.android.connecteddevice.model.DeviceMessage
 import com.google.android.connecteddevice.model.DeviceMessage.OperationType
+import com.google.android.connecteddevice.oob.OobRunner
 import com.google.android.connecteddevice.storage.ConnectedDeviceDatabase
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage
 import com.google.android.connecteddevice.storage.CryptoHelper
@@ -42,9 +43,9 @@ import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.spy
+import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
-import java.nio.charset.StandardCharsets.UTF_8
 import java.security.SignatureException
 import java.util.UUID
 import java.util.zip.DataFormatException
@@ -55,7 +56,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 private const val PROTOCOL_ID_1 = "testProtocol1"
-private const val PROTOCOL_ID_2 = "testProtocol1"
+private const val PROTOCOL_ID_2 = "testProtocol2"
 private val SERVER_DEVICE_ID = UUID.fromString("a29f0c74-2014-4b14-ac02-be6ed15b545a")
 
 @RunWith(AndroidJUnit4::class)
@@ -67,6 +68,7 @@ class MultiProtocolSecureChannelTest {
     spy(ProtocolStream(ProtocolDevice(TestProtocol(), PROTOCOL_ID_2), directExecutor()))
   private val mockInflater: Inflater = mock()
   private val mockCallback: MultiProtocolSecureChannel.Callback = mock()
+  private val mockOobRunner: OobRunner = mock()
 
   private lateinit var secureChannel: MultiProtocolSecureChannel
   private lateinit var spyStorage: ConnectedDeviceStorage
@@ -92,7 +94,7 @@ class MultiProtocolSecureChannelTest {
     completeHandshakeAndSaveTheKey()
 
     val message =
-      DeviceMessage(
+      DeviceMessage.createOutgoingMessage(
         UUID.randomUUID(),
         /* isMessageEncrypted= */ false,
         OperationType.CLIENT_MESSAGE,
@@ -108,7 +110,7 @@ class MultiProtocolSecureChannelTest {
     completeHandshakeAndSaveTheKey()
 
     val message =
-      DeviceMessage(
+      DeviceMessage.createOutgoingMessage(
         UUID.randomUUID(),
         /* isMessageEncrypted= */ true,
         OperationType.CLIENT_MESSAGE,
@@ -122,7 +124,7 @@ class MultiProtocolSecureChannelTest {
   fun decryptMessage_onMessageReceivedErrorForEncryptedMessageWithNoKey() {
     setupSecureChannel(true)
     val message =
-      DeviceMessage(
+      DeviceMessage.createOutgoingMessage(
         UUID.randomUUID(),
         /* isMessageEncrypted= */ true,
         OperationType.CLIENT_MESSAGE,
@@ -137,7 +139,7 @@ class MultiProtocolSecureChannelTest {
   fun onDeviceMessageReceived_onEstablishSecureChannelFailureBadHandshakeMessage() {
     setupSecureChannel(true)
     val message =
-      DeviceMessage(
+      DeviceMessage.createOutgoingMessage(
         UUID.randomUUID(),
         /* isMessageEncrypted= */ true,
         OperationType.ENCRYPTION_HANDSHAKE,
@@ -152,7 +154,7 @@ class MultiProtocolSecureChannelTest {
     completeHandshakeAndSaveTheKey()
 
     val message =
-      DeviceMessage(
+      DeviceMessage.createOutgoingMessage(
         UUID.randomUUID(),
         /* isMessageEncrypted= */ false,
         OperationType.CLIENT_MESSAGE,
@@ -166,7 +168,7 @@ class MultiProtocolSecureChannelTest {
   fun onDeviceMessageReceived_processHandshakeExceptionIssuesSecureChannelFailureCallback() {
     setupSecureChannel(true)
     val message =
-      DeviceMessage(
+      DeviceMessage.createOutgoingMessage(
         UUID.randomUUID(),
         /* isMessageEncrypted= */ false,
         OperationType.ENCRYPTION_HANDSHAKE,
@@ -185,7 +187,7 @@ class MultiProtocolSecureChannelTest {
   fun onDeviceMessageReceived_processClientMessageIssuesMessageReceivedErrorCallback() {
     setupSecureChannel(true)
     val message =
-      DeviceMessage(
+      DeviceMessage.createOutgoingMessage(
         UUID.randomUUID(),
         /* isMessageEncrypted= */ true,
         OperationType.CLIENT_MESSAGE,
@@ -199,7 +201,7 @@ class MultiProtocolSecureChannelTest {
   fun onDeviceMessageReceived_noExceptionWhenReceivedUnknowMessageType() {
     completeHandshakeAndSaveTheKey()
     val message =
-      DeviceMessage(
+      DeviceMessage.createOutgoingMessage(
         UUID.randomUUID(),
         /* isMessageEncrypted= */ true,
         OperationType.UNKNOWN,
@@ -216,7 +218,7 @@ class MultiProtocolSecureChannelTest {
   fun onDeviceMessageReceived_issueOnMessageReceivedWhenHandshakeFinished() {
     completeHandshakeAndSaveTheKey()
     val message =
-      DeviceMessage(
+      DeviceMessage.createOutgoingMessage(
         UUID.randomUUID(),
         /* isMessageEncrypted= */ true,
         OperationType.ENCRYPTION_HANDSHAKE,
@@ -232,7 +234,7 @@ class MultiProtocolSecureChannelTest {
     completeHandshakeAndSaveTheKey()
 
     val deviceMessage =
-      DeviceMessage(
+      DeviceMessage.createOutgoingMessage(
         UUID.randomUUID(),
         /* isMessageEncrypted= */ false,
         OperationType.CLIENT_MESSAGE,
@@ -248,7 +250,7 @@ class MultiProtocolSecureChannelTest {
     completeHandshakeAndSaveTheKey()
     whenever(mockInflater.inflate(any())).then { throw DataFormatException() }
     val deviceMessage =
-      DeviceMessage(
+      DeviceMessage.createOutgoingMessage(
         UUID.randomUUID(),
         /* isMessageEncrypted= */ false,
         OperationType.CLIENT_MESSAGE,
@@ -266,7 +268,7 @@ class MultiProtocolSecureChannelTest {
 
     val message = ByteArray(100)
     val deviceMessage =
-      DeviceMessage(
+      DeviceMessage.createOutgoingMessage(
         UUID.randomUUID(),
         /* isMessageEncrypted= */ false,
         OperationType.CLIENT_MESSAGE,
@@ -283,7 +285,7 @@ class MultiProtocolSecureChannelTest {
 
     val message = ByteArray(100)
     val deviceMessage =
-      DeviceMessage(
+      DeviceMessage.createOutgoingMessage(
         UUID.randomUUID(),
         /* isMessageEncrypted= */ false,
         OperationType.CLIENT_MESSAGE,
@@ -299,7 +301,7 @@ class MultiProtocolSecureChannelTest {
     completeHandshakeAndSaveTheKey()
 
     val deviceMessage =
-      DeviceMessage(
+      DeviceMessage.createOutgoingMessage(
         UUID.randomUUID(),
         /* isMessageEncrypted= */ true,
         OperationType.CLIENT_MESSAGE,
@@ -335,7 +337,7 @@ class MultiProtocolSecureChannelTest {
   fun sendClientMessage_FailedToSendMessageWithNullKey() {
     setupSecureChannel(true)
     val deviceMessage =
-      DeviceMessage(
+      DeviceMessage.createOutgoingMessage(
         UUID.randomUUID(),
         /* isMessageEncrypted= */ true,
         OperationType.CLIENT_MESSAGE,
@@ -348,7 +350,7 @@ class MultiProtocolSecureChannelTest {
   @Test
   fun sendClientMessage_FailedToSendMessageWithEmptyStream() {
     val deviceMessage =
-      DeviceMessage(
+      DeviceMessage.createOutgoingMessage(
         UUID.randomUUID(),
         /* isMessageEncrypted= */ true,
         OperationType.CLIENT_MESSAGE,
@@ -363,7 +365,7 @@ class MultiProtocolSecureChannelTest {
   @Test
   fun sendClientMessage_successfullySendMessage() {
     val deviceMessage =
-      DeviceMessage(
+      DeviceMessage.createOutgoingMessage(
         UUID.randomUUID(),
         /* isMessageEncrypted= */ true,
         OperationType.CLIENT_MESSAGE,
@@ -379,7 +381,7 @@ class MultiProtocolSecureChannelTest {
   fun sendClientMessage_successfullyEncryptAndSetMessage() {
     val testPayload = ByteUtils.randomBytes(10)
     val deviceMessage =
-      DeviceMessage(
+      DeviceMessage.createOutgoingMessage(
         UUID.randomUUID(),
         /* isMessageEncrypted= */ true,
         OperationType.CLIENT_MESSAGE,
@@ -566,37 +568,76 @@ class MultiProtocolSecureChannelTest {
   }
 
   @Test
-  fun processHandshakeInProgress_oobVerificationNeeded_notifyVerificationCodeAvailableCallback() {
-    setupOobSecureChannel()
+  fun receivedOobVerificationCode_verifiedSuccessfully_notifyChannelEstablishedCallback() {
+    val encryptedCode = "oobCode".toByteArray()
+    val oobCode = FakeEncryptionRunner.VERIFICATION_CODE
+    val carEncryptedCode = "carOobCode".toByteArray()
+    whenever(mockOobRunner.decryptData(encryptedCode)).thenReturn(oobCode)
+    whenever(mockOobRunner.encryptData(oobCode)).thenReturn(carEncryptedCode)
+    setupOobSecureChannel(mockOobRunner)
     initHandshakeMessage()
     respondToContinueMessage()
-
-    verify(mockCallback)
-      .onOobVerificationCodeAvailable(FakeEncryptionRunner.VERIFICATION_CODE.toByteArray(UTF_8))
-  }
-
-  @Test
-  fun processHandshake_receivedOobVerificationCode_notifyVerificationCodeReceivedCallback() {
-    setupOobSecureChannel()
-    initHandshakeMessage()
-    respondToContinueMessage()
-    respondToOobCode()
-
-    verify(mockCallback)
-      .onOobVerificationCodeReceived(FakeEncryptionRunner.VERIFICATION_CODE.toByteArray(UTF_8))
-  }
-
-  @Test
-  fun sendOobEncryptedCode_sendHandshakeMessage() {
-    val testEncryptedCode = "VerificationCode".toByteArray()
-    setupOobSecureChannel()
-
+    respondToOobCode(encryptedCode)
+    verify(mockOobRunner).encryptData(oobCode)
     argumentCaptor<DeviceMessage>().apply {
-      secureChannel.sendOobEncryptedCode(testEncryptedCode)
-      verify(stream1).sendMessage(capture())
-      val codeMessage = firstValue.message
-      assertThat(codeMessage).isEqualTo(testEncryptedCode)
+      verify(stream1, times(2)).sendMessage(capture())
+      val codeMessage = secondValue.message
+      assertThat(codeMessage).isEqualTo(carEncryptedCode)
     }
+    verify(mockCallback).onSecureChannelEstablished()
+  }
+
+  @Test
+  fun receivedOobVerificationCode_decryptFailed_issueInvalidEncryptionKeyError() {
+    val encryptedCode = "oobCode".toByteArray()
+    whenever(mockOobRunner.decryptData(encryptedCode)).then { throw Exception() }
+    setupOobSecureChannel(mockOobRunner)
+    initHandshakeMessage()
+    respondToContinueMessage()
+    respondToOobCode(encryptedCode)
+
+    verify(mockCallback)
+      .onEstablishSecureChannelFailure(ChannelError.CHANNEL_ERROR_INVALID_ENCRYPTION_KEY)
+  }
+
+  @Test
+  fun receivedOobVerificationCode_encryptFailed_issueInvalidEncryptionKeyError() {
+    val encryptedCode = "oobCode".toByteArray()
+    val incorrectOobCode = "incorrectCode".toByteArray()
+    whenever(mockOobRunner.decryptData(encryptedCode)).thenReturn(incorrectOobCode)
+    setupOobSecureChannel(mockOobRunner)
+    initHandshakeMessage()
+    respondToContinueMessage()
+    respondToOobCode(encryptedCode)
+
+    verify(mockCallback)
+      .onEstablishSecureChannelFailure(ChannelError.CHANNEL_ERROR_INVALID_ENCRYPTION_KEY)
+  }
+
+  @Test
+  fun receivedOobVerificationCode_codeDoesNotMatch_issueInvalidEncryptionKeyError() {
+    val encryptedCode = "oobCode".toByteArray()
+    val oobCode = FakeEncryptionRunner.VERIFICATION_CODE
+    whenever(mockOobRunner.decryptData(encryptedCode)).thenReturn(oobCode)
+    whenever(mockOobRunner.encryptData(oobCode)).then { throw Exception() }
+    setupOobSecureChannel(mockOobRunner)
+    initHandshakeMessage()
+    respondToContinueMessage()
+    respondToOobCode(encryptedCode)
+
+    verify(mockCallback)
+      .onEstablishSecureChannelFailure(ChannelError.CHANNEL_ERROR_INVALID_ENCRYPTION_KEY)
+  }
+
+  @Test
+  fun receivedOobVerificationCode_oobRunnerIsNull_issueInvalidEncryptionKeyError() {
+    setupOobSecureChannel()
+    initHandshakeMessage()
+    respondToContinueMessage()
+    respondToOobCode(ByteArray(10))
+
+    verify(mockCallback)
+      .onEstablishSecureChannelFailure(ChannelError.CHANNEL_ERROR_INVALID_ENCRYPTION_KEY)
   }
 
   private fun setupSecureChannel(isReconnect: Boolean, deviceId: String? = null) {
@@ -608,14 +649,14 @@ class MultiProtocolSecureChannelTest {
             stream1,
             spyStorage,
             encryptionRunner,
-            deviceId,
+            deviceId = deviceId,
             inflater = mockInflater
           )
           .apply { callback = mockCallback }
       )
   }
 
-  private fun setupOobSecureChannel() {
+  private fun setupOobSecureChannel(oobRunner: OobRunner? = null) {
     val oobEncryptionRunner = EncryptionRunnerFactory.newOobFakeRunner()
     secureChannel =
       spy(
@@ -623,15 +664,17 @@ class MultiProtocolSecureChannelTest {
             stream1,
             spyStorage,
             oobEncryptionRunner,
+            oobRunner,
             deviceId = null,
             inflater = mockInflater
           )
           .apply { callback = mockCallback }
       )
   }
+
   private fun initHandshakeMessage(message: ByteArray = FakeEncryptionRunner.INIT_MESSAGE) {
     val deviceMessage =
-      DeviceMessage(
+      DeviceMessage.createOutgoingMessage(
         /* recipient= */ null,
         /* isMessageEncrypted= */ false,
         OperationType.ENCRYPTION_HANDSHAKE,
@@ -642,7 +685,7 @@ class MultiProtocolSecureChannelTest {
 
   private fun respondToContinueMessage(message: ByteArray = FakeEncryptionRunner.CLIENT_RESPONSE) {
     val deviceMessage =
-      DeviceMessage(
+      DeviceMessage.createOutgoingMessage(
         /* recipient= */ null,
         /* isMessageEncrypted= */ false,
         OperationType.ENCRYPTION_HANDSHAKE,
@@ -651,20 +694,20 @@ class MultiProtocolSecureChannelTest {
     secureChannel.onDeviceMessageReceived(deviceMessage)
   }
 
-  private fun respondToOobCode() {
+  private fun respondToOobCode(encryptedOobCode: ByteArray = "testCode".toByteArray()) {
     val message =
-      DeviceMessage(
+      DeviceMessage.createOutgoingMessage(
         /* recipient= */ null,
         /* isMessageEncrypted= */ false,
         OperationType.ENCRYPTION_HANDSHAKE,
-        FakeEncryptionRunner.VERIFICATION_CODE.toByteArray(UTF_8)
+        encryptedOobCode
       )
     secureChannel.onDeviceMessageReceived(message)
   }
 
   private fun respondToResumeMessage(message: ByteArray = "Placeholder Message".toByteArray()) {
     val deviceMessage =
-      DeviceMessage(
+      DeviceMessage.createOutgoingMessage(
         /* recipient= */ null,
         /* isMessageEncrypted= */ false,
         OperationType.ENCRYPTION_HANDSHAKE,
@@ -685,7 +728,11 @@ class MultiProtocolSecureChannelTest {
 open class TestProtocol : ConnectionProtocol() {
   override val isDeviceVerificationRequired = false
 
-  override fun startAssociationDiscovery(name: String, callback: DiscoveryCallback) {}
+  override fun startAssociationDiscovery(
+    name: String,
+    callback: DiscoveryCallback,
+    identifier: UUID
+  ) {}
 
   override fun startConnectionDiscovery(
     id: UUID,

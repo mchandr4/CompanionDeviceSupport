@@ -61,7 +61,7 @@ public class OobUkey2EncryptionRunner extends Ukey2EncryptionRunner {
       return HandshakeMessage.newBuilder()
           .setHandshakeState(HandshakeState.OOB_VERIFICATION_NEEDED)
           .setNextMessage(nextMessage)
-          .setOobVerificationCode(verificationCode)
+          .setFullVerificationCode(verificationCode)
           .build();
     } catch (com.google.security.cryptauth.lib.securegcm.HandshakeException
         | Ukey2Handshake.AlertException e) {

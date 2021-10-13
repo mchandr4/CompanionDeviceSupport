@@ -16,7 +16,8 @@ import android.os.RemoteException;
 import androidx.room.Room;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
-import com.google.android.connecteddevice.api.IConnectedDeviceManager;
+import com.google.android.connecteddevice.api.Connector;
+import com.google.android.connecteddevice.api.FakeConnector;
 import com.google.android.connecteddevice.model.ConnectedDevice;
 import com.google.android.connecteddevice.trust.api.IOnTrustedDevicesRetrievedListener;
 import com.google.android.connecteddevice.trust.api.ITrustedDeviceAgentDelegate;
@@ -60,13 +61,14 @@ public final class TrustedDeviceManagerTest {
           /* belongsToActiveUser= */ true,
           /* hasSecureChannel= */ true);
 
+  private final Connector fakeConnector = spy(new FakeConnector());
+
   @Captor private ArgumentCaptor<List<TrustedDevice>> trustedDeviceListCaptor;
 
   @Mock private ITrustedDeviceEnrollmentCallback enrollmentCallback;
   @Mock private ITrustedDeviceCallback trustedDeviceCallback;
   @Mock private ITrustedDeviceAgentDelegate trustAgentDelegate;
   @Mock private IOnTrustedDevicesRetrievedListener trustedDeviceListener;
-  @Mock private IConnectedDeviceManager mockConnectedDeviceManager;
 
   private TrustedDeviceManager manager;
   private TrustedDeviceFeature feature;
@@ -88,7 +90,7 @@ public final class TrustedDeviceManagerTest {
             .setQueryExecutor(directExecutor())
             .build();
 
-    feature = spy(new TrustedDeviceFeature(context, mockConnectedDeviceManager));
+    feature = spy(new TrustedDeviceFeature(context, fakeConnector));
 
     manager =
         new TrustedDeviceManager(
@@ -192,6 +194,9 @@ public final class TrustedDeviceManagerTest {
 
   @Test
   public void testStateSync_sendsStateMessage() throws RemoteException {
+    fakeConnector
+        .getConnectedDevices()
+        .add(new ConnectedDevice(DEFAULT_DEVICE_ID, null, true, true));
     triggerDeviceConnected(SECURE_CONNECTED_DEVICE);
     executeAndVerifyValidEnrollFlow();
 
@@ -205,6 +210,8 @@ public final class TrustedDeviceManagerTest {
 
   @Test
   public void testStateSync_doesNotSendDuplicateStateMessages() throws RemoteException {
+    when(fakeConnector.getConnectedDeviceById(DEFAULT_DEVICE_ID))
+        .thenReturn(new ConnectedDevice(DEFAULT_DEVICE_ID, null, true, true));
     triggerDeviceConnected(SECURE_CONNECTED_DEVICE);
     executeAndVerifyValidEnrollFlow();
 
@@ -339,13 +346,12 @@ public final class TrustedDeviceManagerTest {
   }
 
   private void triggerDeviceConnected(ConnectedDevice device) throws RemoteException {
-    when(mockConnectedDeviceManager.getActiveUserConnectedDevices())
-        .thenReturn(Arrays.asList(device));
+    when(fakeConnector.getConnectedDevices()).thenReturn(Arrays.asList(device));
     feature.onSecureChannelEstablished(device);
   }
 
   private void mockNoDevicesConnected() throws RemoteException {
-    when(mockConnectedDeviceManager.getActiveUserConnectedDevices()).thenReturn(ImmutableList.of());
+    when(fakeConnector.getConnectedDevices()).thenReturn(ImmutableList.of());
   }
 
   private static byte[] createTokenMessage(byte[] token) {

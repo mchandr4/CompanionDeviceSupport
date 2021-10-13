@@ -150,11 +150,8 @@ public class ConnectedDeviceManagerTest {
     UUID recipientId = UUID.randomUUID();
     byte[] message = ByteUtils.randomBytes(10);
     DeviceMessage deviceMessage =
-        new DeviceMessage(
-            recipientId,
-            /* isMessageEncrypted= */ true,
-            OperationType.CLIENT_MESSAGE,
-            message);
+        DeviceMessage.createOutgoingMessage(
+            recipientId, /* isMessageEncrypted= */ true, OperationType.CLIENT_MESSAGE, message);
     assertThrows(
         IllegalStateException.class,
         () -> connectedDeviceManager.sendMessage(device, deviceMessage));
@@ -168,11 +165,8 @@ public class ConnectedDeviceManagerTest {
     UUID recipientId = UUID.randomUUID();
     byte[] message = ByteUtils.randomBytes(10);
     DeviceMessage deviceMessage =
-        new DeviceMessage(
-            recipientId,
-            /* isMessageEncrypted= */ true,
-            OperationType.CLIENT_MESSAGE,
-            message);
+        DeviceMessage.createOutgoingMessage(
+            recipientId, /* isMessageEncrypted= */ true, OperationType.CLIENT_MESSAGE, message);
     connectedDeviceManager.sendMessage(device, deviceMessage);
     ArgumentCaptor<DeviceMessage> messageCaptor = ArgumentCaptor.forClass(DeviceMessage.class);
     verify(mockCarBluetoothManager).sendMessage(eq(deviceId), messageCaptor.capture());
@@ -187,11 +181,8 @@ public class ConnectedDeviceManagerTest {
     UUID recipientId = UUID.randomUUID();
     byte[] message = ByteUtils.randomBytes(10);
     DeviceMessage deviceMessage =
-        new DeviceMessage(
-            recipientId,
-            /* isMessageEncrypted= */ true,
-            OperationType.CLIENT_MESSAGE,
-            message);
+        DeviceMessage.createOutgoingMessage(
+            recipientId, /* isMessageEncrypted= */ true, OperationType.CLIENT_MESSAGE, message);
     connectedDeviceManager.sendMessage(device, deviceMessage);
     verify(mockCarBluetoothManager, never()).sendMessage(eq(deviceId), any(DeviceMessage.class));
   }
@@ -203,11 +194,8 @@ public class ConnectedDeviceManagerTest {
     UUID recipientId = UUID.randomUUID();
     byte[] message = ByteUtils.randomBytes(10);
     DeviceMessage deviceMessage =
-        new DeviceMessage(
-            recipientId,
-            /* isMessageEncrypted= */ false,
-            OperationType.CLIENT_MESSAGE,
-            message);
+        DeviceMessage.createOutgoingMessage(
+            recipientId, /* isMessageEncrypted= */ false, OperationType.CLIENT_MESSAGE, message);
     connectedDeviceManager.sendMessage(device, deviceMessage);
     ArgumentCaptor<DeviceMessage> messageCaptor = ArgumentCaptor.forClass(DeviceMessage.class);
     verify(mockCarBluetoothManager).sendMessage(eq(deviceId), messageCaptor.capture());
@@ -298,7 +286,7 @@ public class ConnectedDeviceManagerTest {
     connectedDeviceManager.registerDeviceCallback(
         connectedDevice, recipientId, secondDeviceCallback, directExecutor);
     DeviceMessage message =
-        new DeviceMessage(
+        DeviceMessage.createOutgoingMessage(
             recipientId,
             /* isMessageEncrypted= */ false,
             OperationType.CLIENT_MESSAGE,
@@ -337,11 +325,8 @@ public class ConnectedDeviceManagerTest {
         connectedDevice, recipientId, mockDeviceCallback, directExecutor);
     byte[] payload = ByteUtils.randomBytes(10);
     DeviceMessage message =
-        new DeviceMessage(
-            recipientId,
-            /* isMessageEncrypted= */false,
-            OperationType.CLIENT_MESSAGE,
-            payload);
+        DeviceMessage.createOutgoingMessage(
+            recipientId, /* isMessageEncrypted= */ false, OperationType.CLIENT_MESSAGE, payload);
     connectedDeviceManager.onMessageReceived(connectedDevice.getDeviceId(), message);
     verify(mockDeviceCallback).onMessageReceived(connectedDevice, message);
   }
@@ -355,7 +340,7 @@ public class ConnectedDeviceManagerTest {
         connectedDevice, recipientId, mockDeviceCallback, directExecutor);
     byte[] payload = ByteUtils.randomBytes(10);
     DeviceMessage message =
-        new DeviceMessage(
+        DeviceMessage.createOutgoingMessage(
             UUID.randomUUID(),
             /* isMessageEncrypted= */ false,
             OperationType.CLIENT_MESSAGE,
@@ -392,11 +377,8 @@ public class ConnectedDeviceManagerTest {
     ConnectedDevice connectedDevice = connectedDeviceManager.getActiveUserConnectedDevices().get(0);
     byte[] payload = ByteUtils.randomBytes(10);
     DeviceMessage message =
-        new DeviceMessage(
-            recipientId,
-            /* isMessageEncrypted= */ false,
-            OperationType.CLIENT_MESSAGE,
-            payload);
+        DeviceMessage.createOutgoingMessage(
+            recipientId, /* isMessageEncrypted= */ false, OperationType.CLIENT_MESSAGE, payload);
     connectedDeviceManager.onMessageReceived(connectedDevice.getDeviceId(), message);
     connectedDeviceManager.registerDeviceCallback(
         connectedDevice, recipientId, mockDeviceCallback, directExecutor);
@@ -411,17 +393,11 @@ public class ConnectedDeviceManagerTest {
     byte[] payload1 = ByteUtils.randomBytes(10);
     byte[] payload2 = ByteUtils.randomBytes(10);
     DeviceMessage message1 =
-        new DeviceMessage(
-            recipientId,
-            /* isMessageEncrypted= */ false,
-            OperationType.CLIENT_MESSAGE,
-            payload1);
+        DeviceMessage.createOutgoingMessage(
+            recipientId, /* isMessageEncrypted= */ false, OperationType.CLIENT_MESSAGE, payload1);
     DeviceMessage message2 =
-        new DeviceMessage(
-            recipientId,
-            /* isMessageEncrypted= */ false,
-            OperationType.CLIENT_MESSAGE,
-            payload2);
+        DeviceMessage.createOutgoingMessage(
+            recipientId, /* isMessageEncrypted= */ false, OperationType.CLIENT_MESSAGE, payload2);
     connectedDeviceManager.onMessageReceived(connectedDevice.getDeviceId(), message1);
     connectedDeviceManager.onMessageReceived(connectedDevice.getDeviceId(), message2);
     connectedDeviceManager.registerDeviceCallback(
@@ -437,7 +413,7 @@ public class ConnectedDeviceManagerTest {
     ConnectedDevice connectedDevice = connectedDeviceManager.getActiveUserConnectedDevices().get(0);
     byte[] payload = ByteUtils.randomBytes(10);
     DeviceMessage message =
-        new DeviceMessage(
+        DeviceMessage.createOutgoingMessage(
             UUID.randomUUID(),
             /* isMessageEncrypted= */ false,
             OperationType.CLIENT_MESSAGE,
@@ -457,11 +433,8 @@ public class ConnectedDeviceManagerTest {
     ConnectedDevice otherDevice = connectedDevices.get(1);
     byte[] payload = ByteUtils.randomBytes(10);
     DeviceMessage message =
-        new DeviceMessage(
-            recipientId,
-            /* isMessageEncrypted= */ false,
-            OperationType.CLIENT_MESSAGE,
-            payload);
+        DeviceMessage.createOutgoingMessage(
+            recipientId, /* isMessageEncrypted= */ false, OperationType.CLIENT_MESSAGE, payload);
     connectedDeviceManager.onMessageReceived(otherDevice.getDeviceId(), message);
     connectedDeviceManager.registerDeviceCallback(
         connectedDevice, recipientId, mockDeviceCallback, directExecutor);
@@ -628,7 +601,7 @@ public class ConnectedDeviceManagerTest {
     connectedDeviceManager.registerDeviceCallback(
         connectedDevice, recipientId, mockDeviceCallback, directExecutor);
     DeviceMessage message =
-        new DeviceMessage(
+        DeviceMessage.createOutgoingMessage(
             recipientId,
             /* isMessageEncrypted= */ false,
             OperationType.CLIENT_MESSAGE,
@@ -644,7 +617,7 @@ public class ConnectedDeviceManagerTest {
     connectedDeviceManager.registerDeviceCallback(
         connectedDevice, recipientId, mockDeviceCallback, directExecutor);
     DeviceMessage message =
-        new DeviceMessage(
+        DeviceMessage.createOutgoingMessage(
             recipientId,
             /* isMessageEncrypted= */ false,
             OperationType.CLIENT_MESSAGE,
@@ -662,7 +635,7 @@ public class ConnectedDeviceManagerTest {
     connectedDeviceManager.registerDeviceCallback(
         connectedDevice, recipientId, mockDeviceCallback, directExecutor);
     DeviceMessage message =
-        new DeviceMessage(
+        DeviceMessage.createOutgoingMessage(
             recipientId,
             /* isMessageEncrypted= */ false,
             OperationType.CLIENT_MESSAGE,

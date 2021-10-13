@@ -30,7 +30,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import androidx.annotation.WorkerThread;
-import com.google.android.connecteddevice.api.IConnectedDeviceManager;
 import com.google.android.connecteddevice.api.IDeviceAssociationCallback;
 import com.google.android.connecteddevice.model.AssociatedDevice;
 import com.google.android.connecteddevice.model.ConnectedDevice;
@@ -286,18 +285,7 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
 
   @Override
   public List<ConnectedDevice> getActiveUserConnectedDevices() {
-    List<ConnectedDevice> devices = new ArrayList<>();
-    IConnectedDeviceManager manager = trustedDeviceFeature.getConnectedDeviceManager();
-    if (manager == null) {
-      loge(TAG, "Unable to get connected devices. Service not connected. ");
-      return devices;
-    }
-    try {
-      devices = manager.getActiveUserConnectedDevices();
-    } catch (RemoteException e) {
-      loge(TAG, "Failed to get connected devices. ", e);
-    }
-    return devices;
+    return trustedDeviceFeature.getConnectedDevices();
   }
 
   @Override

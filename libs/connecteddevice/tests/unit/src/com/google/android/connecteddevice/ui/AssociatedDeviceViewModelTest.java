@@ -38,6 +38,7 @@ import com.google.android.connecteddevice.api.IOnAssociatedDevicesRetrievedListe
 import com.google.android.connecteddevice.model.AssociatedDevice;
 import com.google.android.connecteddevice.model.AssociatedDeviceDetails;
 import com.google.android.connecteddevice.model.ConnectedDevice;
+import com.google.android.connecteddevice.model.StartAssociationResponse;
 import com.google.android.connecteddevice.ui.AssociatedDeviceViewModel.AssociationState;
 import java.util.Collections;
 import org.junit.Before;
@@ -146,9 +147,11 @@ public final class AssociatedDeviceViewModelTest {
 
   @Test
   public void startAssociation_inProgress() throws RemoteException {
+    StartAssociationResponse response =
+        new StartAssociationResponse(new byte[0], new byte[0], TEST_CAR_NAME);
     viewModel.startAssociation();
     captureAssociationCallback();
-    associationCallback.onAssociationStartSuccess(TEST_CAR_NAME);
+    associationCallback.onAssociationStartSuccess(response);
     viewModel.getAssociationState().observeForever(mockAssociationStateObserver);
     viewModel.getAdvertisedCarName().observeForever(mockCarNameObserver);
     verify(mockAssociationStateObserver).onChanged(AssociationState.STARTED);
@@ -157,9 +160,11 @@ public final class AssociatedDeviceViewModelTest {
 
   @Test
   public void startAssociation_waitingForVerification() throws RemoteException {
+    StartAssociationResponse response =
+        new StartAssociationResponse(new byte[0], new byte[0], TEST_CAR_NAME);
     viewModel.startAssociation();
     captureAssociationCallback();
-    associationCallback.onAssociationStartSuccess(TEST_CAR_NAME);
+    associationCallback.onAssociationStartSuccess(response);
     associationCallback.onVerificationCodeAvailable(TEST_VERIFICATION_CODE);
     viewModel.getAssociationState().observeForever(mockAssociationStateObserver);
     viewModel.getPairingCode().observeForever(mockPairingCodeObserver);
@@ -169,9 +174,11 @@ public final class AssociatedDeviceViewModelTest {
 
   @Test
   public void startAssociation_associationCompleted() throws RemoteException {
+    StartAssociationResponse response =
+        new StartAssociationResponse(new byte[0], new byte[0], TEST_CAR_NAME);
     viewModel.startAssociation();
     captureAssociationCallback();
-    associationCallback.onAssociationStartSuccess(TEST_CAR_NAME);
+    associationCallback.onAssociationStartSuccess(response);
     associationCallback.onVerificationCodeAvailable(TEST_VERIFICATION_CODE);
     associationCallback.onAssociationCompleted();
     viewModel.getAssociationState().observeForever(mockAssociationStateObserver);

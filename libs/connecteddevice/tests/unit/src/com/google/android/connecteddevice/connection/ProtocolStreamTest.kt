@@ -58,7 +58,7 @@ class ProtocolStreamTest {
     val recipient = UUID.randomUUID()
     val message = ByteUtils.randomBytes(MAX_WRITE_SIZE / 2)
     stream.sendMessage(
-      DeviceMessage(
+      DeviceMessage.createOutgoingMessage(
         recipient,
         /* isMessageEncrypted= */ false,
         DeviceMessage.OperationType.CLIENT_MESSAGE,
@@ -73,7 +73,7 @@ class ProtocolStreamTest {
     val recipient = UUID.randomUUID()
     val message = ByteUtils.randomBytes(MAX_WRITE_SIZE + 1)
     stream.sendMessage(
-      DeviceMessage(
+      DeviceMessage.createOutgoingMessage(
         recipient,
         /* isMessageEncrypted= */ false,
         DeviceMessage.OperationType.CLIENT_MESSAGE,
@@ -88,7 +88,7 @@ class ProtocolStreamTest {
     val recipient = UUID.randomUUID()
     val message = ByteUtils.randomBytes(MAX_WRITE_SIZE / 2)
     stream.sendMessage(
-      DeviceMessage(
+      DeviceMessage.createOutgoingMessage(
         recipient,
         /* isMessageEncrypted= */ false,
         DeviceMessage.OperationType.CLIENT_MESSAGE,
@@ -112,7 +112,7 @@ class ProtocolStreamTest {
     val recipient = UUID.randomUUID()
     val message = ByteUtils.randomBytes(MAX_WRITE_SIZE / 2)
     stream.sendMessage(
-      DeviceMessage(
+      DeviceMessage.createOutgoingMessage(
         recipient,
         /* isMessageEncrypted= */ false,
         DeviceMessage.OperationType.CLIENT_MESSAGE,
@@ -138,7 +138,7 @@ class ProtocolStreamTest {
     val recipient = UUID.randomUUID()
     val message = ByteUtils.randomBytes(MAX_WRITE_SIZE / 2)
     failingStream.sendMessage(
-      DeviceMessage(
+      DeviceMessage.createOutgoingMessage(
         recipient,
         /* isMessageEncrypted= */ false,
         DeviceMessage.OperationType.CLIENT_MESSAGE,
@@ -154,10 +154,14 @@ class ProtocolStreamTest {
     stream.messageReceivedListener = listener
     val message = ByteUtils.randomBytes(MAX_WRITE_SIZE / 2)
     val packets = createPackets(message)
+
     packets.forEach { protocol.receiveData(it.toByteArray()) }
     val captor = argumentCaptor<DeviceMessage>()
     verify(listener).onMessageReceived(captor.capture())
-    assertThat(message).isEqualTo(captor.firstValue.message)
+
+    val deviceMessage = captor.firstValue
+    assertThat(message).isEqualTo(deviceMessage.message)
+    assertThat(message.size).isEqualTo(deviceMessage.originalMessageSize)
   }
 
   @Test
@@ -166,10 +170,14 @@ class ProtocolStreamTest {
     stream.messageReceivedListener = listener
     val message = ByteUtils.randomBytes(MAX_WRITE_SIZE + 1)
     val packets = createPackets(message)
+
     packets.forEach { protocol.receiveData(it.toByteArray()) }
     val captor = argumentCaptor<DeviceMessage>()
     verify(listener).onMessageReceived(captor.capture())
-    assertThat(message).isEqualTo(captor.firstValue.message)
+
+    val deviceMessage = captor.firstValue
+    assertThat(message).isEqualTo(deviceMessage.message)
+    assertThat(message.size).isEqualTo(deviceMessage.originalMessageSize)
   }
 
   @Test
@@ -225,6 +233,7 @@ class ProtocolStreamTest {
         Message.newBuilder()
           .setPayload(ByteString.copyFrom(data))
           .setOperation(OperationType.CLIENT_MESSAGE)
+          .setOriginalSize(data.size)
           .build()
       PacketFactory.makePackets(
         message.toByteArray(),
@@ -244,7 +253,11 @@ class ProtocolStreamTest {
       dataReceivedListeners[PROTOCOL_ID]?.invoke { it.onDataReceived(PROTOCOL_ID, data) }
     }
 
-    override fun startAssociationDiscovery(name: String, callback: DiscoveryCallback) {}
+    override fun startAssociationDiscovery(
+      name: String,
+      callback: DiscoveryCallback,
+      identifier: UUID
+    ) {}
 
     override fun startConnectionDiscovery(
       id: UUID,
@@ -274,7 +287,11 @@ class ProtocolStreamTest {
   open class FailingSendProtocol : ConnectionProtocol() {
     override val isDeviceVerificationRequired = false
 
-    override fun startAssociationDiscovery(name: String, callback: DiscoveryCallback) {}
+    override fun startAssociationDiscovery(
+      name: String,
+      callback: DiscoveryCallback,
+      identifier: UUID
+    ) {}
 
     override fun startConnectionDiscovery(
       id: UUID,

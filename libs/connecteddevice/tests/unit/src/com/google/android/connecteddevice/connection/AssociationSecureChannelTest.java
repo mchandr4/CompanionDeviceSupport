@@ -126,7 +126,7 @@ public final class AssociationSecureChannelTest {
 
   private void sendDeviceId() {
     DeviceMessage message =
-        new DeviceMessage(
+        DeviceMessage.createOutgoingMessage(
             /* recipient= */ null,
             /* isMessageEncrypted= */ true,
             DeviceMessage.OperationType.ENCRYPTION_HANDSHAKE,
@@ -138,7 +138,7 @@ public final class AssociationSecureChannelTest {
 
   private void initHandshakeMessage() {
     DeviceMessage message =
-        new DeviceMessage(
+        DeviceMessage.createOutgoingMessage(
             /* recipient= */ null,
             /* isMessageEncrypted= */ false,
             DeviceMessage.OperationType.ENCRYPTION_HANDSHAKE,
@@ -148,7 +148,7 @@ public final class AssociationSecureChannelTest {
 
   private void respondToContinueMessage() {
     DeviceMessage message =
-        new DeviceMessage(
+        DeviceMessage.createOutgoingMessage(
             /* recipient= */ null,
             /* isMessageEncrypted= */ false,
             DeviceMessage.OperationType.ENCRYPTION_HANDSHAKE,

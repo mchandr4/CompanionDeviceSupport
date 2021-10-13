@@ -33,7 +33,7 @@ import android.os.ParcelUuid;
 import androidx.annotation.NonNull;
 import com.google.android.connecteddevice.ConnectedDeviceManager;
 import com.google.android.connecteddevice.api.CompanionConnector;
-import com.google.android.connecteddevice.api.ConnectedDeviceManagerBinder;
+import com.google.android.connecteddevice.api.Connector;
 import com.google.android.connecteddevice.api.IAssociatedDeviceManager;
 import com.google.android.connecteddevice.api.IAssociationCallback;
 import com.google.android.connecteddevice.api.IConnectedDeviceManager;
@@ -43,7 +43,6 @@ import com.google.android.connecteddevice.api.IDeviceCallback;
 import com.google.android.connecteddevice.api.IFeatureCoordinator;
 import com.google.android.connecteddevice.api.IOnAssociatedDevicesRetrievedListener;
 import com.google.android.connecteddevice.api.IOnLogRequestedListener;
-import com.google.android.connecteddevice.api.RemoteFeature;
 import com.google.android.connecteddevice.connection.CarBluetoothManager;
 import com.google.android.connecteddevice.connection.ble.CarBlePeripheralManager;
 import com.google.android.connecteddevice.connection.spp.CarSppManager;
@@ -71,7 +70,6 @@ import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelega
 import com.google.android.connecteddevice.transport.spp.SppProtocol;
 import com.google.android.connecteddevice.util.EventLog;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -100,9 +98,6 @@ public final class ConnectedDeviceService extends TrunkService {
    */
   private static final String META_SUPPORTED_TRANSPORT_PROTOCOLS =
       "com.google.android.connecteddevice.transport_protocols";
-  /** {@code String} UUID for SPP server. */
-  private static final String META_SPP_SERVICE_UUID =
-      "com.google.android.connecteddevice.spp_service_uuid";
   /** {@code String} UUID for association advertisement. */
   private static final String META_ASSOCIATION_SERVICE_UUID =
       "com.google.android.connecteddevice.association_service_uuid";
@@ -176,19 +171,17 @@ public final class ConnectedDeviceService extends TrunkService {
   public static final String ACTION_BIND_ASSOCIATION =
       "com.google.android.connecteddevice.BIND_ASSOCIATION";
 
-  private final BroadcastReceiver bleBroadcastReceiver =
+  private final BroadcastReceiver bluetoothBroadcastReceiver =
       new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-          if (BluetoothAdapter.ACTION_BLE_STATE_CHANGED.equals(intent.getAction())) {
+          if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(intent.getAction())) {
             onBluetoothStateChanged(intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1));
           }
         }
       };
 
   private final AtomicBoolean isSppServiceBound = new AtomicBoolean(false);
-
-  private final List<RemoteFeature> localFeatures = new ArrayList<>();
 
   private final AtomicBoolean isEveryFeatureInitialized = new AtomicBoolean(false);
 
@@ -212,6 +205,10 @@ public final class ConnectedDeviceService extends TrunkService {
   private boolean useFeatureCoordinator;
 
   private List<String> supportedTransportProtocols;
+
+  private SystemFeature systemFeature;
+
+  private LoggingFeature loggingFeature;
 
   @Override
   public void onCreate() {
@@ -253,9 +250,9 @@ public final class ConnectedDeviceService extends TrunkService {
     populateFeatures();
 
     registerReceiver(
-        bleBroadcastReceiver, new IntentFilter(BluetoothAdapter.ACTION_BLE_STATE_CHANGED));
+        bluetoothBroadcastReceiver, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
     if (isTransportSupported(TransportProtocols.PROTOCOL_BLE_PERIPHERAL)
-        && BluetoothAdapter.getDefaultAdapter().isLeEnabled()) {
+        && BluetoothAdapter.getDefaultAdapter().isEnabled()) {
       initializeFeatures();
     }
   }
@@ -285,8 +282,9 @@ public final class ConnectedDeviceService extends TrunkService {
                     getMetaStringArray(
                       META_SUPPORTED_OOB_CHANNELS,
                       /* defaultValue= */ new String[0]))));
+    UUID associationUuid = UUID.fromString(requireMetaString(META_ASSOCIATION_SERVICE_UUID));
     DeviceController deviceController =
-        new MultiProtocolDeviceController(protocols, storage, oobRunner);
+        new MultiProtocolDeviceController(protocols, storage, oobRunner, associationUuid);
     featureCoordinator = new FeatureCoordinator(deviceController, storage, loggingManager);
     logd(TAG, "Wrapping FeatureCoordinator in legacy binders for backwards compatibility.");
     connectedDeviceManagerBinder = createConnectedDeviceManagerWrapper();
@@ -294,7 +292,6 @@ public final class ConnectedDeviceService extends TrunkService {
   }
 
   private BlePeripheralProtocol createBlePeripheralProtocol() {
-    UUID associationUuid = UUID.fromString(requireMetaString(META_ASSOCIATION_SERVICE_UUID));
     UUID reconnectUuid =
         UUID.fromString(getMetaString(META_RECONNECT_SERVICE_UUID, DEFAULT_RECONNECT_UUID));
     UUID reconnectDataUuid =
@@ -318,7 +315,6 @@ public final class ConnectedDeviceService extends TrunkService {
     }
     return new BlePeripheralProtocol(
         blePeripheralManager,
-        associationUuid,
         reconnectUuid,
         reconnectDataUuid,
         advertiseDataCharacteristicUuid,
@@ -329,9 +325,8 @@ public final class ConnectedDeviceService extends TrunkService {
   }
 
   private SppProtocol createSppProtocol() {
-    UUID sppServiceUuid = UUID.fromString(requireMetaString(META_SPP_SERVICE_UUID));
     int maxSppPacketSize = getMetaInt(META_SPP_PACKET_BYTES, DEFAULT_SPP_PACKET_SIZE);
-    return new SppProtocol(sppDelegateBinder, sppServiceUuid, maxSppPacketSize);
+    return new SppProtocol(sppDelegateBinder, maxSppPacketSize);
   }
 
   private void initializeConnectedDeviceManager() {
@@ -361,15 +356,40 @@ public final class ConnectedDeviceService extends TrunkService {
 
   private void populateFeatures() {
     logd(TAG, "Populating features.");
-    localFeatures.add(new LoggingFeature(this, connectedDeviceManagerBinder, loggingManager));
-    localFeatures.add(new SystemFeature(this, connectedDeviceManagerBinder, storage));
+    if (featureCoordinator != null) {
+      loggingFeature =
+          new LoggingFeature(
+              this,
+              loggingManager,
+              CompanionConnector.createLocalConnector(
+                  this, Connector.USER_TYPE_DRIVER, featureCoordinator));
+      systemFeature =
+          new SystemFeature(
+              this,
+              storage,
+              CompanionConnector.createLocalConnector(
+                  this, Connector.USER_TYPE_DRIVER, featureCoordinator));
+    } else {
+      loggingFeature =
+          new LoggingFeature(
+              this,
+              loggingManager,
+              CompanionConnector.createLocalConnector(
+                  this, Connector.USER_TYPE_ALL, connectedDeviceManagerBinder));
+      systemFeature =
+          new SystemFeature(
+              this,
+              storage,
+              CompanionConnector.createLocalConnector(
+                  this, Connector.USER_TYPE_ALL, connectedDeviceManagerBinder));
+    }
   }
 
   private CarBluetoothManager createSppManager(
       @NonNull ConnectedDeviceStorage storage,
       boolean isCompressionEnabled,
       boolean isCapabilitiesEligible) {
-    UUID sppServiceUuid = UUID.fromString(requireMetaString(META_SPP_SERVICE_UUID));
+    UUID sppServiceUuid = UUID.fromString(requireMetaString(META_ASSOCIATION_SERVICE_UUID));
     int maxSppPacketSize = getMetaInt(META_SPP_PACKET_BYTES, DEFAULT_SPP_PACKET_SIZE);
     return new CarSppManager(
         sppDelegateBinder,
@@ -449,7 +469,7 @@ public final class ConnectedDeviceService extends TrunkService {
     logd(TAG, "Service was destroyed.");
 
     scheduledExecutorService.shutdown();
-    unregisterReceiver(bleBroadcastReceiver);
+    unregisterReceiver(bluetoothBroadcastReceiver);
     cleanup();
     super.onDestroy();
   }
@@ -464,6 +484,7 @@ public final class ConnectedDeviceService extends TrunkService {
           initializeFeatures();
         }
         break;
+      case BluetoothAdapter.STATE_TURNING_OFF:
       case BluetoothAdapter.STATE_OFF:
         cleanup();
         break;
@@ -474,7 +495,7 @@ public final class ConnectedDeviceService extends TrunkService {
 
   private void cleanup() {
     logd(TAG, "Cleaning up features.");
-    if (!isEveryFeatureInitialized.get()) {
+    if (!isEveryFeatureInitialized.compareAndSet(true, false)) {
       logd(TAG, "Features are already cleaned up. No need to clean up again.");
       return;
     }
@@ -484,32 +505,28 @@ public final class ConnectedDeviceService extends TrunkService {
       connectedDeviceManager.reset();
     }
     loggingManager.reset();
-    for (RemoteFeature feature : localFeatures) {
-      feature.stop();
-    }
-    isEveryFeatureInitialized.set(false);
+    systemFeature.stop();
+    loggingFeature.stop();
   }
 
   private void initializeFeatures() {
+    if (!isEveryFeatureInitialized.compareAndSet(false, true)) {
+      logd(TAG, "Features are already initialized. No need to initialize again.");
+      return;
+    }
     // Room cannot be accessed on main thread.
     Executors.defaultThreadFactory()
         .newThread(
             () -> {
               logd(TAG, "Initializing features.");
               loggingManager.start();
-              if (isEveryFeatureInitialized.get()) {
-                logd(TAG, "Features are already initialized. No need to initialize again.");
-                return;
-              }
               if (useFeatureCoordinator) {
                 featureCoordinator.start();
               } else {
                 connectedDeviceManager.start();
               }
-              for (RemoteFeature feature : localFeatures) {
-                feature.start();
-              }
-              isEveryFeatureInitialized.set(true);
+              systemFeature.start();
+              loggingFeature.start();
             })
         .start();
   }

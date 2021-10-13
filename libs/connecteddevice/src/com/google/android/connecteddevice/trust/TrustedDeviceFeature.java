@@ -21,7 +21,7 @@ import android.os.ParcelUuid;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
-import com.google.android.connecteddevice.api.IConnectedDeviceManager;
+import com.google.android.connecteddevice.api.Connector;
 import com.google.android.connecteddevice.api.RemoteFeature;
 import com.google.android.connecteddevice.model.AssociatedDevice;
 import com.google.android.connecteddevice.model.ConnectedDevice;
@@ -44,9 +44,8 @@ class TrustedDeviceFeature extends RemoteFeature {
   }
 
   @VisibleForTesting
-  TrustedDeviceFeature(@NonNull Context context,
-      @NonNull IConnectedDeviceManager connectedDeviceManager) {
-    super(context, FEATURE_ID, connectedDeviceManager);
+  TrustedDeviceFeature(@NonNull Context context, @NonNull Connector connector) {
+    super(context, FEATURE_ID, connector);
   }
 
   /** Set a {@link Callback} for events from the device. Set {@code null} to clear. */

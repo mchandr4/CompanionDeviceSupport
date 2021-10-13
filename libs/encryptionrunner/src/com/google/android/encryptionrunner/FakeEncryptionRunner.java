@@ -40,7 +40,7 @@ public class FakeEncryptionRunner implements EncryptionRunner {
   public static final byte[] RECONNECTION_MESSAGE_KEY_ERROR = "reconnectMessageKeyError".getBytes();
   public static final byte[] RECONNECTION_MESSAGE_EMPTY_RESPONSE =
       "reconnectMessageEmptyResponse".getBytes();
-  public static final String VERIFICATION_CODE = "1234";
+  public static final byte[] VERIFICATION_CODE = "1234".getBytes();
 
   /** The role that this runner is playing. */
   @Retention(RetentionPolicy.SOURCE)
@@ -140,7 +140,7 @@ public class FakeEncryptionRunner implements EncryptionRunner {
     }
 
     return HandshakeMessage.newBuilder()
-        .setVerificationCode(VERIFICATION_CODE)
+        .setFullVerificationCode(VERIFICATION_CODE)
         .setNextMessage(nextMessage)
         .setHandshakeState(state)
         .build();

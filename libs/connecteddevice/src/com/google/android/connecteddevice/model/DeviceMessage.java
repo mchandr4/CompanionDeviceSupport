@@ -68,15 +68,40 @@ public class DeviceMessage implements Parcelable {
 
   private int originalMessageSize;
 
-  public DeviceMessage(
+  /** Create a new outgoing message. */
+  public static DeviceMessage createOutgoingMessage(
       @Nullable UUID recipient,
       boolean isMessageEncrypted,
       OperationType operationType,
       @NonNull byte[] message) {
+    // Original size is populated directly on the outgoing message proto based on compression
+    // success and does not need to be provided by the caller.
+    return new DeviceMessage(
+        recipient, isMessageEncrypted, operationType, message, /* originalMessageSize= */ 0);
+  }
+
+  /** Create a new incoming message. */
+  public static DeviceMessage createIncomingMessage(
+      @Nullable UUID recipient,
+      boolean isMessageEncrypted,
+      OperationType operationType,
+      @NonNull byte[] message,
+      int originalMessageSize) {
+    return new DeviceMessage(
+        recipient, isMessageEncrypted, operationType, message, originalMessageSize);
+  }
+
+  private DeviceMessage(
+      @Nullable UUID recipient,
+      boolean isMessageEncrypted,
+      OperationType operationType,
+      @NonNull byte[] message,
+      int originalMessageSize) {
     this.recipient = recipient;
     this.isMessageEncrypted = isMessageEncrypted;
     this.operationType = operationType;
     this.message = message;
+    this.originalMessageSize = originalMessageSize;
   }
 
   private DeviceMessage(Parcel in) {
@@ -84,8 +109,8 @@ public class DeviceMessage implements Parcelable {
         UUID.fromString(in.readString()),
         in.readBoolean(),
         OperationType.fromValue(in.readInt()),
-        in.createByteArray());
-    originalMessageSize = in.readInt();
+        in.createByteArray(),
+        in.readInt());
   }
 
   /** Returns the recipient for this message. {@code null} if no recipient set. */

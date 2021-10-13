@@ -16,11 +16,13 @@
 
 package com.google.android.connecteddevice.api;
 
+import com.google.android.connecteddevice.model.StartAssociationResponse;
+
 /** Callback for triggered association events. */
 oneway interface IAssociationCallback {
 
     /** Triggered when IHU starts advertising for association successfully. */
-    void onAssociationStartSuccess(in String deviceName);
+    void onAssociationStartSuccess(in StartAssociationResponse response);
 
     /** Triggered when IHU failed to start advertising for association. */
     void onAssociationStartFailure();

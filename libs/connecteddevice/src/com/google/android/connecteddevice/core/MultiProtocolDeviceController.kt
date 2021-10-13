@@ -15,6 +15,7 @@
  */
 package com.google.android.connecteddevice.core
 
+import android.database.sqlite.SQLiteCantOpenDatabaseException
 import androidx.annotation.VisibleForTesting
 import com.google.android.connecteddevice.api.IAssociationCallback
 import com.google.android.connecteddevice.connection.ChannelResolver
@@ -28,6 +29,7 @@ import com.google.android.connecteddevice.model.ConnectedDevice
 import com.google.android.connecteddevice.model.DeviceMessage
 import com.google.android.connecteddevice.model.DeviceMessage.OperationType
 import com.google.android.connecteddevice.model.Errors
+import com.google.android.connecteddevice.model.StartAssociationResponse
 import com.google.android.connecteddevice.oob.OobRunner
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage
 import com.google.android.connecteddevice.transport.ConnectionProtocol
@@ -70,19 +72,14 @@ constructor(
   private val protocols: Set<ConnectionProtocol>,
   private val storage: ConnectedDeviceStorage,
   private val oobRunner: OobRunner,
-  private val callbackExecutor: Executor = Executors.newSingleThreadExecutor()
+  private val callbackExecutor: Executor = Executors.newSingleThreadExecutor(),
+  private val associationServiceUuid: UUID
 ) : DeviceController {
   private val connectedRemoteDevices = ConcurrentHashMap<UUID, ConnectedRemoteDevice>()
 
   private val callbacks = ThreadSafeCallbacks<Callback>()
 
   @VisibleForTesting internal val associationPendingDeviceId = AtomicReference<UUID?>(null)
-
-  /**
-   * The out of band verification code get from the [EncryptionRunner], will be set during out of
-   * band association.
-   */
-  @VisibleForTesting internal var oobCode: ByteArray? = null
 
   private val associatedDevices = CopyOnWriteArrayList<AssociatedDevice>()
   private val driverDevices = CopyOnWriteArrayList<AssociatedDevice>()
@@ -118,8 +115,29 @@ constructor(
 
   init {
     callbackExecutor.execute {
-      associatedDevices.addAll(storage.allAssociatedDevices)
-      driverDevices.addAll(storage.driverAssociatedDevices)
+      while (true) {
+        try {
+          logd(TAG, "Populating associated devices from storage.")
+          associatedDevices.clear()
+          driverDevices.clear()
+          associatedDevices.addAll(storage.allAssociatedDevices)
+          driverDevices.addAll(storage.driverAssociatedDevices)
+          break
+        } catch (sqliteException: SQLiteCantOpenDatabaseException) {
+          loge(
+            TAG,
+            "Caught transient exception while retrieving devices. Trying again.",
+            sqliteException
+          )
+          try {
+            Thread.sleep(ASSOCIATED_DEVICE_RETRY_MS)
+          } catch (interrupted: InterruptedException) {
+            loge(TAG, "Sleep interrupted.", interrupted)
+            break
+          }
+        }
+      }
+      logd(TAG, "Devices populated successfully.")
     }
 
     // TODO(b/192656006) Add registration for updates to associated devices to keep in sync
@@ -143,7 +161,6 @@ constructor(
     for (protocol in protocols) {
       protocol.reset()
     }
-    oobCode = null
     associationPendingDeviceId.set(null)
     for (device in callbackDevices) {
       callbacks.invoke { it.onDeviceDisconnected(device) }
@@ -164,18 +181,28 @@ constructor(
     }
   }
 
-  override fun startAssociation(nameForAssociation: String, callback: IAssociationCallback) {
+  override fun startAssociation(
+    nameForAssociation: String,
+    callback: IAssociationCallback,
+    identifier: UUID?
+  ) {
+    val associationUuid = identifier ?: associationServiceUuid
     logd(TAG, "Start association with name $nameForAssociation")
     val isAbleToStartAssociation = associationPendingDeviceId.compareAndSet(null, UUID.randomUUID())
     if (!isAbleToStartAssociation) {
       loge(TAG, "Attempted to start association when there is already an association in progress.")
       return
     }
-    oobCode = null
+    val startAssociationResponse =
+      StartAssociationResponse(
+        oobRunner.generateOobData(),
+        ByteUtils.hexStringToByteArray(nameForAssociation),
+        nameForAssociation
+      )
     for (protocol in protocols) {
       val discoveryCallback =
-        generateAssociationDiscoveryCallback(protocol, callback, nameForAssociation)
-      protocol.startAssociationDiscovery(nameForAssociation, discoveryCallback)
+        generateAssociationDiscoveryCallback(protocol, callback, startAssociationResponse)
+      protocol.startAssociationDiscovery(nameForAssociation, discoveryCallback, associationUuid)
     }
   }
 
@@ -189,22 +216,12 @@ constructor(
     if (secureChannel == null) {
       loge(
         TAG,
-        "Null SecureChannel found for the current connected device " +
-          "when out-of-band confirmation received."
+        "Null SecureChannel found for the current connected device when out-of-band confirmation " +
+          "received."
       )
       return
     }
     secureChannel.notifyVerificationCodeAccepted()
-    val uniqueId = storage.uniqueId
-    logd(TAG, "Sending car's device id of $uniqueId to device.")
-    val deviceMessage =
-      DeviceMessage(
-        /* recipient= */ null,
-        true,
-        OperationType.ENCRYPTION_HANDSHAKE,
-        ByteUtils.uuidToBytes(uniqueId)
-      )
-    secureChannel.sendClientMessage(deviceMessage)
   }
 
   /**
@@ -367,13 +384,13 @@ constructor(
     }
 
   /**
-   * Generate the [DiscoveryCallback] for associating with device with advertisement name
-   * [nameForAssociation] response will be patched through the [associationCallback].
+   * Generate the [DiscoveryCallback] for associating with device with the [response] that will be
+   * patched through the [associationCallback].
    */
   private fun generateAssociationDiscoveryCallback(
     protocol: ConnectionProtocol,
     associationCallback: IAssociationCallback,
-    nameForAssociation: String
+    response: StartAssociationResponse
   ) =
     object : DiscoveryCallback {
       override fun onDeviceConnected(protocolId: String) {
@@ -423,12 +440,14 @@ constructor(
       }
 
       override fun onDiscoveryStartedSuccessfully() {
-        // TODO(b/197692697): Pass the OOB data to UI
-        oobRunner.generateOobData()
-        associationCallback.aliveOrNull()?.let {
-          logd(TAG, "Association started successfully with name $nameForAssociation")
-          it.onAssociationStartSuccess(nameForAssociation)
-        }
+        associationCallback.aliveOrNull()?.onAssociationStartSuccess(response)
+          ?: run {
+            loge(
+              TAG,
+              "Association callback binder has died. Unable to issue discovery started " +
+                "successfully callback."
+            )
+          }
       }
 
       override fun onDiscoveryFailedToStart() {
@@ -557,17 +576,22 @@ constructor(
     }
   }
 
-  private fun generateSecureChannelCallback(device: ConnectedRemoteDevice) =
+  @VisibleForTesting
+  internal fun generateSecureChannelCallback(device: ConnectedRemoteDevice) =
     object : MultiProtocolSecureChannel.Callback {
-      override fun onOobVerificationCodeAvailable(code: ByteArray) {
-        oobCode = code
-      }
-
-      override fun onOobVerificationCodeReceived(code: ByteArray) {
-        confirmOobVerificationCode(code, device)
-      }
-
       override fun onSecureChannelEstablished() {
+        if (associationPendingDeviceId.get() != null) {
+          val uniqueId = storage.uniqueId
+          logd(TAG, "Sending car's device id of $uniqueId to device.")
+          val deviceMessage =
+            DeviceMessage.createOutgoingMessage(
+              /* recipient= */ null,
+              true,
+              OperationType.ENCRYPTION_HANDSHAKE,
+              ByteUtils.uuidToBytes(uniqueId)
+            )
+          device.secureChannel?.sendClientMessage(deviceMessage)
+        }
         logd(
           TAG,
           "Notifying callbacks that a secure channel has been established with " +
@@ -579,7 +603,7 @@ constructor(
       }
 
       override fun onEstablishSecureChannelFailure(error: ChannelError) {
-        device.callback?.onAssociationError(error.ordinal)
+        device.callback?.aliveOrNull()?.onAssociationError(error.ordinal)
       }
 
       override fun onMessageReceived(deviceMessage: DeviceMessage) {
@@ -588,42 +612,9 @@ constructor(
 
       override fun onMessageReceivedError(error: MultiProtocolSecureChannel.MessageError) {
         loge(TAG, "Error while receiving message.")
-        device.callback?.onAssociationError(Errors.DEVICE_ERROR_INVALID_HANDSHAKE)
+        device.callback?.aliveOrNull()?.onAssociationError(Errors.DEVICE_ERROR_INVALID_HANDSHAKE)
       }
     }
-
-  @VisibleForTesting
-  internal fun encryptAndSendOobVerificationCode(code: ByteArray, device: ConnectedRemoteDevice) {
-    val encryptedCode: ByteArray =
-      try {
-        oobRunner.encryptData(code)
-      } catch (e: Exception) {
-        loge(TAG, "Encryption failed for verification code exchange.", e)
-        device.callback?.aliveOrNull()?.onAssociationError(Errors.DEVICE_ERROR_INVALID_VERIFICATION)
-        return
-      }
-    device.secureChannel?.sendOobEncryptedCode(encryptedCode)
-  }
-
-  @VisibleForTesting
-  internal fun confirmOobVerificationCode(encryptedCode: ByteArray, device: ConnectedRemoteDevice) {
-    val decryptedCode: ByteArray =
-      try {
-        oobRunner.decryptData(encryptedCode)
-      } catch (e: Exception) {
-        loge(TAG, "Decryption failed for verification code exchange", e)
-        device.callback?.aliveOrNull()?.onAssociationError(Errors.DEVICE_ERROR_INVALID_VERIFICATION)
-        return
-      }
-    val code = oobCode
-    if (code == null || !decryptedCode.contentEquals(code)) {
-      loge(TAG, "Exchanged verification codes do not match. Notify callback of failure.")
-      device.callback?.aliveOrNull()?.onAssociationError(Errors.DEVICE_ERROR_INVALID_VERIFICATION)
-      return
-    }
-    encryptAndSendOobVerificationCode(code, device)
-    notifyVerificationCodeAccepted()
-  }
 
   @VisibleForTesting
   internal fun handleSecureChannelMessage(
@@ -655,7 +646,10 @@ constructor(
     val deviceId = ByteUtils.bytesToUUID(deviceMessage.message.copyOf(DEVICE_ID_BYTES))
     if (deviceId == null) {
       loge(TAG, "Received invalid device id. Aborting.")
-      device.callback?.onAssociationError(ChannelError.CHANNEL_ERROR_INVALID_DEVICE_ID.ordinal)
+      device
+        .callback
+        ?.aliveOrNull()
+        ?.onAssociationError(ChannelError.CHANNEL_ERROR_INVALID_DEVICE_ID.ordinal)
       return
     }
 
@@ -671,9 +665,10 @@ constructor(
       } catch (e: InvalidParameterException) {
         loge(TAG, "Error saving challenge secret.", e)
         // Call on old device since it had the original association callback.
-        device.callback?.onAssociationError(
-          ChannelError.CHANNEL_ERROR_INVALID_ENCRYPTION_KEY.ordinal
-        )
+        device
+          .callback
+          ?.aliveOrNull()
+          ?.onAssociationError(ChannelError.CHANNEL_ERROR_INVALID_ENCRYPTION_KEY.ordinal)
         return@computeIfAbsent newDevice
       }
       newDevice.secureChannel?.setDeviceIdDuringAssociation(deviceId)
@@ -769,5 +764,6 @@ constructor(
     private const val SALT_BYTES = 8
     private const val TOTAL_AD_DATA_BYTES = 16
     private const val DEVICE_ID_BYTES = 16
+    private const val ASSOCIATED_DEVICE_RETRY_MS = 100L
   }
 }

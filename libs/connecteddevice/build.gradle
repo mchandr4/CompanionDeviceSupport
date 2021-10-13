@@ -90,6 +90,8 @@ dependencies {
     implementation files('../../../../../../prebuilts/sdk/30/system/android.car-system-stubs.jar')
     implementation project(path: ':libs:companionprotos')
     implementation project(path: ':libs:encryptionrunner')
+    implementation 'com.google.zxing:core:3.4.1'
+    implementation 'com.google.zxing:android-core:3.3.0'
 
     annotationProcessor "androidx.room:room-compiler:$room_version"
     annotationProcessor "com.google.dagger:dagger-compiler:$dagger_version"

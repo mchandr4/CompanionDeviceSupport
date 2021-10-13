@@ -24,6 +24,7 @@ import com.google.common.util.concurrent.MoreExecutors.directExecutor
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.eq
+import com.nhaarman.mockitokotlin2.isNull
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
@@ -44,7 +45,7 @@ class FeatureCoordinatorTest {
     FeatureCoordinator(mockController, mockStorage, mockLoggingManager, directExecutor())
 
   @Test
-  fun getConnectedDevicesForDriver_returnsOnlyDriverDevices() {
+  fun connectedDevicesForDriver_returnsOnlyDriverDevices() {
     val driverDevice1 =
       ConnectedDevice(
         UUID.randomUUID().toString(),
@@ -72,6 +73,68 @@ class FeatureCoordinatorTest {
     val driverDevices = coordinator.connectedDevicesForDriver
 
     assertThat(driverDevices).containsExactly(driverDevice1, driverDevice2)
+  }
+
+  @Test
+  fun connectedDevicesForPassengers_returnsOnlyPassengerDevices() {
+    val passengerDevice1 =
+      ConnectedDevice(
+        UUID.randomUUID().toString(),
+        "passengerDevice1",
+        /* belongsToDriver= */ false,
+        /* hasSecureChannel= */ true
+      )
+    val passengerDevice2 =
+      ConnectedDevice(
+        UUID.randomUUID().toString(),
+        "passengerDevice2",
+        /* belongsToDriver= */ false,
+        /* hasSecureChannel= */ true
+      )
+    val driverDevice =
+      ConnectedDevice(
+        UUID.randomUUID().toString(),
+        "driverDevice",
+        /* belongsToDriver= */ true,
+        /* hasSecureChannel= */ true
+      )
+    whenever(mockController.connectedDevices)
+      .thenReturn(listOf(passengerDevice1, driverDevice, passengerDevice2))
+
+    val driverDevices = coordinator.connectedDevicesForPassengers
+
+    assertThat(driverDevices).containsExactly(passengerDevice1, passengerDevice2)
+  }
+
+  @Test
+  fun allConnectedDevices_returnsAllDevices() {
+    val driverDevice1 =
+      ConnectedDevice(
+        UUID.randomUUID().toString(),
+        "driverDeviceName1",
+        /* belongsToDriver= */ true,
+        /* hasSecureChannel= */ true
+      )
+    val driverDevice2 =
+      ConnectedDevice(
+        UUID.randomUUID().toString(),
+        "driverDeviceName2",
+        /* belongsToDriver= */ true,
+        /* hasSecureChannel= */ true
+      )
+    val passengerDevice =
+      ConnectedDevice(
+        UUID.randomUUID().toString(),
+        "passengerDeviceName",
+        /* belongsToDriver= */ false,
+        /* hasSecureChannel= */ true
+      )
+    whenever(mockController.connectedDevices)
+      .thenReturn(listOf(driverDevice1, passengerDevice, driverDevice2))
+
+    val driverDevices = coordinator.allConnectedDevices
+
+    assertThat(driverDevices).containsExactly(driverDevice1, passengerDevice, driverDevice2)
   }
 
   @Test
@@ -345,7 +408,7 @@ class FeatureCoordinatorTest {
         /* hasSecureChannel= */ true
       )
     val missedMessage =
-      DeviceMessage(
+      DeviceMessage.createOutgoingMessage(
         recipientId.uuid,
         /* isMessageEncrypted= */ true,
         CLIENT_MESSAGE,
@@ -434,7 +497,7 @@ class FeatureCoordinatorTest {
         /* hasSecureChannel= */ true
       )
     val message =
-      DeviceMessage(
+      DeviceMessage.createOutgoingMessage(
         recipientId.uuid,
         /* isMessageEncrypted= */ true,
         CLIENT_MESSAGE,
@@ -460,7 +523,7 @@ class FeatureCoordinatorTest {
         /* hasSecureChannel= */ true
       )
     val message =
-      DeviceMessage(
+      DeviceMessage.createOutgoingMessage(
         recipientId.uuid,
         /* isMessageEncrypted= */ true,
         CLIENT_MESSAGE,
@@ -486,7 +549,7 @@ class FeatureCoordinatorTest {
         /* hasSecureChannel= */ true
       )
     val message =
-      DeviceMessage(
+      DeviceMessage.createOutgoingMessage(
         otherRecipientId.uuid,
         /* isMessageEncrypted= */ true,
         CLIENT_MESSAGE,
@@ -512,7 +575,7 @@ class FeatureCoordinatorTest {
         /* hasSecureChannel= */ true
       )
     val message =
-      DeviceMessage(
+      DeviceMessage.createOutgoingMessage(
         recipientId.uuid,
         /* isMessageEncrypted= */ true,
         CLIENT_MESSAGE,
@@ -537,7 +600,7 @@ class FeatureCoordinatorTest {
         /* hasSecureChannel= */ true
       )
     val nullRecipientMessage =
-      DeviceMessage(
+      DeviceMessage.createOutgoingMessage(
         /* recipient= */ null,
         /* isMessageEncrypted= */ true,
         CLIENT_MESSAGE,
@@ -556,7 +619,7 @@ class FeatureCoordinatorTest {
         /* hasSecureChannel= */ true
       )
     val message =
-      DeviceMessage(
+      DeviceMessage.createOutgoingMessage(
         UUID.randomUUID(),
         /* isMessageEncrypted= */ true,
         CLIENT_MESSAGE,
@@ -575,7 +638,21 @@ class FeatureCoordinatorTest {
     coordinator.startAssociation(associationCallback)
 
     argumentCaptor<String>().apply {
-      verify(mockController).startAssociation(capture(), eq(associationCallback))
+      verify(mockController).startAssociation(capture(), eq(associationCallback), isNull())
+      assertThat(firstValue).hasLength(DEVICE_NAME_LENGTH + 2) // Starts with 0x so add 2
+    }
+  }
+
+  @Test
+  fun startAssociationWithIdentifier_startsAssociationWithCorrectlySizedName() {
+    val associationCallback: IAssociationCallback = mockToBeAlive()
+    val identifier = ParcelUuid(UUID.randomUUID())
+
+    coordinator.startAssociationWithIdentifier(associationCallback, identifier)
+
+    argumentCaptor<String>().apply {
+      verify(mockController)
+        .startAssociation(capture(), eq(associationCallback), eq(identifier.uuid))
       assertThat(firstValue).hasLength(DEVICE_NAME_LENGTH + 2) // Starts with 0x so add 2
     }
   }

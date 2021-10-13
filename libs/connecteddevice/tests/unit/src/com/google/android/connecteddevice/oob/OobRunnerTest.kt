@@ -172,6 +172,12 @@ class OobRunnerTest {
   }
 
   @Test
+  fun generateOobData_algorithmNotSupported_throwException() {
+    val oobRunner = OobRunner(mockOobChannelFactory, supportedTypesSingle, keyAlgorithm = "UNKNOWN")
+    assertThrows(IllegalStateException::class.java) { oobRunner.generateOobData() }
+  }
+
+  @Test
   fun generateOobData_keyAndNoncesAreNonNullAndOobDataIsSetCorrectly() {
     val oobData = oobRunner.generateOobData()
     assertThat(oobRunner.encryptionKey).isNotNull()
@@ -258,7 +264,11 @@ class OobRunnerTest {
     override val isDeviceVerificationRequired: Boolean
       get() = false
 
-    override fun startAssociationDiscovery(name: String, callback: DiscoveryCallback) {}
+    override fun startAssociationDiscovery(
+      name: String,
+      callback: DiscoveryCallback,
+      identifier: UUID
+    ) {}
     override fun startConnectionDiscovery(
       id: UUID,
       challenge: ConnectChallenge,

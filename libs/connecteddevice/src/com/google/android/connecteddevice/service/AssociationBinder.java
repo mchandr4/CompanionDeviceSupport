@@ -33,6 +33,7 @@ import com.google.android.connecteddevice.api.IOnAssociatedDevicesRetrievedListe
 import com.google.android.connecteddevice.connection.AssociationCallback;
 import com.google.android.connecteddevice.model.AssociatedDevice;
 import com.google.android.connecteddevice.model.ConnectedDevice;
+import com.google.android.connecteddevice.model.StartAssociationResponse;
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage.OnAssociatedDevicesRetrievedListener;
 import com.google.android.connecteddevice.util.RemoteCallbackBinder;
 import java.util.List;
@@ -281,7 +282,7 @@ public class AssociationBinder extends IAssociatedDeviceManager.Stub {
       new AssociationCallback() {
 
         @Override
-        public void onAssociationStartSuccess(String deviceName) {
+        public void onAssociationStartSuccess(StartAssociationResponse response) {
           if (iAssociationCallback == null) {
             loge(
                 TAG,
@@ -289,7 +290,7 @@ public class AssociationBinder extends IAssociatedDeviceManager.Stub {
             return;
           }
           try {
-            iAssociationCallback.onAssociationStartSuccess(deviceName);
+            iAssociationCallback.onAssociationStartSuccess(response);
           } catch (RemoteException exception) {
             loge(TAG, "onAssociationStartSuccess failed.", exception);
           }

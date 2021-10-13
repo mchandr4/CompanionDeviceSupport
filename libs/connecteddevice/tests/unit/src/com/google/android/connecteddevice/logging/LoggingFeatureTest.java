@@ -21,6 +21,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 import android.content.Context;
@@ -30,10 +31,10 @@ import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.google.android.companionprotos.LoggingMessageProto.LoggingMessage;
 import com.google.android.companionprotos.LoggingMessageProto.LoggingMessage.MessageType;
-import com.google.android.connecteddevice.api.IConnectedDeviceManager;
+import com.google.android.connecteddevice.api.Connector;
+import com.google.android.connecteddevice.api.FakeConnector;
 import com.google.android.connecteddevice.logging.LoggingManager.LoggingEventCallback;
 import com.google.android.connecteddevice.model.ConnectedDevice;
-import com.google.android.connecteddevice.model.DeviceMessage;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.util.concurrent.Executor;
@@ -49,8 +50,9 @@ public class LoggingFeatureTest {
 
   private final Context context = ApplicationProvider.getApplicationContext();
 
+  private final Connector fakeConnector = spy(new FakeConnector());
+
   @Mock private LoggingManager mockLoggingManager;
-  @Mock private IConnectedDeviceManager mockConnectedDeviceManager;
 
   private LoggingFeature loggingFeature;
   private LoggingEventCallback loggingEventCallback;
@@ -61,7 +63,7 @@ public class LoggingFeatureTest {
 
     ArgumentCaptor<LoggingEventCallback> callbackCaptor =
         ArgumentCaptor.forClass(LoggingEventCallback.class);
-    loggingFeature = new LoggingFeature(context, mockConnectedDeviceManager, mockLoggingManager);
+    loggingFeature = new LoggingFeature(context, mockLoggingManager, fakeConnector);
     verify(mockLoggingManager)
         .registerLoggingEventCallback(callbackCaptor.capture(), any(Executor.class));
     loggingEventCallback = callbackCaptor.getValue();
@@ -102,37 +104,33 @@ public class LoggingFeatureTest {
   @Test
   public void loggingEventCallback_onRemoteLogRequested()
       throws InvalidProtocolBufferException, RemoteException {
-    ArgumentCaptor<DeviceMessage> messageCaptor = ArgumentCaptor.forClass(DeviceMessage.class);
+    ArgumentCaptor<byte[]> messageCaptor = ArgumentCaptor.forClass(byte[].class);
     ConnectedDevice connectedDevice = createConnectedDevice();
 
     loggingFeature.onSecureChannelEstablished(connectedDevice);
     loggingEventCallback.onRemoteLogRequested();
 
-    verify(mockConnectedDeviceManager)
-        .sendMessage(eq(connectedDevice), messageCaptor.capture());
+    verify(fakeConnector).sendMessageSecurely(eq(connectedDevice), messageCaptor.capture());
     LoggingMessage message =
         LoggingMessage.parseFrom(
-            messageCaptor.getValue().getMessage(),
-            ExtensionRegistryLite.getEmptyRegistry());
+            messageCaptor.getValue(), ExtensionRegistryLite.getEmptyRegistry());
     assertThat(message.getType()).isEqualTo(MessageType.START_SENDING);
   }
 
   @Test
   public void loggingEventCallback_onLocalLogAvailable()
       throws InvalidProtocolBufferException, RemoteException {
-    ArgumentCaptor<DeviceMessage> messageCaptor = ArgumentCaptor.forClass(DeviceMessage.class);
+    ArgumentCaptor<byte[]> messageCaptor = ArgumentCaptor.forClass(byte[].class);
     byte[] testLogs = "LOG_MESSAGE_CONTENT".getBytes(UTF_8);
     ConnectedDevice connectedDevice = createConnectedDevice();
 
     loggingFeature.onSecureChannelEstablished(connectedDevice);
     loggingEventCallback.onLocalLogAvailable(testLogs);
 
-    verify(mockConnectedDeviceManager)
-        .sendMessage(eq(connectedDevice), messageCaptor.capture());
+    verify(fakeConnector).sendMessageSecurely(eq(connectedDevice), messageCaptor.capture());
     LoggingMessage message =
         LoggingMessage.parseFrom(
-            messageCaptor.getValue().getMessage(),
-            ExtensionRegistryLite.getEmptyRegistry());
+            messageCaptor.getValue(), ExtensionRegistryLite.getEmptyRegistry());
     assertThat(message.getType()).isEqualTo(MessageType.LOG);
   }
 

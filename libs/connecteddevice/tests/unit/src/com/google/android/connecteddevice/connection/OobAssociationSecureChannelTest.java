@@ -17,7 +17,6 @@
 package com.google.android.connecteddevice.connection;
 
 import static com.google.common.truth.Truth.assertThat;
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.reset;
@@ -82,7 +81,7 @@ public class OobAssociationSecureChannelTest {
     respondToOobCode();
     verify(streamMock, times(2)).writeMessage(messageCaptor.capture());
     byte[] oobCodeResponse = messageCaptor.getAllValues().get(1).getMessage();
-    assertThat(oobCodeResponse).isEqualTo(FakeEncryptionRunner.VERIFICATION_CODE.getBytes(UTF_8));
+    assertThat(oobCodeResponse).isEqualTo(FakeEncryptionRunner.VERIFICATION_CODE);
     DeviceMessage severDeviceId = messageCaptor.getAllValues().get(2);
     channel.processMessage(severDeviceId);
     assertThat(severDeviceId.getMessage()).isEqualTo(ByteUtils.uuidToBytes(SERVER_DEVICE_ID));
@@ -105,14 +104,14 @@ public class OobAssociationSecureChannelTest {
     channel.registerCallback(callback);
 
     when(oobConnectionManagerMock.encryptVerificationCode(any()))
-        .thenReturn(FakeEncryptionRunner.VERIFICATION_CODE.getBytes(UTF_8));
+        .thenReturn(FakeEncryptionRunner.VERIFICATION_CODE);
     when(oobConnectionManagerMock.decryptVerificationCode(any()))
-        .thenReturn(FakeEncryptionRunner.VERIFICATION_CODE.getBytes(UTF_8));
+        .thenReturn(FakeEncryptionRunner.VERIFICATION_CODE);
   }
 
   private void sendDeviceId() {
     DeviceMessage message =
-        new DeviceMessage(
+        DeviceMessage.createOutgoingMessage(
             /* recipient= */ null,
             /* isMessageEncrypted= */ true,
             OperationType.ENCRYPTION_HANDSHAKE,
@@ -124,7 +123,7 @@ public class OobAssociationSecureChannelTest {
 
   private void initHandshakeMessage() {
     DeviceMessage message =
-        new DeviceMessage(
+        DeviceMessage.createOutgoingMessage(
             /* recipient= */ null,
             /* isMessageEncrypted= */ false,
             OperationType.ENCRYPTION_HANDSHAKE,
@@ -134,7 +133,7 @@ public class OobAssociationSecureChannelTest {
 
   private void respondToContinueMessage() {
     DeviceMessage message =
-        new DeviceMessage(
+        DeviceMessage.createOutgoingMessage(
             /* recipient= */ null,
             /* isMessageEncrypted= */ false,
             OperationType.ENCRYPTION_HANDSHAKE,
@@ -144,11 +143,11 @@ public class OobAssociationSecureChannelTest {
 
   private void respondToOobCode() {
     DeviceMessage message =
-        new DeviceMessage(
+        DeviceMessage.createOutgoingMessage(
             /* recipient= */ null,
             /* isMessageEncrypted= */ false,
             OperationType.ENCRYPTION_HANDSHAKE,
-            FakeEncryptionRunner.VERIFICATION_CODE.getBytes(UTF_8));
+            FakeEncryptionRunner.VERIFICATION_CODE);
     channel.onMessageReceived(message);
   }
 }

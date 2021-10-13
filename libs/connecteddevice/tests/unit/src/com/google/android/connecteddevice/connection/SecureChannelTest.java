@@ -88,7 +88,7 @@ public class SecureChannelTest {
   public void processMessage_doesNothingForUnencryptedMessage() throws SignatureException {
     byte[] payload = ByteUtils.randomBytes(10);
     DeviceMessage message =
-        new DeviceMessage(
+        DeviceMessage.createOutgoingMessage(
             UUID.randomUUID(),
             /* isMessageEncrypted= */ false,
             OperationType.CLIENT_MESSAGE,
@@ -102,7 +102,7 @@ public class SecureChannelTest {
   public void processMessage_decryptsEncryptedMessage() throws SignatureException {
     byte[] payload = ByteUtils.randomBytes(10);
     DeviceMessage message =
-        new DeviceMessage(
+        DeviceMessage.createOutgoingMessage(
             UUID.randomUUID(),
             /* isMessageEncrypted= */ true,
             OperationType.CLIENT_MESSAGE,
@@ -115,7 +115,7 @@ public class SecureChannelTest {
   public void processMessage_onMessageReceivedErrorForEncryptedMessageWithNoKey()
       throws InterruptedException {
     DeviceMessage message =
-        new DeviceMessage(
+        DeviceMessage.createOutgoingMessage(
             UUID.randomUUID(),
             /* isMessageEncrypted= */ true,
             OperationType.CLIENT_MESSAGE,
@@ -132,7 +132,7 @@ public class SecureChannelTest {
   @Test
   public void onMessageReceived_onEstablishSecureChannelFailureBadHandshakeMessage() {
     DeviceMessage message =
-        new DeviceMessage(
+        DeviceMessage.createOutgoingMessage(
             UUID.randomUUID(),
             /* isMessageEncrypted= */ true,
             OperationType.ENCRYPTION_HANDSHAKE,
@@ -148,7 +148,7 @@ public class SecureChannelTest {
   @Test
   public void onMessageReceived_onMessageReceivedNotIssuedForNullMessage() {
     DeviceMessage message =
-        new DeviceMessage(
+        DeviceMessage.createOutgoingMessage(
             UUID.randomUUID(),
             /* isMessageEncrypted= */ false,
             OperationType.CLIENT_MESSAGE,
@@ -171,7 +171,7 @@ public class SecureChannelTest {
         };
     secureChannel.registerCallback(mockCallback);
     DeviceMessage message =
-        new DeviceMessage(
+        DeviceMessage.createOutgoingMessage(
             UUID.randomUUID(),
             /* isMessageEncrypted= */ true,
             OperationType.ENCRYPTION_HANDSHAKE,
@@ -186,7 +186,7 @@ public class SecureChannelTest {
   public void decompressMessage_returnsOriginalMessageIfOriginalSizeIsZero() {
     byte[] message = ByteUtils.randomBytes(10);
     DeviceMessage deviceMessage =
-        new DeviceMessage(
+        DeviceMessage.createOutgoingMessage(
             UUID.randomUUID(),
             /* isMessageEncrypted= */ false,
             OperationType.CLIENT_MESSAGE,
@@ -200,7 +200,7 @@ public class SecureChannelTest {
   public void compressMessage_returnsCompressedMessageWithOriginalSize() {
     byte[] message = new byte[100];
     DeviceMessage deviceMessage =
-        new DeviceMessage(
+        DeviceMessage.createOutgoingMessage(
             UUID.randomUUID(),
             /* isMessageEncrypted= */ false,
             OperationType.CLIENT_MESSAGE,
@@ -214,7 +214,7 @@ public class SecureChannelTest {
   public void compressedMessageCanBeDecompressed() {
     byte[] message = new byte[100];
     DeviceMessage deviceMessage =
-        new DeviceMessage(
+        DeviceMessage.createOutgoingMessage(
             UUID.randomUUID(),
             /* isMessageEncrypted= */ false,
             OperationType.CLIENT_MESSAGE,

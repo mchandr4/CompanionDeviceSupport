@@ -97,6 +97,11 @@ constructor(
   override fun getConnectedDevicesForDriver(): List<ConnectedDevice> =
     controller.connectedDevices.filter { it.isAssociatedWithDriver }
 
+  override fun getConnectedDevicesForPassengers(): List<ConnectedDevice> =
+    controller.connectedDevices.filter { !it.isAssociatedWithDriver }
+
+  override fun getAllConnectedDevices(): List<ConnectedDevice> = controller.connectedDevices
+
   override fun registerDriverConnectionCallback(callback: IConnectionCallback) {
     driverConnectionCallbacks.add(callback, callbackExecutor)
   }
@@ -225,11 +230,14 @@ constructor(
   }
 
   override fun startAssociation(callback: IAssociationCallback) {
-    logd(TAG, "Received request to start association.")
-    controller.startAssociation(
-      ByteUtils.byteArrayToHexString(ByteUtils.randomBytes(DEVICE_NAME_LENGTH)),
-      callback
-    )
+    startAssociationInternal(callback)
+  }
+
+  override fun startAssociationWithIdentifier(
+    callback: IAssociationCallback,
+    identifier: ParcelUuid
+  ) {
+    startAssociationInternal(callback, identifier)
   }
 
   override fun stopAssociation() {
@@ -272,6 +280,18 @@ constructor(
   override fun disableAssociatedDeviceConnection(deviceId: String) {
     storage.updateAssociatedDeviceConnectionEnabled(deviceId, /* isConnectionEnabled= */ false)
     controller.disconnectDevice(UUID.fromString(deviceId))
+  }
+
+  private fun startAssociationInternal(
+    callback: IAssociationCallback,
+    identifier: ParcelUuid? = null
+  ) {
+    logd(TAG, "Received request to start association with identifier $identifier.")
+    controller.startAssociation(
+      ByteUtils.byteArrayToHexString(ByteUtils.randomBytes(DEVICE_NAME_LENGTH)),
+      callback,
+      identifier?.uuid
+    )
   }
 
   private fun saveMissedMessage(connectedDevice: ConnectedDevice, message: DeviceMessage) =

@@ -18,16 +18,17 @@ package com.google.android.connecteddevice.connection;
 
 import androidx.annotation.NonNull;
 import com.google.android.connecteddevice.model.Errors.DeviceError;
+import com.google.android.connecteddevice.model.StartAssociationResponse;
 
 /** Callbacks that will be invoked during associating a new client. */
 public interface AssociationCallback {
 
-    /**
-     * Invoked when IHU starts advertising with its device name for association successfully.
-     *
-     * @param deviceName The device name to identify the car.
-     */
-    default void onAssociationStartSuccess(@NonNull String deviceName) {}
+  /**
+   * Invoked when IHU starts advertising with its device name for association successfully.
+   *
+   * @param response contains the data which is generated per association request.
+   */
+  default void onAssociationStartSuccess(@NonNull StartAssociationResponse response) {}
 
     /** Invoked when IHU failed to start advertising for association. */
     default void onAssociationStartFailure() {}

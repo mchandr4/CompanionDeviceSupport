@@ -41,6 +41,7 @@ import com.google.android.connecteddevice.connection.AssociationSecureChannel;
 import com.google.android.connecteddevice.connection.ConnectionResolver;
 import com.google.android.connecteddevice.connection.SecureChannel;
 import com.google.android.connecteddevice.model.AssociatedDevice;
+import com.google.android.connecteddevice.model.StartAssociationResponse;
 import com.google.android.connecteddevice.oob.OobConnectionManager;
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage;
 import com.google.android.connecteddevice.transport.ble.BlePeripheralManager;
@@ -135,8 +136,7 @@ public class CarBlePeripheralManagerTest {
     AdvertiseData scanResponseData = scanResponseDataCaptor.getValue();
     assertThat(scanResponseData.getIncludeDeviceName()).isFalse();
     ParcelUuid dataUuid = new ParcelUuid(RECONNECT_DATA_UUID);
-    assertThat(scanResponseData.getServiceData().get(dataUuid))
-        .isEqualTo(testDeviceName);
+    assertThat(scanResponseData.getServiceData().get(dataUuid)).isEqualTo(testDeviceName);
   }
 
   @Test
@@ -163,8 +163,10 @@ public class CarBlePeripheralManagerTest {
     AdvertiseCallback advertiseCallback = callbackCaptor.getValue();
     AdvertiseSettings settings = new AdvertiseSettings.Builder().build();
     advertiseCallback.onStartSuccess(settings);
-      verify(mockAssociationCallback).onAssociationStartSuccess(
-          ByteUtils.byteArrayToHexString(testDeviceName));
+    verify(mockAssociationCallback)
+        .onAssociationStartSuccess(
+            new StartAssociationResponse(
+                new byte[0], testDeviceName, ByteUtils.byteArrayToHexString(testDeviceName)));
   }
 
   @Test

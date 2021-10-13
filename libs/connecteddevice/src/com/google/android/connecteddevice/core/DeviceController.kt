@@ -35,8 +35,16 @@ interface DeviceController {
   /** Start to connect to associated devices. */
   fun initiateConnectionToDevice(deviceId: UUID)
 
-  /** Start the association with a new device. */
-  fun startAssociation(nameForAssociation: String, callback: IAssociationCallback)
+  /**
+   * Start the association with a new device with [identifier].
+   *
+   * If [identifier] is null, a default [UUID] will be used to identify the association.
+   */
+  fun startAssociation(
+    nameForAssociation: String,
+    callback: IAssociationCallback,
+    identifier: UUID? = null
+  )
 
   /** Notify that the user has accepted a pairing code. */
   fun notifyVerificationCodeAccepted()

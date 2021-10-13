@@ -139,8 +139,9 @@ public class AssociatedDevice implements Parcelable {
     dest.writeInt(userId);
   }
 
+  // Explicitly specifying the type within <> to support building with Java 8.
   public static final Parcelable.Creator<AssociatedDevice> CREATOR =
-      new Parcelable.Creator<>() {
+      new Parcelable.Creator<AssociatedDevice>() {
         @Override
         public AssociatedDevice createFromParcel(Parcel source) {
           return new AssociatedDevice(source);
@@ -151,5 +152,4 @@ public class AssociatedDevice implements Parcelable {
           return new AssociatedDevice[size];
         }
       };
-
 }

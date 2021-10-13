@@ -87,7 +87,7 @@ public class OobAssociationSecureChannel extends AssociationSecureChannel {
       return;
     }
 
-    oobCode = handshakeMessage.getOobVerificationCode();
+    oobCode = handshakeMessage.getFullVerificationCode();
     if (oobCode == null) {
       loge(TAG, "Unable to get out of band verification code.");
       notifySecureChannelFailure(CHANNEL_ERROR_INVALID_VERIFICATION);

@@ -57,7 +57,14 @@ open class AidlThreadSafeCallbacks<T> : ThreadSafeCallbacks<T>() where T : IInte
         callbacks.remove(callback)
         continue
       }
-      executor.execute { notification.accept(aliveCallback) }
+      executor.execute {
+        try {
+          notification.accept(aliveCallback)
+        } catch (e: DeadObjectException) {
+          logw(TAG, "Binder died after check. Removing from the registered callbacks.")
+          callbacks.remove(callback)
+        }
+      }
     }
   }
 

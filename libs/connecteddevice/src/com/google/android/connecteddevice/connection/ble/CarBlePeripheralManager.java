@@ -40,6 +40,7 @@ import com.google.android.connecteddevice.connection.CarBluetoothManager;
 import com.google.android.connecteddevice.connection.ConnectionResolver;
 import com.google.android.connecteddevice.connection.DeviceMessageStream;
 import com.google.android.connecteddevice.connection.ReconnectSecureChannel;
+import com.google.android.connecteddevice.model.StartAssociationResponse;
 import com.google.android.connecteddevice.oob.OobChannel;
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage;
 import com.google.android.connecteddevice.transport.ble.BlePeripheralManager;
@@ -317,7 +318,11 @@ public class CarBlePeripheralManager extends CarBluetoothManager {
           @Override
           public void onStartSuccess(AdvertiseSettings settingsInEffect) {
             super.onStartSuccess(settingsInEffect);
-            callback.onAssociationStartSuccess(ByteUtils.byteArrayToHexString(nameForAssociation));
+            callback.onAssociationStartSuccess(
+                new StartAssociationResponse(
+                    /* oobData= */ new byte[0],
+                    nameForAssociation,
+                    ByteUtils.byteArrayToHexString(nameForAssociation)));
             logd(TAG, "Successfully started advertising for association.");
           }
 

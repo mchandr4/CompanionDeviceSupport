@@ -41,7 +41,6 @@ import java.util.UUID
  */
 class BlePeripheralProtocol(
   private val blePeripheralManager: BlePeripheralManager,
-  private val associationServiceUuid: UUID,
   private val reconnectServiceUuid: UUID,
   private val reconnectDataUuid: UUID,
   advertiseDataCharacteristicUuid: UUID,
@@ -147,7 +146,11 @@ class BlePeripheralProtocol(
     timeoutHandler = Handler(timeoutHandlerThread.looper)
   }
 
-  override fun startAssociationDiscovery(name: String, callback: DiscoveryCallback) {
+  override fun startAssociationDiscovery(
+    name: String,
+    callback: DiscoveryCallback,
+    identifier: UUID
+  ) {
     if (!isReadyToStartDiscovery()) {
       return
     }
@@ -170,7 +173,7 @@ class BlePeripheralProtocol(
       }
     advertiseCallback = associationAdvertiseCallback
     startAdvertising(
-      associationServiceUuid,
+      identifier,
       associationAdvertiseCallback,
       scanResponse = ByteUtils.hexStringToByteArray(name),
       scanResponseUuid = reconnectDataUuid

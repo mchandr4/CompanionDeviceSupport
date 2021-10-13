@@ -29,7 +29,6 @@ import com.google.android.connecteddevice.ConnectedDeviceManager;
 import com.google.android.connecteddevice.ConnectedDeviceManager.ConnectionCallback;
 import com.google.android.connecteddevice.ConnectedDeviceManager.DeviceAssociationCallback;
 import com.google.android.connecteddevice.ConnectedDeviceManager.DeviceCallback;
-import com.google.android.connecteddevice.api.ConnectedDeviceManagerBinder;
 import com.google.android.connecteddevice.api.IConnectionCallback;
 import com.google.android.connecteddevice.api.IDeviceAssociationCallback;
 import com.google.android.connecteddevice.api.IDeviceCallback;
@@ -147,7 +146,7 @@ public class ConnectedDeviceManagerBinderTest {
             /* belongsToActiveUser = */ false,
             /* hasSecureChannel = */ true);
     DeviceMessage message =
-        new DeviceMessage(
+        DeviceMessage.createOutgoingMessage(
             recipientId.getUuid(),
             /* isMessageEncrypted= */ true,
             OperationType.CLIENT_MESSAGE,

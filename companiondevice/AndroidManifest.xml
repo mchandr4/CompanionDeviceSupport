@@ -72,8 +72,6 @@
             </intent-filter>
             <meta-data android:name="com.google.android.connecteddevice.early_services"
                 android:resource="@array/early_single_user_services"/>
-            <meta-data android:name="com.google.android.connecteddevice.spp_service_uuid"
-                android:resource="@string/car_spp_service_uuid_secure" />
             <meta-data android:name="com.google.android.connecteddevice.association_service_uuid"
                 android:resource="@string/car_association_service_uuid" />
             <meta-data android:name="com.google.android.connecteddevice.enable_proxy"

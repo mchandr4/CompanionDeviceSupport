@@ -25,7 +25,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 import com.google.android.companionprotos.LoggingMessageProto.LoggingMessage;
 import com.google.android.companionprotos.LoggingMessageProto.LoggingMessage.MessageType;
-import com.google.android.connecteddevice.api.IConnectedDeviceManager;
+import com.google.android.connecteddevice.api.Connector;
 import com.google.android.connecteddevice.api.RemoteFeature;
 import com.google.android.connecteddevice.logging.LoggingManager.LoggingEventCallback;
 import com.google.android.connecteddevice.model.ConnectedDevice;
@@ -65,9 +65,9 @@ public class LoggingFeature extends RemoteFeature {
 
   public LoggingFeature(
       @NonNull Context context,
-      @NonNull IConnectedDeviceManager connectedDeviceManager,
-      @NonNull LoggingManager loggingManager) {
-    super(context, FEATURE_ID, connectedDeviceManager);
+      @NonNull LoggingManager loggingManager,
+      @NonNull Connector connector) {
+    super(context, FEATURE_ID, connector);
     this.loggingManager = loggingManager;
     loggingManager.registerLoggingEventCallback(
         loggingEventCallback, Executors.newSingleThreadExecutor());

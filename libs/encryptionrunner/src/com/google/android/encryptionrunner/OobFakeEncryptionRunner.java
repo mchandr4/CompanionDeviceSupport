@@ -38,7 +38,7 @@ public class OobFakeEncryptionRunner extends FakeEncryptionRunner {
         }
         setState(newState);
         return HandshakeMessage.newBuilder()
-            .setOobVerificationCode(VERIFICATION_CODE.getBytes())
+            .setFullVerificationCode(VERIFICATION_CODE)
             .setHandshakeState(newState)
             .build();
       case Mode.CLIENT:
@@ -49,7 +49,7 @@ public class OobFakeEncryptionRunner extends FakeEncryptionRunner {
         return HandshakeMessage.newBuilder()
             .setHandshakeState(newState)
             .setNextMessage(CLIENT_RESPONSE)
-            .setOobVerificationCode(VERIFICATION_CODE.getBytes())
+            .setFullVerificationCode(VERIFICATION_CODE)
             .build();
       default:
         throw new IllegalStateException("unexpected role: " + getMode());

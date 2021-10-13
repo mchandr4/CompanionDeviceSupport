@@ -2,6 +2,7 @@ package com.google.android.connecteddevice.transport.ble
 
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGattCharacteristic
+import android.bluetooth.BluetoothGattService
 import android.bluetooth.BluetoothManager
 import android.bluetooth.le.AdvertiseCallback
 import android.content.Context
@@ -36,7 +37,7 @@ private const val TEST_DEVICE_NAME = "TestName"
 
 @RunWith(AndroidJUnit4::class)
 class BlePeripheralProtocolTest {
-  private val testAssociationServiceUuid = UUID.randomUUID()
+  private val testIdentifier = UUID.randomUUID()
   private val testReconnectServiceUuid = UUID.randomUUID()
   private val testReconnectDataUuid = UUID.randomUUID()
   private val testAdvertiseDataCharacteristicUuid = UUID.randomUUID()
@@ -60,13 +61,13 @@ class BlePeripheralProtocolTest {
 
   @Before
   fun setUp() {
-    val bluetoothManager = ApplicationProvider.getApplicationContext<Context>()
-      .getSystemService(BluetoothManager::class.java)
+    val bluetoothManager =
+      ApplicationProvider.getApplicationContext<Context>()
+        .getSystemService(BluetoothManager::class.java)
     testBluetoothDevice = bluetoothManager.adapter.getRemoteDevice(TEST_REMOTE_DEVICE_ADDRESS)
     blePeripheralProtocol =
       BlePeripheralProtocol(
         mockBlePeripheralManager,
-        testAssociationServiceUuid,
         testReconnectServiceUuid,
         testReconnectDataUuid,
         testAdvertiseDataCharacteristicUuid,
@@ -78,8 +79,26 @@ class BlePeripheralProtocolTest {
   }
 
   @Test
+  fun startAssociationDiscovery_startsWithIdentifier() {
+    blePeripheralProtocol.startAssociationDiscovery(
+      TEST_DEVICE_NAME,
+      mockDiscoveryCallback,
+      testIdentifier
+    )
+
+    argumentCaptor<BluetoothGattService>().apply {
+      verify(mockBlePeripheralManager).startAdvertising(capture(), any(), any(), any())
+      assertThat(firstValue.uuid).isEqualTo(testIdentifier)
+    }
+  }
+
+  @Test
   fun startAssociationDiscovery_startedSuccessfully() {
-    blePeripheralProtocol.startAssociationDiscovery(TEST_DEVICE_NAME, mockDiscoveryCallback)
+    blePeripheralProtocol.startAssociationDiscovery(
+      TEST_DEVICE_NAME,
+      mockDiscoveryCallback,
+      testIdentifier
+    )
     argumentCaptor<AdvertiseCallback>().apply {
       verify(mockBlePeripheralManager).startAdvertising(any(), any(), any(), capture())
       firstValue.onStartSuccess(/* settingsInEffect= */ null)
@@ -89,7 +108,11 @@ class BlePeripheralProtocolTest {
 
   @Test
   fun startAssociationDiscovery_failedToStart() {
-    blePeripheralProtocol.startAssociationDiscovery(TEST_DEVICE_NAME, mockDiscoveryCallback)
+    blePeripheralProtocol.startAssociationDiscovery(
+      TEST_DEVICE_NAME,
+      mockDiscoveryCallback,
+      testIdentifier
+    )
     argumentCaptor<AdvertiseCallback>().apply {
       verify(mockBlePeripheralManager).startAdvertising(any(), any(), any(), capture())
       firstValue.onStartFailure(/* errorCode= */ 0)
@@ -100,21 +123,33 @@ class BlePeripheralProtocolTest {
   @Test
   fun startAssociationDiscovery_alreadyInConnection() {
     establishConnection(testBluetoothDevice)
-    blePeripheralProtocol.startAssociationDiscovery(TEST_DEVICE_NAME, mockDiscoveryCallback)
+    blePeripheralProtocol.startAssociationDiscovery(
+      TEST_DEVICE_NAME,
+      mockDiscoveryCallback,
+      testIdentifier
+    )
     // Should only be invoked once for establishing connection.
     verify(mockBlePeripheralManager).startAdvertising(any(), any(), any(), any())
   }
 
   @Test
   fun startAssociationDiscovery_multipleTimesSucceed() {
-    blePeripheralProtocol.startAssociationDiscovery(TEST_DEVICE_NAME, mockDiscoveryCallback)
+    blePeripheralProtocol.startAssociationDiscovery(
+      TEST_DEVICE_NAME,
+      mockDiscoveryCallback,
+      testIdentifier
+    )
     argumentCaptor<AdvertiseCallback>().apply {
       verify(mockBlePeripheralManager, atLeastOnce())
         .startAdvertising(any(), any(), any(), capture())
       firstValue.onStartSuccess(/* settingsInEffect= */ null)
     }
     blePeripheralProtocol.stopAssociationDiscovery()
-    blePeripheralProtocol.startAssociationDiscovery(TEST_DEVICE_NAME, mockDiscoveryCallback)
+    blePeripheralProtocol.startAssociationDiscovery(
+      TEST_DEVICE_NAME,
+      mockDiscoveryCallback,
+      testIdentifier
+    )
     argumentCaptor<AdvertiseCallback>().apply {
       verify(mockBlePeripheralManager, atLeastOnce())
         .startAdvertising(any(), any(), any(), capture())
@@ -128,7 +163,11 @@ class BlePeripheralProtocolTest {
 
   @Test
   fun stopAssociationDiscovery_stopSuccessfully() {
-    blePeripheralProtocol.startAssociationDiscovery(TEST_DEVICE_NAME, mockDiscoveryCallback)
+    blePeripheralProtocol.startAssociationDiscovery(
+      TEST_DEVICE_NAME,
+      mockDiscoveryCallback,
+      testIdentifier
+    )
     blePeripheralProtocol.stopAssociationDiscovery()
     val advertiseCallback =
       argumentCaptor<AdvertiseCallback>()
@@ -258,7 +297,11 @@ class BlePeripheralProtocolTest {
 
   @Test
   fun reset_stopStartedAdvertising() {
-    blePeripheralProtocol.startAssociationDiscovery(TEST_DEVICE_NAME, mockDiscoveryCallback)
+    blePeripheralProtocol.startAssociationDiscovery(
+      TEST_DEVICE_NAME,
+      mockDiscoveryCallback,
+      testIdentifier
+    )
     blePeripheralProtocol.reset()
     val advertiseCallback =
       argumentCaptor<AdvertiseCallback>()
@@ -371,7 +414,11 @@ class BlePeripheralProtocolTest {
   }
 
   private fun establishConnection(bluetoothDevice: BluetoothDevice): String {
-    blePeripheralProtocol.startAssociationDiscovery(TEST_DEVICE_NAME, mockDiscoveryCallback)
+    blePeripheralProtocol.startAssociationDiscovery(
+      TEST_DEVICE_NAME,
+      mockDiscoveryCallback,
+      testIdentifier
+    )
     argumentCaptor<BlePeripheralManager.Callback>().apply {
       verify(mockBlePeripheralManager).registerCallback(capture())
       firstValue.onRemoteDeviceConnected(bluetoothDevice)

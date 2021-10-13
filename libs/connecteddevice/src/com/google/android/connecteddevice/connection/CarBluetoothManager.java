@@ -115,33 +115,6 @@ public abstract class CarBluetoothManager {
   public abstract void startAssociation(
       @NonNull byte[] nameForAssociation, @NonNull AssociationCallback callback);
 
-  /** Start the association with a new device using out of band verification code exchange */
-  public void startOutOfBandAssociation(
-      @NonNull byte[] nameForAssociation,
-      @NonNull OobChannel oobChannel,
-      @NonNull AssociationCallback callback) {
-    logd(TAG, "Starting out of band association.");
-    startAssociation(
-        nameForAssociation,
-        new AssociationCallback() {
-          @Override
-          public void onAssociationStartSuccess(String deviceName) {
-            associationCallback = callback;
-            boolean success = oobConnectionManager.startOobExchange(oobChannel);
-            if (!success) {
-              callback.onAssociationStartFailure();
-              return;
-            }
-            callback.onAssociationStartSuccess(deviceName);
-          }
-
-          @Override
-          public void onAssociationStartFailure() {
-            callback.onAssociationStartFailure();
-          }
-        });
-  }
-
   /** Disconnect the provided device from this manager. */
   public abstract void disconnectDevice(@NonNull String deviceId);
 

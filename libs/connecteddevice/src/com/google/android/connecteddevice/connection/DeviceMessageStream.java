@@ -304,12 +304,13 @@ public abstract class DeviceMessageStream {
       return;
     }
 
-    DeviceMessage deviceMessage = new DeviceMessage(
-        ByteUtils.bytesToUUID(message.getRecipient().toByteArray()),
-        message.getIsPayloadEncrypted(),
-        DeviceMessage.OperationType.fromValue(message.getOperation().getNumber()),
-        message.getPayload().toByteArray());
-    deviceMessage.setOriginalMessageSize(message.getOriginalSize());
+    DeviceMessage deviceMessage =
+        DeviceMessage.createIncomingMessage(
+            ByteUtils.bytesToUUID(message.getRecipient().toByteArray()),
+            message.getIsPayloadEncrypted(),
+            DeviceMessage.OperationType.fromValue(message.getOperation().getNumber()),
+            message.getPayload().toByteArray(),
+            message.getOriginalSize());
     notifyMessageReceivedListener(deviceMessage);
   }
 

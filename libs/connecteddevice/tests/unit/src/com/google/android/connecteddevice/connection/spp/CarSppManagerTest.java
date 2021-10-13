@@ -18,7 +18,6 @@ package com.google.android.connecteddevice.connection.spp;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.util.concurrent.MoreExecutors.directExecutor;
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
@@ -39,8 +38,7 @@ import com.google.android.connecteddevice.connection.ConnectionResolver;
 import com.google.android.connecteddevice.connection.ReconnectSecureChannel;
 import com.google.android.connecteddevice.connection.SecureChannel;
 import com.google.android.connecteddevice.model.AssociatedDevice;
-import com.google.android.connecteddevice.oob.OobChannel;
-import com.google.android.connecteddevice.oob.OobConnectionManager;
+import com.google.android.connecteddevice.model.StartAssociationResponse;
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage;
 import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelegateBinder;
 import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelegateBinder.OnMessageReceivedListener;
@@ -66,7 +64,6 @@ public class CarSppManagerTest {
   private static final UUID TEST_SERVICE_UUID_1 = UUID.randomUUID();
   private static final boolean IS_SECURE = true;
   private static final String TEST_VERIFICATION_CODE = "000000";
-  private static final String TEST_ENCRYPTED_VERIFICATION_CODE = "12345";
   private static final int MAX_PACKET_SIZE = 700;
   private static final boolean COMPRESSION_ENABLED = true;
   private static final boolean EXCHANGE_CAPABILITIES = false;
@@ -83,8 +80,6 @@ public class CarSppManagerTest {
   @Mock private AssociationCallback mockAssociationCallback;
   @Mock private ConnectedDeviceSppDelegateBinder mockSppBinder;
   @Mock private ConnectedDeviceStorage mockStorage;
-  @Mock private OobChannel mockOobChannel;
-  @Mock private OobConnectionManager mockOobConnectionManager;
   private CarSppManager carSppManager;
   private ConnectionResultCaptor connectionResultCaptor;
 
@@ -101,11 +96,6 @@ public class CarSppManagerTest {
             COMPRESSION_ENABLED,
             EXCHANGE_CAPABILITIES);
     carSppManager.registerCallback(mockCallback, callbackExecutor);
-    when(mockOobConnectionManager.encryptVerificationCode(TEST_VERIFICATION_CODE.getBytes(UTF_8)))
-        .thenReturn(TEST_ENCRYPTED_VERIFICATION_CODE.getBytes(UTF_8));
-    when(mockOobConnectionManager.decryptVerificationCode(
-            TEST_ENCRYPTED_VERIFICATION_CODE.getBytes(UTF_8)))
-        .thenReturn(TEST_VERIFICATION_CODE.getBytes(UTF_8));
   }
 
   @After
@@ -123,7 +113,8 @@ public class CarSppManagerTest {
 
     verify(mockSppBinder).unregisterConnectionCallback(TEST_REMOTE_DEVICE_ID);
     verify(mockSppBinder).connectAsServer(TEST_SERVICE_UUID_1, IS_SECURE);
-    verify(mockAssociationCallback).onAssociationStartSuccess(/* deviceName= */ null);
+    verify(mockAssociationCallback)
+        .onAssociationStartSuccess(new StartAssociationResponse(new byte[0], new byte[0], ""));
   }
 
   @Test
@@ -277,14 +268,6 @@ public class CarSppManagerTest {
     connectionResultCaptor.getResult().notifyConnectionError();
 
     verify(mockCallback, never()).onDeviceDisconnected(any());
-  }
-
-  @Test
-  public void testStartOutOfBandAssociation() {
-    carSppManager.startOutOfBandAssociation(
-        /* nameForAssociation= */ null, mockOobChannel, mockAssociationCallback);
-
-    assertThat(carSppManager.getOobConnectionManager()).isNotNull();
   }
 
   private AssociationSecureChannel getChannelForAssociation(AssociationCallback callback) {

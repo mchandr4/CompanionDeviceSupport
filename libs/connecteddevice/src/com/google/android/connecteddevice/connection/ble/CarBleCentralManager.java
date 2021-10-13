@@ -37,7 +37,6 @@ import android.os.ParcelUuid;
 import androidx.annotation.NonNull;
 import com.google.android.connecteddevice.connection.AssociationCallback;
 import com.google.android.connecteddevice.connection.CarBluetoothManager;
-import com.google.android.connecteddevice.oob.OobChannel;
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage;
 import java.math.BigInteger;
 import java.util.List;
@@ -154,10 +153,6 @@ public class CarBleCentralManager extends CarBluetoothManager {
 
   @Override
   public void startAssociation(byte[] nameForAssociation, AssociationCallback callback) {}
-
-  @Override
-  public void startOutOfBandAssociation(
-      byte[] nameForAssociation, OobChannel oobChannel, AssociationCallback callback) {}
 
   private void ignoreDevice(@NonNull ConnectedRemoteDevice device) {
     ignoredDevices.add(device);

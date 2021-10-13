@@ -125,7 +125,7 @@ public class BluetoothRfcommChannelTest {
   }
 
   @Test
-  public void completeOobExchange_noBondedDevices_callOnFailed() throws Exception {
+  public void completeOobExchange_noBondedDevices_callOnFailed() {
     bluetoothRfcommChannel.completeOobDataExchange(
         OOB_ELIGIBLE_DEVICE, mockCallback, ImmutableSet::of);
 
@@ -133,7 +133,7 @@ public class BluetoothRfcommChannelTest {
   }
 
   @Test
-  public void completeOobExchange_bondedToTheWrongDevice_callOnFailed() throws Exception {
+  public void completeOobExchange_bondedToTheWrongDevice_callOnFailed() {
     BluetoothDevice otherBtDevice =
         ApplicationProvider.getApplicationContext()
             .getSystemService(BluetoothManager.class)
@@ -276,7 +276,8 @@ public class BluetoothRfcommChannelTest {
     }
 
     @Override
-    public void startAssociationDiscovery(String name, DiscoveryCallback callback) {}
+    public void startAssociationDiscovery(
+        String name, DiscoveryCallback callback, UUID identifier) {}
 
     @Override
     public void startConnectionDiscovery(

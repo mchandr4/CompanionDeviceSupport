@@ -38,9 +38,12 @@ import javax.crypto.spec.IvParameterSpec
  * [IllegalStateException] if attempting to encrypt/decrypt without first having called
  * [generateOobData].
  */
-open class OobRunner(
+open class OobRunner
+@JvmOverloads
+constructor(
   private val oobChannelFactory: OobChannelFactory,
-  open val supportedTypes: List<String>
+  open val supportedTypes: List<String>,
+  internal val keyAlgorithm: String = KeyProperties.KEY_ALGORITHM_AES
 ) {
   @VisibleForTesting internal var encryptionIv = ByteArray(NONCE_LENGTH_BYTES)
   @VisibleForTesting internal var decryptionIv = ByteArray(NONCE_LENGTH_BYTES)
@@ -56,19 +59,20 @@ open class OobRunner(
   private var oobData: ByteArray? = null
 
   /** Generate OOB data which should be exchanged with remote device. */
-  open fun generateOobData(): ByteArray? {
+  open fun generateOobData(): ByteArray {
     val keyGenerator =
       try {
-        KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES)
+        KeyGenerator.getInstance(keyAlgorithm)
       } catch (e: NoSuchAlgorithmException) {
         loge(TAG, "Unable to get AES key generator.", e)
-        return null
+        throw IllegalStateException(e)
       }
     val secretKey = keyGenerator.generateKey()
     val secureRandom = SecureRandom()
     secureRandom.nextBytes(encryptionIv)
     secureRandom.nextBytes(decryptionIv)
-    oobData = decryptionIv + encryptionIv + secretKey.encoded
+    val oobData = decryptionIv + encryptionIv + secretKey.encoded
+    this.oobData = oobData
     encryptionKey = secretKey
     return oobData
   }

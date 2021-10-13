@@ -245,6 +245,7 @@ public class EncryptionRunnerTest {
         .isEqualTo(HandshakeMessage.HandshakeState.VERIFICATION_NEEDED);
     assertThat(clientMessage.getKey()).isNull();
     assertThat(clientMessage.getVerificationCode()).isNotEmpty();
+    assertThat(clientMessage.getFullVerificationCode()).isNotEmpty();
     assertThat(clientMessage.getNextMessage()).isNotNull();
 
     HandshakeMessage serverMessage = serverRunner.continueHandshake(clientMessage.getNextMessage());
@@ -277,7 +278,7 @@ public class EncryptionRunnerTest {
     assertThat(clientMessage.getHandshakeState())
         .isEqualTo(HandshakeMessage.HandshakeState.OOB_VERIFICATION_NEEDED);
     assertThat(clientMessage.getKey()).isNull();
-    assertThat(clientMessage.getOobVerificationCode()).isNotEmpty();
+    assertThat(clientMessage.getFullVerificationCode()).isNotEmpty();
     assertThat(clientMessage.getNextMessage()).isNotNull();
 
     HandshakeMessage serverMessage = serverRunner.continueHandshake(clientMessage.getNextMessage());

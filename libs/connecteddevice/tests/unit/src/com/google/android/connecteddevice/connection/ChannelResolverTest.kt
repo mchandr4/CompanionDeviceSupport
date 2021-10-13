@@ -223,7 +223,7 @@ class ChannelResolverTest {
       firstValue.onDataReceived(TEST_PROTOCOL_ID_2, createVersionMessage())
     }
     val invalidChallengeMessage =
-      DeviceMessage(
+      DeviceMessage.createOutgoingMessage(
         /* recipient= */ null,
         /* isMessageEncrypted= */ false,
         DeviceMessage.OperationType.ENCRYPTION_HANDSHAKE,
@@ -242,7 +242,7 @@ class ChannelResolverTest {
       firstValue.onDataReceived(TEST_PROTOCOL_ID_2, createVersionMessage())
     }
     val validChallengeMessage =
-      DeviceMessage(
+      DeviceMessage.createOutgoingMessage(
         /* recipient= */ null,
         /* isMessageEncrypted= */ false,
         DeviceMessage.OperationType.ENCRYPTION_HANDSHAKE,
@@ -266,7 +266,7 @@ class ChannelResolverTest {
       firstValue.onDataReceived(TEST_PROTOCOL_ID_2, createVersionMessage())
     }
     val validChallengeMessage =
-      DeviceMessage(
+      DeviceMessage.createOutgoingMessage(
         /* recipient= */ null,
         /* isMessageEncrypted= */ false,
         OperationType.ENCRYPTION_HANDSHAKE,
@@ -409,7 +409,11 @@ class ChannelResolverTest {
 
     override val isDeviceVerificationRequired: Boolean = needDeviceVerification
 
-    override fun startAssociationDiscovery(name: String, callback: DiscoveryCallback) {}
+    override fun startAssociationDiscovery(
+      name: String,
+      callback: DiscoveryCallback,
+      identifier: UUID
+    ) {}
 
     override fun startConnectionDiscovery(
       id: UUID,

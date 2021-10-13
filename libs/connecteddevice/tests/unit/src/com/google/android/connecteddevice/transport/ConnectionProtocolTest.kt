@@ -282,7 +282,11 @@ class ConnectionProtocolTest {
       MutableMap<String, ThreadSafeCallbacks<DeviceMaxDataSizeChangedListener>> =
       maxDataSizeChangedListeners
 
-    override fun startAssociationDiscovery(name: String, callback: DiscoveryCallback) {}
+    override fun startAssociationDiscovery(
+      name: String,
+      callback: DiscoveryCallback,
+      identifier: UUID
+    ) {}
 
     override fun startConnectionDiscovery(
       id: UUID,
