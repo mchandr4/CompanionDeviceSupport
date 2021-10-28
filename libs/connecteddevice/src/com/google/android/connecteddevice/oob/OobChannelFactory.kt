@@ -29,6 +29,7 @@ open class OobChannelFactory(private val sppBinder: ConnectedDeviceSppDelegateBi
   open fun createOobChannel(oobChannelType: OobChannelType): OobChannel =
     when (oobChannelType) {
       OobChannelType.BT_RFCOMM -> BluetoothRfcommChannel(sppBinder)
+      OobChannelType.PRE_ASSOCIATION -> PassThroughChannel()
       else -> throw IllegalArgumentException("Unknown OOB channel type: ${oobChannelType.name}")
     }
 }

@@ -39,6 +39,14 @@ class OobChannelFactoryTest {
   }
 
   @Test
+  fun createOobChannel_supportedType_returnPassThroughChannel() {
+    val supportedType = OobChannelType.PRE_ASSOCIATION
+    val oobChannel = factory.createOobChannel(supportedType)
+
+    assertThat(oobChannel).isInstanceOf(PassThroughChannel::class.java)
+  }
+
+  @Test
   fun createOobChannel_unsupportedChannelType_throwException() {
     try {
       factory.createOobChannel(OobChannelType.OOB_CHANNEL_UNKNOWN)

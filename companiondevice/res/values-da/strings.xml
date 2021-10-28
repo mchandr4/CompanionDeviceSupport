@@ -16,12 +16,16 @@
   -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-  <string name="settings_entry_title">Companion Device</string>
+  <string name="settings_entry_title">Medfølgende enhed</string>
   <string name="default_device_name">Tilknyttet enhed</string>
-  <string name="add_device_title">Tilføj tilknyttet enhed</string>
-  <string name="add_associated_device_title">Tilslut en ledsagende enhed</string>
+  <string name="add_device_title">Opret forbindelse til den medfølgende app</string>
+  <string name="add_associated_device_title">Opret forbindelse til MyCompanion</string>
   <string name="add_associated_device_subtitle">Du kan bruge din telefon som en ledsagende enhed, der kan hjælpe dig under kørsel</string>
   <string name="associated_device_install_app">Sørg for, at <b>den medfølgende app</b> er installeret på telefonen</string>
+  <string name="open_companion_app_instruction_text">Åbn den medfølgende app</string>
+  <string name="enable_bluetooth_instruction_text">Tillad Bluetooth-forbindelse</string>
+  <string name="connect_to_targe_car_instruction_text">Opret forbindelse til &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="connect_to_car_instruction_text">Opret forbindelse til bilen</string>
   <string name="associated_device_pairing_code_title">Bekræft koden på telefonen</string>
   <string name="associated_device_pairing_message">Bekræft, at dette stemmer overens med den kode, der vises på din telefon</string>
   <string name="associated_device_success">Enheden blev tilknyttet</string>
@@ -35,9 +39,9 @@
   <string name="error_screen_title">Noget gik galt</string>
   <string name="error_screen_message">Denne skærm kunne ikke vises korrekt. Prøv igen.</string>
   <string name="turn_on_bluetooth_title">Aktivér Bluetooth</string>
-  <string name="turn_on_bluetooth_message">Bluetooth skal aktiveres i din bil, før din telefon kan konfigureres som en ledsagende enhed.</string>
+  <string name="turn_on_bluetooth_message">Bluetooth skal aktiveres i din bil, før din telefon kan konfigureres som en medfølgende enhed.</string>
   <string name="turn_on_bluetooth_dialog_title">Vil du aktivere Bluetooth?</string>
-  <string name="turn_on_bluetooth_dialog_message">Bluetooth skal aktiveres i din bil, før der kan oprettes forbindelse til din ledsagende enhed.</string>
+  <string name="turn_on_bluetooth_dialog_message">Bluetooth skal aktiveres i din bil, før der kan oprettes forbindelse til din medfølgende enhed.</string>
   <string name="accept">Acceptér</string>
   <string name="reject">Afvis</string>
   <string name="confirm">Bekræft</string>
@@ -53,13 +57,16 @@
   <string name="retry">Prøv igen</string>
   <string name="turn_on">Aktivér</string>
   <string name="not_now">Ikke nu</string>
+  <string name="connect">Opret forbindelse</string>
+  <string name="disconnect">Afbryd</string>
+  <string name="skip">Spring over</string>
   <string name="connected">Forbundet</string>
   <string name="notDetected">Ikke registreret</string>
   <string name="disconnected">Afbrudt</string>
   <string name="unknown">Ukendt</string>
   <string name="app_running_msg_channel_name">Tjenesten til sms-beskeder fra telefonen kører</string>
   <string name="app_running_msg_notification_title">Tjenesten til sms-beskeder fra telefonen er aktiv</string>
-  <string name="app_running_msg_notification_content">Modtager sms-beskeder via den ledsagende enhed</string>
+  <string name="app_running_msg_notification_content">Modtager sms-beskeder via den medfølgende enhed</string>
   <string name="trusted_device_feature_title">Lås profilen op med telefonen</string>
   <string name="trusted_device_feature_instruction">Brug din medfølgende app til at angive indstillinger for oplåsning</string>
   <string name="trusted_device_item_title">Tillad, at &lt;b&gt;%1$s&lt;/b&gt; låser min profil op</string>
@@ -84,4 +91,5 @@
     <item quantity="other">%d nye beskeder</item>
   </plurals>
   <string name="name_not_available">Navnet er ikke tilgængeligt</string>
+  <string name="ble_device_name_prefix">Køretøj\u00A0</string>
 </resources>

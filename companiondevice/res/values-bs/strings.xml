@@ -18,10 +18,14 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <string name="settings_entry_title">Prateći uređaj</string>
   <string name="default_device_name">Povezani uređaj</string>
-  <string name="add_device_title">Dodaj povezani uređaj</string>
-  <string name="add_associated_device_title">Povežite prateći uređaj</string>
+  <string name="add_device_title">Poveži se s pratećom aplikacijom</string>
+  <string name="add_associated_device_title">Povežite se s MyCompanionom</string>
   <string name="add_associated_device_subtitle">Telefon možete koristiti kao prateći uređaj za pomoć pri upravljanju iskustvom vožnje</string>
   <string name="associated_device_install_app">Provjerite je li <b>prateća aplikacija</b> instalirana na telefonu</string>
+  <string name="open_companion_app_instruction_text">Otvorite prateću aplikaciju</string>
+  <string name="enable_bluetooth_instruction_text">Dozvolite Bluetooth vezu</string>
+  <string name="connect_to_targe_car_instruction_text">Povežite se s automobilom &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="connect_to_car_instruction_text">Povežite se s automobilom</string>
   <string name="associated_device_pairing_code_title">Potvrdite kôd na telefonu</string>
   <string name="associated_device_pairing_message">Potvrdite da se ovaj kôd podudara s kodom prikazanim na vašem telefonu</string>
   <string name="associated_device_success">Uređaj je uspješno povezan</string>
@@ -53,6 +57,9 @@
   <string name="retry">Pokušaj ponovo</string>
   <string name="turn_on">Uključi</string>
   <string name="not_now">Ne sada</string>
+  <string name="connect">Poveži</string>
+  <string name="disconnect">Prekini vezu</string>
+  <string name="skip">Preskoči</string>
   <string name="connected">Povezano</string>
   <string name="notDetected">Nije otkriveno</string>
   <string name="disconnected">Veza je prekinuta</string>
@@ -85,4 +92,5 @@
     <item quantity="other">%d novih poruka</item>
   </plurals>
   <string name="name_not_available">Ime nije dostupno</string>
+  <string name="ble_device_name_prefix">Vozilo\u00A0</string>
 </resources>

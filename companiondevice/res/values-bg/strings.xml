@@ -18,10 +18,14 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <string name="settings_entry_title">Придружаващо устройство</string>
   <string name="default_device_name">Свързано устройство</string>
-  <string name="add_device_title">Добавяне на свързано устройство</string>
-  <string name="add_associated_device_title">Свързване на придружаващо устройство</string>
+  <string name="add_device_title">Свържете се с придружаващо приложение</string>
+  <string name="add_associated_device_title">Свържете се с MyCompanion</string>
   <string name="add_associated_device_subtitle">Използвайте телефона си като придружаващо у-во, за да подобрите практическата си работа при шофиране</string>
   <string name="associated_device_install_app">Уверете се, че <b>придр. приложение</b> е инсталирано на телефона</string>
+  <string name="open_companion_app_instruction_text">Отворете придружаващото приложение</string>
+  <string name="enable_bluetooth_instruction_text">Разрешете връзка през Bluetooth</string>
+  <string name="connect_to_targe_car_instruction_text">Свържете се с(ъс) &lt;b&gt;%1$s&lt;/b&gt;%2$s</string>
+  <string name="connect_to_car_instruction_text">Свържете се с автомобила</string>
   <string name="associated_device_pairing_code_title">Потвърждаване на кода за сдвояване на телефона</string>
   <string name="associated_device_pairing_message">Потвърдете, че кодът съвпада с този, показан на телефона ви</string>
   <string name="associated_device_success">Устройството е свързано успешно</string>
@@ -53,6 +57,9 @@
   <string name="retry">Нов опит</string>
   <string name="turn_on">Включване</string>
   <string name="not_now">Не сега</string>
+  <string name="connect">Свързване</string>
+  <string name="disconnect">Прекр. на връзката</string>
+  <string name="skip">Пропускане</string>
   <string name="connected">Свързано</string>
   <string name="notDetected">Не е открито</string>
   <string name="disconnected">Няма връзка</string>
@@ -84,4 +91,5 @@
     <item quantity="other">%d нови съобщения</item>
   </plurals>
   <string name="name_not_available">Няма име</string>
+  <string name="ble_device_name_prefix">Прев. средство\u00A0</string>
 </resources>

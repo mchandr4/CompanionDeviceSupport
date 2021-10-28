@@ -18,10 +18,14 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <string name="settings_entry_title">Companion Device</string>
   <string name="default_device_name">關聯裝置</string>
-  <string name="add_device_title">新增關聯裝置</string>
-  <string name="add_associated_device_title">連接隨附裝置</string>
+  <string name="add_device_title">連接至隨附應用程式</string>
+  <string name="add_associated_device_title">連接至 MyCompanion</string>
   <string name="add_associated_device_subtitle">您可利用手機作隨附裝置，幫助管理駕駛體驗</string>
   <string name="associated_device_install_app">請確保您的手機已安裝<b>隨附應用程式</b></string>
+  <string name="open_companion_app_instruction_text">開啟隨附應用程式</string>
+  <string name="enable_bluetooth_instruction_text">允許藍牙連線</string>
+  <string name="connect_to_targe_car_instruction_text">連接至 &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="connect_to_car_instruction_text">連接至汽車</string>
   <string name="associated_device_pairing_code_title">確認手機上的配對碼</string>
   <string name="associated_device_pairing_message">確認此代碼與手機上的配對碼相符</string>
   <string name="associated_device_success">裝置已成功連繫</string>
@@ -53,6 +57,9 @@
   <string name="retry">重試</string>
   <string name="turn_on">開啟</string>
   <string name="not_now">暫時不要</string>
+  <string name="connect">連接</string>
+  <string name="disconnect">解除連接</string>
+  <string name="skip">略過</string>
   <string name="connected">已連接</string>
   <string name="notDetected">未能偵測</string>
   <string name="disconnected">已解除連接</string>
@@ -84,4 +91,5 @@
     <item quantity="other">%d 則新訊息</item>
   </plurals>
   <string name="name_not_available">找不到名稱</string>
+  <string name="ble_device_name_prefix">車輛\u00A0</string>
 </resources>

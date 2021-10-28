@@ -18,10 +18,14 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <string name="settings_entry_title">Companion Device</string>
   <string name="default_device_name">जोड़ा गया डिवाइस</string>
-  <string name="add_device_title">जोड़ा गया डिवाइस जोड़ें</string>
-  <string name="add_associated_device_title">साथी डिवाइस कनेक्ट करें</string>
-  <string name="add_associated_device_subtitle">अपना ड्राइविंग अनुभव प्रबंधित करने के लिए, आप फ़ोन का इस्तेमाल साथी डिवाइस के तौर पर कर सकते हैं</string>
+  <string name="add_device_title">साथी ऐप्लिकेशन से कनेक्ट करें</string>
+  <string name="add_associated_device_title">MyCompanion से कनेक्ट करें</string>
+  <string name="add_associated_device_subtitle">अपना ड्राइविंग अनुभव मैनेज करने के लिए, आप अपने फ़ोन का इस्तेमाल साथी डिवाइस के तौर पर कर सकते हैं</string>
   <string name="associated_device_install_app">पक्का करें कि आपके फ़ोन पर <b>साथी ऐप्लिकेशन</b> इंस्टॉल किया गया हो</string>
+  <string name="open_companion_app_instruction_text">साथी ऐप्लिकेशन खोलें</string>
+  <string name="enable_bluetooth_instruction_text">ब्लूटूथ कनेक्शन की अनुमति दें</string>
+  <string name="connect_to_targe_car_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s से कनेक्ट करें</string>
+  <string name="connect_to_car_instruction_text">कार से कनेक्ट करें</string>
   <string name="associated_device_pairing_code_title">फ़ोन पर कोड की पुष्टि करें</string>
   <string name="associated_device_pairing_message">पुष्टि करें कि यह कोड, आपके फ़ोन पर दिखाए गए कोड से मेल खाता है</string>
   <string name="associated_device_success">डिवाइस को जोड़ दिया गया है</string>
@@ -53,6 +57,9 @@
   <string name="retry">फिर से कोशिश करें</string>
   <string name="turn_on">चालू करें</string>
   <string name="not_now">अभी नहीं</string>
+  <string name="connect">कनेक्ट करें</string>
+  <string name="disconnect">डिसकनेक्ट करें</string>
+  <string name="skip">अभी नहीं</string>
   <string name="connected">कनेक्ट हो गया</string>
   <string name="notDetected">पता नहीं चला</string>
   <string name="disconnected">डिसकनेक्ट हो गया</string>
@@ -84,4 +91,5 @@
     <item quantity="other">%d नए मैसेज</item>
   </plurals>
   <string name="name_not_available">नाम उपलब्ध नहीं है</string>
+  <string name="ble_device_name_prefix">गाड़ी\u00A0</string>
 </resources>

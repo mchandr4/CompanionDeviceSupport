@@ -20,6 +20,9 @@ import android.bluetooth.BluetoothManager
 import android.content.Context
 import com.google.android.companionprotos.SystemQuery
 import com.google.android.companionprotos.SystemQueryType.DEVICE_NAME
+import com.google.android.companionprotos.SystemQueryType.USER_ROLE
+import com.google.android.companionprotos.SystemUserRole
+import com.google.android.companionprotos.SystemUserRoleResponse
 import com.google.android.connecteddevice.api.Connector
 import com.google.android.connecteddevice.api.Connector.Companion.SYSTEM_FEATURE_ID
 import com.google.android.connecteddevice.api.Connector.QueryCallback
@@ -106,6 +109,7 @@ open class SystemFeature(
 
     when (query.type) {
       DEVICE_NAME -> respondWithDeviceName(device, queryId)
+      USER_ROLE -> respondWithUserRole(device, queryId)
       else -> {
         loge(TAG, "Received unknown query type ${query.type}. Responding with error.")
         respondWithError(device, queryId)
@@ -121,6 +125,19 @@ open class SystemFeature(
       queryId,
       deviceName != null,
       deviceName?.toByteArray(StandardCharsets.UTF_8)
+    )
+  }
+
+  private fun respondWithUserRole(device: ConnectedDevice, queryId: Int) {
+    val role =
+      if (device.isAssociatedWithDriver) SystemUserRole.DRIVER else SystemUserRole.PASSENGER
+    val response = SystemUserRoleResponse.newBuilder().setRole(role).build()
+    logd(TAG, "Responding to query for user role with $role.")
+    connector.respondToQuerySecurely(
+      device,
+      queryId,
+      success = true,
+      response.toByteArray()
     )
   }
 

@@ -41,6 +41,7 @@ import com.google.android.connecteddevice.connection.AssociationSecureChannel;
 import com.google.android.connecteddevice.connection.ConnectionResolver;
 import com.google.android.connecteddevice.connection.SecureChannel;
 import com.google.android.connecteddevice.model.AssociatedDevice;
+import com.google.android.connecteddevice.model.OobData;
 import com.google.android.connecteddevice.model.StartAssociationResponse;
 import com.google.android.connecteddevice.oob.OobConnectionManager;
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage;
@@ -163,10 +164,11 @@ public class CarBlePeripheralManagerTest {
     AdvertiseCallback advertiseCallback = callbackCaptor.getValue();
     AdvertiseSettings settings = new AdvertiseSettings.Builder().build();
     advertiseCallback.onStartSuccess(settings);
+    OobData emptyOobData = new OobData(new byte[0], new byte[0], new byte[0]);
     verify(mockAssociationCallback)
         .onAssociationStartSuccess(
             new StartAssociationResponse(
-                new byte[0], testDeviceName, ByteUtils.byteArrayToHexString(testDeviceName)));
+                emptyOobData, testDeviceName, ByteUtils.byteArrayToHexString(testDeviceName)));
   }
 
   @Test

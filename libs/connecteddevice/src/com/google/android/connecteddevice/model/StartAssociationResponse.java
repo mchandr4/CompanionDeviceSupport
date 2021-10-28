@@ -20,11 +20,12 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import androidx.annotation.NonNull;
 import java.util.Arrays;
+import java.util.Objects;
 
 /** Contains details of the response to association request. */
 public class StartAssociationResponse implements Parcelable {
 
-  private final byte[] oobData;
+  private final OobData oobData;
 
   private final byte[] deviceIdentifier;
 
@@ -39,19 +40,19 @@ public class StartAssociationResponse implements Parcelable {
    * @param deviceName The readable name of current device.
    */
   public StartAssociationResponse(
-      @NonNull byte[] oobData, @NonNull byte[] deviceIdentifier, @NonNull String deviceName) {
+      @NonNull OobData oobData, @NonNull byte[] deviceIdentifier, @NonNull String deviceName) {
     this.oobData = oobData;
     this.deviceIdentifier = deviceIdentifier;
     this.deviceName = deviceName;
   }
 
   private StartAssociationResponse(Parcel in) {
-    this(in.createByteArray(), in.createByteArray(), in.readString());
+    this(in.readParcelable(OobData.class.getClassLoader()), in.createByteArray(), in.readString());
   }
 
   /** Returns the OOB data of the response. */
   @NonNull
-  public byte[] getOobData() {
+  public OobData getOobData() {
     return oobData;
   }
 
@@ -76,14 +77,14 @@ public class StartAssociationResponse implements Parcelable {
       return false;
     }
     StartAssociationResponse response = (StartAssociationResponse) obj;
-    return Arrays.equals(oobData, response.getOobData())
+    return Objects.equals(oobData, response.getOobData())
         && Arrays.equals(deviceIdentifier, response.getDeviceIdentifier())
         && deviceName.equals(response.getDeviceName());
   }
 
   @Override
   public int hashCode() {
-    int result = Arrays.hashCode(oobData);
+    int result = oobData.hashCode();
     result = 31 * result + Arrays.hashCode(deviceIdentifier);
     result = 31 * result + deviceName.hashCode();
     return result;
@@ -96,7 +97,7 @@ public class StartAssociationResponse implements Parcelable {
 
   @Override
   public void writeToParcel(Parcel dest, int flags) {
-    dest.writeByteArray(oobData);
+    dest.writeParcelable(oobData, flags);
     dest.writeByteArray(deviceIdentifier);
     dest.writeString(deviceName);
   }

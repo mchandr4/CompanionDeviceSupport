@@ -27,7 +27,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.os.ParcelUuid;
 import androidx.annotation.NonNull;
@@ -163,13 +162,6 @@ public final class ConnectedDeviceService extends TrunkService {
 
   private static final String[] DEFAULT_TRANSPORT_PROTOCOLS =
       { TransportProtocols.PROTOCOL_BLE_PERIPHERAL };
-
-  /**
-   * When a client calls {@link Context#bindService(Intent, ServiceConnection, int)} to get the
-   * {@link IAssociatedDeviceManager}, this action is required in the param {@link Intent}.
-   */
-  public static final String ACTION_BIND_ASSOCIATION =
-      "com.google.android.connecteddevice.BIND_ASSOCIATION";
 
   private final BroadcastReceiver bluetoothBroadcastReceiver =
       new BroadcastReceiver() {
@@ -375,13 +367,13 @@ public final class ConnectedDeviceService extends TrunkService {
               this,
               loggingManager,
               CompanionConnector.createLocalConnector(
-                  this, Connector.USER_TYPE_ALL, connectedDeviceManagerBinder));
+                  this, Connector.USER_TYPE_ALL, connectedDeviceManagerBinder, associationBinder));
       systemFeature =
           new SystemFeature(
               this,
               storage,
               CompanionConnector.createLocalConnector(
-                  this, Connector.USER_TYPE_ALL, connectedDeviceManagerBinder));
+                  this, Connector.USER_TYPE_ALL, connectedDeviceManagerBinder, associationBinder));
     }
   }
 
@@ -450,7 +442,7 @@ public final class ConnectedDeviceService extends TrunkService {
     logd(TAG, "Service bound. Action: " + intent.getAction());
     String action = intent.getAction();
     switch (action) {
-      case ACTION_BIND_ASSOCIATION:
+      case CompanionConnector.ACTION_BIND_ASSOCIATION:
         return associationBinder;
       case CompanionConnector.ACTION_BIND_REMOTE_FEATURE:
         return connectedDeviceManagerBinder;
@@ -533,11 +525,6 @@ public final class ConnectedDeviceService extends TrunkService {
 
   private boolean isTransportSupported(@NonNull String protocol) {
     return supportedTransportProtocols.contains(protocol);
-  }
-
-  /** Returns the service's instance of {@link ConnectedDeviceManager}. */
-  protected ConnectedDeviceManager getConnectedDeviceManager() {
-    return connectedDeviceManager;
   }
 
   private IConnectedDeviceManager.Stub createConnectedDeviceManagerWrapper() {

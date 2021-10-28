@@ -18,10 +18,14 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <string name="settings_entry_title">Bijbehorend apparaat</string>
   <string name="default_device_name">Bijbehorend apparaat</string>
-  <string name="add_device_title">Gekoppeld apparaat toevoegen</string>
-  <string name="add_associated_device_title">Een bijbehorend apparaat koppelen</string>
+  <string name="add_device_title">Verbinding maken met bijbehorende app</string>
+  <string name="add_associated_device_title">Verbinding maken met MyCompanion</string>
   <string name="add_associated_device_subtitle">Je kunt je telefoon als bijbehorend apparaat gebruiken om de functionaliteit van je auto te beheren</string>
   <string name="associated_device_install_app">Zorg dat de <b>bijbehorende app</b> op je telefoon is geïnstalleerd</string>
+  <string name="open_companion_app_instruction_text">Open de bijbehorende app</string>
+  <string name="enable_bluetooth_instruction_text">Sta de bluetooth-verbinding toe</string>
+  <string name="connect_to_targe_car_instruction_text">Maak verbinding met &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="connect_to_car_instruction_text">Maak verbinding met de auto</string>
   <string name="associated_device_pairing_code_title">Bevestig de code op je telefoon</string>
   <string name="associated_device_pairing_message">Bevestig dat deze overeenkomt met de code die op je telefoon wordt weergegeven</string>
   <string name="associated_device_success">Het apparaat is gekoppeld</string>
@@ -53,6 +57,9 @@
   <string name="retry">Opnieuw</string>
   <string name="turn_on">Inschakelen</string>
   <string name="not_now">Niet nu</string>
+  <string name="connect">Verbinden</string>
+  <string name="disconnect">Verbinding verbreken</string>
+  <string name="skip">Overslaan</string>
   <string name="connected">Gekoppeld</string>
   <string name="notDetected">Niet gedetecteerd</string>
   <string name="disconnected">Ontkoppeld</string>
@@ -84,4 +91,5 @@
     <item quantity="other">%d nieuwe berichten</item>
   </plurals>
   <string name="name_not_available">Naam niet beschikbaar</string>
+  <string name="ble_device_name_prefix">Voertuig\u00A0</string>
 </resources>

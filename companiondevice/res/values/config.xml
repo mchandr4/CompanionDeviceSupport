@@ -39,6 +39,7 @@
 
    <!-- Supported OOB verification approaches. -->
     <string-array name="supported_oob_channels" translatable="false">
+        <item>PRE_ASSOCIATION</item>
         <item>BT_RFCOMM</item>
     </string-array>
 
@@ -50,4 +51,6 @@
     <bool name="enable_proxy">false</bool>
     <bool name="enable_capabilities">false</bool>
     <bool name="enable_feature_coordinator">true</bool>
+
+    <bool name="enable_qr_code">false</bool>
 </resources>

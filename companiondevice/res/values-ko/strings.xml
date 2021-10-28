@@ -18,10 +18,14 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <string name="settings_entry_title">Companion Device</string>
   <string name="default_device_name">연결된 기기</string>
-  <string name="add_device_title">연결된 기기 추가</string>
-  <string name="add_associated_device_title">호환 기기 연결</string>
+  <string name="add_device_title">호환 앱에 연결</string>
+  <string name="add_associated_device_title">MyCompanion에 연결</string>
   <string name="add_associated_device_subtitle">운전 환경을 관리하는 데 도움이 되도록 휴대전화를 호환 기기로 사용하세요.</string>
   <string name="associated_device_install_app">휴대전화에 <b>호환 앱</b>이 설치되어 있어야 합니다.</string>
+  <string name="open_companion_app_instruction_text">호환 앱 열기</string>
+  <string name="enable_bluetooth_instruction_text">블루투스 연결 허용</string>
+  <string name="connect_to_targe_car_instruction_text">&lt;b&gt;%1$s&lt;/b&gt;%2$s에 연결</string>
+  <string name="connect_to_car_instruction_text">차량에 연결</string>
   <string name="associated_device_pairing_code_title">휴대전화의 코드 확인</string>
   <string name="associated_device_pairing_message">이 코드가 휴대전화에 표시된 코드와 일치하는지 확인하세요.</string>
   <string name="associated_device_success">기기가 연결되었습니다.</string>
@@ -53,6 +57,9 @@
   <string name="retry">다시 시도</string>
   <string name="turn_on">사용 설정</string>
   <string name="not_now">나중에</string>
+  <string name="connect">연결</string>
+  <string name="disconnect">연결 해제</string>
+  <string name="skip">건너뛰기</string>
   <string name="connected">연결됨</string>
   <string name="notDetected">감지되지 않음</string>
   <string name="disconnected">연결 끊김</string>
@@ -84,4 +91,5 @@
     <item quantity="other">새 메시지 %d개</item>
   </plurals>
   <string name="name_not_available">이름을 사용할 수 없습니다.</string>
+  <string name="ble_device_name_prefix">차량\u00A0</string>
 </resources>

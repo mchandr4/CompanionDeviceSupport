@@ -18,10 +18,14 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <string name="settings_entry_title">Companion Device</string>
   <string name="default_device_name">Nauugnay na Device</string>
-  <string name="add_device_title">Magdagdag ng Nauugnay na Device</string>
-  <string name="add_associated_device_title">Magkonekta ng kasamang device</string>
+  <string name="add_device_title">Kumonekta sa kasamang app</string>
+  <string name="add_associated_device_title">Kumonekta sa MyCompanion</string>
   <string name="add_associated_device_subtitle">Puwede mong gamitin ang iyong telepono bilang kasamang device para tumulong sa pagmamaneho mo</string>
   <string name="associated_device_install_app">Tiyaking may naka-install kang <b>Kasamang App</b> sa telepono mo</string>
+  <string name="open_companion_app_instruction_text">Buksan ang kasamang app</string>
+  <string name="enable_bluetooth_instruction_text">Payagan ang koneksyon sa Bluetooth</string>
+  <string name="connect_to_targe_car_instruction_text">Kumonekta sa &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="connect_to_car_instruction_text">Kumonekta sa kotse</string>
   <string name="associated_device_pairing_code_title">Kumpirmahin ang code sa telepono</string>
   <string name="associated_device_pairing_message">Kumpirmahing tumutugma ito sa code na ipinapakita sa telepono mo</string>
   <string name="associated_device_success">Matagumpay na naiugnay ang device</string>
@@ -53,6 +57,9 @@
   <string name="retry">Subukan ulit</string>
   <string name="turn_on">I-on</string>
   <string name="not_now">Huwag muna</string>
+  <string name="connect">Kumonekta</string>
+  <string name="disconnect">Idiskonekta</string>
+  <string name="skip">Laktawan</string>
   <string name="connected">Nakakonekta</string>
   <string name="notDetected">Hindi na-detect</string>
   <string name="disconnected">Nadiskonekta</string>
@@ -84,4 +91,5 @@
     <item quantity="other">%d na bagong mensahe</item>
   </plurals>
   <string name="name_not_available">Hindi available ang pangalan</string>
+  <string name="ble_device_name_prefix">Sasakyan\u00A0</string>
 </resources>

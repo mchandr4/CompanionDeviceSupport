@@ -32,6 +32,7 @@ import com.google.android.connecteddevice.model.ConnectedDevice
 import com.google.android.connecteddevice.model.DeviceMessage
 import com.google.android.connecteddevice.model.DeviceMessage.OperationType
 import com.google.android.connecteddevice.model.Errors
+import com.google.android.connecteddevice.model.OobData
 import com.google.android.connecteddevice.model.StartAssociationResponse
 import com.google.android.connecteddevice.oob.OobRunner
 import com.google.android.connecteddevice.storage.ConnectedDeviceDatabase
@@ -63,7 +64,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 private val TEST_CHALLENGE = "test Challenge".toByteArray()
-private val TEST_OOB_DATA = "test OOB data".toByteArray()
+private val TEST_OOB_DATA =
+  OobData("key".toByteArray(), "serverIv".toByteArray(), "clientIv".toByteArray())
 
 @RunWith(AndroidJUnit4::class)
 class MultiProtocolDeviceControllerTest {

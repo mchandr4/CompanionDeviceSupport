@@ -38,6 +38,7 @@ import com.google.android.connecteddevice.connection.ConnectionResolver;
 import com.google.android.connecteddevice.connection.ReconnectSecureChannel;
 import com.google.android.connecteddevice.connection.SecureChannel;
 import com.google.android.connecteddevice.model.AssociatedDevice;
+import com.google.android.connecteddevice.model.OobData;
 import com.google.android.connecteddevice.model.StartAssociationResponse;
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage;
 import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelegateBinder;
@@ -113,8 +114,9 @@ public class CarSppManagerTest {
 
     verify(mockSppBinder).unregisterConnectionCallback(TEST_REMOTE_DEVICE_ID);
     verify(mockSppBinder).connectAsServer(TEST_SERVICE_UUID_1, IS_SECURE);
+    OobData emptyOobData = new OobData(new byte[0], new byte[0], new byte[0]);
     verify(mockAssociationCallback)
-        .onAssociationStartSuccess(new StartAssociationResponse(new byte[0], new byte[0], ""));
+        .onAssociationStartSuccess(new StartAssociationResponse(emptyOobData, new byte[0], ""));
   }
 
   @Test

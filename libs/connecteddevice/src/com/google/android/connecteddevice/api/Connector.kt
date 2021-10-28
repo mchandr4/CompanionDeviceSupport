@@ -90,6 +90,51 @@ interface Connector {
   /** Queries the [ConnectedDevice] for its companion application name. */
   fun retrieveCompanionApplicationName(device: ConnectedDevice, callback: AppNameCallback)
 
+  /**
+   * Starts the association with a new device with a [callback] to be notified for association
+   * events.
+   */
+  fun startAssociation(callback: IAssociationCallback)
+
+  /**
+   * Starts the association with a new device using the specified [identifier] with a [callback] to
+   * be notified for association events.
+   */
+  fun startAssociation(identifier: ParcelUuid, callback: IAssociationCallback)
+
+  /** Stops the association process. */
+  fun stopAssociation()
+
+  /** Confirms the paring code. */
+  fun acceptVerification()
+
+  /** Remove the associated device of the given [deviceId]. */
+  fun removeAssociatedDevice(deviceId: String)
+
+  /** Enable connection on the associated device with the given [deviceId]. */
+  fun enableAssociatedDeviceConnection(deviceId: String)
+
+  /** Disable connection on the associated device with the given [deviceId]. */
+  fun disableAssociatedDeviceConnection(deviceId: String)
+
+  /**
+   * Retrieves all associated devices with a [listener] that will be notified when the associated
+   * devices are retrieved.
+   */
+  fun retrieveAssociatedDevices(listener: IOnAssociatedDevicesRetrievedListener)
+
+  /**
+   * Retrieves the associated devices belonging to the current driver with a [listener] that will be
+   * notified when the associated devices are retrieved.
+   */
+  fun retrieveAssociatedDevicesForDriver(listener: IOnAssociatedDevicesRetrievedListener)
+
+  /**
+   * Retrieves all associated devices belonging to all passengers with a [listener] that will be
+   * notified when the associated devices are retrieved.
+   */
+  fun retrieveAssociatedDevicesForPassengers(listener: IOnAssociatedDevicesRetrievedListener)
+
   /** Callbacks invoked on connection events. */
   interface Callback {
     /** Invoked when a connection has been successfully established. */
@@ -199,6 +244,12 @@ interface Connector {
     const val ACTION_BIND_FEATURE_COORDINATOR_FG =
       "com.google.android.connecteddevice.api.BIND_FEATURE_COORDINATOR_FG"
 
+    /**
+     * When a client calls [Context.bindService] to get the [IAssociatedDeviceManager], this action
+     * is required in the param [Intent].
+     */
+    const val ACTION_BIND_ASSOCIATION = "com.google.android.connecteddevice.BIND_ASSOCIATION"
+
     /** Type associated with a driver's device. */
     const val USER_TYPE_DRIVER = 1 shl 0
 
@@ -209,7 +260,8 @@ interface Connector {
     const val USER_TYPE_ALL = USER_TYPE_DRIVER or USER_TYPE_PASSENGER
 
     /** Id for the system query feature. */
-    val SYSTEM_FEATURE_ID = ParcelUuid.fromString("892ac5d9-e9a5-48dc-874a-c01e3cb00d5d")
+    val SYSTEM_FEATURE_ID: ParcelUuid =
+      ParcelUuid.fromString("892ac5d9-e9a5-48dc-874a-c01e3cb00d5d")
 
     /** User types that can be associated with a connected device. */
     @IntDef(USER_TYPE_DRIVER, USER_TYPE_PASSENGER, USER_TYPE_ALL)

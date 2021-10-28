@@ -7,6 +7,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.companionprotos.SystemQuery
 import com.google.android.companionprotos.SystemQueryType.DEVICE_NAME
 import com.google.android.companionprotos.SystemQueryType.SYSTEM_QUERY_TYPE_UNKNOWN
+import com.google.android.companionprotos.SystemQueryType.USER_ROLE
+import com.google.android.companionprotos.SystemUserRole
+import com.google.android.companionprotos.SystemUserRoleResponse
 import com.google.android.connecteddevice.api.Connector
 import com.google.android.connecteddevice.api.FakeConnector
 import com.google.android.connecteddevice.model.ConnectedDevice
@@ -39,7 +42,7 @@ class SystemFeatureTest {
     ConnectedDevice(
       UUID.randomUUID().toString(),
       /* deviceName= */ null,
-      /* belongsToActiveUser= */ true,
+      /* belongsToDriver= */ true,
       /* hasSecureChannel= */ true
     )
 
@@ -71,12 +74,12 @@ class SystemFeatureTest {
   fun onSecureChannelEstablished_sendsQueryForDeviceName() {
     fakeConnector.callback?.onSecureChannelEstablished(device)
 
-    val captor = argumentCaptor<ByteArray>()
-    verify(fakeConnector).sendQuerySecurely(eq(device), captor.capture(), anyOrNull(), any())
-
-    val systemQuery =
-      SystemQuery.parseFrom(captor.firstValue, ExtensionRegistryLite.getEmptyRegistry())
-    assertThat(systemQuery.type).isEqualTo(DEVICE_NAME)
+    argumentCaptor<ByteArray>() {
+      verify(fakeConnector).sendQuerySecurely(eq(device), capture(), anyOrNull(), any())
+      val systemQuery =
+        SystemQuery.parseFrom(firstValue, ExtensionRegistryLite.getEmptyRegistry())
+      assertThat(systemQuery.type).isEqualTo(DEVICE_NAME)
+    }
   }
 
   @Test
@@ -96,31 +99,34 @@ class SystemFeatureTest {
   fun deviceNameQueryResponse_successDoesNotUpdateDeviceNameIfEmpty() {
     fakeConnector.callback?.onSecureChannelEstablished(device)
 
-    val captor = argumentCaptor<Connector.QueryCallback>()
-    verify(fakeConnector).sendQuerySecurely(eq(device), any(), anyOrNull(), captor.capture())
-    captor.firstValue.onSuccess(ByteArray(0))
-    verify(mockStorage, never()).updateAssociatedDeviceName(any(), any())
+    argumentCaptor<Connector.QueryCallback>() {
+      verify(fakeConnector).sendQuerySecurely(eq(device), any(), anyOrNull(), capture())
+      firstValue.onSuccess(ByteArray(0))
+      verify(mockStorage, never()).updateAssociatedDeviceName(any(), any())
+    }
   }
 
   @Test
   fun deviceNameQueryResponse_onErrorDoesNotUpdateDeviceName() {
     fakeConnector.callback?.onSecureChannelEstablished(device)
 
-    val captor = argumentCaptor<Connector.QueryCallback>()
-    verify(fakeConnector).sendQuerySecurely(eq(device), any(), anyOrNull(), captor.capture())
-    captor.firstValue.onError(/* response= */ null)
-    verify(mockStorage, never()).updateAssociatedDeviceName(any(), any())
+    argumentCaptor<Connector.QueryCallback>() {
+      verify(fakeConnector).sendQuerySecurely(eq(device), any(), anyOrNull(), capture())
+      firstValue.onError(/* response= */ null)
+      verify(mockStorage, never()).updateAssociatedDeviceName(any(), any())
+    }
   }
 
   @Test
   fun deviceNameQueryResponse_onQueryFailedToSendDoesNotUpdateDeviceName() {
     fakeConnector.callback?.onSecureChannelEstablished(device)
 
-    val captor = argumentCaptor<Connector.QueryCallback>()
-    verify(fakeConnector).sendQuerySecurely(eq(device), any(), anyOrNull(), captor.capture())
-    captor.firstValue.onQueryFailedToSend(/* isTransient= */ false)
-    captor.firstValue.onQueryFailedToSend(/* isTransient= */ true)
-    verify(mockStorage, never()).updateAssociatedDeviceName(any(), any())
+    argumentCaptor<Connector.QueryCallback>() {
+      verify(fakeConnector).sendQuerySecurely(eq(device), any(), anyOrNull(), capture())
+      firstValue.onQueryFailedToSend(/* isTransient= */ false)
+      firstValue.onQueryFailedToSend(/* isTransient= */ true)
+      verify(mockStorage, never()).updateAssociatedDeviceName(any(), any())
+    }
   }
 
   @Test
@@ -129,11 +135,12 @@ class SystemFeatureTest {
     val queryId = 0
 
     fakeConnector.callback?.onQueryReceived(device, queryId, query.toByteArray(), null)
-    val captor = argumentCaptor<ByteArray>()
-    verify(fakeConnector)
-      .respondToQuerySecurely(eq(device), eq(queryId), eq(true), captor.capture())
 
-    assertThat(captor.firstValue).isEqualTo(TEST_DEVICE_NAME.toByteArray(StandardCharsets.UTF_8))
+    argumentCaptor<ByteArray> {
+      verify(fakeConnector)
+        .respondToQuerySecurely(eq(device), eq(queryId), eq(true), capture())
+      assertThat(firstValue).isEqualTo(TEST_DEVICE_NAME.toByteArray(StandardCharsets.UTF_8))
+    }
   }
 
   @Test
@@ -142,6 +149,7 @@ class SystemFeatureTest {
     val queryId = 0
 
     fakeConnector.callback?.onQueryReceived(device, queryId, query.toByteArray(), null)
+
     verify(fakeConnector).respondToQuerySecurely(eq(device), eq(queryId), eq(false), anyOrNull())
   }
 
@@ -160,8 +168,54 @@ class SystemFeatureTest {
   @Test
   fun onQueryReceived_failureToParseQueryRespondsWithError() {
     val queryId = 0
+
     fakeConnector.callback?.onQueryReceived(device, queryId, ByteUtils.randomBytes(100), null)
+
     verify(fakeConnector).respondToQuerySecurely(eq(device), eq(queryId), eq(false), anyOrNull())
+  }
+
+  @Test
+  fun onQueryReceived_driverDeviceRespondsWithDriver() {
+    val queryId = 0
+    val query = SystemQuery.newBuilder().setType(USER_ROLE).build()
+    val device =
+      ConnectedDevice(
+        UUID.randomUUID().toString(),
+        /* deviceName= */ null,
+        /* belongsToDriver= */ true,
+        /* hasSecureChannel= */ true
+      )
+
+    fakeConnector.callback?.onQueryReceived(device, queryId, query.toByteArray(), null)
+
+    argumentCaptor<ByteArray> {
+      verify(fakeConnector).respondToQuerySecurely(eq(device), eq(queryId), eq(true), capture())
+      val response =
+        SystemUserRoleResponse.parseFrom(firstValue, ExtensionRegistryLite.getEmptyRegistry())
+      assertThat(response.role).isEqualTo(SystemUserRole.DRIVER)
+    }
+  }
+
+  @Test
+  fun onQueryReceived_passengerDeviceRespondsWithPassenger() {
+    val queryId = 0
+    val query = SystemQuery.newBuilder().setType(USER_ROLE).build()
+    val device =
+      ConnectedDevice(
+        UUID.randomUUID().toString(),
+        /* deviceName= */ null,
+        /* belongsToDriver= */ false,
+        /* hasSecureChannel= */ true
+      )
+
+    fakeConnector.callback?.onQueryReceived(device, queryId, query.toByteArray(), null)
+
+    argumentCaptor<ByteArray> {
+      verify(fakeConnector).respondToQuerySecurely(eq(device), eq(queryId), eq(true), capture())
+      val response =
+        SystemUserRoleResponse.parseFrom(firstValue, ExtensionRegistryLite.getEmptyRegistry())
+      assertThat(response.role).isEqualTo(SystemUserRole.PASSENGER)
+    }
   }
 
   companion object {

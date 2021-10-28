@@ -20,10 +20,14 @@ import static com.google.android.connecteddevice.util.SafeLog.logd;
 import static com.google.android.connecteddevice.util.SafeLog.loge;
 import static com.google.android.connecteddevice.util.SafeLog.logw;
 
+import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.KeyguardManager;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -34,6 +38,7 @@ import android.service.trust.TrustAgentService;
 import com.google.android.connecteddevice.trust.api.ITrustedDeviceAgentDelegate;
 import com.google.android.connecteddevice.trust.api.ITrustedDeviceManager;
 import java.time.Duration;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /** Service to provide TrustAgent functionality to the trusted device feature. */
 public class TrustedDeviceAgentService extends TrustAgentService {
@@ -49,6 +54,8 @@ public class TrustedDeviceAgentService extends TrustAgentService {
 
   private static final Duration RETRY_DURATION = Duration.ofMillis(10);
 
+  private final AtomicBoolean isManagingTrust = new AtomicBoolean(false);
+
   private HandlerThread retryThread;
 
   private Handler retryHandler;
@@ -57,11 +64,13 @@ public class TrustedDeviceAgentService extends TrustAgentService {
 
   private int retries;
 
+  @SuppressLint("UnprotectedReceiver") // Broadcast is protected.
   @Override
   public void onCreate() {
     super.onCreate();
     logd(TAG, "Starting trust agent service.");
     TrustedDeviceEventLog.onTrustAgentStarted();
+    registerReceiver(userUnlockedReceiver, new IntentFilter(Intent.ACTION_USER_UNLOCKED));
     retryThread = new HandlerThread(RETRY_HANDLER_THREAD_NAME);
     retryThread.start();
     retryHandler = new Handler(retryThread.getLooper());
@@ -87,6 +96,7 @@ public class TrustedDeviceAgentService extends TrustAgentService {
     if (retryThread != null) {
       retryThread.quit();
     }
+    unregisterReceiver(userUnlockedReceiver);
     super.onDestroy();
   }
 
@@ -120,9 +130,19 @@ public class TrustedDeviceAgentService extends TrustAgentService {
     }
   }
 
-  @Override
-  public void onDeviceUnlocked() {
-    super.onDeviceUnlocked();
+  private void deviceUnlocked() {
+    if (!isManagingTrust.compareAndSet(true, false)) {
+      logd(
+          TAG,
+          "User was unlocked via an alternative mechanism than an escrow token. No further "
+              + "action required.");
+      return;
+    }
+    logd(TAG, "User successfully unlocked with an escrow token. Dismissing the lock screen.");
+    grantTrust(
+        "Granting trust from escrow token for user.",
+        TRUST_DURATION_MS,
+        FLAG_GRANT_TRUST_DISMISS_KEYGUARD);
     TrustedDeviceEventLog.onUserUnlocked();
     if (trustedDeviceManager == null) {
       loge(TAG, "Manager was null when device was unlocked. Ignoring.");
@@ -187,17 +207,22 @@ public class TrustedDeviceAgentService extends TrustAgentService {
         @Override
         public void unlockUserWithToken(byte[] token, long handle, int userId) {
           setManagingTrust(true);
+          isManagingTrust.set(true);
           TrustedDeviceAgentService.this.unlockUserWithToken(handle, token, UserHandle.of(userId));
-          grantTrust(
-              "Granting trust from escrow token for user " + userId + ".",
-              TRUST_DURATION_MS,
-              FLAG_GRANT_TRUST_DISMISS_KEYGUARD);
         }
 
         @Override
         public void removeEscrowToken(long handle, int userId) {
           logd(TAG, "Removing escrow token for user " + userId + ".");
           TrustedDeviceAgentService.this.removeEscrowToken(handle, UserHandle.of(userId));
+        }
+      };
+
+  private final BroadcastReceiver userUnlockedReceiver =
+      new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+          deviceUnlocked();
         }
       };
 }

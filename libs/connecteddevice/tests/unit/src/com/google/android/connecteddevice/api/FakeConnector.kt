@@ -2,10 +2,17 @@ package com.google.android.connecteddevice.api
 
 import android.os.IBinder
 import android.os.ParcelUuid
+import com.google.android.connecteddevice.model.AssociatedDevice
 import com.google.android.connecteddevice.model.ConnectedDevice
 
 /** Fake implementation of a [Connector] to be used in tests. */
 open class FakeConnector : Connector {
+  /** Current user id for testing associated devices for other users. */
+  var currentUserId = 10
+
+  /** List of associated devices to be returned in [retrieveAssociatedDevices] or user variants. */
+  private val associatedDevices = mutableListOf<AssociatedDevice>()
+
   override var featureId: ParcelUuid? = null
   override var callback: Connector.Callback? = null
   override val connectedDevices = mutableListOf<ConnectedDevice>()
@@ -59,4 +66,43 @@ open class FakeConnector : Connector {
     device: ConnectedDevice,
     callback: Connector.AppNameCallback
   ) {}
+
+  override fun startAssociation(callback: IAssociationCallback) {}
+
+  override fun startAssociation(identifier: ParcelUuid, callback: IAssociationCallback) {}
+
+  override fun stopAssociation() {}
+
+  override fun acceptVerification() {}
+
+  override fun removeAssociatedDevice(deviceId: String) {}
+
+  override fun enableAssociatedDeviceConnection(deviceId: String) {}
+
+  override fun disableAssociatedDeviceConnection(deviceId: String) {}
+
+  override fun retrieveAssociatedDevices(listener: IOnAssociatedDevicesRetrievedListener) {
+    listener.onAssociatedDevicesRetrieved(associatedDevices)
+  }
+
+  override fun retrieveAssociatedDevicesForDriver(listener: IOnAssociatedDevicesRetrievedListener) {
+    listener.onAssociatedDevicesRetrieved(associatedDevices.filter { it.userId == currentUserId })
+  }
+
+  override fun retrieveAssociatedDevicesForPassengers(
+    listener: IOnAssociatedDevicesRetrievedListener
+  ) {
+    listener.onAssociatedDevicesRetrieved(associatedDevices.filter { it.userId != currentUserId })
+  }
+
+  fun addAssociatedDevice(device: AssociatedDevice) {
+    associatedDevices.add(device)
+    callback?.onAssociatedDeviceAdded(device)
+  }
+
+  fun removeAssociatedDevice(device: AssociatedDevice) {
+    if (associatedDevices.remove(device)) {
+      callback?.onAssociatedDeviceRemoved(device)
+    }
+  }
 }

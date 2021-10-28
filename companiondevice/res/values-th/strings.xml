@@ -18,10 +18,14 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <string name="settings_entry_title">Companion Device</string>
   <string name="default_device_name">อุปกรณ์ที่เชื่อมโยง</string>
-  <string name="add_device_title">เพิ่มอุปกรณ์ที่เชื่อมโยง</string>
-  <string name="add_associated_device_title">เชื่อมต่ออุปกรณ์ที่ใช้ร่วมกัน</string>
+  <string name="add_device_title">เชื่อมต่อแอปที่ใช้ร่วมกัน</string>
+  <string name="add_associated_device_title">เชื่อมต่อ MyCompanion</string>
   <string name="add_associated_device_subtitle">คุณใช้โทรศัพท์เป็นอุปกรณ์ที่ใช้ร่วมกันเพื่อช่วยจัดการประสบการณ์การขับขี่ได้</string>
   <string name="associated_device_install_app">ตรวจสอบว่าคุณมี<b>แอปที่ใช้ร่วมกัน</b>ติดตั้งอยู่ในโทรศัพท์</string>
+  <string name="open_companion_app_instruction_text">เปิดแอปที่ใช้ร่วมกัน</string>
+  <string name="enable_bluetooth_instruction_text">อนุญาตการเชื่อมต่อบลูทูธ</string>
+  <string name="connect_to_targe_car_instruction_text">เชื่อมต่อกับ &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="connect_to_car_instruction_text">เชื่อมต่อรถยนต์</string>
   <string name="associated_device_pairing_code_title">ยืนยันรหัสในโทรศัพท์</string>
   <string name="associated_device_pairing_message">ยืนยันว่ารหัสนี้ตรงกับรหัสที่แสดงในโทรศัพท์</string>
   <string name="associated_device_success">เชื่อมโยงอุปกรณ์สำเร็จแล้ว</string>
@@ -53,6 +57,9 @@
   <string name="retry">ลองอีกครั้ง</string>
   <string name="turn_on">เปิด</string>
   <string name="not_now">ไว้ทีหลัง</string>
+  <string name="connect">เชื่อมต่อ</string>
+  <string name="disconnect">ยกเลิกการเชื่อมต่อ</string>
+  <string name="skip">ข้าม</string>
   <string name="connected">เชื่อมต่อแล้ว</string>
   <string name="notDetected">ไม่พบ</string>
   <string name="disconnected">เลิกเชื่อมต่อแล้ว</string>
@@ -84,4 +91,5 @@
     <item quantity="other">%d ข้อความใหม่</item>
   </plurals>
   <string name="name_not_available">ไม่มีชื่อ</string>
+  <string name="ble_device_name_prefix">รถยนต์\u00A0</string>
 </resources>

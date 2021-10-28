@@ -18,10 +18,14 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <string name="settings_entry_title">Idivayisi Engumngane</string>
   <string name="default_device_name">Idivayisi ehlobene</string>
-  <string name="add_device_title">Engeza Idivayisi ehlobene</string>
-  <string name="add_associated_device_title">Xhuma idivayisi engumngane</string>
+  <string name="add_device_title">Xhumeka ku-companion app</string>
+  <string name="add_associated_device_title">Xhumeka ku-MyCompanion</string>
   <string name="add_associated_device_subtitle">Ungasebenzisa ifoni yakho njengedivayisi engumgane ukukusiza uphathe ukuzizwela kwakho kokushayela</string>
   <string name="associated_device_install_app">Qiniseka ukuthi <b>Unohlelo lokusebenza elingumngane</b> olufakwe efonini yakho</string>
+  <string name="open_companion_app_instruction_text">Vula i-companion app</string>
+  <string name="enable_bluetooth_instruction_text">Vumela uxhumo lwe-Bluetooth</string>
+  <string name="connect_to_targe_car_instruction_text">Xhuma ku-&lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="connect_to_car_instruction_text">Xhuma emotweni</string>
   <string name="associated_device_pairing_code_title">Qinisekisa ikhodi kufoni</string>
   <string name="associated_device_pairing_message">Qinisekisa ukuthi lokhu kufana nekhodi eboniswe kufoni yakho</string>
   <string name="associated_device_success">Idivayisi ihlotshaniswe ngokuphumelelayo</string>
@@ -53,6 +57,9 @@
   <string name="retry">Zama futhi</string>
   <string name="turn_on">Vula</string>
   <string name="not_now">Hhayi manje</string>
+  <string name="connect">Xhuma</string>
+  <string name="disconnect">Nqamula</string>
+  <string name="skip">Yeqa</string>
   <string name="connected">Ixhunyiwe</string>
   <string name="notDetected">Ayitholiwe</string>
   <string name="disconnected">Inqamukile</string>
@@ -84,4 +91,5 @@
     <item quantity="other">%d imilayezo emisha</item>
   </plurals>
   <string name="name_not_available">Igama alitholakali</string>
+  <string name="ble_device_name_prefix">Imoto\u00A0</string>
 </resources>

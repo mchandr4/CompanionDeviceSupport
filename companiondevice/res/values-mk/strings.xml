@@ -18,10 +18,14 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <string name="settings_entry_title">Придружен уред</string>
   <string name="default_device_name">Поврзан уред</string>
-  <string name="add_device_title">Додајте поврзан уред</string>
-  <string name="add_associated_device_title">Поврзете придружен уред</string>
+  <string name="add_device_title">Поврзи се со придружната апликација</string>
+  <string name="add_associated_device_title">Поврзете се со MyCompanion</string>
   <string name="add_associated_device_subtitle">Може да го користите телефонот како придружен уред за да ви помогне да управувате со возењето</string>
   <string name="associated_device_install_app">Треба да имате инсталирано <b>придружна апликација</b> на телефонот</string>
+  <string name="open_companion_app_instruction_text">Отворете ја придружната апликација</string>
+  <string name="enable_bluetooth_instruction_text">Дозволете поврзување преку Bluetooth</string>
+  <string name="connect_to_targe_car_instruction_text">Поврзете се со &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="connect_to_car_instruction_text">Поврзете се со автомобилот</string>
   <string name="associated_device_pairing_code_title">Потврдете го кодот на телефонот</string>
   <string name="associated_device_pairing_message">Потврдете дека ова се совпаѓа со кодот прикажан на телефонот</string>
   <string name="associated_device_success">Уредот е успешно поврзан</string>
@@ -53,9 +57,12 @@
   <string name="retry">Обиди се пак</string>
   <string name="turn_on">Вклучи</string>
   <string name="not_now">Не сега</string>
+  <string name="connect">Поврзи</string>
+  <string name="disconnect">Прекини врска</string>
+  <string name="skip">Прескокни</string>
   <string name="connected">Поврзано</string>
   <string name="notDetected">Не е пронајдено</string>
-  <string name="disconnected">Прекината врска</string>
+  <string name="disconnected">Не е поврзано</string>
   <string name="unknown">Непознато</string>
   <string name="app_running_msg_channel_name">Се извршува услугата за SMS-пораки на телефонот</string>
   <string name="app_running_msg_notification_title">Услугата за SMS-пораки на телефонот е активна</string>
@@ -84,4 +91,5 @@
     <item quantity="other">%d нови пораки</item>
   </plurals>
   <string name="name_not_available">Името не е достапно</string>
+  <string name="ble_device_name_prefix">Возило\u00A0</string>
 </resources>

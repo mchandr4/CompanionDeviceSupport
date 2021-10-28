@@ -31,6 +31,7 @@ import com.google.android.connecteddevice.connection.CarBluetoothManager;
 import com.google.android.connecteddevice.connection.ConnectionResolver;
 import com.google.android.connecteddevice.connection.DeviceMessageStream;
 import com.google.android.connecteddevice.connection.ReconnectSecureChannel;
+import com.google.android.connecteddevice.model.OobData;
 import com.google.android.connecteddevice.model.StartAssociationResponse;
 import com.google.android.connecteddevice.oob.BluetoothRfcommChannel;
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage;
@@ -174,7 +175,7 @@ public class CarSppManager extends CarBluetoothManager {
             .setOnConnectionErrorListener(onConnectionErrorListener);
         callback.onAssociationStartSuccess(
             new StartAssociationResponse(
-                /* oobData= */ new byte[0],
+                /* oobData= */ new OobData(new byte[0], new byte[0], new byte[0]),
                 /* deviceIdentifier= */ new byte[0],
                 /* deviceName= */ ""));
       }

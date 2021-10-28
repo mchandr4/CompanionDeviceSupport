@@ -17,25 +17,20 @@
 package com.google.android.connecteddevice.ui;
 
 import static com.google.android.connecteddevice.api.RemoteFeature.ASSOCIATED_DEVICE_DATA_NAME_EXTRA;
-import static com.google.android.connecteddevice.service.ConnectedDeviceService.ACTION_BIND_ASSOCIATION;
 import static com.google.android.connecteddevice.util.SafeLog.logd;
 import static com.google.android.connecteddevice.util.SafeLog.loge;
 
-import android.app.ActivityManager;
+import android.annotation.SuppressLint;
 import android.app.Application;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.IBinder;
-import android.os.RemoteException;
-import android.os.UserHandle;
+import android.graphics.Bitmap;
+import android.net.Uri;
+import android.os.ParcelUuid;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
@@ -43,23 +38,21 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
-import com.google.android.connecteddevice.api.IAssociatedDeviceManager;
+import com.google.android.connecteddevice.api.CompanionConnector;
+import com.google.android.connecteddevice.api.Connector;
 import com.google.android.connecteddevice.api.IAssociationCallback;
-import com.google.android.connecteddevice.api.IConnectionCallback;
-import com.google.android.connecteddevice.api.IDeviceAssociationCallback;
 import com.google.android.connecteddevice.api.IOnAssociatedDevicesRetrievedListener;
 import com.google.android.connecteddevice.model.AssociatedDevice;
 import com.google.android.connecteddevice.model.AssociatedDeviceDetails;
 import com.google.android.connecteddevice.model.ConnectedDevice;
 import com.google.android.connecteddevice.model.StartAssociationResponse;
-import com.google.android.connecteddevice.service.ConnectedDeviceService;
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * Implementation {@link ViewModel} for sharing associated devices data between {@link
- * AssociatedDeviceDetailFragment} and {@link AssociationActivity}
+ * Implementation {@link ViewModel} for sharing associated devices data between the companion
+ * platform and UI elements.
  */
 public class AssociatedDeviceViewModel extends AndroidViewModel {
 
@@ -67,9 +60,11 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
 
   private static final Duration DISCOVERABLE_DURATION = Duration.ofMinutes(2);
 
-  private static final String TIMEOUT_HANDLER_THREAD_NAME = "bindingTimeoutThread";
+  private static final String SCHEME = "https";
 
-  private static final Duration BINDING_TIMEOUT_DURATION = Duration.ofSeconds(5);
+  private static final String AUTHORITY = "demo.companiondevice.com";
+
+  private static final int QR_CODE_SIZE_IN_PIXEL = 200;
 
   /** States of association process. */
   public enum AssociationState {
@@ -81,13 +76,13 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
     ERROR
   }
 
-  private IAssociatedDeviceManager associatedDeviceManager;
   private final List<AssociatedDevice> associatedDevices = new CopyOnWriteArrayList<>();
   private final List<ConnectedDevice> connectedDevices = new CopyOnWriteArrayList<>();
 
   private final MutableLiveData<AssociatedDeviceDetails> currentDeviceDetails =
       new MutableLiveData<>(null);
   private final MutableLiveData<String> advertisedCarName = new MutableLiveData<>(null);
+  private final MutableLiveData<Bitmap> bitmap = new MutableLiveData<>(null);
   private final MutableLiveData<String> pairingCode = new MutableLiveData<>(null);
   private final MutableLiveData<Integer> bluetoothState =
       new MutableLiveData<>(BluetoothAdapter.STATE_OFF);
@@ -99,85 +94,52 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
   private final String bleDeviceNamePrefix;
   private final BluetoothAdapter bluetoothAdapter;
 
-  private final HandlerThread timeoutHandlerThread;
-  private final Handler timeoutHandler;
+  private final Connector connector;
 
-  private final Runnable timeoutRunnable =
-      () -> {
-        loge(TAG, "Timeout period expired without a successful service bind.");
-        associationState.postValue(AssociationState.ERROR);
-      };
+  private ParcelUuid associationIdentifier;
 
   public AssociatedDeviceViewModel(
       @NonNull Application application, boolean isSppEnabled, String bleDeviceNamePrefix) {
-    super(application);
-    this.bleDeviceNamePrefix = bleDeviceNamePrefix;
-    this.isSppEnabled = isSppEnabled;
-    timeoutHandlerThread = new HandlerThread(TIMEOUT_HANDLER_THREAD_NAME);
-    timeoutHandlerThread.start();
-    timeoutHandler = new Handler(timeoutHandlerThread.getLooper());
-    bindService();
-    bluetoothAdapter =
-        application.getApplicationContext().getSystemService(BluetoothManager.class).getAdapter();
-    if (bluetoothAdapter != null) {
-      bluetoothState.postValue(bluetoothAdapter.getState());
-    }
+    this(
+        application,
+        isSppEnabled,
+        bleDeviceNamePrefix,
+        new CompanionConnector(application, /* isForegroundProcess= */ true));
   }
 
   @VisibleForTesting
+  @SuppressLint("UnprotectedReceiver") // Broadcasts are protected.
   AssociatedDeviceViewModel(
       @NonNull Application application,
-      IAssociatedDeviceManager associatedDeviceManager,
       boolean isSppEnabled,
-      String bleDeviceNamePrefix) {
+      String bleDeviceNamePrefix,
+      Connector connector) {
     super(application);
     this.isSppEnabled = isSppEnabled;
     this.bleDeviceNamePrefix = bleDeviceNamePrefix;
-    this.associatedDeviceManager = associatedDeviceManager;
+    this.connector = connector;
+    connector.setCallback(connectorCallback);
+    IntentFilter filter = new IntentFilter();
+    filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
+    getApplication().registerReceiver(receiver, filter);
     bluetoothAdapter =
         application.getApplicationContext().getSystemService(BluetoothManager.class).getAdapter();
-    timeoutHandlerThread = new HandlerThread(TIMEOUT_HANDLER_THREAD_NAME);
-    timeoutHandlerThread.start();
-    timeoutHandler = new Handler(timeoutHandlerThread.getLooper());
     bluetoothState.postValue(BluetoothAdapter.STATE_ON);
-    if (associatedDeviceManager == null) {
-      return;
-    }
-    try {
-      registerCallbacks();
-      setConnectedDevices(associatedDeviceManager.getActiveUserConnectedDevices());
-      associatedDeviceManager.retrievedActiveUserAssociatedDevices(
-          associatedDevicesRetrievedListener);
-    } catch (RemoteException e) {
-      loge(TAG, "Initial setup failed.", e);
-    }
+    connector.connect();
   }
 
   @Override
   protected void onCleared() {
     super.onCleared();
-    timeoutHandlerThread.quit();
-    if (associatedDeviceManager == null) {
-      return;
-    }
-    try {
-      unregisterCallbacks();
-    } catch (RemoteException e) {
-      loge(TAG, "Error clearing registered callbacks. ", e);
-    }
-    getApplication().unbindService(connection);
+    connector.setCallback(null);
+    connector.disconnect();
     getApplication().unregisterReceiver(receiver);
-    associatedDeviceManager = null;
   }
 
   /** Confirms that the pairing code matches. */
   public void acceptVerification() {
     pairingCode.postValue(null);
-    try {
-      associatedDeviceManager.acceptVerification();
-    } catch (RemoteException e) {
-      loge(TAG, "Error while accepting verification.", e);
-    }
+    connector.acceptVerification();
   }
 
   /** Stops association. */
@@ -188,18 +150,14 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
     }
     advertisedCarName.postValue(null);
     pairingCode.postValue(null);
-    try {
-      associatedDeviceManager.stopAssociation();
-    } catch (RemoteException e) {
-      loge(TAG, "Error while stopping association process.", e);
-    }
+    connector.stopAssociation();
     associationState.postValue(AssociationState.NONE);
   }
 
   /** Retries association. */
   public void retryAssociation() {
     stopAssociation();
-    startAssociation();
+    startAssociationInternal();
   }
 
   /** Removes the current associated device. */
@@ -208,11 +166,7 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
     if (device == null) {
       return;
     }
-    try {
-      associatedDeviceManager.removeAssociatedDevice(device.getDeviceId());
-    } catch (RemoteException e) {
-      loge(TAG, "Failed to remove associated device: " + device.getDeviceId(), e);
-    }
+    connector.removeAssociatedDevice(device.getDeviceId());
   }
 
   /** Toggles connection on the current associated device. */
@@ -221,14 +175,10 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
     if (device == null) {
       return;
     }
-    try {
-      if (device.isConnectionEnabled()) {
-        associatedDeviceManager.disableAssociatedDeviceConnection(device.getDeviceId());
-      } else {
-        associatedDeviceManager.enableAssociatedDeviceConnection(device.getDeviceId());
-      }
-    } catch (RemoteException e) {
-      loge(TAG, "Failed to toggle connection status for device: " + device.getDeviceId() + ".", e);
+    if (device.isConnectionEnabled()) {
+      connector.disableAssociatedDeviceConnection(device.getDeviceId());
+    } else {
+      connector.enableAssociatedDeviceConnection(device.getDeviceId());
     }
   }
 
@@ -245,10 +195,11 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
     }
     Intent intent = new Intent(action);
     intent.putExtra(ASSOCIATED_DEVICE_DATA_NAME_EXTRA, device);
-    getApplication().startActivityAsUser(intent, UserHandle.of(ActivityManager.getCurrentUser()));
+    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+    getApplication().startActivity(intent);
   }
 
-  /** Resets the value of {@link #associationState} to {@link AssociationState.NONE}. */
+  /** Resets the value of {@link #associationState}. */
   public void resetAssociationState() {
     associationState.postValue(AssociationState.NONE);
   }
@@ -256,6 +207,11 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
   /** Gets the name that is being advertised by the car. */
   public LiveData<String> getAdvertisedCarName() {
     return advertisedCarName;
+  }
+
+  /** Gets the Qr code bitmap. */
+  public LiveData<Bitmap> getQrCode() {
+    return bitmap;
   }
 
   /** Gets the generated pairing code. */
@@ -269,7 +225,7 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
   }
 
   /** Gets the current {@link AssociationState}. */
-  public MutableLiveData<AssociationState> getAssociationState() {
+  public LiveData<AssociationState> getAssociationState() {
     return associationState;
   }
 
@@ -283,38 +239,40 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
     return isServiceConnected;
   }
 
+  /** Starts adding associated device with the given identifier. */
+  public void startAssociation(@NonNull ParcelUuid identifier) {
+    associationIdentifier = identifier;
+    startAssociationInternal();
+  }
+
   /** Starts adding associated device. */
   public void startAssociation() {
-    if (associatedDeviceManager == null) {
-      return;
-    }
+    associationIdentifier = null;
+    startAssociationInternal();
+  }
+
+  private void startAssociationInternal() {
     associationState.postValue(AssociationState.PENDING);
     if (bluetoothAdapter == null || !bluetoothAdapter.isEnabled()) {
       return;
     }
-    try {
-      if (isSppEnabled
-          && bluetoothAdapter.getScanMode()
-              != BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
-        Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-        discoverableIntent.putExtra(
-            BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, (int) DISCOVERABLE_DURATION.getSeconds());
-        getApplication()
-            .startActivityAsUser(
-                discoverableIntent, UserHandle.of(ActivityManager.getCurrentUser()));
-      }
 
-      associatedDeviceManager.startAssociation(associationCallback);
-
-    } catch (RemoteException e) {
-      loge(TAG, "Failed to start association .", e);
-      associationState.postValue(AssociationState.ERROR);
+    if (isSppEnabled
+        && bluetoothAdapter.getScanMode() != BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
+      Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+      discoverableIntent.putExtra(
+          BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, (int) DISCOVERABLE_DURATION.getSeconds());
+      discoverableIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+      getApplication().startActivity(discoverableIntent);
     }
-    associationState.postValue(AssociationState.STARTING);
-  }
 
-  protected IAssociatedDeviceManager getAssociatedDeviceManager() {
-    return associatedDeviceManager;
+    if (associationIdentifier != null) {
+      connector.startAssociation(associationIdentifier, associationCallback);
+    } else {
+      connector.startAssociation(associationCallback);
+    }
+
+    associationState.postValue(AssociationState.STARTING);
   }
 
   private void updateDeviceDetails() {
@@ -368,63 +326,48 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
     }
   }
 
-  private void registerCallbacks() throws RemoteException {
-    if (associatedDeviceManager == null) {
-      return;
-    }
-    associatedDeviceManager.registerDeviceAssociationCallback(deviceAssociationCallback);
-    associatedDeviceManager.registerConnectionCallback(connectionCallback);
-  }
-
-  private void unregisterCallbacks() throws RemoteException {
-    if (associatedDeviceManager == null) {
-      return;
-    }
-    associatedDeviceManager.unregisterDeviceAssociationCallback(deviceAssociationCallback);
-    associatedDeviceManager.unregisterConnectionCallback(connectionCallback);
-  }
-
-  private void bindService() {
-    logd(TAG, "Binding to ConnectedDeviceService.");
-    Intent intent = new Intent(getApplication(), ConnectedDeviceService.class);
-    intent.setAction(ACTION_BIND_ASSOCIATION);
-    boolean success = getApplication().bindService(intent, connection, /* flags= */ 0);
-    if (!success) {
-      loge(TAG, "Unable to start binding process to service.");
-      associationState.postValue(AssociationState.ERROR);
-      return;
-    }
-
-    timeoutHandler.postDelayed(timeoutRunnable, BINDING_TIMEOUT_DURATION.toMillis());
-  }
-
-  private final ServiceConnection connection =
-      new ServiceConnection() {
+  private final Connector.Callback connectorCallback =
+      new Connector.Callback() {
         @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-          timeoutHandler.removeCallbacks(timeoutRunnable);
-          associatedDeviceManager = IAssociatedDeviceManager.Stub.asInterface(service);
+        public void onConnected() {
+          logd(TAG, "Connected to platform.");
           isServiceConnected.postValue(true);
-          try {
-            registerCallbacks();
-            setConnectedDevices(associatedDeviceManager.getActiveUserConnectedDevices());
-            associatedDeviceManager.retrievedActiveUserAssociatedDevices(
-                associatedDevicesRetrievedListener);
-          } catch (RemoteException e) {
-            loge(TAG, "Initial set failed onServiceConnected", e);
-          }
-          logd(TAG, "Service connected:" + name.getClassName());
-          IntentFilter filter = new IntentFilter();
-          filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
-          getApplication().registerReceiver(receiver, filter);
+          setConnectedDevices(connector.getConnectedDevices());
+          connector.retrieveAssociatedDevicesForDriver(associatedDevicesRetrievedListener);
         }
 
         @Override
-        public void onServiceDisconnected(ComponentName name) {
-          associatedDeviceManager = null;
-          logd(TAG, "Service disconnected: " + name.getClassName());
+        public void onDisconnected() {
+          logd(TAG, "Disconnected from the platform.");
           isServiceConnected.postValue(false);
-          bindService();
+          connector.connect();
+        }
+
+        @Override
+        public void onAssociatedDeviceAdded(@NonNull AssociatedDevice device) {
+          addOrUpdateAssociatedDevice(device);
+        }
+
+        @Override
+        public void onAssociatedDeviceRemoved(@NonNull AssociatedDevice device) {
+          removeAssociatedDevice(device);
+        }
+
+        @Override
+        public void onAssociatedDeviceUpdated(AssociatedDevice device) {
+          addOrUpdateAssociatedDevice(device);
+        }
+
+        @Override
+        public void onDeviceConnected(ConnectedDevice connectedDevice) {
+          connectedDevices.add(connectedDevice);
+          updateDeviceDetails();
+        }
+
+        @Override
+        public void onDeviceDisconnected(ConnectedDevice connectedDevice) {
+          connectedDevices.remove(connectedDevice);
+          updateDeviceDetails();
         }
       };
 
@@ -432,7 +375,21 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
       new IAssociationCallback.Stub() {
         @Override
         public void onAssociationStartSuccess(StartAssociationResponse response) {
-          // TODO(b/197868405) Generate QR code according to the [response].
+          Uri uri =
+              new CompanionUriBuilder()
+                  .scheme(SCHEME)
+                  .authority(AUTHORITY)
+                  .oobData(response.getOobData())
+                  .deviceId(response.getDeviceIdentifier())
+                  .build();
+
+          Bitmap code = QrCodeGenerator.createQrCode(uri.toString(), QR_CODE_SIZE_IN_PIXEL);
+          if (code == null) {
+            loge(TAG, "QR code is null, ignore.");
+            return;
+          }
+          bitmap.postValue(code);
+
           associationState.postValue(AssociationState.STARTED);
           String deviceName = response.getDeviceName();
           if (!deviceName.isEmpty()) {
@@ -463,6 +420,7 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
         @Override
         public void onAssociationCompleted() {
           associationState.postValue(AssociationState.COMPLETED);
+          associationIdentifier = null;
         }
       };
 
@@ -471,39 +429,6 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
         @Override
         public void onAssociatedDevicesRetrieved(List<AssociatedDevice> devices) {
           setAssociatedDevices(devices);
-        }
-      };
-
-  private final IDeviceAssociationCallback deviceAssociationCallback =
-      new IDeviceAssociationCallback.Stub() {
-        @Override
-        public void onAssociatedDeviceAdded(AssociatedDevice device) {
-          addOrUpdateAssociatedDevice(device);
-        }
-
-        @Override
-        public void onAssociatedDeviceRemoved(AssociatedDevice device) {
-          removeAssociatedDevice(device);
-        }
-
-        @Override
-        public void onAssociatedDeviceUpdated(AssociatedDevice device) {
-          addOrUpdateAssociatedDevice(device);
-        }
-      };
-
-  private final IConnectionCallback connectionCallback =
-      new IConnectionCallback.Stub() {
-        @Override
-        public void onDeviceConnected(ConnectedDevice connectedDevice) {
-          connectedDevices.add(connectedDevice);
-          updateDeviceDetails();
-        }
-
-        @Override
-        public void onDeviceDisconnected(ConnectedDevice connectedDevice) {
-          connectedDevices.remove(connectedDevice);
-          updateDeviceDetails();
         }
       };
 
@@ -525,8 +450,8 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
           bluetoothState.postValue(state);
           if (state == BluetoothAdapter.STATE_ON
               && associationState.getValue() == AssociationState.PENDING
-              && associatedDeviceManager != null) {
-            startAssociation();
+              && connector.isConnected()) {
+            startAssociationInternal();
           }
         }
       };

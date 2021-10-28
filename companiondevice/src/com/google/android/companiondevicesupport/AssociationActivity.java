@@ -273,6 +273,11 @@ public class AssociationActivity extends FragmentActivity {
   }
 
   private void showCompanionLandingFragment() {
+    if (getResources().getBoolean(R.bool.enable_qr_code)) {
+      logd(TAG, "Showing LandingFragment with QR code.");
+      showCompanionQrCodeLandingFragment();
+      return;
+    }
     CompanionLandingFragment fragment =
         (CompanionLandingFragment)
             getSupportFragmentManager().findFragmentByTag(COMPANION_LANDING_FRAGMENT_TAG);
@@ -280,6 +285,17 @@ public class AssociationActivity extends FragmentActivity {
       return;
     }
     fragment = CompanionLandingFragment.newInstance(isStartedForSuw);
+    launchFragment(fragment, COMPANION_LANDING_FRAGMENT_TAG);
+  }
+
+  private void showCompanionQrCodeLandingFragment() {
+    CompanionQrCodeLandingFragment fragment =
+        (CompanionQrCodeLandingFragment)
+            getSupportFragmentManager().findFragmentByTag(COMPANION_LANDING_FRAGMENT_TAG);
+    if (fragment != null && fragment.isVisible()) {
+      return;
+    }
+    fragment = CompanionQrCodeLandingFragment.newInstance(isStartedForSuw);
     launchFragment(fragment, COMPANION_LANDING_FRAGMENT_TAG);
   }
 

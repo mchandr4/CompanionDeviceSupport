@@ -18,10 +18,14 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <string name="settings_entry_title">Hamroh qurilma</string>
   <string name="default_device_name">Aloqador qurilma</string>
-  <string name="add_device_title">Aloqador qurilmani kiritish</string>
-  <string name="add_associated_device_title">Hamroh qurilmani ulang</string>
+  <string name="add_device_title">Hamroh ilovaga ulanish</string>
+  <string name="add_associated_device_title">MyCompanion ilovasiga ulanish</string>
   <string name="add_associated_device_subtitle">Harakatlanishni boshqarishga telefoningizni hamroh qurilma sifatida ishlatishingiz mumkin</string>
   <string name="associated_device_install_app">Telefoningizda <b>hamroh ilova</b> oʻrnatilganini tekshiring</string>
+  <string name="open_companion_app_instruction_text">Hamroh ilovani ochish</string>
+  <string name="enable_bluetooth_instruction_text">Bluetooth ulanishga ruxsat berish</string>
+  <string name="connect_to_targe_car_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s avtomobiliga ulanish</string>
+  <string name="connect_to_car_instruction_text">Avtomobilga ulanish</string>
   <string name="associated_device_pairing_code_title">Kodni telefoningizda tasdiqlang</string>
   <string name="associated_device_pairing_message">Bu kod telefoningizdagi bilan mos ekanini tasdiqlang</string>
   <string name="associated_device_success">Qurilma ulandi</string>
@@ -53,6 +57,9 @@
   <string name="retry">Qayta urinish</string>
   <string name="turn_on">Yoqish</string>
   <string name="not_now">Hozir emas</string>
+  <string name="connect">Ulash</string>
+  <string name="disconnect">Uzish</string>
+  <string name="skip">Tashlab ketish</string>
   <string name="connected">Ulandi</string>
   <string name="notDetected">Aniqlanmadi</string>
   <string name="disconnected">Uzildi</string>
@@ -84,4 +91,5 @@
     <item quantity="other">%d ta yangi xabar</item>
   </plurals>
   <string name="name_not_available">Bu nom mavjud emas</string>
+  <string name="ble_device_name_prefix">Avtomobil\u00A0</string>
 </resources>

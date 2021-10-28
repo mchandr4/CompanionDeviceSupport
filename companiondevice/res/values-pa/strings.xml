@@ -18,10 +18,14 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <string name="settings_entry_title">Companion Device</string>
   <string name="default_device_name">ਸੰਬੰਧਿਤ ਡੀਵਾਈਸ</string>
-  <string name="add_device_title">ਸੰਬੰਧਿਤ ਡੀਵਾਈਸ ਨੂੰ ਸ਼ਾਮਲ ਕਰੋ</string>
-  <string name="add_associated_device_title">ਸੰਬੰਧੀ ਡੀਵਾਈਸ ਨੂੰ ਕਨੈਕਟ ਕਰੋ</string>
+  <string name="add_device_title">ਸੰਬੰਧੀ ਐਪ ਨਾਲ ਕਨੈਕਟ ਕਰੋ</string>
+  <string name="add_associated_device_title">MyCompanion ਨਾਲ ਕਨੈਕਟ ਕਰੋ</string>
   <string name="add_associated_device_subtitle">ਤੁਸੀਂ ਆਪਣੇ ਡਰਾਈਵਿੰਗ ਅਨੁਭਵ ਦੇ ਪ੍ਰਬੰਧਨ ਵਿੱਚ ਮਦਦ ਲਈ ਆਪਣੇ ਫ਼ੋਨ ਨੂੰ ਸੰਬੰਧੀ ਡੀਵਾਈਸ ਵਜੋਂ ਵਰਤ ਸਕਦੇ ਹੋ</string>
   <string name="associated_device_install_app">ਪੱਕਾ ਕਰੋ ਕਿ ਤੁਹਾਡੇ ਫ਼ੋਨ \'ਤੇ <b>ਸੰਬੰਧੀ ਐਪ</b> ਸਥਾਪਤ ਹੈ</string>
+  <string name="open_companion_app_instruction_text">ਸੰਬੰਧੀ ਐਪ ਖੋਲ੍ਹੋ</string>
+  <string name="enable_bluetooth_instruction_text">ਬਲੂਟੁੱਥ ਕਨੈਕਸ਼ਨ ਨੂੰ ਇਜਾਜ਼ਤ ਦਿਓ</string>
+  <string name="connect_to_targe_car_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s ਨਾਲ ਕਨੈਕਟ ਕਰੋ</string>
+  <string name="connect_to_car_instruction_text">ਕਾਰ ਨਾਲ ਕਨੈਕਟ ਕਰੋ</string>
   <string name="associated_device_pairing_code_title">ਫ਼ੋਨ \'ਤੇ ਕੋਡ ਦੀ ਤਸਦੀਕ ਕਰੋ</string>
   <string name="associated_device_pairing_message">ਤਸਦੀਕ ਕਰੋ ਕਿ ਇਹ ਤੁਹਾਡੇ ਫ਼ੋਨ \'ਤੇ ਦਿਖਾਏ ਜਾ ਰਹੇ ਕੋਡ ਨਾਲ ਮੇਲ ਖਾਂਦਾ ਹੈ</string>
   <string name="associated_device_success">ਡੀਵਾਈਸ ਨੂੰ ਸਫਲਤਾਪੂਰਵਕ ਜੋੜਿਆ ਗਿਆ ਹੈ</string>
@@ -53,6 +57,9 @@
   <string name="retry">ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ</string>
   <string name="turn_on">ਚਾਲੂ ਕਰੋ</string>
   <string name="not_now">ਹੁਣੇ ਨਹੀਂ</string>
+  <string name="connect">ਕਨੈਕਟ ਕਰੋ</string>
+  <string name="disconnect">ਡਿਸਕਨੈਕਟ ਕਰੋ</string>
+  <string name="skip">ਛੱਡੋ</string>
   <string name="connected">ਕਨੈਕਟ ਹੈ</string>
   <string name="notDetected">ਪਤਾ ਨਹੀਂ ਲੱਗਾ</string>
   <string name="disconnected">ਡਿਸਕਨੈਕਟ ਹੋਇਆ</string>
@@ -84,4 +91,5 @@
     <item quantity="other">%d ਨਵੇਂ ਸੁਨੇਹੇ</item>
   </plurals>
   <string name="name_not_available">ਨਾਮ ਉਪਲਬਧ ਨਹੀਂ ਹੈ</string>
+  <string name="ble_device_name_prefix">ਵਾਹਨ\u00A0</string>
 </resources>

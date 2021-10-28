@@ -18,15 +18,20 @@ package com.google.android.connecteddevice.oob
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.companionprotos.CapabilitiesExchangeProto.CapabilitiesExchange.OobChannelType
+import com.google.android.companionprotos.OutOfBandAssociationToken
+import com.google.android.connecteddevice.model.OobData
 import com.google.android.connecteddevice.model.OobEligibleDevice
 import com.google.android.connecteddevice.transport.ConnectionProtocol
 import com.google.android.connecteddevice.transport.ProtocolDevice
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.spy
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
+import java.io.IOException
 import java.util.UUID
 import org.junit.Assert.assertThrows
 import org.junit.Before
@@ -37,6 +42,7 @@ import org.junit.runner.RunWith
 class OobRunnerTest {
   private val mockOobRunnerCallback: OobRunner.Callback = mock()
   private val mockOobChannelFactory: OobChannelFactory = mock()
+  private val testSecurityVersion = OobRunner.MIN_SECURITY_VERSION_FOR_OOB_PROTO
   private val supportedTypesSingle = listOf(OobChannelType.BT_RFCOMM.name)
   private val supportedTypesTwo =
     listOf(OobChannelType.BT_RFCOMM.name, OobChannelType.OOB_CHANNEL_UNKNOWN.name)
@@ -46,7 +52,7 @@ class OobRunnerTest {
 
   @Before
   fun setUp() {
-    testOobChannel = TestOobChannel()
+    testOobChannel = spy(TestOobChannel())
     whenever(mockOobChannelFactory.createOobChannel(any())).thenReturn(testOobChannel)
     testProtocolDevice = ProtocolDevice(TestConnectionProtocol(), "testProtocolId")
   }
@@ -59,10 +65,36 @@ class OobRunnerTest {
         oobRunner.startOobDataExchange(
           testProtocolDevice,
           listOf(OobChannelType.BT_RFCOMM),
+          testSecurityVersion,
           mockOobRunnerCallback
         )
       )
       .isTrue()
+  }
+
+  @Test
+  fun startOobDataExchange_PreOobDataProto_sendRawBytes() {
+    testOobChannel.oobDataExchangeResult = true
+    oobRunner.generateOobData()
+
+    assertThat(
+        oobRunner.startOobDataExchange(
+          testProtocolDevice,
+          listOf(OobChannelType.BT_RFCOMM),
+          testSecurityVersion - 1,
+          mockOobRunnerCallback
+        )
+      )
+      .isTrue()
+    testOobChannel.oobChannelCallback!!.onOobExchangeSuccess()
+
+    val data =
+      argumentCaptor<ByteArray>().run {
+        verify(testOobChannel).sendOobData(capture())
+        firstValue
+      }
+
+    assertThrows(IOException::class.java) { OutOfBandAssociationToken.parseFrom(data) }
   }
 
   @Test
@@ -73,6 +105,7 @@ class OobRunnerTest {
         oobRunner.startOobDataExchange(
           testProtocolDevice,
           listOf(OobChannelType.BT_RFCOMM),
+          testSecurityVersion,
           mockOobRunnerCallback
         )
       )
@@ -87,6 +120,7 @@ class OobRunnerTest {
         oobRunner.startOobDataExchange(
           testProtocolDevice,
           listOf(OobChannelType.OOB_CHANNEL_UNKNOWN),
+          testSecurityVersion,
           mockOobRunnerCallback
         )
       )
@@ -102,6 +136,7 @@ class OobRunnerTest {
         oobRunner.startOobDataExchange(
           testProtocolDevice,
           listOf(OobChannelType.BT_RFCOMM, OobChannelType.OOB_CHANNEL_UNKNOWN),
+          testSecurityVersion,
           mockOobRunnerCallback
         )
       )
@@ -116,6 +151,7 @@ class OobRunnerTest {
     oobRunner.startOobDataExchange(
       testProtocolDevice,
       listOf(OobChannelType.BT_RFCOMM),
+      testSecurityVersion,
       mockOobRunnerCallback
     )
     assertThat(testOobChannel.oobChannelCallback).isNotNull()
@@ -130,6 +166,7 @@ class OobRunnerTest {
     oobRunner.startOobDataExchange(
       testProtocolDevice,
       listOf(OobChannelType.BT_RFCOMM),
+      testSecurityVersion,
       mockOobRunnerCallback
     )
     testOobChannel.oobChannelCallback!!.onOobExchangeSuccess()
@@ -144,6 +181,7 @@ class OobRunnerTest {
     oobRunner.startOobDataExchange(
       testProtocolDevice,
       listOf(OobChannelType.BT_RFCOMM),
+      testSecurityVersion,
       mockOobRunnerCallback
     )
     assertThat(testOobChannel.oobChannelCallback).isNotNull()
@@ -159,6 +197,7 @@ class OobRunnerTest {
     oobRunner.startOobDataExchange(
       testProtocolDevice,
       listOf(OobChannelType.BT_RFCOMM),
+      testSecurityVersion,
       mockOobRunnerCallback
     )
     oobRunner.reset()
@@ -181,13 +220,11 @@ class OobRunnerTest {
   fun generateOobData_keyAndNoncesAreNonNullAndOobDataIsSetCorrectly() {
     val oobData = oobRunner.generateOobData()
     assertThat(oobRunner.encryptionKey).isNotNull()
-    assertThat(oobRunner.encryptionIv).isNotNull()
-    assertThat(oobRunner.decryptionIv).isNotNull()
-    assertThat(oobRunner.encryptionIv).isNotEqualTo(oobRunner.decryptionIv)
+    assertThat(oobRunner.ihuIv).isNotNull()
+    assertThat(oobRunner.mobileIv).isNotNull()
+    assertThat(oobRunner.ihuIv).isNotEqualTo(oobRunner.mobileIv)
     assertThat(oobData)
-      .isEqualTo(
-        oobRunner.decryptionIv + oobRunner.encryptionIv + oobRunner.encryptionKey!!.encoded
-      )
+      .isEqualTo(OobData(oobRunner.encryptionKey!!.encoded, oobRunner.ihuIv, oobRunner.mobileIv))
   }
 
   @Test
@@ -231,11 +268,11 @@ class OobRunnerTest {
   }
 
   private fun switchClientAndServerRole() {
-    val encryptionIv = oobRunner.encryptionIv
-    oobRunner.encryptionIv = oobRunner.decryptionIv
-    oobRunner.decryptionIv = encryptionIv
+    val encryptionIv = oobRunner.ihuIv
+    oobRunner.ihuIv = oobRunner.mobileIv
+    oobRunner.mobileIv = encryptionIv
   }
-  private class TestOobChannel : OobChannel {
+  private open class TestOobChannel : OobChannel {
     var oobDataExchangeResult = false
     var oobChannelCallback: OobChannel.Callback? = null
     var isInterrupted = false

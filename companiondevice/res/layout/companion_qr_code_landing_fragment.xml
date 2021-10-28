@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2021 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+  <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:orientation="vertical"
+      android:gravity="center_horizontal"
+      android:paddingVertical="?attr/pageMarginVertical"
+      android:layout_marginHorizontal="?attr/pageMarginHorizontal">
+    <ImageView
+        android:id="@+id/device_icon"
+        android:layout_width="?attr/companionPrimaryIconSize"
+        android:layout_height="?attr/companionPrimaryIconSize"
+        android:gravity="center"
+        android:src="@drawable/ic_smartphone_24dp"
+        android:tint="?attr/companionColorAccent"
+        tools:ignore="ContentDescription" />
+    <TextView
+        android:id="@+id/add_associated_device_title"
+        android:text="@string/add_associated_device_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_marginVertical="?attr/contentMarginVertical"
+        style="@style/CompanionTitleTextStyle" />
+    <TextView
+        android:id="@+id/add_associated_device_subtitle"
+        android:text="@string/add_associated_device_subtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        style="@style/CompanionSubtitleTextStyle" />
+    <LinearLayout
+        android:id="@+id/add_button_and_divider"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal">
+      <View
+          android:layout_marginTop="?attr/companionDividerMargin"
+          style="@style/HorizontalDividerStyle" />
+      <include layout="@layout/add_associated_device_button"/>
+      <View
+          android:layout_marginBottom="?attr/companionDividerMargin"
+          style="@style/HorizontalDividerStyle" />
+    </LinearLayout>
+    <ImageView
+        android:id="@+id/qr_code"
+        android:layout_width="@dimen/qr_code_size"
+        android:layout_height="@dimen/qr_code_size"
+        android:visibility="gone"
+        tools:ignore="ContentDescription" />
+    <include layout="@layout/association_qr_code_instructions_horizontal"/>
+  </LinearLayout>
+</ScrollView>

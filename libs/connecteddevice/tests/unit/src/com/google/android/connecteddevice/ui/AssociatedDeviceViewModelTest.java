@@ -20,27 +20,28 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.app.Application;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
+import android.os.ParcelUuid;
 import android.os.RemoteException;
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule;
 import androidx.lifecycle.Observer;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
-import com.google.android.connecteddevice.api.IAssociatedDeviceManager;
+import com.google.android.connecteddevice.api.FakeConnector;
 import com.google.android.connecteddevice.api.IAssociationCallback;
-import com.google.android.connecteddevice.api.IConnectionCallback;
-import com.google.android.connecteddevice.api.IDeviceAssociationCallback;
-import com.google.android.connecteddevice.api.IOnAssociatedDevicesRetrievedListener;
 import com.google.android.connecteddevice.model.AssociatedDevice;
 import com.google.android.connecteddevice.model.AssociatedDeviceDetails;
 import com.google.android.connecteddevice.model.ConnectedDevice;
+import com.google.android.connecteddevice.model.OobData;
 import com.google.android.connecteddevice.model.StartAssociationResponse;
 import com.google.android.connecteddevice.ui.AssociatedDeviceViewModel.AssociationState;
-import java.util.Collections;
+import java.util.UUID;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -59,6 +60,7 @@ public final class AssociatedDeviceViewModelTest {
   private static final String TEST_CAR_NAME = "test_car_name";
   private static final String TEST_VERIFICATION_CODE = "test_code";
   private static final String TEST_BLE_DEVICE_NAME_PREFIX = "TestPrefix";
+  private static final OobData TEST_OOB_DATA = new OobData(new byte[0], new byte[0], new byte[0]);
 
   @Rule public final MockitoRule mockito = MockitoJUnit.rule();
 
@@ -70,7 +72,8 @@ public final class AssociatedDeviceViewModelTest {
   private final BluetoothAdapter adapter =
       application.getSystemService(BluetoothManager.class).getAdapter();
 
-  @Mock private IAssociatedDeviceManager mockAssociatedDeviceManager;
+  private final FakeConnector fakeConnector = spy(new FakeConnector());
+
   @Mock private Observer<AssociationState> mockAssociationStateObserver;
   @Mock private Observer<AssociatedDeviceDetails> mockDeviceDetailsObserver;
   @Mock private Observer<String> mockCarNameObserver;
@@ -80,75 +83,70 @@ public final class AssociatedDeviceViewModelTest {
   private AssociatedDeviceViewModel viewModel;
 
   private IAssociationCallback associationCallback;
-  private IDeviceAssociationCallback deviceAssociationCallback;
-  private IConnectionCallback connectionCallback;
-  private IOnAssociatedDevicesRetrievedListener devicesRetrievedListener;
 
   @Before
   public void setUp() throws RemoteException {
     viewModel =
         new AssociatedDeviceViewModel(
-            application,
-            mockAssociatedDeviceManager,
-            /* isSppEnabled= */ false,
-            TEST_BLE_DEVICE_NAME_PREFIX);
+            application, /* isSppEnabled= */ false, TEST_BLE_DEVICE_NAME_PREFIX, fakeConnector);
     adapter.enable();
-    captureCallbacks();
   }
 
   @Test
   public void acceptVerification() throws RemoteException {
     viewModel.acceptVerification();
-    verify(mockAssociatedDeviceManager).acceptVerification();
+    verify(fakeConnector).acceptVerification();
   }
 
   @Test
-  public void removeCurrentDevice() throws RemoteException {
-    AssociatedDevice testDevice = createAssociatedDevice(/* isConnectionEnabled= */ true);
-    devicesRetrievedListener.onAssociatedDevicesRetrieved(Collections.singletonList(testDevice));
+  public void removeCurrentDevice() {
+    fakeConnector.addAssociatedDevice(createAssociatedDevice(/* isConnectionEnabled= */ true));
     viewModel.removeCurrentDevice();
-    verify(mockAssociatedDeviceManager).removeAssociatedDevice(eq(TEST_ASSOCIATED_DEVICE_ID));
+    verify(fakeConnector).removeAssociatedDevice(eq(TEST_ASSOCIATED_DEVICE_ID));
   }
 
   @Test
-  public void toggleConnectionStatusForCurrentDevice_disableDevice() throws RemoteException {
-    AssociatedDevice testDevice = createAssociatedDevice(/* isConnectionEnabled= */ true);
-    devicesRetrievedListener.onAssociatedDevicesRetrieved(Collections.singletonList(testDevice));
+  public void toggleConnectionStatusForCurrentDevice_disableDevice() {
+    fakeConnector.addAssociatedDevice(createAssociatedDevice(/* isConnectionEnabled= */ true));
     viewModel.toggleConnectionStatusForCurrentDevice();
-    verify(mockAssociatedDeviceManager)
-        .disableAssociatedDeviceConnection(eq(TEST_ASSOCIATED_DEVICE_ID));
+    verify(fakeConnector).disableAssociatedDeviceConnection(eq(TEST_ASSOCIATED_DEVICE_ID));
   }
 
   @Test
-  public void toggleConnectionStatusForCurrentDevice_enableDevice() throws RemoteException {
-    AssociatedDevice testDevice = createAssociatedDevice(/* isConnectionEnabled= */ false);
-    devicesRetrievedListener.onAssociatedDevicesRetrieved(Collections.singletonList(testDevice));
+  public void toggleConnectionStatusForCurrentDevice_enableDevice() {
+    fakeConnector.addAssociatedDevice(createAssociatedDevice(/* isConnectionEnabled= */ false));
     viewModel.toggleConnectionStatusForCurrentDevice();
-    verify(mockAssociatedDeviceManager)
-        .enableAssociatedDeviceConnection(eq(TEST_ASSOCIATED_DEVICE_ID));
+    verify(fakeConnector).enableAssociatedDeviceConnection(eq(TEST_ASSOCIATED_DEVICE_ID));
   }
 
   @Test
-  public void startAssociation_deviceNotReady() throws RemoteException {
+  public void startAssociation_startWithIdentifier() {
+    ParcelUuid testIdentifier = new ParcelUuid(UUID.randomUUID());
+    viewModel.startAssociation(testIdentifier);
+    verify(fakeConnector).startAssociation(eq(testIdentifier), any());
+  }
+
+  @Test
+  public void startAssociation_deviceNotReady() {
     adapter.disable();
     viewModel.startAssociation();
     viewModel.getAssociationState().observeForever(mockAssociationStateObserver);
     verify(mockAssociationStateObserver).onChanged(AssociationState.PENDING);
-    verify(mockAssociatedDeviceManager, never()).startAssociation(any());
+    verify(fakeConnector, never()).startAssociation(any());
   }
 
   @Test
-  public void startAssociation_waitingForPasswordSetup() throws RemoteException {
+  public void startAssociation_waitingForPasswordSetup() {
     viewModel.startAssociation();
     viewModel.getAssociationState().observeForever(mockAssociationStateObserver);
     verify(mockAssociationStateObserver).onChanged(AssociationState.STARTING);
-    verify(mockAssociatedDeviceManager).startAssociation(any());
+    verify(fakeConnector).startAssociation(any());
   }
 
   @Test
   public void startAssociation_inProgress() throws RemoteException {
     StartAssociationResponse response =
-        new StartAssociationResponse(new byte[0], new byte[0], TEST_CAR_NAME);
+        new StartAssociationResponse(TEST_OOB_DATA, new byte[0], TEST_CAR_NAME);
     viewModel.startAssociation();
     captureAssociationCallback();
     associationCallback.onAssociationStartSuccess(response);
@@ -161,7 +159,7 @@ public final class AssociatedDeviceViewModelTest {
   @Test
   public void startAssociation_waitingForVerification() throws RemoteException {
     StartAssociationResponse response =
-        new StartAssociationResponse(new byte[0], new byte[0], TEST_CAR_NAME);
+        new StartAssociationResponse(TEST_OOB_DATA, new byte[0], TEST_CAR_NAME);
     viewModel.startAssociation();
     captureAssociationCallback();
     associationCallback.onAssociationStartSuccess(response);
@@ -175,7 +173,7 @@ public final class AssociatedDeviceViewModelTest {
   @Test
   public void startAssociation_associationCompleted() throws RemoteException {
     StartAssociationResponse response =
-        new StartAssociationResponse(new byte[0], new byte[0], TEST_CAR_NAME);
+        new StartAssociationResponse(TEST_OOB_DATA, new byte[0], TEST_CAR_NAME);
     viewModel.startAssociation();
     captureAssociationCallback();
     associationCallback.onAssociationStartSuccess(response);
@@ -186,114 +184,106 @@ public final class AssociatedDeviceViewModelTest {
   }
 
   @Test
-  public void stopAssociation() throws RemoteException {
+  public void retryAssociation_retryWithPreviousIdentifier() {
+    ParcelUuid testIdentifier = new ParcelUuid(UUID.randomUUID());
+    viewModel.startAssociation(testIdentifier);
+    viewModel.retryAssociation();
+    verify(fakeConnector, times(2)).startAssociation(eq(testIdentifier), any());
+  }
+
+  @Test
+  public void stopAssociation() {
     viewModel.startAssociation();
     viewModel.stopAssociation();
     viewModel.getAssociationState().observeForever(mockAssociationStateObserver);
     verify(mockAssociationStateObserver).onChanged(AssociationState.NONE);
-    verify(mockAssociatedDeviceManager).stopAssociation();
+    verify(fakeConnector).stopAssociation();
   }
 
   @Test
-  public void retrieveAssociatedDevice() throws RemoteException {
+  public void retrieveAssociatedDevice() {
     AssociatedDevice testDevice = createAssociatedDevice(/* isConnectionEnabled= */ true);
-    devicesRetrievedListener.onAssociatedDevicesRetrieved(Collections.singletonList(testDevice));
+    fakeConnector.addAssociatedDevice(testDevice);
     viewModel.getCurrentDeviceDetails().observeForever(mockDeviceDetailsObserver);
     assertThat(viewModel.getCurrentDeviceDetails().getValue().getAssociatedDevice())
         .isEqualTo(testDevice);
   }
 
   @Test
-  public void associatedDeviceUpdated() throws RemoteException {
+  public void associatedDeviceUpdated() {
     AssociatedDevice testDevice = createAssociatedDevice(/* isConnectionEnabled= */ true);
-    devicesRetrievedListener.onAssociatedDevicesRetrieved(Collections.singletonList(testDevice));
+    fakeConnector.addAssociatedDevice(testDevice);
     AssociatedDevice updatedDevice =
         new AssociatedDevice(
             TEST_ASSOCIATED_DEVICE_ID,
             TEST_ASSOCIATED_DEVICE_ADDRESS,
             TEST_ASSOCIATED_DEVICE_NAME_2,
             /* isConnectionEnabled= */ true);
-    deviceAssociationCallback.onAssociatedDeviceUpdated(updatedDevice);
+    fakeConnector.getCallback().onAssociatedDeviceUpdated(updatedDevice);
     viewModel.getCurrentDeviceDetails().observeForever(mockDeviceDetailsObserver);
     assertThat(viewModel.getCurrentDeviceDetails().getValue().getDeviceName())
         .isEqualTo(TEST_ASSOCIATED_DEVICE_NAME_2);
   }
 
   @Test
-  public void removeAssociatedDevice() throws RemoteException {
+  public void removeAssociatedDevice() {
     AssociatedDevice testDevice = createAssociatedDevice(/* isConnectionEnabled= */ true);
-    devicesRetrievedListener.onAssociatedDevicesRetrieved(Collections.singletonList(testDevice));
+    fakeConnector.addAssociatedDevice(testDevice);
     viewModel.removeCurrentDevice();
-    verify(mockAssociatedDeviceManager).removeAssociatedDevice(eq(TEST_ASSOCIATED_DEVICE_ID));
+    verify(fakeConnector).removeAssociatedDevice(eq(TEST_ASSOCIATED_DEVICE_ID));
   }
 
   @Test
-  public void associatedDeviceRemoved() throws RemoteException {
+  public void associatedDeviceRemoved() {
     AssociatedDevice testDevice = createAssociatedDevice(/* isConnectionEnabled= */ true);
-    devicesRetrievedListener.onAssociatedDevicesRetrieved(Collections.singletonList(testDevice));
-    deviceAssociationCallback.onAssociatedDeviceRemoved(testDevice);
+    fakeConnector.addAssociatedDevice(testDevice);
+
+    fakeConnector.removeAssociatedDevice(testDevice);
+
     viewModel.getRemovedDevice().observeForever(mockRemovedDeviceObserver);
     verify(mockRemovedDeviceObserver).onChanged(testDevice);
   }
 
   @Test
-  public void associatedDeviceConnected() throws RemoteException {
+  public void associatedDeviceConnected() {
     AssociatedDevice testAssociatedDevice = createAssociatedDevice(/* isConnectionEnabled= */ true);
-    devicesRetrievedListener.onAssociatedDevicesRetrieved(
-        Collections.singletonList(testAssociatedDevice));
+    fakeConnector.addAssociatedDevice(testAssociatedDevice);
     ConnectedDevice testConnectedDevice = createConnectedDevice();
-    connectionCallback.onDeviceConnected(testConnectedDevice);
+
+    fakeConnector.getCallback().onDeviceConnected(testConnectedDevice);
+
     viewModel.getCurrentDeviceDetails().observeForever(mockDeviceDetailsObserver);
     assertThat(viewModel.getCurrentDeviceDetails().getValue().isConnected()).isTrue();
   }
 
   @Test
-  public void associatedDeviceDisconnected() throws RemoteException {
+  public void associatedDeviceDisconnected() {
     AssociatedDevice testAssociatedDevice = createAssociatedDevice(/* isConnectionEnabled= */ true);
-    devicesRetrievedListener.onAssociatedDevicesRetrieved(
-        Collections.singletonList(testAssociatedDevice));
+    fakeConnector.addAssociatedDevice(testAssociatedDevice);
     ConnectedDevice testConnectedDevice = createConnectedDevice();
-    connectionCallback.onDeviceConnected(testConnectedDevice);
-    connectionCallback.onDeviceDisconnected(testConnectedDevice);
+
+    fakeConnector.getCallback().onDeviceConnected(testConnectedDevice);
+    fakeConnector.getCallback().onDeviceDisconnected(testConnectedDevice);
+
     viewModel.getCurrentDeviceDetails().observeForever(mockDeviceDetailsObserver);
     assertThat(viewModel.getCurrentDeviceDetails().getValue().isConnected()).isFalse();
   }
 
   @Test
-  public void onCleard_doesNotThrowBeforeConnectionEstablished() {
-    AssociatedDeviceViewModel associatedDeviceViewModel = new AssociatedDeviceViewModel(
-        ApplicationProvider.getApplicationContext(),
-        /* associatedDeviceManager= */ null,
-        /* isSppEnabled= */ false,
-        TEST_BLE_DEVICE_NAME_PREFIX);
+  public void onCleared_doesNotThrowBeforeConnectionEstablished() {
+    AssociatedDeviceViewModel associatedDeviceViewModel =
+        new AssociatedDeviceViewModel(
+            ApplicationProvider.getApplicationContext(),
+            /* isSppEnabled= */ false,
+            TEST_BLE_DEVICE_NAME_PREFIX);
     associatedDeviceViewModel.onCleared();
   }
 
-  private void captureAssociationCallback() throws RemoteException {
+  private void captureAssociationCallback() {
     ArgumentCaptor<IAssociationCallback> associationCallbackCaptor =
         ArgumentCaptor.forClass(IAssociationCallback.class);
-    verify(mockAssociatedDeviceManager).startAssociation(associationCallbackCaptor.capture());
+    verify(fakeConnector).startAssociation(associationCallbackCaptor.capture());
     associationCallback = associationCallbackCaptor.getValue();
-  }
-
-  private void captureCallbacks() throws RemoteException {
-    ArgumentCaptor<IDeviceAssociationCallback> deviceAssociationCallbackCaptor =
-        ArgumentCaptor.forClass(IDeviceAssociationCallback.class);
-    verify(mockAssociatedDeviceManager)
-        .registerDeviceAssociationCallback(deviceAssociationCallbackCaptor.capture());
-    deviceAssociationCallback = deviceAssociationCallbackCaptor.getValue();
-
-    ArgumentCaptor<IConnectionCallback> connectionCallbackCaptor =
-        ArgumentCaptor.forClass(IConnectionCallback.class);
-    verify(mockAssociatedDeviceManager)
-        .registerConnectionCallback(connectionCallbackCaptor.capture());
-    connectionCallback = connectionCallbackCaptor.getValue();
-
-    ArgumentCaptor<IOnAssociatedDevicesRetrievedListener> devicesRetrievedListenerCaptor =
-        ArgumentCaptor.forClass(IOnAssociatedDevicesRetrievedListener.class);
-    verify(mockAssociatedDeviceManager)
-        .retrievedActiveUserAssociatedDevices(devicesRetrievedListenerCaptor.capture());
-    devicesRetrievedListener = devicesRetrievedListenerCaptor.getValue();
   }
 
   private static AssociatedDevice createAssociatedDevice(boolean isConnectionEnabled) {

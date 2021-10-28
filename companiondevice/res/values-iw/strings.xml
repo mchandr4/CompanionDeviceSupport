@@ -18,10 +18,14 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <string name="settings_entry_title">Companion Device</string>
   <string name="default_device_name">מכשיר משויך</string>
-  <string name="add_device_title">הוספת מכשיר משויך</string>
-  <string name="add_associated_device_title">חיבור המכשיר הנלווה</string>
+  <string name="add_device_title">התחברות לאפליקציה הנלווית</string>
+  <string name="add_associated_device_title">התחברות אל MyCompanion</string>
   <string name="add_associated_device_subtitle">אפשר להשתמש בטלפון כמכשיר נלווה לעזרה בניהול חוויית הנהיגה</string>
   <string name="associated_device_install_app">יש לוודא ש<b>האפליקציה הנלווית</b> מותקנת בטלפון</string>
+  <string name="open_companion_app_instruction_text">פותחים את האפליקציה הנלווית</string>
+  <string name="enable_bluetooth_instruction_text">מפעילים את חיבור ה-Bluetooth</string>
+  <string name="connect_to_targe_car_instruction_text">מתחברים אל &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="connect_to_car_instruction_text">מתחברים אל המכונית</string>
   <string name="associated_device_pairing_code_title">צריך לאשר את הקוד בטלפון</string>
   <string name="associated_device_pairing_message">יש לאשר שזה מתאים לקוד שמופיע בטלפון שלך</string>
   <string name="associated_device_success">המכשיר שויך בהצלחה</string>
@@ -53,6 +57,9 @@
   <string name="retry">ניסיון חוזר</string>
   <string name="turn_on">הפעלה</string>
   <string name="not_now">לא עכשיו</string>
+  <string name="connect">התחברות</string>
+  <string name="disconnect">התנתקות</string>
+  <string name="skip">דילוג</string>
   <string name="connected">מחובר</string>
   <string name="notDetected">לא מזוהה</string>
   <string name="disconnected">מנותק</string>
@@ -86,4 +93,5 @@
     <item quantity="other">%d הודעות חדשות</item>
   </plurals>
   <string name="name_not_available">השם לא זמין</string>
+  <string name="ble_device_name_prefix">רכב\u00A0</string>
 </resources>

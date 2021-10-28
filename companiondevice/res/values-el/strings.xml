@@ -18,10 +18,14 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <string name="settings_entry_title">Companion Device</string>
   <string name="default_device_name">Συσχετισμένη συσκευή</string>
-  <string name="add_device_title">Προσθήκη συσχετισμένης συσκευής</string>
-  <string name="add_associated_device_title">Σύνδεση συνοδευτικής συσκευής</string>
+  <string name="add_device_title">Σύνδεση σε συνοδευτική εφαρμογή</string>
+  <string name="add_associated_device_title">Σύνδεση στο MyCompanion</string>
   <string name="add_associated_device_subtitle">Μπορείτε να χρησιμοποιήσετε το τηλέφωνό σας ως συνοδευτική συσκευή στην εμπειρία οδήγησής σας.</string>
   <string name="associated_device_install_app">Βεβαιωθείτε ότι εγκαταστάθηκε η <b>Συνοδευτική εφαρμογή</b>.</string>
+  <string name="open_companion_app_instruction_text">Άνοιγμα συνοδευτικής εφαρμογής</string>
+  <string name="enable_bluetooth_instruction_text">Να επιτρέπεται η σύνδεση Bluetooth</string>
+  <string name="connect_to_targe_car_instruction_text">Σύνδεση με &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="connect_to_car_instruction_text">Σύνδεση στο αυτοκίνητο</string>
   <string name="associated_device_pairing_code_title">Επιβεβαίωση κωδικού στο τηλέφωνο</string>
   <string name="associated_device_pairing_message">Βεβαιωθείτε ότι συμφωνεί με τον κωδικό που εμφανίζεται στο τηλέφωνό σας.</string>
   <string name="associated_device_success">Η συσκευή συσχετίστηκε με επιτυχία.</string>
@@ -53,6 +57,9 @@
   <string name="retry">Επανάληψη</string>
   <string name="turn_on">Ενεργοποίηση</string>
   <string name="not_now">Όχι τώρα</string>
+  <string name="connect">Σύνδεση</string>
+  <string name="disconnect">Αποσύνδεση</string>
+  <string name="skip">Παράβλεψη</string>
   <string name="connected">Συνδέθηκε</string>
   <string name="notDetected">Δεν εντοπίστηκε</string>
   <string name="disconnected">Αποσυνδέθηκε</string>
@@ -84,4 +91,5 @@
     <item quantity="other">%d νέα μηνύματα</item>
   </plurals>
   <string name="name_not_available">Το όνομα δεν είναι διαθέσιμο.</string>
+  <string name="ble_device_name_prefix">Όχημα\u00A0</string>
 </resources>

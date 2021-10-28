@@ -86,6 +86,7 @@ class ChannelResolver(
   private var deviceId: UUID? = null
   private var challenge: ByteArray? = null
   private var oobRunner: OobRunner? = null
+  private var resolvedSecurityVersion: Int = 0
 
   /** Resolves the [MultiProtocolSecureChannel] for a reconnect with [deviceId] and [challenge]. */
   fun resolveReconnect(deviceId: UUID, challenge: ByteArray) {
@@ -156,7 +157,7 @@ class ChannelResolver(
     }
 
     val resolvedMessageVersion = min(MAX_MESSAGING_VERSION, version.maxSupportedMessagingVersion)
-    val resolvedSecurityVersion = min(MAX_SECURITY_VERSION, version.maxSupportedSecurityVersion)
+    resolvedSecurityVersion = min(MAX_SECURITY_VERSION, version.maxSupportedSecurityVersion)
     logd(
       TAG,
       "Resolved to messaging version $resolvedMessageVersion and security version " +
@@ -203,6 +204,7 @@ class ChannelResolver(
     if (!oobRunner.startOobDataExchange(
         device,
         sharedOobChannels,
+        resolvedSecurityVersion,
         generateOobRunnerCallback(device)
       )
     ) {

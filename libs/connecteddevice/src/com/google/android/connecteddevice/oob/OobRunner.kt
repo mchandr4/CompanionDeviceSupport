@@ -19,10 +19,13 @@ package com.google.android.connecteddevice.oob
 import android.security.keystore.KeyProperties
 import androidx.annotation.VisibleForTesting
 import com.google.android.companionprotos.CapabilitiesExchangeProto.CapabilitiesExchange.OobChannelType
+import com.google.android.companionprotos.OutOfBandAssociationToken
+import com.google.android.connecteddevice.model.OobData
 import com.google.android.connecteddevice.transport.ProtocolDevice
 import com.google.android.connecteddevice.util.SafeLog.logd
 import com.google.android.connecteddevice.util.SafeLog.loge
 import com.google.android.connecteddevice.util.SafeLog.logw
+import com.google.protobuf.ByteString
 import java.security.NoSuchAlgorithmException
 import java.security.SecureRandom
 import javax.crypto.Cipher
@@ -45,8 +48,8 @@ constructor(
   open val supportedTypes: List<String>,
   internal val keyAlgorithm: String = KeyProperties.KEY_ALGORITHM_AES
 ) {
-  @VisibleForTesting internal var encryptionIv = ByteArray(NONCE_LENGTH_BYTES)
-  @VisibleForTesting internal var decryptionIv = ByteArray(NONCE_LENGTH_BYTES)
+  @VisibleForTesting internal var ihuIv = ByteArray(NONCE_LENGTH_BYTES)
+  @VisibleForTesting internal var mobileIv = ByteArray(NONCE_LENGTH_BYTES)
   @VisibleForTesting internal var encryptionKey: SecretKey? = null
   private val cipher =
     try {
@@ -56,10 +59,10 @@ constructor(
       throw IllegalStateException(e)
     }
   private var currentOobChannel: OobChannel? = null
-  private var oobData: ByteArray? = null
+  private var oobData: OobData? = null
 
   /** Generate OOB data which should be exchanged with remote device. */
-  open fun generateOobData(): ByteArray {
+  open fun generateOobData(): OobData {
     val keyGenerator =
       try {
         KeyGenerator.getInstance(keyAlgorithm)
@@ -68,12 +71,12 @@ constructor(
         throw IllegalStateException(e)
       }
     val secretKey = keyGenerator.generateKey()
-    val secureRandom = SecureRandom()
-    secureRandom.nextBytes(encryptionIv)
-    secureRandom.nextBytes(decryptionIv)
-    val oobData = decryptionIv + encryptionIv + secretKey.encoded
-    this.oobData = oobData
     encryptionKey = secretKey
+    val secureRandom = SecureRandom()
+    secureRandom.nextBytes(ihuIv)
+    secureRandom.nextBytes(mobileIv)
+    val oobData = OobData(secretKey.encoded, ihuIv, mobileIv)
+    this.oobData = oobData
     return oobData
   }
 
@@ -84,6 +87,7 @@ constructor(
   open fun startOobDataExchange(
     protocolDevice: ProtocolDevice,
     commonTypes: List<OobChannelType>,
+    securityVersion: Int,
     callback: Callback
   ): Boolean {
     for (oobType in commonTypes) {
@@ -94,7 +98,11 @@ constructor(
       val oobChannel = oobChannelFactory.createOobChannel(oobType)
       if (oobChannel.completeOobDataExchange(
           protocolDevice,
-          generateOobChannelCallback(oobChannel, callback)
+          generateOobChannelCallback(
+            oobChannel,
+            callback,
+            securityVersion >= MIN_SECURITY_VERSION_FOR_OOB_PROTO
+          )
         )
       ) {
         currentOobChannel = oobChannel
@@ -104,7 +112,11 @@ constructor(
     return false
   }
 
-  private fun generateOobChannelCallback(oobChannel: OobChannel, callback: Callback) =
+  private fun generateOobChannelCallback(
+    oobChannel: OobChannel,
+    callback: Callback,
+    isProtoApplied: Boolean
+  ) =
     object : OobChannel.Callback {
       override fun onOobExchangeSuccess() {
         val data = oobData
@@ -117,7 +129,7 @@ constructor(
           callback.onOobDataExchangeFailure()
           return
         }
-        oobChannel.sendOobData(data)
+        oobChannel.sendOobData(if (isProtoApplied) toOobProto(data) else data.toRawBytes())
         callback.onOobDataExchangeSuccess()
       }
       override fun onOobExchangeFailure() {
@@ -129,7 +141,7 @@ constructor(
   @Throws(IllegalStateException::class)
   open fun encryptData(data: ByteArray): ByteArray {
     return try {
-      cipher.init(Cipher.ENCRYPT_MODE, encryptionKey, IvParameterSpec(encryptionIv))
+      cipher.init(Cipher.ENCRYPT_MODE, encryptionKey, IvParameterSpec(ihuIv))
       cipher.doFinal(data)
     } catch (e: Exception) {
       loge(TAG, "Encountered exception when encrypt data.", e)
@@ -141,7 +153,7 @@ constructor(
   @Throws(IllegalStateException::class)
   open fun decryptData(data: ByteArray): ByteArray {
     return try {
-      cipher.init(Cipher.DECRYPT_MODE, encryptionKey, IvParameterSpec(decryptionIv))
+      cipher.init(Cipher.DECRYPT_MODE, encryptionKey, IvParameterSpec(mobileIv))
       cipher.doFinal(data)
     } catch (e: Exception) {
       loge(TAG, "Encountered exception when decrypt data.", e)
@@ -153,10 +165,22 @@ constructor(
   open fun reset() {
     logd(TAG, "Reset OOB key and interrupt OOB channel.")
     currentOobChannel?.interrupt()
-    encryptionIv = ByteArray(NONCE_LENGTH_BYTES)
-    decryptionIv = ByteArray(NONCE_LENGTH_BYTES)
+    ihuIv = ByteArray(NONCE_LENGTH_BYTES)
+    mobileIv = ByteArray(NONCE_LENGTH_BYTES)
     encryptionKey = null
   }
+
+  private fun toOobProto(oobData: OobData): ByteArray {
+    return OutOfBandAssociationToken.newBuilder().run {
+        setEncryptionKey(ByteString.copyFrom(oobData.encryptionKey))
+        setIhuIv(ByteString.copyFrom(oobData.ihuIv))
+        setMobileIv(ByteString.copyFrom(oobData.mobileIv))
+        build()
+      }
+      .toByteArray()
+  }
+
+  private fun OobData.toRawBytes() = mobileIv + ihuIv + encryptionKey
 
   /** Callbacks for [OobRunner.startOobDataExchange] */
   interface Callback {
@@ -170,6 +194,7 @@ constructor(
   companion object {
     private const val TAG = "OobRunner"
     private const val ALGORITHM = "AES/GCM/NoPadding"
+    @VisibleForTesting internal const val MIN_SECURITY_VERSION_FOR_OOB_PROTO = 4
 
     // The nonce length is chosen to be consistent with the standard specification:
     // Section 8.2 of https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38d.pdf

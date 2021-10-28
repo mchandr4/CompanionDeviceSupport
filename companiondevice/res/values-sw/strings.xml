@@ -18,10 +18,14 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <string name="settings_entry_title">Kifaa Kisaidizi</string>
   <string name="default_device_name">Kifaa Kinachounganishwa</string>
-  <string name="add_device_title">Weka Kifaa Kinachounganishwa</string>
-  <string name="add_associated_device_title">Unganisha kifaa kisaidizi</string>
+  <string name="add_device_title">Unganisha kwenye programu saidizi</string>
+  <string name="add_associated_device_title">Unganisha kwenye MyCompanion</string>
   <string name="add_associated_device_subtitle">Unaweza kutumia simu yako kama kifaa kisaidizi ili kukusaidia kudhibiti hali yako ya kuendesha gari</string>
   <string name="associated_device_install_app">Hakikisha kuwa umesakinisha <b>Programu Saidizi</b> kwenye simu</string>
+  <string name="open_companion_app_instruction_text">Fungua progamu saidizi</string>
+  <string name="enable_bluetooth_instruction_text">Ruhusu muunganisho wa Bluetooth</string>
+  <string name="connect_to_targe_car_instruction_text">Unganisha kwenye &lt;b&gt;%1$s&lt;/b&gt;%2$s</string>
+  <string name="connect_to_car_instruction_text">Unganisha kwenye gari</string>
   <string name="associated_device_pairing_code_title">Thibitisha msimbo kwenye simu</string>
   <string name="associated_device_pairing_message">Thibitisha kuwa msimbo huu unalingana na msimbo unaoonyeshwa kwenye simu yako</string>
   <string name="associated_device_success">Kifaa kimeunganishwa</string>
@@ -53,6 +57,9 @@
   <string name="retry">Jaribu tena</string>
   <string name="turn_on">Washa</string>
   <string name="not_now">Si sasa</string>
+  <string name="connect">Unganisha</string>
+  <string name="disconnect">Ondoa</string>
+  <string name="skip">Ruka</string>
   <string name="connected">Imeunganishwa</string>
   <string name="notDetected">Haijagunduliwa</string>
   <string name="disconnected">Imetenganishwa</string>
@@ -84,4 +91,5 @@
     <item quantity="other">Ujumbe %d mpya</item>
   </plurals>
   <string name="name_not_available">Jina halipatikani</string>
+  <string name="ble_device_name_prefix">Gari\u00A0</string>
 </resources>

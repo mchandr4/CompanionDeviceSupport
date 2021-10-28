@@ -18,10 +18,14 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <string name="settings_entry_title">ተጓዳኝ መሣሪያ</string>
   <string name="default_device_name">የተጎዳኘ መሣሪያ</string>
-  <string name="add_device_title">ተጓዳኝ መሣሪያ አክል</string>
-  <string name="add_associated_device_title">አጃቢ መሣሪያ ያገናኙ</string>
+  <string name="add_device_title">ከአጃቢ መተግበሪያ ጋር አገናኝ</string>
+  <string name="add_associated_device_title">ከMyCompanion ጋር ያገናኙ</string>
   <string name="add_associated_device_subtitle">የመንዳት ተሞክሮዎን እንዲያቀናብሩ እንዲያግዝ ስልክዎን እንደ አጃቢ መሣሪያዎ ሊጠቀሙበት ይችላሉ</string>
   <string name="associated_device_install_app">በስልክዎ ላይ <b>አጃቢ መተግበሪያ</b> መጫንዎን ያረጋግጡ</string>
+  <string name="open_companion_app_instruction_text">አጃቢ መተግበሪያውን ይክፈቱ</string>
+  <string name="enable_bluetooth_instruction_text">የብሉቱዝ ግንኙነትን ይፍቀዱ</string>
+  <string name="connect_to_targe_car_instruction_text">ከ&lt;b&gt;%1$s&lt;/b&gt;%2$s ጋር ይገናኙ</string>
+  <string name="connect_to_car_instruction_text">ከመኪናው ጋር ይገናኙ</string>
   <string name="associated_device_pairing_code_title">በስልክ ላይ ኮድ ያረጋግጡ</string>
   <string name="associated_device_pairing_message">ይህ በስልክዎ ላይ ከሚታየው ኮድ ጋር እንደሚዛመድ ያረጋግጡ</string>
   <string name="associated_device_success">መሣሪያ በተሳካ ሁኔታ ተገናኝቷል</string>
@@ -53,6 +57,9 @@
   <string name="retry">እንደገና ሞክር</string>
   <string name="turn_on">አብራ</string>
   <string name="not_now">አሁን አይደለም</string>
+  <string name="connect">አገናኝ</string>
+  <string name="disconnect">ግንኙነት አቋርጥ</string>
+  <string name="skip">ዝለል</string>
   <string name="connected">ተገናኝቷል</string>
   <string name="notDetected">አልተገኘም</string>
   <string name="disconnected">ተቋርጧል</string>
@@ -84,4 +91,5 @@
     <item quantity="other">%d አዲስ መልዕክቶች</item>
   </plurals>
   <string name="name_not_available">ስም አይገኝም</string>
+  <string name="ble_device_name_prefix">ተሽከርካሪ\u00A0</string>
 </resources>
