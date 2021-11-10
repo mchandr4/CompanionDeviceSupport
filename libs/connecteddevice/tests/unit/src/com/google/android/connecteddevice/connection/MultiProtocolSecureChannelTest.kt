@@ -645,7 +645,7 @@ class MultiProtocolSecureChannelTest {
     encryptionRunner.setIsReconnect(isReconnect)
     secureChannel =
       spy(
-        MultiProtocolSecureChannel(
+        MultiProtocolSecureChannelPreV4(
             stream1,
             spyStorage,
             encryptionRunner,
@@ -660,7 +660,7 @@ class MultiProtocolSecureChannelTest {
     val oobEncryptionRunner = EncryptionRunnerFactory.newOobFakeRunner()
     secureChannel =
       spy(
-        MultiProtocolSecureChannel(
+        MultiProtocolSecureChannelPreV4(
             stream1,
             spyStorage,
             oobEncryptionRunner,
@@ -725,7 +725,7 @@ class MultiProtocolSecureChannelTest {
   }
 }
 
-open class TestProtocol : ConnectionProtocol() {
+private open class TestProtocol : ConnectionProtocol() {
   override val isDeviceVerificationRequired = false
 
   override fun startAssociationDiscovery(

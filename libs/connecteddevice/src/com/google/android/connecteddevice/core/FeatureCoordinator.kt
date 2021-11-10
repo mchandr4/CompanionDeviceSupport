@@ -282,6 +282,14 @@ constructor(
     controller.disconnectDevice(UUID.fromString(deviceId))
   }
 
+  override fun claimAssociatedDevice(deviceId: String) {
+    storage.claimAssociatedDevice(deviceId)
+  }
+
+  override fun removeAssociatedDeviceClaim(deviceId: String) {
+    storage.removeAssociatedDeviceClaim(deviceId)
+  }
+
   private fun startAssociationInternal(
     callback: IAssociationCallback,
     identifier: ParcelUuid? = null

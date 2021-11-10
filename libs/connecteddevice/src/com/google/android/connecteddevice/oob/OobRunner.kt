@@ -88,13 +88,14 @@ constructor(
     protocolDevice: ProtocolDevice,
     commonTypes: List<OobChannelType>,
     securityVersion: Int,
-    callback: Callback
+    callback: Callback? = null
   ): Boolean {
     for (oobType in commonTypes) {
       if (oobType.name !in supportedTypes) {
         logw(TAG, "Unsupported OOB channel ${oobType.name}. Ignored.")
         continue
       }
+      logd(TAG, "Establish OOB channel with ${oobType.name}.")
       val oobChannel = oobChannelFactory.createOobChannel(oobType)
       if (oobChannel.completeOobDataExchange(
           protocolDevice,
@@ -114,7 +115,7 @@ constructor(
 
   private fun generateOobChannelCallback(
     oobChannel: OobChannel,
-    callback: Callback,
+    callback: Callback?,
     isProtoApplied: Boolean
   ) =
     object : OobChannel.Callback {
@@ -126,14 +127,14 @@ constructor(
             "OOB channel established successfully with invalid OOB data, issue failure " +
               "callback."
           )
-          callback.onOobDataExchangeFailure()
+          callback?.onOobDataExchangeFailure()
           return
         }
         oobChannel.sendOobData(if (isProtoApplied) toOobProto(data) else data.toRawBytes())
-        callback.onOobDataExchangeSuccess()
+        callback?.onOobDataExchangeSuccess()
       }
       override fun onOobExchangeFailure() {
-        callback.onOobDataExchangeFailure()
+        callback?.onOobDataExchangeFailure()
       }
     }
 
@@ -171,7 +172,8 @@ constructor(
   }
 
   private fun toOobProto(oobData: OobData): ByteArray {
-    return OutOfBandAssociationToken.newBuilder().run {
+    return OutOfBandAssociationToken.newBuilder()
+      .run {
         setEncryptionKey(ByteString.copyFrom(oobData.encryptionKey))
         setIhuIv(ByteString.copyFrom(oobData.ihuIv))
         setMobileIv(ByteString.copyFrom(oobData.mobileIv))

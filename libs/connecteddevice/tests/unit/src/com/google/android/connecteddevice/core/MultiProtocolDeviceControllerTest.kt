@@ -23,6 +23,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.connecteddevice.api.IAssociationCallback
 import com.google.android.connecteddevice.connection.MultiProtocolSecureChannel
+import com.google.android.connecteddevice.connection.MultiProtocolSecureChannelPreV4
 import com.google.android.connecteddevice.connection.ProtocolStream
 import com.google.android.connecteddevice.core.DeviceController.Callback
 import com.google.android.connecteddevice.core.util.mockToBeAlive
@@ -104,7 +105,11 @@ class MultiProtocolDeviceControllerTest {
     deviceController.registerCallback(mockCallback, directExecutor())
     secureChannel =
       spy(
-        MultiProtocolSecureChannel(mockStream, spyStorage, EncryptionRunnerFactory.newFakeRunner())
+        MultiProtocolSecureChannelPreV4(
+          mockStream,
+          spyStorage,
+          EncryptionRunnerFactory.newFakeRunner()
+        )
       )
   }
 

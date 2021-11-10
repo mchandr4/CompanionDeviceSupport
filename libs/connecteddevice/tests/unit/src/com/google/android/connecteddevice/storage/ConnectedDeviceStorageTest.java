@@ -404,6 +404,42 @@ public final class ConnectedDeviceStorageTest {
     assertThat(captor.getValue().getDeviceName()).isEqualTo(newName);
   }
 
+  @Test
+  public void claimAssociatedDevice_setsCurrentUserIdOnAssociatedDevice() {
+    AssociatedDeviceCallback callback = mock(AssociatedDeviceCallback.class);
+    connectedDeviceStorage.setAssociatedDeviceCallback(callback);
+    AssociatedDevice device = addRandomAssociatedDevice(AssociatedDevice.UNCLAIMED_USER_ID);
+
+    connectedDeviceStorage.claimAssociatedDevice(device.getDeviceId());
+
+    ArgumentCaptor<AssociatedDevice> captor = ArgumentCaptor.forClass(AssociatedDevice.class);
+    verify(callback).onAssociatedDeviceUpdated(captor.capture());
+    assertThat(captor.getValue().getUserId()).isEqualTo(0);
+  }
+
+  @Test
+  public void claimAssociatedDevice_unknownDeviceDoesNotThrow() {
+    connectedDeviceStorage.claimAssociatedDevice(UUID.randomUUID().toString());
+  }
+
+  @Test
+  public void removeAssociatedDeviceClaim_setsUnclaimedUserIdOnAssociatedDevice() {
+    AssociatedDeviceCallback callback = mock(AssociatedDeviceCallback.class);
+    connectedDeviceStorage.setAssociatedDeviceCallback(callback);
+    AssociatedDevice device = addRandomAssociatedDevice(AssociatedDevice.UNCLAIMED_USER_ID);
+
+    connectedDeviceStorage.removeAssociatedDeviceClaim(device.getDeviceId());
+
+    ArgumentCaptor<AssociatedDevice> captor = ArgumentCaptor.forClass(AssociatedDevice.class);
+    verify(callback).onAssociatedDeviceUpdated(captor.capture());
+    assertThat(captor.getValue().getUserId()).isEqualTo(AssociatedDevice.UNCLAIMED_USER_ID);
+  }
+
+  @Test
+  public void removeAssociatedDeviceClaim_unknownDeviceDoesNotThrow() {
+    connectedDeviceStorage.removeAssociatedDeviceClaim(UUID.randomUUID().toString());
+  }
+
   private AssociatedDevice addRandomAssociatedDevice(int userId) {
     AssociatedDevice device =
         new AssociatedDevice(

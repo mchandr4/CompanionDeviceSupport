@@ -40,14 +40,14 @@ import kotlin.math.roundToLong
  * Establishes a secure channel with [EncryptionRunner] over [ProtocolStream]s as server side, sends
  * and receives messages securely after the secure channel has been established.
  */
-open class MultiProtocolSecureChannel(
+abstract class MultiProtocolSecureChannel(
   stream: ProtocolStream,
   private val storage: ConnectedDeviceStorage,
   private val encryptionRunner: EncryptionRunner,
   private val oobRunner: OobRunner? = null,
   /** Should be set whenever the remote device id is available. */
   private var deviceId: String? = null,
-  @VisibleForTesting internal val inflater: Inflater = Inflater(),
+  protected val inflater: Inflater = Inflater(),
   private val deflater: Deflater = Deflater(Deflater.BEST_COMPRESSION),
   private val isCompressionEnabled: Boolean = true
 ) {
@@ -86,13 +86,15 @@ open class MultiProtocolSecureChannel(
 
   private val encryptionKey = AtomicReference<Key>()
 
+  private var visualVerificationCode: String? = null
+
   var showVerificationCodeListener: ShowVerificationCodeListener? = null
 
   /**
    * The out of band verification code get from the [EncryptionRunner], will be set during out of
    * band association.
    */
-  private var oobCode: ByteArray? = null
+  protected var oobCode: ByteArray? = null
 
   @HandshakeState private var state: Int = HandshakeState.UNKNOWN
 
@@ -109,6 +111,7 @@ open class MultiProtocolSecureChannel(
     when (state) {
       HandshakeState.UNKNOWN -> processHandshakeInitialization(message)
       HandshakeState.IN_PROGRESS -> processHandshakeInProgress(message)
+      HandshakeState.VERIFICATION_NEEDED -> processVerificationCodeMessage(message)
       HandshakeState.OOB_VERIFICATION_NEEDED -> confirmOobVerificationCode(message)
       HandshakeState.FINISHED ->
         // Should not reach this line.
@@ -132,7 +135,7 @@ open class MultiProtocolSecureChannel(
       notifySecureChannelFailure(ChannelError.CHANNEL_ERROR_INVALID_HANDSHAKE)
       return
     }
-    sendHandshakeMessage(nextMessage, /* isEncrypted= */ false)
+    sendHandshakeMessage(nextMessage)
   }
 
   @Throws(HandshakeException::class)
@@ -146,19 +149,14 @@ open class MultiProtocolSecureChannel(
     }
     when (state) {
       HandshakeState.VERIFICATION_NEEDED -> {
-        val code = handshakeMessage.verificationCode
-        // Unreachable error, the [code] will always be non-null if the status is
-        // [VERIFICATION_NEEDED].
-        if (code == null) {
-          loge(
-            TAG,
-            "Handshake state is VERIFICATION_NEEDED, but handshake message does not " +
-              "contain verification code. Notifying callback of failure."
-          )
-          notifySecureChannelFailure(ChannelError.CHANNEL_ERROR_INVALID_VERIFICATION)
-          return
+        visualVerificationCode = handshakeMessage.verificationCode
+        val fullVerificationCode = handshakeMessage.fullVerificationCode
+        if (fullVerificationCode != null) {
+          processOobVerificationCode(fullVerificationCode)
+        } else {
+          loge(TAG, "Full verification is null. Notify channel error")
+          notifySecureChannelFailure(ChannelError.CHANNEL_ERROR_INVALID_STATE)
         }
-        processVerificationCode(code)
       }
       HandshakeState.OOB_VERIFICATION_NEEDED -> {
         val oobCode = handshakeMessage.fullVerificationCode
@@ -186,7 +184,14 @@ open class MultiProtocolSecureChannel(
     }
   }
 
-  private fun confirmOobVerificationCode(encryptedCode: ByteArray) {
+  /** Will be called when OOB verification code is available from [EncryptionRunner]. */
+  protected abstract fun processOobVerificationCode(oobCode: ByteArray)
+
+  /** Process the message received from remote device during verification stage. */
+  protected abstract fun processVerificationCodeMessage(message: ByteArray)
+
+  /** Should be called when OOB verification code is received from remote device. */
+  protected fun confirmOobVerificationCode(encryptedCode: ByteArray) {
     val runner = oobRunner
     if (runner == null) {
       loge(TAG, "Missing OOB elements during OOB verification, issue error callback.")
@@ -208,7 +213,7 @@ open class MultiProtocolSecureChannel(
       return
     }
     encryptAndSendOobVerificationCode(code, runner)
-    notifyVerificationCodeAccepted()
+    verificationCodeAcceptedInternal()
   }
 
   private fun encryptAndSendOobVerificationCode(code: ByteArray, oobRunner: OobRunner) {
@@ -220,10 +225,14 @@ open class MultiProtocolSecureChannel(
         notifySecureChannelFailure(ChannelError.CHANNEL_ERROR_INVALID_ENCRYPTION_KEY)
         return
       }
-    sendHandshakeMessage(encryptedCode, isEncrypted = false)
+    sendHandshakeMessage(createOobResponse(encryptedCode))
   }
 
-  private fun processVerificationCode(code: String) {
+  /** Generate understandable OOB data response which will be sent to remote device. */
+  protected abstract fun createOobResponse(code: ByteArray): ByteArray
+
+  /** Communicate with other components that the visual verification code is available. */
+  protected fun invokeVerificationCodeListener() {
     if (showVerificationCodeListener == null) {
       loge(
         TAG,
@@ -233,6 +242,13 @@ open class MultiProtocolSecureChannel(
       notifySecureChannelFailure(ChannelError.CHANNEL_ERROR_INVALID_STATE)
       return
     }
+    val code = visualVerificationCode
+    if (code == null) {
+      loge(TAG, "No verification code set. Unable to display verification code to user.")
+      notifySecureChannelFailure(ChannelError.CHANNEL_ERROR_INVALID_STATE)
+      return
+    }
+
     logd(TAG, "Notify pairing code available: $code")
     showVerificationCodeListener!!.showVerificationCode(code)
   }
@@ -278,7 +294,7 @@ open class MultiProtocolSecureChannel(
       notifySecureChannelFailure(ChannelError.CHANNEL_ERROR_INVALID_MSG)
       return
     }
-    sendHandshakeMessage(message, /* isEncrypted= */ false)
+    sendHandshakeMessage(message)
   }
 
   /** Notify that the device id is received from remote device during association. */
@@ -297,6 +313,11 @@ open class MultiProtocolSecureChannel(
    * confirmation, and send confirmation signals to remote bluetooth device.
    */
   open fun notifyVerificationCodeAccepted() {
+    processVisualVerificationConfirmed()
+    verificationCodeAcceptedInternal()
+  }
+
+  private fun verificationCodeAcceptedInternal() {
     oobCode = null
     val message =
       try {
@@ -327,6 +348,9 @@ open class MultiProtocolSecureChannel(
     notifyCallback { it.onSecureChannelEstablished() }
   }
 
+  /** A confirmation message should be sent to remote device according to the version. */
+  protected abstract fun processVisualVerificationConfirmed()
+
   /** Add a protocol stream to this channel. */
   fun addStream(stream: ProtocolStream) {
     streams.add(stream)
@@ -352,12 +376,13 @@ open class MultiProtocolSecureChannel(
       }
   }
 
-  private fun sendHandshakeMessage(message: ByteArray, isEncrypted: Boolean) {
+  /** Send un-encrypted message to remote device during handshake. */
+  protected fun sendHandshakeMessage(message: ByteArray) {
     logd(TAG, "Sending handshake message.")
     val deviceMessage =
       DeviceMessage.createOutgoingMessage(
         /* recipient= */ null,
-        isEncrypted,
+        false,
         OperationType.ENCRYPTION_HANDSHAKE,
         message
       )
@@ -419,7 +444,7 @@ open class MultiProtocolSecureChannel(
   }
 
   /** Notify callbacks that an error has occurred. */
-  private fun notifySecureChannelFailure(error: ChannelError) {
+  protected fun notifySecureChannelFailure(error: ChannelError) {
     loge(TAG, "Secure channel error: $error")
     notifyCallback { it.onEstablishSecureChannelFailure(error) }
   }

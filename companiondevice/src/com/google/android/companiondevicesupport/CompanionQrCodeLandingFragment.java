@@ -109,7 +109,7 @@ public class CompanionQrCodeLandingFragment extends Fragment {
 
   private void setImageView(Bitmap bitmap, View view) {
     ImageView qrImage = view.findViewById(R.id.qr_code);
-    View instruction = view.findViewById(R.id.association_instructions_horizontal);
+    View instruction = view.findViewById(R.id.association_qr_code_instructions);
     View addButton = view.findViewById(R.id.add_button_and_divider);
     if (qrImage == null) {
       loge(TAG, "No valid ImageView to show QR code.");

@@ -172,10 +172,19 @@ class ChannelResolver(
         .build()
     device.protocol.sendData(device.protocolId, carVersion.toByteArray())
 
-    if (isReconnect || resolvedSecurityVersion < MIN_SECURITY_VERSION_FOR_CAPABILITIES_EXCHANGE) {
-      logd(TAG, "Capabilities exchange not supported, resolving stream.")
-      resolveStream(device)
+    if (!isReconnect && resolvedSecurityVersion == SECURITY_VERSION_FOR_CAPABILITIES_EXCHANGE) {
+      logd(TAG, "Waiting for capabilities exchange message.")
+      return
     }
+
+    logd(TAG, "Capabilities exchange not supported, resolving stream.")
+    if (!isReconnect && resolvedSecurityVersion > SECURITY_VERSION_FOR_CAPABILITIES_EXCHANGE) {
+      logd(TAG, "Start OOB data exchange.")
+      val supportedChannels =
+        oobRunner?.supportedTypes?.map { it.asOobChannelType() } ?: emptyList<OobChannelType>()
+      oobRunner?.startOobDataExchange(device, supportedChannels, resolvedSecurityVersion)
+    }
+    resolveStream(device)
   }
 
   private fun processCapabilityMessage(message: ByteArray, device: ProtocolDevice) {
@@ -306,7 +315,22 @@ class ChannelResolver(
   private fun resolveChannel(stream: ProtocolStream) {
     encryptionRunner.setIsReconnect(isReconnect)
     val channel =
-      MultiProtocolSecureChannel(stream, storage, encryptionRunner, oobRunner, deviceId?.toString())
+      if (resolvedSecurityVersion > SECURITY_VERSION_FOR_CAPABILITIES_EXCHANGE)
+        MultiProtocolSecureChannelV4(
+          stream,
+          storage,
+          encryptionRunner,
+          oobRunner,
+          deviceId?.toString()
+        )
+      else
+        MultiProtocolSecureChannelPreV4(
+          stream,
+          storage,
+          encryptionRunner,
+          oobRunner,
+          deviceId?.toString()
+        )
     protocolDevices.keys.forEach { channel.addStream(ProtocolStream(it)) }
     clearDataReceivedListeners()
     callback.onChannelResolved(channel)
@@ -338,8 +362,8 @@ class ChannelResolver(
     internal const val MIN_MESSAGING_VERSION = 3
     internal const val MAX_MESSAGING_VERSION = 3
     internal const val MIN_SECURITY_VERSION = 2
-    internal const val MAX_SECURITY_VERSION = 3
-    internal const val MIN_SECURITY_VERSION_FOR_CAPABILITIES_EXCHANGE = 3
+    internal const val MAX_SECURITY_VERSION = 4
+    internal const val SECURITY_VERSION_FOR_CAPABILITIES_EXCHANGE = 3
     private const val TAG = "ChannelResolver"
   }
 }

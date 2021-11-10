@@ -187,4 +187,10 @@ interface IFeatureCoordinator {
      * @param identifier {@link ParcelUuid} to identify the association.
      */
     void startAssociationWithIdentifier(in IAssociationCallback callback, in ParcelUuid identifier);
+
+    /** Claim an associated device to belong to the current user. */
+    void claimAssociatedDevice(in String deviceId);
+
+    /** Remove the claim on the identified associated device. */
+    void removeAssociatedDeviceClaim(in String deviceId);
 }

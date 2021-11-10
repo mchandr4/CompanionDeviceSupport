@@ -35,7 +35,7 @@ object QrCodeGenerator {
     content: String,
     sizeInPixels: Int,
     foregroundColor: Int = Color.WHITE,
-    backgroundColor: Int = Color.BLACK,
+    backgroundColor: Int = Color.TRANSPARENT,
     errorCorrection: ErrorCorrectionLevel = ErrorCorrectionLevel.L
   ): Bitmap? {
     val hints =

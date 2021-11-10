@@ -60,6 +60,7 @@ import org.junit.runner.RunWith
 
 private const val TEST_PROTOCOL_ID_1 = "testDevice1"
 private const val TEST_PROTOCOL_ID_2 = "testDevice2"
+private const val OOB_CALLBACK_VALID_VERSION = 3
 private val TEST_DEVICE_ID = UUID.randomUUID()
 private val TEST_CHALLENGE = "test Challenge".toByteArray()
 private val TEST_CHALLENGE_RESPONSE = "test Challenge response".toByteArray()
@@ -170,7 +171,7 @@ class ChannelResolverTest {
         .setMaxSupportedMessagingVersion(ChannelResolver.MAX_MESSAGING_VERSION)
         .setMinSupportedMessagingVersion(ChannelResolver.MIN_MESSAGING_VERSION)
         .setMaxSupportedSecurityVersion(
-          ChannelResolver.MIN_SECURITY_VERSION_FOR_CAPABILITIES_EXCHANGE - 1
+          ChannelResolver.SECURITY_VERSION_FOR_CAPABILITIES_EXCHANGE - 1
         )
         .setMinSupportedSecurityVersion(ChannelResolver.MIN_SECURITY_VERSION)
         .build()
@@ -287,7 +288,7 @@ class ChannelResolverTest {
   }
 
   @Test
-  fun onOobExchangeSuccess_updateEncryptionRunnerAndResolveStream() {
+  fun onOobExchangeSuccess_V3_updateEncryptionRunnerAndResolveStream() {
     val testProtocolDevice = ProtocolDevice(testProtocol1, TEST_PROTOCOL_ID_1)
     val testOobChannels = listOf(BT_RFCOMM_CHANNEL)
     whenever(mockOobRunner.startOobDataExchange(eq(testProtocolDevice), any(), any(), any()))
@@ -296,7 +297,10 @@ class ChannelResolverTest {
     val deviceCallback =
       argumentCaptor<DataReceivedListener>().apply {
         verify(testProtocol1).registerDataReceivedListener(eq(TEST_PROTOCOL_ID_1), capture(), any())
-        firstValue.onDataReceived(TEST_PROTOCOL_ID_1, createVersionMessage())
+        firstValue.onDataReceived(
+          TEST_PROTOCOL_ID_1,
+          createVersionMessage(OOB_CALLBACK_VALID_VERSION)
+        )
       }
     val capabilities =
       CapabilitiesExchange.newBuilder()
@@ -323,7 +327,10 @@ class ChannelResolverTest {
     val deviceCallback =
       argumentCaptor<DataReceivedListener>().apply {
         verify(testProtocol1).registerDataReceivedListener(eq(TEST_PROTOCOL_ID_1), capture(), any())
-        firstValue.onDataReceived(TEST_PROTOCOL_ID_1, createVersionMessage())
+        firstValue.onDataReceived(
+          TEST_PROTOCOL_ID_1,
+          createVersionMessage(OOB_CALLBACK_VALID_VERSION)
+        )
       }
     val capabilities =
       CapabilitiesExchange.newBuilder()
@@ -350,7 +357,10 @@ class ChannelResolverTest {
     val deviceCallback =
       argumentCaptor<DataReceivedListener>().apply {
         verify(testProtocol1).registerDataReceivedListener(eq(TEST_PROTOCOL_ID_1), capture(), any())
-        firstValue.onDataReceived(TEST_PROTOCOL_ID_1, createVersionMessage())
+        firstValue.onDataReceived(
+          TEST_PROTOCOL_ID_1,
+          createVersionMessage(OOB_CALLBACK_VALID_VERSION)
+        )
       }
     verify(testProtocol1).sendData(eq(TEST_PROTOCOL_ID_1), any(), anyOrNull())
 
@@ -372,7 +382,10 @@ class ChannelResolverTest {
     val deviceCallback =
       argumentCaptor<DataReceivedListener>().apply {
         verify(testProtocol1).registerDataReceivedListener(eq(TEST_PROTOCOL_ID_1), capture(), any())
-        firstValue.onDataReceived(TEST_PROTOCOL_ID_1, createVersionMessage())
+        firstValue.onDataReceived(
+          TEST_PROTOCOL_ID_1,
+          createVersionMessage(OOB_CALLBACK_VALID_VERSION)
+        )
       }
     verify(testProtocol1).sendData(eq(TEST_PROTOCOL_ID_1), any(), anyOrNull())
 
@@ -387,11 +400,13 @@ class ChannelResolverTest {
     verify(mockEncryptionRunner).setIsReconnect(false)
   }
 
-  private fun createVersionMessage(): ByteArray {
+  private fun createVersionMessage(
+    maxSecurityVersion: Int = ChannelResolver.MAX_SECURITY_VERSION
+  ): ByteArray {
     return VersionExchangeProto.VersionExchange.newBuilder()
       .setMaxSupportedMessagingVersion(ChannelResolver.MAX_MESSAGING_VERSION)
       .setMinSupportedMessagingVersion(ChannelResolver.MIN_MESSAGING_VERSION)
-      .setMaxSupportedSecurityVersion(ChannelResolver.MAX_SECURITY_VERSION)
+      .setMaxSupportedSecurityVersion(maxSecurityVersion)
       .setMinSupportedSecurityVersion(ChannelResolver.MIN_SECURITY_VERSION)
       .build()
       .toByteArray()

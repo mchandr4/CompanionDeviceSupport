@@ -15,34 +15,38 @@
   ~ limitations under the License.
   -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/association_qr_code_instructions"
-    android:orientation="horizontal"
+    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:baselineAligned="false">
-  <LinearLayout
-      android:id="@+id/enable_bluetooth_instruction"
-      android:layout_width="0dp"
+    android:layout_height="wrap_content">
+  <androidx.constraintlayout.widget.ConstraintLayout
+      android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:layout_weight="1"
-      android:layout_marginHorizontal="@dimen/instruction_margin"
-      android:orientation="vertical"
-      android:gravity="center_horizontal">
+      android:minHeight="?attr/companionListItemMinHeight">
     <ImageView
         android:id="@+id/enable_bluetooth_icon"
         android:layout_width="?attr/companionSecondaryIconSize"
         android:layout_height="?attr/companionSecondaryIconSize"
         android:scaleType="fitXY"
-        android:src="@drawable/ic_bluetooth_drive_24dp"
         android:tint="?attr/companionColorListIcon"
-        tools:ignore="ContentDescription"/>
+        android:src="@drawable/ic_bluetooth_drive_24dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/enable_bluetooth_text"
+        tools:ignore="ContentDescription" />
     <TextView
         android:id="@+id/enable_bluetooth_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="center"
+        android:layout_marginStart="?attr/companionListItemTextMarginStart"
+        android:layout_marginEnd="?attr/companionListItemTextMarginEnd"
         android:text="@string/enable_bluetooth_instruction_text"
-        android:textAppearance="@style/CompanionSubtitleTextStyle" />
-  </LinearLayout>
+        android:textAppearance="@style/CompanionSubtitleTextStyle"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+  </androidx.constraintlayout.widget.ConstraintLayout>
 </LinearLayout>

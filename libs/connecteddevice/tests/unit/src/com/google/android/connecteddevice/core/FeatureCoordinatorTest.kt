@@ -934,12 +934,32 @@ class FeatureCoordinatorTest {
   @Test
   fun start_startsController() {
     coordinator.start()
+
     verify(mockController).start()
   }
 
   @Test
   fun reset_resetsController() {
     coordinator.reset()
+
     verify(mockController).reset()
+  }
+
+  @Test
+  fun claimAssociatedDevice_claimsDevice() {
+    val deviceId = UUID.randomUUID().toString()
+
+    coordinator.claimAssociatedDevice(deviceId)
+
+    verify(mockStorage).claimAssociatedDevice(deviceId)
+  }
+
+  @Test
+  fun removeAssociatedDeviceClaim_removesClaim() {
+    val deviceId = UUID.randomUUID().toString()
+
+    coordinator.removeAssociatedDeviceClaim(deviceId)
+
+    verify(mockStorage).removeAssociatedDeviceClaim(deviceId)
   }
 }

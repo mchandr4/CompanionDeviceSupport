@@ -37,10 +37,11 @@
         <item>com.google.android.companiondevicesupport/com.google.android.connecteddevice.trust.TrustedDeviceUiDelegateService</item>
     </string-array>
 
-   <!-- Supported OOB verification approaches. -->
+    <!-- Supported OOB verification approaches. -->
     <string-array name="supported_oob_channels" translatable="false">
-        <item>PRE_ASSOCIATION</item>
         <item>BT_RFCOMM</item>
+        <!-- The pass through OOB channel PRE_ASSOCIATION has to be the last one in the list. -->
+        <item>PRE_ASSOCIATION</item>
     </string-array>
 
     <!-- Supported transport protocols. -->

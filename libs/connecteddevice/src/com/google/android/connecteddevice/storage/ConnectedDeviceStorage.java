@@ -491,6 +491,42 @@ public class ConnectedDeviceStorage {
     return entity.toAssociatedDevice();
   }
 
+  /** Updates the identified associated device to be claimed by the current user. */
+  public void claimAssociatedDevice(@NonNull String deviceId) {
+    logd(TAG, "Claiming device " + deviceId + " for the current user.");
+    AssociatedDeviceEntity entity = associatedDeviceDatabase.getAssociatedDevice(deviceId);
+    if (entity == null) {
+      logw(TAG, "Attempted to claim an unrecognized device with id " + deviceId + ". Ignoring.");
+      return;
+    }
+
+    entity.userId = ActivityManager.getCurrentUser();
+    associatedDeviceDatabase.addOrReplaceAssociatedDevice(entity);
+    if (associatedDeviceCallback != null) {
+      associatedDeviceCallback.onAssociatedDeviceUpdated(entity.toAssociatedDevice());
+    }
+  }
+
+  /** Removes the claim on the identified associated device leaving it in an unclaimed state. */
+  public void removeAssociatedDeviceClaim(@NonNull String deviceId) {
+    logd(TAG, "Removing the user claim for device " + deviceId + ".");
+    AssociatedDeviceEntity entity = associatedDeviceDatabase.getAssociatedDevice(deviceId);
+    if (entity == null) {
+      logw(
+          TAG,
+          "Attempted to remove claim on an unrecognized device with id "
+              + deviceId
+              + ". Ignoring.");
+      return;
+    }
+
+    entity.userId = AssociatedDevice.UNCLAIMED_USER_ID;
+    associatedDeviceDatabase.addOrReplaceAssociatedDevice(entity);
+    if (associatedDeviceCallback != null) {
+      associatedDeviceCallback.onAssociatedDeviceUpdated(entity.toAssociatedDevice());
+    }
+  }
+
   /** Callback for association device related events. */
   public interface AssociatedDeviceCallback {
     /** Triggered when an associated device has been added. */
