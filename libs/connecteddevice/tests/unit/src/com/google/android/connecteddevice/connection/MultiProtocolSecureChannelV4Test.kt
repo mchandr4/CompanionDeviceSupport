@@ -68,7 +68,7 @@ class MultiProtocolSecureChannelV4Test {
         .setQueryExecutor(directExecutor())
         .build()
         .associatedDeviceDao()
-    storage = ConnectedDeviceStorage(context, Base64CryptoHelper(), database)
+    storage = ConnectedDeviceStorage(context, Base64CryptoHelper(), database, directExecutor())
   }
   @Test
   fun processVerificationCodeMessage_oobVerification_verifyOobCode() {

@@ -77,7 +77,7 @@ constructor(
 
   init {
     controller.registerCallback(createDeviceControllerCallback(), callbackExecutor)
-    storage.setAssociatedDeviceCallback(createStorageAssociatedDeviceCallback())
+    storage.registerAssociatedDeviceCallback(createStorageAssociatedDeviceCallback())
   }
 
   /** Initiate connections with all enabled [AssociatedDevice]s. */
@@ -283,11 +283,17 @@ constructor(
   }
 
   override fun claimAssociatedDevice(deviceId: String) {
+    logd(TAG, "Claiming device $deviceId. Updating storage and disconnecting.")
+    controller.disconnectDevice(UUID.fromString(deviceId))
     storage.claimAssociatedDevice(deviceId)
+    controller.initiateConnectionToDevice(UUID.fromString(deviceId))
   }
 
   override fun removeAssociatedDeviceClaim(deviceId: String) {
+    logd(TAG, "Removing claim on device $deviceId. Updating storage and disconnecting.")
+    controller.disconnectDevice(UUID.fromString(deviceId))
     storage.removeAssociatedDeviceClaim(deviceId)
+    controller.initiateConnectionToDevice(UUID.fromString(deviceId))
   }
 
   private fun startAssociationInternal(

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2021 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:layout_marginHorizontal="?attr/pageMarginHorizontal">
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_weight="@integer/suw_title_column_weight"
+        android:paddingVertical="?attr/pageMarginVertical"
+        android:layout_marginEnd="@dimen/suw_column_inner_padding_horizontal">
+      <TextView
+          android:id="@+id/suw_setup_profile_title"
+          android:text="@string/suw_setup_profile_title"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:gravity="left"
+          android:layout_marginVertical="?attr/contentMarginVertical"
+          style="@style/CompanionTitleTextStyle" />
+      <TextView
+          android:id="@+id/suw_setup_profile_content"
+          android:text="@string/suw_setup_profile_content"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:gravity="left"
+          style="@style/CompanionSubtitleTextStyle" />
+    </LinearLayout>
+    <View style="@style/SuwVerticalDividerStyle"/>
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:layout_weight="@integer/suw_content_column_weight"
+        android:layout_marginVertical="?attr/pageMarginVertical"
+        android:layout_marginStart="@dimen/suw_column_inner_padding_horizontal" >
+      <ImageView
+          android:id="@+id/qr_code"
+          android:layout_width="@dimen/qr_code_size"
+          android:layout_height="@dimen/qr_code_size"
+          tools:ignore="ContentDescription" />
+      <TextView
+          android:id="@+id/connect_to_car_instruction"
+          android:text="@string/suw_qr_instruction_text"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_marginVertical="?attr/contentMarginVertical"
+          android:gravity="center"
+          style="@style/CompanionSubtitleTextStyle" />
+    </LinearLayout>
+</LinearLayout>

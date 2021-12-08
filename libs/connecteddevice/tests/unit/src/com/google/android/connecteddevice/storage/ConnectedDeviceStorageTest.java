@@ -62,7 +62,8 @@ public final class ConnectedDeviceStorageTest {
             .build();
     AssociatedDeviceDao database = connectedDeviceDatabase.associatedDeviceDao();
 
-    connectedDeviceStorage = new ConnectedDeviceStorage(context, new FakeCryptoHelper(), database);
+    connectedDeviceStorage =
+        new ConnectedDeviceStorage(context, new FakeCryptoHelper(), database, directExecutor());
     addedAssociatedDevices = new ArrayList<>();
   }
 
@@ -233,7 +234,7 @@ public final class ConnectedDeviceStorageTest {
   @Test
   public void setAssociatedDeviceName_issuesCallbackOnNameChange() {
     AssociatedDeviceCallback callback = mock(AssociatedDeviceCallback.class);
-    connectedDeviceStorage.setAssociatedDeviceCallback(callback);
+    connectedDeviceStorage.registerAssociatedDeviceCallback(callback);
     AssociatedDevice device =
         new AssociatedDevice(
             UUID.randomUUID().toString(),
@@ -299,7 +300,7 @@ public final class ConnectedDeviceStorageTest {
   @Test
   public void updateAssociatedDeviceName_issuesCallbackOnNameChange() {
     AssociatedDeviceCallback callback = mock(AssociatedDeviceCallback.class);
-    connectedDeviceStorage.setAssociatedDeviceCallback(callback);
+    connectedDeviceStorage.registerAssociatedDeviceCallback(callback);
     AssociatedDevice device =
         new AssociatedDevice(
             UUID.randomUUID().toString(),
@@ -372,7 +373,7 @@ public final class ConnectedDeviceStorageTest {
   @Test
   public void addAssociatedDeviceForUser_invokesCallback() {
     AssociatedDeviceCallback callback = mock(AssociatedDeviceCallback.class);
-    connectedDeviceStorage.setAssociatedDeviceCallback(callback);
+    connectedDeviceStorage.registerAssociatedDeviceCallback(callback);
 
     AssociatedDevice device = addRandomAssociatedDevice(ACTIVE_USER_ID);
 
@@ -382,7 +383,7 @@ public final class ConnectedDeviceStorageTest {
   @Test
   public void removeAssociatedDeviceForUser_invokesCallback() {
     AssociatedDeviceCallback callback = mock(AssociatedDeviceCallback.class);
-    connectedDeviceStorage.setAssociatedDeviceCallback(callback);
+    connectedDeviceStorage.registerAssociatedDeviceCallback(callback);
     AssociatedDevice device = addRandomAssociatedDevice(ACTIVE_USER_ID);
 
     connectedDeviceStorage.removeAssociatedDevice(device.getDeviceId());
@@ -393,7 +394,7 @@ public final class ConnectedDeviceStorageTest {
   @Test
   public void updateAssociatedDeviceName_invokesCallback() {
     AssociatedDeviceCallback callback = mock(AssociatedDeviceCallback.class);
-    connectedDeviceStorage.setAssociatedDeviceCallback(callback);
+    connectedDeviceStorage.registerAssociatedDeviceCallback(callback);
     AssociatedDevice device = addRandomAssociatedDevice(ACTIVE_USER_ID);
     String newName = "New Name";
 
@@ -407,7 +408,7 @@ public final class ConnectedDeviceStorageTest {
   @Test
   public void claimAssociatedDevice_setsCurrentUserIdOnAssociatedDevice() {
     AssociatedDeviceCallback callback = mock(AssociatedDeviceCallback.class);
-    connectedDeviceStorage.setAssociatedDeviceCallback(callback);
+    connectedDeviceStorage.registerAssociatedDeviceCallback(callback);
     AssociatedDevice device = addRandomAssociatedDevice(AssociatedDevice.UNCLAIMED_USER_ID);
 
     connectedDeviceStorage.claimAssociatedDevice(device.getDeviceId());
@@ -425,7 +426,7 @@ public final class ConnectedDeviceStorageTest {
   @Test
   public void removeAssociatedDeviceClaim_setsUnclaimedUserIdOnAssociatedDevice() {
     AssociatedDeviceCallback callback = mock(AssociatedDeviceCallback.class);
-    connectedDeviceStorage.setAssociatedDeviceCallback(callback);
+    connectedDeviceStorage.registerAssociatedDeviceCallback(callback);
     AssociatedDevice device = addRandomAssociatedDevice(AssociatedDevice.UNCLAIMED_USER_ID);
 
     connectedDeviceStorage.removeAssociatedDeviceClaim(device.getDeviceId());

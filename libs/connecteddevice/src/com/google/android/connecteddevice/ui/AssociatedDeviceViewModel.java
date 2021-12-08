@@ -28,8 +28,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.ParcelUuid;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -60,12 +58,6 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
 
   private static final Duration DISCOVERABLE_DURATION = Duration.ofMinutes(2);
 
-  private static final String SCHEME = "https";
-
-  private static final String AUTHORITY = "demo.companiondevice.com";
-
-  private static final int QR_CODE_SIZE_IN_PIXEL = 200;
-
   /** States of association process. */
   public enum AssociationState {
     NONE,
@@ -82,7 +74,8 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
   private final MutableLiveData<AssociatedDeviceDetails> currentDeviceDetails =
       new MutableLiveData<>(null);
   private final MutableLiveData<String> advertisedCarName = new MutableLiveData<>(null);
-  private final MutableLiveData<Bitmap> bitmap = new MutableLiveData<>(null);
+  private final MutableLiveData<StartAssociationResponse> associationResponse =
+      new MutableLiveData<>(null);
   private final MutableLiveData<String> pairingCode = new MutableLiveData<>(null);
   private final MutableLiveData<Integer> bluetoothState =
       new MutableLiveData<>(BluetoothAdapter.STATE_OFF);
@@ -199,9 +192,10 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
     getApplication().startActivity(intent);
   }
 
-  /** Resets the value of {@link #associationState}. */
+  /** Resets the value of {@link #associationState} and {@link #associationResponse}. */
   public void resetAssociationState() {
     associationState.postValue(AssociationState.NONE);
+    associationResponse.postValue(null);
   }
 
   /** Gets the name that is being advertised by the car. */
@@ -209,9 +203,9 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
     return advertisedCarName;
   }
 
-  /** Gets the Qr code bitmap. */
-  public LiveData<Bitmap> getQrCode() {
-    return bitmap;
+  /** Gets the response from a successful request to start association. */
+  public LiveData<StartAssociationResponse> getAssociationResponse() {
+    return associationResponse;
   }
 
   /** Gets the generated pairing code. */
@@ -345,6 +339,7 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
 
         @Override
         public void onAssociatedDeviceAdded(@NonNull AssociatedDevice device) {
+          resetAssociationState();
           addOrUpdateAssociatedDevice(device);
         }
 
@@ -375,21 +370,7 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
       new IAssociationCallback.Stub() {
         @Override
         public void onAssociationStartSuccess(StartAssociationResponse response) {
-          Uri uri =
-              new CompanionUriBuilder()
-                  .scheme(SCHEME)
-                  .authority(AUTHORITY)
-                  .oobData(response.getOobData())
-                  .deviceId(response.getDeviceIdentifier())
-                  .build();
-
-          Bitmap code = QrCodeGenerator.createQrCode(uri.toString(), QR_CODE_SIZE_IN_PIXEL);
-          if (code == null) {
-            loge(TAG, "QR code is null, ignore.");
-            return;
-          }
-          bitmap.postValue(code);
-
+          associationResponse.postValue(response);
           associationState.postValue(AssociationState.STARTED);
           String deviceName = response.getDeviceName();
           if (!deviceName.isEmpty()) {

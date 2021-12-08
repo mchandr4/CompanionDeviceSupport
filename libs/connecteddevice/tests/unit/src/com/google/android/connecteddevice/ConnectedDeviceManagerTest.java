@@ -92,7 +92,7 @@ public class ConnectedDeviceManagerTest {
             directExecutor,
             directExecutor,
             directExecutor);
-    verify(mockStorage).setAssociatedDeviceCallback(callbackCaptor.capture());
+    verify(mockStorage).registerAssociatedDeviceCallback(callbackCaptor.capture());
     when(mockStorage.getDriverAssociatedDevices()).thenReturn(userDevices);
     when(mockStorage.getDriverAssociatedDeviceIds()).thenReturn(userDeviceIds);
     associatedDeviceCallback = callbackCaptor.getValue();

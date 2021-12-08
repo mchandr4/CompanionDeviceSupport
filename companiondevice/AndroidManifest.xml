@@ -84,6 +84,7 @@
                 android:resource="@bool/enable_feature_coordinator" />
             <meta-data android:name="com.google.android.connecteddevice.supported_oob_channels"
                 android:resource="@array/supported_oob_channels"/>
+
         </service>
         <service
             android:name="com.google.android.connecteddevice.service.ConnectedDeviceFgUserService"

@@ -137,6 +137,9 @@ public final class ConnectedDeviceService extends TrunkService {
   private static final String META_SUPPORTED_OOB_CHANNELS =
       "com.google.android.connecteddevice.supported_oob_channels";
 
+  private static final String META_ENABLE_PASSENGER =
+      "com.google.android.connecteddevice.enable_passenger";
+
   private static final boolean PROXY_ENABLED_BY_DEFAULT = false;
 
   private static final String DEFAULT_RECONNECT_UUID = "000000e0-0000-1000-8000-00805f9b34fb";
@@ -159,6 +162,8 @@ public final class ConnectedDeviceService extends TrunkService {
   private static final boolean ENABLE_CAPABILITIES_EXCHANGE_BY_DEFAULT = false;
 
   private static final boolean ENABLE_FEATURE_COORDINATOR_BY_DEFAULT = false;
+
+  private static final boolean ENABLE_PASSENGER_BY_DEFAULT = false;
 
   private static final String[] DEFAULT_TRANSPORT_PROTOCOLS =
       { TransportProtocols.PROTOCOL_BLE_PERIPHERAL };
@@ -275,8 +280,10 @@ public final class ConnectedDeviceService extends TrunkService {
                       META_SUPPORTED_OOB_CHANNELS,
                       /* defaultValue= */ new String[0]))));
     UUID associationUuid = UUID.fromString(requireMetaString(META_ASSOCIATION_SERVICE_UUID));
+    boolean enablePassenger = getMetaBoolean(META_ENABLE_PASSENGER, ENABLE_PASSENGER_BY_DEFAULT);
     DeviceController deviceController =
-        new MultiProtocolDeviceController(protocols, storage, oobRunner, associationUuid);
+        new MultiProtocolDeviceController(
+            protocols, storage, oobRunner, associationUuid, enablePassenger);
     featureCoordinator = new FeatureCoordinator(deviceController, storage, loggingManager);
     logd(TAG, "Wrapping FeatureCoordinator in legacy binders for backwards compatibility.");
     connectedDeviceManagerBinder = createConnectedDeviceManagerWrapper();

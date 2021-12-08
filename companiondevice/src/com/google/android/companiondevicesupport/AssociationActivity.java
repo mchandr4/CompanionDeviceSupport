@@ -55,6 +55,7 @@ public class AssociationActivity extends FragmentActivity {
   private static final String ASSOCIATION_ERROR_FRAGMENT_TAG = "AssociationErrorFragment";
   private static final String TURN_ON_BLUETOOTH_DIALOG_TAG = "TurnOnBluetoothDialog";
   private static final String EXTRA_AUTH_IS_SETUP_WIZARD = "is_setup_wizard";
+  private static final String EXTRA_AUTH_IS_SETUP_PROFILE = "is_setup_profile_association";
   private static final String EXTRA_USE_IMMERSIVE_MODE = "useImmersiveMode";
   private static final String EXTRA_HIDE_SKIP_BUTTON = "hide_skip_button";
 
@@ -62,6 +63,7 @@ public class AssociationActivity extends FragmentActivity {
   private CarSetupWizardCompatLayout carSetupWizardLayout;
   private AssociatedDeviceViewModel model;
   private boolean isStartedForSuw = false;
+  private boolean isStartedForSetupProfile = false;
   private boolean isImmersive = false;
   private boolean hideSkipButton = false;
 
@@ -101,6 +103,8 @@ public class AssociationActivity extends FragmentActivity {
       return;
     }
     isStartedForSuw = intent.getBooleanExtra(EXTRA_AUTH_IS_SETUP_WIZARD, /* defaultValue= */ false);
+    isStartedForSetupProfile =
+        intent.getBooleanExtra(EXTRA_AUTH_IS_SETUP_PROFILE, /* defaultValue= */ false);
     isImmersive = intent.getBooleanExtra(EXTRA_USE_IMMERSIVE_MODE, /* defaultValue= */ false);
     hideSkipButton = intent.getBooleanExtra(EXTRA_HIDE_SKIP_BUTTON, /* defaultValue= */ false);
   }
@@ -295,8 +299,12 @@ public class AssociationActivity extends FragmentActivity {
     if (fragment != null && fragment.isVisible()) {
       return;
     }
-    fragment = CompanionQrCodeLandingFragment.newInstance(isStartedForSuw);
+    fragment =
+        CompanionQrCodeLandingFragment.newInstance(isStartedForSuw, isStartedForSetupProfile);
     launchFragment(fragment, COMPANION_LANDING_FRAGMENT_TAG);
+    if (isStartedForSetupProfile) {
+      showSkipButton();
+    }
   }
 
   private void showTurnOnBluetoothFragment() {

@@ -83,7 +83,8 @@ class MultiProtocolSecureChannelTest {
         .setQueryExecutor(directExecutor())
         .build()
         .associatedDeviceDao()
-    spyStorage = spy(ConnectedDeviceStorage(context, Base64CryptoHelper(), database))
+    spyStorage =
+      spy(ConnectedDeviceStorage(context, Base64CryptoHelper(), database, directExecutor()))
     whenever(spyStorage.uniqueId).thenReturn(SERVER_DEVICE_ID)
   }
 

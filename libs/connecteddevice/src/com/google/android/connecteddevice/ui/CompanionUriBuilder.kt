@@ -25,10 +25,10 @@ import com.google.android.connecteddevice.model.OobData
 import com.google.protobuf.ByteString
 
 /** Build Uri which will be used to communicate with remote device. */
-class CompanionUriBuilder {
+class CompanionUriBuilder(private val uri: Uri? = null) {
   private var oobData: OobData? = null
   private var deviceId: ByteArray? = null
-  private val builder = Uri.Builder()
+  private val builder: Uri.Builder = uri?.buildUpon() ?: Uri.Builder()
 
   fun scheme(scheme: String) = apply { builder.scheme(scheme) }
   fun authority(authority: String) = apply { builder.authority(authority) }
@@ -51,21 +51,23 @@ class CompanionUriBuilder {
 
   fun build(): Uri {
     val oobData = this.oobData
-    val oobAssociationData = OutOfBandAssociationData.newBuilder().run {
-      if (deviceId != null) {
-        setDeviceIdentifier(ByteString.copyFrom(deviceId))
-      }
-      if (oobData != null) {
-        val token = OutOfBandAssociationToken.newBuilder().run {
-          setEncryptionKey(ByteString.copyFrom(oobData.encryptionKey))
-          setIhuIv(ByteString.copyFrom(oobData.ihuIv))
-          setMobileIv(ByteString.copyFrom(oobData.mobileIv))
-          build()
+    val oobAssociationData =
+      OutOfBandAssociationData.newBuilder().run {
+        if (deviceId != null) {
+          setDeviceIdentifier(ByteString.copyFrom(deviceId))
         }
-        setToken(token)
+        if (oobData != null) {
+          val token =
+            OutOfBandAssociationToken.newBuilder().run {
+              setEncryptionKey(ByteString.copyFrom(oobData.encryptionKey))
+              setIhuIv(ByteString.copyFrom(oobData.ihuIv))
+              setMobileIv(ByteString.copyFrom(oobData.mobileIv))
+              build()
+            }
+          setToken(token)
+        }
+        build()
       }
-      build()
-    }
     builder.appendQueryParameter(
       OOB_DATA_PARAMETER_KEY,
       Base64.encodeToString(oobAssociationData.toByteArray(), Base64.URL_SAFE)

@@ -31,11 +31,13 @@ import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Binder;
+import android.os.Build.VERSION;
+import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.IBinder;
+import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.RemoteInput;
-import androidx.annotation.Nullable;
 import com.google.android.connecteddevice.model.ConnectedDevice;
 import com.google.android.connecteddevice.notificationmsg.common.ConversationKey;
 import com.google.android.connecteddevice.notificationmsg.proto.NotificationMsg;
@@ -171,6 +173,13 @@ public class NotificationMsgService extends MetaDataService {
    * started.
    */
   private void sendServiceRunningNotification() {
+    // TODO(b/201677355) A new rule in S restricts
+    // the ability to start foreground services to only active UI
+    // however, this needs to be fixed properly as Assistant needs the foreground service
+    // for replies to work
+    if (VERSION.SDK_INT > VERSION_CODES.R) {
+      return;
+    }
     NotificationManager notificationManager = getSystemService(NotificationManager.class);
     // Create notification channel for app running notification
     NotificationChannel appRunningNotificationChannel =

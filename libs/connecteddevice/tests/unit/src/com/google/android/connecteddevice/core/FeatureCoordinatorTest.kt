@@ -946,20 +946,24 @@ class FeatureCoordinatorTest {
   }
 
   @Test
-  fun claimAssociatedDevice_claimsDevice() {
-    val deviceId = UUID.randomUUID().toString()
+  fun claimAssociatedDevice_disconnectsAndClaimsDeviceAndInitiatesReconnection() {
+    val deviceId = UUID.randomUUID()
 
-    coordinator.claimAssociatedDevice(deviceId)
+    coordinator.claimAssociatedDevice(deviceId.toString())
 
-    verify(mockStorage).claimAssociatedDevice(deviceId)
+    verify(mockController).disconnectDevice(deviceId)
+    verify(mockStorage).claimAssociatedDevice(deviceId.toString())
+    verify(mockController).initiateConnectionToDevice(deviceId)
   }
 
   @Test
-  fun removeAssociatedDeviceClaim_removesClaim() {
-    val deviceId = UUID.randomUUID().toString()
+  fun removeAssociatedDeviceClaim_disconnectsAndRemovesClaimAndInitiatesReconnection() {
+    val deviceId = UUID.randomUUID()
 
-    coordinator.removeAssociatedDeviceClaim(deviceId)
+    coordinator.removeAssociatedDeviceClaim(deviceId.toString())
 
-    verify(mockStorage).removeAssociatedDeviceClaim(deviceId)
+    verify(mockController).disconnectDevice(deviceId)
+    verify(mockStorage).removeAssociatedDeviceClaim(deviceId.toString())
+    verify(mockController).initiateConnectionToDevice(deviceId)
   }
 }

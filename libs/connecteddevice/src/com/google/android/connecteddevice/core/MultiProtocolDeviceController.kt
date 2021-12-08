@@ -64,6 +64,8 @@ import java.util.concurrent.atomic.AtomicReference
  *
  * @property protocols List of supported protocols.
  * @property storage Storage necessary to generate reconnect challenge.
+ * @property enablePassenger Whether passenger devices automatically connect. When `true`, newly
+ * associated devices will remain unclaimed by default.
  * @property callbackExecutor Executor on which callbacks are executed.
  */
 class MultiProtocolDeviceController
@@ -72,8 +74,9 @@ constructor(
   private val protocols: Set<ConnectionProtocol>,
   private val storage: ConnectedDeviceStorage,
   private val oobRunner: OobRunner,
-  private val callbackExecutor: Executor = Executors.newSingleThreadExecutor(),
-  private val associationServiceUuid: UUID
+  private val associationServiceUuid: UUID,
+  private val enablePassenger: Boolean,
+  private val callbackExecutor: Executor = Executors.newSingleThreadExecutor()
 ) : DeviceController {
   private val connectedRemoteDevices = ConcurrentHashMap<UUID, ConnectedRemoteDevice>()
 
@@ -83,6 +86,23 @@ constructor(
 
   private val associatedDevices = CopyOnWriteArrayList<AssociatedDevice>()
   private val driverDevices = CopyOnWriteArrayList<AssociatedDevice>()
+
+  private val storageCallback =
+    object : ConnectedDeviceStorage.AssociatedDeviceCallback {
+      override fun onAssociatedDeviceAdded(device: AssociatedDevice) {
+        // Device population is handled locally when a new device is added.
+      }
+
+      override fun onAssociatedDeviceRemoved(device: AssociatedDevice) {
+        logd(TAG, "An associated device has been removed. Repopulating devices from storage.")
+        populateDevices()
+      }
+
+      override fun onAssociatedDeviceUpdated(device: AssociatedDevice) {
+        logd(TAG, "An associated device has been updated. Repopulating devices from storage.")
+        populateDevices()
+      }
+    }
 
   override val connectedDevices: List<ConnectedDevice>
     get() {
@@ -114,42 +134,26 @@ constructor(
     }
 
   init {
-    callbackExecutor.execute {
-      while (true) {
-        try {
-          logd(TAG, "Populating associated devices from storage.")
-          associatedDevices.clear()
-          driverDevices.clear()
-          associatedDevices.addAll(storage.allAssociatedDevices)
-          driverDevices.addAll(storage.driverAssociatedDevices)
-          break
-        } catch (sqliteException: SQLiteCantOpenDatabaseException) {
-          loge(
-            TAG,
-            "Caught transient exception while retrieving devices. Trying again.",
-            sqliteException
-          )
-          try {
-            Thread.sleep(ASSOCIATED_DEVICE_RETRY_MS)
-          } catch (interrupted: InterruptedException) {
-            loge(TAG, "Sleep interrupted.", interrupted)
-            break
-          }
-        }
-      }
-      logd(TAG, "Devices populated successfully.")
-    }
-
-    // TODO(b/192656006) Add registration for updates to associated devices to keep in sync
+    storage.registerAssociatedDeviceCallback(storageCallback)
   }
 
   override fun start() {
-    logd(TAG, "Starting controller.")
-    val associatedDevices = storage.driverAssociatedDevices
-    for (device in associatedDevices) {
+    logd(TAG, "Starting controller and initiating connections with driver devices.")
+    populateDevices()
+    val driverDevices = storage.driverAssociatedDevices
+    for (device in driverDevices) {
       if (device.isConnectionEnabled) {
         initiateConnectionToDevice(UUID.fromString(device.deviceId))
       }
+    }
+    if (!enablePassenger) {
+      logd(TAG, "The passenger experience is disabled. Skipping discovery of passenger devices.")
+      return
+    }
+    logd(TAG, "Initiating connections with passenger devices.")
+    val passengerDevices = storage.passengerAssociatedDevices
+    for (device in passengerDevices) {
+      initiateConnectionToDevice(UUID.fromString(device.deviceId))
     }
   }
 
@@ -308,6 +312,34 @@ constructor(
   override fun unregisterCallback(callback: Callback) {
     logd(TAG, "Unregistering a callback.")
     callbacks.remove(callback)
+  }
+
+  private fun populateDevices() {
+    callbackExecutor.execute {
+      while (true) {
+        try {
+          logd(TAG, "Populating associated devices from storage.")
+          associatedDevices.clear()
+          driverDevices.clear()
+          associatedDevices.addAll(storage.allAssociatedDevices)
+          driverDevices.addAll(storage.driverAssociatedDevices)
+          logd(TAG, "Devices populated successfully.")
+          break
+        } catch (sqliteException: SQLiteCantOpenDatabaseException) {
+          loge(
+            TAG,
+            "Caught transient exception while retrieving devices. Trying again.",
+            sqliteException
+          )
+          try {
+            Thread.sleep(ASSOCIATED_DEVICE_RETRY_MS)
+          } catch (interrupted: InterruptedException) {
+            loge(TAG, "Sleep interrupted.", interrupted)
+            break
+          }
+        }
+      }
+    }
   }
 
   /**
@@ -710,8 +742,14 @@ constructor(
         /* deviceName= */ null,
         /* isConnectionEnabled= */ true
       )
-    storage.addAssociatedDeviceForDriver(associatedDevice)
-    driverDevices.add(associatedDevice)
+    if (enablePassenger) {
+      logd(TAG, "Saving newly associated device $deviceId as unclaimed.")
+      storage.addAssociatedDeviceForUser(AssociatedDevice.UNCLAIMED_USER_ID, associatedDevice)
+    } else {
+      logd(TAG, "Saving newly associated device $deviceId as a driver's device.")
+      storage.addAssociatedDeviceForDriver(associatedDevice)
+      driverDevices.add(associatedDevice)
+    }
     associatedDevices.add(associatedDevice)
   }
 

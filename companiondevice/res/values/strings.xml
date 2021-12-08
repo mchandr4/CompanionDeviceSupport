@@ -184,4 +184,19 @@
 
     <!-- Prefix of the BLE device name. [CHAR LIMIT=20]-->
     <string name="ble_device_name_prefix">Vehicle\u00A0</string>
+
+    <!-- QR code uri scheme. -->
+    <string name="uri_scheme" translatable="false">companion</string>
+    <!-- QR code uri authority. -->
+    <string name="uri_authority"  translatable="false">demo.companiondevice.com</string>
+    <!-- QR code uri path. -->
+    <string name="uri_path"  translatable="false">associate</string>
+
+    <!-- Car SUW setup profile page title. [CHAR LIMIT=40]-->
+    <string name="suw_setup_profile_title">Setup profile with phone</string>
+    <!-- Car SUW setup profile page content. [CHAR LIMIT=200]-->
+    <string name="suw_setup_profile_content">Scan QR code to get started. If you don\'t have a MyCompanion app, you can download it on Google Play and the App Store.</string>
+    <!-- Car SUW setup profile page instructions for user to scan the QR code. [CHAR LIMIT=150]-->
+    <string name="suw_qr_instruction_text">Scan QR code to connect to&lt;br /&gt; &lt;b><xliff:g id="car_name" example="MyVehicle">%1$s</xliff:g>&lt;/b> <xliff:g id="advertised_car_name" example="(Vehicle 0000)">%2$s</xliff:g></string>
+
 </resources>

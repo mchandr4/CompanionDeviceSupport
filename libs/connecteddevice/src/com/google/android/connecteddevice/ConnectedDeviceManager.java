@@ -138,7 +138,7 @@ public class ConnectedDeviceManager {
     this.carBluetoothManager = carBluetoothManager;
     this.connectionExecutor = connectionExecutor;
     this.carBluetoothManager.registerCallback(generateCarManagerCallback(), callbackExecutor);
-    this.storage.setAssociatedDeviceCallback(associatedDeviceCallback);
+    this.storage.registerAssociatedDeviceCallback(associatedDeviceCallback);
     this.storageExecutor = storageExecutor;
   }
 

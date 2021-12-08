@@ -93,7 +93,8 @@ class ChannelResolverTest {
         .setQueryExecutor(directExecutor())
         .build()
     val database = connectedDeviceDatabase.associatedDeviceDao()
-    spyStorage = spy(ConnectedDeviceStorage(context, Base64CryptoHelper(), database))
+    spyStorage =
+      spy(ConnectedDeviceStorage(context, Base64CryptoHelper(), database, directExecutor()))
     whenever(mockStreamFactory.createProtocolStream(any(), any())).thenReturn(mockStream)
     whenever(spyStorage.hashWithChallengeSecret(any(), any())).thenReturn(TEST_CHALLENGE_RESPONSE)
     channelResolver =

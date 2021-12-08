@@ -28,12 +28,15 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import androidx.room.Room;
 import com.google.android.connecteddevice.model.AssociatedDevice;
+import com.google.android.connecteddevice.util.ThreadSafeCallbacks;
 import java.security.InvalidKeyException;
 import java.security.InvalidParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -55,11 +58,14 @@ public class ConnectedDeviceStorage {
 
   private final CryptoHelper cryptoHelper;
 
+  private final Executor callbackExecutor;
+
   private SharedPreferences sharedPreferences;
 
   private UUID uniqueId;
 
-  private AssociatedDeviceCallback associatedDeviceCallback;
+  private final ThreadSafeCallbacks<AssociatedDeviceCallback> callbacks =
+      new ThreadSafeCallbacks<>();
 
   public ConnectedDeviceStorage(@NonNull Context context) {
     this(
@@ -68,31 +74,30 @@ public class ConnectedDeviceStorage {
         Room.databaseBuilder(context, ConnectedDeviceDatabase.class, DATABASE_NAME)
             .fallbackToDestructiveMigration()
             .build()
-            .associatedDeviceDao());
+            .associatedDeviceDao(),
+        Executors.newSingleThreadExecutor());
   }
 
   @VisibleForTesting
   public ConnectedDeviceStorage(
       @NonNull Context context,
       @NonNull CryptoHelper cryptoHelper,
-      @NonNull AssociatedDeviceDao associatedDeviceDatabase) {
+      @NonNull AssociatedDeviceDao associatedDeviceDatabase,
+      @NonNull Executor callbackExecutor) {
     this.context = context;
     this.cryptoHelper = cryptoHelper;
     this.associatedDeviceDatabase = associatedDeviceDatabase;
+    this.callbackExecutor = callbackExecutor;
   }
 
-  /**
-   * Set a callback for associated device updates.
-   *
-   * @param callback {@link AssociatedDeviceCallback} to set.
-   */
-  public void setAssociatedDeviceCallback(@NonNull AssociatedDeviceCallback callback) {
-    associatedDeviceCallback = callback;
+  /** Register an {@link AssociatedDeviceCallback} for associated device updates. */
+  public void registerAssociatedDeviceCallback(@NonNull AssociatedDeviceCallback callback) {
+    callbacks.add(callback, callbackExecutor);
   }
 
-  /** Clear the callback for association device callback updates. */
-  public void clearAssociationDeviceCallback() {
-    associatedDeviceCallback = null;
+  /** Unregister an {@link AssociatedDeviceCallback} from associated device updates. */
+  public void unregisterAssociatedDeviceCallback(@NonNull AssociatedDeviceCallback callback) {
+    callbacks.remove(callback);
   }
 
   /**
@@ -377,9 +382,7 @@ public class ConnectedDeviceStorage {
     AssociatedDeviceEntity entity =
         new AssociatedDeviceEntity(userId, device, /* isConnectionEnabled= */ true);
     associatedDeviceDatabase.addOrReplaceAssociatedDevice(entity);
-    if (associatedDeviceCallback != null) {
-      associatedDeviceCallback.onAssociatedDeviceAdded(device);
-    }
+    callbacks.invoke(callback -> callback.onAssociatedDeviceAdded(device));
   }
 
   /**
@@ -427,9 +430,7 @@ public class ConnectedDeviceStorage {
   private void updateName(AssociatedDeviceEntity entity, String name) {
     entity.name = name;
     associatedDeviceDatabase.addOrReplaceAssociatedDevice(entity);
-    if (associatedDeviceCallback != null) {
-      associatedDeviceCallback.onAssociatedDeviceUpdated(entity.toAssociatedDevice());
-    }
+    callbacks.invoke(callback -> callback.onAssociatedDeviceUpdated(entity.toAssociatedDevice()));
   }
 
   /**
@@ -443,9 +444,7 @@ public class ConnectedDeviceStorage {
       return;
     }
     associatedDeviceDatabase.removeAssociatedDevice(entity);
-    if (associatedDeviceCallback != null) {
-      associatedDeviceCallback.onAssociatedDeviceRemoved(entity.toAssociatedDevice());
-    }
+    callbacks.invoke(callback -> callback.onAssociatedDeviceRemoved(entity.toAssociatedDevice()));
   }
 
   /**
@@ -470,9 +469,7 @@ public class ConnectedDeviceStorage {
     }
     entity.isConnectionEnabled = isConnectionEnabled;
     associatedDeviceDatabase.addOrReplaceAssociatedDevice(entity);
-    if (associatedDeviceCallback != null) {
-      associatedDeviceCallback.onAssociatedDeviceUpdated(entity.toAssociatedDevice());
-    }
+    callbacks.invoke(callback -> callback.onAssociatedDeviceUpdated(entity.toAssociatedDevice()));
   }
 
   /**
@@ -502,9 +499,7 @@ public class ConnectedDeviceStorage {
 
     entity.userId = ActivityManager.getCurrentUser();
     associatedDeviceDatabase.addOrReplaceAssociatedDevice(entity);
-    if (associatedDeviceCallback != null) {
-      associatedDeviceCallback.onAssociatedDeviceUpdated(entity.toAssociatedDevice());
-    }
+    callbacks.invoke(callback -> callback.onAssociatedDeviceUpdated(entity.toAssociatedDevice()));
   }
 
   /** Removes the claim on the identified associated device leaving it in an unclaimed state. */
@@ -522,9 +517,7 @@ public class ConnectedDeviceStorage {
 
     entity.userId = AssociatedDevice.UNCLAIMED_USER_ID;
     associatedDeviceDatabase.addOrReplaceAssociatedDevice(entity);
-    if (associatedDeviceCallback != null) {
-      associatedDeviceCallback.onAssociatedDeviceUpdated(entity.toAssociatedDevice());
-    }
+    callbacks.invoke(callback -> callback.onAssociatedDeviceUpdated(entity.toAssociatedDevice()));
   }
 
   /** Callback for association device related events. */

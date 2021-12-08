@@ -46,7 +46,7 @@
         android:layout_marginVertical="?attr/contentMarginVertical"
         style="@style/CompanionTitleTextStyle" />
       <TextView
-        android:id="@+id/add_associated_device_subtitle"
+        android:id="@+id/connect_to_car_instruction"
         android:text="@string/add_associated_device_subtitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
