@@ -12,8 +12,12 @@ import java.util.List;
 public interface TrustedDeviceDao {
 
   /** Get a {@link TrustedDeviceEntity} based on device id. */
-  @Query("SELECT * FROM trusted_devices WHERE id LIKE :deviceId AND isValid = 1 LIMIT 1")
+  @Query("SELECT * FROM trusted_devices WHERE id LIKE :deviceId LIMIT 1")
   TrustedDeviceEntity getTrustedDevice(String deviceId);
+
+  /** Get a {@link TrustedDeviceEntity} based on device id only if it is valid. */
+  @Query("SELECT * FROM trusted_devices WHERE id LIKE :deviceId AND isValid = 1 LIMIT 1")
+  TrustedDeviceEntity getTrustedDeviceIfValid(String deviceId);
 
   /** Get a {@link FeatureStateEntity} based on device id. */
   @Query("SELECT * FROM feature_state WHERE id = :deviceId")
@@ -47,4 +51,19 @@ public interface TrustedDeviceDao {
   /** Remove any stored feature statue for a car with the given {@code deviceId}. */
   @Query("DELETE FROM feature_state WHERE id = :deviceId")
   void removeFeatureState(String deviceId);
+
+  /** Get a {@link TrustedDeviceTokenEntity} based on device id. */
+  @Query("SELECT * FROM trusted_device_tokens WHERE id = :deviceId LIMIT 1")
+  TrustedDeviceTokenEntity getTrustedDeviceHashedToken(String deviceId);
+
+  /**
+   * Add a {@link TrustedDeviceTokenEntity}. Replaces any previously stored hashed token with a
+   * matching device id.
+   */
+  @Insert(onConflict = OnConflictStrategy.REPLACE)
+  void addOrReplaceTrustedDeviceHashedToken(TrustedDeviceTokenEntity hashedToken);
+
+  /** Remove a {@link TrustedDeviceTokenEntity} belonging with the given {@code deviceId}. */
+  @Query("DELETE FROM trusted_device_tokens WHERE id = :deviceId")
+  void removeTrustedDeviceHashedToken(String deviceId);
 }

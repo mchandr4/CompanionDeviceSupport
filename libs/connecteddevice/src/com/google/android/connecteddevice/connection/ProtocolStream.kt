@@ -19,7 +19,10 @@ import com.google.android.companionprotos.DeviceMessageProto
 import com.google.android.companionprotos.OperationProto.OperationType
 import com.google.android.companionprotos.PacketProto.Packet
 import com.google.android.connecteddevice.model.DeviceMessage
-import com.google.android.connecteddevice.transport.ConnectionProtocol
+import com.google.android.connecteddevice.transport.IDataReceivedListener
+import com.google.android.connecteddevice.transport.IDataSendCallback
+import com.google.android.connecteddevice.transport.IDeviceDisconnectedListener
+import com.google.android.connecteddevice.transport.IDeviceMaxDataSizeChangedListener
 import com.google.android.connecteddevice.transport.ProtocolDevice
 import com.google.android.connecteddevice.util.ByteUtils
 import com.google.android.connecteddevice.util.EventLog.onMessageFullyReceived
@@ -32,18 +35,11 @@ import com.google.protobuf.ExtensionRegistryLite
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.util.ArrayDeque
-import java.util.concurrent.Executor
-import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 
-/**
- * Data stream for a specified [protocol] and its corresponding device identified with [protocolId].
- */
-open class ProtocolStream(
-  private val device: ProtocolDevice,
-  callbackExecutor: Executor = Executors.newSingleThreadExecutor()
-) {
+/** Data stream for a specified [device]. */
+open class ProtocolStream(private val device: ProtocolDevice) {
   /** Listener which will be notified when there is new [DeviceMessage] received. */
   var messageReceivedListener: MessageReceivedListener? = null
 
@@ -69,31 +65,28 @@ open class ProtocolStream(
     logd(TAG, "Creating new ProtocolStream for protocol device ${device.protocolId}.")
     device.protocol.registerDataReceivedListener(
       device.protocolId,
-      object : ConnectionProtocol.DataReceivedListener {
+      object : IDataReceivedListener.Stub() {
         override fun onDataReceived(protocolId: String, data: ByteArray) {
           onDataReceived(data)
         }
-      },
-      callbackExecutor
+      }
     )
     device.protocol.registerDeviceDisconnectedListener(
       device.protocolId,
-      object : ConnectionProtocol.DeviceDisconnectedListener {
+      object : IDeviceDisconnectedListener.Stub() {
         override fun onDeviceDisconnected(protocolId: String) {
           isConnected.set(false)
           protocolDisconnectListener?.onProtocolDisconnected()
         }
-      },
-      callbackExecutor
+      }
     )
     device.protocol.registerDeviceMaxDataSizeChangedListener(
       device.protocolId,
-      object : ConnectionProtocol.DeviceMaxDataSizeChangedListener {
+      object : IDeviceMaxDataSizeChangedListener.Stub() {
         override fun onDeviceMaxDataSizeChanged(protocolId: String, maxBytes: Int) {
           maxWriteSize = maxBytes
         }
-      },
-      callbackExecutor
+      }
     )
     maxWriteSize = device.protocol.getMaxWriteSize(device.protocolId)
   }
@@ -107,7 +100,7 @@ open class ProtocolStream(
     device.protocol.sendData(
       device.protocolId,
       data,
-      object : ConnectionProtocol.DataSendCallback {
+      object : IDataSendCallback.Stub() {
         override fun onDataSentSuccessfully() {
           logd(TAG, "Data sent successfully. Sending next message in queue.")
           isSendingInProgress.set(false)

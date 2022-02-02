@@ -3,6 +3,9 @@ package com.google.android.connecteddevice.trust;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.util.concurrent.MoreExecutors.directExecutor;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -24,15 +27,19 @@ import com.google.android.connecteddevice.trust.api.ITrustedDeviceAgentDelegate;
 import com.google.android.connecteddevice.trust.api.ITrustedDeviceCallback;
 import com.google.android.connecteddevice.trust.api.ITrustedDeviceEnrollmentCallback;
 import com.google.android.connecteddevice.trust.api.TrustedDevice;
+import com.google.android.connecteddevice.trust.proto.PhoneAuthProto.PhoneCredentials;
 import com.google.android.connecteddevice.trust.proto.TrustedDeviceMessageProto.TrustedDeviceMessage;
 import com.google.android.connecteddevice.trust.proto.TrustedDeviceMessageProto.TrustedDeviceMessage.MessageType;
 import com.google.android.connecteddevice.trust.proto.TrustedDeviceMessageProto.TrustedDeviceState;
 import com.google.android.connecteddevice.trust.storage.TrustedDeviceDatabase;
 import com.google.android.connecteddevice.trust.storage.TrustedDeviceEntity;
+import com.google.android.connecteddevice.trust.storage.TrustedDeviceTokenEntity;
+import com.google.android.connecteddevice.util.ByteUtils;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.ByteString;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,7 +51,7 @@ import org.mockito.MockitoAnnotations;
 
 @RunWith(AndroidJUnit4.class)
 public final class TrustedDeviceManagerTest {
-  private static final String DEFAULT_DEVICE_ID = "deviceId";
+  private static final String DEFAULT_DEVICE_ID = UUID.randomUUID().toString();
 
   // Note: This token needs to be of length 8 to be valid.
   private static final byte[] FAKE_TOKEN = "12345678".getBytes(UTF_8);
@@ -58,7 +65,7 @@ public final class TrustedDeviceManagerTest {
       new ConnectedDevice(
           DEFAULT_DEVICE_ID,
           "secureConnectedDevice",
-          /* belongsToActiveUser= */ true,
+          /* belongsToDriver= */ true,
           /* hasSecureChannel= */ true);
 
   private final Connector fakeConnector = spy(new FakeConnector());
@@ -73,6 +80,7 @@ public final class TrustedDeviceManagerTest {
   private TrustedDeviceManager manager;
   private TrustedDeviceFeature feature;
   private TrustedDeviceDatabase database;
+  private TrustedDeviceFeature.Callback featureCallback;
 
   @Before
   public void setUp() throws RemoteException {
@@ -102,6 +110,10 @@ public final class TrustedDeviceManagerTest {
     manager.setTrustedDeviceAgentDelegate(trustAgentDelegate);
     manager.registerTrustedDeviceEnrollmentCallback(enrollmentCallback);
     manager.registerTrustedDeviceCallback(trustedDeviceCallback);
+    ArgumentCaptor<TrustedDeviceFeature.Callback> captor =
+        ArgumentCaptor.forClass(TrustedDeviceFeature.Callback.class);
+    verify(feature).setCallback(captor.capture());
+    featureCallback = captor.getValue();
   }
 
   @After
@@ -132,6 +144,17 @@ public final class TrustedDeviceManagerTest {
         new TrustedDevice(SECURE_CONNECTED_DEVICE.getDeviceId(), DEFAULT_USER_ID, FAKE_HANDLE);
 
     assertThat(trustedDeviceListCaptor.getValue()).containsExactly(expectedTrustedDevice);
+  }
+
+  @Test
+  public void enrollment_storesHashedToken() throws RemoteException {
+    triggerDeviceConnected(SECURE_CONNECTED_DEVICE);
+
+    executeAndVerifyValidEnrollFlow();
+
+    TrustedDeviceTokenEntity entity =
+        database.trustedDeviceDao().getTrustedDeviceHashedToken(DEFAULT_DEVICE_ID);
+    assertThat(entity).isNotNull();
   }
 
   @Test
@@ -174,10 +197,7 @@ public final class TrustedDeviceManagerTest {
 
     ConnectedDevice unenrolledDevice =
         new ConnectedDevice(
-            "unenrolled",
-            "unenrolled",
-            /* belongsToActiveUser= */ true,
-            /* hasSecureChannel= */ true);
+            "unenrolled", "unenrolled", /* belongsToDriver= */ true, /* hasSecureChannel= */ true);
 
     manager.featureCallback.onMessageReceived(
         unenrolledDevice, createStateSyncMessage(/* enabled= */ false));
@@ -322,6 +342,105 @@ public final class TrustedDeviceManagerTest {
         new TrustedDevice(SECURE_CONNECTED_DEVICE.getDeviceId(), DEFAULT_USER_ID, FAKE_HANDLE);
 
     assertThat(trustedDeviceListCaptor.getValue()).containsExactly(expectedTrustedDevice);
+  }
+
+  @Test
+  public void unlock_validTokenPassedToDelegate() throws RemoteException {
+    triggerDeviceConnected(SECURE_CONNECTED_DEVICE);
+    executeAndVerifyValidEnrollFlow();
+
+    TrustedDeviceMessage unlockMessage =
+        TrustedDeviceMessage.newBuilder()
+            .setType(MessageType.UNLOCK_CREDENTIALS)
+            .setPayload(
+                PhoneCredentials.newBuilder()
+                    .setEscrowToken(ByteString.copyFrom(FAKE_TOKEN))
+                    .setHandle(ByteString.copyFrom(ByteUtils.longToBytes(FAKE_HANDLE)))
+                    .build()
+                    .toByteString())
+            .build();
+    featureCallback.onMessageReceived(SECURE_CONNECTED_DEVICE, unlockMessage.toByteArray());
+
+    verify(trustAgentDelegate).unlockUserWithToken(FAKE_TOKEN, FAKE_HANDLE, DEFAULT_USER_ID);
+  }
+
+  @Test
+  public void unlock_invalidTokenIsNotPassedToDelegate() throws RemoteException {
+    triggerDeviceConnected(SECURE_CONNECTED_DEVICE);
+    executeAndVerifyValidEnrollFlow();
+    byte[] incorrectToken = ByteUtils.randomBytes(8);
+
+    TrustedDeviceMessage unlockMessage =
+        TrustedDeviceMessage.newBuilder()
+            .setType(MessageType.UNLOCK_CREDENTIALS)
+            .setPayload(
+                PhoneCredentials.newBuilder()
+                    .setEscrowToken(ByteString.copyFrom(incorrectToken))
+                    .setHandle(ByteString.copyFrom(ByteUtils.longToBytes(FAKE_HANDLE)))
+                    .build()
+                    .toByteString())
+            .build();
+    featureCallback.onMessageReceived(SECURE_CONNECTED_DEVICE, unlockMessage.toByteArray());
+
+    verify(trustAgentDelegate, never()).unlockUserWithToken(any(), anyLong(), anyInt());
+  }
+
+  @Test
+  public void unlock_missingHashedTokenIsNotPassedToDelegate() throws RemoteException {
+    triggerDeviceConnected(SECURE_CONNECTED_DEVICE);
+    executeAndVerifyValidEnrollFlow();
+    database.trustedDeviceDao().removeTrustedDeviceHashedToken(DEFAULT_DEVICE_ID);
+
+    TrustedDeviceMessage unlockMessage =
+        TrustedDeviceMessage.newBuilder()
+            .setType(MessageType.UNLOCK_CREDENTIALS)
+            .setPayload(
+                PhoneCredentials.newBuilder()
+                    .setEscrowToken(ByteString.copyFrom(FAKE_TOKEN))
+                    .setHandle(ByteString.copyFrom(ByteUtils.longToBytes(FAKE_HANDLE)))
+                    .build()
+                    .toByteString())
+            .build();
+    featureCallback.onMessageReceived(SECURE_CONNECTED_DEVICE, unlockMessage.toByteArray());
+
+    verify(trustAgentDelegate, never()).unlockUserWithToken(any(), anyLong(), anyInt());
+  }
+
+  @Test
+  public void removeTrustedDevice_removesHashedToken() throws RemoteException {
+    triggerDeviceConnected(SECURE_CONNECTED_DEVICE);
+    executeAndVerifyValidEnrollFlow();
+    ArgumentCaptor<TrustedDevice> captor = ArgumentCaptor.forClass(TrustedDevice.class);
+    verify(trustedDeviceCallback).onTrustedDeviceAdded(captor.capture());
+    TrustedDevice enrolledDevice = captor.getValue();
+
+    manager.removeTrustedDevice(enrolledDevice);
+
+    TrustedDeviceTokenEntity entity =
+        database.trustedDeviceDao().getTrustedDeviceHashedToken(DEFAULT_DEVICE_ID);
+    assertThat(entity).isNull();
+  }
+
+  @Test
+  public void setTrustedDeviceAgentDelegate_generatesFeatureStateAndRemovesAllInvalidDevices()
+      throws RemoteException {
+    String deviceId = UUID.randomUUID().toString();
+    TrustedDeviceEntity entity =
+        new TrustedDeviceEntity(
+            new TrustedDevice(deviceId, DEFAULT_USER_ID, FAKE_HANDLE), /* isValid= */ false);
+    database.trustedDeviceDao().addOrReplaceTrustedDevice(entity);
+    TrustedDeviceManager manager =
+        new TrustedDeviceManager(
+            database,
+            feature,
+            /* databaseExecutor= */ directExecutor(),
+            /* remoteCallbackExecutor= */ directExecutor());
+
+    manager.setTrustedDeviceAgentDelegate(trustAgentDelegate);
+
+    assertThat(database.trustedDeviceDao().getFeatureState(deviceId)).isNotNull();
+    assertThat(database.trustedDeviceDao().getTrustedDevice(deviceId)).isNull();
+    verify(trustAgentDelegate).removeEscrowToken(FAKE_HANDLE, DEFAULT_USER_ID);
   }
 
   /**

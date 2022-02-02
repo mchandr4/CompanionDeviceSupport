@@ -17,7 +17,6 @@
 package com.google.android.connecteddevice.oob;
 
 import androidx.annotation.NonNull;
-import com.google.android.connecteddevice.model.OobEligibleDevice;
 import com.google.android.connecteddevice.transport.ProtocolDevice;
 
 /**
@@ -42,14 +41,6 @@ public interface OobChannel {
    */
   boolean completeOobDataExchange(
       @NonNull ProtocolDevice protocolDevice, @NonNull Callback callback);
-
-  /**
-   * Exchange out of band data with a remote device. This must be done prior to the start of the
-   * association with that device.
-   *
-   * @param device The remote device to exchange out of band data with
-   */
-  void completeOobDataExchange(@NonNull OobEligibleDevice device, @NonNull Callback callback);
 
   /**
    * Send raw data over the out of band channel

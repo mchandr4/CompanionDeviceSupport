@@ -26,18 +26,24 @@ public class AssociatedDeviceViewModelFactory implements ViewModelProvider.Facto
   private final Application application;
   private final boolean isSppEnabled;
   private final String bleDeviceNamePrefix;
+  private final boolean isPassengerEnabled;
 
   public AssociatedDeviceViewModelFactory(
-      Application application, boolean isSppEnabled, String bleDeviceNamePrefix) {
+      Application application,
+      boolean isSppEnabled,
+      String bleDeviceNamePrefix,
+      boolean isPassengerEnabled) {
     this.application = application;
     this.isSppEnabled = isSppEnabled;
     this.bleDeviceNamePrefix = bleDeviceNamePrefix;
+    this.isPassengerEnabled = isPassengerEnabled;
   }
 
   @NonNull
   @Override
   public <T extends ViewModel> T create(@NonNull Class<T> aClass) {
     return aClass.cast(
-        new AssociatedDeviceViewModel(application, isSppEnabled, bleDeviceNamePrefix));
+        new AssociatedDeviceViewModel(
+            application, isSppEnabled, bleDeviceNamePrefix, isPassengerEnabled));
   }
 }

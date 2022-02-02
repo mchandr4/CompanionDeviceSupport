@@ -16,6 +16,8 @@
 package com.google.android.connecteddevice.connection
 
 import androidx.annotation.VisibleForTesting
+import com.google.android.companionprotos.VerificationCode
+import com.google.android.companionprotos.VerificationCodeState
 import com.google.android.connecteddevice.model.DeviceMessage
 import com.google.android.connecteddevice.model.DeviceMessage.OperationType
 import com.google.android.connecteddevice.oob.OobRunner
@@ -27,6 +29,7 @@ import com.google.android.encryptionrunner.EncryptionRunner
 import com.google.android.encryptionrunner.HandshakeException
 import com.google.android.encryptionrunner.HandshakeMessage.HandshakeState
 import com.google.android.encryptionrunner.Key
+import com.google.protobuf.ByteString
 import java.security.SignatureException
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
@@ -40,7 +43,7 @@ import kotlin.math.roundToLong
  * Establishes a secure channel with [EncryptionRunner] over [ProtocolStream]s as server side, sends
  * and receives messages securely after the secure channel has been established.
  */
-abstract class MultiProtocolSecureChannel(
+open class MultiProtocolSecureChannel(
   stream: ProtocolStream,
   private val storage: ConnectedDeviceStorage,
   private val encryptionRunner: EncryptionRunner,
@@ -94,7 +97,7 @@ abstract class MultiProtocolSecureChannel(
    * The out of band verification code get from the [EncryptionRunner], will be set during out of
    * band association.
    */
-  protected var oobCode: ByteArray? = null
+  private var oobCode: ByteArray? = null
 
   @HandshakeState private var state: Int = HandshakeState.UNKNOWN
 
@@ -112,7 +115,6 @@ abstract class MultiProtocolSecureChannel(
       HandshakeState.UNKNOWN -> processHandshakeInitialization(message)
       HandshakeState.IN_PROGRESS -> processHandshakeInProgress(message)
       HandshakeState.VERIFICATION_NEEDED -> processVerificationCodeMessage(message)
-      HandshakeState.OOB_VERIFICATION_NEEDED -> confirmOobVerificationCode(message)
       HandshakeState.FINISHED ->
         // Should not reach this line.
         loge(TAG, "Received handshake message after handshake is completed. Ignored.")
@@ -152,26 +154,11 @@ abstract class MultiProtocolSecureChannel(
         visualVerificationCode = handshakeMessage.verificationCode
         val fullVerificationCode = handshakeMessage.fullVerificationCode
         if (fullVerificationCode != null) {
-          processOobVerificationCode(fullVerificationCode)
+          this.oobCode = fullVerificationCode
         } else {
           loge(TAG, "Full verification is null. Notify channel error")
           notifySecureChannelFailure(ChannelError.CHANNEL_ERROR_INVALID_STATE)
         }
-      }
-      HandshakeState.OOB_VERIFICATION_NEEDED -> {
-        val oobCode = handshakeMessage.fullVerificationCode
-        // Unreachable error, the [oobCode] will always be nonnull if the status is
-        // [OOB_VERIFICATION_NEEDED].
-        if (oobCode == null) {
-          loge(
-            TAG,
-            "Handshake state is OOB_VERIFICATION_NEEDED, but handshake message does " +
-              "not contain out of band verification code. Notifying callback of failure."
-          )
-          notifySecureChannelFailure(ChannelError.CHANNEL_ERROR_INVALID_VERIFICATION)
-          return
-        }
-        this.oobCode = oobCode
       }
       else -> {
         loge(
@@ -184,11 +171,19 @@ abstract class MultiProtocolSecureChannel(
     }
   }
 
-  /** Will be called when OOB verification code is available from [EncryptionRunner]. */
-  protected abstract fun processOobVerificationCode(oobCode: ByteArray)
-
   /** Process the message received from remote device during verification stage. */
-  protected abstract fun processVerificationCodeMessage(message: ByteArray)
+  private fun processVerificationCodeMessage(message: ByteArray) {
+    val verificationMessage = VerificationCode.parseFrom(message)
+    when (verificationMessage.state) {
+      VerificationCodeState.OOB_VERIFICATION ->
+        confirmOobVerificationCode(verificationMessage.payload.toByteArray())
+      VerificationCodeState.VISUAL_VERIFICATION -> invokeVerificationCodeListener()
+      else -> {
+        loge(TAG, "Unexpected verification message received, issue error callback.")
+        notifySecureChannelFailure(ChannelError.CHANNEL_ERROR_INVALID_STATE)
+      }
+    }
+  }
 
   /** Should be called when OOB verification code is received from remote device. */
   protected fun confirmOobVerificationCode(encryptedCode: ByteArray) {
@@ -229,7 +224,14 @@ abstract class MultiProtocolSecureChannel(
   }
 
   /** Generate understandable OOB data response which will be sent to remote device. */
-  protected abstract fun createOobResponse(code: ByteArray): ByteArray
+  private fun createOobResponse(code: ByteArray) =
+    VerificationCode.newBuilder()
+      .run {
+        setState(VerificationCodeState.OOB_VERIFICATION)
+        setPayload(ByteString.copyFrom(code))
+        build()
+      }
+      .toByteArray()
 
   /** Communicate with other components that the visual verification code is available. */
   protected fun invokeVerificationCodeListener() {
@@ -313,7 +315,12 @@ abstract class MultiProtocolSecureChannel(
    * confirmation, and send confirmation signals to remote bluetooth device.
    */
   open fun notifyVerificationCodeAccepted() {
-    processVisualVerificationConfirmed()
+    val confirmationMessage =
+      VerificationCode.newBuilder().run {
+        setState(VerificationCodeState.VISUAL_CONFIRMATION)
+        build()
+      }
+    sendHandshakeMessage(confirmationMessage.toByteArray())
     verificationCodeAcceptedInternal()
   }
 
@@ -347,9 +354,6 @@ abstract class MultiProtocolSecureChannel(
     logd(TAG, "Pairing code successfully verified.")
     notifyCallback { it.onSecureChannelEstablished() }
   }
-
-  /** A confirmation message should be sent to remote device according to the version. */
-  protected abstract fun processVisualVerificationConfirmed()
 
   /** Add a protocol stream to this channel. */
   fun addStream(stream: ProtocolStream) {

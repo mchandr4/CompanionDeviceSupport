@@ -135,6 +135,12 @@ interface Connector {
    */
   fun retrieveAssociatedDevicesForPassengers(listener: IOnAssociatedDevicesRetrievedListener)
 
+  /** Claim an associated device as belonging to the current user. */
+  fun claimAssociatedDevice(deviceId: String)
+
+  /** Remove the claim on the identified associated device. */
+  fun removeAssociatedDeviceClaim(deviceId: String)
+
   /** Callbacks invoked on connection events. */
   interface Callback {
     /** Invoked when a connection has been successfully established. */
@@ -215,21 +221,6 @@ interface Connector {
 
   companion object {
     /**
-     * When a client calls [Context.bindService] to get the [IConnectedDeviceManager], this action
-     * is required in the param [Intent].
-     */
-    const val ACTION_BIND_REMOTE_FEATURE =
-      "com.google.android.connecteddevice.api.BIND_REMOTE_FEATURE"
-
-    /**
-     * When a client calls [Context.bindService] to get the [IConnectedDeviceManager] from a service
-     * running in the foreground user. Any process that resides outside of the service host
-     * application must use this action in its [Intent].
-     */
-    const val ACTION_BIND_REMOTE_FEATURE_FG =
-      "com.google.android.connecteddevice.api.BIND_REMOTE_FEATURE_FG"
-
-    /**
      * When a client calls [Context.bindService] to get the [IFeatureCoordinator], this action is
      * required in the param [Intent].
      */
@@ -243,12 +234,6 @@ interface Connector {
      */
     const val ACTION_BIND_FEATURE_COORDINATOR_FG =
       "com.google.android.connecteddevice.api.BIND_FEATURE_COORDINATOR_FG"
-
-    /**
-     * When a client calls [Context.bindService] to get the [IAssociatedDeviceManager], this action
-     * is required in the param [Intent].
-     */
-    const val ACTION_BIND_ASSOCIATION = "com.google.android.connecteddevice.BIND_ASSOCIATION"
 
     /** Type associated with a driver's device. */
     const val USER_TYPE_DRIVER = 1 shl 0

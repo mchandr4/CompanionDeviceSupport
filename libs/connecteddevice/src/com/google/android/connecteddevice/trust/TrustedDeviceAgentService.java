@@ -34,7 +34,9 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.service.trust.TrustAgentService;
+import androidx.annotation.VisibleForTesting;
 import com.google.android.connecteddevice.trust.api.ITrustedDeviceAgentDelegate;
 import com.google.android.connecteddevice.trust.api.ITrustedDeviceManager;
 import java.time.Duration;
@@ -60,15 +62,21 @@ public class TrustedDeviceAgentService extends TrustAgentService {
 
   private Handler retryHandler;
 
-  private ITrustedDeviceManager trustedDeviceManager;
+  @VisibleForTesting ITrustedDeviceManager trustedDeviceManager;
 
   private int retries;
+
+  private UserManager userManager;
+
+  private KeyguardManager keyguardManager;
 
   @SuppressLint("UnprotectedReceiver") // Broadcast is protected.
   @Override
   public void onCreate() {
     super.onCreate();
     logd(TAG, "Starting trust agent service.");
+    userManager = (UserManager) getSystemService(Context.USER_SERVICE);
+    keyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
     TrustedDeviceEventLog.onTrustAgentStarted();
     registerReceiver(userUnlockedReceiver, new IntentFilter(Intent.ACTION_USER_UNLOCKED));
     retryThread = new HandlerThread(RETRY_HANDLER_THREAD_NAME);
@@ -130,20 +138,19 @@ public class TrustedDeviceAgentService extends TrustAgentService {
     }
   }
 
-  private void deviceUnlocked() {
+  @VisibleForTesting
+  void maybeDismissLockscreen() {
     if (!isManagingTrust.compareAndSet(true, false)) {
-      logd(
-          TAG,
-          "User was unlocked via an alternative mechanism than an escrow token. No further "
-              + "action required.");
+      logd(TAG, "User was unlocked before receiving an escrow token.");
       return;
     }
-    logd(TAG, "User successfully unlocked with an escrow token. Dismissing the lock screen.");
+    logd(TAG, "Dismissing the lockscreen.");
     grantTrust(
         "Granting trust from escrow token for user.",
         TRUST_DURATION_MS,
         FLAG_GRANT_TRUST_DISMISS_KEYGUARD);
     TrustedDeviceEventLog.onUserUnlocked();
+    setManagingTrust(false);
     if (trustedDeviceManager == null) {
       loge(TAG, "Manager was null when device was unlocked. Ignoring.");
       return;
@@ -155,9 +162,25 @@ public class TrustedDeviceAgentService extends TrustAgentService {
     }
   }
 
-  private void bindToService() {
+  @VisibleForTesting
+  boolean isUserUnlocked(int userId) {
+    return userManager.isUserUnlocked(UserHandle.of(userId));
+  }
+
+  @VisibleForTesting
+  void bindToService() {
     Intent intent = new Intent(this, TrustedDeviceManagerService.class);
     bindService(intent, serviceConnection, /* flags= */ 0);
+  }
+
+  @VisibleForTesting
+  final void setupManager() {
+    try {
+      trustedDeviceManager.setTrustedDeviceAgentDelegate(trustedDeviceAgentDelegate);
+      logd(TAG, "Successfully connected to TrustedDeviceManager.");
+    } catch (RemoteException e) {
+      loge(TAG, "Error while establishing connection to TrustedDeviceManager.", e);
+    }
   }
 
   private final ServiceConnection serviceConnection =
@@ -165,12 +188,7 @@ public class TrustedDeviceAgentService extends TrustAgentService {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
           trustedDeviceManager = ITrustedDeviceManager.Stub.asInterface(service);
-          try {
-            trustedDeviceManager.setTrustedDeviceAgentDelegate(trustedDeviceAgentDelegate);
-            logd(TAG, "Successfully connected to TrustedDeviceManager.");
-          } catch (RemoteException e) {
-            loge(TAG, "Error while establishing connection to TrustedDeviceManager.", e);
-          }
+          setupManager();
         }
 
         @Override
@@ -206,8 +224,19 @@ public class TrustedDeviceAgentService extends TrustAgentService {
 
         @Override
         public void unlockUserWithToken(byte[] token, long handle, int userId) {
-          setManagingTrust(true);
+          if (!keyguardManager.isDeviceLocked()) {
+            logd(TAG, "Received an escrow token while no lockscreen was visible. Ignoring.");
+            return;
+          }
+          logd(TAG, "Received an escrow token for user " + userId + ".");
           isManagingTrust.set(true);
+          setManagingTrust(true);
+          if (isUserUnlocked(userId)) {
+            logd(TAG, "User was already unlocked when token was received.");
+            maybeDismissLockscreen();
+            return;
+          }
+          logd(TAG, "Unlocking user with token.");
           TrustedDeviceAgentService.this.unlockUserWithToken(handle, token, UserHandle.of(userId));
         }
 
@@ -222,7 +251,7 @@ public class TrustedDeviceAgentService extends TrustAgentService {
       new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-          deviceUnlocked();
+          maybeDismissLockscreen();
         }
       };
 }

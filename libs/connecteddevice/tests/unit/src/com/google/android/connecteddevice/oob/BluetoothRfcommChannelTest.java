@@ -16,7 +16,6 @@
 
 package com.google.android.connecteddevice.oob;
 
-import static com.google.android.connecteddevice.model.OobEligibleDevice.OOB_TYPE_BLUETOOTH;
 import static com.google.common.truth.Truth.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.mockito.ArgumentMatchers.any;
@@ -29,24 +28,24 @@ import static org.mockito.Mockito.when;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
+import android.os.ParcelUuid;
 import android.os.RemoteException;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
-import com.google.android.connecteddevice.model.OobEligibleDevice;
 import com.google.android.connecteddevice.transport.BluetoothDeviceProvider;
+import com.google.android.connecteddevice.transport.ConnectChallenge;
 import com.google.android.connecteddevice.transport.ConnectionProtocol;
+import com.google.android.connecteddevice.transport.IDataSendCallback;
+import com.google.android.connecteddevice.transport.IDiscoveryCallback;
 import com.google.android.connecteddevice.transport.ProtocolDevice;
 import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelegateBinder;
 import com.google.android.connecteddevice.transport.spp.PendingConnection;
-import com.google.android.connecteddevice.transport.spp.PendingSentMessage;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.primitives.Bytes;
 import java.util.UUID;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnit;
@@ -57,8 +56,6 @@ import org.robolectric.shadows.ShadowLooper;
 @RunWith(AndroidJUnit4.class)
 public class BluetoothRfcommChannelTest {
   private static final String DEVICE_ADDRESS = "00:11:22:33:AA:BB";
-  private static final OobEligibleDevice OOB_ELIGIBLE_DEVICE =
-      new OobEligibleDevice(DEVICE_ADDRESS, OOB_TYPE_BLUETOOTH);
   private static final byte[] TEST_MESSAGE = "someData".getBytes(UTF_8);
   private static final BluetoothDevice TEST_BLUETOOTH_DEVICE =
       ApplicationProvider.getApplicationContext()
@@ -80,54 +77,20 @@ public class BluetoothRfcommChannelTest {
   }
 
   @Test
-  public void completeOobExchange_success() throws Exception {
-    PendingSentMessage pendingSentMessage = new PendingSentMessage();
-    when(mockSppDelegateBinder.sendMessage(any(), any())).thenReturn(pendingSentMessage);
-    PendingConnection connection = establishConnection();
-
-    OobConnectionManager oobConnectionManager = new OobConnectionManager();
-    oobConnectionManager.startOobExchange(bluetoothRfcommChannel);
-
-    ArgumentCaptor<byte[]> messageArgumentCaptor = ArgumentCaptor.forClass(byte[].class);
-    verify(mockSppDelegateBinder).sendMessage(any(), messageArgumentCaptor.capture());
-    byte[] oobData = messageArgumentCaptor.getValue();
-
-    assertThat(oobData)
-        .isEqualTo(
-            Bytes.concat(
-                oobConnectionManager.decryptionIv,
-                oobConnectionManager.encryptionIv,
-                oobConnectionManager.encryptionKey.getEncoded()));
-
-    pendingSentMessage.notifyMessageSent();
-    verify(mockSppDelegateBinder).disconnect(connection.toConnection(TEST_BLUETOOTH_DEVICE));
-  }
-
-  @Test
-  public void completeOobExchange_pendingSentMessageIsNull_callOnFailed() throws Exception {
-    establishConnection();
-
-    new OobConnectionManager().startOobExchange(bluetoothRfcommChannel);
-
-    verify(mockSppDelegateBinder).sendMessage(any(), any());
-    verify(mockCallback).onOobExchangeFailure();
-  }
-
-  @Test
   public void completeOobExchange_createRfcommSocketFails_callOnFailed() throws Exception {
     doThrow(RemoteException.class)
         .when(mockSppDelegateBinder)
         .connectAsClient(any(), any(), anyBoolean());
 
     bluetoothRfcommChannel.completeOobDataExchange(
-        OOB_ELIGIBLE_DEVICE, mockCallback, () -> ImmutableSet.of(TEST_BLUETOOTH_DEVICE));
+        TEST_BLUETOOTH_DEVICE, mockCallback, () -> ImmutableSet.of(TEST_BLUETOOTH_DEVICE));
     verify(mockCallback).onOobExchangeFailure();
   }
 
   @Test
   public void completeOobExchange_noBondedDevices_callOnFailed() {
     bluetoothRfcommChannel.completeOobDataExchange(
-        OOB_ELIGIBLE_DEVICE, mockCallback, ImmutableSet::of);
+        TEST_BLUETOOTH_DEVICE, mockCallback, ImmutableSet::of);
 
     verify(mockCallback).onOobExchangeFailure();
   }
@@ -140,7 +103,7 @@ public class BluetoothRfcommChannelTest {
             .getAdapter()
             .getRemoteDevice("BB:AA:33:22:11:00");
     bluetoothRfcommChannel.completeOobDataExchange(
-        OOB_ELIGIBLE_DEVICE, mockCallback, () -> ImmutableSet.of(otherBtDevice));
+        TEST_BLUETOOTH_DEVICE, mockCallback, () -> ImmutableSet.of(otherBtDevice));
 
     verify(mockCallback).onOobExchangeFailure();
   }
@@ -191,7 +154,7 @@ public class BluetoothRfcommChannelTest {
         .connectAsClient(any(), any(), anyBoolean());
 
     bluetoothRfcommChannel.completeOobDataExchange(
-        OOB_ELIGIBLE_DEVICE, mockCallback, () -> ImmutableSet.of(TEST_BLUETOOTH_DEVICE));
+        TEST_BLUETOOTH_DEVICE, mockCallback, () -> ImmutableSet.of(TEST_BLUETOOTH_DEVICE));
 
     verify(mockCallback, never()).onOobExchangeSuccess();
     verify(mockCallback, never()).onOobExchangeFailure();
@@ -240,7 +203,7 @@ public class BluetoothRfcommChannelTest {
         .connectAsClient(any(), any(), anyBoolean());
 
     bluetoothRfcommChannel.completeOobDataExchange(
-        OOB_ELIGIBLE_DEVICE, mockCallback, () -> ImmutableSet.of(TEST_BLUETOOTH_DEVICE));
+        TEST_BLUETOOTH_DEVICE, mockCallback, () -> ImmutableSet.of(TEST_BLUETOOTH_DEVICE));
     verify(mockSppDelegateBinder).connectAsClient(any(), any(), anyBoolean());
 
     return connectionCaptor.getResult();
@@ -264,7 +227,6 @@ public class BluetoothRfcommChannelTest {
 
   private static class TestConnectionProtocol extends ConnectionProtocol
       implements BluetoothDeviceProvider {
-
     @Override
     public BluetoothDevice getBluetoothDeviceById(String protocolId) {
       return null;
@@ -277,20 +239,20 @@ public class BluetoothRfcommChannelTest {
 
     @Override
     public void startAssociationDiscovery(
-        String name, DiscoveryCallback callback, UUID identifier) {}
+        String name, ParcelUuid identifier, IDiscoveryCallback callback) {}
 
     @Override
     public void startConnectionDiscovery(
-        UUID id, ConnectChallenge challenge, DiscoveryCallback callback) {}
+        ParcelUuid id, ConnectChallenge challenge, IDiscoveryCallback callback) {}
 
     @Override
     public void stopAssociationDiscovery() {}
 
     @Override
-    public void stopConnectionDiscovery(UUID id) {}
+    public void stopConnectionDiscovery(ParcelUuid id) {}
 
     @Override
-    public void sendData(String protocolId, byte[] data, DataSendCallback callback) {}
+    public void sendData(String protocolId, byte[] data, IDataSendCallback callback) {}
 
     @Override
     public void disconnectDevice(String protocolId) {}

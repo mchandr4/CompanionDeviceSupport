@@ -18,14 +18,16 @@ package com.google.android.connecteddevice.transport.spp
 
 import android.bluetooth.BluetoothManager
 import android.content.Context
+import android.os.ParcelUuid
 import android.os.RemoteException
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.google.android.connecteddevice.transport.ConnectionProtocol.ConnectChallenge
-import com.google.android.connecteddevice.transport.ConnectionProtocol.DataReceivedListener
-import com.google.android.connecteddevice.transport.ConnectionProtocol.DataSendCallback
-import com.google.android.connecteddevice.transport.ConnectionProtocol.DeviceDisconnectedListener
-import com.google.android.connecteddevice.transport.ConnectionProtocol.DiscoveryCallback
+import com.google.android.connecteddevice.core.util.mockToBeAlive
+import com.google.android.connecteddevice.transport.ConnectChallenge
+import com.google.android.connecteddevice.transport.IDataReceivedListener
+import com.google.android.connecteddevice.transport.IDataSendCallback
+import com.google.android.connecteddevice.transport.IDeviceDisconnectedListener
+import com.google.android.connecteddevice.transport.IDiscoveryCallback
 import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelegateBinder.OnErrorListener
 import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelegateBinder.OnMessageReceivedListener
 import com.google.android.connecteddevice.transport.spp.PendingConnection.OnConnectedListener
@@ -45,72 +47,69 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class SppProtocolTest {
-  private val mockPendingConnection: PendingConnection = mock()
-  private val mockDiscoveryCallback: DiscoveryCallback = mock()
-  private val mockDataSendCallback: DataSendCallback = mock()
-  private val mockDisconnectedListener: DeviceDisconnectedListener = mock()
-  private val mockDataReceivedListener: DataReceivedListener = mock()
-  private val mockSppBinder: ConnectedDeviceSppDelegateBinder = mock {
-    on { connectAsServer(any(), any()) } doReturn mockPendingConnection
-  }
-  private val invalidMockSppBinder: ConnectedDeviceSppDelegateBinder = mock()
+  private val mockPendingConnection = mock<PendingConnection>()
+  private val mockDiscoveryCallback = mockToBeAlive<IDiscoveryCallback>()
+  private val mockDataSendCallback = mockToBeAlive<IDataSendCallback>()
+  private val mockDisconnectedListener = mockToBeAlive<IDeviceDisconnectedListener>()
+  private val mockDataReceivedListener = mockToBeAlive<IDataReceivedListener>()
+  private val mockSppBinder =
+    mock<ConnectedDeviceSppDelegateBinder> {
+      on { connectAsServer(any(), any()) } doReturn mockPendingConnection
+    }
+  private val invalidMockSppBinder = mock<ConnectedDeviceSppDelegateBinder>()
   private val testMaxSize = 0
-  private val testIdentifier = UUID.randomUUID()
+  private val testIdentifier = ParcelUuid(UUID.randomUUID())
   private val testProtocolId = UUID.randomUUID()
   private val testName = "TestName"
   private val testMessage = "TestMessage".toByteArray()
   private val testChallenge =
     ConnectChallenge("TestChallenge".toByteArray(), "TestSalt".toByteArray())
-  private val sppProtocol = SppProtocol(mockSppBinder, testMaxSize)
+  private val sppProtocol = SppProtocol(mockSppBinder, testMaxSize, directExecutor())
   private val invalidSppProtocol = SppProtocol(invalidMockSppBinder, testMaxSize)
 
   @Test
   fun startAssociationDiscovery_startedSuccessfully() {
-    sppProtocol.startAssociationDiscovery(testName, mockDiscoveryCallback, testIdentifier)
+    sppProtocol.startAssociationDiscovery(testName, testIdentifier, mockDiscoveryCallback)
 
-    verify(mockSppBinder).connectAsServer(eq(testIdentifier), any())
+    verify(mockSppBinder).connectAsServer(eq(testIdentifier.uuid), any())
     verify(mockDiscoveryCallback).onDiscoveryStartedSuccessfully()
   }
 
   @Test
   fun startAssociationDiscovery_startsWithIdentifier() {
-    val testIdentifier = UUID.randomUUID()
+    sppProtocol.startAssociationDiscovery(testName, testIdentifier, mockDiscoveryCallback)
 
-    sppProtocol.startAssociationDiscovery(testName, mockDiscoveryCallback, testIdentifier)
-
-    verify(mockSppBinder).connectAsServer(eq(testIdentifier), any())
+    verify(mockSppBinder).connectAsServer(eq(testIdentifier.uuid), any())
   }
 
   @Test
   fun startAssociationDiscovery_startedFailed() {
-    invalidSppProtocol.startAssociationDiscovery(testName, mockDiscoveryCallback, testIdentifier)
+    invalidSppProtocol.startAssociationDiscovery(testName, testIdentifier, mockDiscoveryCallback)
 
     verify(mockDiscoveryCallback).onDiscoveryFailedToStart()
   }
 
   @Test
   fun startConnectionDiscovery_startedSuccessfully() {
-    val testDeviceId = UUID.randomUUID()
+    sppProtocol.startConnectionDiscovery(testIdentifier, testChallenge, mockDiscoveryCallback)
 
-    sppProtocol.startConnectionDiscovery(testDeviceId, testChallenge, mockDiscoveryCallback)
-
-    verify(mockSppBinder).connectAsServer(eq(testDeviceId), any())
+    verify(mockSppBinder).connectAsServer(eq(testIdentifier.uuid), any())
     verify(mockDiscoveryCallback).onDiscoveryStartedSuccessfully()
   }
 
   @Test
   fun stopAssociationDiscovery_stopSuccessfully() {
-    sppProtocol.startAssociationDiscovery(testName, mockDiscoveryCallback, testIdentifier)
+    sppProtocol.startAssociationDiscovery(testName, testIdentifier, mockDiscoveryCallback)
+
     sppProtocol.stopAssociationDiscovery()
+
     verify(mockSppBinder).cancelConnectionAttempt(mockPendingConnection)
   }
 
   @Test
   fun stopConnectionDiscovery_stopSuccessfully() {
-    val testDeviceId = UUID.randomUUID()
-
-    sppProtocol.startConnectionDiscovery(testDeviceId, testChallenge, mockDiscoveryCallback)
-    sppProtocol.stopConnectionDiscovery(testDeviceId)
+    sppProtocol.startConnectionDiscovery(testIdentifier, testChallenge, mockDiscoveryCallback)
+    sppProtocol.stopConnectionDiscovery(testIdentifier)
 
     verify(mockSppBinder).cancelConnectionAttempt(mockPendingConnection)
   }
@@ -144,7 +143,7 @@ class SppProtocolTest {
 
   @Test
   fun reset_cancelConnectionAttempt() {
-    sppProtocol.startAssociationDiscovery(testName, mockDiscoveryCallback, testIdentifier)
+    sppProtocol.startAssociationDiscovery(testName, testIdentifier, mockDiscoveryCallback)
     sppProtocol.reset()
 
     verify(mockSppBinder).cancelConnectionAttempt(mockPendingConnection)
@@ -166,7 +165,7 @@ class SppProtocolTest {
   @Test
   fun onMessageReceived_informCallback() {
     val protocolId = establishConnection()
-    sppProtocol.registerDataReceivedListener(protocolId, mockDataReceivedListener, directExecutor())
+    sppProtocol.registerDataReceivedListener(protocolId, mockDataReceivedListener)
 
     argumentCaptor<OnMessageReceivedListener>().apply {
       verify(mockSppBinder).setOnMessageReceivedListener(any(), capture())
@@ -182,18 +181,14 @@ class SppProtocolTest {
 
     argumentCaptor<UUID>().apply {
       verify(mockSppBinder).registerConnectionCallback(capture(), any())
-      assertThat(firstValue).isEqualTo(testIdentifier)
+      assertThat(firstValue).isEqualTo(testIdentifier.uuid)
     }
   }
 
   @Test
   fun onDeviceDisconnected_informCallback() {
     val protocolId = establishConnection()
-    sppProtocol.registerDeviceDisconnectedListener(
-      protocolId,
-      mockDisconnectedListener,
-      directExecutor()
-    )
+    sppProtocol.registerDeviceDisconnectedListener(protocolId, mockDisconnectedListener)
 
     val connection =
       argumentCaptor<Connection>()
@@ -211,7 +206,7 @@ class SppProtocolTest {
   @Test
   fun startDiscovery_throwException_startDiscoveryFailed() {
     doThrow(RemoteException()).`when`(mockSppBinder).connectAsServer(any(), any())
-    sppProtocol.startAssociationDiscovery(testName, mockDiscoveryCallback, testIdentifier)
+    sppProtocol.startAssociationDiscovery(testName, testIdentifier, mockDiscoveryCallback)
 
     verify(mockDiscoveryCallback).onDiscoveryFailedToStart()
   }
@@ -265,10 +260,10 @@ class SppProtocolTest {
       ApplicationProvider.getApplicationContext<Context>()
         .getSystemService(BluetoothManager::class.java)
     val testBluetoothDevice = bluetoothManager.adapter.getRemoteDevice(testMacAddress)
-    sppProtocol.startAssociationDiscovery(testName, mockDiscoveryCallback, testIdentifier)
+    sppProtocol.startAssociationDiscovery(testName, testIdentifier, mockDiscoveryCallback)
     argumentCaptor<OnConnectedListener>().apply {
       verify(mockPendingConnection).setOnConnectedListener(capture())
-      firstValue.onConnected(testIdentifier, testBluetoothDevice, false, testName)
+      firstValue.onConnected(testIdentifier.uuid, testBluetoothDevice, false, testName)
     }
     return argumentCaptor<String>()
       .apply { verify(mockDiscoveryCallback).onDeviceConnected(capture()) }

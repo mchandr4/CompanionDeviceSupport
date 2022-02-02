@@ -28,32 +28,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.IBinder;
-import android.os.ParcelUuid;
 import androidx.annotation.NonNull;
-import com.google.android.connecteddevice.ConnectedDeviceManager;
 import com.google.android.connecteddevice.api.CompanionConnector;
 import com.google.android.connecteddevice.api.Connector;
-import com.google.android.connecteddevice.api.IAssociatedDeviceManager;
-import com.google.android.connecteddevice.api.IAssociationCallback;
-import com.google.android.connecteddevice.api.IConnectedDeviceManager;
-import com.google.android.connecteddevice.api.IConnectionCallback;
-import com.google.android.connecteddevice.api.IDeviceAssociationCallback;
-import com.google.android.connecteddevice.api.IDeviceCallback;
-import com.google.android.connecteddevice.api.IFeatureCoordinator;
-import com.google.android.connecteddevice.api.IOnAssociatedDevicesRetrievedListener;
-import com.google.android.connecteddevice.api.IOnLogRequestedListener;
-import com.google.android.connecteddevice.connection.CarBluetoothManager;
-import com.google.android.connecteddevice.connection.ble.CarBlePeripheralManager;
-import com.google.android.connecteddevice.connection.spp.CarSppManager;
 import com.google.android.connecteddevice.core.DeviceController;
 import com.google.android.connecteddevice.core.FeatureCoordinator;
 import com.google.android.connecteddevice.core.MultiProtocolDeviceController;
 import com.google.android.connecteddevice.logging.LoggingFeature;
 import com.google.android.connecteddevice.logging.LoggingManager;
-import com.google.android.connecteddevice.model.ConnectedDevice;
-import com.google.android.connecteddevice.model.DeviceMessage;
 import com.google.android.connecteddevice.model.TransportProtocols;
-import com.google.android.connecteddevice.oob.BluetoothRfcommChannel;
 import com.google.android.connecteddevice.oob.OobChannelFactory;
 import com.google.android.connecteddevice.oob.OobRunner;
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage;
@@ -78,10 +61,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-/**
- * Early start service that holds a {@link ConnectedDeviceManager} reference to support companion
- * device features.
- */
+/** Early start service that hosts the core companion platform. */
 public final class ConnectedDeviceService extends TrunkService {
 
   private static final String TAG = "ConnectedDeviceService";
@@ -90,11 +70,7 @@ public final class ConnectedDeviceService extends TrunkService {
   // reconnect advertisement every 6 minutes to avoid crossing a rotation.
   private static final Duration MAX_ADVERTISEMENT_DURATION = Duration.ofMinutes(6);
 
-  /**
-   * {@code string-array} Supported transport protocols. If the {@link FeatureCoordinator} is not
-   * enabled, the first protocol in the list will be selected to initialize the
-   * {@link ConnectedDeviceManager}.
-   */
+  /** {@code string-array} Supported transport protocols. */
   private static final String META_SUPPORTED_TRANSPORT_PROTOCOLS =
       "com.google.android.connecteddevice.transport_protocols";
   /** {@code String} UUID for association advertisement. */
@@ -120,19 +96,8 @@ public final class ConnectedDeviceService extends TrunkService {
   /** {@code int} Maximum number of bytes each SPP packet can contain. */
   private static final String META_SPP_PACKET_BYTES =
       "com.google.android.connecteddevice.spp_packet_bytes";
-  /** {@code boolean} Whether to compress outgoing messages. */
-  private static final String META_COMPRESS_OUTGOING_MESSAGES =
-      "com.google.android.connecteddevice.compress_outgoing_messages";
   /** {@code boolean} Enable BLE proxy. */
   private static final String META_ENABLE_PROXY = "com.google.android.connecteddevice.enable_proxy";
-  /** {@code boolean} Enable a capabilities exchange during association. */
-  private static final String META_ENABLE_CAPABILITIES_EXCHANGE =
-      "com.google.android.connecteddevice.enable_capabilities_exchange";
-  /**
-   * {@code boolean} Use the {@link IFeatureCoordinator} instead of {@link IConnectedDeviceManager}
-   */
-  private static final String META_ENABLE_FEATURE_COORDINATOR =
-      "com.google.android.connecteddevice.enable_feature_coordinator";
 
   private static final String META_SUPPORTED_OOB_CHANNELS =
       "com.google.android.connecteddevice.supported_oob_channels";
@@ -157,12 +122,6 @@ public final class ConnectedDeviceService extends TrunkService {
 
   private static final int DEFAULT_SPP_PACKET_SIZE = 700;
 
-  private static final boolean ENABLE_COMPRESSION_BY_DEFAULT = true;
-
-  private static final boolean ENABLE_CAPABILITIES_EXCHANGE_BY_DEFAULT = false;
-
-  private static final boolean ENABLE_FEATURE_COORDINATOR_BY_DEFAULT = false;
-
   private static final boolean ENABLE_PASSENGER_BY_DEFAULT = false;
 
   private static final String[] DEFAULT_TRANSPORT_PROTOCOLS =
@@ -185,21 +144,13 @@ public final class ConnectedDeviceService extends TrunkService {
   private final ScheduledExecutorService scheduledExecutorService =
       Executors.newSingleThreadScheduledExecutor();
 
-  private ConnectedDeviceManager connectedDeviceManager;
-
   private LoggingManager loggingManager;
 
   private FeatureCoordinator featureCoordinator;
 
   private ConnectedDeviceStorage storage;
 
-  private IConnectedDeviceManager.Stub connectedDeviceManagerBinder;
-
-  private IAssociatedDeviceManager.Stub associationBinder;
-
   private ConnectedDeviceSppDelegateBinder sppDelegateBinder;
-
-  private boolean useFeatureCoordinator;
 
   private List<String> supportedTransportProtocols;
 
@@ -232,17 +183,11 @@ public final class ConnectedDeviceService extends TrunkService {
               + "this service. Reverting to default values.");
       supportedTransportProtocols = Arrays.asList(DEFAULT_TRANSPORT_PROTOCOLS);
     }
-    useFeatureCoordinator =
-        getMetaBoolean(META_ENABLE_FEATURE_COORDINATOR, ENABLE_FEATURE_COORDINATOR_BY_DEFAULT);
 
     loggingManager = new LoggingManager(this);
     storage = new ConnectedDeviceStorage(this);
     sppDelegateBinder = new ConnectedDeviceSppDelegateBinder(onRemoteCallbackSetListener);
-    if (useFeatureCoordinator) {
-      initializeFeatureCoordinator();
-    } else {
-      initializeConnectedDeviceManager();
-    }
+    initializeFeatureCoordinator();
 
     populateFeatures();
 
@@ -286,8 +231,6 @@ public final class ConnectedDeviceService extends TrunkService {
             protocols, storage, oobRunner, associationUuid, enablePassenger);
     featureCoordinator = new FeatureCoordinator(deviceController, storage, loggingManager);
     logd(TAG, "Wrapping FeatureCoordinator in legacy binders for backwards compatibility.");
-    connectedDeviceManagerBinder = createConnectedDeviceManagerWrapper();
-    associationBinder = createAssociatedDeviceManagerWrapper();
   }
 
   private BlePeripheralProtocol createBlePeripheralProtocol() {
@@ -328,117 +271,20 @@ public final class ConnectedDeviceService extends TrunkService {
     return new SppProtocol(sppDelegateBinder, maxSppPacketSize);
   }
 
-  private void initializeConnectedDeviceManager() {
-    logd(TAG, "Initializing ConnectedDeviceManager version of the platform.");
-    boolean isCompressionEnabled =
-        getMetaBoolean(META_COMPRESS_OUTGOING_MESSAGES, ENABLE_COMPRESSION_BY_DEFAULT);
-    boolean isCapabilitiesEligible =
-        getMetaBoolean(META_ENABLE_CAPABILITIES_EXCHANGE, ENABLE_CAPABILITIES_EXCHANGE_BY_DEFAULT);
-    CarBluetoothManager carBluetoothManager;
-    String defaultProtocol = supportedTransportProtocols.get(0);
-    logd(TAG, "Setting " + defaultProtocol + " as the transport.");
-    switch (defaultProtocol) {
-      case TransportProtocols.PROTOCOL_SPP:
-        carBluetoothManager =
-            createSppManager(storage, isCompressionEnabled, isCapabilitiesEligible);
-        break;
-      case TransportProtocols.PROTOCOL_BLE_PERIPHERAL:
-      default:
-        carBluetoothManager =
-            createBleManager(storage, isCompressionEnabled, isCapabilitiesEligible);
-    }
-    connectedDeviceManager = new ConnectedDeviceManager(carBluetoothManager, storage);
-    connectedDeviceManagerBinder =
-        new ConnectedDeviceManagerBinder(connectedDeviceManager, loggingManager);
-    associationBinder = new AssociationBinder(connectedDeviceManager);
-  }
-
   private void populateFeatures() {
     logd(TAG, "Populating features.");
-    if (featureCoordinator != null) {
-      loggingFeature =
-          new LoggingFeature(
-              this,
-              loggingManager,
-              CompanionConnector.createLocalConnector(
-                  this, Connector.USER_TYPE_DRIVER, featureCoordinator));
-      systemFeature =
-          new SystemFeature(
-              this,
-              storage,
-              CompanionConnector.createLocalConnector(
-                  this, Connector.USER_TYPE_DRIVER, featureCoordinator));
-    } else {
-      loggingFeature =
-          new LoggingFeature(
-              this,
-              loggingManager,
-              CompanionConnector.createLocalConnector(
-                  this, Connector.USER_TYPE_ALL, connectedDeviceManagerBinder, associationBinder));
-      systemFeature =
-          new SystemFeature(
-              this,
-              storage,
-              CompanionConnector.createLocalConnector(
-                  this, Connector.USER_TYPE_ALL, connectedDeviceManagerBinder, associationBinder));
-    }
-  }
-
-  private CarBluetoothManager createSppManager(
-      @NonNull ConnectedDeviceStorage storage,
-      boolean isCompressionEnabled,
-      boolean isCapabilitiesEligible) {
-    UUID sppServiceUuid = UUID.fromString(requireMetaString(META_ASSOCIATION_SERVICE_UUID));
-    int maxSppPacketSize = getMetaInt(META_SPP_PACKET_BYTES, DEFAULT_SPP_PACKET_SIZE);
-    return new CarSppManager(
-        sppDelegateBinder,
-        storage,
-        sppServiceUuid,
-        maxSppPacketSize,
-        isCompressionEnabled,
-        isCapabilitiesEligible);
-  }
-
-  private CarBluetoothManager createBleManager(
-      @NonNull ConnectedDeviceStorage storage,
-      boolean isCompressionEnabled,
-      boolean isCapabilitiesEligible) {
-    UUID associationUuid = UUID.fromString(requireMetaString(META_ASSOCIATION_SERVICE_UUID));
-    UUID reconnectUuid =
-        UUID.fromString(getMetaString(META_RECONNECT_SERVICE_UUID, DEFAULT_RECONNECT_UUID));
-    UUID reconnectDataUuid =
-        UUID.fromString(getMetaString(META_RECONNECT_DATA_UUID, DEFAULT_RECONNECT_DATA_UUID));
-    UUID advertiseDataCharacteristicUuid =
-        UUID.fromString(
-            getMetaString(
-                META_ADVERTISE_DATA_CHARACTERISTIC_UUID,
-                DEFAULT_ADVERTISE_DATA_CHARACTERISTIC_UUID));
-    UUID writeUuid = UUID.fromString(getMetaString(META_WRITE_UUID, DEFAULT_WRITE_UUID));
-    UUID readUuid = UUID.fromString(getMetaString(META_READ_UUID, DEFAULT_READ_UUID));
-    int defaultMtuSize = getMetaInt(META_DEFAULT_MTU_BYTES, DEFAULT_MTU_SIZE);
-    boolean isProxyEnabled = getMetaBoolean(META_ENABLE_PROXY, PROXY_ENABLED_BY_DEFAULT);
-    BlePeripheralManager blePeripheralManager;
-    if (isProxyEnabled) {
-      logi(TAG, "Initializing with ProxyBlePeripheralManager");
-      blePeripheralManager =
-          new ProxyBlePeripheralManager(new NetworkSocketFactory(this), scheduledExecutorService);
-    } else {
-      blePeripheralManager = new OnDeviceBlePeripheralManager(this);
-    }
-    return new CarBlePeripheralManager(
-        blePeripheralManager,
-        storage,
-        associationUuid,
-        reconnectUuid,
-        reconnectDataUuid,
-        advertiseDataCharacteristicUuid,
-        writeUuid,
-        readUuid,
-        MAX_ADVERTISEMENT_DURATION,
-        defaultMtuSize,
-        isCompressionEnabled,
-        new BluetoothRfcommChannel(sppDelegateBinder),
-        isCapabilitiesEligible);
+    loggingFeature =
+        new LoggingFeature(
+            this,
+            loggingManager,
+            CompanionConnector.createLocalConnector(
+                this, Connector.USER_TYPE_DRIVER, featureCoordinator));
+    systemFeature =
+        new SystemFeature(
+            this,
+            storage,
+            CompanionConnector.createLocalConnector(
+                this, Connector.USER_TYPE_ALL, featureCoordinator));
   }
 
   @Override
@@ -449,10 +295,6 @@ public final class ConnectedDeviceService extends TrunkService {
     logd(TAG, "Service bound. Action: " + intent.getAction());
     String action = intent.getAction();
     switch (action) {
-      case CompanionConnector.ACTION_BIND_ASSOCIATION:
-        return associationBinder;
-      case CompanionConnector.ACTION_BIND_REMOTE_FEATURE:
-        return connectedDeviceManagerBinder;
       case ConnectedDeviceSppDelegateBinder.ACTION_BIND_SPP:
         return sppDelegateBinder;
       case CompanionConnector.ACTION_BIND_FEATURE_COORDINATOR:
@@ -498,11 +340,7 @@ public final class ConnectedDeviceService extends TrunkService {
       logd(TAG, "Features are already cleaned up. No need to clean up again.");
       return;
     }
-    if (useFeatureCoordinator) {
-      featureCoordinator.reset();
-    } else {
-      connectedDeviceManager.reset();
-    }
+    featureCoordinator.reset();
     loggingManager.reset();
     systemFeature.stop();
     loggingFeature.stop();
@@ -519,11 +357,7 @@ public final class ConnectedDeviceService extends TrunkService {
             () -> {
               logd(TAG, "Initializing features.");
               loggingManager.start();
-              if (useFeatureCoordinator) {
-                featureCoordinator.start();
-              } else {
-                connectedDeviceManager.start();
-              }
+              featureCoordinator.start();
               systemFeature.start();
               loggingFeature.start();
             })
@@ -532,132 +366,5 @@ public final class ConnectedDeviceService extends TrunkService {
 
   private boolean isTransportSupported(@NonNull String protocol) {
     return supportedTransportProtocols.contains(protocol);
-  }
-
-  private IConnectedDeviceManager.Stub createConnectedDeviceManagerWrapper() {
-    return new IConnectedDeviceManager.Stub() {
-      @Override
-      public List<ConnectedDevice> getActiveUserConnectedDevices() {
-        return featureCoordinator.getConnectedDevicesForDriver();
-      }
-
-      @Override
-      public void registerActiveUserConnectionCallback(IConnectionCallback callback) {
-        featureCoordinator.registerDriverConnectionCallback(callback);
-      }
-
-      @Override
-      public void unregisterConnectionCallback(IConnectionCallback callback) {
-        featureCoordinator.unregisterConnectionCallback(callback);
-      }
-
-      @Override
-      public void registerDeviceCallback(
-          ConnectedDevice connectedDevice, ParcelUuid recipientId, IDeviceCallback callback) {
-        featureCoordinator.registerDeviceCallback(connectedDevice, recipientId, callback);
-      }
-
-      @Override
-      public void unregisterDeviceCallback(
-          ConnectedDevice connectedDevice, ParcelUuid recipientId, IDeviceCallback callback) {
-        featureCoordinator.unregisterDeviceCallback(connectedDevice, recipientId, callback);
-      }
-
-      @Override
-      public boolean sendMessage(ConnectedDevice connectedDevice, DeviceMessage message) {
-        return featureCoordinator.sendMessage(connectedDevice, message);
-      }
-
-      @Override
-      public void registerDeviceAssociationCallback(IDeviceAssociationCallback callback) {
-        featureCoordinator.registerDeviceAssociationCallback(callback);
-      }
-
-      @Override
-      public void unregisterDeviceAssociationCallback(IDeviceAssociationCallback callback) {
-        featureCoordinator.unregisterDeviceAssociationCallback(callback);
-      }
-
-      @Override
-      public void registerOnLogRequestedListener(int loggerId, IOnLogRequestedListener listener) {
-        featureCoordinator.registerOnLogRequestedListener(loggerId, listener);
-      }
-
-      @Override
-      public void unregisterOnLogRequestedListener(int loggerId, IOnLogRequestedListener listener) {
-        featureCoordinator.unregisterOnLogRequestedListener(loggerId, listener);
-      }
-
-      @Override
-      public void processLogRecords(int loggerId, byte[] logRecords) {
-        featureCoordinator.processLogRecords(loggerId, logRecords);
-      }
-    };
-  }
-
-  private IAssociatedDeviceManager.Stub createAssociatedDeviceManagerWrapper() {
-    return new IAssociatedDeviceManager.Stub() {
-
-      @Override
-      public void startAssociation(IAssociationCallback callback) {
-        featureCoordinator.startAssociation(callback);
-      }
-
-      @Override
-      public void stopAssociation() {
-        featureCoordinator.stopAssociation();
-      }
-
-      @Override
-      public void retrievedActiveUserAssociatedDevices(
-          IOnAssociatedDevicesRetrievedListener listener) {
-        featureCoordinator.retrieveAssociatedDevicesForDriver(listener);
-      }
-
-      @Override
-      public void acceptVerification() {
-        featureCoordinator.acceptVerification();
-      }
-
-      @Override
-      public void removeAssociatedDevice(String deviceId) {
-        featureCoordinator.removeAssociatedDevice(deviceId);
-      }
-
-      @Override
-      public void registerDeviceAssociationCallback(IDeviceAssociationCallback callback) {
-        featureCoordinator.registerDeviceAssociationCallback(callback);
-      }
-
-      @Override
-      public void unregisterDeviceAssociationCallback(IDeviceAssociationCallback callback) {
-        featureCoordinator.unregisterDeviceAssociationCallback(callback);
-      }
-
-      @Override
-      public List<ConnectedDevice> getActiveUserConnectedDevices() {
-        return featureCoordinator.getConnectedDevicesForDriver();
-      }
-
-      @Override
-      public void registerConnectionCallback(IConnectionCallback callback) {
-        featureCoordinator.registerDriverConnectionCallback(callback);
-      }
-
-      @Override
-      public void unregisterConnectionCallback(IConnectionCallback callback) {
-        featureCoordinator.unregisterConnectionCallback(callback);
-      }
-
-      @Override
-      public void enableAssociatedDeviceConnection(String deviceId) {
-        featureCoordinator.enableAssociatedDeviceConnection(deviceId);
-      }
-
-      @Override
-      public void disableAssociatedDeviceConnection(String deviceId) {
-        featureCoordinator.disableAssociatedDeviceConnection(deviceId);
-      }
-    };
   }
 }

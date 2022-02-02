@@ -246,10 +246,12 @@ public class ConnectedDeviceSppDelegateBinder extends IConnectedDeviceSppDelegat
 
   public void registerConnectionCallback(
       @NonNull UUID serviceUuid, @Nullable OnErrorListener onErrorListener) {
+    logd(TAG, "Registering a new error listener for " + serviceUuid + ".");
     connectionErrorListeners.put(serviceUuid, onErrorListener);
   }
 
   public void unregisterConnectionCallback(@NonNull UUID serviceUuid) {
+    logd(TAG, "Removing error listener for " + serviceUuid + ".");
     connectionErrorListeners.remove(serviceUuid);
   }
 

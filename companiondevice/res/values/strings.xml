@@ -28,6 +28,8 @@
     <string name="add_associated_device_title">Connect to MyCompanion</string>
     <!-- Instruction for adding associated device [CHAR LIMIT=100] -->
     <string name="add_associated_device_subtitle">You can use your phone as a companion device to help manage your driving experience</string>
+    <!-- Title for a button for a user to associate a new device [CHAR LIMIT=50]-->
+    <string name="add_associated_device_button" translatable="false">Add new device</string>
     <!-- Instruction for opening Companion App [CHAR LIMIT=100] -->
     <string name="associated_device_install_app">Make sure you have <b>Companion App</b> installed on your phone</string>
     <!-- Instruction for opening Companion App [CHAR LIMIT=100] -->
@@ -110,12 +112,14 @@
     <!-- Skip button text [CHAR LIMIT=20] -->
     <string name="skip">Skip</string>
 
-    <!-- Connected status text [CHAR LIMIT=20]-->
+    <!-- Connected with secure channel status text [CHAR LIMIT=20]-->
     <string name="connected">Connected</string>
     <!-- Not detected status text [CHAR LIMIT=20]-->
     <string name="notDetected">Not detected</string>
     <!-- Disconnected status text [CHAR LIMIT=20]-->
     <string name="disconnected">Disconnected</string>
+    <!-- Connected without secure channel status text [CHAR LIMIT=20]-->
+    <string name="detected">Detected</string>
     <!-- Unknown status text [CHAR LIMIT=20]-->
     <string name="unknown">Unknown</string>
 
@@ -198,5 +202,15 @@
     <string name="suw_setup_profile_content">Scan QR code to get started. If you don\'t have a MyCompanion app, you can download it on Google Play and the App Store.</string>
     <!-- Car SUW setup profile page instructions for user to scan the QR code. [CHAR LIMIT=150]-->
     <string name="suw_qr_instruction_text">Scan QR code to connect to&lt;br /&gt; &lt;b><xliff:g id="car_name" example="MyVehicle">%1$s</xliff:g>&lt;/b> <xliff:g id="advertised_car_name" example="(Vehicle 0000)">%2$s</xliff:g></string>
+
+    <!-- Setting passenger strings' translatable to false until reference UI has been defined. -->
+    <!-- Text for a claim button on a device that has been claimed by the current user. [CHAR LIMIT=30] -->
+    <string name="claimed_device" translatable="false">This is my device</string>
+    <!-- Text for a claim button on a device that has not been claimed by the current user. [CHAR LIMIT=30] -->
+    <string name="unclaimed_device" translatable="false">This is not my device</string>
+    <!-- Text for a label on a driver's device in the list. [CHAR LIMIT=30] -->
+    <string name="driver_device" translatable="false">My device</string>
+    <!-- Text for a label on a passenger's device in the list. [CHAR LIMIT=30] -->
+    <string name="passenger_device" translatable="false">Passenger\'s device</string>
 
 </resources>

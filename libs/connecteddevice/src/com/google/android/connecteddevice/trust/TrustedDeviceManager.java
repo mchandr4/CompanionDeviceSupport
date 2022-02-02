@@ -51,13 +51,17 @@ import com.google.android.connecteddevice.trust.storage.TrustedDeviceDao;
 import com.google.android.connecteddevice.trust.storage.TrustedDeviceDatabase;
 import com.google.android.connecteddevice.trust.storage.TrustedDeviceDatabaseProvider;
 import com.google.android.connecteddevice.trust.storage.TrustedDeviceEntity;
+import com.google.android.connecteddevice.trust.storage.TrustedDeviceTokenEntity;
 import com.google.android.connecteddevice.util.ByteUtils;
 import com.google.android.connecteddevice.util.SafeConsumer;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -71,6 +75,8 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
 
   /** Length of token generated on a trusted device. */
   private static final int ESCROW_TOKEN_LENGTH = 8;
+
+  private static final String SHA256 = "SHA-256";
 
   private final RemoteCallbackList<ITrustedDeviceCallback> remoteTrustedDeviceCallbacks =
       new RemoteCallbackList<>();
@@ -189,7 +195,6 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
   @Override
   public void onEscrowTokenAdded(int userId, long handle) {
     logd(TAG, "Escrow token has been successfully added.");
-    pendingToken = null;
 
     if (remoteEnrollmentCallbacks.getRegisteredCallbackCount() == 0) {
       isWaitingForCredentials.set(true);
@@ -214,6 +219,11 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
       loge(TAG, "Unable to complete device enrollment. Pending device was null.");
       return;
     }
+    byte[] hashedToken = hashToken(pendingToken, UUID.fromString(pendingDevice.getDeviceId()));
+    if (hashedToken == null) {
+      loge(TAG, "Unable to hash pending token. Aborting enrollment.");
+      return;
+    }
 
     logd(
         TAG,
@@ -225,13 +235,17 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
     String deviceId = pendingDevice.getDeviceId();
 
     TrustedDeviceEntity entity = new TrustedDeviceEntity(deviceId, userId, handle);
+    TrustedDeviceTokenEntity tokenEntity =
+        new TrustedDeviceTokenEntity(deviceId, ByteUtils.byteArrayToHexString(hashedToken));
     databaseExecutor.execute(
         () -> {
           database.removeFeatureState(deviceId);
           database.addOrReplaceTrustedDevice(entity);
+          database.addOrReplaceTrustedDeviceHashedToken(tokenEntity);
         });
 
     pendingDevice = null;
+    pendingToken = null;
 
     TrustedDevice trustedDevice = new TrustedDevice(deviceId, userId, handle);
     notifyRemoteCallbackList(
@@ -274,7 +288,8 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
     logd(TAG, "Received request to remove trusted device");
     databaseExecutor.execute(
         () -> {
-          TrustedDeviceEntity entity = database.getTrustedDevice(trustedDevice.getDeviceId());
+          TrustedDeviceEntity entity =
+              database.getTrustedDeviceIfValid(trustedDevice.getDeviceId());
           if (entity == null) {
             return;
           }
@@ -356,8 +371,11 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
     // Remove invalid trusted devices.
     databaseExecutor.execute(
         () -> {
+          byte[] stateMessage = createDisabledStateSyncMessage();
           List<TrustedDeviceEntity> entities = database.getInvalidTrustedDevicesForUser(userId);
           for (TrustedDeviceEntity entity : entities) {
+            FeatureStateEntity stateEntity = new FeatureStateEntity(entity.id, stateMessage);
+            databaseExecutor.execute(() -> database.addOrReplaceFeatureState(stateEntity));
             removeTrustedDeviceInternal(entity);
           }
         });
@@ -419,6 +437,8 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
     logd(TAG, "Marking device " + entity.id + " as invalid.");
     entity.isValid = false;
     database.addOrReplaceTrustedDevice(entity);
+    logd(TAG, "Removing hashed token for device " + entity.id + ".");
+    database.removeTrustedDeviceHashedToken(entity.id);
     sendStateDisabledMessage(entity.id);
     notifyRemoteCallbackList(
         remoteTrustedDeviceCallbacks,
@@ -467,8 +487,38 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
     return trustedDevices;
   }
 
-  private static boolean areCredentialsValid(@Nullable PhoneCredentials credentials) {
-    return credentials != null;
+  @WorkerThread
+  private boolean areCredentialsValid(@Nullable PhoneCredentials credentials, String deviceId) {
+    if (credentials == null) {
+      return false;
+    }
+    TrustedDeviceTokenEntity entity = database.getTrustedDeviceHashedToken(deviceId);
+    if (entity == null) {
+      loge(TAG, "Unable to find hashed token for device " + deviceId + ".");
+      return false;
+    }
+    byte[] hashedToken =
+        hashToken(credentials.getEscrowToken().toByteArray(), UUID.fromString(deviceId));
+    if (hashedToken == null) {
+      return false;
+    }
+    return MessageDigest.isEqual(
+        hashedToken, ByteUtils.hexStringToByteArray(entity.getHashedToken()));
+  }
+
+  @Nullable
+  private static byte[] hashToken(byte[] token, UUID deviceId) {
+    MessageDigest digest;
+    try {
+      digest = MessageDigest.getInstance(SHA256);
+    } catch (NoSuchAlgorithmException e) {
+      loge(TAG, "Unable to find " + SHA256 + " algorithm. Token hash could not be generated.");
+      return null;
+    }
+
+    digest.update(token);
+    digest.update(ByteUtils.uuidToBytes(deviceId));
+    return digest.digest();
   }
 
   private void sendStateDisabledMessage(@NonNull String deviceId) {
@@ -513,7 +563,7 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
     }
     byte[] message = payload.toByteArray();
 
-    PhoneCredentials credentials = null;
+    PhoneCredentials credentials;
     try {
       credentials = PhoneCredentials.parseFrom(message, ExtensionRegistryLite.getEmptyRegistry());
     } catch (InvalidProtocolBufferException e) {
@@ -521,12 +571,12 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
       return;
     }
 
-    if (!areCredentialsValid(credentials)) {
+    if (!areCredentialsValid(credentials, device.getDeviceId())) {
       loge(TAG, "Received invalid credentials from device. Not unlocking head unit.");
       return;
     }
 
-    TrustedDeviceEntity entity = database.getTrustedDevice(device.getDeviceId());
+    TrustedDeviceEntity entity = database.getTrustedDeviceIfValid(device.getDeviceId());
 
     if (entity == null) {
       logw(TAG, "Received unlock request from an untrusted device.");
@@ -559,7 +609,7 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
   private void processStatusSyncMessage(
       @NonNull ConnectedDevice device,
       @NonNull ByteString payload) {
-    TrustedDeviceState state = null;
+    TrustedDeviceState state;
     try {
       state = TrustedDeviceState.parseFrom(payload, ExtensionRegistryLite.getEmptyRegistry());
     } catch (InvalidProtocolBufferException e) {
@@ -578,7 +628,7 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
       return;
     }
 
-    TrustedDeviceEntity entity = database.getTrustedDevice(device.getDeviceId());
+    TrustedDeviceEntity entity = database.getTrustedDeviceIfValid(device.getDeviceId());
 
     if (entity == null) {
       logw(TAG, "Received state sync message from an untrusted device.");
@@ -598,7 +648,7 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
       logw(TAG, "Received error message with null payload. Ignoring.");
       return;
     }
-    TrustedDeviceError trustedDeviceError = null;
+    TrustedDeviceError trustedDeviceError;
     try {
       trustedDeviceError =
           TrustedDeviceError.parseFrom(payload, ExtensionRegistryLite.getEmptyRegistry());
@@ -705,7 +755,7 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
       new TrustedDeviceFeature.Callback() {
         @Override
         public void onMessageReceived(ConnectedDevice device, byte[] message) {
-          TrustedDeviceMessage trustedDeviceMessage = null;
+          TrustedDeviceMessage trustedDeviceMessage;
           try {
             trustedDeviceMessage =
                 TrustedDeviceMessage.parseFrom(message, ExtensionRegistryLite.getEmptyRegistry());
@@ -770,7 +820,7 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
         @Override
         public void onAssociatedDeviceRemoved(AssociatedDevice device) {
           List<TrustedDevice> devices = getTrustedDevicesForActiveUser();
-          if (devices == null || devices.isEmpty()) {
+          if (devices.isEmpty()) {
             return;
           }
           TrustedDevice deviceToRemove = null;

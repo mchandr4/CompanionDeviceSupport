@@ -16,18 +16,16 @@
 package com.google.android.connecteddevice.connection
 
 import com.google.android.connecteddevice.transport.ProtocolDevice
-import java.util.concurrent.Executor
 
 /** Factory for creating [ProtocolStream]. */
 interface ProtocolStreamFactory {
 
   /** Creates a [ProtocolStream] with provided [device]. */
-  fun createProtocolStream(device: ProtocolDevice, executor: Executor): ProtocolStream
+  fun createProtocolStream(device: ProtocolDevice): ProtocolStream
 }
 
 /** Implementation of [ProtocolStreamFactory]. */
 class ProtocolStreamFactoryImpl : ProtocolStreamFactory {
 
-  override fun createProtocolStream(device: ProtocolDevice, executor: Executor): ProtocolStream =
-    ProtocolStream(device, executor)
+  override fun createProtocolStream(device: ProtocolDevice): ProtocolStream = ProtocolStream(device)
 }

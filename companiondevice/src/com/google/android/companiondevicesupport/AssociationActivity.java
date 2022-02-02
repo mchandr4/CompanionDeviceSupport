@@ -29,8 +29,10 @@ import android.os.Bundle;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
 import android.view.View;
 import android.widget.Toast;
+import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelStoreOwner;
 import com.android.car.setupwizardlib.CarSetupWizardCompatLayout;
@@ -39,6 +41,7 @@ import com.android.car.ui.toolbar.ToolbarController;
 import com.google.android.connecteddevice.api.RemoteFeature;
 import com.google.android.connecteddevice.model.AssociatedDevice;
 import com.google.android.connecteddevice.model.TransportProtocols;
+import com.google.android.connecteddevice.ui.AssociatedDeviceDetails;
 import com.google.android.connecteddevice.ui.AssociatedDeviceViewModel;
 import com.google.android.connecteddevice.ui.AssociatedDeviceViewModelFactory;
 import java.util.Arrays;
@@ -50,6 +53,7 @@ public class AssociationActivity extends FragmentActivity {
   private static final String TAG = "CompanionAssociationActivity";
   private static final String COMPANION_LANDING_FRAGMENT_TAG = "CompanionLandingFragment";
   private static final String DEVICE_DETAIL_FRAGMENT_TAG = "AssociatedDeviceDetailFragment";
+  private static final String DEVICES_LIST_FRAGMENT_TAG = "AssociatedDevicesListFragment";
   private static final String PAIRING_CODE_FRAGMENT_TAG = "ConfirmPairingCodeFragment";
   private static final String TURN_ON_BLUETOOTH_FRAGMENT_TAG = "TurnOnBluetoothFragment";
   private static final String ASSOCIATION_ERROR_FRAGMENT_TAG = "AssociationErrorFragment";
@@ -58,23 +62,50 @@ public class AssociationActivity extends FragmentActivity {
   private static final String EXTRA_AUTH_IS_SETUP_PROFILE = "is_setup_profile_association";
   private static final String EXTRA_USE_IMMERSIVE_MODE = "useImmersiveMode";
   private static final String EXTRA_HIDE_SKIP_BUTTON = "hide_skip_button";
+  private static final String ASSOCIATED_DEVICE_DETAILS_BACKSTACK_NAME =
+      "AssociatedDeviceDetailsBackstack";
 
   private ToolbarController toolbar;
   private CarSetupWizardCompatLayout carSetupWizardLayout;
   private AssociatedDeviceViewModel model;
+
+  private boolean isPassengerEnabled = false;
   private boolean isStartedForSuw = false;
   private boolean isStartedForSetupProfile = false;
   private boolean isImmersive = false;
   private boolean hideSkipButton = false;
 
   @Override
-  public void onCreate(Bundle saveInstanceState) {
+  public void onCreate(Bundle savedInstanceState) {
+    isPassengerEnabled = getResources().getBoolean(R.bool.enable_passenger);
+
     resolveIntent();
+
     // Set theme before calling super.onCreate(bundle) to avoid recreating activity.
     setAssociationTheme();
-    super.onCreate(saveInstanceState);
+    super.onCreate(savedInstanceState);
     prepareLayout();
+
+    // Only need to attach the click listener if we are recreating this activity due to a
+    // configuration change.
+    if (isPassengerEnabled && savedInstanceState != null) {
+      maybeAttachItemClickListener();
+    }
+
     observeViewModel();
+  }
+
+  /**
+   * Attempts to attach a click listener to a {@link AssociatedDevicesListFragment} if it is
+   * currently visible.
+   */
+  private void maybeAttachItemClickListener() {
+    Fragment fragment = getSupportFragmentManager().findFragmentByTag(DEVICES_LIST_FRAGMENT_TAG);
+    if (fragment == null) {
+      return;
+    }
+    ((AssociatedDevicesListFragment) fragment).setOnListItemClickListener(
+        this::showAssociatedDeviceDetailFragment);
   }
 
   @Override
@@ -155,7 +186,8 @@ public class AssociationActivity extends FragmentActivity {
                 new AssociatedDeviceViewModelFactory(
                     getApplication(),
                     transportProtocols.contains(TransportProtocols.PROTOCOL_SPP),
-                    getResources().getString(R.string.ble_device_name_prefix)))
+                    getResources().getString(R.string.ble_device_name_prefix),
+                    getResources().getBoolean(R.bool.enable_passenger)))
             .get(AssociatedDeviceViewModel.class);
 
     model
@@ -198,15 +230,7 @@ public class AssociationActivity extends FragmentActivity {
 
     model
         .getBluetoothState()
-        .observe(
-            this,
-            state -> {
-              if (state != BluetoothAdapter.STATE_ON
-                  && getSupportFragmentManager().findFragmentByTag(DEVICE_DETAIL_FRAGMENT_TAG)
-                      != null) {
-                runOnUiThread(this::showTurnOnBluetoothDialog);
-              }
-            });
+        .observe(this, this::handleBluetoothStateChange);
     model
         .getPairingCode()
         .observe(
@@ -217,22 +241,8 @@ public class AssociationActivity extends FragmentActivity {
               }
             });
     model
-        .getCurrentDeviceDetails()
-        .observe(
-            this,
-            deviceDetails -> {
-              if (deviceDetails == null) {
-                return;
-              }
-              AssociatedDevice device = deviceDetails.getAssociatedDevice();
-              if (isStartedByFeature()) {
-                // Features always expect activity result when they start AssociationActivity.
-                setDeviceToReturn(device);
-                finish();
-              } else {
-                runOnUiThread(this::showAssociatedDeviceDetailFragment);
-              }
-            });
+        .getAssociatedDevicesDetails()
+        .observe(this, this::handleAssociatedDevicesDetailsChange);
     model
         .getRemovedDevice()
         .observe(
@@ -240,7 +250,6 @@ public class AssociationActivity extends FragmentActivity {
             device -> {
               if (device != null) {
                 runOnUiThread(() -> showDeviceRemovedToast(device.getDeviceName()));
-                showCompanionLandingFragment();
               }
             });
     model
@@ -256,6 +265,80 @@ public class AssociationActivity extends FragmentActivity {
                 showLoadingScreen();
               }
             });
+  }
+
+  private void handleBluetoothStateChange(int state) {
+    FragmentManager fragmentManager = getSupportFragmentManager();
+
+    // A warning dialog for Bluetooth should only be shown during association.
+    if (state != BluetoothAdapter.STATE_ON
+        && fragmentManager.findFragmentByTag(DEVICE_DETAIL_FRAGMENT_TAG) != null
+        && fragmentManager.findFragmentByTag(DEVICES_LIST_FRAGMENT_TAG) != null) {
+      runOnUiThread(this::showTurnOnBluetoothDialog);
+    }
+  }
+
+  private void handleAssociatedDevicesDetailsChange(List<AssociatedDeviceDetails> devicesDetails) {
+    // An empty list means that there are no more associated devices.
+    if (devicesDetails.isEmpty()) {
+      handleEmptyDeviceList();
+      return;
+    }
+
+    if (isPassengerEnabled) {
+      showAssociatedDevicesList(devicesDetails);
+    } else {
+      // Otherwise, there will only be one associated device.
+      showAssociatedDeviceDetails(devicesDetails.get(0));
+    }
+  }
+
+  private void showAssociatedDeviceDetails(AssociatedDeviceDetails deviceDetails) {
+    if (isStartedByFeature()) {
+      // Features always expect activity result when they start AssociationActivity.
+      setDeviceToReturn(deviceDetails.getAssociatedDevice());
+      finish();
+      return;
+    }
+
+    runOnUiThread(() -> showAssociatedDeviceDetailFragment(deviceDetails));
+  }
+
+  /** Shows a list of associated devices. The provided list should be non-empty. */
+  private void showAssociatedDevicesList(List<AssociatedDeviceDetails> devicesDetails) {
+    if (isStartedByFeature()) {
+      setDeviceToReturn(findFirstDriverDevice(devicesDetails));
+      finish();
+      return;
+    }
+
+    // If the device details are showing, then the details fragment will handle any UI changes.
+    if (isAssociatedDeviceDetailsShowing()) {
+      return;
+    }
+
+    runOnUiThread(this::showAssociatedDevicesListFragment);
+  }
+
+  @Nullable
+  private AssociatedDevice findFirstDriverDevice(List<AssociatedDeviceDetails> devicesDetails) {
+    for (AssociatedDeviceDetails deviceDetails : devicesDetails) {
+      if (deviceDetails.belongsToDriver()) {
+        return deviceDetails.getAssociatedDevice();
+      }
+    }
+    return null;
+  }
+
+  private boolean isAssociatedDeviceDetailsShowing() {
+    FragmentManager fragmentManager = getSupportFragmentManager();
+    for (int i = 0; i < fragmentManager.getBackStackEntryCount(); i++) {
+      if (ASSOCIATED_DEVICE_DETAILS_BACKSTACK_NAME.equals(
+          fragmentManager.getBackStackEntryAt(i).getName())) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private void showDeviceRemovedToast(String deviceName) {
@@ -276,7 +359,23 @@ public class AssociationActivity extends FragmentActivity {
     showProgressBar();
   }
 
+  private void handleEmptyDeviceList() {
+    Fragment fragment =
+        getSupportFragmentManager().findFragmentByTag(COMPANION_LANDING_FRAGMENT_TAG);
+
+    if (fragment != null) {
+      logd(TAG,
+          "Device list is empty, but landing fragment already showing. Nothing more to be done.");
+      return;
+    }
+
+    showCompanionLandingFragment();
+  }
+
   private void showCompanionLandingFragment() {
+    maybeClearDetailsFragmentFromBackstack();
+    dismissButtons();
+
     if (getResources().getBoolean(R.bool.enable_qr_code)) {
       logd(TAG, "Showing LandingFragment with QR code.");
       showCompanionQrCodeLandingFragment();
@@ -297,6 +396,7 @@ public class AssociationActivity extends FragmentActivity {
         (CompanionQrCodeLandingFragment)
             getSupportFragmentManager().findFragmentByTag(COMPANION_LANDING_FRAGMENT_TAG);
     if (fragment != null && fragment.isVisible()) {
+      logd(TAG, "Attempted to show QR code, but fragment is visible already. Ignoring");
       return;
     }
     fragment =
@@ -328,11 +428,37 @@ public class AssociationActivity extends FragmentActivity {
     launchFragment(fragment, ASSOCIATION_ERROR_FRAGMENT_TAG);
   }
 
-  private void showAssociatedDeviceDetailFragment() {
-    dismissButtons();
+  private void showAssociatedDeviceDetailFragment(AssociatedDeviceDetails deviceDetails) {
+    // If passenger mode is enabled, then the device list fragment is shown first and will take
+    // care of adjusting the toolbar buttons.
+    if (!isPassengerEnabled) {
+      dismissButtons();
+    }
+
     hideProgressBar();
-    AssociatedDeviceDetailFragment fragment = new AssociatedDeviceDetailFragment();
-    launchFragment(fragment, DEVICE_DETAIL_FRAGMENT_TAG);
+
+    AssociatedDeviceDetailFragment fragment =
+        AssociatedDeviceDetailFragment.newInstance(deviceDetails);
+
+    // If passenger mode is enabled, the details should be pushed on top of the list of devices.
+    // Otherwise, it will be the root view.
+    if (isPassengerEnabled) {
+      addFragment(fragment, DEVICE_DETAIL_FRAGMENT_TAG);
+    } else {
+      launchFragment(fragment, DEVICE_DETAIL_FRAGMENT_TAG);
+    }
+
+    showTurnOnBluetoothDialog();
+  }
+
+  private void showAssociatedDevicesListFragment() {
+    showAssociateButton();
+    hideProgressBar();
+
+    AssociatedDevicesListFragment fragment = new AssociatedDevicesListFragment();
+    fragment.setOnListItemClickListener(this::showAssociatedDeviceDetailFragment);
+
+    launchFragment(fragment, DEVICES_LIST_FRAGMENT_TAG);
     showTurnOnBluetoothDialog();
   }
 
@@ -389,6 +515,23 @@ public class AssociationActivity extends FragmentActivity {
         });
   }
 
+  private void showAssociateButton() {
+    if (isStartedForSuw) {
+      return;
+    }
+
+    MenuItem associationButton =
+        MenuItem.builder(this)
+            .setTitle(R.string.add_associated_device_button)
+            .setOnClickListener(v -> {
+              dismissButtons();
+              model.startAssociation();
+            })
+           .build();
+
+    toolbar.setMenuItems(Arrays.asList(associationButton));
+  }
+
   private void showProgressBar() {
     if (isStartedForSuw) {
       carSetupWizardLayout.setProgressBarVisible(true);
@@ -412,10 +555,42 @@ public class AssociationActivity extends FragmentActivity {
     }
   }
 
+  /** Checks for the details page being shown and clears it from the Fragment backstack. */
+  private void maybeClearDetailsFragmentFromBackstack() {
+    // The details page is only added to the backstack if passenger mode is enabled. Also, no need
+    // to clear if the fragment isn't there.
+    if (!isPassengerEnabled
+        || getSupportFragmentManager().findFragmentByTag(DEVICE_DETAIL_FRAGMENT_TAG) == null) {
+      return;
+    }
+
+    // If the details fragment is showing, then it will be on the backstack.
+    FragmentManager fragmentManager = getSupportFragmentManager();
+    for (int i = 0; i < fragmentManager.getBackStackEntryCount(); i++) {
+      fragmentManager.popBackStack();
+    }
+  }
+
+  /** Displays the given {@code fragment} and replaces the current content. */
   private void launchFragment(Fragment fragment, String tag) {
     getSupportFragmentManager()
         .beginTransaction()
         .replace(R.id.fragment_container, fragment, tag)
+        .commit();
+  }
+
+  /** Displays the given {@code fragment} and adds it to the backstack. */
+  private void addFragment(Fragment fragment, String tag) {
+    getSupportFragmentManager()
+        .beginTransaction()
+        .setCustomAnimations(
+            R.anim.fade_in,
+            R.anim.fade_out,
+            R.anim.fade_in,
+            R.anim.fade_out
+        )
+        .replace(R.id.fragment_container, fragment, tag)
+        .addToBackStack(ASSOCIATED_DEVICE_DETAILS_BACKSTACK_NAME)
         .commit();
   }
 

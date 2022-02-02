@@ -24,7 +24,6 @@ import com.google.android.connecteddevice.model.OobData
 import com.google.android.connecteddevice.transport.ProtocolDevice
 import com.google.android.connecteddevice.util.SafeLog.logd
 import com.google.android.connecteddevice.util.SafeLog.loge
-import com.google.android.connecteddevice.util.SafeLog.logw
 import com.google.protobuf.ByteString
 import java.security.NoSuchAlgorithmException
 import java.security.SecureRandom
@@ -81,30 +80,16 @@ constructor(
   }
 
   /**
-   * Iterate through all available OOB channels, establish OOB channel and exchange OOB key with
-   * remote device, result will be returned through [callback].
+   * Iterate through all available OOB channels, establish OOB channels and send OOB data to remote
+   * device.
    */
-  open fun startOobDataExchange(
+  open fun sendOobData(
     protocolDevice: ProtocolDevice,
-    commonTypes: List<OobChannelType>,
-    securityVersion: Int,
-    callback: Callback? = null
   ): Boolean {
-    for (oobType in commonTypes) {
-      if (oobType.name !in supportedTypes) {
-        logw(TAG, "Unsupported OOB channel ${oobType.name}. Ignored.")
-        continue
-      }
+    for (oobType in supportedTypes.map { it.asOobChannelType() }) {
       logd(TAG, "Establish OOB channel with ${oobType.name}.")
       val oobChannel = oobChannelFactory.createOobChannel(oobType)
-      if (oobChannel.completeOobDataExchange(
-          protocolDevice,
-          generateOobChannelCallback(
-            oobChannel,
-            callback,
-            securityVersion >= MIN_SECURITY_VERSION_FOR_OOB_PROTO
-          )
-        )
+      if (oobChannel.completeOobDataExchange(protocolDevice, generateOobChannelCallback(oobChannel))
       ) {
         currentOobChannel = oobChannel
         return true
@@ -113,11 +98,11 @@ constructor(
     return false
   }
 
-  private fun generateOobChannelCallback(
-    oobChannel: OobChannel,
-    callback: Callback?,
-    isProtoApplied: Boolean
-  ) =
+  private fun String.asOobChannelType(): OobChannelType =
+    OobChannelType.values().firstOrNull { it.name.equals(this) }
+      ?: OobChannelType.OOB_CHANNEL_UNKNOWN
+
+  private fun generateOobChannelCallback(oobChannel: OobChannel) =
     object : OobChannel.Callback {
       override fun onOobExchangeSuccess() {
         val data = oobData
@@ -127,14 +112,12 @@ constructor(
             "OOB channel established successfully with invalid OOB data, issue failure " +
               "callback."
           )
-          callback?.onOobDataExchangeFailure()
           return
         }
-        oobChannel.sendOobData(if (isProtoApplied) toOobProto(data) else data.toRawBytes())
-        callback?.onOobDataExchangeSuccess()
+        oobChannel.sendOobData(toOobProto(data))
       }
       override fun onOobExchangeFailure() {
-        callback?.onOobDataExchangeFailure()
+        loge(TAG, "Failed to start OOB data exchange.")
       }
     }
 
@@ -182,21 +165,9 @@ constructor(
       .toByteArray()
   }
 
-  private fun OobData.toRawBytes() = mobileIv + ihuIv + encryptionKey
-
-  /** Callbacks for [OobRunner.startOobDataExchange] */
-  interface Callback {
-    /** Called when [OobRunner.startOobDataExchange] finishes successfully. */
-    fun onOobDataExchangeSuccess()
-
-    /** Called when OOB data exchange fails. */
-    fun onOobDataExchangeFailure()
-  }
-
   companion object {
     private const val TAG = "OobRunner"
     private const val ALGORITHM = "AES/GCM/NoPadding"
-    @VisibleForTesting internal const val MIN_SECURITY_VERSION_FOR_OOB_PROTO = 4
 
     // The nonce length is chosen to be consistent with the standard specification:
     // Section 8.2 of https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38d.pdf

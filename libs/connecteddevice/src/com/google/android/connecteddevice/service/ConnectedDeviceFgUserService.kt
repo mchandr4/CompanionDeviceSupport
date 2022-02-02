@@ -20,18 +20,19 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.os.UserManager
 import com.google.android.connecteddevice.api.CompanionConnector
 import com.google.android.connecteddevice.api.Connector
-import com.google.android.connecteddevice.api.IConnectedDeviceManager
 import com.google.android.connecteddevice.util.SafeLog.logd
 import com.google.android.connecteddevice.util.SafeLog.loge
+import java.time.Duration
 
 /**
  * Service responsible for starting services that must be run in the active foreground user.
- * External features running in the foreground user may bind with `ACTION_BIND_REMOTE_FEATURE` to
- * access the [IConnectedDeviceManager] instance.
+ * External features running in the foreground user must bind to this service.
  */
 class ConnectedDeviceFgUserService : TrunkService() {
   private lateinit var connector: CompanionConnector
@@ -41,17 +42,32 @@ class ConnectedDeviceFgUserService : TrunkService() {
   @SuppressLint("UnprotectedReceiver") // Broadcasts are protected.
   override fun onCreate() {
     super.onCreate()
+    logd(TAG, "Creating service.")
     connector = CompanionConnector(this)
     connector.callback =
       object : Connector.Callback {
+        override fun onConnected() {
+          logd(TAG, "Successfully connected to the companion platform.")
+          val userManager = getSystemService(UserManager::class.java)
+          if (userManager.isUserUnlocked) {
+            logd(TAG, "User was already unlocked. Starting unlock branch services.")
+            startBranchServices(META_UNLOCK_SERVICES)
+          }
+        }
+
         override fun onDisconnected() {
-          loge(TAG, "Lost connection to companion. Stopping service.")
+          loge(TAG, "Lost connection to the companion platform. Stopping service.")
           stopSelf()
         }
 
         override fun onFailedToConnect() {
-          loge(TAG, "Unable to establish connection with companion. Stopping service.")
-          stopSelf()
+          loge(
+            TAG,
+            "Unable to establish connection with the companion platform. Retrying in " +
+              "${RETRY_WAIT.toMillis()} ms."
+          )
+          Handler(Looper.myLooper() ?: Looper.getMainLooper())
+            .postDelayed({ connector.connect() }, RETRY_WAIT.toMillis())
         }
       }
     connector.connect()
@@ -62,12 +78,6 @@ class ConnectedDeviceFgUserService : TrunkService() {
     // Listen for user going to the background so we can clean up.
     registerReceiver(userBackgroundReceiver, IntentFilter(Intent.ACTION_USER_BACKGROUND))
     receiversRegistered = true
-
-    val userManager = getSystemService(UserManager::class.java)
-    if (userManager.isUserUnlocked) {
-      logd(TAG, "User was already unlocked on service start.")
-      onUserUnlocked()
-    }
   }
 
   override fun onDestroy() {
@@ -85,8 +95,11 @@ class ConnectedDeviceFgUserService : TrunkService() {
   }
 
   private fun onUserUnlocked() {
-    logd(TAG, "Starting unlock branch services.")
-    startBranchServices(META_UNLOCK_SERVICES)
+    logd(TAG, "User has been unlocked.")
+    if (connector.isConnected) {
+      logd(TAG, "Starting unlock branch services.")
+      startBranchServices(META_UNLOCK_SERVICES)
+    }
   }
 
   private fun unregisterReceivers() {
@@ -119,5 +132,7 @@ class ConnectedDeviceFgUserService : TrunkService() {
 
     /** `string-array` List of services to start after the user has unlocked. */
     private const val META_UNLOCK_SERVICES = "com.google.android.connecteddevice.unlock_services"
+
+    private val RETRY_WAIT = Duration.ofMillis(500)
   }
 }

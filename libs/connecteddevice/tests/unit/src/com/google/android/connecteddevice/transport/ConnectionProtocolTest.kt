@@ -1,13 +1,13 @@
 package com.google.android.connecteddevice.transport
 
+import android.os.ParcelUuid
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.google.android.connecteddevice.util.ThreadSafeCallbacks
+import com.google.android.connecteddevice.core.util.mockToBeAlive
 import com.google.common.truth.Truth.assertThat
 import com.google.common.util.concurrent.MoreExecutors.directExecutor
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
-import java.util.UUID
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -15,10 +15,9 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class ConnectionProtocolTest {
   private lateinit var testProtocol: TestConnectionProtocol
-  private val mockDataReceivedListener: ConnectionProtocol.DataReceivedListener = mock()
-  private val mockDisconnectedListener: ConnectionProtocol.DeviceDisconnectedListener = mock()
-  private val mockMaxDataSizeChangedListener: ConnectionProtocol.DeviceMaxDataSizeChangedListener =
-    mock()
+  private val mockDataReceivedListener = mockToBeAlive<IDataReceivedListener>()
+  private val mockDisconnectedListener = mockToBeAlive<IDeviceDisconnectedListener>()
+  private val mockMaxDataSizeChangedListener = mockToBeAlive<IDeviceMaxDataSizeChangedListener>()
 
   @Before
   fun setUp() {
@@ -29,11 +28,7 @@ class ConnectionProtocolTest {
   fun registerDataReceivedListener_invokeListenerWithCall() {
     val testProtocolId = "testProtocolId"
     val testData = "testData".toByteArray()
-    testProtocol.registerDataReceivedListener(
-      testProtocolId,
-      mockDataReceivedListener,
-      directExecutor()
-    )
+    testProtocol.registerDataReceivedListener(testProtocolId, mockDataReceivedListener)
 
     testProtocol.invokeDataReceivedListeners(testProtocolId, testData)
 
@@ -46,11 +41,7 @@ class ConnectionProtocolTest {
     val testData = "testData".toByteArray()
     testProtocol.notifyDataReceived(testProtocolId, testData)
 
-    testProtocol.registerDataReceivedListener(
-      testProtocolId,
-      mockDataReceivedListener,
-      directExecutor()
-    )
+    testProtocol.registerDataReceivedListener(testProtocolId, mockDataReceivedListener)
 
     verify(mockDataReceivedListener).onDataReceived(testProtocolId, testData)
   }
@@ -61,17 +52,9 @@ class ConnectionProtocolTest {
     val testData = "testData".toByteArray()
     testProtocol.notifyDataReceived(testProtocolId, testData)
 
-    testProtocol.registerDataReceivedListener(
-      testProtocolId,
-      mockDataReceivedListener,
-      directExecutor()
-    )
-    val mockSecondDataReceivedListener: ConnectionProtocol.DataReceivedListener = mock()
-    testProtocol.registerDataReceivedListener(
-      testProtocolId,
-      mockSecondDataReceivedListener,
-      directExecutor()
-    )
+    testProtocol.registerDataReceivedListener(testProtocolId, mockDataReceivedListener)
+    val mockSecondDataReceivedListener: IDataReceivedListener = mock()
+    testProtocol.registerDataReceivedListener(testProtocolId, mockSecondDataReceivedListener)
 
     verify(mockDataReceivedListener).onDataReceived(testProtocolId, testData)
     verify(mockSecondDataReceivedListener, never()).onDataReceived(testProtocolId, testData)
@@ -81,11 +64,7 @@ class ConnectionProtocolTest {
   fun unregisterDataReceivedListener_doNotInvokeListenerWithCall() {
     val testProtocolId = "testProtocolId"
     val testData = "testData".toByteArray()
-    testProtocol.registerDataReceivedListener(
-      testProtocolId,
-      mockDataReceivedListener,
-      directExecutor()
-    )
+    testProtocol.registerDataReceivedListener(testProtocolId, mockDataReceivedListener)
     testProtocol.unregisterDataReceivedListener(testProtocolId, mockDataReceivedListener)
 
     testProtocol.invokeDataReceivedListeners(testProtocolId, testData)
@@ -101,11 +80,7 @@ class ConnectionProtocolTest {
   @Test
   fun unregisterDataReceivedListener_onLastListenerUnregistered_keyCleared() {
     val testProtocolId = "testProtocolId"
-    testProtocol.registerDataReceivedListener(
-      testProtocolId,
-      mockDataReceivedListener,
-      directExecutor()
-    )
+    testProtocol.registerDataReceivedListener(testProtocolId, mockDataReceivedListener)
 
     testProtocol.unregisterDataReceivedListener(testProtocolId, mockDataReceivedListener)
 
@@ -115,11 +90,7 @@ class ConnectionProtocolTest {
   @Test
   fun registerDeviceDisconnectListener_invokeListenerWithCall() {
     val testProtocolId = "testProtocolId"
-    testProtocol.registerDeviceDisconnectedListener(
-      testProtocolId,
-      mockDisconnectedListener,
-      directExecutor()
-    )
+    testProtocol.registerDeviceDisconnectedListener(testProtocolId, mockDisconnectedListener)
 
     testProtocol.invokeDeviceDisconnectedListeners(testProtocolId)
 
@@ -129,11 +100,7 @@ class ConnectionProtocolTest {
   @Test
   fun unregisterDeviceDisconnectListener_doNotInvokeListenerWithCall() {
     val testProtocolId = "testProtocolId"
-    testProtocol.registerDeviceDisconnectedListener(
-      testProtocolId,
-      mockDisconnectedListener,
-      directExecutor()
-    )
+    testProtocol.registerDeviceDisconnectedListener(testProtocolId, mockDisconnectedListener)
     testProtocol.unregisterDeviceDisconnectListener(testProtocolId, mockDisconnectedListener)
 
     testProtocol.invokeDeviceDisconnectedListeners(testProtocolId)
@@ -149,11 +116,7 @@ class ConnectionProtocolTest {
   @Test
   fun unregisterDeviceDisconnectListener_onLastListenerUnregistered_keyCleared() {
     val testProtocolId = "testProtocolId"
-    testProtocol.registerDeviceDisconnectedListener(
-      testProtocolId,
-      mockDisconnectedListener,
-      directExecutor()
-    )
+    testProtocol.registerDeviceDisconnectedListener(testProtocolId, mockDisconnectedListener)
 
     testProtocol.unregisterDeviceDisconnectListener(testProtocolId, mockDisconnectedListener)
 
@@ -166,8 +129,7 @@ class ConnectionProtocolTest {
     val testSize = 20
     testProtocol.registerDeviceMaxDataSizeChangedListener(
       testProtocolId,
-      mockMaxDataSizeChangedListener,
-      directExecutor()
+      mockMaxDataSizeChangedListener
     )
 
     testProtocol.invokeDeviceMaxDataSizeChangedListener(testProtocolId, testSize)
@@ -181,8 +143,7 @@ class ConnectionProtocolTest {
     val testSize = 20
     testProtocol.registerDeviceMaxDataSizeChangedListener(
       testProtocolId,
-      mockMaxDataSizeChangedListener,
-      directExecutor()
+      mockMaxDataSizeChangedListener
     )
     testProtocol.unregisterDeviceMaxDataSizeChangedListener(
       testProtocolId,
@@ -208,8 +169,7 @@ class ConnectionProtocolTest {
     val testProtocolId = "testProtocolId"
     testProtocol.registerDeviceMaxDataSizeChangedListener(
       testProtocolId,
-      mockMaxDataSizeChangedListener,
-      directExecutor()
+      mockMaxDataSizeChangedListener
     )
 
     testProtocol.unregisterDeviceMaxDataSizeChangedListener(
@@ -225,20 +185,11 @@ class ConnectionProtocolTest {
     val testProtocolId = "testProtocolId"
     val testData = "testData".toByteArray()
     val testSize = 20
-    testProtocol.registerDataReceivedListener(
-      testProtocolId,
-      mockDataReceivedListener,
-      directExecutor()
-    )
-    testProtocol.registerDeviceDisconnectedListener(
-      testProtocolId,
-      mockDisconnectedListener,
-      directExecutor()
-    )
+    testProtocol.registerDataReceivedListener(testProtocolId, mockDataReceivedListener)
+    testProtocol.registerDeviceDisconnectedListener(testProtocolId, mockDisconnectedListener)
     testProtocol.registerDeviceMaxDataSizeChangedListener(
       testProtocolId,
-      mockMaxDataSizeChangedListener,
-      directExecutor()
+      mockMaxDataSizeChangedListener
     )
     testProtocol.reset()
 
@@ -259,46 +210,37 @@ class ConnectionProtocolTest {
     testProtocol.notifyDataReceived(testProtocolId, testData)
     testProtocol.reset()
 
-    testProtocol.registerDataReceivedListener(
-      testProtocolId,
-      mockDataReceivedListener,
-      directExecutor()
-    )
+    testProtocol.registerDataReceivedListener(testProtocolId, mockDataReceivedListener)
 
     verify(mockDataReceivedListener, never()).onDataReceived(testProtocolId, testData)
   }
 
-  class TestConnectionProtocol : ConnectionProtocol() {
-    override val isDeviceVerificationRequired = false
+  class TestConnectionProtocol : ConnectionProtocol(directExecutor()) {
+    override fun isDeviceVerificationRequired() = false
 
-    val deviceDisconnectedListenerList:
-      MutableMap<String, ThreadSafeCallbacks<DeviceDisconnectedListener>> =
-      deviceDisconnectedListeners
+    val deviceDisconnectedListenerList = deviceDisconnectedListeners
 
-    val dataReceivedListenerList: MutableMap<String, ThreadSafeCallbacks<DataReceivedListener>> =
-      dataReceivedListeners
+    val dataReceivedListenerList = dataReceivedListeners
 
-    val maxDataSizeChangedListenerList:
-      MutableMap<String, ThreadSafeCallbacks<DeviceMaxDataSizeChangedListener>> =
-      maxDataSizeChangedListeners
+    val maxDataSizeChangedListenerList = maxDataSizeChangedListeners
 
     override fun startAssociationDiscovery(
       name: String,
-      callback: DiscoveryCallback,
-      identifier: UUID
+      identifier: ParcelUuid,
+      callback: IDiscoveryCallback,
     ) {}
 
     override fun startConnectionDiscovery(
-      id: UUID,
+      id: ParcelUuid,
       challenge: ConnectChallenge,
-      callback: DiscoveryCallback
+      callback: IDiscoveryCallback
     ) {}
 
     override fun stopAssociationDiscovery() {}
 
-    override fun stopConnectionDiscovery(id: UUID) {}
+    override fun stopConnectionDiscovery(id: ParcelUuid) {}
 
-    override fun sendData(protocolId: String, data: ByteArray, callback: DataSendCallback?) {}
+    override fun sendData(protocolId: String, data: ByteArray, callback: IDataSendCallback?) {}
 
     override fun disconnectDevice(protocolId: String) {}
 

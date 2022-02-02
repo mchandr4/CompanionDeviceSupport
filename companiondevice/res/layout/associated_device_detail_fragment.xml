@@ -96,6 +96,35 @@
             android:textAppearance="@style/SettingsItemButtonTextStyle" />
       </LinearLayout>
       <LinearLayout
+          android:id="@+id/claim_button"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:orientation="horizontal"
+          android:gravity="center"
+          android:layout_weight="1"
+          android:background="@drawable/car_ui_list_item_background"
+          android:clickable="true"
+          android:minHeight="?attr/companionListItemMinHeight">
+        <ImageView
+            android:id="@+id/claim_button_icon"
+            android:layout_width="?attr/companionSecondaryIconSize"
+            android:layout_height="?attr/companionSecondaryIconSize"
+            android:scaleType="fitXY"
+            android:src="@drawable/ic_baseline_star_border_24"
+            android:tint="?attr/companionColorAccent"
+            tools:ignore="ContentDescription" />
+        <TextView
+            android:id="@+id/claim_button_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/settings_list_item_text_no_icon_margin_start"
+            android:layout_marginEnd="@dimen/settings_list_item_text_margin_end"
+            android:layout_marginBottom="@dimen/settings_list_item_content_margin_bottom"
+            android:layout_marginTop="@dimen/settings_list_item_content_margin_top"
+            android:text="@string/unclaimed_device"
+            android:textAppearance="@style/SettingsItemButtonTextStyle" />
+      </LinearLayout>
+      <LinearLayout
           android:id="@+id/forget_button"
           android:layout_width="0dp"
           android:layout_height="wrap_content"

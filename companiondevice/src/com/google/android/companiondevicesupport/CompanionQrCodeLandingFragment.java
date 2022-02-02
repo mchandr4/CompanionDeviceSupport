@@ -99,7 +99,8 @@ public class CompanionQrCodeLandingFragment extends Fragment {
                 new AssociatedDeviceViewModelFactory(
                     requireActivity().getApplication(),
                     transportProtocols.contains(TransportProtocols.PROTOCOL_SPP),
-                    getResources().getString(R.string.ble_device_name_prefix)))
+                    getResources().getString(R.string.ble_device_name_prefix),
+                    getResources().getBoolean(R.bool.enable_passenger)))
             .get(AssociatedDeviceViewModel.class);
 
     TextView connectToCarTextView = view.findViewById(R.id.connect_to_car_instruction);

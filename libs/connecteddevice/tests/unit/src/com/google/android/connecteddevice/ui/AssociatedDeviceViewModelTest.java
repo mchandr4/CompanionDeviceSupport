@@ -23,6 +23,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.app.Application;
 import android.bluetooth.BluetoothAdapter;
@@ -36,11 +37,13 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.google.android.connecteddevice.api.FakeConnector;
 import com.google.android.connecteddevice.api.IAssociationCallback;
 import com.google.android.connecteddevice.model.AssociatedDevice;
-import com.google.android.connecteddevice.model.AssociatedDeviceDetails;
 import com.google.android.connecteddevice.model.ConnectedDevice;
 import com.google.android.connecteddevice.model.OobData;
 import com.google.android.connecteddevice.model.StartAssociationResponse;
+import com.google.android.connecteddevice.ui.AssociatedDeviceDetails.ConnectionState;
 import com.google.android.connecteddevice.ui.AssociatedDeviceViewModel.AssociationState;
+import com.google.common.collect.ImmutableList;
+import java.util.List;
 import java.util.UUID;
 import org.junit.Before;
 import org.junit.Rule;
@@ -75,7 +78,7 @@ public final class AssociatedDeviceViewModelTest {
   private final FakeConnector fakeConnector = spy(new FakeConnector());
 
   @Mock private Observer<AssociationState> mockAssociationStateObserver;
-  @Mock private Observer<AssociatedDeviceDetails> mockDeviceDetailsObserver;
+  @Mock private Observer<List<AssociatedDeviceDetails>> mockDeviceDetailsObserver;
   @Mock private Observer<String> mockCarNameObserver;
   @Mock private Observer<String> mockPairingCodeObserver;
   @Mock private Observer<AssociatedDevice> mockRemovedDeviceObserver;
@@ -88,7 +91,11 @@ public final class AssociatedDeviceViewModelTest {
   public void setUp() throws RemoteException {
     viewModel =
         new AssociatedDeviceViewModel(
-            application, /* isSppEnabled= */ false, TEST_BLE_DEVICE_NAME_PREFIX, fakeConnector);
+            application,
+            /* isSppEnabled= */ false,
+            TEST_BLE_DEVICE_NAME_PREFIX,
+            /* isPassengerEnabled= */ false,
+            fakeConnector);
     adapter.enable();
   }
 
@@ -99,23 +106,26 @@ public final class AssociatedDeviceViewModelTest {
   }
 
   @Test
-  public void removeCurrentDevice() {
-    fakeConnector.addAssociatedDevice(createAssociatedDevice(/* isConnectionEnabled= */ true));
-    viewModel.removeCurrentDevice();
+  public void removeDevice() {
+    AssociatedDevice device = createAssociatedDevice(/* isConnectionEnabled= */ true);
+    fakeConnector.addAssociatedDevice(device);
+    viewModel.removeDevice(device);
     verify(fakeConnector).removeAssociatedDevice(eq(TEST_ASSOCIATED_DEVICE_ID));
   }
 
   @Test
-  public void toggleConnectionStatusForCurrentDevice_disableDevice() {
-    fakeConnector.addAssociatedDevice(createAssociatedDevice(/* isConnectionEnabled= */ true));
-    viewModel.toggleConnectionStatusForCurrentDevice();
+  public void toggleConnectionStatusForDevice_disableDevice() {
+    AssociatedDevice device = createAssociatedDevice(/* isConnectionEnabled= */ true);
+    fakeConnector.addAssociatedDevice(device);
+    viewModel.toggleConnectionStatusForDevice(device);
     verify(fakeConnector).disableAssociatedDeviceConnection(eq(TEST_ASSOCIATED_DEVICE_ID));
   }
 
   @Test
-  public void toggleConnectionStatusForCurrentDevice_enableDevice() {
-    fakeConnector.addAssociatedDevice(createAssociatedDevice(/* isConnectionEnabled= */ false));
-    viewModel.toggleConnectionStatusForCurrentDevice();
+  public void toggleConnectionStatusForDevice_enableDevice() {
+    AssociatedDevice device = createAssociatedDevice(/* isConnectionEnabled= */ false);
+    fakeConnector.addAssociatedDevice(device);
+    viewModel.toggleConnectionStatusForDevice(device);
     verify(fakeConnector).enableAssociatedDeviceConnection(eq(TEST_ASSOCIATED_DEVICE_ID));
   }
 
@@ -201,12 +211,72 @@ public final class AssociatedDeviceViewModelTest {
   }
 
   @Test
-  public void retrieveAssociatedDevice() {
+  public void retrieveAssociatedDeviceForDriver() {
     AssociatedDevice testDevice = createAssociatedDevice(/* isConnectionEnabled= */ true);
     fakeConnector.addAssociatedDevice(testDevice);
-    viewModel.getCurrentDeviceDetails().observeForever(mockDeviceDetailsObserver);
-    assertThat(viewModel.getCurrentDeviceDetails().getValue().getAssociatedDevice())
-        .isEqualTo(testDevice);
+
+    AssociatedDeviceDetails expectedDetails =
+        new AssociatedDeviceDetails(testDevice, ConnectionState.NOT_DETECTED);
+    viewModel.getAssociatedDevicesDetails().observeForever(mockDeviceDetailsObserver);
+    assertThat(viewModel.getAssociatedDevicesDetails().getValue()).containsExactly(expectedDetails);
+  }
+
+  @Test
+  public void retrieveAssociatedDeviceForDriver_onConnection() {
+    // Adding devices before the creation of the ViewModel since the connector is connected
+    // upon construction.
+    AssociatedDevice driverDevice = createAssociatedDevice(/* isConnectionEnabled= */ true);
+    fakeConnector.addAssociatedDevice(driverDevice);
+    fakeConnector.claimAssociatedDevice(driverDevice.getDeviceId());
+
+    AssociatedDevice nonClaimedDevice = createAssociatedDevice(/* isConnectionEnabled= */ true);
+    fakeConnector.addAssociatedDevice(nonClaimedDevice);
+
+    viewModel =
+        new AssociatedDeviceViewModel(
+            application,
+            /* isSppEnabled= */ false,
+            TEST_BLE_DEVICE_NAME_PREFIX,
+            /* isPassengerEnabled= */ false,
+            fakeConnector);
+    adapter.enable();
+
+    AssociatedDeviceDetails expectedDetails =
+        new AssociatedDeviceDetails(driverDevice, ConnectionState.NOT_DETECTED);
+    viewModel.getAssociatedDevicesDetails().observeForever(mockDeviceDetailsObserver);
+
+    // Only the driver device should show up with passenger mode disabled.
+    assertThat(viewModel.getAssociatedDevicesDetails().getValue()).containsExactly(expectedDetails);
+  }
+
+  @Test
+  public void retrieveAssociatedDevices_onConnection_passengerEnabled() {
+    // Adding devices before the creation of the ViewModel since the connector is connected
+    // upon construction.
+    AssociatedDevice driverDevice = createAssociatedDevice(/* isConnectionEnabled= */ true);
+    fakeConnector.addAssociatedDevice(driverDevice);
+    fakeConnector.claimAssociatedDevice(driverDevice.getDeviceId());
+
+    AssociatedDevice nonClaimedDevice = createAssociatedDevice(/* isConnectionEnabled= */ true);
+    fakeConnector.addAssociatedDevice(nonClaimedDevice);
+
+    viewModel =
+        new AssociatedDeviceViewModel(
+            application,
+            /* isSppEnabled= */ false,
+            TEST_BLE_DEVICE_NAME_PREFIX,
+            /* isPassengerEnabled= */ true,
+            fakeConnector);
+    adapter.enable();
+
+    AssociatedDeviceDetails driverDetails =
+        new AssociatedDeviceDetails(driverDevice, ConnectionState.NOT_DETECTED);
+    AssociatedDeviceDetails passengerDetails =
+        new AssociatedDeviceDetails(nonClaimedDevice, ConnectionState.NOT_DETECTED);
+
+    viewModel.getAssociatedDevicesDetails().observeForever(mockDeviceDetailsObserver);
+    assertThat(viewModel.getAssociatedDevicesDetails().getValue()).containsExactly(
+        driverDetails, passengerDetails);
   }
 
   @Test
@@ -219,17 +289,20 @@ public final class AssociatedDeviceViewModelTest {
             TEST_ASSOCIATED_DEVICE_ADDRESS,
             TEST_ASSOCIATED_DEVICE_NAME_2,
             /* isConnectionEnabled= */ true);
+
+    AssociatedDeviceDetails expectedDetails =
+        new AssociatedDeviceDetails(updatedDevice, ConnectionState.NOT_DETECTED);
+
     fakeConnector.getCallback().onAssociatedDeviceUpdated(updatedDevice);
-    viewModel.getCurrentDeviceDetails().observeForever(mockDeviceDetailsObserver);
-    assertThat(viewModel.getCurrentDeviceDetails().getValue().getDeviceName())
-        .isEqualTo(TEST_ASSOCIATED_DEVICE_NAME_2);
+    viewModel.getAssociatedDevicesDetails().observeForever(mockDeviceDetailsObserver);
+    assertThat(viewModel.getAssociatedDevicesDetails().getValue()).containsExactly(expectedDetails);
   }
 
   @Test
   public void removeAssociatedDevice() {
     AssociatedDevice testDevice = createAssociatedDevice(/* isConnectionEnabled= */ true);
     fakeConnector.addAssociatedDevice(testDevice);
-    viewModel.removeCurrentDevice();
+    viewModel.removeDevice(testDevice);
     verify(fakeConnector).removeAssociatedDevice(eq(TEST_ASSOCIATED_DEVICE_ID));
   }
 
@@ -245,28 +318,49 @@ public final class AssociatedDeviceViewModelTest {
   }
 
   @Test
-  public void associatedDeviceConnected() {
+  public void onDeviceConnected_updateConnectionStatusToDetected() {
     AssociatedDevice testAssociatedDevice = createAssociatedDevice(/* isConnectionEnabled= */ true);
     fakeConnector.addAssociatedDevice(testAssociatedDevice);
-    ConnectedDevice testConnectedDevice = createConnectedDevice();
+    ConnectedDevice testConnectedDevice = createDetectedDevice();
+    when(fakeConnector.getConnectedDevices()).thenReturn(ImmutableList.of(testConnectedDevice));
 
     fakeConnector.getCallback().onDeviceConnected(testConnectedDevice);
 
-    viewModel.getCurrentDeviceDetails().observeForever(mockDeviceDetailsObserver);
-    assertThat(viewModel.getCurrentDeviceDetails().getValue().isConnected()).isTrue();
+    AssociatedDeviceDetails expectedDetails =
+        new AssociatedDeviceDetails(testAssociatedDevice, ConnectionState.DETECTED);
+
+    viewModel.getAssociatedDevicesDetails().observeForever(mockDeviceDetailsObserver);
+    assertThat(viewModel.getAssociatedDevicesDetails().getValue()).containsExactly(expectedDetails);
   }
 
   @Test
-  public void associatedDeviceDisconnected() {
+  public void onSecureChannelEstablished_updatesConnectionStatusToConnected() {
+    AssociatedDevice testAssociatedDevice = createAssociatedDevice(/* isConnectionEnabled= */ true);
+    fakeConnector.addAssociatedDevice(testAssociatedDevice);
+    ConnectedDevice testConnectedDevice = createConnectedDevice();
+    when(fakeConnector.getConnectedDevices()).thenReturn(ImmutableList.of(testConnectedDevice));
+
+    fakeConnector.getCallback().onSecureChannelEstablished(testConnectedDevice);
+
+    AssociatedDeviceDetails expectedDetails =
+        new AssociatedDeviceDetails(testAssociatedDevice, ConnectionState.CONNECTED);
+    viewModel.getAssociatedDevicesDetails().observeForever(mockDeviceDetailsObserver);
+    assertThat(viewModel.getAssociatedDevicesDetails().getValue()).containsExactly(expectedDetails);
+  }
+
+  @Test
+  public void onDeviceDisconnected_updatesConnectionStatusToNotDetected() {
     AssociatedDevice testAssociatedDevice = createAssociatedDevice(/* isConnectionEnabled= */ true);
     fakeConnector.addAssociatedDevice(testAssociatedDevice);
     ConnectedDevice testConnectedDevice = createConnectedDevice();
 
-    fakeConnector.getCallback().onDeviceConnected(testConnectedDevice);
     fakeConnector.getCallback().onDeviceDisconnected(testConnectedDevice);
 
-    viewModel.getCurrentDeviceDetails().observeForever(mockDeviceDetailsObserver);
-    assertThat(viewModel.getCurrentDeviceDetails().getValue().isConnected()).isFalse();
+    AssociatedDeviceDetails expectedDetails =
+        new AssociatedDeviceDetails(testAssociatedDevice, ConnectionState.NOT_DETECTED);
+
+    viewModel.getAssociatedDevicesDetails().observeForever(mockDeviceDetailsObserver);
+    assertThat(viewModel.getAssociatedDevicesDetails().getValue()).containsExactly(expectedDetails);
   }
 
   @Test
@@ -275,8 +369,29 @@ public final class AssociatedDeviceViewModelTest {
         new AssociatedDeviceViewModel(
             ApplicationProvider.getApplicationContext(),
             /* isSppEnabled= */ false,
-            TEST_BLE_DEVICE_NAME_PREFIX);
+            TEST_BLE_DEVICE_NAME_PREFIX,
+            /* isPassengerEnabled= */ false);
     associatedDeviceViewModel.onCleared();
+  }
+
+  @Test
+  public void claimDevice_claimsAssociatedDevice() {
+    AssociatedDevice device = createAssociatedDevice(/* isConnectionEnabled= */ true);
+    fakeConnector.addAssociatedDevice(device);
+
+    viewModel.claimDevice(device);
+
+    verify(fakeConnector).claimAssociatedDevice(device.getDeviceId());
+  }
+
+  @Test
+  public void removeClaimOnDevice_removesAssociatedDeviceClaim() {
+    AssociatedDevice device = createAssociatedDevice(/* isConnectionEnabled= */ true);
+    fakeConnector.addAssociatedDevice(device);
+
+    viewModel.removeClaimOnDevice(device);
+
+    verify(fakeConnector).removeAssociatedDeviceClaim(device.getDeviceId());
   }
 
   private void captureAssociationCallback() {
@@ -298,7 +413,15 @@ public final class AssociatedDeviceViewModelTest {
     return new ConnectedDevice(
         TEST_ASSOCIATED_DEVICE_ID,
         TEST_ASSOCIATED_DEVICE_NAME_1,
-        /* belongsToActiveUser= */ true,
+        /* belongsToDriver= */ true,
         /* hasSecureChannel= */ true);
+  }
+
+  private static ConnectedDevice createDetectedDevice() {
+    return new ConnectedDevice(
+        TEST_ASSOCIATED_DEVICE_ID,
+        TEST_ASSOCIATED_DEVICE_NAME_1,
+        /* belongsToDriver= */ true,
+        /* hasSecureChannel= */ false);
   }
 }

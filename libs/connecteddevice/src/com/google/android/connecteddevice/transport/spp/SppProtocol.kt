@@ -19,13 +19,18 @@ import android.bluetooth.BluetoothDevice
 import android.os.ParcelUuid
 import android.os.RemoteException
 import com.google.android.connecteddevice.transport.BluetoothDeviceProvider
+import com.google.android.connecteddevice.transport.ConnectChallenge
 import com.google.android.connecteddevice.transport.ConnectionProtocol
+import com.google.android.connecteddevice.transport.IDataSendCallback
+import com.google.android.connecteddevice.transport.IDiscoveryCallback
 import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelegateBinder.OnErrorListener
 import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelegateBinder.OnMessageReceivedListener
 import com.google.android.connecteddevice.util.SafeLog.logd
 import com.google.android.connecteddevice.util.SafeLog.loge
 import com.google.android.connecteddevice.util.SafeLog.logw
 import java.util.UUID
+import java.util.concurrent.Executor
+import java.util.concurrent.Executors
 
 /**
  * Representation of a Serial Port Profile channel, which communicated with [SppService] via
@@ -34,12 +39,13 @@ import java.util.UUID
  * @property sppBinder [ConnectedDeviceSppDelegateBinder] for communication with [SppService].
  * @property maxWriteSize Maximum size in bytes to write in one packet.
  */
-class SppProtocol(
+class SppProtocol
+@JvmOverloads
+constructor(
   private val sppBinder: ConnectedDeviceSppDelegateBinder,
   private val maxWriteSize: Int,
-) : ConnectionProtocol(), BluetoothDeviceProvider {
-  override val isDeviceVerificationRequired = false
-
+  callbackExecutor: Executor = Executors.newCachedThreadPool()
+) : ConnectionProtocol(callbackExecutor), BluetoothDeviceProvider {
   private val pendingConnections = mutableMapOf<UUID, PendingConnection>()
   private val connections = mutableMapOf<UUID, Connection>()
   private val connectedDevices = mutableMapOf<UUID, BluetoothDevice>()
@@ -47,24 +53,25 @@ class SppProtocol(
 
   override fun startAssociationDiscovery(
     name: String,
-    callback: DiscoveryCallback,
-    identifier: UUID
+    identifier: ParcelUuid,
+    callback: IDiscoveryCallback
   ) {
-    associationIdentifier = identifier
-    logd(TAG, "Start association discovery for association with UUID $identifier")
-    startConnection(identifier, callback)
+    val uuidIdentifier = identifier.uuid
+    associationIdentifier = uuidIdentifier
+    logd(TAG, "Start association discovery for association with UUID $uuidIdentifier.")
+    startConnection(uuidIdentifier, callback)
   }
 
   override fun startConnectionDiscovery(
-    id: UUID,
+    id: ParcelUuid,
     challenge: ConnectChallenge,
-    callback: DiscoveryCallback
+    callback: IDiscoveryCallback
   ) {
     logd(TAG, "Starting connection discovery for device $id")
-    startConnection(id, callback)
+    startConnection(id.uuid, callback)
   }
 
-  private fun startConnection(id: UUID, callback: DiscoveryCallback) {
+  private fun startConnection(id: UUID, callback: IDiscoveryCallback) {
     try {
       val pendingConnection = sppBinder.connectAsServer(id, /* isSecure= */ true)
       if (pendingConnection == null) {
@@ -80,7 +87,7 @@ class SppProtocol(
     }
   }
 
-  private fun generateOnConnectionListener(callback: DiscoveryCallback) =
+  private fun generateOnConnectionListener(callback: IDiscoveryCallback) =
     PendingConnection.OnConnectedListener { uuid, remoteDevice, isSecure, deviceName ->
       val protocolId = UUID.randomUUID()
       val connection = Connection(ParcelUuid(uuid), remoteDevice, isSecure, deviceName)
@@ -118,10 +125,11 @@ class SppProtocol(
       val listeners = deviceDisconnectedListeners[protocolId.toString()]
       listeners?.invoke { it.onDeviceDisconnected(protocolId.toString()) }
       connectedDevices.remove(protocolId)
+      connections.remove(protocolId)
       logd(
         TAG,
-        "Inform device connection error with connection $protocolId to " +
-          "${listeners?.size()} listeners."
+        "Inform device connection error with connection $protocolId to ${listeners?.size()} " +
+          "listeners."
       )
       removeListeners(protocolId.toString())
     }
@@ -138,9 +146,9 @@ class SppProtocol(
     associationIdentifier = null
   }
 
-  override fun stopConnectionDiscovery(id: UUID) {
-    logd(TAG, "Stop connection discovery with UUID $id.")
-    stopDiscovery(id)
+  override fun stopConnectionDiscovery(id: ParcelUuid) {
+    logd(TAG, "Stop connection discovery with UUID ${id.uuid}.")
+    stopDiscovery(id.uuid)
   }
 
   private fun stopDiscovery(id: UUID) {
@@ -152,7 +160,7 @@ class SppProtocol(
     }
   }
 
-  override fun sendData(protocolId: String, data: ByteArray, callback: DataSendCallback?) {
+  override fun sendData(protocolId: String, data: ByteArray, callback: IDataSendCallback?) {
     val connection = connections[UUID.fromString(protocolId)]
     if (connection == null) {
       callback?.onDataFailedToSend()
@@ -218,6 +226,8 @@ class SppProtocol(
   }
 
   override fun getMaxWriteSize(protocolId: String) = maxWriteSize
+
+  override fun isDeviceVerificationRequired() = false
 
   companion object {
     private const val TAG = "SppProtocol"

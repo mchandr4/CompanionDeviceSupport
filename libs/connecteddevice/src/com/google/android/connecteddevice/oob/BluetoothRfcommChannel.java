@@ -29,7 +29,6 @@ import android.os.RemoteException;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
-import com.google.android.connecteddevice.model.OobEligibleDevice;
 import com.google.android.connecteddevice.transport.BluetoothDeviceProvider;
 import com.google.android.connecteddevice.transport.ConnectionProtocol;
 import com.google.android.connecteddevice.transport.ProtocolDevice;
@@ -70,26 +69,16 @@ public class BluetoothRfcommChannel implements OobChannel {
     BluetoothDevice remoteDevice =
         ((BluetoothDeviceProvider) protocol).getBluetoothDeviceById(device.getProtocolId());
     completeOobDataExchange(
-        new OobEligibleDevice(remoteDevice.getAddress(), OobEligibleDevice.OOB_TYPE_BLUETOOTH),
-        callback,
-        () -> BluetoothAdapter.getDefaultAdapter().getBondedDevices());
+        remoteDevice, callback, () -> BluetoothAdapter.getDefaultAdapter().getBondedDevices());
     return true;
-  }
-
-  @Override
-  public void completeOobDataExchange(
-      @NonNull OobEligibleDevice device, @NonNull Callback callback) {
-    completeOobDataExchange(
-        device, callback, () -> BluetoothAdapter.getDefaultAdapter().getBondedDevices());
   }
 
   @VisibleForTesting
   void completeOobDataExchange(
-      OobEligibleDevice device, Callback callback, BondedDevicesResolver bondedDevicesResolver) {
+      BluetoothDevice remoteDevice,
+      Callback callback,
+      BondedDevicesResolver bondedDevicesResolver) {
     this.callback = callback;
-
-    BluetoothDevice remoteDevice =
-        BluetoothAdapter.getDefaultAdapter().getRemoteDevice(device.getDeviceAddress());
     Set<BluetoothDevice> bondedDevices = bondedDevicesResolver.getBondedDevices();
     if (bondedDevices == null || !bondedDevices.contains(remoteDevice)) {
       notifyFailure(

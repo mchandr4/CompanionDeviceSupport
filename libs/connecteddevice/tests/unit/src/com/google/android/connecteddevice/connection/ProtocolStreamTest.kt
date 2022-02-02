@@ -15,6 +15,7 @@
  */
 package com.google.android.connecteddevice.connection
 
+import android.os.ParcelUuid
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.companionprotos.DeviceMessageProto.Message
 import com.google.android.companionprotos.OperationProto.OperationType
@@ -22,7 +23,10 @@ import com.google.android.companionprotos.PacketProto.Packet
 import com.google.android.connecteddevice.connection.ProtocolStream.MessageReceivedListener
 import com.google.android.connecteddevice.connection.ProtocolStream.ProtocolDisconnectListener
 import com.google.android.connecteddevice.model.DeviceMessage
+import com.google.android.connecteddevice.transport.ConnectChallenge
 import com.google.android.connecteddevice.transport.ConnectionProtocol
+import com.google.android.connecteddevice.transport.IDataSendCallback
+import com.google.android.connecteddevice.transport.IDiscoveryCallback
 import com.google.android.connecteddevice.transport.ProtocolDevice
 import com.google.android.connecteddevice.util.ByteUtils
 import com.google.common.truth.Truth
@@ -51,7 +55,7 @@ class ProtocolStreamTest {
 
   private val protocol = spy(TestProtocol())
 
-  private val stream = ProtocolStream(ProtocolDevice(protocol, PROTOCOL_ID), directExecutor())
+  private val stream = ProtocolStream(ProtocolDevice(protocol, PROTOCOL_ID))
 
   @Test
   fun sendMessage_smallMessageSendsSinglePacket() {
@@ -133,8 +137,7 @@ class ProtocolStreamTest {
   @Test
   fun protocolOnDataFailedToSend_disconnectsProtocol() {
     val failingProtocol = spy(FailingSendProtocol())
-    val failingStream =
-      ProtocolStream(ProtocolDevice(failingProtocol, PROTOCOL_ID), directExecutor())
+    val failingStream = ProtocolStream(ProtocolDevice(failingProtocol, PROTOCOL_ID))
     val recipient = UUID.randomUUID()
     val message = ByteUtils.randomBytes(MAX_WRITE_SIZE / 2)
     failingStream.sendMessage(
@@ -246,8 +249,8 @@ class ProtocolStreamTest {
     }
   }
 
-  open class TestProtocol : ConnectionProtocol() {
-    override val isDeviceVerificationRequired = false
+  open class TestProtocol : ConnectionProtocol(directExecutor()) {
+    override fun isDeviceVerificationRequired() = false
 
     fun receiveData(data: ByteArray) {
       dataReceivedListeners[PROTOCOL_ID]?.invoke { it.onDataReceived(PROTOCOL_ID, data) }
@@ -255,21 +258,21 @@ class ProtocolStreamTest {
 
     override fun startAssociationDiscovery(
       name: String,
-      callback: DiscoveryCallback,
-      identifier: UUID
+      identifier: ParcelUuid,
+      callback: IDiscoveryCallback
     ) {}
 
     override fun startConnectionDiscovery(
-      id: UUID,
+      id: ParcelUuid,
       challenge: ConnectChallenge,
-      callback: DiscoveryCallback
+      callback: IDiscoveryCallback
     ) {}
 
     override fun stopAssociationDiscovery() {}
 
-    override fun stopConnectionDiscovery(id: UUID) {}
+    override fun stopConnectionDiscovery(id: ParcelUuid) {}
 
-    override fun sendData(protocolId: String, data: ByteArray, callback: DataSendCallback?) {
+    override fun sendData(protocolId: String, data: ByteArray, callback: IDataSendCallback?) {
       callback?.onDataSentSuccessfully()
     }
 
@@ -284,26 +287,26 @@ class ProtocolStreamTest {
     }
   }
 
-  open class FailingSendProtocol : ConnectionProtocol() {
-    override val isDeviceVerificationRequired = false
+  open class FailingSendProtocol : ConnectionProtocol(directExecutor()) {
+    override fun isDeviceVerificationRequired() = false
 
     override fun startAssociationDiscovery(
       name: String,
-      callback: DiscoveryCallback,
-      identifier: UUID
+      identifier: ParcelUuid,
+      callback: IDiscoveryCallback
     ) {}
 
     override fun startConnectionDiscovery(
-      id: UUID,
+      id: ParcelUuid,
       challenge: ConnectChallenge,
-      callback: DiscoveryCallback
+      callback: IDiscoveryCallback
     ) {}
 
     override fun stopAssociationDiscovery() {}
 
-    override fun stopConnectionDiscovery(id: UUID) {}
+    override fun stopConnectionDiscovery(id: ParcelUuid) {}
 
-    override fun sendData(protocolId: String, data: ByteArray, callback: DataSendCallback?) {
+    override fun sendData(protocolId: String, data: ByteArray, callback: IDataSendCallback?) {
       callback?.onDataFailedToSend()
     }
 

@@ -16,6 +16,7 @@
 package com.google.android.connecteddevice.connection
 
 import android.content.Context
+import android.os.ParcelUuid
 import android.util.Base64
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
@@ -29,7 +30,10 @@ import com.google.android.connecteddevice.oob.OobRunner
 import com.google.android.connecteddevice.storage.ConnectedDeviceDatabase
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage
 import com.google.android.connecteddevice.storage.CryptoHelper
+import com.google.android.connecteddevice.transport.ConnectChallenge
 import com.google.android.connecteddevice.transport.ConnectionProtocol
+import com.google.android.connecteddevice.transport.IDataSendCallback
+import com.google.android.connecteddevice.transport.IDiscoveryCallback
 import com.google.android.connecteddevice.transport.ProtocolDevice
 import com.google.android.encryptionrunner.EncryptionRunnerFactory
 import com.google.android.encryptionrunner.FakeEncryptionRunner
@@ -43,7 +47,6 @@ import com.nhaarman.mockitokotlin2.spy
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
-import java.util.UUID
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -53,8 +56,7 @@ private const val PROTOCOL_ID = "testProtocol"
 @RunWith(AndroidJUnit4::class)
 class MultiProtocolSecureChannelV4Test {
   private val context = ApplicationProvider.getApplicationContext<Context>()
-  private val stream1 =
-    spy(ProtocolStream(ProtocolDevice(TestProtocol(), PROTOCOL_ID), directExecutor()))
+  private val stream1 = spy(ProtocolStream(ProtocolDevice(TestProtocolV4(), PROTOCOL_ID)))
   private lateinit var storage: ConnectedDeviceStorage
   private val mockOobRunner: OobRunner = mock()
   private val mockShowVerificationCodeListener: ShowVerificationCodeListener = mock()
@@ -68,7 +70,7 @@ class MultiProtocolSecureChannelV4Test {
         .setQueryExecutor(directExecutor())
         .build()
         .associatedDeviceDao()
-    storage = ConnectedDeviceStorage(context, Base64CryptoHelper(), database, directExecutor())
+    storage = ConnectedDeviceStorage(context, Base64CryptoHelperV4(), database, directExecutor())
   }
   @Test
   fun processVerificationCodeMessage_oobVerification_verifyOobCode() {
@@ -78,8 +80,8 @@ class MultiProtocolSecureChannelV4Test {
     val testPayload = "testPayload".toByteArray()
     val testVerificationCodeMessage =
       VerificationCode.newBuilder().run {
-        setState(VerificationCodeState.OOB_VERIFICATION)
-        setPayload(ByteString.copyFrom(testPayload))
+        state = VerificationCodeState.OOB_VERIFICATION
+        payload = ByteString.copyFrom(testPayload)
         build()
       }
     val deviceMessage =
@@ -106,8 +108,8 @@ class MultiProtocolSecureChannelV4Test {
     respondToContinueMessage(secureChannel)
     val testVerificationCodeMessage =
       VerificationCode.newBuilder().run {
-        setState(VerificationCodeState.OOB_VERIFICATION)
-        setPayload(ByteString.copyFrom(testPayload))
+        state = VerificationCodeState.OOB_VERIFICATION
+        payload = ByteString.copyFrom(testPayload)
         build()
       }
     val deviceMessage =
@@ -220,26 +222,26 @@ class MultiProtocolSecureChannelV4Test {
   }
 }
 
-private class TestProtocol : ConnectionProtocol() {
-  override val isDeviceVerificationRequired = false
+private class TestProtocolV4 : ConnectionProtocol() {
+  override fun isDeviceVerificationRequired() = false
 
   override fun startAssociationDiscovery(
     name: String,
-    callback: DiscoveryCallback,
-    identifier: UUID
+    identifier: ParcelUuid,
+    callback: IDiscoveryCallback
   ) {}
 
   override fun startConnectionDiscovery(
-    id: UUID,
+    id: ParcelUuid,
     challenge: ConnectChallenge,
-    callback: DiscoveryCallback
+    callback: IDiscoveryCallback
   ) {}
 
   override fun stopAssociationDiscovery() {}
 
-  override fun stopConnectionDiscovery(id: UUID) {}
+  override fun stopConnectionDiscovery(id: ParcelUuid) {}
 
-  override fun sendData(protocolId: String, data: ByteArray, callback: DataSendCallback?) {}
+  override fun sendData(protocolId: String, data: ByteArray, callback: IDataSendCallback?) {}
 
   override fun disconnectDevice(protocolId: String) {}
 
@@ -250,7 +252,7 @@ private class TestProtocol : ConnectionProtocol() {
   }
 }
 
-private class Base64CryptoHelper : CryptoHelper {
+private class Base64CryptoHelperV4 : CryptoHelper {
   override fun encrypt(value: ByteArray?): String? = Base64.encodeToString(value, Base64.DEFAULT)
 
   override fun decrypt(value: String?): ByteArray? = Base64.decode(value, Base64.DEFAULT)

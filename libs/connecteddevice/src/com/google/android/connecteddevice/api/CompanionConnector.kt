@@ -31,11 +31,8 @@ import com.google.android.companionprotos.QueryResponse
 import com.google.android.companionprotos.SystemQuery
 import com.google.android.companionprotos.SystemQueryType
 import com.google.android.connecteddevice.api.Connector.AppNameCallback
-import com.google.android.connecteddevice.api.Connector.Companion.ACTION_BIND_ASSOCIATION
 import com.google.android.connecteddevice.api.Connector.Companion.ACTION_BIND_FEATURE_COORDINATOR
 import com.google.android.connecteddevice.api.Connector.Companion.ACTION_BIND_FEATURE_COORDINATOR_FG
-import com.google.android.connecteddevice.api.Connector.Companion.ACTION_BIND_REMOTE_FEATURE
-import com.google.android.connecteddevice.api.Connector.Companion.ACTION_BIND_REMOTE_FEATURE_FG
 import com.google.android.connecteddevice.api.Connector.Companion.SYSTEM_FEATURE_ID
 import com.google.android.connecteddevice.api.Connector.Companion.USER_TYPE_ALL
 import com.google.android.connecteddevice.api.Connector.Companion.USER_TYPE_DRIVER
@@ -74,24 +71,17 @@ constructor(
   private val isForegroundProcess: Boolean = false,
   private val userType: @UserType Int = USER_TYPE_DRIVER
 ) : Connector {
-  private val isLegacyOnly = AtomicBoolean(false)
-
   private val retryHandler = Handler(Looper.getMainLooper())
 
   private val loggerId = Logger.getLogger().loggerId
+
+  private val isPlatformInitialized = AtomicBoolean(false)
 
   private val featureCoordinatorAction =
     if (isForegroundProcess) {
       ACTION_BIND_FEATURE_COORDINATOR_FG
     } else {
       ACTION_BIND_FEATURE_COORDINATOR
-    }
-
-  private val connectedDeviceManagerAction =
-    if (isForegroundProcess) {
-      ACTION_BIND_REMOTE_FEATURE_FG
-    } else {
-      ACTION_BIND_REMOTE_FEATURE
     }
 
   private val featureCoordinatorConnection =
@@ -101,6 +91,7 @@ constructor(
         featureCoordinator =
           IFeatureCoordinator.Stub.asInterface(service)
             ?: throw IllegalStateException("Cannot create wrapper of a null feature coordinator.")
+        logd(TAG, "Feature coordinator is alive: ${featureCoordinator?.asBinder()?.isBinderAlive}")
         this@CompanionConnector.onServiceConnected()
       }
 
@@ -110,42 +101,6 @@ constructor(
 
       override fun onNullBinding(name: ComponentName) {
         loge(TAG, "Received a null binding for FeatureCoordinator.")
-        this@CompanionConnector.onNullBinding()
-      }
-    }
-
-  private val connectedDeviceManagerConnection =
-    object : ServiceConnection {
-      override fun onServiceConnected(name: ComponentName, service: IBinder) {
-        logd(TAG, "ConnectedDeviceManager binding has connected successfully.")
-        connectedDeviceManager = IConnectedDeviceManager.Stub.asInterface(service)
-        this@CompanionConnector.onServiceConnected()
-      }
-
-      override fun onServiceDisconnected(name: ComponentName) {
-        this@CompanionConnector.onServiceDisconnected()
-      }
-
-      override fun onNullBinding(name: ComponentName) {
-        loge(TAG, "Received a null binding for ConnectedDeviceManager.")
-        this@CompanionConnector.onNullBinding()
-      }
-    }
-
-  private val associatedDeviceManagerConnection =
-    object : ServiceConnection {
-      override fun onServiceConnected(name: ComponentName, service: IBinder) {
-        logd(TAG, "AssociatedDeviceManager binding has connected successfully.")
-        associatedDeviceManager = IAssociatedDeviceManager.Stub.asInterface(service)
-        this@CompanionConnector.onServiceConnected()
-      }
-
-      override fun onServiceDisconnected(name: ComponentName) {
-        this@CompanionConnector.onServiceDisconnected()
-      }
-
-      override fun onNullBinding(name: ComponentName) {
-        loge(TAG, "Received a null binding for AssociatedDeviceManager.")
         this@CompanionConnector.onNullBinding()
       }
     }
@@ -164,7 +119,6 @@ constructor(
         // Only call method once. If featureCoordinator is not null, connectedDeviceManager is a
         // wrapper and will result in a double call on featureCoordinator.
         aliveFeatureCoordinator?.registerDeviceCallback(device, featureId, deviceCallback)
-          ?: aliveConnectedDeviceManager?.registerDeviceCallback(device, featureId, deviceCallback)
       }
 
       override fun onDeviceDisconnected(device: ConnectedDevice) {
@@ -176,11 +130,6 @@ constructor(
         // Only call method once. If featureCoordinator is not null, connectedDeviceManager is a
         // wrapper and will result in a double call on featureCoordinator.
         aliveFeatureCoordinator?.unregisterDeviceCallback(device, featureId, deviceCallback)
-          ?: aliveConnectedDeviceManager?.unregisterDeviceCallback(
-            device,
-            featureId,
-            deviceCallback
-          )
       }
     }
 
@@ -225,7 +174,6 @@ constructor(
         val loggerBytes = Logger.getLogger().toByteArray()
         try {
           featureCoordinator?.processLogRecords(loggerId, loggerBytes)
-            ?: connectedDeviceManager?.processLogRecords(loggerId, loggerBytes)
         } catch (e: RemoteException) {
           loge(TAG, "Failed to send log records for logger $loggerId.", e)
         }
@@ -242,30 +190,7 @@ constructor(
 
   private var bindAttempts = 0
 
-  /**
-   * When bound to a [featureCoordinator], this connector will wrap [connectedDeviceManager] and
-   * [associatedDeviceManager] around the coordinator. Otherwise, a legacy binding will be made
-   * for both [connectedDeviceManager] and [associatedDeviceManager] separately.
-   *
-   * Note: legacy support is a temporary state and will be removed once all clients have
-   * successfully moved to the [featureCoordinator] binding version.
-   */
-  @VisibleForTesting
-  internal var featureCoordinator: IFeatureCoordinator? = null
-    set(value) {
-      field = value
-      if (value == null) {
-        connectedDeviceManager = null
-        associatedDeviceManager = null
-        return
-      }
-      connectedDeviceManager = createConnectedDeviceManagerWrapper(value)
-      associatedDeviceManager = createAssociatedDeviceManagerWrapper(value)
-    }
-
-  @VisibleForTesting internal var connectedDeviceManager: IConnectedDeviceManager? = null
-
-  @VisibleForTesting internal var associatedDeviceManager: IAssociatedDeviceManager? = null
+  @VisibleForTesting internal var featureCoordinator: IFeatureCoordinator? = null
 
   override var featureId: ParcelUuid? = null
 
@@ -283,51 +208,32 @@ constructor(
       }
       return when (userType) {
         USER_TYPE_DRIVER -> aliveFeatureCoordinator?.connectedDevicesForDriver
-            ?: aliveConnectedDeviceManager?.activeUserConnectedDevices
         USER_TYPE_PASSENGER -> aliveFeatureCoordinator?.connectedDevicesForPassengers
         USER_TYPE_ALL -> aliveFeatureCoordinator?.allConnectedDevices
-            ?: aliveConnectedDeviceManager?.activeUserConnectedDevices
         else -> null
       }
         ?: emptyList()
     }
 
   override val isConnected: Boolean
-    get() =
-      aliveFeatureCoordinator != null ||
-        (aliveConnectedDeviceManager != null && aliveAssociatedDeviceManager != null)
+    get() = aliveFeatureCoordinator != null
 
   private val isBound: Boolean
-    get() =
-      featureCoordinator != null ||
-        (connectedDeviceManager != null && associatedDeviceManager != null)
+    get() = featureCoordinator != null
 
   private val aliveFeatureCoordinator
     get() = featureCoordinator?.aliveOrNull()
-
-  private val aliveConnectedDeviceManager
-    get() = connectedDeviceManager?.aliveOrNull()
-
-  private val aliveAssociatedDeviceManager
-    get() = associatedDeviceManager?.aliveOrNull()
 
   override fun connect() {
     logd(TAG, "Initiating connection to companion platform.")
     if (isConnected) {
       logd(TAG, "Platform is already connected. Skipping binding.")
       initializePlatform()
-      callback?.onConnected()
       return
     }
 
     logd(TAG, "Platform is not currently connected. Initiating binding.")
-    val intent =
-      if (isLegacyOnly.get()) {
-        resolveIntent(connectedDeviceManagerAction)
-      } else {
-        resolveIntent(featureCoordinatorAction)
-          ?: resolveIntent(connectedDeviceManagerAction).also { isLegacyOnly.set(true) }
-      }
+    val intent = resolveIntent(featureCoordinatorAction)
 
     if (intent == null) {
       loge(TAG, "No services found supporting companion device. Aborting.")
@@ -335,15 +241,7 @@ constructor(
       return
     }
 
-    val success =
-      if (isLegacyOnly.get()) {
-        val associationIntent =
-          Intent(ACTION_BIND_ASSOCIATION).apply { component = intent.component }
-        context.bindService(intent, connectedDeviceManagerConnection, /* flag= */ 0) &&
-          context.bindService(associationIntent, associatedDeviceManagerConnection, /* flag= */ 0)
-      } else {
-        context.bindService(intent, featureCoordinatorConnection, /* flag= */ 0)
-      }
+    val success = context.bindService(intent, featureCoordinatorConnection, /* flag= */ 0)
     if (success) {
       logd(TAG, "Successfully started binding with ${intent.action}.")
       return
@@ -364,18 +262,13 @@ constructor(
     val wasConnected = isBound
     logd(TAG, "FeatureCoordinator is null: ${featureCoordinator == null} isBound: $isBound")
     cleanUpFeatureCoordinator()
-    cleanUpConnectedDeviceManager()
-    associatedDeviceManager = null
     retryHandler.removeCallbacksAndMessages(/* token= */ null)
     try {
       context.unbindService(featureCoordinatorConnection)
-      context.unbindService(connectedDeviceManagerConnection)
-      context.unbindService(associatedDeviceManagerConnection)
     } catch (e: IllegalArgumentException) {
       logw(TAG, "Attempted to unbind an already unbound service.")
     }
     bindAttempts = 0
-    isLegacyOnly.set(false)
     if (wasConnected) {
       callback?.onDisconnected()
     }
@@ -404,35 +297,13 @@ constructor(
     if (featureCoordinator != null) {
       featureCoordinator = null
     }
-  }
-
-  private fun cleanUpConnectedDeviceManager() {
-    logd(TAG, "Cleaning up ConnectedDeviceManager.")
-    aliveConnectedDeviceManager?.let {
-      try {
-        it.unregisterConnectionCallback(connectionCallback)
-        val featureId = featureId
-        if (featureId != null) {
-          for (device in it.activeUserConnectedDevices) {
-            it.unregisterDeviceCallback(device, featureId, deviceCallback)
-          }
-        }
-        it.unregisterDeviceAssociationCallback(deviceAssociationCallback)
-        it.unregisterOnLogRequestedListener(loggerId, logRequestedListener)
-      } catch (e: RemoteException) {
-        loge(TAG, "Error while cleaning up ConnectedDeviceManager.", e)
-      }
-    }
-    connectedDeviceManager = null
+    isPlatformInitialized.set(false)
   }
 
   override fun binderForAction(action: String): IBinder? {
     return when (action) {
       ACTION_BIND_FEATURE_COORDINATOR, ACTION_BIND_FEATURE_COORDINATOR_FG ->
         featureCoordinator?.asBinder()
-      ACTION_BIND_REMOTE_FEATURE, ACTION_BIND_REMOTE_FEATURE_FG ->
-        connectedDeviceManager?.asBinder()
-      ACTION_BIND_ASSOCIATION -> associatedDeviceManager?.asBinder()
       else -> null
     }
   }
@@ -596,7 +467,6 @@ constructor(
     val connectedDevices =
       try {
         aliveFeatureCoordinator?.allConnectedDevices
-          ?: aliveConnectedDeviceManager?.activeUserConnectedDevices
       } catch (e: RemoteException) {
         loge(TAG, "Exception while retrieving connected devices.", e)
         null
@@ -642,49 +512,38 @@ constructor(
 
   override fun startAssociation(callback: IAssociationCallback) {
     aliveFeatureCoordinator?.startAssociation(callback)
-      ?: aliveAssociatedDeviceManager?.startAssociation(callback)
   }
 
   override fun startAssociation(identifier: ParcelUuid, callback: IAssociationCallback) {
-    if (isLegacyOnly.get()) {
-      loge(TAG, "Called unsupported startAssociationWithIdentifier while in legacy mode.")
-      return
-    }
     aliveFeatureCoordinator?.startAssociationWithIdentifier(callback, identifier)
   }
 
   override fun stopAssociation() {
-    aliveFeatureCoordinator?.stopAssociation() ?: aliveAssociatedDeviceManager?.stopAssociation()
+    aliveFeatureCoordinator?.stopAssociation()
   }
 
   override fun acceptVerification() {
     aliveFeatureCoordinator?.acceptVerification()
-      ?: aliveAssociatedDeviceManager?.acceptVerification()
   }
 
   override fun removeAssociatedDevice(deviceId: String) {
     aliveFeatureCoordinator?.removeAssociatedDevice(deviceId)
-      ?: aliveAssociatedDeviceManager?.removeAssociatedDevice(deviceId)
   }
 
   override fun enableAssociatedDeviceConnection(deviceId: String) {
     aliveFeatureCoordinator?.enableAssociatedDeviceConnection(deviceId)
-      ?: aliveAssociatedDeviceManager?.enableAssociatedDeviceConnection(deviceId)
   }
 
   override fun disableAssociatedDeviceConnection(deviceId: String) {
     aliveFeatureCoordinator?.disableAssociatedDeviceConnection(deviceId)
-      ?: aliveAssociatedDeviceManager?.disableAssociatedDeviceConnection(deviceId)
   }
 
   override fun retrieveAssociatedDevices(listener: IOnAssociatedDevicesRetrievedListener) {
     aliveFeatureCoordinator?.retrieveAssociatedDevices(listener)
-      ?: aliveAssociatedDeviceManager?.retrievedActiveUserAssociatedDevices(listener)
   }
 
   override fun retrieveAssociatedDevicesForDriver(listener: IOnAssociatedDevicesRetrievedListener) {
     aliveFeatureCoordinator?.retrieveAssociatedDevicesForDriver(listener)
-      ?: aliveAssociatedDeviceManager?.retrievedActiveUserAssociatedDevices(listener)
   }
 
   override fun retrieveAssociatedDevicesForPassengers(
@@ -694,15 +553,20 @@ constructor(
       ?: listener.onAssociatedDevicesRetrieved(emptyList())
   }
 
+  override fun claimAssociatedDevice(deviceId: String) {
+    aliveFeatureCoordinator?.claimAssociatedDevice(deviceId)
+  }
+
+  override fun removeAssociatedDeviceClaim(deviceId: String) {
+    aliveFeatureCoordinator?.removeAssociatedDeviceClaim(deviceId)
+  }
+
   private fun sendMessageInternal(device: ConnectedDevice, message: DeviceMessage) {
     aliveFeatureCoordinator?.sendMessage(device, message)
-      ?: aliveConnectedDeviceManager?.sendMessage(device, message)
   }
 
   private fun onServiceConnected() {
-    if (featureCoordinator == null &&
-        (connectedDeviceManager == null || associatedDeviceManager == null)
-    ) {
+    if (!isConnected) {
       logd(
         TAG,
         "Initialization criteria have not been met yet. Waiting for further service connections " +
@@ -711,15 +575,13 @@ constructor(
       return
     }
     initializePlatform()
-    callback?.onConnected()
   }
 
   private fun initializePlatform() {
-    initializeFeatureCoordinator()
-    initializeConnectedDeviceManager()
-  }
-
-  private fun initializeFeatureCoordinator() {
+    if (!isPlatformInitialized.compareAndSet(false, true)) {
+      logw(TAG, "Platform is already initialized. Ignoring.")
+      return
+    }
     logd(TAG, "Initializing FeatureCoordinator.")
     val featureCoordinator = featureCoordinator
     if (featureCoordinator == null) {
@@ -763,40 +625,7 @@ constructor(
     } catch (e: RemoteException) {
       loge(TAG, "Error while initializing FeatureCoordinator.", e)
     }
-  }
-
-  private fun initializeConnectedDeviceManager() {
-    logd(TAG, "Initializing ConnectedDeviceManager.")
-    if (featureCoordinator != null) {
-      logd(TAG, "FeatureCoordinator has already registered callbacks.")
-      return
-    }
-    val connectedDeviceManager =
-      connectedDeviceManager
-        ?: throw IllegalStateException(
-          "Attempted to initialize the platform with a null ConnectedDeviceManager! This should " +
-            "not happen and is indicative of a serious logic flaw."
-        )
-    try {
-      connectedDeviceManager.registerActiveUserConnectionCallback(connectionCallback)
-      connectedDeviceManager.registerDeviceAssociationCallback(deviceAssociationCallback)
-      connectedDeviceManager.registerOnLogRequestedListener(loggerId, logRequestedListener)
-      val activeUserConnectedDevices = connectedDeviceManager.activeUserConnectedDevices
-      val featureId = featureId
-      for (device in activeUserConnectedDevices) {
-        callback?.onDeviceConnected(device)
-        if (device.hasSecureChannel()) {
-          callback?.onSecureChannelEstablished(device)
-        }
-        if (featureId == null) {
-          logd(TAG, "There is currently no feature id set. Skipping device registration.")
-          continue
-        }
-        connectedDeviceManager.registerDeviceCallback(device, featureId, deviceCallback)
-      }
-    } catch (e: RemoteException) {
-      loge(TAG, "Error while initializing ConnectedDeviceManager.", e)
-    }
+    callback?.onConnected()
   }
 
   private fun onServiceDisconnected() {
@@ -805,17 +634,8 @@ constructor(
   }
 
   private fun onNullBinding() {
-    if (!isLegacyOnly.compareAndSet(false, true)) {
-      logd(TAG, "Issuing onFailedToConnect callback after legacy null binding.")
-      callback?.onFailedToConnect()
-      return
-    }
-    logd(
-      TAG,
-      "Service does not support feature coordinator despite defining the action. " +
-        "Attempting to bind again in legacy mode."
-    )
-    connect()
+    logd(TAG, "Issuing onFailedToConnect callback after null binding.")
+    callback?.onFailedToConnect()
   }
 
   private fun resolveIntent(action: String): Intent? {
@@ -907,160 +727,6 @@ constructor(
       CompanionConnector(context, userType = userType).apply {
         this.featureCoordinator = featureCoordinator
       }
-
-    @JvmStatic
-    /** Create a [CompanionConnector] instance with a [connectedDeviceManager] already populated. */
-    fun createLocalConnector(
-      context: Context,
-      userType: @UserType Int,
-      connectedDeviceManager: IConnectedDeviceManager,
-      associatedDeviceManager: IAssociatedDeviceManager
-    ): CompanionConnector =
-      CompanionConnector(context, userType = userType).apply {
-        this.connectedDeviceManager = connectedDeviceManager
-        this.associatedDeviceManager = associatedDeviceManager
-      }
-
-    /**
-     * Generate an [IConnectedDeviceManager] wrapper around the [fromFeatureCoordinator] to support
-     * legacy functionality.
-     */
-    @VisibleForTesting
-    internal fun createConnectedDeviceManagerWrapper(
-      fromFeatureCoordinator: IFeatureCoordinator
-    ): IConnectedDeviceManager {
-
-      return object : IConnectedDeviceManager.Stub() {
-        @Throws(RemoteException::class)
-        override fun getActiveUserConnectedDevices(): List<ConnectedDevice> {
-          return fromFeatureCoordinator.connectedDevicesForDriver
-        }
-
-        @Throws(RemoteException::class)
-        override fun registerActiveUserConnectionCallback(callback: IConnectionCallback) {
-          fromFeatureCoordinator.registerDriverConnectionCallback(callback)
-        }
-
-        @Throws(RemoteException::class)
-        override fun unregisterConnectionCallback(callback: IConnectionCallback) {
-          fromFeatureCoordinator.unregisterConnectionCallback(callback)
-        }
-
-        @Throws(RemoteException::class)
-        override fun registerDeviceCallback(
-          connectedDevice: ConnectedDevice,
-          recipientId: ParcelUuid,
-          callback: IDeviceCallback
-        ) {
-          fromFeatureCoordinator.registerDeviceCallback(connectedDevice, recipientId, callback)
-        }
-
-        @Throws(RemoteException::class)
-        override fun unregisterDeviceCallback(
-          connectedDevice: ConnectedDevice,
-          recipientId: ParcelUuid,
-          callback: IDeviceCallback
-        ) {
-          fromFeatureCoordinator.unregisterDeviceCallback(connectedDevice, recipientId, callback)
-        }
-
-        @Throws(RemoteException::class)
-        override fun sendMessage(
-          connectedDevice: ConnectedDevice,
-          message: DeviceMessage
-        ): Boolean {
-          return fromFeatureCoordinator.sendMessage(connectedDevice, message)
-        }
-
-        @Throws(RemoteException::class)
-        override fun registerDeviceAssociationCallback(callback: IDeviceAssociationCallback) {
-          fromFeatureCoordinator.registerDeviceAssociationCallback(callback)
-        }
-
-        @Throws(RemoteException::class)
-        override fun unregisterDeviceAssociationCallback(callback: IDeviceAssociationCallback) {
-          fromFeatureCoordinator.unregisterDeviceAssociationCallback(callback)
-        }
-
-        @Throws(RemoteException::class)
-        override fun registerOnLogRequestedListener(
-          loggerId: Int,
-          listener: IOnLogRequestedListener
-        ) {
-          fromFeatureCoordinator.registerOnLogRequestedListener(loggerId, listener)
-        }
-
-        @Throws(RemoteException::class)
-        override fun unregisterOnLogRequestedListener(
-          loggerId: Int,
-          listener: IOnLogRequestedListener
-        ) {
-          fromFeatureCoordinator.unregisterOnLogRequestedListener(loggerId, listener)
-        }
-
-        @Throws(RemoteException::class)
-        override fun processLogRecords(loggerId: Int, logRecords: ByteArray) {
-          fromFeatureCoordinator.processLogRecords(loggerId, logRecords)
-        }
-      }
-    }
-
-    @VisibleForTesting
-    internal fun createAssociatedDeviceManagerWrapper(
-      fromFeatureCoordinator: IFeatureCoordinator
-    ): IAssociatedDeviceManager.Stub {
-      return object : IAssociatedDeviceManager.Stub() {
-        override fun startAssociation(callback: IAssociationCallback) {
-          fromFeatureCoordinator.startAssociation(callback)
-        }
-
-        override fun stopAssociation() {
-          fromFeatureCoordinator.stopAssociation()
-        }
-
-        override fun retrievedActiveUserAssociatedDevices(
-          listener: IOnAssociatedDevicesRetrievedListener
-        ) {
-          fromFeatureCoordinator.retrieveAssociatedDevicesForDriver(listener)
-        }
-
-        override fun acceptVerification() {
-          fromFeatureCoordinator.acceptVerification()
-        }
-
-        override fun removeAssociatedDevice(deviceId: String) {
-          fromFeatureCoordinator.removeAssociatedDevice(deviceId)
-        }
-
-        override fun registerDeviceAssociationCallback(callback: IDeviceAssociationCallback) {
-          fromFeatureCoordinator.registerDeviceAssociationCallback(callback)
-        }
-
-        override fun unregisterDeviceAssociationCallback(callback: IDeviceAssociationCallback) {
-          fromFeatureCoordinator.unregisterDeviceAssociationCallback(callback)
-        }
-
-        override fun getActiveUserConnectedDevices(): List<ConnectedDevice> {
-          return fromFeatureCoordinator.connectedDevicesForDriver
-        }
-
-        override fun registerConnectionCallback(callback: IConnectionCallback) {
-          fromFeatureCoordinator.registerDriverConnectionCallback(callback)
-        }
-
-        override fun unregisterConnectionCallback(callback: IConnectionCallback) {
-          fromFeatureCoordinator.unregisterConnectionCallback(callback)
-        }
-
-        override fun enableAssociatedDeviceConnection(deviceId: String) {
-          fromFeatureCoordinator.enableAssociatedDeviceConnection(deviceId)
-        }
-
-        override fun disableAssociatedDeviceConnection(deviceId: String) {
-          fromFeatureCoordinator.disableAssociatedDeviceConnection(deviceId)
-        }
-      }
-    }
 
     /** A generator of unique IDs for queries. */
     private class QueryIdGenerator {

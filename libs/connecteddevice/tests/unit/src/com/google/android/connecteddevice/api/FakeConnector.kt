@@ -95,6 +95,18 @@ open class FakeConnector : Connector {
     listener.onAssociatedDevicesRetrieved(associatedDevices.filter { it.userId != currentUserId })
   }
 
+  override fun claimAssociatedDevice(deviceId: String) {
+    val device = associatedDevices.firstOrNull { it.deviceId == deviceId } ?: return
+    associatedDevices.remove(device)
+    associatedDevices.add(device.cloneWith(currentUserId))
+  }
+
+  override fun removeAssociatedDeviceClaim(deviceId: String) {
+    val device = associatedDevices.firstOrNull { it.deviceId == deviceId } ?: return
+    associatedDevices.remove(device)
+    associatedDevices.add(device.cloneWith(AssociatedDevice.UNCLAIMED_USER_ID))
+  }
+
   fun addAssociatedDevice(device: AssociatedDevice) {
     associatedDevices.add(device)
     callback?.onAssociatedDeviceAdded(device)
@@ -105,4 +117,7 @@ open class FakeConnector : Connector {
       callback?.onAssociatedDeviceRemoved(device)
     }
   }
+
+  private fun AssociatedDevice.cloneWith(userId: Int): AssociatedDevice =
+    AssociatedDevice(deviceId, deviceAddress, deviceName, isConnectionEnabled, userId)
 }

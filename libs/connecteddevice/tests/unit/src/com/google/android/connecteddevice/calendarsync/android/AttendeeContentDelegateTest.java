@@ -40,7 +40,7 @@ public class AttendeeContentDelegateTest {
           .put(Attendees.ATTENDEE_STATUS, Attendees.ATTENDEE_STATUS_ACCEPTED)
           .put(Attendees.ATTENDEE_TYPE, Attendees.TYPE_REQUIRED)
           .put(Attendees.ATTENDEE_NAME, NAME)
-          .build();
+          .buildOrThrow();
 
   @Before
   public void setUp() {

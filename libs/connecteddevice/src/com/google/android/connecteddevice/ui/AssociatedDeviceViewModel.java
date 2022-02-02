@@ -30,7 +30,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.ParcelUuid;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
@@ -41,11 +40,13 @@ import com.google.android.connecteddevice.api.Connector;
 import com.google.android.connecteddevice.api.IAssociationCallback;
 import com.google.android.connecteddevice.api.IOnAssociatedDevicesRetrievedListener;
 import com.google.android.connecteddevice.model.AssociatedDevice;
-import com.google.android.connecteddevice.model.AssociatedDeviceDetails;
 import com.google.android.connecteddevice.model.ConnectedDevice;
 import com.google.android.connecteddevice.model.StartAssociationResponse;
+import com.google.android.connecteddevice.ui.AssociatedDeviceDetails.ConnectionState;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -69,10 +70,9 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
   }
 
   private final List<AssociatedDevice> associatedDevices = new CopyOnWriteArrayList<>();
-  private final List<ConnectedDevice> connectedDevices = new CopyOnWriteArrayList<>();
 
-  private final MutableLiveData<AssociatedDeviceDetails> currentDeviceDetails =
-      new MutableLiveData<>(null);
+  private final MutableLiveData<List<AssociatedDeviceDetails>> associatedDevicesDetails =
+      new MutableLiveData<>(new ArrayList<>());
   private final MutableLiveData<String> advertisedCarName = new MutableLiveData<>(null);
   private final MutableLiveData<StartAssociationResponse> associationResponse =
       new MutableLiveData<>(null);
@@ -84,6 +84,7 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
   private final MutableLiveData<AssociatedDevice> removedDevice = new MutableLiveData<>(null);
   private final MutableLiveData<Boolean> isServiceConnected = new MutableLiveData<>(false);
   private final boolean isSppEnabled;
+  private final boolean isPassengerEnabled;
   private final String bleDeviceNamePrefix;
   private final BluetoothAdapter bluetoothAdapter;
 
@@ -92,12 +93,18 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
   private ParcelUuid associationIdentifier;
 
   public AssociatedDeviceViewModel(
-      @NonNull Application application, boolean isSppEnabled, String bleDeviceNamePrefix) {
+      @NonNull Application application,
+      boolean isSppEnabled,
+      String bleDeviceNamePrefix,
+      boolean isPassengerEnabled
+  ) {
     this(
         application,
         isSppEnabled,
         bleDeviceNamePrefix,
-        new CompanionConnector(application, /* isForegroundProcess= */ true));
+        isPassengerEnabled,
+        new CompanionConnector(
+            application, /* isForegroundProcess= */ true, /* userType= */ Connector.USER_TYPE_ALL));
   }
 
   @VisibleForTesting
@@ -106,19 +113,28 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
       @NonNull Application application,
       boolean isSppEnabled,
       String bleDeviceNamePrefix,
+      boolean isPassengerEnabled,
       Connector connector) {
     super(application);
     this.isSppEnabled = isSppEnabled;
     this.bleDeviceNamePrefix = bleDeviceNamePrefix;
     this.connector = connector;
+    this.isPassengerEnabled = isPassengerEnabled;
+
     connector.setCallback(connectorCallback);
+
     IntentFilter filter = new IntentFilter();
     filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
     getApplication().registerReceiver(receiver, filter);
     bluetoothAdapter =
         application.getApplicationContext().getSystemService(BluetoothManager.class).getAdapter();
     bluetoothState.postValue(BluetoothAdapter.STATE_ON);
-    connector.connect();
+
+    // Registers for device callbacks
+    this.connector.setFeatureId(new ParcelUuid(UUID.randomUUID()));
+
+    this.connector.setCallback(connectorCallback);
+    this.connector.connect();
   }
 
   @Override
@@ -153,21 +169,13 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
     startAssociationInternal();
   }
 
-  /** Removes the current associated device. */
-  public void removeCurrentDevice() {
-    AssociatedDevice device = getAssociatedDevice();
-    if (device == null) {
-      return;
-    }
+  /** Removes the association of the given device. */
+  public void removeDevice(@NonNull AssociatedDevice device) {
     connector.removeAssociatedDevice(device.getDeviceId());
   }
 
-  /** Toggles connection on the current associated device. */
-  public void toggleConnectionStatusForCurrentDevice() {
-    AssociatedDevice device = getAssociatedDevice();
-    if (device == null) {
-      return;
-    }
+  /** Toggles connection of the given associated device. */
+  public void toggleConnectionStatusForDevice(@NonNull AssociatedDevice device) {
     if (device.isConnectionEnabled()) {
       connector.disableAssociatedDeviceConnection(device.getDeviceId());
     } else {
@@ -175,17 +183,29 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
     }
   }
 
-  /** Gets the associated device details. */
-  public LiveData<AssociatedDeviceDetails> getCurrentDeviceDetails() {
-    return currentDeviceDetails;
+  /** Mark the given device as belonging to the active driver. */
+  public void claimDevice(@NonNull AssociatedDevice device) {
+    connector.claimAssociatedDevice(device.getDeviceId());
   }
 
-  /** Starts feature activity for the current associated device. */
-  public void startFeatureActivityForCurrentDevice(@NonNull String action) {
-    AssociatedDevice device = getAssociatedDevice();
-    if (device == null || action == null) {
-      return;
-    }
+  /** Mark the given device as unclaimed by any user. */
+  public void removeClaimOnDevice(@NonNull AssociatedDevice device) {
+    connector.removeAssociatedDeviceClaim(device.getDeviceId());
+  }
+
+  /**
+   * Gets a list of details for all associated device.
+   *
+   * <p>The list will always be non-{@code null}, and will be empty if there are no associated
+   * devices.
+   */
+  public LiveData<List<AssociatedDeviceDetails>> getAssociatedDevicesDetails() {
+    return associatedDevicesDetails;
+  }
+
+  /** Starts feature activity for the given associated device. */
+  public void startFeatureActivityForDevice(
+      @NonNull String action, @NonNull AssociatedDevice device) {
     Intent intent = new Intent(action);
     intent.putExtra(ASSOCIATED_DEVICE_DATA_NAME_EXTRA, device);
     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -213,7 +233,7 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
     return pairingCode;
   }
 
-  /** Value is {@code true} if the current associated device has been removed. */
+  /** Returns the value of a device whose association has been removed. */
   public LiveData<AssociatedDevice> getRemovedDevice() {
     return removedDevice;
   }
@@ -270,40 +290,31 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
   }
 
   private void updateDeviceDetails() {
-    AssociatedDevice device = getAssociatedDevice();
-    if (device == null) {
-      return;
+    List<AssociatedDeviceDetails> associatedDevicesDetails = new ArrayList<>();
+    for (AssociatedDevice device : associatedDevices) {
+      associatedDevicesDetails.add(new AssociatedDeviceDetails(device, getConnectionState(device)));
     }
-    currentDeviceDetails.postValue(
-        new AssociatedDeviceDetails(getAssociatedDevice(), isConnected()));
+    this.associatedDevicesDetails.postValue(associatedDevicesDetails);
   }
 
-  @Nullable
-  private AssociatedDevice getAssociatedDevice() {
-    if (associatedDevices.isEmpty()) {
-      return null;
+  private ConnectionState getConnectionState(@NonNull AssociatedDevice device) {
+    logd(TAG, "Getting connection state for device " + device.getDeviceId() + ".");
+    ConnectedDevice connectedDevice = connector.getConnectedDeviceById(device.getDeviceId());
+    if (connectedDevice == null) {
+      logd(TAG, "Device is not detected.");
+      return ConnectionState.NOT_DETECTED;
     }
-    return associatedDevices.get(0);
-  }
-
-  private boolean isConnected() {
-    if (associatedDevices.isEmpty() || connectedDevices.isEmpty()) {
-      return false;
+    if (connectedDevice.hasSecureChannel()) {
+      logd(TAG, "Device is connected.");
+      return ConnectionState.CONNECTED;
     }
-    String associatedDeviceId = associatedDevices.get(0).getDeviceId();
-    String connectedDeviceId = connectedDevices.get(0).getDeviceId();
-    return associatedDeviceId.equals(connectedDeviceId);
+    logd(TAG, "Device is detected.");
+    return ConnectionState.DETECTED;
   }
 
   private void setAssociatedDevices(@NonNull List<AssociatedDevice> associatedDevices) {
     this.associatedDevices.clear();
     this.associatedDevices.addAll(associatedDevices);
-    updateDeviceDetails();
-  }
-
-  private void setConnectedDevices(@NonNull List<ConnectedDevice> connectedDevices) {
-    this.connectedDevices.clear();
-    this.connectedDevices.addAll(connectedDevices);
     updateDeviceDetails();
   }
 
@@ -316,7 +327,7 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
   private void removeAssociatedDevice(AssociatedDevice device) {
     if (associatedDevices.remove(device)) {
       removedDevice.postValue(device);
-      currentDeviceDetails.postValue(null);
+      updateDeviceDetails();
     }
   }
 
@@ -326,8 +337,14 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
         public void onConnected() {
           logd(TAG, "Connected to platform.");
           isServiceConnected.postValue(true);
-          setConnectedDevices(connector.getConnectedDevices());
-          connector.retrieveAssociatedDevicesForDriver(associatedDevicesRetrievedListener);
+
+          if (isPassengerEnabled) {
+            connector.retrieveAssociatedDevices(associatedDevicesRetrievedListener);
+          } else {
+            // If passenger is disabled, then there should only be one device and that will belong
+            // to the driver.
+            connector.retrieveAssociatedDevicesForDriver(associatedDevicesRetrievedListener);
+          }
         }
 
         @Override
@@ -355,13 +372,19 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
 
         @Override
         public void onDeviceConnected(ConnectedDevice connectedDevice) {
-          connectedDevices.add(connectedDevice);
+          logd(TAG, "Device " + connectedDevice.getDeviceId() + " has connected.");
           updateDeviceDetails();
         }
 
         @Override
         public void onDeviceDisconnected(ConnectedDevice connectedDevice) {
-          connectedDevices.remove(connectedDevice);
+          logd(TAG, "Device " + connectedDevice.getDeviceId() + " has disconnected.");
+          updateDeviceDetails();
+        }
+
+        @Override
+        public void onSecureChannelEstablished(@NonNull ConnectedDevice device) {
+          logd(TAG, "Device " + device.getDeviceId() + " has established a secure channel.");
           updateDeviceDetails();
         }
       };

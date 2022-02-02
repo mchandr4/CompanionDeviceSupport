@@ -27,19 +27,26 @@ import android.os.HandlerThread
 import android.os.ParcelUuid
 import androidx.annotation.VisibleForTesting
 import com.google.android.connecteddevice.transport.BluetoothDeviceProvider
+import com.google.android.connecteddevice.transport.ConnectChallenge
 import com.google.android.connecteddevice.transport.ConnectionProtocol
+import com.google.android.connecteddevice.transport.IDataSendCallback
+import com.google.android.connecteddevice.transport.IDiscoveryCallback
 import com.google.android.connecteddevice.util.ByteUtils
 import com.google.android.connecteddevice.util.SafeLog.logd
 import com.google.android.connecteddevice.util.SafeLog.loge
 import com.google.android.connecteddevice.util.SafeLog.logw
 import java.time.Duration
 import java.util.UUID
+import java.util.concurrent.Executor
+import java.util.concurrent.Executors
 
 /**
  * A ble peripheral communication protocol that provides actions and event notifications for
  * interacting with devices.
  */
-class BlePeripheralProtocol(
+class BlePeripheralProtocol
+@JvmOverloads
+constructor(
   private val blePeripheralManager: BlePeripheralManager,
   private val reconnectServiceUuid: UUID,
   private val reconnectDataUuid: UUID,
@@ -48,9 +55,8 @@ class BlePeripheralProtocol(
   readCharacteristicUuid: UUID,
   private val maxReconnectAdvertisementDuration: Duration,
   defaultMtuSize: Int,
-) : ConnectionProtocol(), BluetoothDeviceProvider {
-  override val isDeviceVerificationRequired = true
-
+  callbackExecutor: Executor = Executors.newCachedThreadPool()
+) : ConnectionProtocol(callbackExecutor), BluetoothDeviceProvider {
   private val writeCharacteristic =
     BluetoothGattCharacteristic(
       writeCharacteristicUuid,
@@ -123,7 +129,11 @@ class BlePeripheralProtocol(
     val currentChallenge = connectChallenge
     if (currentDeviceId != null && currentDiscoveryCallback != null && currentChallenge != null) {
       reset()
-      startConnectionDiscovery(currentDeviceId, currentChallenge, currentDiscoveryCallback)
+      startConnectionDiscovery(
+        ParcelUuid(currentDeviceId),
+        currentChallenge,
+        currentDiscoveryCallback
+      )
     }
   }
 
@@ -134,9 +144,9 @@ class BlePeripheralProtocol(
   private var protocolId: String? = null
   private var connectChallenge: ConnectChallenge? = null
   private var advertiseCallback: AdvertiseCallback? = null
-  private var discoveryCallback: DiscoveryCallback? = null
+  private var discoveryCallback: IDiscoveryCallback? = null
   private var timeoutHandler: Handler? = null
-  private var dataSendCallback: DataSendCallback? = null
+  private var dataSendCallback: IDataSendCallback? = null
 
   init {
     writeCharacteristic.addDescriptor(createBluetoothGattDescriptor())
@@ -148,8 +158,8 @@ class BlePeripheralProtocol(
 
   override fun startAssociationDiscovery(
     name: String,
-    callback: DiscoveryCallback,
-    identifier: UUID
+    identifier: ParcelUuid,
+    callback: IDiscoveryCallback,
   ) {
     if (!isReadyToStartDiscovery()) {
       return
@@ -173,7 +183,7 @@ class BlePeripheralProtocol(
       }
     advertiseCallback = associationAdvertiseCallback
     startAdvertising(
-      identifier,
+      identifier.uuid,
       associationAdvertiseCallback,
       scanResponse = ByteUtils.hexStringToByteArray(name),
       scanResponseUuid = reconnectDataUuid
@@ -181,15 +191,15 @@ class BlePeripheralProtocol(
   }
 
   override fun startConnectionDiscovery(
-    id: UUID,
+    id: ParcelUuid,
     challenge: ConnectChallenge,
-    callback: DiscoveryCallback
+    callback: IDiscoveryCallback
   ) {
     if (!isReadyToStartDiscovery()) {
       return
     }
     reset()
-    deviceId = id
+    deviceId = id.uuid
     discoveryCallback = callback
     connectChallenge = challenge
     blePeripheralManager.registerCallback(peripheralCallback)
@@ -230,15 +240,15 @@ class BlePeripheralProtocol(
     reset()
   }
 
-  override fun stopConnectionDiscovery(id: UUID) {
-    if (id != deviceId || advertiseCallback == null) {
+  override fun stopConnectionDiscovery(id: ParcelUuid) {
+    if (id.uuid != deviceId || advertiseCallback == null) {
       logd(TAG, "No connection discovery is happening for device $id, ignoring.")
       return
     }
     reset()
   }
 
-  override fun sendData(protocolId: String, data: ByteArray, callback: DataSendCallback?) {
+  override fun sendData(protocolId: String, data: ByteArray, callback: IDataSendCallback?) {
     val device: BluetoothDevice? = bluetoothDevice
     if (device == null) {
       loge(TAG, "Failed to send data, no connected device.")
@@ -308,6 +318,8 @@ class BlePeripheralProtocol(
 
   override fun getBluetoothDeviceById(protocolId: String) =
     if (protocolId == this.protocolId) bluetoothDevice else null
+
+  override fun isDeviceVerificationRequired(): Boolean = true
 
   private fun startAdvertising(
     serviceUuid: UUID,

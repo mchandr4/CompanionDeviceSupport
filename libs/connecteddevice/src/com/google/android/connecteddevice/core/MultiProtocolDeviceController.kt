@@ -16,6 +16,8 @@
 package com.google.android.connecteddevice.core
 
 import android.database.sqlite.SQLiteCantOpenDatabaseException
+import android.os.ParcelUuid
+import androidx.annotation.GuardedBy
 import androidx.annotation.VisibleForTesting
 import com.google.android.connecteddevice.api.IAssociationCallback
 import com.google.android.connecteddevice.connection.ChannelResolver
@@ -32,9 +34,10 @@ import com.google.android.connecteddevice.model.Errors
 import com.google.android.connecteddevice.model.StartAssociationResponse
 import com.google.android.connecteddevice.oob.OobRunner
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage
+import com.google.android.connecteddevice.transport.ConnectChallenge
 import com.google.android.connecteddevice.transport.ConnectionProtocol
-import com.google.android.connecteddevice.transport.ConnectionProtocol.ConnectChallenge
-import com.google.android.connecteddevice.transport.ConnectionProtocol.DiscoveryCallback
+import com.google.android.connecteddevice.transport.IDeviceDisconnectedListener
+import com.google.android.connecteddevice.transport.IDiscoveryCallback
 import com.google.android.connecteddevice.transport.ProtocolDevice
 import com.google.android.connecteddevice.util.ByteUtils
 import com.google.android.connecteddevice.util.SafeLog.logd
@@ -46,11 +49,12 @@ import java.security.InvalidParameterException
 import java.util.Objects
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CopyOnWriteArraySet
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicReference
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 
 /**
  * The controller to manage all the connected devices and connected protocols of each connected
@@ -84,8 +88,10 @@ constructor(
 
   @VisibleForTesting internal val associationPendingDeviceId = AtomicReference<UUID?>(null)
 
-  private val associatedDevices = CopyOnWriteArrayList<AssociatedDevice>()
-  private val driverDevices = CopyOnWriteArrayList<AssociatedDevice>()
+  private val lock = ReentrantLock()
+
+  @GuardedBy("lock") private val associatedDevices = mutableListOf<AssociatedDevice>()
+  @GuardedBy("lock") private val driverDevices = mutableListOf<AssociatedDevice>()
 
   private val storageCallback =
     object : ConnectedDeviceStorage.AssociatedDeviceCallback {
@@ -106,31 +112,33 @@ constructor(
 
   override val connectedDevices: List<ConnectedDevice>
     get() {
-      val devices = mutableListOf<ConnectedDevice>()
-      for (device in connectedRemoteDevices.values) {
-        val associatedDevice =
-          associatedDevices.firstOrNull { it.deviceId == device.deviceId.toString() }
-        if (associatedDevice == null) {
-          logd(
-            TAG,
-            "Unable to find a device with id ${device.deviceId} in associated devices. Skipped " +
-              "mapping."
+      lock.withLock {
+        val devices = mutableListOf<ConnectedDevice>()
+        for (device in connectedRemoteDevices.values) {
+          val associatedDevice =
+            associatedDevices.firstOrNull { it.deviceId == device.deviceId.toString() }
+          if (associatedDevice == null) {
+            logd(
+              TAG,
+              "Unable to find a device with id ${device.deviceId} in associated devices. Skipped " +
+                "mapping."
+            )
+            continue
+          }
+          val belongsToDriver = driverDevices.any { it.deviceId == associatedDevice.deviceId }
+          val hasSecureChannel = device.secureChannel != null
+          devices.add(
+            ConnectedDevice(
+              associatedDevice.deviceId,
+              associatedDevice.deviceName,
+              belongsToDriver,
+              hasSecureChannel
+            )
           )
-          continue
         }
-        val belongsToDriver = driverDevices.any { it.deviceId == associatedDevice.deviceId }
-        val hasSecureChannel = device.secureChannel != null
-        devices.add(
-          ConnectedDevice(
-            associatedDevice.deviceId,
-            associatedDevice.deviceName,
-            belongsToDriver,
-            hasSecureChannel
-          )
-        )
-      }
 
-      return devices
+        return devices
+      }
     }
 
   init {
@@ -181,7 +189,7 @@ constructor(
     }
     for (protocol in protocols) {
       val discoveryCallback = generateConnectionDiscoveryCallback(deviceId, protocol, challenge)
-      protocol.startConnectionDiscovery(deviceId, challenge, discoveryCallback)
+      protocol.startConnectionDiscovery(ParcelUuid(deviceId), challenge, discoveryCallback)
     }
   }
 
@@ -206,7 +214,11 @@ constructor(
     for (protocol in protocols) {
       val discoveryCallback =
         generateAssociationDiscoveryCallback(protocol, callback, startAssociationResponse)
-      protocol.startAssociationDiscovery(nameForAssociation, discoveryCallback, associationUuid)
+      protocol.startAssociationDiscovery(
+        nameForAssociation,
+        ParcelUuid(associationUuid),
+        discoveryCallback
+      )
     }
   }
 
@@ -262,7 +274,7 @@ constructor(
   override fun disconnectDevice(deviceId: UUID) {
     logd(TAG, "Disconnecting device with id $deviceId.")
     for (protocol in protocols) {
-      protocol.stopConnectionDiscovery(deviceId)
+      protocol.stopConnectionDiscovery(ParcelUuid(deviceId))
     }
     val device = connectedRemoteDevices.remove(deviceId)
     if (device == null) {
@@ -319,10 +331,16 @@ constructor(
       while (true) {
         try {
           logd(TAG, "Populating associated devices from storage.")
-          associatedDevices.clear()
-          driverDevices.clear()
-          associatedDevices.addAll(storage.allAssociatedDevices)
-          driverDevices.addAll(storage.driverAssociatedDevices)
+
+          // Fetch devices prior to applying lock to reduce lock time.
+          val driverOnlyDevices = storage.driverAssociatedDevices
+          val allDevices = storage.allAssociatedDevices
+          lock.withLock {
+            associatedDevices.clear()
+            associatedDevices.addAll(allDevices)
+            driverDevices.clear()
+            driverDevices.addAll(driverOnlyDevices)
+          }
           logd(TAG, "Devices populated successfully.")
           break
         } catch (sqliteException: SQLiteCantOpenDatabaseException) {
@@ -368,7 +386,7 @@ constructor(
     protocol: ConnectionProtocol,
     challenge: ConnectChallenge
   ) =
-    object : DiscoveryCallback {
+    object : IDiscoveryCallback.Stub() {
       override fun onDeviceConnected(protocolId: String) {
         logd(
           TAG,
@@ -376,8 +394,7 @@ constructor(
         )
         protocol.registerDeviceDisconnectedListener(
           protocolId,
-          generateDeviceDisconnectedListener(deviceId, protocol),
-          callbackExecutor
+          generateDeviceDisconnectedListener(deviceId, protocol)
         )
         val protocolDevice = ProtocolDevice(protocol, protocolId)
         val device =
@@ -424,7 +441,7 @@ constructor(
     associationCallback: IAssociationCallback,
     response: StartAssociationResponse
   ) =
-    object : DiscoveryCallback {
+    object : IDiscoveryCallback.Stub() {
       override fun onDeviceConnected(protocolId: String) {
         logd(TAG, "New connection protocol connected, id: $protocolId, protocol: $protocol")
         val protocolDevice = ProtocolDevice(protocol, protocolId)
@@ -440,8 +457,7 @@ constructor(
         }
         protocol.registerDeviceDisconnectedListener(
           protocolId,
-          generateDeviceDisconnectedListener(pendingId, protocol),
-          callbackExecutor
+          generateDeviceDisconnectedListener(pendingId, protocol)
         )
         // The channel only needs to be resolved once for all protocols connected to one remote
         // device.
@@ -545,7 +561,7 @@ constructor(
     deviceId: UUID,
     protocol: ConnectionProtocol,
   ) =
-    object : ConnectionProtocol.DeviceDisconnectedListener {
+    object : IDeviceDisconnectedListener.Stub() {
       override fun onDeviceDisconnected(protocolId: String) {
         logd(TAG, "Remote connect protocol disconnected, id: $protocolId, protocol: $protocol")
         connectedRemoteDevices.compute(deviceId) { deviceId, device ->
@@ -727,8 +743,7 @@ constructor(
     for (protocolDevice in newDevice.protocolDevices) {
       protocolDevice.protocol.registerDeviceDisconnectedListener(
         protocolDevice.protocolId,
-        generateDeviceDisconnectedListener(deviceId, protocolDevice.protocol),
-        callbackExecutor
+        generateDeviceDisconnectedListener(deviceId, protocolDevice.protocol)
       )
     }
     return newDevice
@@ -742,15 +757,17 @@ constructor(
         /* deviceName= */ null,
         /* isConnectionEnabled= */ true
       )
-    if (enablePassenger) {
-      logd(TAG, "Saving newly associated device $deviceId as unclaimed.")
-      storage.addAssociatedDeviceForUser(AssociatedDevice.UNCLAIMED_USER_ID, associatedDevice)
-    } else {
-      logd(TAG, "Saving newly associated device $deviceId as a driver's device.")
-      storage.addAssociatedDeviceForDriver(associatedDevice)
-      driverDevices.add(associatedDevice)
+    lock.withLock {
+      if (enablePassenger) {
+        logd(TAG, "Saving newly associated device $deviceId as unclaimed.")
+        storage.addAssociatedDeviceForUser(AssociatedDevice.UNCLAIMED_USER_ID, associatedDevice)
+      } else {
+        logd(TAG, "Saving newly associated device $deviceId as a driver's device.")
+        storage.addAssociatedDeviceForDriver(associatedDevice)
+        driverDevices.add(associatedDevice)
+      }
+      associatedDevices.add(associatedDevice)
     }
-    associatedDevices.add(associatedDevice)
   }
 
   /**
@@ -761,7 +778,7 @@ constructor(
     device: ConnectedRemoteDevice,
     onCallback: (ConnectedDevice, Callback) -> Unit
   ) {
-    val connectedDevice = device.toConnectedDevice(driverDevices)
+    val connectedDevice = lock.withLock { device.toConnectedDevice(driverDevices) }
     callbacks.invoke { onCallback(connectedDevice, it) }
   }
 

@@ -16,8 +16,11 @@
 
 package com.google.android.companiondevicesupport;
 
+import static com.google.android.connecteddevice.util.SafeLog.logd;
+
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -34,10 +37,10 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelStoreOwner;
-import com.google.android.connecteddevice.model.AssociatedDeviceDetails;
 import com.google.android.connecteddevice.model.TransportProtocols;
 import com.google.android.connecteddevice.trust.TrustedDeviceConstants;
+import com.google.android.connecteddevice.ui.AssociatedDeviceDetails;
+import com.google.android.connecteddevice.ui.AssociatedDeviceDetails.ConnectionState;
 import com.google.android.connecteddevice.ui.AssociatedDeviceViewModel;
 import com.google.android.connecteddevice.ui.AssociatedDeviceViewModelFactory;
 import java.util.Arrays;
@@ -47,12 +50,31 @@ import java.util.List;
 public class AssociatedDeviceDetailFragment extends Fragment {
   private static final String TAG = "AssociatedDeviceDetailFragment";
   private static final String REMOVE_DEVICE_DIALOG_TAG = "RemoveDeviceDialog";
+  private static final String ASSOCIATED_DEVICE_DETAILS_KEY = "AssociatedDeviceDetailsKey";
+
+  private AssociatedDeviceDetails deviceDetails;
   private TextView deviceName;
   private TextView connectionStatusText;
   private ImageView connectionStatusIndicator;
   private TextView connectionText;
   private ImageView connectionIcon;
   private AssociatedDeviceViewModel model;
+  private TextView claimText;
+  private ImageView claimIcon;
+
+  /**
+   * Returns an instance of the {@link AssociatedDeviceDetailFragment} that will display the details
+   * of the given {@link AssociatedDeviceDetails}.
+   */
+  @NonNull
+  public static AssociatedDeviceDetailFragment newInstance(AssociatedDeviceDetails deviceDetails) {
+    Bundle arguments = new Bundle();
+    arguments.putParcelable(ASSOCIATED_DEVICE_DETAILS_KEY, deviceDetails);
+
+    AssociatedDeviceDetailFragment fragment = new AssociatedDeviceDetailFragment();
+    fragment.setArguments(arguments);
+    return fragment;
+  }
 
   @Override
   public View onCreateView(
@@ -67,63 +89,99 @@ public class AssociatedDeviceDetailFragment extends Fragment {
     connectionText = view.findViewById(R.id.connection_button_text);
     connectionStatusText = view.findViewById(R.id.connection_status_text);
     connectionStatusIndicator = view.findViewById(R.id.connection_status_indicator);
+    claimText = view.findViewById(R.id.claim_button_text);
+    claimIcon = view.findViewById(R.id.claim_button_icon);
     List<String> transportProtocols =
         Arrays.asList(getResources().getStringArray(R.array.transport_protocols));
     model =
         new ViewModelProvider(
-                (ViewModelStoreOwner) requireActivity(),
+                requireActivity(),
                 new AssociatedDeviceViewModelFactory(
                     requireActivity().getApplication(),
                     transportProtocols.contains(TransportProtocols.PROTOCOL_SPP),
-                    getResources().getString(R.string.ble_device_name_prefix)))
+                    getResources().getString(R.string.ble_device_name_prefix),
+                    getResources().getBoolean(R.bool.enable_passenger)))
             .get(AssociatedDeviceViewModel.class);
-    model.getCurrentDeviceDetails().observe(this, this::setDeviceDetails);
+    model.getAssociatedDevicesDetails().observe(this, this::setDeviceDetails);
 
     view.findViewById(R.id.connection_button)
         .setOnClickListener(
-            l -> {
-              model.toggleConnectionStatusForCurrentDevice();
-            });
+            l -> model.toggleConnectionStatusForDevice(deviceDetails.getAssociatedDevice()));
     view.findViewById(R.id.forget_button).setOnClickListener(v -> showRemoveDeviceDialog());
-    view.findViewById(R.id.trusted_device_feature_button)
-        .setOnClickListener(
-            v ->
-                model.startFeatureActivityForCurrentDevice(
-                    TrustedDeviceConstants.INTENT_ACTION_TRUSTED_DEVICE_SETTING));
+    view.findViewById(R.id.trusted_device_feature_button).setOnClickListener(
+        v ->
+            model.startFeatureActivityForDevice(
+                TrustedDeviceConstants.INTENT_ACTION_TRUSTED_DEVICE_SETTING,
+                deviceDetails.getAssociatedDevice()));
+    View claimButton = view.findViewById(R.id.claim_button);
+    if (getResources().getBoolean(R.bool.enable_passenger)) {
+      claimButton.setOnClickListener(v -> toggleClaim());
+    } else {
+      claimButton.setVisibility(View.GONE);
+    }
   }
 
   @Override
   public void onCreate(@Nullable Bundle bundle) {
     super.onCreate(bundle);
+
+    Bundle arguments = getArguments();
+    arguments.setClassLoader(AssociatedDeviceDetails.class.getClassLoader());
+    deviceDetails = arguments.getParcelable(ASSOCIATED_DEVICE_DETAILS_KEY);
+
     if (bundle != null) {
       resumeRemoveDeviceDialog();
     }
   }
 
-  private void setDeviceDetails(AssociatedDeviceDetails deviceDetails) {
-    if (deviceDetails == null) {
+  private void setDeviceDetails(List<AssociatedDeviceDetails> associatedDevicesDetails) {
+    int index = associatedDevicesDetails.indexOf(deviceDetails);
+    if (index == -1) {
+      logd(TAG, "Device details updated for non-matching device. Ignoring.");
+      return;
+    }
+    deviceDetails = associatedDevicesDetails.get(index);
+
+    Context context = getContext();
+    if (context == null) {
       return;
     }
     deviceName.setText(deviceDetails.getDeviceName());
 
     if (!deviceDetails.isConnectionEnabled()) {
       setConnectionStatus(
-          ContextCompat.getColor(getContext(), R.color.connection_color_disconnected),
+          ContextCompat.getColor(context, R.color.connection_color_disconnected),
           getString(R.string.disconnected),
-          ContextCompat.getDrawable(getContext(), R.drawable.ic_phonelink_ring_24dp),
+          ContextCompat.getDrawable(context, R.drawable.ic_phonelink_ring_24dp),
           getString(R.string.connect));
-    } else if (deviceDetails.isConnected()) {
+    } else if (deviceDetails.getConnectionState() == ConnectionState.CONNECTED) {
       setConnectionStatus(
-          ContextCompat.getColor(getContext(), R.color.connection_color_connected),
+          ContextCompat.getColor(context, R.color.connection_color_connected),
           getString(R.string.connected),
+          ContextCompat.getDrawable(context, R.drawable.ic_phonelink_erase_24dp),
+          getString(R.string.disconnect));
+    } else if (deviceDetails.getConnectionState() == ConnectionState.DETECTED) {
+      setConnectionStatus(
+          ContextCompat.getColor(getContext(), R.color.connection_color_detected),
+          getString(R.string.detected),
           ContextCompat.getDrawable(getContext(), R.drawable.ic_phonelink_erase_24dp),
           getString(R.string.disconnect));
     } else {
       setConnectionStatus(
-          ContextCompat.getColor(getContext(), R.color.connection_color_not_detected),
+          ContextCompat.getColor(context, R.color.connection_color_not_detected),
           getString(R.string.notDetected),
-          ContextCompat.getDrawable(getContext(), R.drawable.ic_phonelink_erase_24dp),
+          ContextCompat.getDrawable(context, R.drawable.ic_phonelink_erase_24dp),
           getString(R.string.disconnect));
+    }
+
+    if (deviceDetails.belongsToDriver()) {
+      claimText.setText(getString(R.string.claimed_device));
+      claimIcon.setImageDrawable(
+          ContextCompat.getDrawable(context, R.drawable.ic_baseline_star_24));
+    } else {
+      claimText.setText(getString(R.string.unclaimed_device));
+      claimIcon.setImageDrawable(
+          ContextCompat.getDrawable(context, R.drawable.ic_baseline_star_border_24));
     }
   }
 
@@ -139,9 +197,10 @@ public class AssociatedDeviceDetailFragment extends Fragment {
   }
 
   private void showRemoveDeviceDialog() {
-    String deviceName = model.getCurrentDeviceDetails().getValue().getDeviceName();
+    String deviceName = deviceDetails.getDeviceName();
     RemoveDeviceDialogFragment dialogFragment =
-        RemoveDeviceDialogFragment.newInstance(deviceName, (d, w) -> model.removeCurrentDevice());
+        RemoveDeviceDialogFragment.newInstance(
+          deviceName, (d, w) -> model.removeDevice(deviceDetails.getAssociatedDevice()));
     dialogFragment.show(getParentFragmentManager(), REMOVE_DEVICE_DIALOG_TAG);
   }
 
@@ -150,7 +209,16 @@ public class AssociatedDeviceDetailFragment extends Fragment {
         (RemoveDeviceDialogFragment)
             getParentFragmentManager().findFragmentByTag(REMOVE_DEVICE_DIALOG_TAG);
     if (removeDeviceDialogFragment != null) {
-      removeDeviceDialogFragment.setOnConfirmListener((d, w) -> model.removeCurrentDevice());
+      removeDeviceDialogFragment.setOnConfirmListener(
+        (d, w) -> model.removeDevice(deviceDetails.getAssociatedDevice()));
+    }
+  }
+
+  private void toggleClaim() {
+    if (deviceDetails.belongsToDriver()) {
+      model.removeClaimOnDevice(deviceDetails.getAssociatedDevice());
+    } else {
+      model.claimDevice(deviceDetails.getAssociatedDevice());
     }
   }
 

@@ -78,7 +78,7 @@ public class EventContentDelegateTest {
           .put(Instances.RDATE, NULL_VALUE)
           .put(Instances.ORIGINAL_ID, NULL_VALUE)
           .put(Instances.ORIGINAL_INSTANCE_TIME, NULL_VALUE)
-          .build();
+          .buildOrThrow();
 
   private TestCalendarProvider testCalendarProvider;
 

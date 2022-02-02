@@ -7,7 +7,6 @@ import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.content.pm.ServiceInfo
-import android.os.IBinder
 import android.os.Looper
 import android.os.ParcelUuid
 import android.os.RemoteException
@@ -16,14 +15,12 @@ import com.google.android.companionprotos.Query
 import com.google.android.companionprotos.QueryResponse
 import com.google.android.companionprotos.SystemQuery
 import com.google.android.companionprotos.SystemQueryType
-import com.google.android.connecteddevice.api.Connector.Companion.ACTION_BIND_ASSOCIATION
 import com.google.android.connecteddevice.api.Connector.Companion.ACTION_BIND_FEATURE_COORDINATOR
 import com.google.android.connecteddevice.api.Connector.Companion.ACTION_BIND_FEATURE_COORDINATOR_FG
-import com.google.android.connecteddevice.api.Connector.Companion.ACTION_BIND_REMOTE_FEATURE
-import com.google.android.connecteddevice.api.Connector.Companion.ACTION_BIND_REMOTE_FEATURE_FG
 import com.google.android.connecteddevice.api.Connector.Companion.USER_TYPE_ALL
 import com.google.android.connecteddevice.api.Connector.Companion.USER_TYPE_DRIVER
 import com.google.android.connecteddevice.api.Connector.Companion.USER_TYPE_PASSENGER
+import com.google.android.connecteddevice.core.util.mockToBeAlive
 import com.google.android.connecteddevice.model.AssociatedDevice
 import com.google.android.connecteddevice.model.ConnectedDevice
 import com.google.android.connecteddevice.model.DeviceMessage
@@ -54,24 +51,14 @@ class CompanionConnectorTest {
 
   private val mockCallback = mock<Connector.Callback>()
 
-  private val mockFeatureCoordinator = mock<IFeatureCoordinator.Stub>()
-
-  private val mockConnectedDeviceManager = mock<IConnectedDeviceManager.Stub>()
-
-  private val mockAssociatedDeviceManager = mock<IAssociatedDeviceManager.Stub>()
+  private val mockFeatureCoordinator = mockToBeAlive<IFeatureCoordinator>()
 
   private val context = FakeContext(mockPackageManager)
-
-  private val aliveBinder = mock<IBinder>()
 
   private lateinit var defaultConnector: CompanionConnector
 
   @Before
   fun setUp() {
-    whenever(aliveBinder.isBinderAlive).thenReturn(true)
-    whenever(mockFeatureCoordinator.asBinder()).thenReturn(aliveBinder)
-    whenever(mockConnectedDeviceManager.asBinder()).thenReturn(aliveBinder)
-    whenever(mockAssociatedDeviceManager.asBinder()).thenReturn(aliveBinder)
     defaultConnector =
       CompanionConnector(context).apply {
         featureCoordinator = mockFeatureCoordinator
@@ -82,7 +69,7 @@ class CompanionConnectorTest {
 
   @Test
   fun connect_bindsWithFgActionWhenIsForegroundProcessIsTrue() {
-    whenever(mockPackageManager.queryIntentServices(any(), any())).thenAnswer(defaultServiceAnswer)
+    setQueryIntentServicesAnswer(defaultServiceAnswer)
     val connector = CompanionConnector(context, isForegroundProcess = true)
 
     connector.connect()
@@ -92,7 +79,7 @@ class CompanionConnectorTest {
 
   @Test
   fun connect_bindsWithBgActionWhenIsForegroundProcessIsFalse() {
-    whenever(mockPackageManager.queryIntentServices(any(), any())).thenAnswer(defaultServiceAnswer)
+    setQueryIntentServicesAnswer(defaultServiceAnswer)
     val connector = CompanionConnector(context, isForegroundProcess = false)
 
     connector.connect()
@@ -102,65 +89,29 @@ class CompanionConnectorTest {
 
   @Test
   fun connect_fgRetriesBindWithRemoteFeatureActionIfFeatureCoordinatorReturnsNullBinding() {
-    whenever(mockPackageManager.queryIntentServices(any(), any())).thenAnswer(defaultServiceAnswer)
+    setQueryIntentServicesAnswer(defaultServiceAnswer)
     val connector = CompanionConnector(context, isForegroundProcess = true)
 
     connector.connect()
     context.serviceConnection.firstOrNull()?.onNullBinding(ComponentName(PACKAGE_NAME, FG_NAME))
 
-    assertThat(context.bindingActions)
-      .containsExactly(
-        ACTION_BIND_FEATURE_COORDINATOR_FG,
-        ACTION_BIND_REMOTE_FEATURE_FG,
-        ACTION_BIND_ASSOCIATION
-      )
+    assertThat(context.bindingActions).containsExactly(ACTION_BIND_FEATURE_COORDINATOR_FG)
   }
 
   @Test
   fun connect_bgRetriesBindWithRemoteFeatureActionIfFeatureCoordinatorReturnsNullBinding() {
-    whenever(mockPackageManager.queryIntentServices(any(), any())).thenAnswer(defaultServiceAnswer)
+    setQueryIntentServicesAnswer(defaultServiceAnswer)
     val connector = CompanionConnector(context, isForegroundProcess = false)
 
     connector.connect()
     context.serviceConnection.firstOrNull()?.onNullBinding(ComponentName(PACKAGE_NAME, BG_NAME))
 
-    assertThat(context.bindingActions)
-      .containsExactly(
-        ACTION_BIND_FEATURE_COORDINATOR,
-        ACTION_BIND_REMOTE_FEATURE,
-        ACTION_BIND_ASSOCIATION
-      )
-  }
-
-  @Test
-  fun connect_fgRetriesBindWithRemoteFeatureActionIfFeatureCoordinatorActionMissing() {
-    whenever(mockPackageManager.queryIntentServices(any(), any()))
-      .thenAnswer(connectedDeviceManagerOnlyAnswer)
-    val connector = CompanionConnector(context, isForegroundProcess = true)
-
-    connector.connect()
-    context.serviceConnection.firstOrNull()?.onNullBinding(ComponentName(PACKAGE_NAME, BG_NAME))
-
-    assertThat(context.bindingActions)
-      .containsExactly(ACTION_BIND_REMOTE_FEATURE_FG, ACTION_BIND_ASSOCIATION)
-  }
-
-  @Test
-  fun connect_bgRetriesBindWithRemoteFeatureActionIfFeatureCoordinatorActionMissing() {
-    whenever(mockPackageManager.queryIntentServices(any(), any()))
-      .thenAnswer(connectedDeviceManagerOnlyAnswer)
-    val connector = CompanionConnector(context, isForegroundProcess = false)
-
-    connector.connect()
-    context.serviceConnection.firstOrNull()?.onNullBinding(ComponentName(PACKAGE_NAME, BG_NAME))
-
-    assertThat(context.bindingActions)
-      .containsExactly(ACTION_BIND_REMOTE_FEATURE, ACTION_BIND_ASSOCIATION)
+    assertThat(context.bindingActions).containsExactly(ACTION_BIND_FEATURE_COORDINATOR)
   }
 
   @Test
   fun disconnect_invokesOnDisconnectedWhenFeatureCoordinatorConnected() {
-    whenever(mockPackageManager.queryIntentServices(any(), any())).thenAnswer(defaultServiceAnswer)
+    setQueryIntentServicesAnswer(defaultServiceAnswer)
     val connector =
       CompanionConnector(context, isForegroundProcess = false).apply { callback = mockCallback }
 
@@ -168,26 +119,7 @@ class CompanionConnectorTest {
     context
       .serviceConnection
       .firstOrNull()
-      ?.onServiceConnected(ComponentName(PACKAGE_NAME, BG_NAME), mockFeatureCoordinator)
-    connector.disconnect()
-
-    verify(mockCallback).onDisconnected()
-  }
-
-  @Test
-  fun disconnect_invokesOnDisconnectedWhenConnectedDeviceManagerConnected() {
-    whenever(mockPackageManager.queryIntentServices(any(), any())).thenAnswer(defaultServiceAnswer)
-    val connector =
-      CompanionConnector(context, isForegroundProcess = false).apply {
-        callback = mockCallback
-        associatedDeviceManager = mockAssociatedDeviceManager
-      }
-
-    connector.connect()
-    context
-      .serviceConnection
-      .firstOrNull()
-      ?.onServiceConnected(ComponentName(PACKAGE_NAME, BG_NAME), mockConnectedDeviceManager)
+      ?.onServiceConnected(ComponentName(PACKAGE_NAME, BG_NAME), mockFeatureCoordinator.asBinder())
     connector.disconnect()
 
     verify(mockCallback).onDisconnected()
@@ -195,7 +127,7 @@ class CompanionConnectorTest {
 
   @Test
   fun disconnect_notInvokedWithNoBoundService() {
-    whenever(mockPackageManager.queryIntentServices(any(), any())).thenAnswer(defaultServiceAnswer)
+    setQueryIntentServicesAnswer(defaultServiceAnswer)
     val connector =
       CompanionConnector(context, isForegroundProcess = false).apply { callback = mockCallback }
 
@@ -206,25 +138,8 @@ class CompanionConnectorTest {
   }
 
   @Test
-  fun disconnect_nullsOutFeatureCoordinatorAndConnectedDeviceManager() {
-    whenever(mockPackageManager.queryIntentServices(any(), any())).thenAnswer(defaultServiceAnswer)
-    val connector = CompanionConnector(context, isForegroundProcess = false)
-
-    connector.connect()
-    context
-      .serviceConnection
-      .firstOrNull()
-      ?.onServiceConnected(ComponentName(PACKAGE_NAME, BG_NAME), mockFeatureCoordinator)
-    connector.disconnect()
-
-    assertThat(connector.featureCoordinator).isNull()
-    assertThat(connector.connectedDeviceManager).isNull()
-    assertThat(connector.associatedDeviceManager).isNull()
-  }
-
-  @Test
   fun disconnect_doesNotThrowWhileUnbindingUnboundService() {
-    whenever(mockPackageManager.queryIntentServices(any(), any())).thenAnswer(defaultServiceAnswer)
+    setQueryIntentServicesAnswer(defaultServiceAnswer)
     val connector =
       CompanionConnector(FailingContext(mockPackageManager), isForegroundProcess = false).apply {
         callback = mockCallback
@@ -235,7 +150,7 @@ class CompanionConnectorTest {
 
   @Test
   fun onConnected_invokedWhenBindingSucceeds() {
-    whenever(mockPackageManager.queryIntentServices(any(), any())).thenAnswer(defaultServiceAnswer)
+    setQueryIntentServicesAnswer(defaultServiceAnswer)
     val connector =
       CompanionConnector(context, isForegroundProcess = false).apply { callback = mockCallback }
 
@@ -243,14 +158,14 @@ class CompanionConnectorTest {
     context
       .serviceConnection
       .firstOrNull()
-      ?.onServiceConnected(ComponentName(PACKAGE_NAME, BG_NAME), mockFeatureCoordinator)
+      ?.onServiceConnected(ComponentName(PACKAGE_NAME, BG_NAME), mockFeatureCoordinator.asBinder())
 
     verify(mockCallback).onConnected()
   }
 
   @Test
   fun onDisconnected_invokedWhenServiceDisconnects() {
-    whenever(mockPackageManager.queryIntentServices(any(), any())).thenAnswer(defaultServiceAnswer)
+    setQueryIntentServicesAnswer(defaultServiceAnswer)
     val connector =
       CompanionConnector(context, isForegroundProcess = false).apply { callback = mockCallback }
 
@@ -259,7 +174,7 @@ class CompanionConnectorTest {
     context
       .serviceConnection
       .firstOrNull()
-      ?.onServiceConnected(componentName, mockFeatureCoordinator)
+      ?.onServiceConnected(componentName, mockFeatureCoordinator.asBinder())
     context.serviceConnection.firstOrNull()?.onServiceDisconnected(componentName)
 
     verify(mockCallback).onDisconnected()
@@ -267,8 +182,7 @@ class CompanionConnectorTest {
 
   @Test
   fun onFailedToConnect_invokedWhenServiceIsNotFound() {
-    whenever(mockPackageManager.queryIntentServices(any(), any()))
-      .thenAnswer(featureCoordinatorOnlyAnswer)
+    setQueryIntentServicesAnswer(defaultServiceAnswer)
     val connector =
       CompanionConnector(context, isForegroundProcess = false).apply { callback = mockCallback }
 
@@ -280,7 +194,7 @@ class CompanionConnectorTest {
 
   @Test
   fun onFailedToConnect_invokedWithNullBindingFromFeatureCoordinatorAndNoCDMService() {
-    whenever(mockPackageManager.queryIntentServices(any(), any())).thenAnswer(notFoundAnswer)
+    setQueryIntentServicesAnswer(notFoundAnswer)
     val connector =
       CompanionConnector(context, isForegroundProcess = false).apply { callback = mockCallback }
 
@@ -291,7 +205,7 @@ class CompanionConnectorTest {
 
   @Test
   fun onFailedToConnect_invokedAfterBindingRetryLimitExceeded() {
-    whenever(mockPackageManager.queryIntentServices(any(), any())).thenAnswer(defaultServiceAnswer)
+    setQueryIntentServicesAnswer(defaultServiceAnswer)
     val failingContext = FailingContext(mockPackageManager)
     val connector =
       CompanionConnector(failingContext, isForegroundProcess = false).apply {
@@ -307,143 +221,17 @@ class CompanionConnectorTest {
   }
 
   @Test
-  fun featureCoordinatorAndConnectedDeviceManager_areNotNullAfterServiceConnection() {
-    whenever(mockPackageManager.queryIntentServices(any(), any())).thenAnswer(defaultServiceAnswer)
+  fun featureCoordinator_isNotNullAfterServiceConnection() {
+    setQueryIntentServicesAnswer(defaultServiceAnswer)
     val connector = CompanionConnector(context, isForegroundProcess = false)
 
     connector.connect()
     context
       .serviceConnection
       .firstOrNull()
-      ?.onServiceConnected(ComponentName(PACKAGE_NAME, BG_NAME), mockFeatureCoordinator)
+      ?.onServiceConnected(ComponentName(PACKAGE_NAME, BG_NAME), mockFeatureCoordinator.asBinder())
 
     assertThat(connector.featureCoordinator).isNotNull()
-    assertThat(connector.connectedDeviceManager).isNotNull()
-  }
-
-  @Test
-  fun connectedDeviceManager_isNotNullAfterServiceConnectionWhenLegacy() {
-    whenever(mockPackageManager.queryIntentServices(any(), any()))
-      .thenAnswer(connectedDeviceManagerOnlyAnswer)
-    val connector = CompanionConnector(context, isForegroundProcess = false)
-
-    connector.connect()
-    context.serviceConnection[0].onServiceConnected(
-      ComponentName(PACKAGE_NAME, BG_NAME),
-      mockConnectedDeviceManager
-    )
-    context.serviceConnection[1].onServiceConnected(
-      ComponentName(PACKAGE_NAME, BG_NAME),
-      mockAssociatedDeviceManager
-    )
-    assertThat(connector.connectedDeviceManager).isNotNull()
-    assertThat(connector.associatedDeviceManager).isNotNull()
-  }
-
-  @Test
-  fun connectedDeviceManager_wrapsFeatureCoordinatorWhenNotLegacy() {
-    val connectedDeviceManager =
-      CompanionConnector.createConnectedDeviceManagerWrapper(mockFeatureCoordinator)
-    val connectedDevice =
-      ConnectedDevice(
-        /* deviceId= */ UUID.randomUUID().toString(),
-        /* deviceName= */ null,
-        /* belongsToDriver= */ true,
-        /* isConnectionEnabled= */ true
-      )
-
-    connectedDeviceManager.activeUserConnectedDevices
-    verify(mockFeatureCoordinator).connectedDevicesForDriver
-
-    val loggerId = 0
-    val logRecords = ByteArray(0)
-    connectedDeviceManager.processLogRecords(loggerId, logRecords)
-    verify(mockFeatureCoordinator).processLogRecords(loggerId, logRecords)
-
-    val connectionCallback = mock<IConnectionCallback>()
-    connectedDeviceManager.registerActiveUserConnectionCallback(connectionCallback)
-    verify(mockFeatureCoordinator).registerDriverConnectionCallback(connectionCallback)
-    connectedDeviceManager.unregisterConnectionCallback(connectionCallback)
-    verify(mockFeatureCoordinator).unregisterConnectionCallback(connectionCallback)
-
-    val deviceAssociationCallback = mock<IDeviceAssociationCallback>()
-    connectedDeviceManager.registerDeviceAssociationCallback(deviceAssociationCallback)
-    verify(mockFeatureCoordinator).registerDeviceAssociationCallback(deviceAssociationCallback)
-    connectedDeviceManager.unregisterDeviceAssociationCallback(deviceAssociationCallback)
-    verify(mockFeatureCoordinator).unregisterDeviceAssociationCallback(deviceAssociationCallback)
-
-    val deviceCallback = mock<IDeviceCallback>()
-    val recipientId = ParcelUuid(UUID.randomUUID())
-    connectedDeviceManager.registerDeviceCallback(connectedDevice, recipientId, deviceCallback)
-    verify(mockFeatureCoordinator)
-      .registerDeviceCallback(connectedDevice, recipientId, deviceCallback)
-    connectedDeviceManager.unregisterDeviceCallback(connectedDevice, recipientId, deviceCallback)
-    verify(mockFeatureCoordinator)
-      .unregisterDeviceCallback(connectedDevice, recipientId, deviceCallback)
-
-    val logRequestedListener = mock<IOnLogRequestedListener>()
-    connectedDeviceManager.registerOnLogRequestedListener(loggerId, logRequestedListener)
-    verify(mockFeatureCoordinator).registerOnLogRequestedListener(loggerId, logRequestedListener)
-    connectedDeviceManager.unregisterOnLogRequestedListener(loggerId, logRequestedListener)
-    verify(mockFeatureCoordinator).unregisterOnLogRequestedListener(loggerId, logRequestedListener)
-
-    val message =
-      DeviceMessage.createOutgoingMessage(
-        recipientId.uuid,
-        /* isMessageEncrypted= */ false,
-        DeviceMessage.OperationType.CLIENT_MESSAGE,
-        ByteUtils.randomBytes(10)
-      )
-    connectedDeviceManager.sendMessage(connectedDevice, message)
-    verify(mockFeatureCoordinator).sendMessage(connectedDevice, message)
-  }
-
-  @Test
-  fun associatedDeviceManager_wrapsFeatureCoordinatorWhenNotLegacy() {
-    val associatedDeviceManager =
-      CompanionConnector.createAssociatedDeviceManagerWrapper(mockFeatureCoordinator)
-    val mockAssociationCallback = mock<IAssociationCallback>()
-    val mockDeviceAssociationCallback = mock<IDeviceAssociationCallback>()
-    val mockConnectionCallback = mock<IConnectionCallback>()
-    val mockListener = mock<IOnAssociatedDevicesRetrievedListener>()
-    val deviceId = UUID.randomUUID().toString()
-
-    associatedDeviceManager.startAssociation(mockAssociationCallback)
-    verify(mockFeatureCoordinator).startAssociation(mockAssociationCallback)
-
-    associatedDeviceManager.stopAssociation()
-    verify(mockFeatureCoordinator).stopAssociation()
-
-    associatedDeviceManager.retrievedActiveUserAssociatedDevices(mockListener)
-    verify(mockFeatureCoordinator).retrieveAssociatedDevicesForDriver(mockListener)
-
-    associatedDeviceManager.acceptVerification()
-    verify(mockFeatureCoordinator).acceptVerification()
-
-    associatedDeviceManager.removeAssociatedDevice(deviceId)
-    verify(mockFeatureCoordinator).removeAssociatedDevice(deviceId)
-
-    associatedDeviceManager.registerDeviceAssociationCallback(mockDeviceAssociationCallback)
-    verify(mockFeatureCoordinator).registerDeviceAssociationCallback(mockDeviceAssociationCallback)
-
-    associatedDeviceManager.unregisterDeviceAssociationCallback(mockDeviceAssociationCallback)
-    verify(mockFeatureCoordinator)
-      .unregisterDeviceAssociationCallback(mockDeviceAssociationCallback)
-
-    associatedDeviceManager.activeUserConnectedDevices
-    verify(mockFeatureCoordinator).connectedDevicesForDriver
-
-    associatedDeviceManager.registerConnectionCallback(mockConnectionCallback)
-    verify(mockFeatureCoordinator).registerDriverConnectionCallback(mockConnectionCallback)
-
-    associatedDeviceManager.unregisterConnectionCallback(mockConnectionCallback)
-    verify(mockFeatureCoordinator).unregisterConnectionCallback(mockConnectionCallback)
-
-    associatedDeviceManager.enableAssociatedDeviceConnection(deviceId)
-    verify(mockFeatureCoordinator).enableAssociatedDeviceConnection(deviceId)
-
-    associatedDeviceManager.disableAssociatedDeviceConnection(deviceId)
-    verify(mockFeatureCoordinator).disableAssociatedDeviceConnection(deviceId)
   }
 
   @Test
@@ -452,6 +240,29 @@ class CompanionConnectorTest {
 
     verify(mockFeatureCoordinator).registerDeviceAssociationCallback(any())
     verify(mockFeatureCoordinator).registerOnLogRequestedListener(any(), any())
+  }
+
+  @Test
+  fun connect_multipleCallsOnlyRegistersCallbacksOnce() {
+    val featureId = ParcelUuid(UUID.randomUUID())
+    val connector =
+      CompanionConnector(context, userType = USER_TYPE_DRIVER).apply {
+        featureCoordinator = mockFeatureCoordinator
+        this.featureId = featureId
+      }
+    val device =
+      ConnectedDevice(
+        UUID.randomUUID().toString(),
+        /* deviceName= */ "",
+        /* belongsToDriver= */ true,
+        /* hasSecureChannel= */ false
+      )
+    whenever(mockFeatureCoordinator.connectedDevicesForDriver).thenReturn(listOf(device))
+
+    connector.connect()
+    connector.connect()
+
+    verify(mockFeatureCoordinator).registerDeviceCallback(eq(device), eq(featureId), any())
   }
 
   @Test
@@ -622,69 +433,6 @@ class CompanionConnectorTest {
   }
 
   @Test
-  fun disconnect_unregistersConnectedDeviceManagerCallbacks() {
-    defaultConnector.apply {
-      featureCoordinator = null
-      connectedDeviceManager = mockConnectedDeviceManager
-    }
-    val device =
-      ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ false
-      )
-    whenever(mockConnectedDeviceManager.activeUserConnectedDevices).thenReturn(listOf(device))
-
-    defaultConnector.disconnect()
-
-    verify(mockConnectedDeviceManager).unregisterConnectionCallback(any())
-    verify(mockConnectedDeviceManager).unregisterDeviceAssociationCallback(any())
-    verify(mockConnectedDeviceManager).unregisterOnLogRequestedListener(any(), any())
-    verify(mockConnectedDeviceManager)
-      .unregisterDeviceCallback(eq(device), eq(defaultConnector.featureId), any())
-  }
-
-  @Test
-  fun disconnect_connectedDeviceManagerWithoutFeatureIdDoesNotThrow() {
-    defaultConnector.apply {
-      featureId = null
-      featureCoordinator = null
-      connectedDeviceManager = mockConnectedDeviceManager
-    }
-    val device =
-      ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ false
-      )
-    whenever(mockConnectedDeviceManager.activeUserConnectedDevices).thenReturn(listOf(device))
-
-    defaultConnector.disconnect()
-  }
-
-  @Test
-  fun disconnect_connectedDeviceManagerRemoteExceptionIsCaught() {
-    whenever(mockConnectedDeviceManager.unregisterConnectionCallback(any()))
-      .thenThrow(RemoteException())
-    defaultConnector.apply {
-      featureCoordinator = null
-      connectedDeviceManager = mockConnectedDeviceManager
-    }
-    val device =
-      ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ false
-      )
-    whenever(mockConnectedDeviceManager.activeUserConnectedDevices).thenReturn(listOf(device))
-
-    defaultConnector.disconnect()
-  }
-
-  @Test
   fun onDeviceConnected_registersDeviceCallbackWithFeatureId() {
     val device =
       ConnectedDevice(
@@ -761,31 +509,6 @@ class CompanionConnectorTest {
     }
 
     verify(mockFeatureCoordinator)
-      .unregisterDeviceCallback(eq(device), eq(defaultConnector.featureId), any())
-  }
-
-  @Test
-  fun onDeviceDisconnected_unregistersDeviceCallbackConnectedDeviceManager() {
-    defaultConnector.apply {
-      featureCoordinator = null
-      connectedDeviceManager = mockConnectedDeviceManager
-      associatedDeviceManager = mockAssociatedDeviceManager
-    }
-    val device =
-      ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ false
-      )
-    defaultConnector.connect()
-
-    argumentCaptor<IConnectionCallback> {
-      verify(mockConnectedDeviceManager).registerActiveUserConnectionCallback(capture())
-      firstValue.onDeviceDisconnected(device)
-    }
-
-    verify(mockConnectedDeviceManager)
       .unregisterDeviceCallback(eq(device), eq(defaultConnector.featureId), any())
   }
 
@@ -1040,7 +763,6 @@ class CompanionConnectorTest {
   @Test
   fun onMessageFailedToSend_invokedWhenSendMessageIdCalledBeforeServiceConnection() {
     defaultConnector.featureCoordinator = null
-    defaultConnector.connectedDeviceManager = null
     val deviceId = UUID.randomUUID().toString()
     val message = ByteUtils.randomBytes(10)
 
@@ -1052,7 +774,6 @@ class CompanionConnectorTest {
   @Test
   fun onMessageFailedToSend_invokedWhenSendMessageCalledBeforeServiceConnection() {
     defaultConnector.featureCoordinator = null
-    defaultConnector.connectedDeviceManager = null
     val device =
       ConnectedDevice(
         UUID.randomUUID().toString(),
@@ -1137,7 +858,6 @@ class CompanionConnectorTest {
   @Test
   fun getConnectedDeviceById_returnsNullBeforeServiceConnection() {
     defaultConnector.featureCoordinator = null
-    defaultConnector.connectedDeviceManager = null
 
     assertThat(defaultConnector.getConnectedDeviceById(UUID.randomUUID().toString())).isNull()
   }
@@ -1312,7 +1032,6 @@ class CompanionConnectorTest {
   @Test
   fun sendQuery_queryCallbackOnQueryNotSentInvokedBeforeServiceConnectionWithId() {
     defaultConnector.featureCoordinator = null
-    defaultConnector.connectedDeviceManager = null
     val deviceId = UUID.randomUUID().toString()
     val request = ByteUtils.randomBytes(10)
     val parameters = ByteUtils.randomBytes(10)
@@ -1326,7 +1045,6 @@ class CompanionConnectorTest {
   @Test
   fun sendQuery_queryCallbackOnQueryNotSentInvokedBeforeServiceConnectionWithDevice() {
     defaultConnector.featureCoordinator = null
-    defaultConnector.connectedDeviceManager = null
     val device =
       ConnectedDevice(
         UUID.randomUUID().toString(),
@@ -1561,7 +1279,6 @@ class CompanionConnectorTest {
   @Test
   fun respondToQuery_doesNotThrowBeforeServiceConnectionWithDevice() {
     defaultConnector.featureCoordinator = null
-    defaultConnector.connectedDeviceManager = null
     val device =
       ConnectedDevice(
         UUID.randomUUID().toString(),
@@ -1781,36 +1498,8 @@ class CompanionConnectorTest {
   }
 
   @Test
-  fun createLocalConnector_createsConnectorWithLegacyManagers() {
-    val device =
-      ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
-      )
-    whenever(mockConnectedDeviceManager.activeUserConnectedDevices).thenReturn(listOf(device))
-
-    val connector =
-      CompanionConnector.createLocalConnector(
-        context,
-        USER_TYPE_ALL,
-        mockConnectedDeviceManager,
-        mockAssociatedDeviceManager
-      )
-
-    assertThat(connector.connectedDeviceManager).isEqualTo(mockConnectedDeviceManager)
-    assertThat(connector.associatedDeviceManager).isEqualTo(mockAssociatedDeviceManager)
-    assertThat(connector.connectedDevices).containsExactly(device)
-    assertThat(connector.isConnected).isTrue()
-  }
-
-  @Test
   fun connectedDevices_returnsEmptyListWhenPlatformIsDisconnected() {
-    defaultConnector.apply {
-      featureCoordinator = null
-      connectedDeviceManager = null
-    }
+    defaultConnector.apply { featureCoordinator = null }
 
     assertThat(defaultConnector.connectedDevices).isEmpty()
   }
@@ -1875,12 +1564,6 @@ class CompanionConnectorTest {
       .isEqualTo(defaultConnector.featureCoordinator?.asBinder())
     assertThat(defaultConnector.binderForAction(ACTION_BIND_FEATURE_COORDINATOR_FG))
       .isEqualTo(defaultConnector.featureCoordinator?.asBinder())
-    assertThat(defaultConnector.binderForAction(ACTION_BIND_REMOTE_FEATURE))
-      .isEqualTo(defaultConnector.connectedDeviceManager?.asBinder())
-    assertThat(defaultConnector.binderForAction(ACTION_BIND_REMOTE_FEATURE_FG))
-      .isEqualTo(defaultConnector.connectedDeviceManager?.asBinder())
-    assertThat(defaultConnector.binderForAction(ACTION_BIND_ASSOCIATION))
-      .isEqualTo(defaultConnector.associatedDeviceManager?.asBinder())
     assertThat(defaultConnector.binderForAction("")).isNull()
   }
 
@@ -1894,22 +1577,6 @@ class CompanionConnectorTest {
   }
 
   @Test
-  fun startAssociation_startsAssociationOnAssociatedDeviceManager() {
-    val legacyConnector =
-      CompanionConnector.createLocalConnector(
-        context,
-        USER_TYPE_DRIVER,
-        mockConnectedDeviceManager,
-        mockAssociatedDeviceManager
-      )
-    val mockAssociationCallback = mock<IAssociationCallback>()
-
-    legacyConnector.startAssociation(mockAssociationCallback)
-
-    verify(mockAssociatedDeviceManager).startAssociation(mockAssociationCallback)
-  }
-
-  @Test
   fun startAssociationWithId_startsAssociationWithIdentifierOnFeatureCoordinator() {
     val mockAssociationCallback = mock<IAssociationCallback>()
     val id = ParcelUuid(UUID.randomUUID())
@@ -1920,21 +1587,6 @@ class CompanionConnectorTest {
   }
 
   @Test
-  fun startAssociationWithId_doesNotThrowWhenLegacy() {
-    val mockAssociationCallback = mock<IAssociationCallback>()
-    val id = ParcelUuid(UUID.randomUUID())
-    val legacyConnector =
-      CompanionConnector.createLocalConnector(
-        context,
-        USER_TYPE_DRIVER,
-        mockConnectedDeviceManager,
-        mockAssociatedDeviceManager
-      )
-
-    legacyConnector.startAssociation(id, mockAssociationCallback)
-  }
-
-  @Test
   fun stopAssociation_stopsAssociationOnFeatureCoordinator() {
     defaultConnector.stopAssociation()
 
@@ -1942,40 +1594,10 @@ class CompanionConnectorTest {
   }
 
   @Test
-  fun stopAssociation_stopsAssociationOnAssociatedDeviceManager() {
-    val legacyConnector =
-      CompanionConnector.createLocalConnector(
-        context,
-        USER_TYPE_DRIVER,
-        mockConnectedDeviceManager,
-        mockAssociatedDeviceManager
-      )
-
-    legacyConnector.stopAssociation()
-
-    verify(mockAssociatedDeviceManager).stopAssociation()
-  }
-
-  @Test
   fun acceptVerification_acceptsVerificationOnFeatureCoordinator() {
     defaultConnector.acceptVerification()
 
     verify(mockFeatureCoordinator).acceptVerification()
-  }
-
-  @Test
-  fun acceptVerification_acceptsVerificationOnAssociatedDeviceManager() {
-    val legacyConnector =
-      CompanionConnector.createLocalConnector(
-        context,
-        USER_TYPE_DRIVER,
-        mockConnectedDeviceManager,
-        mockAssociatedDeviceManager
-      )
-
-    legacyConnector.acceptVerification()
-
-    verify(mockAssociatedDeviceManager).acceptVerification()
   }
 
   @Test
@@ -1988,22 +1610,6 @@ class CompanionConnectorTest {
   }
 
   @Test
-  fun removeAssociatedDevice_removesAssociatedDeviceOnAssociatedDeviceManager() {
-    val deviceId = UUID.randomUUID().toString()
-    val legacyConnector =
-      CompanionConnector.createLocalConnector(
-        context,
-        USER_TYPE_DRIVER,
-        mockConnectedDeviceManager,
-        mockAssociatedDeviceManager
-      )
-
-    legacyConnector.removeAssociatedDevice(deviceId)
-
-    verify(mockAssociatedDeviceManager).removeAssociatedDevice(deviceId)
-  }
-
-  @Test
   fun enableAssociatedDeviceConnection_enablesAssociatedDeviceConnectionOnFeatureCoordinator() {
     val deviceId = UUID.randomUUID().toString()
 
@@ -2013,44 +1619,12 @@ class CompanionConnectorTest {
   }
 
   @Test
-  fun enableAssociatedDeviceConnection_enablesDeviceConnectionOnAssociatedDeviceManager() {
-    val deviceId = UUID.randomUUID().toString()
-    val legacyConnector =
-      CompanionConnector.createLocalConnector(
-        context,
-        USER_TYPE_DRIVER,
-        mockConnectedDeviceManager,
-        mockAssociatedDeviceManager
-      )
-
-    legacyConnector.enableAssociatedDeviceConnection(deviceId)
-
-    verify(mockAssociatedDeviceManager).enableAssociatedDeviceConnection(deviceId)
-  }
-
-  @Test
   fun disableAssociatedDeviceConnection_disablesAssociatedDeviceConnectionOnFeatureCoordinator() {
     val deviceId = UUID.randomUUID().toString()
 
     defaultConnector.disableAssociatedDeviceConnection(deviceId)
 
     verify(mockFeatureCoordinator).disableAssociatedDeviceConnection(deviceId)
-  }
-
-  @Test
-  fun disableAssociatedDeviceConnection_disablesOnAssociatedDeviceManager() {
-    val deviceId = UUID.randomUUID().toString()
-    val legacyConnector =
-      CompanionConnector.createLocalConnector(
-        context,
-        USER_TYPE_DRIVER,
-        mockConnectedDeviceManager,
-        mockAssociatedDeviceManager
-      )
-
-    legacyConnector.disableAssociatedDeviceConnection(deviceId)
-
-    verify(mockAssociatedDeviceManager).disableAssociatedDeviceConnection(deviceId)
   }
 
   @Test
@@ -2081,76 +1655,28 @@ class CompanionConnectorTest {
   }
 
   @Test
-  fun retrieveAssociatedDevices_retrievesActiveUserDevicesOnAssociatedDeviceManager() {
-    val mockListener = mock<IOnAssociatedDevicesRetrievedListener>()
-    val legacyConnector =
-      CompanionConnector.createLocalConnector(
-        context,
-        USER_TYPE_DRIVER,
-        mockConnectedDeviceManager,
-        mockAssociatedDeviceManager
-      )
+  fun claimAssociatedDevice_claimsDevice() {
+    val deviceId = UUID.randomUUID().toString()
 
-    legacyConnector.retrieveAssociatedDevices(mockListener)
+    defaultConnector.claimAssociatedDevice(deviceId)
 
-    verify(mockAssociatedDeviceManager).retrievedActiveUserAssociatedDevices(mockListener)
+    verify(mockFeatureCoordinator).claimAssociatedDevice(deviceId)
   }
 
   @Test
-  fun retrieveAssociatedDevicesForDriver_retrievesActiveUserDevicesOnAssociatedDeviceManager() {
-    val mockListener = mock<IOnAssociatedDevicesRetrievedListener>()
-    val legacyConnector =
-      CompanionConnector.createLocalConnector(
-        context,
-        USER_TYPE_DRIVER,
-        mockConnectedDeviceManager,
-        mockAssociatedDeviceManager
-      )
+  fun removeAssociatedDeviceClaim_removesDeviceClaim() {
+    val deviceId = UUID.randomUUID().toString()
 
-    legacyConnector.retrieveAssociatedDevicesForDriver(mockListener)
+    defaultConnector.removeAssociatedDeviceClaim(deviceId)
 
-    verify(mockAssociatedDeviceManager).retrievedActiveUserAssociatedDevices(mockListener)
+    verify(mockFeatureCoordinator).removeAssociatedDeviceClaim(deviceId)
   }
 
-  @Test
-  fun retrieveAssociatedDevicesForPassengers_issuesCallbackWithEmptyListWhenLegacy() {
-    val mockListener = mock<IOnAssociatedDevicesRetrievedListener>()
-    val legacyConnector =
-      CompanionConnector.createLocalConnector(
-        context,
-        USER_TYPE_DRIVER,
-        mockConnectedDeviceManager,
-        mockAssociatedDeviceManager
-      )
-
-    legacyConnector.retrieveAssociatedDevicesForPassengers(mockListener)
-
-    argumentCaptor<List<AssociatedDevice>> {
-      verify(mockListener).onAssociatedDevicesRetrieved(capture())
-      assertThat(firstValue).isEmpty()
-    }
+  private fun setQueryIntentServicesAnswer(answer: Answer<List<ResolveInfo>>) {
+    whenever(mockPackageManager.queryIntentServices(any(), any<Int>())).thenAnswer(answer)
   }
 
-  /** All companion actions are resolved. */
   private val defaultServiceAnswer = Answer {
-    val intent = it.arguments.first() as Intent
-    val resolveInfo =
-      ResolveInfo().apply { serviceInfo = ServiceInfo().apply { packageName = PACKAGE_NAME } }
-    when (intent.action) {
-      ACTION_BIND_FEATURE_COORDINATOR_FG, ACTION_BIND_REMOTE_FEATURE_FG -> {
-        resolveInfo.serviceInfo.name = FG_NAME
-        listOf(resolveInfo)
-      }
-      ACTION_BIND_FEATURE_COORDINATOR, ACTION_BIND_REMOTE_FEATURE -> {
-        resolveInfo.serviceInfo.name = BG_NAME
-        listOf(resolveInfo)
-      }
-      else -> listOf()
-    }
-  }
-
-  /** Only the feature coordinator actions are resolved. */
-  private val featureCoordinatorOnlyAnswer = Answer {
     val intent = it.arguments.first() as Intent
     val resolveInfo =
       ResolveInfo().apply { serviceInfo = ServiceInfo().apply { packageName = PACKAGE_NAME } }
@@ -2160,24 +1686,6 @@ class CompanionConnectorTest {
         listOf(resolveInfo)
       }
       ACTION_BIND_FEATURE_COORDINATOR -> {
-        resolveInfo.serviceInfo.name = BG_NAME
-        listOf(resolveInfo)
-      }
-      else -> listOf()
-    }
-  }
-
-  /** Only the connected device manager actions are resolved. */
-  private val connectedDeviceManagerOnlyAnswer = Answer {
-    val intent = it.arguments.first() as Intent
-    val resolveInfo =
-      ResolveInfo().apply { serviceInfo = ServiceInfo().apply { packageName = PACKAGE_NAME } }
-    when (intent.action) {
-      ACTION_BIND_REMOTE_FEATURE_FG -> {
-        resolveInfo.serviceInfo.name = FG_NAME
-        listOf(resolveInfo)
-      }
-      ACTION_BIND_REMOTE_FEATURE -> {
         resolveInfo.serviceInfo.name = BG_NAME
         listOf(resolveInfo)
       }

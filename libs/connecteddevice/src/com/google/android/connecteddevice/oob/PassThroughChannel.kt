@@ -33,11 +33,6 @@ class PassThroughChannel : OobChannel {
     return true
   }
 
-  override fun completeOobDataExchange(
-    device: com.google.android.connecteddevice.model.OobEligibleDevice,
-    callback: OobChannel.Callback
-  ) {}
-
   override fun sendOobData(oobData: ByteArray) {}
 
   override fun interrupt() {}

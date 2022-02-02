@@ -48,7 +48,7 @@ public class CalendarContentDelegateTest {
           .put(Calendars.CALENDAR_DISPLAY_NAME, NAME)
           .put(Calendars.OWNER_ACCOUNT, ACCOUNT)
           .put(Calendars.CALENDAR_TIME_ZONE, ZONE_ID.getId())
-          .build();
+          .buildOrThrow();
 
   private TestCalendarProvider testCalendarProvider;
 

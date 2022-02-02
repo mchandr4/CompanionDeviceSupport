@@ -22,6 +22,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.security.InvalidParameterException;
 import java.security.SecureRandom;
 import java.util.UUID;
 
@@ -82,6 +83,10 @@ public final class ByteUtils {
    */
   public static byte[] hexStringToByteArray(String hex) {
     int len = hex.length();
+    if (len % 2 != 0) {
+      throw new InvalidParameterException(
+          "Hex string must have a length that is evenly divisible by two.");
+    }
     byte[] data = new byte[len / 2];
     for (int i = 0; i < len; i += 2) {
       data[i / 2] =

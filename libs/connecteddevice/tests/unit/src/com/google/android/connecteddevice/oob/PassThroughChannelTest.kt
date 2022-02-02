@@ -16,13 +16,16 @@
 
 package com.google.android.connecteddevice.oob
 
+import android.os.ParcelUuid
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.google.android.connecteddevice.transport.ConnectChallenge
 import com.google.android.connecteddevice.transport.ConnectionProtocol
+import com.google.android.connecteddevice.transport.IDataSendCallback
+import com.google.android.connecteddevice.transport.IDiscoveryCallback
 import com.google.android.connecteddevice.transport.ProtocolDevice
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
-import java.util.UUID
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -40,23 +43,22 @@ class PassThroughChannelTest {
 }
 
 private class TestConnectionProtocol : ConnectionProtocol() {
-  override val isDeviceVerificationRequired: Boolean
-    get() = false
+  override fun isDeviceVerificationRequired() = false
 
   override fun startAssociationDiscovery(
     name: String,
-    callback: DiscoveryCallback,
-    identifier: UUID
+    identifier: ParcelUuid,
+    callback: IDiscoveryCallback
   ) {}
   override fun startConnectionDiscovery(
-    id: UUID,
+    id: ParcelUuid,
     challenge: ConnectChallenge,
-    callback: DiscoveryCallback
+    callback: IDiscoveryCallback
   ) {}
 
   override fun stopAssociationDiscovery() {}
-  override fun stopConnectionDiscovery(id: UUID) {}
-  override fun sendData(protocolId: String, data: ByteArray, callback: DataSendCallback?) {}
+  override fun stopConnectionDiscovery(id: ParcelUuid) {}
+  override fun sendData(protocolId: String, data: ByteArray, callback: IDataSendCallback?) {}
   override fun disconnectDevice(protocolId: String) {}
   override fun getMaxWriteSize(protocolId: String): Int {
     return 0

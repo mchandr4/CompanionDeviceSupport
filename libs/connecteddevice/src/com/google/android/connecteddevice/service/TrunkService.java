@@ -115,7 +115,7 @@ public abstract class TrunkService extends MetaDataService {
     if (attempts > MAX_BIND_ATTEMPTS) {
       loge(
           TAG,
-          "Failed to bind to " + flatComponentName + "after " + attempts + " attempts. Aborting.");
+          "Failed to bind to " + flatComponentName + " after " + attempts + " attempts. Aborting.");
       return;
     }
     logw(TAG, "Unable to bind to " + flatComponentName + ". Trying again.");

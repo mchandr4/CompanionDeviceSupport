@@ -16,7 +16,9 @@
   -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.google.android.companiondevicesupport">
+          xmlns:tools="http://schemas.android.com/tools"
+          package="com.google.android.companiondevicesupport"
+          tools:ignore="all">
 
     <!--  Needed for BLE scanning/advertising -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
@@ -78,10 +80,6 @@
                 android:resource="@bool/enable_proxy" />
             <meta-data android:name="com.google.android.connecteddevice.transport_protocols"
                 android:resource="@array/transport_protocols" />
-            <meta-data android:name="com.google.android.connecteddevice.enable_capabilities_exchange"
-                android:resource="@bool/enable_capabilities" />
-            <meta-data android:name="com.google.android.connecteddevice.enable_feature_coordinator"
-                android:resource="@bool/enable_feature_coordinator" />
             <meta-data android:name="com.google.android.connecteddevice.supported_oob_channels"
                 android:resource="@array/supported_oob_channels"/>
 
@@ -101,8 +99,6 @@
                 android:resource="@array/early_fg_user_services"/>
             <meta-data android:name="com.google.android.connecteddevice.unlock_services"
                 android:resource="@array/unlock_fg_user_services"/>
-            <meta-data android:name="com.google.android.connecteddevice.enable_feature_coordinator"
-                android:resource="@bool/enable_feature_coordinator" />
         </service>
         <service
             android:name="com.google.android.connecteddevice.service.SppService"
@@ -205,6 +201,8 @@
                        android:resource="@string/trusted_device_feature_title" />
             <meta-data android:name="com.android.settings.category"
                        android:value="com.android.settings.category.ia.security" />
+            <meta-data android:name="com.android.settings.icon_tintable"
+                       android:value="true" />
         </activity>
     </application>
 </manifest>
