@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
   <string name="open_companion_app_instruction_text">Társalkalmazás megnyitása</string>
   <string name="enable_bluetooth_instruction_text">Bluetooth-kapcsolat engedélyezése</string>
   <string name="connect_to_targe_car_instruction_text">Csatlakozzon a következőhöz: &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">Olvassa be a QR-kódot, vagy nyissa meg a MyCompanion alkalmazást a következőhöz való kapcsolódáshoz: &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
   <string name="connect_to_car_instruction_text">Csatlakozás az autóhoz</string>
   <string name="associated_device_pairing_code_title">Kód ellenőrzése a telefonon</string>
   <string name="associated_device_pairing_message">Ellenőrizze, hogy ez egyezik-e a telefonon látható kóddal</string>
@@ -63,6 +64,7 @@
   <string name="connected">Csatlakozva</string>
   <string name="notDetected">Nincs észlelve</string>
   <string name="disconnected">Leválasztva</string>
+  <string name="detected">Észlelve</string>
   <string name="unknown">Ismeretlen</string>
   <string name="app_running_msg_channel_name">Fut a telefonos SMS-szolgáltatás</string>
   <string name="app_running_msg_notification_title">A telefonos SMS-szolgáltatás aktív</string>
@@ -92,4 +94,7 @@
   </plurals>
   <string name="name_not_available">A név nem használható</string>
   <string name="ble_device_name_prefix">Jármű\u00A0</string>
+  <string name="suw_setup_profile_title">Profil beállítása telefonnal</string>
+  <string name="suw_setup_profile_content">A kezdéshez olvassa be a QR-kódot. Ha nem található meg az eszközén a MyCompanion alkalmazás, letöltheti a Google Playről és az App Store-ból.</string>
+  <string name="suw_qr_instruction_text">Olvassa be a QR-kódot a következőhöz való csatlakozáshoz:&lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
 </resources>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
   <string name="open_companion_app_instruction_text">ਸੰਬੰਧੀ ਐਪ ਖੋਲ੍ਹੋ</string>
   <string name="enable_bluetooth_instruction_text">ਬਲੂਟੁੱਥ ਕਨੈਕਸ਼ਨ ਨੂੰ ਇਜਾਜ਼ਤ ਦਿਓ</string>
   <string name="connect_to_targe_car_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s ਨਾਲ ਕਨੈਕਟ ਕਰੋ</string>
+  <string name="qr_instruction_text">QR ਕੋਡ ਨੂੰ ਸਕੈਨ ਕਰੋ ਜਾਂ &lt;b&gt;%1$s&lt;/b&gt; %2$s ਨਾਲ ਕਨੈਕਟ ਕਰਨ ਲਈ MyCompanion ਖੋਲ੍ਹੋ</string>
   <string name="connect_to_car_instruction_text">ਕਾਰ ਨਾਲ ਕਨੈਕਟ ਕਰੋ</string>
   <string name="associated_device_pairing_code_title">ਫ਼ੋਨ \'ਤੇ ਕੋਡ ਦੀ ਤਸਦੀਕ ਕਰੋ</string>
   <string name="associated_device_pairing_message">ਤਸਦੀਕ ਕਰੋ ਕਿ ਇਹ ਤੁਹਾਡੇ ਫ਼ੋਨ \'ਤੇ ਦਿਖਾਏ ਜਾ ਰਹੇ ਕੋਡ ਨਾਲ ਮੇਲ ਖਾਂਦਾ ਹੈ</string>
@@ -63,6 +64,7 @@
   <string name="connected">ਕਨੈਕਟ ਹੈ</string>
   <string name="notDetected">ਪਤਾ ਨਹੀਂ ਲੱਗਾ</string>
   <string name="disconnected">ਡਿਸਕਨੈਕਟ ਹੋਇਆ</string>
+  <string name="detected">ਪਤਾ ਲਗਾਇਆ ਗਿਆ</string>
   <string name="unknown">ਅਗਿਆਤ</string>
   <string name="app_running_msg_channel_name">ਫ਼ੋਨ ਦੀ ਲਿਖਤ ਸੁਨੇਹਿਆਂ ਵਾਲੀ ਸੇਵਾ ਚੱਲ ਰਹੀ ਹੈ</string>
   <string name="app_running_msg_notification_title">ਫ਼ੋਨ ਦੀ ਲਿਖਤ ਸੁਨੇਹਿਆਂ ਵਾਲੀ ਸੇਵਾ ਕਿਰਿਆਸ਼ੀਲ ਹੈ</string>
@@ -92,4 +94,7 @@
   </plurals>
   <string name="name_not_available">ਨਾਮ ਉਪਲਬਧ ਨਹੀਂ ਹੈ</string>
   <string name="ble_device_name_prefix">ਵਾਹਨ\u00A0</string>
+  <string name="suw_setup_profile_title">ਫ਼ੋਨ ਨਾਲ ਪ੍ਰੋਫਾਈਲ ਦਾ ਸੈੱਟਅੱਪ ਕਰੋ</string>
+  <string name="suw_setup_profile_content">ਸ਼ੁਰੂਆਤ ਕਰਨ ਲਈ QR ਕੋਡ ਨੂੰ ਸਕੈਨ ਕਰੋ। ਜੇ ਤੁਹਾਡੇ ਕੋਲ MyCompanion ਐਪ ਨਹੀਂ ਹੈ, ਤਾਂ ਤੁਸੀਂ ਇਸਨੂੰ Google Play ਅਤੇ App Store ਤੋਂ ਡਾਊਨਲੋਡ ਕਰ ਸਕਦੇ ਹੋ।</string>
+  <string name="suw_qr_instruction_text">&lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s ਨਾਲ ਕਨੈਕਟ ਕਰਨ ਲਈ QR ਕੋਡ ਨੂੰ ਸਕੈਨ ਕਰੋ</string>
 </resources>

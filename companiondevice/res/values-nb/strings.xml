@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
   <string name="open_companion_app_instruction_text">Åpne følgeappen</string>
   <string name="enable_bluetooth_instruction_text">Tillat Bluetooth-tilkobling</string>
   <string name="connect_to_targe_car_instruction_text">Koble til &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">Skann QR-koden eller åpne MyCompanion for å koble til &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
   <string name="connect_to_car_instruction_text">Koble til bilen</string>
   <string name="associated_device_pairing_code_title">Bekreft koden på telefonen</string>
   <string name="associated_device_pairing_message">Sjekk at den er lik koden som vises på telefonen</string>
@@ -63,6 +64,7 @@
   <string name="connected">Tilkoblet</string>
   <string name="notDetected">Ikke oppdaget</string>
   <string name="disconnected">Frakoblet</string>
+  <string name="detected">Registrert</string>
   <string name="unknown">Ukjent</string>
   <string name="app_running_msg_channel_name">Tjenesten for telefon-SMS kjører</string>
   <string name="app_running_msg_notification_title">Tjenesten for telefon-SMS er aktiv</string>
@@ -92,4 +94,7 @@
   </plurals>
   <string name="name_not_available">Navnet er ikke tilgjengelig</string>
   <string name="ble_device_name_prefix">Kjøretøy\u00A0</string>
+  <string name="suw_setup_profile_title">Konfigurer en profil med telefonen</string>
+  <string name="suw_setup_profile_content">Skann QR-koden for å komme i gang. Hvis du ikke har MyCompanion-appen, kan du laste den ned via Google Play eller App Store.</string>
+  <string name="suw_qr_instruction_text">Skann QR-koden for å koble til&lt;br/&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
 </resources>

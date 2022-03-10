@@ -382,31 +382,6 @@ class BlePeripheralProtocolTest {
     verify(mockBlePeripheralManager).stopAdvertising(any())
   }
 
-  @Test
-  fun getBluetoothDevice_returnNonNullDevice() {
-    val protocolId = establishConnection(testBluetoothDevice)
-
-    assertThat(blePeripheralProtocol.getBluetoothDeviceById(protocolId)).isNotNull()
-  }
-
-  @Test
-  fun getBluetoothDevice_returnNullWhenDisconnected() {
-    val protocolId = establishConnection(testBluetoothDevice)
-    argumentCaptor<BlePeripheralManager.Callback>().apply {
-      verify(mockBlePeripheralManager).registerCallback(capture())
-      firstValue.onRemoteDeviceDisconnected(testBluetoothDevice)
-    }
-
-    assertThat(blePeripheralProtocol.getBluetoothDeviceById(protocolId)).isNull()
-  }
-
-  @Test
-  fun getBluetoothDevice_returnNullWhenProtocolIdMismatch() {
-    establishConnection(testBluetoothDevice)
-
-    assertThat(blePeripheralProtocol.getBluetoothDeviceById("RandomProtocolId")).isNull()
-  }
-
   private fun establishConnection(bluetoothDevice: BluetoothDevice): String {
     blePeripheralProtocol.startAssociationDiscovery(
       TEST_DEVICE_NAME,

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
   <string name="open_companion_app_instruction_text">פותחים את האפליקציה הנלווית</string>
   <string name="enable_bluetooth_instruction_text">מפעילים את חיבור ה-Bluetooth</string>
   <string name="connect_to_targe_car_instruction_text">מתחברים אל &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">צריך לסרוק את קוד ה-QR או לפתוח את MyCompanion כדי להתחבר אל &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
   <string name="connect_to_car_instruction_text">מתחברים אל המכונית</string>
   <string name="associated_device_pairing_code_title">צריך לאשר את הקוד בטלפון</string>
   <string name="associated_device_pairing_message">יש לאשר שזה מתאים לקוד שמופיע בטלפון שלך</string>
@@ -63,6 +64,7 @@
   <string name="connected">מחובר</string>
   <string name="notDetected">לא מזוהה</string>
   <string name="disconnected">מנותק</string>
+  <string name="detected">מזוהה</string>
   <string name="unknown">לא ידוע</string>
   <string name="app_running_msg_channel_name">שירות הודעות הטקסט פועל בטלפון</string>
   <string name="app_running_msg_notification_title">שירות הודעות הטקסט פעיל בטלפון</string>
@@ -94,4 +96,7 @@
   </plurals>
   <string name="name_not_available">השם לא זמין</string>
   <string name="ble_device_name_prefix">רכב\u00A0</string>
+  <string name="suw_setup_profile_title">הגדרת פרופיל באמצעות הטלפון</string>
+  <string name="suw_setup_profile_content">סורקים קוד QR כדי להתחיל. אם לא מותקנת במכשיר אפליקציית MyCompanion, אפשר להוריד אותה מ-Google Play ומ-App Store.</string>
+  <string name="suw_qr_instruction_text">עליך לסרוק את קוד ה-QR כדי להתחבר אל &lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
 </resources>

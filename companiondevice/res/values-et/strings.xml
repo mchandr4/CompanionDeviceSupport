@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
   <string name="open_companion_app_instruction_text">Avage kaasrakendus</string>
   <string name="enable_bluetooth_instruction_text">Lubage Bluetooth-ühendus</string>
   <string name="connect_to_targe_car_instruction_text">Ühendage autoga &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">Skannige QR-kood või avage rakendus MyCompanion, et ühendada autoga &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
   <string name="connect_to_car_instruction_text">Ühendage autoga</string>
   <string name="associated_device_pairing_code_title">Kinnitage kood telefonis</string>
   <string name="associated_device_pairing_message">Veenduge, et see ühtiks teie telefonis kuvatud koodiga</string>
@@ -63,6 +64,7 @@
   <string name="connected">Ühendatud</string>
   <string name="notDetected">Ei tuvastatud</string>
   <string name="disconnected">Pole ühendatud</string>
+  <string name="detected">Tuvastatud</string>
   <string name="unknown">Teadmata</string>
   <string name="app_running_msg_channel_name">Telefoni tekstsõnumiteenus töötab</string>
   <string name="app_running_msg_notification_title">Telefoni tekstsõnumiteenus on aktiivne</string>
@@ -92,4 +94,7 @@
   </plurals>
   <string name="name_not_available">Nimi pole saadaval</string>
   <string name="ble_device_name_prefix">Sõiduk\u00A0</string>
+  <string name="suw_setup_profile_title">Profiili seadistamine telefoniga</string>
+  <string name="suw_setup_profile_content">Alustamiseks skannige QR-kood. Kui teil rakendust MyCompanion ei ole, saate selle alla laadida Google Playst ja App Store\'ist.</string>
+  <string name="suw_qr_instruction_text">Skannige QR-kood, et autoga&lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s ühendus luua</string>
 </resources>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
   <string name="open_companion_app_instruction_text">Abre a aplicación complementaria</string>
   <string name="enable_bluetooth_instruction_text">Permite a conexión mediante Bluetooth</string>
   <string name="connect_to_targe_car_instruction_text">Conéctate a: &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">Escanea o código QR ou abre MyCompanion para conectarte a: &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
   <string name="connect_to_car_instruction_text">Conéctate ao coche</string>
   <string name="associated_device_pairing_code_title">Confirmar o código do teléfono</string>
   <string name="associated_device_pairing_message">Confirma que este código coincide co que che aparece no teléfono</string>
@@ -63,6 +64,7 @@
   <string name="connected">Conectado</string>
   <string name="notDetected">Non se detectou</string>
   <string name="disconnected">Desconectado</string>
+  <string name="detected">Detectouse</string>
   <string name="unknown">Descoñecido</string>
   <string name="app_running_msg_channel_name">Servizo de mensaxes de texto do teléfono en execución</string>
   <string name="app_running_msg_notification_title">Servizo de mensaxes de texto do teléfono activo</string>
@@ -92,4 +94,7 @@
   </plurals>
   <string name="name_not_available">O nome non está dispoñible</string>
   <string name="ble_device_name_prefix">Vehículo\u00A0</string>
+  <string name="suw_setup_profile_title">Configura o perfil co teléfono</string>
+  <string name="suw_setup_profile_content">Para comezar, escanea o código QR. Se non tes a aplicación MyCompanion, podes descargala en Google Play e App Store.</string>
+  <string name="suw_qr_instruction_text">Escanea o código QR para conectarte ao seguinte vehículo:&lt;br/&gt;&lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
 </resources>

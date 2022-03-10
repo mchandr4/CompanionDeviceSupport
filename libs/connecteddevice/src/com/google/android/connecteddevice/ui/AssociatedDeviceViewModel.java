@@ -29,6 +29,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.ParcelUuid;
+import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 import androidx.lifecycle.AndroidViewModel;
@@ -47,7 +48,8 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Implementation {@link ViewModel} for sharing associated devices data between the companion
@@ -69,10 +71,15 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
     ERROR
   }
 
-  private final List<AssociatedDevice> associatedDevices = new CopyOnWriteArrayList<>();
+  private final Lock associatedDevicesLock = new ReentrantLock();
 
+  @GuardedBy("associatedDevicesLock")
+  private final List<AssociatedDevice> associatedDevices = new ArrayList<>();
+
+  @GuardedBy("associatedDevicesLock")
   private final MutableLiveData<List<AssociatedDeviceDetails>> associatedDevicesDetails =
       new MutableLiveData<>(new ArrayList<>());
+
   private final MutableLiveData<String> advertisedCarName = new MutableLiveData<>(null);
   private final MutableLiveData<StartAssociationResponse> associationResponse =
       new MutableLiveData<>(null);
@@ -200,7 +207,12 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
    * devices.
    */
   public LiveData<List<AssociatedDeviceDetails>> getAssociatedDevicesDetails() {
-    return associatedDevicesDetails;
+    associatedDevicesLock.lock();
+    try {
+      return associatedDevicesDetails;
+    } finally {
+      associatedDevicesLock.unlock();
+    }
   }
 
   /** Starts feature activity for the given associated device. */
@@ -289,7 +301,28 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
     associationState.postValue(AssociationState.STARTING);
   }
 
+  /**
+   * Refreshes the {@link #associatedDevicesDetails} based on the current state of
+   * {@link #associatedDevices}.
+   */
   private void updateDeviceDetails() {
+    associatedDevicesLock.lock();
+    try {
+      updateDeviceDetailsLocked();
+    } finally {
+      associatedDevicesLock.unlock();
+    }
+  }
+
+  /**
+   * A version of {@link #updateDeviceDetails()} that should be called if the caller already
+   * holds the {@link #associatedDevicesLock}.
+   */
+  @GuardedBy("associatedDevicesLock")
+  private void updateDeviceDetailsLocked() {
+    logd(TAG, "Updating device details. Current number of associated devices: "
+        + associatedDevices.size());
+
     List<AssociatedDeviceDetails> associatedDevicesDetails = new ArrayList<>();
     for (AssociatedDevice device : associatedDevices) {
       associatedDevicesDetails.add(new AssociatedDeviceDetails(device, getConnectionState(device)));
@@ -313,21 +346,42 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
   }
 
   private void setAssociatedDevices(@NonNull List<AssociatedDevice> associatedDevices) {
-    this.associatedDevices.clear();
-    this.associatedDevices.addAll(associatedDevices);
-    updateDeviceDetails();
+    associatedDevicesLock.lock();
+
+    try {
+      this.associatedDevices.clear();
+      this.associatedDevices.addAll(associatedDevices);
+      updateDeviceDetailsLocked();
+    } finally {
+      associatedDevicesLock.unlock();
+    }
   }
 
   private void addOrUpdateAssociatedDevice(@NonNull AssociatedDevice device) {
-    associatedDevices.remove(device);
-    associatedDevices.add(device);
-    updateDeviceDetails();
+    associatedDevicesLock.lock();
+
+    try {
+      associatedDevices.remove(device);
+      associatedDevices.add(device);
+      updateDeviceDetailsLocked();
+    } finally {
+      associatedDevicesLock.unlock();
+    }
   }
 
   private void removeAssociatedDevice(AssociatedDevice device) {
-    if (associatedDevices.remove(device)) {
-      removedDevice.postValue(device);
-      updateDeviceDetails();
+    associatedDevicesLock.lock();
+
+    try {
+      if (associatedDevices.remove(device)) {
+        logd(TAG, device.getDeviceId() + " removed as an associated device. "
+            + "Current number of associated devices: " + associatedDevices.size());
+
+        removedDevice.postValue(device);
+        updateDeviceDetailsLocked();
+      }
+    } finally {
+      associatedDevicesLock.unlock();
     }
   }
 
@@ -356,17 +410,20 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
 
         @Override
         public void onAssociatedDeviceAdded(@NonNull AssociatedDevice device) {
+          logd(TAG, "Associated device has been added: " + device.getDeviceId());
           resetAssociationState();
           addOrUpdateAssociatedDevice(device);
         }
 
         @Override
         public void onAssociatedDeviceRemoved(@NonNull AssociatedDevice device) {
+          logd(TAG, "Associated device " + device.getDeviceId() + " was removed");
           removeAssociatedDevice(device);
         }
 
         @Override
         public void onAssociatedDeviceUpdated(AssociatedDevice device) {
+          logd(TAG, "Associated device has been updated: " + device.getDeviceId());
           addOrUpdateAssociatedDevice(device);
         }
 

@@ -43,7 +43,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 /** An implementation that uses Android platform API for BLE peripheral operations. */
 public class OnDeviceBlePeripheralManager extends BlePeripheralManager {
-  private static final String TAG = "BlePeripheralManager";
+  private static final String TAG = "OnDeviceBlePeripheralManager";
 
   private static final int BLE_RETRY_LIMIT = 5;
   private static final int BLE_RETRY_INTERVAL_MS = 1000;

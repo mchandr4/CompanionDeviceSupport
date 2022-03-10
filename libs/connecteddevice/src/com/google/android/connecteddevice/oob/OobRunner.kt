@@ -18,7 +18,6 @@ package com.google.android.connecteddevice.oob
 
 import android.security.keystore.KeyProperties
 import androidx.annotation.VisibleForTesting
-import com.google.android.companionprotos.CapabilitiesExchangeProto.CapabilitiesExchange.OobChannelType
 import com.google.android.companionprotos.OutOfBandAssociationToken
 import com.google.android.connecteddevice.model.OobData
 import com.google.android.connecteddevice.transport.ProtocolDevice
@@ -35,7 +34,7 @@ import javax.crypto.spec.IvParameterSpec
 /**
  * Manages all OOB related actions, those actions should be ordered as below:
  * 1. [generateOobData] returns [ByteArray] which contains the OOB key.
- * 2. [startOobDataExchange] with the remote [ProtocolDevice] and exchange OOB data.
+ * 2. [sendOobData] to the remote [ProtocolDevice].
  * 3. [encryptData] and [decryptData] data after the OOB data exchange succeed. Will throw
  * [IllegalStateException] if attempting to encrypt/decrypt without first having called
  * [generateOobData].
@@ -50,6 +49,8 @@ constructor(
   @VisibleForTesting internal var ihuIv = ByteArray(NONCE_LENGTH_BYTES)
   @VisibleForTesting internal var mobileIv = ByteArray(NONCE_LENGTH_BYTES)
   @VisibleForTesting internal var encryptionKey: SecretKey? = null
+  @VisibleForTesting internal val establishedOobChannels = mutableListOf<OobChannel>()
+
   private val cipher =
     try {
       Cipher.getInstance(ALGORITHM)
@@ -57,7 +58,6 @@ constructor(
       loge(TAG, "Unable to create cipher with $ALGORITHM.", e)
       throw IllegalStateException(e)
     }
-  private var currentOobChannel: OobChannel? = null
   private var oobData: OobData? = null
 
   /** Generate OOB data which should be exchanged with remote device. */
@@ -83,43 +83,21 @@ constructor(
    * Iterate through all available OOB channels, establish OOB channels and send OOB data to remote
    * device.
    */
-  open fun sendOobData(
-    protocolDevice: ProtocolDevice,
-  ): Boolean {
-    for (oobType in supportedTypes.map { it.asOobChannelType() }) {
-      logd(TAG, "Establish OOB channel with ${oobType.name}.")
+  open fun sendOobData(protocolDevice: ProtocolDevice) {
+    val dataToSend = oobData
+    if (dataToSend == null) {
+      loge(TAG, "OOB data unavailable, failed to send OOB data.")
+      return
+    }
+    establishedOobChannels.clear()
+    for (oobType in supportedTypes) {
+      logd(TAG, "Establish OOB channel and send OOB data with $oobType.")
       val oobChannel = oobChannelFactory.createOobChannel(oobType)
-      if (oobChannel.completeOobDataExchange(protocolDevice, generateOobChannelCallback(oobChannel))
-      ) {
-        currentOobChannel = oobChannel
-        return true
+      if (oobChannel.completeOobDataExchange(protocolDevice, toOobProto(dataToSend))) {
+        establishedOobChannels.add(oobChannel)
       }
     }
-    return false
   }
-
-  private fun String.asOobChannelType(): OobChannelType =
-    OobChannelType.values().firstOrNull { it.name.equals(this) }
-      ?: OobChannelType.OOB_CHANNEL_UNKNOWN
-
-  private fun generateOobChannelCallback(oobChannel: OobChannel) =
-    object : OobChannel.Callback {
-      override fun onOobExchangeSuccess() {
-        val data = oobData
-        if (data == null) {
-          loge(
-            TAG,
-            "OOB channel established successfully with invalid OOB data, issue failure " +
-              "callback."
-          )
-          return
-        }
-        oobChannel.sendOobData(toOobProto(data))
-      }
-      override fun onOobExchangeFailure() {
-        loge(TAG, "Failed to start OOB data exchange.")
-      }
-    }
 
   /** Encrypt [data] with OOB key, throw exception when encryption failed. */
   @Throws(IllegalStateException::class)
@@ -148,7 +126,10 @@ constructor(
   /** Reset OOB data, interrupt any ongoing data exchange and prevent invoke of callback */
   open fun reset() {
     logd(TAG, "Reset OOB key and interrupt OOB channel.")
-    currentOobChannel?.interrupt()
+    for (channel in establishedOobChannels) {
+      channel.interrupt()
+    }
+    establishedOobChannels.clear()
     ihuIv = ByteArray(NONCE_LENGTH_BYTES)
     mobileIv = ByteArray(NONCE_LENGTH_BYTES)
     encryptionKey = null

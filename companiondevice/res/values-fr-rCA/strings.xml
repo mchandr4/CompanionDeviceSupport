@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
   <string name="open_companion_app_instruction_text">Ouvrir l\'application compagnon</string>
   <string name="enable_bluetooth_instruction_text">Autoriser la connexion Bluetooth</string>
   <string name="connect_to_targe_car_instruction_text">Connectez à &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">Numérisez le code QR ou ouvrez MyCompanion pour vous connecter à &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
   <string name="connect_to_car_instruction_text">Effectuez la connexion au véhicule</string>
   <string name="associated_device_pairing_code_title">Confirmer le code sur votre téléphone</string>
   <string name="associated_device_pairing_message">Confirmez si ce code correspond à celui affiché sur votre téléphone</string>
@@ -63,6 +64,7 @@
   <string name="connected">Connecté</string>
   <string name="notDetected">Non détecté</string>
   <string name="disconnected">Déconnecté</string>
+  <string name="detected">Détecté</string>
   <string name="unknown">Inconnu</string>
   <string name="app_running_msg_channel_name">Le service de messagerie texte du téléphone est en cours d\'exécution</string>
   <string name="app_running_msg_notification_title">Le service de messagerie texte du téléphone est actif</string>
@@ -92,4 +94,7 @@
   </plurals>
   <string name="name_not_available">Nom indisponible</string>
   <string name="ble_device_name_prefix">Véhicule\u00A0</string>
+  <string name="suw_setup_profile_title">Configurer le profil avec le téléphone</string>
+  <string name="suw_setup_profile_content">Numérisez le code QR pour commencer. Si vous n\'avez pas l\'application MyCompanion, vous pouvez la télécharger dans Google Play et dans l\'App Store d\'Apple.</string>
+  <string name="suw_qr_instruction_text">Numérisez le code QR pour vous connecter à&lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
 </resources>

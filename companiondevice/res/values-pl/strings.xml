@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
   <string name="open_companion_app_instruction_text">Otwórz aplikację towarzyszącą</string>
   <string name="enable_bluetooth_instruction_text">Zezwól na połączenie Bluetooth</string>
   <string name="connect_to_targe_car_instruction_text">Połącz z: &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">Aby połączyć się z samochodem &lt;b&gt;%1$s&lt;/b&gt; %2$s, zeskanuj kod QR lub otwórz aplikację MyCompanion</string>
   <string name="connect_to_car_instruction_text">Połącz z samochodem</string>
   <string name="associated_device_pairing_code_title">Potwierdź kod na telefonie</string>
   <string name="associated_device_pairing_message">Potwierdź zgodność z kodem wyświetlanym na telefonie</string>
@@ -63,6 +64,7 @@
   <string name="connected">Połączono</string>
   <string name="notDetected">Nie wykryto</string>
   <string name="disconnected">Rozłączono</string>
+  <string name="detected">Wykryto</string>
   <string name="unknown">Brak danych</string>
   <string name="app_running_msg_channel_name">Usługa SMS-ów z telefonu jest uruchomiona</string>
   <string name="app_running_msg_notification_title">Usługa SMS-ów z telefonu jest aktywna</string>
@@ -94,4 +96,7 @@
   </plurals>
   <string name="name_not_available">Brak danych o nadawcy</string>
   <string name="ble_device_name_prefix">Pojazd\u00A0</string>
+  <string name="suw_setup_profile_title">Konfigurowanie profilu przez telefon</string>
+  <string name="suw_setup_profile_content">Aby rozpocząć, zeskanuj kod QR. Jeśli nie masz aplikacji MyCompanion, możesz ją pobrać z Google Play lub App Store.</string>
+  <string name="suw_qr_instruction_text">Zeskanuj kod QR, aby połączyć się z:&lt;br /&gt;&lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
 </resources>

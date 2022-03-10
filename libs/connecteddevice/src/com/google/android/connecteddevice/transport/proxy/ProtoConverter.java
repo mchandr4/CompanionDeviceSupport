@@ -28,7 +28,7 @@ import java.util.UUID;
 
 /** A collection of methods that converts between proxy proto messages and platform APIs. */
 final class ProtoConverter {
-  private static final String TAG = "BlePeripheralManager";
+  private static final String TAG = "ProtoConverter";
 
   static Characteristic toCharacteristic(BluetoothGattCharacteristic gattCharacteristic) {
     Characteristic.Builder builder =

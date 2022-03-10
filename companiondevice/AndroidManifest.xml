@@ -21,9 +21,15 @@
           tools:ignore="all">
 
     <!--  Needed for BLE scanning/advertising -->
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-    <uses-permission android:name="android.permission.BLUETOOTH"/>
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"
+        android:maxSdkVersion="30" />
+    <uses-permission android:name="android.permission.BLUETOOTH"
+        android:maxSdkVersion="30" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN"
+        android:usesPermissionFlags="neverForLocation" />
 
     <!--  Needed for detecting foreground user -->
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS"/>
@@ -72,12 +78,14 @@
                 <action android:name="com.google.android.connecteddevice.BIND_SPP" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="com.google.android.connecteddevice.BIND_TRANSPORT" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
             <meta-data android:name="com.google.android.connecteddevice.early_services"
                 android:resource="@array/early_single_user_services"/>
             <meta-data android:name="com.google.android.connecteddevice.association_service_uuid"
                 android:resource="@string/car_association_service_uuid" />
-            <meta-data android:name="com.google.android.connecteddevice.enable_proxy"
-                android:resource="@bool/enable_proxy" />
             <meta-data android:name="com.google.android.connecteddevice.transport_protocols"
                 android:resource="@array/transport_protocols" />
             <meta-data android:name="com.google.android.connecteddevice.supported_oob_channels"
@@ -103,6 +111,16 @@
         <service
             android:name="com.google.android.connecteddevice.service.SppService"
             android:exported="false">
+        </service>
+        <service
+            android:name="com.google.android.connecteddevice.service.TransportService"
+            android:exported="false">
+            <meta-data android:name="com.google.android.connecteddevice.association_service_uuid"
+                android:resource="@string/car_association_service_uuid" />
+            <meta-data android:name="com.google.android.connecteddevice.enable_proxy"
+                android:resource="@bool/enable_proxy" />
+            <meta-data android:name="com.google.android.connecteddevice.transport_protocols"
+                android:resource="@array/transport_protocols" />
         </service>
         <activity android:name=".AssociationActivity"
                   android:exported="true"

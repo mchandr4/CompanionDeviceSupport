@@ -41,7 +41,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * <p>The sent out message will be notified via Callback#onMessageSent.
  */
 class MessageWriter {
-  private static final String TAG = "BlePeripheralManager";
+  private static final String TAG = "MessageWriter";
 
   private static final int PARCEL_VERSION = 1;
 

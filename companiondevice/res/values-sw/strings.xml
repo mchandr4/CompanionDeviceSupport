@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
   <string name="open_companion_app_instruction_text">Fungua progamu saidizi</string>
   <string name="enable_bluetooth_instruction_text">Ruhusu muunganisho wa Bluetooth</string>
   <string name="connect_to_targe_car_instruction_text">Unganisha kwenye &lt;b&gt;%1$s&lt;/b&gt;%2$s</string>
+  <string name="qr_instruction_text">Changanua msimbo wa QR au ufungue programu ya MyCompanion ili uunganishe kwenye &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
   <string name="connect_to_car_instruction_text">Unganisha kwenye gari</string>
   <string name="associated_device_pairing_code_title">Thibitisha msimbo kwenye simu</string>
   <string name="associated_device_pairing_message">Thibitisha kuwa msimbo huu unalingana na msimbo unaoonyeshwa kwenye simu yako</string>
@@ -63,6 +64,7 @@
   <string name="connected">Imeunganishwa</string>
   <string name="notDetected">Haijagunduliwa</string>
   <string name="disconnected">Imetenganishwa</string>
+  <string name="detected">Imetambua</string>
   <string name="unknown">Haijulikani</string>
   <string name="app_running_msg_channel_name">Huduma ya SMS za simu inafanya kazi</string>
   <string name="app_running_msg_notification_title">Huduma ya SMS za simu inatumika</string>
@@ -92,4 +94,7 @@
   </plurals>
   <string name="name_not_available">Jina halipatikani</string>
   <string name="ble_device_name_prefix">Gari\u00A0</string>
+  <string name="suw_setup_profile_title">Weka mipangilio ya wasifu ukitumia simu</string>
+  <string name="suw_setup_profile_content">Changanua msimbo wa QR ili uanze. Ikiwa huna programu ya MyCompanion, unaweza kuipakua kwenye Google Play na App Store.</string>
+  <string name="suw_qr_instruction_text">Changanua msimbo wa QR ili uunganishe kwenye &lt;br/&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
 </resources>

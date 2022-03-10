@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
   <string name="open_companion_app_instruction_text">បើក​កម្មវិធី​ដៃគូ</string>
   <string name="enable_bluetooth_instruction_text">អនុញ្ញាតឱ្យ​តភ្ជាប់​ប៊្លូធូស</string>
   <string name="connect_to_targe_car_instruction_text">ភ្ជាប់ទៅ &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">ស្កេនកូដ QR ឬបើក MyCompanion ដើម្បីភ្ជាប់ជាមួយ &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
   <string name="connect_to_car_instruction_text">ភ្ជាប់ទៅ​រថយន្ត</string>
   <string name="associated_device_pairing_code_title">បញ្ជាក់កូដ​នៅលើ​ទូរសព្ទ</string>
   <string name="associated_device_pairing_message">បញ្ជាក់ថា​កូដនេះ​ត្រូវគ្នាជាមួយ​កូដ​ដែលបង្ហាញ​នៅលើ​ទូរសព្ទ​របស់អ្នក</string>
@@ -63,6 +64,7 @@
   <string name="connected">បានភ្ជាប់</string>
   <string name="notDetected">រកមិនឃើញទេ</string>
   <string name="disconnected">បាន​ដាច់</string>
+  <string name="detected">បានសម្គាល់</string>
   <string name="unknown">មិនស្គាល់</string>
   <string name="app_running_msg_channel_name">សេវាកម្ម​សារជាអក្សរ​របស់ទូរសព្ទ​កំពុងដំណើរការ</string>
   <string name="app_running_msg_notification_title">សេវាកម្ម​ផ្ញើសារជាអក្សរ​របស់ទូរសព្ទ​កំពុងដំណើរការ</string>
@@ -92,4 +94,7 @@
   </plurals>
   <string name="name_not_available">មិន​មាន​ឈ្មោះ​ទេ</string>
   <string name="ble_device_name_prefix">យានជំនិះ\u00A0</string>
+  <string name="suw_setup_profile_title">រៀបចំ​កម្រងព័ត៌មាន​ដោយប្រើទូរសព្ទ</string>
+  <string name="suw_setup_profile_content">ស្កេនកូដ QR ដើម្បី​ចាប់ផ្ដើម។ ប្រសិនបើ​អ្នកមិនមាន​កម្មវិធី MyCompanion ទេ អ្នកអាចទាញយក​វានៅលើ Google Play និង App Store។</string>
+  <string name="suw_qr_instruction_text">ស្កេនកូដ QR ដើម្បីភ្ជាប់ទៅ&lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
 </resources>

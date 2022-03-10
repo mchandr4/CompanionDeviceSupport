@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
   <string name="open_companion_app_instruction_text">Atveriet palīglietotni.</string>
   <string name="enable_bluetooth_instruction_text">Atļaujiet Bluetooth savienojuma izveidi.</string>
   <string name="connect_to_targe_car_instruction_text">Izveidojiet savienojumu ar automašīnu &lt;b&gt;%1$s&lt;/b&gt; (%2$s)</string>
+  <string name="qr_instruction_text">Skenējiet ātrās atbildes kodu vai atveriet lietotni MyCompanion, lai izveidotu savienojumu ar &lt;b&gt;%1$s&lt;/b&gt; %2$s.</string>
   <string name="connect_to_car_instruction_text">Izveidojiet savienojumu ar automašīnu</string>
   <string name="associated_device_pairing_code_title">Koda apstiprināšana tālrunī</string>
   <string name="associated_device_pairing_message">Apstipriniet, ka šis kods atbilst jūsu tālrunī redzamajam kodam.</string>
@@ -63,6 +64,7 @@
   <string name="connected">Pievienots</string>
   <string name="notDetected">Netika atrasts</string>
   <string name="disconnected">Atvienots</string>
+  <string name="detected">Noteiktā ierīce</string>
   <string name="unknown">Nezināms</string>
   <string name="app_running_msg_channel_name">Darbojas tālruņa īsziņu pakalpojums</string>
   <string name="app_running_msg_notification_title">Tālruņa īsziņu pakalpojums ir aktīvs.</string>
@@ -93,4 +95,7 @@
   </plurals>
   <string name="name_not_available">Vārds nav pieejams.</string>
   <string name="ble_device_name_prefix">Transportlīdzeklis\u00A0</string>
+  <string name="suw_setup_profile_title">Profila iestatīšana, izmantojot tālruni</string>
+  <string name="suw_setup_profile_content">Skenējiet ātrās atbildes kodu, lai sāktu darbu. Ja jums nav lietotnes MyCompanion, varat to lejupielādēt pakalpojumā Google Play vai veikalā App Store.</string>
+  <string name="suw_qr_instruction_text">Skenējiet ātrās atbildes kodu, lai izveidotu savienojumu ar&lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
 </resources>

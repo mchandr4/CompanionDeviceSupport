@@ -17,11 +17,10 @@
 package com.google.android.connecteddevice.oob
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.google.android.companionprotos.CapabilitiesExchangeProto.CapabilitiesExchange.OobChannelType
 import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelegateBinder
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
-import org.junit.Assert.fail
+import org.junit.Assert.assertThrows
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -32,7 +31,7 @@ class OobChannelFactoryTest {
 
   @Test
   fun createOobChannel_supportedType_returnCorrectChannelType() {
-    val supportedType = OobChannelType.BT_RFCOMM
+    val supportedType = OobChannelFactory.BT_RFCOMM
     val oobChannel = factory.createOobChannel(supportedType)
 
     assertThat(oobChannel).isInstanceOf(BluetoothRfcommChannel::class.java)
@@ -40,7 +39,7 @@ class OobChannelFactoryTest {
 
   @Test
   fun createOobChannel_supportedType_returnPassThroughChannel() {
-    val supportedType = OobChannelType.PRE_ASSOCIATION
+    val supportedType = OobChannelFactory.PRE_ASSOCIATION
     val oobChannel = factory.createOobChannel(supportedType)
 
     assertThat(oobChannel).isInstanceOf(PassThroughChannel::class.java)
@@ -48,9 +47,8 @@ class OobChannelFactoryTest {
 
   @Test
   fun createOobChannel_unsupportedChannelType_throwException() {
-    try {
-      factory.createOobChannel(OobChannelType.OOB_CHANNEL_UNKNOWN)
-      fail("Expected exception did not throw.")
-    } catch (e: IllegalArgumentException) {}
+    assertThrows(IllegalArgumentException::class.java) {
+      factory.createOobChannel("Unknown channel")
+    }
   }
 }

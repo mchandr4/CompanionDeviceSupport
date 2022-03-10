@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
   <string name="open_companion_app_instruction_text">Otevřete doprovodnou aplikaci</string>
   <string name="enable_bluetooth_instruction_text">Povolte připojení přes Bluetooth</string>
   <string name="connect_to_targe_car_instruction_text">Připojte se k autu &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">Naskenujte QR kód nebo otevřete aplikaci MyCompanion a připojte se k autu &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
   <string name="connect_to_car_instruction_text">Připojte se k autu</string>
   <string name="associated_device_pairing_code_title">Ověření kódu v telefonu</string>
   <string name="associated_device_pairing_message">Ověřte, zda se kód shoduje s kódem v telefonu</string>
@@ -63,6 +64,7 @@
   <string name="connected">Připojeno</string>
   <string name="notDetected">Nerozpoznáno</string>
   <string name="disconnected">Odpojeno</string>
+  <string name="detected">Zjištěno</string>
   <string name="unknown">Neznámé</string>
   <string name="app_running_msg_channel_name">Služba textových zpráv z telefonu je spuštěna</string>
   <string name="app_running_msg_notification_title">Služba textových zpráv z telefonu je aktivní</string>
@@ -94,4 +96,7 @@
   </plurals>
   <string name="name_not_available">Jméno není dostupné</string>
   <string name="ble_device_name_prefix">Vozidlo\u00A0</string>
+  <string name="suw_setup_profile_title">Nastavení profilu pomocí telefonu</string>
+  <string name="suw_setup_profile_content">Začněte naskenováním QR kódu. Pokud nemáte aplikaci MyCompanion, stáhněte si ji na Google Play nebo v App Store.</string>
+  <string name="suw_qr_instruction_text">Naskenováním QR kódu se připojte k autu&lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
 </resources>

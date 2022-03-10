@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
   <string name="open_companion_app_instruction_text">Avaa kumppanisovellus</string>
   <string name="enable_bluetooth_instruction_text">Salli Bluetooth-yhteys</string>
   <string name="connect_to_targe_car_instruction_text">Yhdistä: &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">Yhdistä &lt;b&gt;%1$s&lt;/b&gt; %2$s skannaamalla QR-koodi tai avaamalla MyCompanion</string>
   <string name="connect_to_car_instruction_text">Yhdistä autoon</string>
   <string name="associated_device_pairing_code_title">Vahvista koodi puhelimella</string>
   <string name="associated_device_pairing_message">Vahvista, että tämä vastaa puhelimessa näkyvää koodia</string>
@@ -63,6 +64,7 @@
   <string name="connected">Yhdistetty</string>
   <string name="notDetected">Ei havaittu</string>
   <string name="disconnected">Yhteys katkaistu</string>
+  <string name="detected">Havaittu</string>
   <string name="unknown">Tuntematon</string>
   <string name="app_running_msg_channel_name">Puhelimen tekstiviestipalvelu käynnissä</string>
   <string name="app_running_msg_notification_title">Puhelimen tekstiviestipalvelu on aktiivinen</string>
@@ -92,4 +94,7 @@
   </plurals>
   <string name="name_not_available">Nimi ei ole saatavilla</string>
   <string name="ble_device_name_prefix">Ajoneuvo\u00A0</string>
+  <string name="suw_setup_profile_title">Luo profiili puhelimella</string>
+  <string name="suw_setup_profile_content">Aloita skannaamalla QR-koodi. Jos sinulla ei ole MyCompanion-sovellusta, voit ladata sen Google Playsta tai App Storesta.</string>
+  <string name="suw_qr_instruction_text">Yhdistä&lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s skannaamalla QR-koodi</string>
 </resources>

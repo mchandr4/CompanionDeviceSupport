@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
   <string name="open_companion_app_instruction_text">አጃቢ መተግበሪያውን ይክፈቱ</string>
   <string name="enable_bluetooth_instruction_text">የብሉቱዝ ግንኙነትን ይፍቀዱ</string>
   <string name="connect_to_targe_car_instruction_text">ከ&lt;b&gt;%1$s&lt;/b&gt;%2$s ጋር ይገናኙ</string>
+  <string name="qr_instruction_text">ከ&lt;b&gt;%1$s&lt;/b&gt; %2$s ጋር ለመገናኘት QR ኮዱን ይቃኙት ወይም MyCompanionን ይክፈቱ</string>
   <string name="connect_to_car_instruction_text">ከመኪናው ጋር ይገናኙ</string>
   <string name="associated_device_pairing_code_title">በስልክ ላይ ኮድ ያረጋግጡ</string>
   <string name="associated_device_pairing_message">ይህ በስልክዎ ላይ ከሚታየው ኮድ ጋር እንደሚዛመድ ያረጋግጡ</string>
@@ -63,6 +64,7 @@
   <string name="connected">ተገናኝቷል</string>
   <string name="notDetected">አልተገኘም</string>
   <string name="disconnected">ተቋርጧል</string>
+  <string name="detected">ተገኝቷል</string>
   <string name="unknown">ያልታወቀ</string>
   <string name="app_running_msg_channel_name">የስልክ ጽሑፍ መልዕክት አገልግሎት በማሄድ ላይ</string>
   <string name="app_running_msg_notification_title">የስልክ ጽሑፍ መልዕክት መላላኪያ አገልግሎት ገቢር ነው</string>
@@ -92,4 +94,7 @@
   </plurals>
   <string name="name_not_available">ስም አይገኝም</string>
   <string name="ble_device_name_prefix">ተሽከርካሪ\u00A0</string>
+  <string name="suw_setup_profile_title">መገለጫን በስልክ ያዋቅሩ</string>
+  <string name="suw_setup_profile_content">ለመጀመር የQR ኮድን ይቃኙ። የMyCompanion መተግበሪያ ከሌለዎት Google Play እና App Store ላይ ማውረድ ይችላሉ።</string>
+  <string name="suw_qr_instruction_text">ከ&lt;b&gt;%1$s&lt;/b&gt; %2$s ጋር&lt;br /&gt;ለመገናኘት የQR ኮድን ይቃኙ</string>
 </resources>

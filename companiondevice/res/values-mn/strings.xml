@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
   <string name="open_companion_app_instruction_text">Дэмжигч аппыг нээх</string>
   <string name="enable_bluetooth_instruction_text">Bluetooth холболтыг зөвшөөрөх</string>
   <string name="connect_to_targe_car_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s-д холбогдох</string>
+  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s-д холбогдохын тулд доорх QR кодыг скан хийх эсвэл MyCompanion-г нээнэ үү</string>
   <string name="connect_to_car_instruction_text"> машинд холбох</string>
   <string name="associated_device_pairing_code_title">Утсан дээрх кодыг баталгаажуулна уу</string>
   <string name="associated_device_pairing_message">Энэ нь таны утсан дээр харуулсан кодтой таарч байгаа эсэхийг баталгаажуулна уу</string>
@@ -63,6 +64,7 @@
   <string name="connected">Холбогдсон</string>
   <string name="notDetected">Илрээгүй</string>
   <string name="disconnected">Салсан</string>
+  <string name="detected">Илэрсэн</string>
   <string name="unknown">Тодорхойгүй</string>
   <string name="app_running_msg_channel_name">Утасны мессежийн үйлчилгээ ажиллаж байна</string>
   <string name="app_running_msg_notification_title">Утасны мессежийн үйлчилгээ идэвхтэй байна</string>
@@ -92,4 +94,7 @@
   </plurals>
   <string name="name_not_available">Нэр боломжгүй байна</string>
   <string name="ble_device_name_prefix">Тээврийн хэрэгсэл\u00A0</string>
+  <string name="suw_setup_profile_title">Профайлыг утсаар тохируулна уу</string>
+  <string name="suw_setup_profile_content">Эхлүүлэхийн тулд QR кодыг скан хийнэ үү. Хэрэв танд MyCompanion апп байхгүй бол Google Play болон апп дэлгүүрээс үүнийг татах боломжтой.</string>
+  <string name="suw_qr_instruction_text">&lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s-д холбогдохын тулд QR кодыг скан хийнэ үү</string>
 </resources>

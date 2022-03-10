@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
   <string name="open_companion_app_instruction_text">Mở ứng dụng đồng hành</string>
   <string name="enable_bluetooth_instruction_text">Cho phép kết nối Bluetooth</string>
   <string name="connect_to_targe_car_instruction_text">Kết nối với &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">Quét mã QR hoặc mở MyCompanion để kết nối với &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
   <string name="connect_to_car_instruction_text">Kết nối với ô tô</string>
   <string name="associated_device_pairing_code_title">Xác nhận mã trên điện thoại</string>
   <string name="associated_device_pairing_message">Xác nhận rằng mã này khớp với mã hiện trên điện thoại của bạn</string>
@@ -63,6 +64,7 @@
   <string name="connected">Đã kết nối</string>
   <string name="notDetected">Không tìm thấy</string>
   <string name="disconnected">Đã ngắt kết nối</string>
+  <string name="detected">Đã phát hiện</string>
   <string name="unknown">Không xác định</string>
   <string name="app_running_msg_channel_name">Dịch vụ tin nhắn văn bản trên điện thoại đang chạy</string>
   <string name="app_running_msg_notification_title">Dịch vụ nhắn tin văn bản trên điện thoại đang hoạt động</string>
@@ -92,4 +94,7 @@
   </plurals>
   <string name="name_not_available">Không có tên</string>
   <string name="ble_device_name_prefix">Xe\u00A0</string>
+  <string name="suw_setup_profile_title">Thiết lập hồ sơ trên điện thoại</string>
+  <string name="suw_setup_profile_content">Hãy quét mã QR để bắt đầu. Nếu chưa có ứng dụng MyCompanion, bạn có thể tải qua Google Play và App Store.</string>
+  <string name="suw_qr_instruction_text">Quét mã QR để kết nối với&lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
 </resources>

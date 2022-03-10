@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
   <string name="open_companion_app_instruction_text">Öppna kompletterande app</string>
   <string name="enable_bluetooth_instruction_text">Tillåt Bluetooth-anslutning</string>
   <string name="connect_to_targe_car_instruction_text">Anslut till &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">Skanna QR-koden eller öppna MyCompanion för att ansluta till &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
   <string name="connect_to_car_instruction_text">Anslut till bilen</string>
   <string name="associated_device_pairing_code_title">Kolla koden på telefonen</string>
   <string name="associated_device_pairing_message">Kontrollera att detta är samma kod som visas på telefonen</string>
@@ -63,6 +64,7 @@
   <string name="connected">Ansluten</string>
   <string name="notDetected">Ingen hittades</string>
   <string name="disconnected">Frånkopplad</string>
+  <string name="detected">Upptäckt</string>
   <string name="unknown">Okänd</string>
   <string name="app_running_msg_channel_name">Telefonens sms-tjänst körs</string>
   <string name="app_running_msg_notification_title">Telefonens sms-tjänst är aktiv</string>
@@ -92,4 +94,7 @@
   </plurals>
   <string name="name_not_available">Namnet är inte tillgängligt</string>
   <string name="ble_device_name_prefix">Fordon\u00A0</string>
+  <string name="suw_setup_profile_title">Konfigurera profilen med telefonen</string>
+  <string name="suw_setup_profile_content">Skanna QR-koden för att komma igång. Om du inte har en MyCompanion-app kan du ladda ned den från Google Play och App Store.</string>
+  <string name="suw_qr_instruction_text">Skanna QR-koden för att ansluta till&lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
 </resources>

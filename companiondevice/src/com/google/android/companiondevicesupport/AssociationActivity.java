@@ -20,11 +20,16 @@ import static com.android.car.setupwizardlib.util.ResultCodes.RESULT_SKIP;
 import static com.android.car.ui.core.CarUi.requireToolbar;
 import static com.android.car.ui.toolbar.Toolbar.State.SUBPAGE;
 import static com.google.android.connecteddevice.util.SafeLog.logd;
+import static com.google.android.connecteddevice.util.SafeLog.loge;
 
+import android.Manifest.permission;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build.VERSION;
+import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
@@ -32,7 +37,10 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import android.view.View;
 import android.widget.Toast;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelStoreOwner;
 import com.android.car.setupwizardlib.CarSetupWizardCompatLayout;
@@ -44,6 +52,7 @@ import com.google.android.connecteddevice.model.TransportProtocols;
 import com.google.android.connecteddevice.ui.AssociatedDeviceDetails;
 import com.google.android.connecteddevice.ui.AssociatedDeviceViewModel;
 import com.google.android.connecteddevice.ui.AssociatedDeviceViewModelFactory;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -65,6 +74,8 @@ public class AssociationActivity extends FragmentActivity {
   private static final String ASSOCIATED_DEVICE_DETAILS_BACKSTACK_NAME =
       "AssociatedDeviceDetailsBackstack";
 
+  private final List<String> requiredPermissions = new ArrayList<>();
+
   private ToolbarController toolbar;
   private CarSetupWizardCompatLayout carSetupWizardLayout;
   private AssociatedDeviceViewModel model;
@@ -74,11 +85,11 @@ public class AssociationActivity extends FragmentActivity {
   private boolean isStartedForSetupProfile = false;
   private boolean isImmersive = false;
   private boolean hideSkipButton = false;
+  private boolean pendingAssociationAfterPerms = false;
+  private ActivityResultLauncher<String[]> requestPermissionLauncher;
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
-    isPassengerEnabled = getResources().getBoolean(R.bool.enable_passenger);
-
     resolveIntent();
 
     // Set theme before calling super.onCreate(bundle) to avoid recreating activity.
@@ -86,13 +97,38 @@ public class AssociationActivity extends FragmentActivity {
     super.onCreate(savedInstanceState);
     prepareLayout();
 
+    if (VERSION.SDK_INT >= VERSION_CODES.S) {
+      requiredPermissions.add(permission.BLUETOOTH_SCAN);
+      requiredPermissions.add(permission.BLUETOOTH_ADVERTISE);
+      requiredPermissions.add(permission.BLUETOOTH_CONNECT);
+    }
+
     // Only need to attach the click listener if we are recreating this activity due to a
     // configuration change.
+    isPassengerEnabled = getResources().getBoolean(R.bool.enable_passenger);
     if (isPassengerEnabled && savedInstanceState != null) {
       maybeAttachItemClickListener();
     }
 
     observeViewModel();
+    requestPermissionLauncher =
+        registerForActivityResult(
+            new ActivityResultContracts.RequestMultiplePermissions(),
+            results -> {
+              for (boolean granted : results.values()) {
+                if (!granted) {
+                  loge(
+                      TAG, "At least one permission was not granted. Unable to start association.");
+                  showAssociationErrorFragment();
+                  return;
+                }
+              }
+              logd(TAG, "All permissions have been granted.");
+              if (pendingAssociationAfterPerms) {
+                pendingAssociationAfterPerms = false;
+                model.startAssociation();
+              }
+            });
   }
 
   /**
@@ -126,6 +162,41 @@ public class AssociationActivity extends FragmentActivity {
     if (hasFocus) {
       handleImmersive();
     }
+  }
+
+  /** Performs permission checks and starts association flow. */
+  void startAssociation() {
+    logd(TAG, "Starting association.");
+    if (maybeAskForPermissions()) {
+      logd(TAG, "Waiting for permissions to be granted before association can be started.");
+      pendingAssociationAfterPerms = true;
+      return;
+    }
+    model.startAssociation();
+  }
+
+  /**
+   * Prompts the user to accept the required runtime permissions if needed. Returns {@code true} if
+   * the user was prompted, otherwise {@code false}.
+   */
+  private boolean maybeAskForPermissions() {
+    logd(TAG, "Checking if there are any runtime permissions that have not yet been granted.");
+    List<String> missingPermissions = new ArrayList<>();
+    for (String permission : requiredPermissions) {
+      if (ContextCompat.checkSelfPermission(this, permission)
+          == PackageManager.PERMISSION_GRANTED) {
+        continue;
+      }
+      logd(TAG, "Required permission " + permission + " has not been granted yet.");
+      missingPermissions.add(permission);
+    }
+    if (missingPermissions.isEmpty()) {
+      logd(TAG, "The user has already granted all necessary permissions.");
+      return false;
+    }
+    logd(TAG, "Prompting the user for all the required permissions.");
+    requestPermissionLauncher.launch(missingPermissions.toArray(new String[0]));
+    return true;
   }
 
   private void resolveIntent() {
@@ -284,6 +355,7 @@ public class AssociationActivity extends FragmentActivity {
       handleEmptyDeviceList();
       return;
     }
+    maybeAskForPermissions();
 
     if (isPassengerEnabled) {
       showAssociatedDevicesList(devicesDetails);
@@ -523,11 +595,12 @@ public class AssociationActivity extends FragmentActivity {
     MenuItem associationButton =
         MenuItem.builder(this)
             .setTitle(R.string.add_associated_device_button)
-            .setOnClickListener(v -> {
-              dismissButtons();
-              model.startAssociation();
-            })
-           .build();
+            .setOnClickListener(
+                v -> {
+                  dismissButtons();
+                  startAssociation();
+                })
+            .build();
 
     toolbar.setMenuItems(Arrays.asList(associationButton));
   }

@@ -35,9 +35,10 @@ import com.google.android.connecteddevice.model.StartAssociationResponse
 import com.google.android.connecteddevice.oob.OobRunner
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage
 import com.google.android.connecteddevice.transport.ConnectChallenge
-import com.google.android.connecteddevice.transport.ConnectionProtocol
+import com.google.android.connecteddevice.transport.IConnectionProtocol
 import com.google.android.connecteddevice.transport.IDeviceDisconnectedListener
 import com.google.android.connecteddevice.transport.IDiscoveryCallback
+import com.google.android.connecteddevice.transport.ProtocolDelegate
 import com.google.android.connecteddevice.transport.ProtocolDevice
 import com.google.android.connecteddevice.util.ByteUtils
 import com.google.android.connecteddevice.util.SafeLog.logd
@@ -62,11 +63,11 @@ import kotlin.concurrent.withLock
  *
  * It is responsible for:
  * 1. Establish a connection: Handle Association/Reconnection request and communicate with
- * [ConnectionProtocol].
+ * [IConnectionProtocol].
  * 2. Maintain the connection: Manage all connected devices with [ConnectedRemoteDevice]; Dispatch
  * [Callback.onMessageReceived] callback; Enable to disconnect specific devices.
  *
- * @property protocols List of supported protocols.
+ * @property protocolDelegate Delegate for interacting with protocols.
  * @property storage Storage necessary to generate reconnect challenge.
  * @property enablePassenger Whether passenger devices automatically connect. When `true`, newly
  * associated devices will remain unclaimed by default.
@@ -75,7 +76,7 @@ import kotlin.concurrent.withLock
 class MultiProtocolDeviceController
 @JvmOverloads
 constructor(
-  private val protocols: Set<ConnectionProtocol>,
+  private val protocolDelegate: ProtocolDelegate,
   private val storage: ConnectedDeviceStorage,
   private val oobRunner: OobRunner,
   private val associationServiceUuid: UUID,
@@ -170,7 +171,7 @@ constructor(
     logd(TAG, "Resetting controller and disconnecting ${callbackDevices.size} devices.")
     // Current devices must be cleared prior to issuing callbacks to avoid race conditions.
     connectedRemoteDevices.clear()
-    for (protocol in protocols) {
+    for (protocol in protocolDelegate.protocols) {
       protocol.reset()
     }
     associationPendingDeviceId.set(null)
@@ -187,7 +188,7 @@ constructor(
       loge(TAG, "Unable to create connect challenge. Aborting connection.")
       return
     }
-    for (protocol in protocols) {
+    for (protocol in protocolDelegate.protocols) {
       val discoveryCallback = generateConnectionDiscoveryCallback(deviceId, protocol, challenge)
       protocol.startConnectionDiscovery(ParcelUuid(deviceId), challenge, discoveryCallback)
     }
@@ -211,7 +212,7 @@ constructor(
         ByteUtils.hexStringToByteArray(nameForAssociation),
         nameForAssociation
       )
-    for (protocol in protocols) {
+    for (protocol in protocolDelegate.protocols) {
       val discoveryCallback =
         generateAssociationDiscoveryCallback(protocol, callback, startAssociationResponse)
       protocol.startAssociationDiscovery(
@@ -273,7 +274,7 @@ constructor(
 
   override fun disconnectDevice(deviceId: UUID) {
     logd(TAG, "Disconnecting device with id $deviceId.")
-    for (protocol in protocols) {
+    for (protocol in protocolDelegate.protocols) {
       protocol.stopConnectionDiscovery(ParcelUuid(deviceId))
     }
     val device = connectedRemoteDevices.remove(deviceId)
@@ -295,7 +296,7 @@ constructor(
   override fun stopAssociation() {
     logd(TAG, "Stopping association.")
     oobRunner.reset()
-    for (protocol in protocols) {
+    for (protocol in protocolDelegate.protocols) {
       protocol.stopAssociationDiscovery()
     }
     val pendingDeviceId = associationPendingDeviceId.getAndSet(null)
@@ -378,12 +379,12 @@ constructor(
   }
 
   /**
-   * Generate the [DiscoveryCallback] for reconnecting to device [deviceId] with reconnect
+   * Generate the [IDiscoveryCallback] for reconnecting to device [deviceId] with reconnect
    * [challenge].
    */
   private fun generateConnectionDiscoveryCallback(
     deviceId: UUID,
-    protocol: ConnectionProtocol,
+    protocol: IConnectionProtocol,
     challenge: ConnectChallenge
   ) =
     object : IDiscoveryCallback.Stub() {
@@ -433,11 +434,11 @@ constructor(
     }
 
   /**
-   * Generate the [DiscoveryCallback] for associating with device with the [response] that will be
+   * Generate the [IDiscoveryCallback] for associating with device with the [response] that will be
    * patched through the [associationCallback].
    */
   private fun generateAssociationDiscoveryCallback(
-    protocol: ConnectionProtocol,
+    protocol: IConnectionProtocol,
     associationCallback: IAssociationCallback,
     response: StartAssociationResponse
   ) =
@@ -559,7 +560,7 @@ constructor(
 
   private fun generateDeviceDisconnectedListener(
     deviceId: UUID,
-    protocol: ConnectionProtocol,
+    protocol: IConnectionProtocol,
   ) =
     object : IDeviceDisconnectedListener.Stub() {
       override fun onDeviceDisconnected(protocolId: String) {
@@ -611,7 +612,7 @@ constructor(
       if (associatedDevice == null) {
         loge(
           TAG,
-          "Unable to find recently disconnected device $disconnectedDeviceId. " + "Cannot proceed."
+          "Unable to find recently disconnected device $disconnectedDeviceId. Cannot proceed."
         )
         return@execute
       }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
   <string name="open_companion_app_instruction_text">Atidaryti papildomą programą</string>
   <string name="enable_bluetooth_instruction_text">Leisti „Bluetooth“ ryšį</string>
   <string name="connect_to_targe_car_instruction_text">Prisijunkite prie automobilio &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">Nuskaitykite QR kodą arba atidarykite „MyCompanion“, kad prisijungtumėte prie &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
   <string name="connect_to_car_instruction_text">Prisijunkite prie automobilio</string>
   <string name="associated_device_pairing_code_title">Kodo patvirtinimas telefonu</string>
   <string name="associated_device_pairing_message">Patvirtinkite, kad kodas atitinka telefone rodomą kodą</string>
@@ -63,6 +64,7 @@
   <string name="connected">Susieta</string>
   <string name="notDetected">Neaptikta</string>
   <string name="disconnected">Atjungta</string>
+  <string name="detected">Aptikta</string>
   <string name="unknown">Nežinoma</string>
   <string name="app_running_msg_channel_name">Vykdoma telefono teksto pranešimų paslauga</string>
   <string name="app_running_msg_notification_title">Telefono teksto pranešimų paslauga aktyvi</string>
@@ -94,4 +96,7 @@
   </plurals>
   <string name="name_not_available">Vardas nepasiekiamas</string>
   <string name="ble_device_name_prefix">Tr. priemonė\u00A0</string>
+  <string name="suw_setup_profile_title">Profilio sąranka naudojant telefoną</string>
+  <string name="suw_setup_profile_content">Nuskaitykite QR kodą, kad galėtumėte pradėti. Jei neturite programos „MyCompanion“, galite ją atsisiųsti „Google Play“ ir „App Store“.</string>
+  <string name="suw_qr_instruction_text">Nuskaitykite QR kodą, kad prisijungtumėte prie&lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
 </resources>

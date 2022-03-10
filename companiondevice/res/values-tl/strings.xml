@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
   <string name="open_companion_app_instruction_text">Buksan ang kasamang app</string>
   <string name="enable_bluetooth_instruction_text">Payagan ang koneksyon sa Bluetooth</string>
   <string name="connect_to_targe_car_instruction_text">Kumonekta sa &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">I-scan ang QR code o buksan ang MyCompanion para kumonekta sa &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
   <string name="connect_to_car_instruction_text">Kumonekta sa kotse</string>
   <string name="associated_device_pairing_code_title">Kumpirmahin ang code sa telepono</string>
   <string name="associated_device_pairing_message">Kumpirmahing tumutugma ito sa code na ipinapakita sa telepono mo</string>
@@ -63,6 +64,7 @@
   <string name="connected">Nakakonekta</string>
   <string name="notDetected">Hindi na-detect</string>
   <string name="disconnected">Nadiskonekta</string>
+  <string name="detected">Na-detect</string>
   <string name="unknown">Hindi Alam</string>
   <string name="app_running_msg_channel_name">Gumagana ang serbisyo ng text message ng telepono</string>
   <string name="app_running_msg_notification_title">Aktibo ang serbisyo ng text messaging ng telepono</string>
@@ -92,4 +94,7 @@
   </plurals>
   <string name="name_not_available">Hindi available ang pangalan</string>
   <string name="ble_device_name_prefix">Sasakyan\u00A0</string>
+  <string name="suw_setup_profile_title">I-set up ang profile gamit ang telepono</string>
+  <string name="suw_setup_profile_content">I-scan ang QR code para magsimula. Kung wala kang MyCompanion app, puwede mo itong i-download sa Google Play at App Store.</string>
+  <string name="suw_qr_instruction_text">I-scan ang QR code para kumonekta sa&lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
 </resources>

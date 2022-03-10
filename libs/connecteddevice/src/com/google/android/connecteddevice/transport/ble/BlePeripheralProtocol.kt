@@ -26,7 +26,6 @@ import android.os.Handler
 import android.os.HandlerThread
 import android.os.ParcelUuid
 import androidx.annotation.VisibleForTesting
-import com.google.android.connecteddevice.transport.BluetoothDeviceProvider
 import com.google.android.connecteddevice.transport.ConnectChallenge
 import com.google.android.connecteddevice.transport.ConnectionProtocol
 import com.google.android.connecteddevice.transport.IDataSendCallback
@@ -56,7 +55,7 @@ constructor(
   private val maxReconnectAdvertisementDuration: Duration,
   defaultMtuSize: Int,
   callbackExecutor: Executor = Executors.newCachedThreadPool()
-) : ConnectionProtocol(callbackExecutor), BluetoothDeviceProvider {
+) : ConnectionProtocol(callbackExecutor) {
   private val writeCharacteristic =
     BluetoothGattCharacteristic(
       writeCharacteristicUuid,
@@ -315,9 +314,6 @@ constructor(
     }
     return true
   }
-
-  override fun getBluetoothDeviceById(protocolId: String) =
-    if (protocolId == this.protocolId) bluetoothDevice else null
 
   override fun isDeviceVerificationRequired(): Boolean = true
 

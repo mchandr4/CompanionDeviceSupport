@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
   <string name="open_companion_app_instruction_text">Abra o aplicativo Companion</string>
   <string name="enable_bluetooth_instruction_text">Autorize a conexão Bluetooth</string>
   <string name="connect_to_targe_car_instruction_text">Conectar ao &lt;b&gt;%1$s&lt;/b&gt;%2$s</string>
+  <string name="qr_instruction_text">Leia o código QR ou abra o MyCompanion para se conectar ao veículo &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
   <string name="connect_to_car_instruction_text">Conecte-se ao carro</string>
   <string name="associated_device_pairing_code_title">Confirmar o código no smartphone</string>
   <string name="associated_device_pairing_message">Confirme se este valor corresponde ao código exibido no smartphone</string>
@@ -63,6 +64,7 @@
   <string name="connected">Conectado</string>
   <string name="notDetected">Não detectado</string>
   <string name="disconnected">Desconectado</string>
+  <string name="detected">Detectado</string>
   <string name="unknown">Desconhecido</string>
   <string name="app_running_msg_channel_name">Serviço de mensagens de texto em funcionamento no smartphone</string>
   <string name="app_running_msg_notification_title">Serviço de mensagens de texto ativo no smartphone</string>
@@ -92,4 +94,7 @@
   </plurals>
   <string name="name_not_available">Nome indisponível</string>
   <string name="ble_device_name_prefix">Veículo\u00A0</string>
+  <string name="suw_setup_profile_title">Configurar perfil com smartphone</string>
+  <string name="suw_setup_profile_content">Para começar, leia o código QR. Se você não tiver o app MyCompanion, faça o download no Google Play ou na App store.</string>
+  <string name="suw_qr_instruction_text">Leia o código QR para conectar ao carro&lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
 </resources>

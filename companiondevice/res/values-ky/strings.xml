@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
   <string name="open_companion_app_instruction_text">Өнөктөштүн колдонмосун ачуу</string>
   <string name="enable_bluetooth_instruction_text">Bluetooth аркылуу туташууга уруксат берүү</string>
   <string name="connect_to_targe_car_instruction_text">&lt;b&gt;%1$s&lt;/b&gt;%2$s унаасына туташтыруу</string>
+  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s унаасына туташуу үчүн QR кодду скандаңыз же MyCompanion\'ду ачыңыз</string>
   <string name="connect_to_car_instruction_text">Унаага туташтырыңыз</string>
   <string name="associated_device_pairing_code_title">Телефондогу кодду ырастоо</string>
   <string name="associated_device_pairing_message">Бул телефонуңуздагы кодго дал келерин ырастаңыз</string>
@@ -63,6 +64,7 @@
   <string name="connected">Туташты</string>
   <string name="notDetected">Аныкталган жок</string>
   <string name="disconnected">Ажыратылды</string>
+  <string name="detected">Аныкталды</string>
   <string name="unknown">Белгисиз</string>
   <string name="app_running_msg_channel_name">Телефондун жазышуу кызматы иштеп жатат</string>
   <string name="app_running_msg_notification_title">Телефондун жазышуу кызматы иштеп жатат</string>
@@ -92,4 +94,7 @@
   </plurals>
   <string name="name_not_available">Аты-жөнү жеткиликсиз</string>
   <string name="ble_device_name_prefix">Унаа\u00A0</string>
+  <string name="suw_setup_profile_title">Телефонуңузда профиль түзүңүз</string>
+  <string name="suw_setup_profile_content">Баштоо үчүн QR кодун скандаңыз. Эгер MyCompanion колдонмосу жок болсо, аны Google Play жана App Store\'дон жүктөп алсаңыз болот.</string>
+  <string name="suw_qr_instruction_text">&lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s менен туташуу үчүн QR кодун скандаңыз</string>
 </resources>

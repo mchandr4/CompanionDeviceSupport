@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
   <string name="open_companion_app_instruction_text">സഹകാരി ആപ്പ് തുറക്കുക</string>
   <string name="enable_bluetooth_instruction_text">Bluetooth കണക്ഷൻ അനുവദിക്കുക</string>
   <string name="connect_to_targe_car_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s എന്നതിലേക്ക് കണക്റ്റ് ചെയ്യുക</string>
+  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s എന്നതിലേക്ക് കണക്റ്റ് ചെയ്യാൻ QR കോഡ് സ്‌കാൻ ചെയ്യുകയോ MyCompanion തുറക്കുകയോ ചെയ്യുക</string>
   <string name="connect_to_car_instruction_text">കാറിലേക്ക് കണക്‌റ്റ് ചെയ്യുക</string>
   <string name="associated_device_pairing_code_title">ഫോണിലെ കോഡ് സ്ഥിരീകരിക്കുക</string>
   <string name="associated_device_pairing_message">നിങ്ങളുടെ ഫോണിൽ കാണിക്കുന്ന കോഡുമായി ഇത് പൊരുത്തപ്പെടുന്നുണ്ടെന്ന് സ്ഥിരീകരിക്കുക</string>
@@ -63,6 +64,7 @@
   <string name="connected">കണക്റ്റ് ചെയ്‌തു</string>
   <string name="notDetected">കണ്ടെത്തിയില്ല</string>
   <string name="disconnected">വിച്ഛേദിച്ചു</string>
+  <string name="detected">കണ്ടെത്തി</string>
   <string name="unknown">അജ്ഞാതം</string>
   <string name="app_running_msg_channel_name">ഫോണിലെ ടെക്‌സ്‌റ്റ് മെസേജ് സേവനം റൺ ചെയ്യുന്നു</string>
   <string name="app_running_msg_notification_title">ഫോണിലെ ടെക്‌സ്‌റ്റ് മെസേജ് സേവനം സജീവമാണ്</string>
@@ -92,4 +94,7 @@
   </plurals>
   <string name="name_not_available">പേര് ലഭ്യമല്ല</string>
   <string name="ble_device_name_prefix">വാഹനം\u00A0</string>
+  <string name="suw_setup_profile_title">ഫോൺ ഉപയോഗിച്ച് പ്രൊഫൈൽ സജ്ജീകരിക്കുക</string>
+  <string name="suw_setup_profile_content">ആരംഭിക്കാൻ QR കോഡ് സ്‌കാൻ ചെയ്യുക. നിങ്ങൾക്ക് MyCompanion ആപ്പില്ലെങ്കിൽ, ഇത് Google Play-ലും ആപ്പ് സ്റ്റോറിലും ഡൗൺലോഡ് ചെയ്യാം.</string>
+  <string name="suw_qr_instruction_text">&lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s എന്നതിലേക്ക് കണക്റ്റ് ചെയ്യാൻ QR കോഡ് സ്‌കാൻ ചെയ്യുക</string>
 </resources>

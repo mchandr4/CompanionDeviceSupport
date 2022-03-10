@@ -16,4 +16,4 @@
 package com.google.android.connecteddevice.transport
 
 /** Representation of a single device within a [ConnectionProtocol]. */
-data class ProtocolDevice(val protocol: ConnectionProtocol, val protocolId: String)
+data class ProtocolDevice(val protocol: IConnectionProtocol, val protocolId: String)

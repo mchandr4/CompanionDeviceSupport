@@ -26,4 +26,7 @@ oneway interface ITrustedDeviceEnrollmentCallback {
 
     /** Triggered when an error happens during trusted device enrollment. */
     void onTrustedDeviceEnrollmentError(in int error);
+
+    /** Triggered when a lockscreen credential needs to be set up for trusted device enrollment. */
+    void onSecureDeviceRequest();
 }

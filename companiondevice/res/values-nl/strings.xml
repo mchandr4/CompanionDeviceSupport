@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,9 +25,10 @@
   <string name="open_companion_app_instruction_text">Open de bijbehorende app</string>
   <string name="enable_bluetooth_instruction_text">Sta de bluetooth-verbinding toe</string>
   <string name="connect_to_targe_car_instruction_text">Maak verbinding met &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">Scan de QR-code of open MyCompanion om verbinding te maken met &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
   <string name="connect_to_car_instruction_text">Maak verbinding met de auto</string>
   <string name="associated_device_pairing_code_title">Bevestig de code op je telefoon</string>
-  <string name="associated_device_pairing_message">Bevestig dat deze overeenkomt met de code die op je telefoon wordt weergegeven</string>
+  <string name="associated_device_pairing_message">Bevestig dat deze overeenkomt met de code die op je telefoon wordt getoond</string>
   <string name="associated_device_success">Het apparaat is gekoppeld</string>
   <string name="associated_device_select_device">Open de app en koppel met &lt;b&gt;%1$s&lt;b&gt;</string>
   <string name="associated_device_open_app">Open de app en volg de instructies in de app</string>
@@ -37,10 +38,10 @@
   <string name="device_removed_failure_toast_text">Kan %1$s niet vergeten</string>
   <string name="continue_setup_toast_text">Ga verder met het instellen op je telefoon</string>
   <string name="error_screen_title">Er is iets misgegaan</string>
-  <string name="error_screen_message">Dit scherm kan niet goed worden weergegeven. Probeer het opnieuw.</string>
-  <string name="turn_on_bluetooth_title">Bluetooth inschakelen</string>
+  <string name="error_screen_message">Dit scherm kan niet goed worden getoond. Probeer het opnieuw.</string>
+  <string name="turn_on_bluetooth_title">Bluetooth aanzetten</string>
   <string name="turn_on_bluetooth_message">Je auto heeft bluetooth nodig om je telefoon in te stellen als bijbehorend apparaat.</string>
-  <string name="turn_on_bluetooth_dialog_title">Bluetooth inschakelen?</string>
+  <string name="turn_on_bluetooth_dialog_title">Bluetooth aanzetten?</string>
   <string name="turn_on_bluetooth_dialog_message">Je auto heeft bluetooth nodig om de auto te koppelen aan je bijbehorende apparaat.</string>
   <string name="accept">Accepteren</string>
   <string name="reject">Afwijzen</string>
@@ -51,11 +52,11 @@
   <string name="connection">Verbinding</string>
   <string name="forget_title">Dit apparaat vergeten</string>
   <string name="forget">Vergeten</string>
-  <string name="disable">Uitschakelen</string>
-  <string name="enable">Inschakelen</string>
+  <string name="disable">Uitzetten</string>
+  <string name="enable">Aanzetten</string>
   <string name="continue_button">Doorgaan</string>
   <string name="retry">Opnieuw</string>
-  <string name="turn_on">Inschakelen</string>
+  <string name="turn_on">Aanzetten</string>
   <string name="not_now">Niet nu</string>
   <string name="connect">Verbinden</string>
   <string name="disconnect">Verbinding verbreken</string>
@@ -63,6 +64,7 @@
   <string name="connected">Gekoppeld</string>
   <string name="notDetected">Niet gedetecteerd</string>
   <string name="disconnected">Ontkoppeld</string>
+  <string name="detected">Waargenomen</string>
   <string name="unknown">Onbekend</string>
   <string name="app_running_msg_channel_name">Sms-service van telefoon wordt uitgevoerd</string>
   <string name="app_running_msg_notification_title">Sms-service van telefoon is actief</string>
@@ -83,7 +85,7 @@
   <string name="trusted_device_notification_title">Laat je telefoon je profiel ontgrendelen</string>
   <string name="trusted_device_notification_content">Tik hier om deze functie te autoriseren</string>
   <string name="trusted_device_enrollment_error_dialog_title">Er is iets misgegaan</string>
-  <string name="trusted_device_enrollment_error_dialog_message">Deze functie kan op dit moment niet worden ingeschakeld. Probeer het opnieuw.</string>
+  <string name="trusted_device_enrollment_error_dialog_message">Deze functie kan op dit moment niet worden aangezet. Probeer het opnieuw.</string>
   <string name="create_phone_lock_dialog_title">Maak een schermvergrendeling op je telefoon</string>
   <string name="create_phone_lock_dialog_message">Er is nog geen schermvergrendeling ingesteld op je telefoon. Als je je auto wilt ontgrendelen met je telefoon, maak je eerst een schermvergrendeling (ook wel toegangscode genoemd) in de instellingen van je telefoon.</string>
   <plurals name="notification_new_message">
@@ -92,4 +94,7 @@
   </plurals>
   <string name="name_not_available">Naam niet beschikbaar</string>
   <string name="ble_device_name_prefix">Voertuig\u00A0</string>
+  <string name="suw_setup_profile_title">Profiel instellen met telefoon</string>
+  <string name="suw_setup_profile_content">Scan de QR-code om aan de slag te gaan. Als je geen MyCompanion-app hebt, kun je deze downloaden via Google Play en de App Store.</string>
+  <string name="suw_qr_instruction_text">Scan de QR-code om verbinding te maken met&lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
 </resources>

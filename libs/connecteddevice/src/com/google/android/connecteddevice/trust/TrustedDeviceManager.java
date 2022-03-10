@@ -96,7 +96,7 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
 
   private final Executor remoteCallbackExecutor;
 
-  private final AtomicBoolean isWaitingForCredentials = new AtomicBoolean(false);
+  private final AtomicBoolean isWaitingForCredentialSetUp = new AtomicBoolean(false);
 
   private final AtomicReference<String> pendingUnlockDeviceId = new AtomicReference<>(null);
 
@@ -109,6 +109,8 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
   private byte[] pendingToken;
 
   private PendingCredentials pendingCredentials;
+
+  private PendingHandle pendingHandle;
 
   TrustedDeviceManager(@NonNull Context context) {
     this(
@@ -139,8 +141,9 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
     pendingToken = null;
     pendingDevice = null;
     pendingCredentials = null;
-    isWaitingForCredentials.set(false);
     pendingUnlockDeviceId.set(null);
+    pendingHandle = null;
+    isWaitingForCredentialSetUp.set(false);
     trustedDeviceFeature.stop();
     remoteDeviceAssociationCallbacks.kill();
     remoteTrustedDeviceCallbacks.kill();
@@ -151,6 +154,7 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
   private void startEnrollment(@NonNull ConnectedDevice device, @NonNull byte[] token) {
     logd(TAG, "Starting trusted device enrollment process.");
     pendingDevice = device;
+    pendingToken = token;
 
     notifyRemoteCallbackList(
         remoteEnrollmentNotificationRequestListeners,
@@ -161,8 +165,13 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
             loge(TAG, "Failed to notify the enrollment notification request.");
           }
         });
+  }
 
-    pendingToken = token;
+  private void addEscrowToken() {
+    if (pendingToken == null) {
+      loge(TAG, "No pending token can be added.");
+      return;
+    }
     if (trustAgentDelegate == null) {
       logd(
           TAG,
@@ -170,11 +179,13 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
               + "can be taken at this time.");
       return;
     }
-
-    try {
-      trustAgentDelegate.addEscrowToken(token, ActivityManager.getCurrentUser());
-    } catch (RemoteException e) {
-      loge(TAG, "Error while adding token through delegate.", e);
+    if (!isWaitingForCredentialSetUp.get()) {
+      logd(TAG, "Adding escrow token.");
+      try {
+        trustAgentDelegate.addEscrowToken(pendingToken, ActivityManager.getCurrentUser());
+      } catch (RemoteException e) {
+        loge(TAG, "Error while adding token through delegate.", e);
+      }
     }
   }
 
@@ -195,13 +206,8 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
   @Override
   public void onEscrowTokenAdded(int userId, long handle) {
     logd(TAG, "Escrow token has been successfully added.");
+    pendingHandle = new PendingHandle(userId, handle);
 
-    if (remoteEnrollmentCallbacks.getRegisteredCallbackCount() == 0) {
-      isWaitingForCredentials.set(true);
-      return;
-    }
-
-    isWaitingForCredentials.set(false);
     notifyRemoteCallbackList(
         remoteEnrollmentCallbacks,
         callback -> {
@@ -246,6 +252,7 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
 
     pendingDevice = null;
     pendingToken = null;
+    pendingHandle = null;
 
     TrustedDevice trustedDevice = new TrustedDevice(deviceId, userId, handle);
     notifyRemoteCallbackList(
@@ -309,6 +316,46 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
   }
 
   @Override
+  public void processEnrollment(boolean isDeviceSecure) {
+    if (isDeviceSecure) {
+      isWaitingForCredentialSetUp.set(false);
+      logd(TAG, "Processing enrollment on secure device.");
+      addEscrowToken();
+      return;
+    }
+    logd(
+        TAG,
+        "Request to process enrollment on insecure device. "
+            + "Notifying callbacks of secure device request.");
+    isWaitingForCredentialSetUp.set(true);
+    notifyRemoteCallbackList(
+        remoteEnrollmentCallbacks,
+        callback -> {
+          try {
+            callback.onSecureDeviceRequest();
+          } catch (RemoteException e) {
+            loge(TAG, "Error notifying callbacks of secure device request.", e);
+          }
+        });
+  }
+
+  @Override
+  public void abortEnrollment() {
+    logd(TAG, "Aborting enrollment");
+    if (pendingHandle != null && trustAgentDelegate != null) {
+      logd(TAG, "Removing added token.");
+      try {
+        trustAgentDelegate.removeEscrowToken(pendingHandle.handle, pendingHandle.userId);
+      } catch (RemoteException e) {
+        loge(TAG, "Error while removing token through delegate.", e);
+      }
+    }
+    pendingToken = null;
+    pendingHandle = null;
+    isWaitingForCredentialSetUp.set(false);
+  }
+
+  @Override
   public void registerTrustedDeviceCallback(ITrustedDeviceCallback callback) {
     remoteTrustedDeviceCallbacks.register(callback);
   }
@@ -331,17 +378,6 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
   @Override
   public void registerTrustedDeviceEnrollmentCallback(ITrustedDeviceEnrollmentCallback callback) {
     remoteEnrollmentCallbacks.register(callback);
-    // A token has been added and is waiting on user credential validation.
-    if (isWaitingForCredentials.getAndSet(false)) {
-      remoteCallbackExecutor.execute(
-          () -> {
-            try {
-              callback.onValidateCredentialsRequest();
-            } catch (RemoteException e) {
-              loge(TAG, "Error while notifying enrollment listener.", e);
-            }
-          });
-    }
   }
 
   @Override
@@ -381,14 +417,7 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
         });
 
     // Add pending token if present.
-    if (pendingToken != null) {
-      try {
-        trustAgentDelegate.addEscrowToken(pendingToken, userId);
-      } catch (RemoteException e) {
-        loge(TAG, "Error while adding token through delegate.", e);
-      }
-      return;
-    }
+    addEscrowToken();
 
     // Unlock with pending credentials if present.
     if (pendingCredentials != null) {
@@ -865,6 +894,16 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
     PendingCredentials(@NonNull String deviceId, @NonNull PhoneCredentials credentials) {
       this.deviceId = deviceId;
       phoneCredentials = credentials;
+    }
+  }
+
+  private static class PendingHandle {
+    final int userId;
+    final long handle;
+
+    PendingHandle(int userId, long handle) {
+      this.userId = userId;
+      this.handle = handle;
     }
   }
 }

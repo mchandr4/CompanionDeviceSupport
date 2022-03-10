@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
   <string name="open_companion_app_instruction_text">ಕಂಪ್ಯಾನಿಯನ್ ಆ್ಯಪ್ ಅನ್ನು ತೆರೆಯಿರಿ</string>
   <string name="enable_bluetooth_instruction_text">ಬ್ಲೂಟೂತ್ ಕನೆಕ್ಷನ್ ಅನ್ನು ಅನುಮತಿಸಿ</string>
   <string name="connect_to_targe_car_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s ಗೆ ಕನೆಕ್ಟ್ ಮಾಡಿ</string>
+  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s ಗೆ ಸಂಪರ್ಕಿಸಲು QR ಕೋಡ್ ಅನ್ನು ಸ್ಕ್ಯಾನ್ ಮಾಡಿ ಅಥವಾ MyCompanion ಅನ್ನು ತೆರೆಯಿರಿ</string>
   <string name="connect_to_car_instruction_text">ಕಾರ್‌ಗೆ ಕನೆಕ್ಟ್ ಮಾಡಿ</string>
   <string name="associated_device_pairing_code_title">ಫೋನ್‌ನಲ್ಲಿ ಕೋಡ್ ಅನ್ನು ದೃಢೀಕರಿಸಿ</string>
   <string name="associated_device_pairing_message">ನಿಮ್ಮ ಫೋನ್‌ನಲ್ಲಿ ತೋರಿಸಲಾಗುವ ಕೋಡ್‌ಗೆ ಇದು ಹೊಂದಾಣಿಕೆಯಾಗುತ್ತಿದೆ ಎಂದು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ</string>
@@ -63,6 +64,7 @@
   <string name="connected">ಕನೆಕ್ಟ್ ಆಗಿದೆ</string>
   <string name="notDetected">ಪತ್ತೆಯಾಗಲಿಲ್ಲ</string>
   <string name="disconnected">ಡಿಸ್‌ಕನೆಕ್ಟ್ ಆಗಿದೆ</string>
+  <string name="detected">ಪತ್ತೆಹಚ್ಚಲಾಗಿದೆ</string>
   <string name="unknown">ಅಪರಿಚಿತ</string>
   <string name="app_running_msg_channel_name">ಫೋನ್ ಪಠ್ಯ ಸಂದೇಶ ಸೇವೆಯು ಚಾಲನೆಯಲ್ಲಿದೆ</string>
   <string name="app_running_msg_notification_title">ಫೋನ್ ಪಠ್ಯ ಸಂದೇಶ ಕಳುಹಿಸುವಿಕೆ ಸೇವೆಯು ಸಕ್ರಿಯವಾಗಿದೆ</string>
@@ -92,4 +94,7 @@
   </plurals>
   <string name="name_not_available">ಹೆಸರು ಲಭ್ಯವಿಲ್ಲ</string>
   <string name="ble_device_name_prefix">ವಾಹನ\u00A0</string>
+  <string name="suw_setup_profile_title">ಫೋನ್‌ನ ಮೂಲಕ ಪ್ರೊಫೈಲ್ ಅನ್ನು ಸೆಟಪ್ ಮಾಡಿ</string>
+  <string name="suw_setup_profile_content">ಪ್ರಾರಂಭಿಸಲು QR ಕೋಡ್ ಅನ್ನು ಸ್ಕ್ಯಾನ್ ಮಾಡಿ. ನೀವು MyCompanion ಆ್ಯಪ್ ಅನ್ನು ಹೊಂದಿರದಿದ್ದರೆ, ನೀವು ಅದನ್ನು Google Play ಮತ್ತು ಆ್ಯಪ್ ಸ್ಟೋರ್‌ನಲ್ಲಿ ಡೌನ್‌ಲೋಡ್ ಮಾಡಬಹುದು.</string>
+  <string name="suw_qr_instruction_text">&lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s ಗೆ ಕನೆಕ್ಟ್ ಆಗಲು QR ಕೋಡ್ ಅನ್ನು ಸ್ಕ್ಯಾನ್ ಮಾಡಿ</string>
 </resources>

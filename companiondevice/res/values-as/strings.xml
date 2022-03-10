@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
   <string name="open_companion_app_instruction_text">সহযোগী এপ্‌টো খোলক।</string>
   <string name="enable_bluetooth_instruction_text">ব্লুটুথ সংযোগৰ অনুমতি দিয়ক</string>
   <string name="connect_to_targe_car_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$sৰ সৈতে সংযোগ কৰক</string>
+  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$sৰ সৈতে সংযোগ কৰিবলৈ কিউআৰ ক’ডটো স্কেন কৰক অথবা MyCompanion খোলক</string>
   <string name="connect_to_car_instruction_text">গাড়ীখনৰ সৈতে সংযোগ কৰক</string>
   <string name="associated_device_pairing_code_title">ক’ডটো ফ’নত নিশ্চিত কৰক</string>
   <string name="associated_device_pairing_message">এইটো আপোনাৰ ফ’নটোত দেখুওৱা ক’ডটোৰ সৈতে মিলাটো নিশ্চিত কৰক</string>
@@ -63,6 +64,7 @@
   <string name="connected">সংযোগ কৰা হ’ল</string>
   <string name="notDetected">চিনাক্ত কৰা হোৱা নাই</string>
   <string name="disconnected">সংযোগ বিচ্ছিন্ন হৈছে</string>
+  <string name="detected">চিনাক্ত কৰা হৈছে</string>
   <string name="unknown">অজ্ঞাত</string>
   <string name="app_running_msg_channel_name">ফ’নৰ পাঠ বাৰ্তাৰ সেৱাটো চলি আছে</string>
   <string name="app_running_msg_notification_title">ফ’নৰ পাঠ বাৰ্তাৰ সেৱাটো সক্ৰিয় হৈ আছে</string>
@@ -92,4 +94,7 @@
   </plurals>
   <string name="name_not_available">নামটো উপলব্ধ নহয়</string>
   <string name="ble_device_name_prefix">বাহন\u00A0</string>
+  <string name="suw_setup_profile_title">ফ’নৰ জৰিয়তে প্ৰ’ফাইল ছেটআপ কৰক</string>
+  <string name="suw_setup_profile_content">আৰম্ভ কৰিবলৈ কিউআৰ ক’ড স্কেন কৰক। যদি আপোনাৰ ওচৰত MyCompanion এপ্‌টো নাই, তেন্তে আপুনি সেইটো Google Play আৰু App Storeৰ পৰা ডাউনল’ড কৰিব পাৰে।</string>
+  <string name="suw_qr_instruction_text">&lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$sৰ সৈতে সংযোগ কৰিবলৈ কিউআৰ ক’ড স্কেন কৰক</string>
 </resources>

@@ -19,21 +19,17 @@ package com.google.android.connecteddevice.oob
 import com.google.android.connecteddevice.transport.ProtocolDevice
 
 /**
- * A out of band data exchange channel.
+ * An out of band data exchange channel.
  *
- * This class performs no-op. It is a pass-through when call [completeOobDataExchange], it will
- * return `true` and issue [Callback.onOobExchangeSuccess] immediately.
+ * This class performs no-op. [completeOobDataExchange] returns `true` immediately.
  */
 class PassThroughChannel : OobChannel {
   override fun completeOobDataExchange(
     protocolDevice: ProtocolDevice,
-    callback: OobChannel.Callback
+    oobData: ByteArray
   ): Boolean {
-    callback.onOobExchangeSuccess()
     return true
   }
-
-  override fun sendOobData(oobData: ByteArray) {}
 
   override fun interrupt() {}
 }

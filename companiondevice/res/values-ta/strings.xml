@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
   <string name="open_companion_app_instruction_text">கம்பேனியன் ஆப்ஸைத் திறக்கவும்</string>
   <string name="enable_bluetooth_instruction_text">புளூடூத் இணைப்பை அனுமதிக்கவும்</string>
   <string name="connect_to_targe_car_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s உடன் இணைக்கவும்</string>
+  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s உடன் இணைக்க QR குறியீட்டை ஸ்கேன் செய்யவும் அல்லது MyCompanion ஆப்ஸைத் திறக்கவும்</string>
   <string name="connect_to_car_instruction_text">காருடன் இணைக்கவும்</string>
   <string name="associated_device_pairing_code_title">மொபைலில் காட்டும் குறியீட்டை உறுதிசெய்தல்</string>
   <string name="associated_device_pairing_message">மொபைலில் காட்டும் குறியீட்டுடன் இது பொருந்துகிறது என்பதை உறுதிசெய்யவும்</string>
@@ -63,6 +64,7 @@
   <string name="connected">இணைக்கப்பட்டது</string>
   <string name="notDetected">கண்டறிய முடியவில்லை</string>
   <string name="disconnected">துண்டிக்கப்பட்டது</string>
+  <string name="detected">கண்டறியப்பட்டது</string>
   <string name="unknown">அறியப்படாதது</string>
   <string name="app_running_msg_channel_name">மொபைல் மெசேஜ் சேவை இயக்கத்திலுள்ளது</string>
   <string name="app_running_msg_notification_title">மொபைல் மெசேஜ் சேவை செயலிலுள்ளது</string>
@@ -92,4 +94,7 @@
   </plurals>
   <string name="name_not_available">பெயர் கிடைக்கவில்லை</string>
   <string name="ble_device_name_prefix">வாகனம்\u00A0</string>
+  <string name="suw_setup_profile_title">மொபைல் மூலம் சுயவிவரத்தை அமைத்தல்</string>
+  <string name="suw_setup_profile_content">தொடங்க QR குறியீட்டை ஸ்கேன் செய்யுங்கள். உங்களிடம் MyCompanion ஆப்ஸ் இல்லையெனில் Google Play மற்றும் App Storeரில் இருந்து அதைப் பதிவிறக்கிக் கொள்ளலாம்.</string>
+  <string name="suw_qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s உடன்&lt;br /&gt;இணைக்க QR குறியீட்டை ஸ்கேன் செய்யவும்</string>
 </resources>

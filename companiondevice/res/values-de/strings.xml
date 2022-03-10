@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
   <string name="open_companion_app_instruction_text">Companion App öffnen</string>
   <string name="enable_bluetooth_instruction_text">Bluetooth-Verbindung zulassen</string>
   <string name="connect_to_targe_car_instruction_text">Mit &lt;b&gt;%1$s&lt;/b&gt; %2$s verbinden</string>
+  <string name="qr_instruction_text">Scanne den QR-Code oder öffne MyCompanion, um eine Verbindung zu &lt;b&gt;%1$s&lt;/b&gt; %2$s herzustellen</string>
   <string name="connect_to_car_instruction_text">Mit dem Fahrzeug verbinden</string>
   <string name="associated_device_pairing_code_title">Code auf Smartphone bestätigen</string>
   <string name="associated_device_pairing_message">Bestätige, dass dieser Code dem Code auf deinem Smartphone entspricht</string>
@@ -63,6 +64,7 @@
   <string name="connected">Verbunden</string>
   <string name="notDetected">Nicht gefunden</string>
   <string name="disconnected">Nicht verbunden</string>
+  <string name="detected">Erkannt</string>
   <string name="unknown">Unbekannt</string>
   <string name="app_running_msg_channel_name">SMS-Dienst auf Smartphone läuft</string>
   <string name="app_running_msg_notification_title">SMS-Dienst auf Smartphone ist aktiv</string>
@@ -92,4 +94,7 @@
   </plurals>
   <string name="name_not_available">Name nicht verfügbar</string>
   <string name="ble_device_name_prefix">Fahrzeug\u00A0</string>
+  <string name="suw_setup_profile_title">Profil mit Smartphone einrichten</string>
+  <string name="suw_setup_profile_content">Scanne den QR-Code, um loszulegen. Wenn du die MyCompanion App nicht hast, lade sie bei Google Play oder im App Store herunter.</string>
+  <string name="suw_qr_instruction_text">QR-Code scannen, um Verbindung mit&lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s herzustellen</string>
 </resources>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
   <string name="open_companion_app_instruction_text">Otvorite prateću aplikaciju</string>
   <string name="enable_bluetooth_instruction_text">Dozvolite Bluetooth vezu</string>
   <string name="connect_to_targe_car_instruction_text">Povežite se s automobilom &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">Skenirajte QR kôd ili otvorite MyCompanion da se povežete s automobilom &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
   <string name="connect_to_car_instruction_text">Povežite se s automobilom</string>
   <string name="associated_device_pairing_code_title">Potvrdite kôd na telefonu</string>
   <string name="associated_device_pairing_message">Potvrdite da se ovaj kôd podudara s kodom prikazanim na vašem telefonu</string>
@@ -63,6 +64,7 @@
   <string name="connected">Povezano</string>
   <string name="notDetected">Nije otkriveno</string>
   <string name="disconnected">Veza je prekinuta</string>
+  <string name="detected">Otkriveno</string>
   <string name="unknown">Nepoznato</string>
   <string name="app_running_msg_channel_name">Usluga slanja SMS-ova na telefonu je pokrenuta</string>
   <string name="app_running_msg_notification_title">Usluga slanja SMS-ova na telefonu je aktivna</string>
@@ -93,4 +95,7 @@
   </plurals>
   <string name="name_not_available">Ime nije dostupno</string>
   <string name="ble_device_name_prefix">Vozilo\u00A0</string>
+  <string name="suw_setup_profile_title">Postavite profil pomoću telefona</string>
+  <string name="suw_setup_profile_content">Skenirajte QR kôd da započnete. Ako nemate aplikaciju MyCompanion, možete je preuzeti na Google Playu i App Storeu.</string>
+  <string name="suw_qr_instruction_text">Skenirajte QR kôd da se povežete s automobilom&lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
 </resources>

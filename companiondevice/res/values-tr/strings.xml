@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
   <string name="open_companion_app_instruction_text">Tamamlayıcı uygulamayı açın</string>
   <string name="enable_bluetooth_instruction_text">Bluetooth bağlantısına izin verin</string>
   <string name="connect_to_targe_car_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s aracına bağlanın</string>
+  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s adlı arabaya bağlanmak için QR kodunu tarayın veya MyCompanion\'u açın</string>
   <string name="connect_to_car_instruction_text">Arabaya bağlanın</string>
   <string name="associated_device_pairing_code_title">Kodu telefonda onaylayın</string>
   <string name="associated_device_pairing_message">Bunun telefonunuzda gösterilen kodla aynı olduğunu onaylayın</string>
@@ -63,6 +64,7 @@
   <string name="connected">Bağlı</string>
   <string name="notDetected">Algılanmadı</string>
   <string name="disconnected">Bağlı değil</string>
+  <string name="detected">Algılandı</string>
   <string name="unknown">Bilinmiyor</string>
   <string name="app_running_msg_channel_name">Telefon kısa mesaj hizmeti çalışıyor</string>
   <string name="app_running_msg_notification_title">Telefon kısa mesaj hizmeti etkin</string>
@@ -92,4 +94,7 @@
   </plurals>
   <string name="name_not_available">Ad kullanılamıyor</string>
   <string name="ble_device_name_prefix">Araç\u00A0</string>
+  <string name="suw_setup_profile_title">Telefonla profil oluşturun</string>
+  <string name="suw_setup_profile_content">Başlamak için QR kodunu tarayın. MyCompanion uygulamanız yoksa Google Play\'den ve App Store\'dan indirebilirsiniz.</string>
+  <string name="suw_qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s aracına bağlanmak için&lt;br /&gt;QR kodunu tarayın</string>
 </resources>

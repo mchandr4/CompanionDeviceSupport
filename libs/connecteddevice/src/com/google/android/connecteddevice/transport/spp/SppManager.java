@@ -170,7 +170,6 @@ public class SppManager {
         new AcceptTask(adapter, isSecure, serviceUuid, acceptTaskListener, taskCallbackExecutor);
 
     if (!acceptTask.startListening()) {
-      // TODO(b/159376003): Handle listening error.
       acceptTask.cancel();
       acceptTask = null;
       return false;

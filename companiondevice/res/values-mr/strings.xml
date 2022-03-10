@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
   <string name="open_companion_app_instruction_text">सहयोगी अ‍ॅप उघडा</string>
   <string name="enable_bluetooth_instruction_text">ब्लूटूथ कनेक्शनला अनुमती द्या</string>
   <string name="connect_to_targe_car_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s सोबत कनेक्ट करा</string>
+  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s शी कनेक्ट करण्यासाठी QR कोड स्कॅन करा किंवा MyCompanion उघडा</string>
   <string name="connect_to_car_instruction_text">कारशी कनेक्ट करा</string>
   <string name="associated_device_pairing_code_title">फोनवरील कोडची खात्री करा</string>
   <string name="associated_device_pairing_message">तुमच्या फोनवर दाखवलेल्या कोडशी हा जुळत असल्याची खात्री करा</string>
@@ -63,6 +64,7 @@
   <string name="connected">कनेक्ट केले आहे</string>
   <string name="notDetected">आढळले नाही</string>
   <string name="disconnected">डिस्कनेक्ट केले आहे</string>
+  <string name="detected">डिटेक्ट केले</string>
   <string name="unknown">अज्ञात</string>
   <string name="app_running_msg_channel_name">फोनवर एसएमएस सेवा रन होत आहे</string>
   <string name="app_running_msg_notification_title">फोनवर एसएमएस सेवा अ‍ॅक्टिव्ह आहे</string>
@@ -92,4 +94,7 @@
   </plurals>
   <string name="name_not_available">नाव उपलब्ध नाही</string>
   <string name="ble_device_name_prefix">वाहन\u00A0</string>
+  <string name="suw_setup_profile_title">फोन वापरून प्रोफाइल सेट करा</string>
+  <string name="suw_setup_profile_content">सुरुवात करण्यासाठी, QR कोड स्कॅन करा. तुमच्याकडे MyCompanion ॲप नसल्यास, तुम्ही ते Google Play आणि App Store वरून डाउनलोड करू शकता.</string>
+  <string name="suw_qr_instruction_text">&lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s सह कनेक्ट करण्यासाठी QR कोड स्कॅन करा</string>
 </resources>

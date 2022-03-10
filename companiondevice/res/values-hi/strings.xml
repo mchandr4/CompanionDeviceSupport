@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
   <string name="open_companion_app_instruction_text">साथी ऐप्लिकेशन खोलें</string>
   <string name="enable_bluetooth_instruction_text">ब्लूटूथ कनेक्शन की अनुमति दें</string>
   <string name="connect_to_targe_car_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s से कनेक्ट करें</string>
+  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s से कनेक्ट करने के लिए, यह क्यूआर कोड स्कैन करें या MyCompanion खोलें</string>
   <string name="connect_to_car_instruction_text">कार से कनेक्ट करें</string>
   <string name="associated_device_pairing_code_title">फ़ोन पर कोड की पुष्टि करें</string>
   <string name="associated_device_pairing_message">पुष्टि करें कि यह कोड, आपके फ़ोन पर दिखाए गए कोड से मेल खाता है</string>
@@ -63,6 +64,7 @@
   <string name="connected">कनेक्ट हो गया</string>
   <string name="notDetected">पता नहीं चला</string>
   <string name="disconnected">डिसकनेक्ट हो गया</string>
+  <string name="detected">डिवाइस का पता चला</string>
   <string name="unknown">कोई जानकारी नहीं</string>
   <string name="app_running_msg_channel_name">फ़ोन पर मैसेज सेवा चालू है</string>
   <string name="app_running_msg_notification_title">फ़ोन पर मैसेज सेवा चालू है</string>
@@ -92,4 +94,7 @@
   </plurals>
   <string name="name_not_available">नाम उपलब्ध नहीं है</string>
   <string name="ble_device_name_prefix">गाड़ी\u00A0</string>
+  <string name="suw_setup_profile_title">फ़ोन की मदद से प्रोफ़ाइल सेट अप करें</string>
+  <string name="suw_setup_profile_content">शुरू करने के लिए, क्यूआर कोड स्कैन करें. अगर आपके पास MyCompanion ऐप्लिकेशन नहीं है, तो Google Play और App Store से इसे डाउनलोड किया जा सकता है.</string>
+  <string name="suw_qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s&lt;br /&gt; से कनेक्ट करने के लिए, क्यूआर कोड स्कैन करें</string>
 </resources>

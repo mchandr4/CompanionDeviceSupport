@@ -39,7 +39,7 @@ import java.util.concurrent.ScheduledFuture;
  * <p>The subscribed GATT characteristic is not tracked - only the central UUID is used.
  */
 class CentralConnectionStatus {
-  private static final String TAG = "BlePeripheralManager";
+  private static final String TAG = "CentralConnectionStatus";
   private static final long NO_SUBSCRIPTION_TIMEOUT = 2000;
 
   private final Object lock = new Object();

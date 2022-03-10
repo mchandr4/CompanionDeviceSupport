@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
   <string name="open_companion_app_instruction_text">Hamroh ilovani ochish</string>
   <string name="enable_bluetooth_instruction_text">Bluetooth ulanishga ruxsat berish</string>
   <string name="connect_to_targe_car_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s avtomobiliga ulanish</string>
+  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s avtomobiliga ulanish uchun QR-kodni skanerlang yoki MyCompanion ilovasini oching</string>
   <string name="connect_to_car_instruction_text">Avtomobilga ulanish</string>
   <string name="associated_device_pairing_code_title">Kodni telefoningizda tasdiqlang</string>
   <string name="associated_device_pairing_message">Bu kod telefoningizdagi bilan mos ekanini tasdiqlang</string>
@@ -63,6 +64,7 @@
   <string name="connected">Ulandi</string>
   <string name="notDetected">Aniqlanmadi</string>
   <string name="disconnected">Uzildi</string>
+  <string name="detected">Aniqlandi</string>
   <string name="unknown">Noaniq</string>
   <string name="app_running_msg_channel_name">Telefon SMS xizmati ishlamoqda</string>
   <string name="app_running_msg_notification_title">Telefon SMS xizmati faol</string>
@@ -92,4 +94,7 @@
   </plurals>
   <string name="name_not_available">Bu nom mavjud emas</string>
   <string name="ble_device_name_prefix">Avtomobil\u00A0</string>
+  <string name="suw_setup_profile_title">Profilni telefon orqali sozlash</string>
+  <string name="suw_setup_profile_content">Boshlash uchun QR kodni skanerlang. MyCompanion ilovasi boʻlmasa, uni Google Play yoki App Store orqali yuklab oling.</string>
+  <string name="suw_qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s mashinasiga&lt;br /&gt;ulanish uchun QR kodni skanerlang</string>
 </resources>

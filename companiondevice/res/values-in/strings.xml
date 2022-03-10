@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
   <string name="open_companion_app_instruction_text">Buka aplikasi pendamping</string>
   <string name="enable_bluetooth_instruction_text">Izinkan koneksi Bluetooth</string>
   <string name="connect_to_targe_car_instruction_text">Hubungkan ke &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">Pindai kode QR atau buka MyCompanion untuk terhubung ke &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
   <string name="connect_to_car_instruction_text">Hubungkan ke mobil</string>
   <string name="associated_device_pairing_code_title">Konfirmasi kode di ponsel</string>
   <string name="associated_device_pairing_message">Konfirmasi bahwa kode ini sesuai dengan kode yang ditampilkan di ponsel</string>
@@ -63,6 +64,7 @@
   <string name="connected">Terhubung</string>
   <string name="notDetected">Tidak terdeteksi</string>
   <string name="disconnected">Terputus</string>
+  <string name="detected">Terdeteksi</string>
   <string name="unknown">Tidak dikenal</string>
   <string name="app_running_msg_channel_name">Layanan SMS ponsel sedang berjalan</string>
   <string name="app_running_msg_notification_title">Layanan SMS ponsel aktif</string>
@@ -92,4 +94,7 @@
   </plurals>
   <string name="name_not_available">Nama tidak tersedia</string>
   <string name="ble_device_name_prefix">Kendaraan\u00A0</string>
+  <string name="suw_setup_profile_title">Menyiapkan profil dengan ponsel</string>
+  <string name="suw_setup_profile_content">Pindai kode QR untuk memulai. Jika tidak memiliki aplikasi MyCompanion, Anda dapat mendownloadnya di Google Play dan App Store.</string>
+  <string name="suw_qr_instruction_text">Pindai kode QR untuk menghubungkan ke&lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
 </resources>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
   <string name="open_companion_app_instruction_text">Қосымша қолданбаны ашыңыз.</string>
   <string name="enable_bluetooth_instruction_text">Bluetooth байланысына рұқсат беріңіз.</string>
   <string name="connect_to_targe_car_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s көлігіне қосылыңыз.</string>
+  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s көлігіне қосылу үшін QR кодын сканерлеңіз немесе MyCompanion қолданбасын ашыңыз.</string>
   <string name="connect_to_car_instruction_text">Көлікке қосылыңыз.</string>
   <string name="associated_device_pairing_code_title">Кодты телефоннан растау</string>
   <string name="associated_device_pairing_message">Мұның телефонда көрсетілетін кодқа сәйкес келетінін растаңыз.</string>
@@ -63,6 +64,7 @@
   <string name="connected">Қосулы</string>
   <string name="notDetected">Анықталмаған</string>
   <string name="disconnected">Ажыратулы</string>
+  <string name="detected">Анықталды</string>
   <string name="unknown">Белгісіз</string>
   <string name="app_running_msg_channel_name">Телефонда мәтіндік хабар қызметі іске қосылған.</string>
   <string name="app_running_msg_notification_title">Телефонда мәтіндік хабар қызметі қосулы.</string>
@@ -92,4 +94,7 @@
   </plurals>
   <string name="name_not_available">Атауы жоқ</string>
   <string name="ble_device_name_prefix">Көлік\u00A0</string>
+  <string name="suw_setup_profile_title">Профильді телефонмен реттеңіз</string>
+  <string name="suw_setup_profile_content">Реттеуді бастау үшін QR кодын сканерлеңіз. MyCompanion қолданбасы болмаса, оны Google Play және App Store дүкендерінен жүктеп ала аласыз.</string>
+  <string name="suw_qr_instruction_text">%1$s&lt;/b&gt; %2$s көлігіне қосылу үшін&lt;br /&gt; &lt;b&gt;QR кодын сканерлеңіз.</string>
 </resources>

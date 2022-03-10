@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
   <string name="open_companion_app_instruction_text">Otvorite prateću aplikaciju</string>
   <string name="enable_bluetooth_instruction_text">Omogućite Bluetooth vezu</string>
   <string name="connect_to_targe_car_instruction_text">Povežite se sa automobilom &lt;b&gt;%1$s&lt;/b&gt;%2$s</string>
+  <string name="qr_instruction_text">Skenirajte QR kôd ili otvorite MyCompanion da biste se povezali sa automobilom &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
   <string name="connect_to_car_instruction_text">Povežite se sa automobilom</string>
   <string name="associated_device_pairing_code_title">Potvrdite kôd na telefonu</string>
   <string name="associated_device_pairing_message">Potvrdite da se ovo podudara sa kodom koji se prikazuje na telefonu</string>
@@ -63,6 +64,7 @@
   <string name="connected">Povezano</string>
   <string name="notDetected">Nije otkriveno</string>
   <string name="disconnected">Prekinuta veza</string>
+  <string name="detected">Otkriveno</string>
   <string name="unknown">Nepoznato</string>
   <string name="app_running_msg_channel_name">Usluga za tekstualne poruke na telefonu je pokrenuta</string>
   <string name="app_running_msg_notification_title">Usluga za tekstualne poruke na telefonu je aktivna</string>
@@ -93,4 +95,7 @@
   </plurals>
   <string name="name_not_available">Ime nije dostupno</string>
   <string name="ble_device_name_prefix">Vozilo\u00A0</string>
+  <string name="suw_setup_profile_title">Podesite profil pomoću telefona</string>
+  <string name="suw_setup_profile_content">Skenirajte QR kôd da biste započeli. Ako nemate aplikaciju MyCompanion, možete da je preuzmete na Google Play-u i u App Store-u.</string>
+  <string name="suw_qr_instruction_text">Skenirajte QR kôd da biste se povezali sa automobilom&lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
 </resources>

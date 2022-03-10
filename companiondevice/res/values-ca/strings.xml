@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
   <string name="open_companion_app_instruction_text">Obre l\'aplicació complementària</string>
   <string name="enable_bluetooth_instruction_text">Permet la connexió Bluetooth</string>
   <string name="connect_to_targe_car_instruction_text">Connecta a &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">Escaneja el codi QR o obre MyCompanion per connectar-te a &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
   <string name="connect_to_car_instruction_text">Connecta al cotxe</string>
   <string name="associated_device_pairing_code_title">Confirma el codi al telèfon</string>
   <string name="associated_device_pairing_message">Confirma que coincideix amb el codi que es mostra al teu telèfon</string>
@@ -63,6 +64,7 @@
   <string name="connected">Connectat</string>
   <string name="notDetected">No detectat</string>
   <string name="disconnected">Desconnectat</string>
+  <string name="detected">Detectat</string>
   <string name="unknown">Desconegut</string>
   <string name="app_running_msg_channel_name">Servei de missatges de text del telèfon en execució</string>
   <string name="app_running_msg_notification_title">Servei de missatgeria de text del telèfon actiu</string>
@@ -92,4 +94,7 @@
   </plurals>
   <string name="name_not_available">Nom no disponible</string>
   <string name="ble_device_name_prefix">Vehicle\u00A0</string>
+  <string name="suw_setup_profile_title">Configura el perfil amb el telèfon</string>
+  <string name="suw_setup_profile_content">Escaneja el codi QR per començar. Si no tens l\'aplicació MyCompanion, pots baixar-la de Google Play o l\'App Store.</string>
+  <string name="suw_qr_instruction_text">Escaneja el codi QR per connectar-te al cotxe &lt;br/&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
 </resources>

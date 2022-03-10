@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
   <string name="open_companion_app_instruction_text">Vula i-companion app</string>
   <string name="enable_bluetooth_instruction_text">Vumela uxhumo lwe-Bluetooth</string>
   <string name="connect_to_targe_car_instruction_text">Xhuma ku-&lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">Skena ikhodi ye-QR noma vula i-MyCompanion ukuze uxhumeke ku-&lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
   <string name="connect_to_car_instruction_text">Xhuma emotweni</string>
   <string name="associated_device_pairing_code_title">Qinisekisa ikhodi kufoni</string>
   <string name="associated_device_pairing_message">Qinisekisa ukuthi lokhu kufana nekhodi eboniswe kufoni yakho</string>
@@ -63,6 +64,7 @@
   <string name="connected">Ixhunyiwe</string>
   <string name="notDetected">Ayitholiwe</string>
   <string name="disconnected">Inqamukile</string>
+  <string name="detected">Itholiwe</string>
   <string name="unknown">Akwaziwa</string>
   <string name="app_running_msg_channel_name">Isevisi yomyalezo obhaliwe wefoni iyasebenza</string>
   <string name="app_running_msg_notification_title">Isevisi yomlayezo obhaliwe wefoni iyasebenza</string>
@@ -92,4 +94,7 @@
   </plurals>
   <string name="name_not_available">Igama alitholakali</string>
   <string name="ble_device_name_prefix">Imoto\u00A0</string>
+  <string name="suw_setup_profile_title">Setha iphrofayela ngefoni</string>
+  <string name="suw_setup_profile_content">Skena ikhodi ye-QR ukuze uqalise. Uma ungenayo i-app ye-MyCompanion, ungayidawuniloda ku-Google Play kanye ne-App Store.</string>
+  <string name="suw_qr_instruction_text">Skena ikhodi ye-QR ukuze uxhume ku-&lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
 </resources>

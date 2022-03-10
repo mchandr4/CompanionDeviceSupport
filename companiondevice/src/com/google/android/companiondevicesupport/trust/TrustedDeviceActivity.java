@@ -27,6 +27,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.KeyguardManager;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.os.Bundle;
 import androidx.fragment.app.DialogFragment;
@@ -110,6 +111,7 @@ public class TrustedDeviceActivity extends FragmentActivity {
     toolbar.setState(SUBPAGE);
     toolbar.setTitle(R.string.trusted_device_feature_title);
     toolbar.getProgressBar().setVisible(true);
+    toolbar.registerBackListener(this::onBackListener);
 
     extractAssociatedDevice();
 
@@ -124,6 +126,13 @@ public class TrustedDeviceActivity extends FragmentActivity {
     if (isStartedForEnrollment(intent)) {
       model.processEnrollment();
     }
+  }
+
+  private boolean onBackListener() {
+    if (model.getEnrollmentState().getValue() != EnrollmentState.NONE) {
+      model.abortEnrollment();
+    }
+    return false;
   }
 
   private void resumePreviousState(Bundle saveInstanceState) {
@@ -256,7 +265,7 @@ public class TrustedDeviceActivity extends FragmentActivity {
       return;
     }
     loge(TAG, "Lock screen was unsuccessful. Returned result code: " + resultCode + ".");
-    model.finishEnrollment();
+    model.abortEnrollment();
   }
 
   private static boolean isStartedForEnrollment(Intent intent) {
@@ -277,7 +286,9 @@ public class TrustedDeviceActivity extends FragmentActivity {
       return;
     }
     CreateProfileLockDialogFragment fragment =
-        CreateProfileLockDialogFragment.newInstance((d, w) -> createScreenLock());
+        CreateProfileLockDialogFragment.newInstance(
+            /* onConfirmListener= */ (d, w) -> createScreenLock(),
+            /* onCancelListener= */ (d, w) -> model.abortEnrollment());
     fragment.show(getSupportFragmentManager(), CREATE_PROFILE_LOCK_DIALOG_TAG);
   }
 
@@ -298,6 +309,7 @@ public class TrustedDeviceActivity extends FragmentActivity {
     if (!isDeviceSecure()) {
       loge(TAG, "Failed to create lock screen.");
       isScreenLockNewlyCreated.set(false);
+      model.abortEnrollment();
       return;
     }
     isScreenLockNewlyCreated.set(true);
@@ -333,7 +345,9 @@ public class TrustedDeviceActivity extends FragmentActivity {
   private void showUnlockProfileDialogFragment() {
     isScreenLockNewlyCreated.set(false);
     UnlockProfileDialogFragment fragment =
-        UnlockProfileDialogFragment.newInstance((d, w) -> validateCredential());
+        UnlockProfileDialogFragment.newInstance(
+            /* onConfirmListener= */ (d, w) -> validateCredential(),
+            /* onCancelListener= */ (d, w) -> model.abortEnrollment());
     fragment.show(getSupportFragmentManager(), UNLOCK_PROFILE_TO_FINISH_DIALOG_TAG);
   }
 
@@ -424,53 +438,71 @@ public class TrustedDeviceActivity extends FragmentActivity {
 
   /** Dialog Fragment to notify that a profile lock is needed to continue enrollment. */
   public static class CreateProfileLockDialogFragment extends DialogFragment {
-    private DialogInterface.OnClickListener onConfirmListener;
+    private OnClickListener onConfirmListener;
+    private OnClickListener onCancelListener;
 
-    static CreateProfileLockDialogFragment newInstance(DialogInterface.OnClickListener listener) {
+    static CreateProfileLockDialogFragment newInstance(
+        OnClickListener onConfirmListener, OnClickListener onCancelListener) {
       CreateProfileLockDialogFragment fragment = new CreateProfileLockDialogFragment();
-      fragment.setOnConfirmListener(listener);
+      fragment.setOnConfirmListener(onConfirmListener);
+      fragment.setOnCancelListener(onCancelListener);
       return fragment;
     }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-      return new AlertDialog.Builder(getActivity())
-          .setTitle(getString(R.string.create_profile_lock_dialog_title))
-          .setMessage(getString(R.string.create_profile_lock_dialog_message))
-          .setNegativeButton(getString(R.string.cancel), null)
-          .setPositiveButton(getString(R.string.continue_button), onConfirmListener)
-          .setCancelable(true)
-          .create();
+      Dialog dialog =
+          new AlertDialog.Builder(getActivity())
+              .setTitle(getString(R.string.create_profile_lock_dialog_title))
+              .setMessage(getString(R.string.create_profile_lock_dialog_message))
+              .setNegativeButton(getString(R.string.cancel), onCancelListener)
+              .setPositiveButton(getString(R.string.continue_button), onConfirmListener)
+              .create();
+      dialog.setCanceledOnTouchOutside(false);
+      return dialog;
     }
 
     void setOnConfirmListener(DialogInterface.OnClickListener onConfirmListener) {
       this.onConfirmListener = onConfirmListener;
+    }
+
+    void setOnCancelListener(OnClickListener onCancelListener) {
+      this.onCancelListener = onCancelListener;
     }
   }
 
   /** Dialog Fragment to notify that the user needs to unlock again to finish enrollment. */
   public static class UnlockProfileDialogFragment extends DialogFragment {
-    private DialogInterface.OnClickListener onConfirmListener;
+    private OnClickListener onConfirmListener;
+    private OnClickListener onCancelListener;
 
-    static UnlockProfileDialogFragment newInstance(DialogInterface.OnClickListener listener) {
+    static UnlockProfileDialogFragment newInstance(
+        OnClickListener onConfirmListener, OnClickListener onCancelListener) {
       UnlockProfileDialogFragment fragment = new UnlockProfileDialogFragment();
-      fragment.setOnConfirmListener(listener);
+      fragment.setOnConfirmListener(onConfirmListener);
+      fragment.setOnCancelListener(onCancelListener);
       return fragment;
     }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-      return new AlertDialog.Builder(getActivity())
-          .setTitle(getString(R.string.unlock_profile_to_finish_title))
-          .setMessage(getString(R.string.unlock_profile_to_finish_message))
-          .setNegativeButton(getString(R.string.cancel), null)
-          .setPositiveButton(getString(R.string.continue_button), onConfirmListener)
-          .setCancelable(true)
-          .create();
+      Dialog dialog =
+          new AlertDialog.Builder(getActivity())
+              .setTitle(getString(R.string.unlock_profile_to_finish_title))
+              .setMessage(getString(R.string.unlock_profile_to_finish_message))
+              .setNegativeButton(getString(R.string.cancel), onCancelListener)
+              .setPositiveButton(getString(R.string.continue_button), onConfirmListener)
+              .create();
+      dialog.setCanceledOnTouchOutside(false);
+      return dialog;
     }
 
-    void setOnConfirmListener(DialogInterface.OnClickListener onConfirmListener) {
+    void setOnConfirmListener(OnClickListener onConfirmListener) {
       this.onConfirmListener = onConfirmListener;
+    }
+
+    void setOnCancelListener(OnClickListener onCancelListener) {
+      this.onCancelListener = onCancelListener;
     }
   }
 

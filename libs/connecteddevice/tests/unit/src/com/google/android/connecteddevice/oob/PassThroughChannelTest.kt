@@ -24,21 +24,18 @@ import com.google.android.connecteddevice.transport.IDataSendCallback
 import com.google.android.connecteddevice.transport.IDiscoveryCallback
 import com.google.android.connecteddevice.transport.ProtocolDevice
 import com.google.common.truth.Truth.assertThat
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.verify
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class PassThroughChannelTest {
   private val channel = PassThroughChannel()
-  private val mockCallback: OobChannel.Callback = mock()
   private val testProtocolDevice = ProtocolDevice(TestConnectionProtocol(), "testProtocolId")
 
   @Test
   fun startOobExchange_directlyPassThrough_invokeCallback() {
-    assertThat(channel.completeOobDataExchange(testProtocolDevice, mockCallback)).isTrue()
-    verify(mockCallback).onOobExchangeSuccess()
+    assertThat(channel.completeOobDataExchange(testProtocolDevice, "testMessage".toByteArray()))
+      .isTrue()
   }
 }
 

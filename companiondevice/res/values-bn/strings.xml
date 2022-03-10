@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
   <string name="open_companion_app_instruction_text">কম্প্যানিয়ন অ্যাপ খুলুন</string>
   <string name="enable_bluetooth_instruction_text">ব্লুটুথ কানেকশনের অনুমতি দিন</string>
   <string name="connect_to_targe_car_instruction_text">&lt;b&gt;%1$s&lt;/b&gt;-এ কানেক্ট করুন%2$s</string>
+  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s-এর সাথে কানেক্ট করতে QR কোড স্ক্যান করুন অথবা MyCompanion খুলুন</string>
   <string name="connect_to_car_instruction_text">গাড়ির সাথে কানেক্ট করুন</string>
   <string name="associated_device_pairing_code_title">ফোনে কোড কনফার্ম করুন</string>
   <string name="associated_device_pairing_message">আপনার ফোনে দেখানো কোডের সাথে এটি ম্যাচ করছে কিনা তা কনফার্ম করুন</string>
@@ -63,6 +64,7 @@
   <string name="connected">কানেক্ট করা আছে</string>
   <string name="notDetected">শনাক্ত করা যায়নি</string>
   <string name="disconnected">কানেকশন নেই</string>
+  <string name="detected">শনাক্ত করা হয়েছে</string>
   <string name="unknown">অজানা</string>
   <string name="app_running_msg_channel_name">ফোনের টেক্সট মেসেজ পরিষেবা চলছে</string>
   <string name="app_running_msg_notification_title">ফোনের টেক্সট মেসেজ পরিষেবা অ্যাক্টিভ আছে</string>
@@ -92,4 +94,7 @@
   </plurals>
   <string name="name_not_available">নাম পাওয়া যাচ্ছে না</string>
   <string name="ble_device_name_prefix">গাড়ি\u00A0</string>
+  <string name="suw_setup_profile_title">ফোন থেকে প্রোফাইল সেট-আপ করুন</string>
+  <string name="suw_setup_profile_content">শুরু করতে QR কোড স্ক্যান করুন। আপনার ডিভাইসে MyCompanion অ্যাপ ইনস্টল করা না থাকলে, আপনি এটি Google Play এবং App Store থেকে ডাউনলোড করতে পারবেন।</string>
+  <string name="suw_qr_instruction_text">&lt;br /&gt;&lt;b&gt;%1$s&lt;/b&gt; %2$s-এর সাথে কানেক্ট করতে QR কোড স্ক্যান করুন</string>
 </resources>

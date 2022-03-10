@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
   <string name="open_companion_app_instruction_text">Отворете ја придружната апликација</string>
   <string name="enable_bluetooth_instruction_text">Дозволете поврзување преку Bluetooth</string>
   <string name="connect_to_targe_car_instruction_text">Поврзете се со &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">Скенирајте го QR-кодот или отворете ја MyCompanion за да се поврзете со &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
   <string name="connect_to_car_instruction_text">Поврзете се со автомобилот</string>
   <string name="associated_device_pairing_code_title">Потврдете го кодот на телефонот</string>
   <string name="associated_device_pairing_message">Потврдете дека ова се совпаѓа со кодот прикажан на телефонот</string>
@@ -63,6 +64,7 @@
   <string name="connected">Поврзано</string>
   <string name="notDetected">Не е пронајдено</string>
   <string name="disconnected">Не е поврзано</string>
+  <string name="detected">Откриен</string>
   <string name="unknown">Непознато</string>
   <string name="app_running_msg_channel_name">Се извршува услугата за SMS-пораки на телефонот</string>
   <string name="app_running_msg_notification_title">Услугата за SMS-пораки на телефонот е активна</string>
@@ -92,4 +94,7 @@
   </plurals>
   <string name="name_not_available">Името не е достапно</string>
   <string name="ble_device_name_prefix">Возило\u00A0</string>
+  <string name="suw_setup_profile_title">Поставете го профилот со телефон</string>
+  <string name="suw_setup_profile_content">Скенирајте го QR-кодот за да започнете. Ако ја немате апликацијата MyCompanion, може да ја преземете од Google Play и од App Store.</string>
+  <string name="suw_qr_instruction_text">Скенирајте го QR-кодот за да се поврзете со&lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
 </resources>

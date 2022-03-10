@@ -27,10 +27,9 @@ import android.os.Looper;
 import android.os.ParcelUuid;
 import android.os.RemoteException;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import com.google.android.connecteddevice.transport.BluetoothDeviceProvider;
-import com.google.android.connecteddevice.transport.ConnectionProtocol;
+import com.google.android.connecteddevice.transport.IConnectionProtocol;
 import com.google.android.connecteddevice.transport.ProtocolDevice;
 import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelegateBinder;
 import com.google.android.connecteddevice.transport.spp.Connection;
@@ -52,16 +51,13 @@ public class BluetoothRfcommChannel implements OobChannel {
   private Connection activeConnection;
   private PendingConnection activePendingConnection;
 
-  @VisibleForTesting Callback callback;
-
   public BluetoothRfcommChannel(ConnectedDeviceSppDelegateBinder sppDelegateBinder) {
     this.sppDelegateBinder = sppDelegateBinder;
   }
 
   @Override
-  public boolean completeOobDataExchange(
-      @NonNull ProtocolDevice device, @NonNull Callback callback) {
-    ConnectionProtocol protocol = device.getProtocol();
+  public boolean completeOobDataExchange(@NonNull ProtocolDevice device, @NonNull byte[] oobData) {
+    IConnectionProtocol protocol = device.getProtocol();
     if (!(protocol instanceof BluetoothDeviceProvider)) {
       logw(TAG, "Protocol is not supported by current OOB channel, ignored.");
       return false;
@@ -69,21 +65,18 @@ public class BluetoothRfcommChannel implements OobChannel {
     BluetoothDevice remoteDevice =
         ((BluetoothDeviceProvider) protocol).getBluetoothDeviceById(device.getProtocolId());
     completeOobDataExchange(
-        remoteDevice, callback, () -> BluetoothAdapter.getDefaultAdapter().getBondedDevices());
+        remoteDevice, () -> BluetoothAdapter.getDefaultAdapter().getBondedDevices(), oobData);
     return true;
   }
 
   @VisibleForTesting
   void completeOobDataExchange(
-      BluetoothDevice remoteDevice,
-      Callback callback,
-      BondedDevicesResolver bondedDevicesResolver) {
-    this.callback = callback;
+      BluetoothDevice remoteDevice, BondedDevicesResolver bondedDevicesResolver, byte[] oobData) {
     Set<BluetoothDevice> bondedDevices = bondedDevicesResolver.getBondedDevices();
     if (bondedDevices == null || !bondedDevices.contains(remoteDevice)) {
-      notifyFailure(
-          "This device has not been bonded to device with address " + remoteDevice.getAddress(),
-          /* exception= */ null);
+      loge(
+          TAG,
+          "This device has not been bonded to device with address " + remoteDevice.getAddress());
       return;
     }
 
@@ -91,8 +84,7 @@ public class BluetoothRfcommChannel implements OobChannel {
       PendingConnection connection =
           sppDelegateBinder.connectAsClient(RFCOMM_UUID, remoteDevice, /* isSecure= */ true);
       if (connection == null) {
-        notifyFailure(
-            "Connection with " + remoteDevice.getName() + " failed.", /* exception= */ null);
+        loge(TAG, "Connection with " + remoteDevice.getName() + " failed.");
         return;
       }
 
@@ -106,8 +98,7 @@ public class BluetoothRfcommChannel implements OobChannel {
             } catch (RemoteException e) {
               logw(TAG, "Failed to cancel connection attempt with " + remoteDevice.getName());
             }
-            notifyFailure(
-                "Connection with " + remoteDevice.getName() + " timed out.", /* exception= */ null);
+            loge(TAG, "Connection with " + remoteDevice.getName() + " timed out.");
           },
           CONNECTION_TIMEOUT_MS);
 
@@ -118,37 +109,35 @@ public class BluetoothRfcommChannel implements OobChannel {
                 activePendingConnection = null;
                 activeConnection =
                     new Connection(new ParcelUuid(uuid), btDevice, isSecure, deviceName);
-                notifySuccess();
+                sendOobData(oobData);
               })
           .setOnConnectionErrorListener(
               () -> {
                 handler.removeCallbacksAndMessages(null);
-                notifyFailure(
-                    "Connection with " + remoteDevice.getName() + " failed.",
-                    /* exception= */ null);
+                loge(TAG, "Connection with " + remoteDevice.getName() + " failed.");
               });
     } catch (RemoteException e) {
-      notifyFailure("Connection with " + remoteDevice.getName() + " failed.", e);
+      loge(TAG, "Connection with " + remoteDevice.getName() + " failed.", e);
     }
   }
 
-  @Override
-  public void sendOobData(byte[] oobData) {
+  private void sendOobData(byte[] oobData) {
     if (isInterrupted.get()) {
       logd(TAG, "Oob connection is interrupted, data will not be set.");
       return;
     }
 
     if (activeConnection == null) {
-      notifyFailure("Connection is null, oob data cannot be sent", /* exception= */ null);
+      loge(TAG, "Connection is null, oob data cannot be sent");
       return;
     }
+
     try {
       PendingSentMessage pendingSentMessage =
           sppDelegateBinder.sendMessage(activeConnection, oobData);
 
       if (pendingSentMessage == null) {
-        notifyFailure("Sending oob data failed", null);
+        loge(TAG, "Sending oob data failed");
         return;
       }
 
@@ -161,7 +150,7 @@ public class BluetoothRfcommChannel implements OobChannel {
             }
           });
     } catch (RemoteException e) {
-      notifyFailure("Sending oob data failed", e);
+      loge(TAG, "Sending oob data failed", e);
     }
   }
 
@@ -184,19 +173,6 @@ public class BluetoothRfcommChannel implements OobChannel {
     if (activePendingConnection != null) {
       sppDelegateBinder.cancelConnectionAttempt(activePendingConnection);
       activePendingConnection = null;
-    }
-  }
-
-  private void notifyFailure(@NonNull String message, @Nullable Exception exception) {
-    loge(TAG, message, exception);
-    if (callback != null && !isInterrupted.get()) {
-      callback.onOobExchangeFailure();
-    }
-  }
-
-  private void notifySuccess() {
-    if (callback != null && !isInterrupted.get()) {
-      callback.onOobExchangeSuccess();
     }
   }
 

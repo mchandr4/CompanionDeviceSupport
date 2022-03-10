@@ -45,7 +45,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * corresponding Android platform Bluetooth API class and notifies the registered callback.
  */
 class MessageReader implements CentralConnectionStatus.Callback {
-  private static final String TAG = "BlePeripheralManager";
+  private static final String TAG = "MessageReader";
   // Interval between each attempt to process data in the input stream.
   private static final int READ_INPUT_STREAM_INTERNAL_MS = 50;
   private static final BluetoothDevice FAKE_BLUETOOTH_DEVICE =

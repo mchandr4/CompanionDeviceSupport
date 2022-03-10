@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
   <string name="open_companion_app_instruction_text">افتح التطبيق المصاحب.</string>
   <string name="enable_bluetooth_instruction_text">اسمَح باتصال البلوتوث.</string>
   <string name="connect_to_targe_car_instruction_text">اتّصِل بـ &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">امسح رمز الاستجابة السريعة ضوئيًا أو افتح تطبيق MyCompanion لربطه بالسيارة &lt;b&gt;%1$s&lt;/b&gt; %2$s.</string>
   <string name="connect_to_car_instruction_text">الاتصال بالسيارة</string>
   <string name="associated_device_pairing_code_title">تأكيد الرمز على الهاتف</string>
   <string name="associated_device_pairing_message">أكِّد تطابق هذا الرمز مع الرمز الموضّح على هاتفك.</string>
@@ -63,6 +64,7 @@
   <string name="connected">متصل بالسيارة</string>
   <string name="notDetected">لم ترصده السيارة</string>
   <string name="disconnected">غير متصل بالسيارة</string>
+  <string name="detected">تم رصده</string>
   <string name="unknown">الحالة غير معروفة</string>
   <string name="app_running_msg_channel_name">خدمة تلقّي الرسائل النصية على الهاتف مُفعَّلة</string>
   <string name="app_running_msg_notification_title">خدمة تلقّي الرسائل النصية على الهاتف نشطة.</string>
@@ -96,4 +98,7 @@
   </plurals>
   <string name="name_not_available">الاسم غير متاح.</string>
   <string name="ble_device_name_prefix">المركبة\u00A0</string>
+  <string name="suw_setup_profile_title">إعداد الملف الشخصي باستخدام الهاتف</string>
+  <string name="suw_setup_profile_content">امسح رمز الاستجابة السريعة ضوئيًا للبدء. إذا لم يكن لديك تطبيق MyCompanion، يمكنك تنزيله من Google Play وApp Store.</string>
+  <string name="suw_qr_instruction_text">امسح رمز الاستجابة السريعة ضوئيًا للربط بالسيارة &lt;br /&gt;‏ &lt;b&gt;%1$s&lt;/b&gt; %2$s.</string>
 </resources>

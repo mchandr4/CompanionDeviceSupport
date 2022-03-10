@@ -16,6 +16,7 @@
 
 package com.google.android.connecteddevice.trust;
 
+import static com.google.android.connecteddevice.trust.TrustedDeviceConstants.TRUSTED_DEVICE_ERROR_UNEXPECTED_STATE;
 import static com.google.android.connecteddevice.util.SafeLog.logd;
 import static com.google.android.connecteddevice.util.SafeLog.loge;
 
@@ -41,7 +42,6 @@ import com.google.android.connecteddevice.trust.api.ITrustedDeviceEnrollmentCall
 import com.google.android.connecteddevice.trust.api.ITrustedDeviceManager;
 import com.google.android.connecteddevice.trust.api.TrustedDevice;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /** ViewModel that powers the Trusted Device views. */
 public class TrustedDeviceViewModel extends AndroidViewModel {
@@ -57,8 +57,6 @@ public class TrustedDeviceViewModel extends AndroidViewModel {
     NO_CONNECTION
   }
 
-  private final AtomicBoolean hasPendingCredential = new AtomicBoolean(false);
-  private final AtomicBoolean hasEnrollmentIntent = new AtomicBoolean(false);
   private final MutableLiveData<List<TrustedDevice>> trustedDevices = new MutableLiveData<>();
   private final MutableLiveData<AssociatedDevice> associatedDevice = new MutableLiveData<>(null);
   private final MutableLiveData<TrustedDevice> deviceDisabled = new MutableLiveData<>(null);
@@ -161,8 +159,39 @@ public class TrustedDeviceViewModel extends AndroidViewModel {
 
   /** Process trusted device enrollment. */
   public void processEnrollment() {
-    hasEnrollmentIntent.set(true);
-    processEnrollmentInternal();
+    switch (enrollmentState.getValue()) {
+      case NONE:
+        logd(TAG, "Processing new enrollment.");
+        processEnrollmentInternal();
+        break;
+      case WAITING_FOR_PASSWORD_SETUP:
+        if (!isDeviceSecure()) {
+          loge(TAG, "Device not secure, failed to process enrollment on secure device.");
+          abortEnrollment();
+          return;
+        }
+        logd(TAG, "Continue processing enrollment on secure device.");
+        processEnrollmentInternal();
+        break;
+      default:
+        loge(TAG, "Attempted to process enrollment with unexpected state, aborting enrollment.");
+        abortEnrollment();
+        enrollmentError.postValue(TRUSTED_DEVICE_ERROR_UNEXPECTED_STATE);
+    }
+  }
+
+  /** Aborts enrollment. */
+  public void abortEnrollment() {
+    if (trustedDeviceManager == null) {
+      loge(TAG, "Failed to abort enrollment. service not connected.");
+      return;
+    }
+    try {
+      trustedDeviceManager.abortEnrollment();
+    } catch (RemoteException e) {
+      loge(TAG, "Failed to abort enrollment.", e);
+    }
+    resetEnrollmentState();
   }
 
   /**
@@ -193,8 +222,6 @@ public class TrustedDeviceViewModel extends AndroidViewModel {
 
   /** Marks enrollment as finished. */
   public void finishEnrollment() {
-    hasPendingCredential.set(false);
-    hasEnrollmentIntent.set(false);
     enrollmentState.postValue(EnrollmentState.FINISHED);
   }
 
@@ -202,7 +229,6 @@ public class TrustedDeviceViewModel extends AndroidViewModel {
   protected void onCleared() {
     try {
       unregisterCallbacks();
-      hasPendingCredential.set(false);
     } catch (RemoteException e) {
       loge(TAG, "Error clearing registered callbacks.", e);
     }
@@ -211,15 +237,16 @@ public class TrustedDeviceViewModel extends AndroidViewModel {
   }
 
   private void processEnrollmentInternal() {
-    if (!isDeviceSecure()) {
-      enrollmentState.postValue(EnrollmentState.WAITING_FOR_PASSWORD_SETUP);
-      return;
-    }
-    if (hasEnrollmentIntent.get() && hasPendingCredential.getAndSet(false)) {
-      enrollmentState.postValue(EnrollmentState.CREDENTIAL_PENDING);
+    if (trustedDeviceManager == null) {
+      loge(TAG, "Failed to process enrollment. TrustedDeviceManager not connected.");
       return;
     }
     enrollmentState.postValue(EnrollmentState.IN_PROGRESS);
+    try {
+      trustedDeviceManager.processEnrollment(isDeviceSecure());
+    } catch (RemoteException e) {
+      loge(TAG, "Failed to process enrollment. ", e);
+    }
   }
 
   private void attemptInitiatingEnrollment(AssociatedDevice device) {
@@ -315,7 +342,9 @@ public class TrustedDeviceViewModel extends AndroidViewModel {
         }
 
         @Override
-        public void onServiceDisconnected(ComponentName name) {}
+        public void onServiceDisconnected(ComponentName name) {
+          resetEnrollmentState();
+        }
       };
 
   private final ITrustedDeviceCallback trustedDeviceCallback =
@@ -360,14 +389,18 @@ public class TrustedDeviceViewModel extends AndroidViewModel {
 
         @Override
         public void onValidateCredentialsRequest() {
-          hasPendingCredential.set(true);
-          processEnrollmentInternal();
+          enrollmentState.postValue(EnrollmentState.CREDENTIAL_PENDING);
         }
 
         @Override
         public void onTrustedDeviceEnrollmentError(int error) {
           loge(TAG, "Failed to enroll trusted device, encountered error: " + error + ".");
           enrollmentError.postValue(error);
+        }
+
+        @Override
+        public void onSecureDeviceRequest() {
+          enrollmentState.postValue(EnrollmentState.WAITING_FOR_PASSWORD_SETUP);
         }
       };
 

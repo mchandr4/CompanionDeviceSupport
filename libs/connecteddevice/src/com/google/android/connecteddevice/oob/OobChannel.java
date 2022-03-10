@@ -25,10 +25,10 @@ import com.google.android.connecteddevice.transport.ProtocolDevice;
  *
  * <p>Usage is:
  *
- * <pre>
- *     1. Define success and failure responses in {@link Callback}
- *     2. Call {@link OobChannel#completeOobDataExchange(ProtocolDevice, Callback)}
- * </pre>
+ * <ol>
+ *   <li>Call {@link OobChannel#completeOobDataExchange(ProtocolDevice, byte[])}
+ *   <li>Provide way to stop the OOB data exchange through {@link OobChannel#interrupt()}
+ * </ol>
  */
 public interface OobChannel {
   /**
@@ -36,33 +36,12 @@ public interface OobChannel {
    * association with that device.
    *
    * @param protocolDevice The remote device to exchange out of band data with
+   * @param oobData The data that will be sent to remote device via OOB channel
    * @return {@code true} if the data exchange is started successfully, otherwise return {@code
    *     false}
    */
-  boolean completeOobDataExchange(
-      @NonNull ProtocolDevice protocolDevice, @NonNull Callback callback);
-
-  /**
-   * Send raw data over the out of band channel
-   *
-   * @param oobData to be sent
-   */
-  void sendOobData(@NonNull byte[] oobData);
+  boolean completeOobDataExchange(@NonNull ProtocolDevice protocolDevice, @NonNull byte[] oobData);
 
   /** Interrupt the current data exchange and prevent callbacks from being issued. */
   void interrupt();
-
-  /** Callbacks for {@link OobChannel#completeOobDataExchange(OobEligibleDevice, Callback)} */
-  interface Callback {
-    /**
-     * Called when {@link OobChannel#completeOobDataExchange(OobEligibleDevice, Callback)} finishes
-     * successfully.
-     */
-    void onOobExchangeSuccess();
-
-    /**
-     * Called when {@link OobChannel#completeOobDataExchange(OobEligibleDevice, Callback)} fails.
-     */
-    void onOobExchangeFailure();
-  }
 }

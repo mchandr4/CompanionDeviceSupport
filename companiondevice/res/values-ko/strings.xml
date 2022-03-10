@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
   <string name="open_companion_app_instruction_text">호환 앱 열기</string>
   <string name="enable_bluetooth_instruction_text">블루투스 연결 허용</string>
   <string name="connect_to_targe_car_instruction_text">&lt;b&gt;%1$s&lt;/b&gt;%2$s에 연결</string>
+  <string name="qr_instruction_text">QR 코드를 스캔하거나 MyCompanion을 열고 &lt;b&gt;%1$s&lt;/b&gt;%2$s에 연결하세요.</string>
   <string name="connect_to_car_instruction_text">차량에 연결</string>
   <string name="associated_device_pairing_code_title">휴대전화의 코드 확인</string>
   <string name="associated_device_pairing_message">이 코드가 휴대전화에 표시된 코드와 일치하는지 확인하세요.</string>
@@ -63,6 +64,7 @@
   <string name="connected">연결됨</string>
   <string name="notDetected">감지되지 않음</string>
   <string name="disconnected">연결 끊김</string>
+  <string name="detected">감지됨</string>
   <string name="unknown">알 수 없음</string>
   <string name="app_running_msg_channel_name">휴대전화 문자 메시지 서비스 실행 중</string>
   <string name="app_running_msg_notification_title">휴대전화 문자 메시지 서비스가 활성화됨</string>
@@ -92,4 +94,7 @@
   </plurals>
   <string name="name_not_available">이름을 사용할 수 없습니다.</string>
   <string name="ble_device_name_prefix">차량\u00A0</string>
+  <string name="suw_setup_profile_title">휴대전화로 프로필 설정</string>
+  <string name="suw_setup_profile_content">시작하려면 QR 코드를 스캔하세요. MyCompanion 앱이 없으면 Google Play 및 App Store에서 다운로드할 수 있습니다.</string>
+  <string name="suw_qr_instruction_text">QR 코드를 스캔하여&lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt;%2$s에 연결</string>
 </resources>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
   <string name="open_companion_app_instruction_text">මිත්‍ර යෙදුම විවෘත කරන්න</string>
   <string name="enable_bluetooth_instruction_text">බ්ලූටූත් සම්බන්ධතාවට ඉඩ දෙන්න</string>
   <string name="connect_to_targe_car_instruction_text">&lt;b&gt;%1$s&lt;/b&gt;%2$s වෙත සම්බන්ධ කරන්න</string>
+  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s වෙත සම්බන්ධ වීමට QR කේතය ස්කෑන් කරන්න හෝ MyCompanion විවෘත කරන්න</string>
   <string name="connect_to_car_instruction_text">මෝටර් රථයට සම්බන්ධ කරන්න</string>
   <string name="associated_device_pairing_code_title">දුරකථනයේ කේතය තහවුරු කරන්න</string>
   <string name="associated_device_pairing_message">මෙය ඔබේ දුරකථනයේ පෙන්වනු ලබන කේතයට ගැළපෙන බව තහවුරු කරන්න</string>
@@ -63,6 +64,7 @@
   <string name="connected">සම්බන්ධයි</string>
   <string name="notDetected">අනාවරණය නොවීය</string>
   <string name="disconnected">විසන්ධි විය</string>
+  <string name="detected">හඳුනා ගන්නා ලදි</string>
   <string name="unknown">නොදනී</string>
   <string name="app_running_msg_channel_name">දුරකථන පෙළ පණිවිඩ සේවය ධාවනය වේ</string>
   <string name="app_running_msg_notification_title">දුරකථන පෙළ පණිවිඩ යැවීමේ සේවය සක්‍රියයි</string>
@@ -92,4 +94,7 @@
   </plurals>
   <string name="name_not_available">නම ලබා ගත නොහැකිය</string>
   <string name="ble_device_name_prefix">වාහනය\u00A0</string>
+  <string name="suw_setup_profile_title">දුරකථනය සමඟ පැතිකඩ පිහිටුවන්න</string>
+  <string name="suw_setup_profile_content">ආරම්භ කිරීමට QR කේතය ස්කෑන් කරන්න. ඔබට MyCompanion යෙදුමක් නොමැති නම්, ඔබට එය Google Play සහ App Store වෙතින් බාගත හැකිය.</string>
+  <string name="suw_qr_instruction_text">&lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s වෙත සම්බන්ධ වීමට QR කේතය ස්කෑන් කරන්න</string>
 </resources>

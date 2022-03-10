@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
   <string name="open_companion_app_instruction_text">સાથી ઍપ ખોલો</string>
   <string name="enable_bluetooth_instruction_text">બ્લૂટૂથ કનેક્શનને મંજૂરી આપો</string>
   <string name="connect_to_targe_car_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s સાથે કનેક્ટ કરો</string>
+  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s સાથે કનેક્ટ કરવા માટે, QR કોડ સ્કૅન કરો અથવા MyCompanion ખોલો</string>
   <string name="connect_to_car_instruction_text">કાર સાથે કનેક્ટ કરો</string>
   <string name="associated_device_pairing_code_title">ફોન પર કોડ કન્ફર્મ કરો</string>
   <string name="associated_device_pairing_message">તમારા ફોન પર બતાવેલા કોડ સાથે આનો મેળ બેસતો હોવાનું કન્ફર્મ કરો</string>
@@ -63,6 +64,7 @@
   <string name="connected">કનેક્ટ કરેલું</string>
   <string name="notDetected">મળ્યું નથી</string>
   <string name="disconnected">ડિસ્કનેક્ટ કરેલું</string>
+  <string name="detected">ભાળ મળી</string>
   <string name="unknown">અજાણ</string>
   <string name="app_running_msg_channel_name">ફોન ટેક્સ્ટ સંદેશની સેવા ચાલુ છે</string>
   <string name="app_running_msg_notification_title">ફોન ટેક્સ્ટ સંદેશની સેવા સક્રિય છે</string>
@@ -92,4 +94,7 @@
   </plurals>
   <string name="name_not_available">નામ ઉપલબ્ધ નથી</string>
   <string name="ble_device_name_prefix">વાહન\u00A0</string>
+  <string name="suw_setup_profile_title">ફોન વડે પ્રોફાઇલ સેટઅપ કરો</string>
+  <string name="suw_setup_profile_content">શરૂ કરવા માટે QR કોડ સ્કૅન કરો. જો તમારી પાસે MyCompanion ઍપ ન હોય, તો તમે તેને Google Play અને ઍપ સ્ટોરમાંથી ડાઉનલોડ કરી શકો છો.</string>
+  <string name="suw_qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s&lt;br /&gt;સાથે કનેક્ટ કરવા માટે QR કોડ સ્કૅન કરો</string>
 </resources>

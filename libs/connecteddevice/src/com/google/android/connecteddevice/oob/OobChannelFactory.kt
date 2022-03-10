@@ -16,7 +16,6 @@
 
 package com.google.android.connecteddevice.oob
 
-import com.google.android.companionprotos.CapabilitiesExchangeProto.CapabilitiesExchange.OobChannelType
 import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelegateBinder
 
 /** Factory that creates [OobChannel]. */
@@ -24,12 +23,18 @@ open class OobChannelFactory(private val sppBinder: ConnectedDeviceSppDelegateBi
   /**
    * Returns [OobChannel] of the type [oobChannelType].
    *
-   * [IllegalArgumentException] will be thrown if the [oobChannelType] passed is not supported.
+   * Throws [IllegalArgumentException] if the [oobChannelType] passed is not supported.
    */
-  open fun createOobChannel(oobChannelType: OobChannelType): OobChannel =
+  open fun createOobChannel(oobChannelType: String): OobChannel =
     when (oobChannelType) {
-      OobChannelType.BT_RFCOMM -> BluetoothRfcommChannel(sppBinder)
-      OobChannelType.PRE_ASSOCIATION -> PassThroughChannel()
-      else -> throw IllegalArgumentException("Unknown OOB channel type: ${oobChannelType.name}")
+      BT_RFCOMM -> BluetoothRfcommChannel(sppBinder)
+      PRE_ASSOCIATION -> PassThroughChannel()
+      else -> throw IllegalArgumentException("Unknown OOB channel type: $oobChannelType")
     }
+
+  companion object {
+    /** Should be passed to [createOobChannel] to create corresponding OOB channel. */
+    const val BT_RFCOMM = "BT_RFCOMM"
+    const val PRE_ASSOCIATION = "PRE_ASSOCIATION"
+  }
 }

@@ -155,7 +155,7 @@ class ChannelResolver(
         .setMaxSupportedSecurityVersion(MAX_SECURITY_VERSION)
         .setMinSupportedSecurityVersion(MIN_SECURITY_VERSION)
         .build()
-    device.protocol.sendData(device.protocolId, carVersion.toByteArray(), callback = null)
+    device.protocol.sendData(device.protocolId, carVersion.toByteArray(), /* callback= */ null)
 
     if (!isReconnect) {
       logd(TAG, "Send OOB data to remote device $device.")

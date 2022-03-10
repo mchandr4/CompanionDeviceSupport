@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
   <string name="open_companion_app_instruction_text">Otvorte sprievodnú aplikáciu</string>
   <string name="enable_bluetooth_instruction_text">Povoľte pripojenie Bluetooth</string>
   <string name="connect_to_targe_car_instruction_text">Pripojte sa k autu &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">Naskenujte príslušný QR kód alebo otvorte MyCompanion a pripojte sa k autu &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
   <string name="connect_to_car_instruction_text">Pripojte sa k autu</string>
   <string name="associated_device_pairing_code_title">Potvrďte kód v telefóne</string>
   <string name="associated_device_pairing_message">Potvrďte, že sa tento kód zhoduje s kódom v telefóne</string>
@@ -63,6 +64,7 @@
   <string name="connected">Pripojené</string>
   <string name="notDetected">Nerozpoznané</string>
   <string name="disconnected">Odpojené</string>
+  <string name="detected">Zistené</string>
   <string name="unknown">Neznáme</string>
   <string name="app_running_msg_channel_name">Služba textových správ telefónu je spustená</string>
   <string name="app_running_msg_notification_title">Služba textových správ telefónu je aktívna</string>
@@ -94,4 +96,7 @@
   </plurals>
   <string name="name_not_available">Meno nie je k dispozícii</string>
   <string name="ble_device_name_prefix">Vozidlo\u00A0</string>
+  <string name="suw_setup_profile_title">Nastavenie profilu pomocou telefónu</string>
+  <string name="suw_setup_profile_content">Ak chcete začať, naskenujte QR kód. Ak nemáte aplikáciu MyCompanion, môžete si ju stiahnuť na Google Play a v obchode App Store.</string>
+  <string name="suw_qr_instruction_text">Naskenujte QR kód a pripojte sa&lt;br /&gt;k vozidlu &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
 </resources>

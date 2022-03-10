@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
   <string name="open_companion_app_instruction_text">Բացեք ուղեկցող հավելվածը</string>
   <string name="enable_bluetooth_instruction_text">Թույլատրեք Bluetooth միացումը</string>
   <string name="connect_to_targe_car_instruction_text">Միացեք &lt;b&gt;%1$s&lt;/b&gt; (%2$s) մեքենային</string>
+  <string name="qr_instruction_text">Սկանավորեք QR կոդը կամ բացեք MyCompanion հավելվածը, որպեսզի միանաք &lt;b&gt;%1$s&lt;/b&gt; %2$s ավտոմեքենային։</string>
   <string name="connect_to_car_instruction_text">Միացեք մեքենային</string>
   <string name="associated_device_pairing_code_title">Հաստատեք կոդը հեռախոսում</string>
   <string name="associated_device_pairing_message">Հաստատեք, որ հեռախոսում նույն կոդն է ցուցադրվում</string>
@@ -63,6 +64,7 @@
   <string name="connected">Միացված է</string>
   <string name="notDetected">Չի հայտնաբերվել</string>
   <string name="disconnected">Անջատված է</string>
+  <string name="detected">Հայտնաբերվել է</string>
   <string name="unknown">Անհայտ</string>
   <string name="app_running_msg_channel_name">SMS-ների մասին ծանուցման ծառայությունն ակտիվ է</string>
   <string name="app_running_msg_notification_title">SMS-ների մասին ծանուցման ծառայությունն ակտիվ է</string>
@@ -92,4 +94,7 @@
   </plurals>
   <string name="name_not_available">Անունը հասանելի չէ</string>
   <string name="ble_device_name_prefix">Ավտոմեքենա\u00A0</string>
+  <string name="suw_setup_profile_title">Կարգավորեք պրոֆիլը հեռախոսի միջոցով</string>
+  <string name="suw_setup_profile_content">Սկսելու համար սկանավորեք QR կոդը։ Եթե չունեք MyCompanion հավելված, ներբեռնեք այն Google Play-ից կամ App Store-ից։</string>
+  <string name="suw_qr_instruction_text">Սկանավորեք QR կոդը՝&lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; (%2$s) մեքենային միանալու համար</string>
 </resources>

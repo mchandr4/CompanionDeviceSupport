@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
   <string name="open_companion_app_instruction_text">გახსენით კომპანიონი აპი</string>
   <string name="enable_bluetooth_instruction_text">დაუშვით Bluetooth კავშირი</string>
   <string name="connect_to_targe_car_instruction_text">დაუკავშირდით &lt;b&gt;%1$s&lt;/b&gt;-ს %2$s</string>
+  <string name="qr_instruction_text">დაასკანირეთ QR კოდი ან გახსენით MyCompanion, რომ დაუკავშირდეთ &lt;b&gt;%1$s&lt;/b&gt;-ს %2$s</string>
   <string name="connect_to_car_instruction_text">დაუკავშირდით მანქანას</string>
   <string name="associated_device_pairing_code_title">დაადასტურეთ კოდი ტელეფონზე</string>
   <string name="associated_device_pairing_message">დაადასტურეთ, რომ ეს ემთხვევა თქვენს ტელეფონზე ნაჩვენებ კოდს</string>
@@ -63,6 +64,7 @@
   <string name="connected">დაკავშირებული</string>
   <string name="notDetected">აღმოჩენილი არ არის</string>
   <string name="disconnected">კავშირი გაწყვეტილია</string>
+  <string name="detected">აღმოჩენილია</string>
   <string name="unknown">უცნობი</string>
   <string name="app_running_msg_channel_name">ტელეფონის ტექსტური შეტყობინებების სერვისი გაშვებულია</string>
   <string name="app_running_msg_notification_title">ტელეფონის ტექსტური შეტყობინებების სერვისი აქტიურია</string>
@@ -92,4 +94,7 @@
   </plurals>
   <string name="name_not_available">სახელი მიუწვდომელია</string>
   <string name="ble_device_name_prefix">ავტომობილი\u00A0</string>
+  <string name="suw_setup_profile_title">პროფილის დაყენება ტელეფონის მეშვეობით</string>
+  <string name="suw_setup_profile_content">დასაწყებად დაასკანირეთ QR კოდი. თუ არ გაქვთ MyCompanion აპი, შეგიძლიათ ჩამოტვირთოთ ის Google Play-ისა და App Store-იდან.</string>
+  <string name="suw_qr_instruction_text">დაასკანირეთ QR კოდი, რომ დაუკავშირდეთ მანქანას&lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
 </resources>

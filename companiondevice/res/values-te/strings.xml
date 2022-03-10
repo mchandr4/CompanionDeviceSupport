@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
   <string name="open_companion_app_instruction_text">సహచర యాప్‌ను తెరవండి</string>
   <string name="enable_bluetooth_instruction_text">బ్లూటూత్ కనెక్షన్‌ను అనుమతించండి</string>
   <string name="connect_to_targe_car_instruction_text">&lt;b&gt;%1$s&lt;/b&gt;%2$s‌కు కనెక్ట్ చేయండి</string>
+  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s‌కు కనెక్ట్ చేయడానికి QR కోడ్‌ను స్కాన్ చేయండి లేదా MyCompanionను తెరవండి</string>
   <string name="connect_to_car_instruction_text">కార్‌కు కనెక్ట్ చేయండి</string>
   <string name="associated_device_pairing_code_title">ఫోన్‌లో కోడ్‌ను నిర్ధారించండి</string>
   <string name="associated_device_pairing_message">ఇది మీ ఫోన్‌లో చూపించిన కోడ్‌తో మ్యాచ్ అవుతున్నట్లు నిర్ధారించండి</string>
@@ -63,6 +64,7 @@
   <string name="connected">కనెక్ట్ చేయబడింది</string>
   <string name="notDetected">గుర్తించబడలేదు</string>
   <string name="disconnected">డిస్‌కనెక్ట్ అయింది</string>
+  <string name="detected">గుర్తించబడింది</string>
   <string name="unknown">తెలియదు</string>
   <string name="app_running_msg_channel_name">ఫోన్ టెక్స్ట్ మెసేజ్ సర్వీస్ రన్ అవుతోంది</string>
   <string name="app_running_msg_notification_title">ఫోన్ టెక్స్ట్ మెసేజింగ్ సర్వీస్ యాక్టివ్‌గా ఉంది</string>
@@ -92,4 +94,7 @@
   </plurals>
   <string name="name_not_available">పేరు అందుబాటులో లేదు</string>
   <string name="ble_device_name_prefix">వెహికల్\u00A0</string>
+  <string name="suw_setup_profile_title">ఫోన్‌తో ప్రొఫైల్‌ను సెటప్ చేయండి</string>
+  <string name="suw_setup_profile_content">ప్రారంభించడానికి QR కోడ్‌ను స్కాన్ చేయండి. మీకు MyCompanion యాప్ లేకపోతే, మీరు దాన్ని Google Play అలాగే App Storeలో డౌన్‌లోడ్ చేసుకోవచ్చు.</string>
+  <string name="suw_qr_instruction_text">&lt;br /&gt;&lt;b&gt; %1$s&lt;/b&gt; :%2$s కనెక్ట్ చేయడానికి QR కోడ్‌ను స్కాన్ చేయండి</string>
 </resources>

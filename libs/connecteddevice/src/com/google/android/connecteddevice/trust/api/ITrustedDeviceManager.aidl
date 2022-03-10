@@ -71,18 +71,28 @@ interface ITrustedDeviceManager {
     /** Retrieves trusted devices for the active user. */
     void retrieveTrustedDevicesForActiveUser(in IOnTrustedDevicesRetrievedListener listener);
 
-    /** Remove a trusted device and invalidate any credentials associated with it. */
+    /** Removes a trusted device and invalidate any credentials associated with it. */
     void removeTrustedDevice(in TrustedDevice trustedDevice);
 
     /** Returns {@link List<ConnectedDevice>} of devices currently connected. */
     List<ConnectedDevice> getActiveUserConnectedDevices();
 
-    /** Register a new callback for associated device events. */
+    /** Registers a new callback for associated device events. */
     void registerAssociatedDeviceCallback(in IDeviceAssociationCallback callback);
 
-    /** Remove a previously registered callback. */
+    /** Removes a previously registered callback. */
     void unregisterAssociatedDeviceCallback(IDeviceAssociationCallback callback);
 
     /** Attempts to initiate trusted device enrollment on the phone with the given device id. */
     void initiateEnrollment(in String deviceId);
+
+    /**
+     * Processes trusted device enrollment.
+     *
+     * @param isDeviceSecure {@code true} if the car is secured with a lockscreen.
+     */
+    void processEnrollment(boolean isDeviceSecure);
+
+    /** Aborts an ongoing enrollment. */
+    void abortEnrollment();
 }

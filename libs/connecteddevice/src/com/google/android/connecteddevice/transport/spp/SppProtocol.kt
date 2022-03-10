@@ -16,15 +16,14 @@
 package com.google.android.connecteddevice.transport.spp
 
 import android.bluetooth.BluetoothDevice
+import android.content.Context
 import android.os.ParcelUuid
-import android.os.RemoteException
-import com.google.android.connecteddevice.transport.BluetoothDeviceProvider
+import androidx.annotation.VisibleForTesting
 import com.google.android.connecteddevice.transport.ConnectChallenge
 import com.google.android.connecteddevice.transport.ConnectionProtocol
 import com.google.android.connecteddevice.transport.IDataSendCallback
 import com.google.android.connecteddevice.transport.IDiscoveryCallback
-import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelegateBinder.OnErrorListener
-import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelegateBinder.OnMessageReceivedListener
+import com.google.android.connecteddevice.transport.spp.SppManager.OnMessageReceivedListener
 import com.google.android.connecteddevice.util.SafeLog.logd
 import com.google.android.connecteddevice.util.SafeLog.loge
 import com.google.android.connecteddevice.util.SafeLog.logw
@@ -42,19 +41,24 @@ import java.util.concurrent.Executors
 class SppProtocol
 @JvmOverloads
 constructor(
-  private val sppBinder: ConnectedDeviceSppDelegateBinder,
+  private val context: Context,
   private val maxWriteSize: Int,
   callbackExecutor: Executor = Executors.newCachedThreadPool()
-) : ConnectionProtocol(callbackExecutor), BluetoothDeviceProvider {
-  private val pendingConnections = mutableMapOf<UUID, PendingConnection>()
-  private val connections = mutableMapOf<UUID, Connection>()
-  private val connectedDevices = mutableMapOf<UUID, BluetoothDevice>()
-  private var associationIdentifier: UUID? = null
+) : ConnectionProtocol(callbackExecutor) {
+  /** Map protocolId to the [SppManager] which manages the certain connection. */
+  private val connections = mutableMapOf<String, SppManager>()
+  /**
+   * Map service UUID used to perform discovery to the [SppManager] which performs the discovery.
+   */
+  private val pendingDiscoveries = mutableMapOf<UUID, SppManager>()
+  /** Invoke [SppManager]'s callback in current thread. */
+  private val managerCallbackExecutor = Runnable::run
+  @VisibleForTesting internal var associationIdentifier: UUID? = null
 
   override fun startAssociationDiscovery(
     name: String,
     identifier: ParcelUuid,
-    callback: IDiscoveryCallback
+    callback: IDiscoveryCallback,
   ) {
     val uuidIdentifier = identifier.uuid
     associationIdentifier = uuidIdentifier
@@ -65,73 +69,74 @@ constructor(
   override fun startConnectionDiscovery(
     id: ParcelUuid,
     challenge: ConnectChallenge,
-    callback: IDiscoveryCallback
+    callback: IDiscoveryCallback,
   ) {
     logd(TAG, "Starting connection discovery for device $id")
     startConnection(id.uuid, callback)
   }
 
-  private fun startConnection(id: UUID, callback: IDiscoveryCallback) {
-    try {
-      val pendingConnection = sppBinder.connectAsServer(id, /* isSecure= */ true)
-      if (pendingConnection == null) {
-        callback.onDiscoveryFailedToStart()
-        return
-      }
-      pendingConnections[id] = pendingConnection
-      pendingConnection.setOnConnectedListener(generateOnConnectionListener(callback))
+  @VisibleForTesting
+  internal fun startConnection(
+    id: UUID,
+    callback: IDiscoveryCallback,
+    manager: SppManager = SppManager(context, /* isSecure= */ true)
+  ) {
+    manager.registerCallback(
+      generateConnectionCallback(manager, id, callback),
+      managerCallbackExecutor
+    )
+    if (manager.startListening(id)) {
       callback.onDiscoveryStartedSuccessfully()
-    } catch (e: RemoteException) {
+      pendingDiscoveries[id] = manager
+    } else {
+      loge(
+        TAG,
+        "Error when try to start discovery for remote device. Issue discovery failed callback."
+      )
       callback.onDiscoveryFailedToStart()
-      loge(TAG, "Error when try to start discovery for remote device.", e)
     }
   }
 
-  private fun generateOnConnectionListener(callback: IDiscoveryCallback) =
-    PendingConnection.OnConnectedListener { uuid, remoteDevice, isSecure, deviceName ->
-      val protocolId = UUID.randomUUID()
-      val connection = Connection(ParcelUuid(uuid), remoteDevice, isSecure, deviceName)
-      connectedDevices[protocolId] = remoteDevice
+  private fun generateConnectionCallback(
+    manager: SppManager,
+    id: UUID,
+    discoveryCallback: IDiscoveryCallback,
+  ): SppManager.ConnectionCallback {
+    val protocolId = createProtocolId()
+    return object : SppManager.ConnectionCallback {
+      override fun onRemoteDeviceConnected(device: BluetoothDevice) {
+        pendingDiscoveries.remove(id)
+        connections[protocolId] = manager
+        manager.addOnMessageReceivedListener(
+          generateOnMessageReceivedListener(protocolId),
+          managerCallbackExecutor
+        )
+        discoveryCallback.onDeviceConnected(protocolId)
+        logd(
+          TAG,
+          "Remote device $device connected successfully, assigned connection id $protocolId."
+        )
+      }
 
-      pendingConnections.remove(uuid)
-      connections[protocolId] = connection
-      sppBinder.registerConnectionCallback(uuid, generateOnErrorListener())
-      sppBinder.setOnMessageReceivedListener(
-        connection,
-        generateOnMessageReceivedListener(protocolId)
-      )
-      callback.onDeviceConnected(protocolId.toString())
-      logd(
-        TAG,
-        "Remote device $remoteDevice connected successfully with UUID $uuid, assigned " +
-          "connection id $protocolId."
-      )
+      override fun onRemoteDeviceDisconnected(device: BluetoothDevice) {
+        logd(TAG, "Remote device disconnected: $device")
+        deviceDisconnectedListeners[protocolId]?.invoke { it.onDeviceDisconnected(protocolId) }
+        connections.remove(protocolId)
+        removeListeners(protocolId)
+      }
     }
+  }
 
-  private fun generateOnMessageReceivedListener(protocolId: UUID): OnMessageReceivedListener {
-    return OnMessageReceivedListener { message ->
-      notifyDataReceived(protocolId.toString(), message)
-      val listeners = dataReceivedListeners[protocolId.toString()]
+  private fun createProtocolId() = UUID.randomUUID().toString()
+
+  private fun generateOnMessageReceivedListener(protocolId: String): OnMessageReceivedListener {
+    return OnMessageReceivedListener { _, message ->
+      notifyDataReceived(protocolId, message)
+      val listeners = dataReceivedListeners[protocolId]
       logd(
         TAG,
         "Informed message received with connection $protocolId to ${listeners?.size()} listeners."
       )
-    }
-  }
-
-  private fun generateOnErrorListener(): OnErrorListener {
-    return OnErrorListener { currentConnection ->
-      val protocolId = connections.entries.first { it.value == currentConnection }.key
-      val listeners = deviceDisconnectedListeners[protocolId.toString()]
-      listeners?.invoke { it.onDeviceDisconnected(protocolId.toString()) }
-      connectedDevices.remove(protocolId)
-      connections.remove(protocolId)
-      logd(
-        TAG,
-        "Inform device connection error with connection $protocolId to ${listeners?.size()} " +
-          "listeners."
-      )
-      removeListeners(protocolId.toString())
     }
   }
 
@@ -152,77 +157,47 @@ constructor(
   }
 
   private fun stopDiscovery(id: UUID) {
-    val pendingConnection = pendingConnections[id]
-    if (pendingConnection != null) {
-      cancelPendingConnection(pendingConnection)
-    } else {
-      logw(TAG, "Try to stop unidentified discovery process with id $id")
+    val pendingDiscoveryManager = pendingDiscoveries[id]
+    if (pendingDiscoveryManager == null) {
+      logw(TAG, "Attetmpted to stop discovery for $id, but no pending discovery. Ignoring.")
+      return
     }
+    pendingDiscoveryManager.cleanup()
   }
 
   override fun sendData(protocolId: String, data: ByteArray, callback: IDataSendCallback?) {
-    val connection = connections[UUID.fromString(protocolId)]
-    if (connection == null) {
+    val manager = connections[protocolId]
+    if (manager == null) {
       callback?.onDataFailedToSend()
       logw(TAG, "Unable to find correct connection channel with id $protocolId to send data")
       return
     }
-    try {
-      sppBinder.sendMessage(connection, data)
-    } catch (e: RemoteException) {
-      loge(TAG, "Error when try to send data to protocol channel with id $protocolId.", e)
+    val pendingMessage =
+      PendingSentMessage().apply { setOnSuccessListener { callback?.onDataSentSuccessfully() } }
+    val success = manager.write(data, pendingMessage)
+    if (!success) {
+      loge(TAG, "Error when try to send data to protocol channel with id $protocolId.")
       callback?.onDataFailedToSend()
     }
-    callback?.onDataSentSuccessfully()
   }
 
   override fun disconnectDevice(protocolId: String) {
-    val connection = connections[UUID.fromString(protocolId)]
-    if (connection == null) {
-      logw(TAG, "Try to disconnect unidentified device with id $protocolId")
-      return
-    }
-    disconnect(connection)
+    connections.remove(protocolId)?.cleanup()
   }
 
   /** Cancel all ongoing connection attempt and disconnect already connected devices. */
   override fun reset() {
     super.reset()
     logd(TAG, "Reset: cancel all connection attempts and disconnect all devices.")
+    for (manager in pendingDiscoveries.values) {
+      manager.cleanup()
+    }
+    for (manager in connections.values) {
+      manager.cleanup()
+    }
     associationIdentifier = null
-    pendingConnections.forEach { cancelPendingConnection(it.value) }
-    pendingConnections.clear()
-
-    connections.forEach { disconnect(it.value) }
+    pendingDiscoveries.clear()
     connections.clear()
-  }
-
-  override fun getBluetoothDeviceById(protocolId: String) =
-    try {
-      connectedDevices[UUID.fromString(protocolId)]
-    } catch (e: IllegalArgumentException) {
-      loge(TAG, "Invalid protocol Id passed.", e)
-      null
-    }
-
-  private fun cancelPendingConnection(pendingConnection: PendingConnection) {
-    try {
-      sppBinder.cancelConnectionAttempt(pendingConnection)
-    } catch (e: RemoteException) {
-      loge(
-        TAG,
-        "Error when try to stop discovery for remote device with id " + "${pendingConnection.id}.",
-        e
-      )
-    }
-  }
-
-  private fun disconnect(connection: Connection) {
-    try {
-      sppBinder.disconnect(connection)
-    } catch (e: RemoteException) {
-      loge(TAG, "Error when try to disconnect remote device with id ${connection.serviceUuid}.", e)
-    }
   }
 
   override fun getMaxWriteSize(protocolId: String) = maxWriteSize

@@ -3,6 +3,7 @@ package com.google.android.connecteddevice.trust;
 import static android.os.Looper.getMainLooper;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.robolectric.Shadows.shadowOf;
@@ -83,31 +84,87 @@ public final class TrustedDeviceViewModelTest {
   }
 
   @Test
-  public void processEnrollment_deviceNotSecured() {
+  public void testEnrollmentState_processEnrollmentOnInsecureDevice() throws RemoteException {
     shadowOf(keyguardManager).setIsDeviceSecure(false);
+    viewModel.getEnrollmentState().observeForever(mockEnrollmentStateObserver);
+
+    viewModel.processEnrollment();
+
+    waitForLiveDataUpdate();
+    verify(mockEnrollmentStateObserver).onChanged(EnrollmentState.IN_PROGRESS);
+    verify(mockTrustedDeviceManager).processEnrollment(eq(false));
+  }
+
+  @Test
+  public void testEnrollmentState_processEnrollmentOnSecureDevice() throws RemoteException {
+    shadowOf(keyguardManager).setIsDeviceSecure(true);
+    // User confirms enrollment through notification.
     viewModel.processEnrollment();
     viewModel.getEnrollmentState().observeForever(mockEnrollmentStateObserver);
+    waitForLiveDataUpdate();
+    verify(mockEnrollmentStateObserver).onChanged(EnrollmentState.IN_PROGRESS);
+    verify(mockTrustedDeviceManager).processEnrollment(eq(true));
+  }
+
+  @Test
+  public void testEnrollmentState_onSecureDeviceRequest() throws RemoteException {
+    shadowOf(keyguardManager).setIsDeviceSecure(false);
+    viewModel.getEnrollmentState().observeForever(mockEnrollmentStateObserver);
+
+    enrollmentCallback.onSecureDeviceRequest();
+
     waitForLiveDataUpdate();
     verify(mockEnrollmentStateObserver).onChanged(EnrollmentState.WAITING_FOR_PASSWORD_SETUP);
   }
 
   @Test
-  public void processEnrollment_receivedCredentialBeforeStartEnrollment() throws RemoteException {
-    shadowOf(keyguardManager).setIsDeviceSecure(true);
-    enrollmentCallback.onValidateCredentialsRequest();
+  public void testEnrollmentState_processEnrollmentOnNewSecureDevice() throws RemoteException {
+    ArgumentCaptor<EnrollmentState> stateCaptor = ArgumentCaptor.forClass(EnrollmentState.class);
+    shadowOf(keyguardManager).setIsDeviceSecure(false);
     viewModel.processEnrollment();
     viewModel.getEnrollmentState().observeForever(mockEnrollmentStateObserver);
+    waitForLiveDataUpdate();
+    enrollmentCallback.onSecureDeviceRequest();
+    waitForLiveDataUpdate();
+
+    shadowOf(keyguardManager).setIsDeviceSecure(true);
+    viewModel.processEnrollment();
+
+    waitForLiveDataUpdate();
+    // NONE -> IN_PROGRESS -> WAITING_FOR_PASSWORD_SETUP -> IN_PROGRESS
+    verify(mockEnrollmentStateObserver, times(4)).onChanged(stateCaptor.capture());
+    assertThat(stateCaptor.getValue()).isEqualTo(EnrollmentState.IN_PROGRESS);
+    verify(mockTrustedDeviceManager).processEnrollment(eq(true));
+  }
+
+  @Test
+  public void testEnrollmentState_onValidateCredentialsRequest() throws RemoteException {
+    shadowOf(keyguardManager).setIsDeviceSecure(true);
+    viewModel.getEnrollmentState().observeForever(mockEnrollmentStateObserver);
+    viewModel.processEnrollment();
+    waitForLiveDataUpdate();
+
+    enrollmentCallback.onValidateCredentialsRequest();
+
     waitForLiveDataUpdate();
     verify(mockEnrollmentStateObserver).onChanged(EnrollmentState.CREDENTIAL_PENDING);
   }
 
   @Test
-  public void processEnrollment_receivedCredentialAfterStartEnrollment() {
-    shadowOf(keyguardManager).setIsDeviceSecure(true);
-    viewModel.processEnrollment();
+  public void testEnrollmentState_abortEnrollment() throws RemoteException {
+    ArgumentCaptor<EnrollmentState> captor = ArgumentCaptor.forClass(EnrollmentState.class);
+    shadowOf(keyguardManager).setIsDeviceSecure(false);
     viewModel.getEnrollmentState().observeForever(mockEnrollmentStateObserver);
+    viewModel.processEnrollment();
     waitForLiveDataUpdate();
-    verify(mockEnrollmentStateObserver).onChanged(EnrollmentState.IN_PROGRESS);
+
+    viewModel.abortEnrollment();
+
+    waitForLiveDataUpdate();
+    verify(mockTrustedDeviceManager).abortEnrollment();
+    // NONE -> IN_PROGRESS -> NONE
+    verify(mockEnrollmentStateObserver, times(3)).onChanged(captor.capture());
+    assertThat(captor.getValue()).isEqualTo(EnrollmentState.NONE);
   }
 
   @Test
@@ -173,7 +230,7 @@ public final class TrustedDeviceViewModelTest {
     return new ConnectedDevice(
         TEST_ASSOCIATED_DEVICE_ID,
         TEST_ASSOCIATED_DEVICE_NAME,
-        /* belongsToActiveUser= */ true,
+        /* belongsToDriver= */ true,
         /* hasSecureChannel= */ true);
   }
 

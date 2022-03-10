@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
   <string name="open_companion_app_instruction_text">Άνοιγμα συνοδευτικής εφαρμογής</string>
   <string name="enable_bluetooth_instruction_text">Να επιτρέπεται η σύνδεση Bluetooth</string>
   <string name="connect_to_targe_car_instruction_text">Σύνδεση με &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">Σαρώστε τον κωδικό QR ή ανοίξτε το MyCompanion για να συνδεθείτε στο &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
   <string name="connect_to_car_instruction_text">Σύνδεση στο αυτοκίνητο</string>
   <string name="associated_device_pairing_code_title">Επιβεβαίωση κωδικού στο τηλέφωνο</string>
   <string name="associated_device_pairing_message">Βεβαιωθείτε ότι συμφωνεί με τον κωδικό που εμφανίζεται στο τηλέφωνό σας.</string>
@@ -63,6 +64,7 @@
   <string name="connected">Συνδέθηκε</string>
   <string name="notDetected">Δεν εντοπίστηκε</string>
   <string name="disconnected">Αποσυνδέθηκε</string>
+  <string name="detected">Ανιχνεύθηκε</string>
   <string name="unknown">Άγνωστη</string>
   <string name="app_running_msg_channel_name">Εκτελείται η υπηρεσία μηνυμάτων κειμένου τηλεφώνου</string>
   <string name="app_running_msg_notification_title">Η υπηρ. μηνυμάτων κειμένου τηλεφώνου είναι ενεργή.</string>
@@ -92,4 +94,7 @@
   </plurals>
   <string name="name_not_available">Το όνομα δεν είναι διαθέσιμο.</string>
   <string name="ble_device_name_prefix">Όχημα\u00A0</string>
+  <string name="suw_setup_profile_title">Ρύθμιση προφίλ μέσω τηλεφώνου</string>
+  <string name="suw_setup_profile_content">Σαρώστε τον κωδικό QR για να ξεκινήσετε. Εάν δεν διαθέτετε την εφαρμογή MyCompanion, μπορείτε να την κατεβάσετε στο Google Play και το App Store.</string>
+  <string name="suw_qr_instruction_text">Σαρώστε τον κωδικό QR για να συνδεθείτε στο&lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
 </resources>

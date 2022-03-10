@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
   <string name="open_companion_app_instruction_text">برنامه همراه را باز کنید</string>
   <string name="enable_bluetooth_instruction_text">اتصال بلوتوث را مجاز کنید</string>
   <string name="connect_to_targe_car_instruction_text">به &lt;b&gt;%1$s&lt;/b&gt; %2$s متصل شوید</string>
+  <string name="qr_instruction_text">برای اتصال به &lt;b&gt;%1$s&lt;/b&gt; %2$s، رمزینه پاسخ‌سریع را اسکن کنید یا MyCompanion را باز کنید</string>
   <string name="connect_to_car_instruction_text">به خودرو متصل شوید</string>
   <string name="associated_device_pairing_code_title">تأیید کد در تلفن</string>
   <string name="associated_device_pairing_message">تأیید کنید این کد با کدی است که در تلفنتان نشان داده شده است مطابقت دارد</string>
@@ -63,6 +64,7 @@
   <string name="connected">متصل</string>
   <string name="notDetected">چیزی شناسایی نشد</string>
   <string name="disconnected">قطع اتصال</string>
+  <string name="detected">شناسایی شد</string>
   <string name="unknown">نامشخص</string>
   <string name="app_running_msg_channel_name">سرویس پیامک تلفن درحال اجرا است</string>
   <string name="app_running_msg_notification_title">سرویس پیامک تلفن فعال است</string>
@@ -92,4 +94,7 @@
   </plurals>
   <string name="name_not_available">نام دردسترس نیست</string>
   <string name="ble_device_name_prefix">خودرو\u00A0</string>
+  <string name="suw_setup_profile_title">راه‌اندازی نمایه با تلفن</string>
+  <string name="suw_setup_profile_content">برای شروع به‌کار، رمزینه پاسخ‌سریع را اسکن کنید. اگر برنامه MyCompanion را ندارید، می‌توانید آن را در Google Play و App Store بارگیری کنید.</string>
+  <string name="suw_qr_instruction_text">برای اتصال به &lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s، رمزینه پاسخ‌سریع را اسکن کنید</string>
 </resources>

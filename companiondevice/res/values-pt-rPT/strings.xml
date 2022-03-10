@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
   <string name="open_companion_app_instruction_text">Abra a app associada</string>
   <string name="enable_bluetooth_instruction_text">Permita a ligação Bluetooth</string>
   <string name="connect_to_targe_car_instruction_text">Estabeleça ligação a &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">Leia o código QR ou abra o MyCompanion para se ligar a &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
   <string name="connect_to_car_instruction_text">Estabeleça ligação ao carro</string>
   <string name="associated_device_pairing_code_title">Confirme o código no telemóvel</string>
   <string name="associated_device_pairing_message">Confirme se este código corresponde ao código apresentado no seu telemóvel.</string>
@@ -63,6 +64,7 @@
   <string name="connected">Ligado</string>
   <string name="notDetected">Não detetado</string>
   <string name="disconnected">Desligado</string>
+  <string name="detected">Detetado</string>
   <string name="unknown">Desconhecido</string>
   <string name="app_running_msg_channel_name">Serviço de mensagens de texto do telemóvel em execução</string>
   <string name="app_running_msg_notification_title">Serviço de mensagens de texto do telemóvel ativo</string>
@@ -87,9 +89,12 @@
   <string name="create_phone_lock_dialog_title">Crie um bloqueio de ecrã no telemóvel</string>
   <string name="create_phone_lock_dialog_message">O seu telemóvel não tem um bloqueio de ecrã definido. Para desbloquear o perfil do seu carro com o telemóvel, crie primeiro um bloqueio de ecrã (também conhecido como código secreto) nas definições do telemóvel.</string>
   <plurals name="notification_new_message">
-    <item quantity="one">Nova mensagem</item>
+    <item quantity="one">%d nova(s) mensagem(ns)</item>
     <item quantity="other">%d novas mensagens</item>
   </plurals>
   <string name="name_not_available">Nome não disponível</string>
   <string name="ble_device_name_prefix">Veículo\u00A0</string>
+  <string name="suw_setup_profile_title">Configure o perfil com o telemóvel</string>
+  <string name="suw_setup_profile_content">Leia o código QR para começar. Se não tiver a app MyCompanion, pode transfira-la no Google Play e na App Store.</string>
+  <string name="suw_qr_instruction_text">Leia o código QR para se ligar a &lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
 </resources>

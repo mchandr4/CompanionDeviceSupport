@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
   <string name="open_companion_app_instruction_text">Maak die metgeselprogram oop</string>
   <string name="enable_bluetooth_instruction_text">Laat Bluetooth-verbinding toe</string>
   <string name="connect_to_targe_car_instruction_text">Koppel aan &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">Skandeer die QR-kode of maak MyCompanion oop om te koppel aan &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
   <string name="connect_to_car_instruction_text">Koppel aan die motor</string>
   <string name="associated_device_pairing_code_title">Bevestig kode op foon</string>
   <string name="associated_device_pairing_message">Maak seker dat dit ooreenstem met die kode wat op jou foon gewys word</string>
@@ -63,6 +64,7 @@
   <string name="connected">Gekoppel</string>
   <string name="notDetected">Nie bespeur nie</string>
   <string name="disconnected">Ontkoppel</string>
+  <string name="detected">Bespeur</string>
   <string name="unknown">Onbekend</string>
   <string name="app_running_msg_channel_name">Foon se SMS-diens werk tans</string>
   <string name="app_running_msg_notification_title">Foon se SMS-diens is aktief</string>
@@ -92,4 +94,7 @@
   </plurals>
   <string name="name_not_available">Naam is nie beskikbaar nie</string>
   <string name="ble_device_name_prefix">Voertuig\u00A0</string>
+  <string name="suw_setup_profile_title">Stel profiel op met foon</string>
+  <string name="suw_setup_profile_content">Skandeer QR-kode om te begin. As jy nie \'n MyCompanion-program het nie, kan jy dit in Google Play en die programwinkel aflaai.</string>
+  <string name="suw_qr_instruction_text">Skandeer QR-kode om te koppel aan&lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
 </resources>

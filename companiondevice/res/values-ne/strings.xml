@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
   <string name="open_companion_app_instruction_text">सहयोगी एप खोल्नुहोस्</string>
   <string name="enable_bluetooth_instruction_text">ब्लुटुथ कनेक्ट गर्ने अनुमति दिनुहोस्</string>
   <string name="connect_to_targe_car_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s मा कनेक्ट गर्नुहोस्</string>
+  <string name="qr_instruction_text">तपाईं आफ्नो डिभाइस &lt;b&gt;%1$s&lt;/b&gt; %2$s सँग कनेक्ट गर्न चाहनुहुन्छ भने यो QR कोड स्क्यान गर्नुहोस् वा MyCompanion खोल्नुहोस्</string>
   <string name="connect_to_car_instruction_text">कारमा कनेक्ट गर्नुहोस्</string>
   <string name="associated_device_pairing_code_title">फोनमा देखाइएको कोड पुष्टि गर्नुहोस्</string>
   <string name="associated_device_pairing_message">यो कोड तपाईंको फोनमा देखाइएको कोडसँग मिल्छ भन्ने कुरा पुष्टि गर्नुहोस्</string>
@@ -63,6 +64,7 @@
   <string name="connected">कनेक्ट गरियो</string>
   <string name="notDetected">पत्ता लागेन</string>
   <string name="disconnected">डिस्कनेक्ट भयो</string>
+  <string name="detected">पत्ता लाग्यो</string>
   <string name="unknown">अज्ञात</string>
   <string name="app_running_msg_channel_name">फोनबाट टेक्स्ट म्यासेज पठाउने सेवा चालू छ</string>
   <string name="app_running_msg_notification_title">फोनबाट टेक्स्ट म्यासेज पठाउने सेवा अन छ</string>
@@ -92,4 +94,7 @@
   </plurals>
   <string name="name_not_available">नाम उपलब्ध छैन</string>
   <string name="ble_device_name_prefix">सवारी साधन\u00A0</string>
+  <string name="suw_setup_profile_title">फोन प्रयोग गरेर प्रोफाइल सेटअप गर्नुहोस्</string>
+  <string name="suw_setup_profile_content">तपाईं आफ्नो प्रोफाइल सेटअप गर्न चाहनुहुन्छ भने QR कोड स्क्यान गर्नुहोस्। तपाईंको फोनमा MyCompanion एप छैन भने तपाईं Google Play वा एप स्टोरमा गई उक्त एप डाउनलोड गर्न सक्नुहुन्छ।</string>
+  <string name="suw_qr_instruction_text">तपाईं &lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s मा कनेक्ट गर्न चाहनुहुन्छ भने QR कोड स्क्यान गर्नुहोस्</string>
 </resources>
