@@ -16,14 +16,17 @@
 
 package com.google.android.connecteddevice.ui;
 
+import static android.os.Looper.getMainLooper;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.robolectric.Shadows.shadowOf;
 
 import android.app.Application;
 import android.bluetooth.BluetoothAdapter;
@@ -34,6 +37,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule;
 import androidx.lifecycle.Observer;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import com.google.android.connecteddevice.api.Connector;
 import com.google.android.connecteddevice.api.FakeConnector;
 import com.google.android.connecteddevice.api.IAssociationCallback;
 import com.google.android.connecteddevice.model.AssociatedDevice;
@@ -76,6 +80,8 @@ public final class AssociatedDeviceViewModelTest {
       application.getSystemService(BluetoothManager.class).getAdapter();
 
   private final FakeConnector fakeConnector = spy(new FakeConnector());
+  private final NeverConnectFakeConnector neverConnectFakeConnector =
+      spy(new NeverConnectFakeConnector());
 
   @Mock private Observer<AssociationState> mockAssociationStateObserver;
   @Mock private Observer<List<AssociatedDeviceDetails>> mockDeviceDetailsObserver;
@@ -89,13 +95,7 @@ public final class AssociatedDeviceViewModelTest {
 
   @Before
   public void setUp() throws RemoteException {
-    viewModel =
-        new AssociatedDeviceViewModel(
-            application,
-            /* isSppEnabled= */ false,
-            TEST_BLE_DEVICE_NAME_PREFIX,
-            /* isPassengerEnabled= */ false,
-            fakeConnector);
+    viewModel = createViewModel(fakeConnector);
     adapter.enable();
   }
 
@@ -106,11 +106,30 @@ public final class AssociatedDeviceViewModelTest {
   }
 
   @Test
+  public void acceptVerification_notInvokedIfServiceBotConnected() {
+    viewModel = createViewModel(neverConnectFakeConnector);
+
+    viewModel.acceptVerification();
+
+    verify(neverConnectFakeConnector, never()).acceptVerification();
+  }
+
+  @Test
   public void removeDevice() {
     AssociatedDevice device = createAssociatedDevice(/* isConnectionEnabled= */ true);
     fakeConnector.addAssociatedDevice(device);
     viewModel.removeDevice(device);
     verify(fakeConnector).removeAssociatedDevice(eq(TEST_ASSOCIATED_DEVICE_ID));
+  }
+
+  @Test
+  public void removeDevice_notInvokedIfServiceBotConnected() {
+    viewModel = createViewModel(neverConnectFakeConnector);
+    AssociatedDevice device = createAssociatedDevice(/* isConnectionEnabled= */ true);
+
+    viewModel.removeDevice(device);
+
+    verify(neverConnectFakeConnector, never()).removeAssociatedDevice(anyString());
   }
 
   @Test
@@ -130,10 +149,31 @@ public final class AssociatedDeviceViewModelTest {
   }
 
   @Test
+  public void toggleConnectionStatusForDevice_notInvokedIfServiceBotConnected() {
+    viewModel = createViewModel(neverConnectFakeConnector);
+    AssociatedDevice device1 = createAssociatedDevice(/* isConnectionEnabled= */ false);
+    AssociatedDevice device2 = createAssociatedDevice(/* isConnectionEnabled= */ true);
+
+    viewModel.toggleConnectionStatusForDevice(device1);
+    viewModel.toggleConnectionStatusForDevice(device2);
+
+    verify(neverConnectFakeConnector, never()).enableAssociatedDeviceConnection(anyString());
+    verify(neverConnectFakeConnector, never()).disableAssociatedDeviceConnection(anyString());
+  }
+
+  @Test
   public void startAssociation_startWithIdentifier() {
     ParcelUuid testIdentifier = new ParcelUuid(UUID.randomUUID());
     viewModel.startAssociation(testIdentifier);
     verify(fakeConnector).startAssociation(eq(testIdentifier), any());
+  }
+
+  @Test
+  public void startAssociation_notInvokedIfServiceBotConnected() {
+    viewModel = createViewModel(neverConnectFakeConnector);
+
+    viewModel.startAssociation();
+    verify(neverConnectFakeConnector, never()).startAssociation(any());
   }
 
   @Test
@@ -385,6 +425,16 @@ public final class AssociatedDeviceViewModelTest {
   }
 
   @Test
+  public void claimDevice_notInvokedIfServiceBotConnected() {
+    viewModel = createViewModel(neverConnectFakeConnector);
+    AssociatedDevice device = createAssociatedDevice(/* isConnectionEnabled= */ true);
+
+    viewModel.claimDevice(device);
+
+    verify(neverConnectFakeConnector, never()).claimAssociatedDevice(anyString());
+  }
+
+  @Test
   public void removeClaimOnDevice_removesAssociatedDeviceClaim() {
     AssociatedDevice device = createAssociatedDevice(/* isConnectionEnabled= */ true);
     fakeConnector.addAssociatedDevice(device);
@@ -392,6 +442,25 @@ public final class AssociatedDeviceViewModelTest {
     viewModel.removeClaimOnDevice(device);
 
     verify(fakeConnector).removeAssociatedDeviceClaim(device.getDeviceId());
+  }
+
+  @Test
+  public void removeClaimOnDevice_notInvokedIfServiceBotConnected() {
+    viewModel = createViewModel(neverConnectFakeConnector);
+    AssociatedDevice device = createAssociatedDevice(/* isConnectionEnabled= */ true);
+
+    viewModel.claimDevice(device);
+
+    verify(neverConnectFakeConnector, never()).claimAssociatedDevice(anyString());
+  }
+
+  @Test
+  public void connectTimeout() {
+    viewModel = createViewModel(neverConnectFakeConnector);
+
+    shadowOf(getMainLooper()).runToEndOfTasks();
+
+    verify(neverConnectFakeConnector).disconnect();
   }
 
   private void captureAssociationCallback() {
@@ -423,5 +492,22 @@ public final class AssociatedDeviceViewModelTest {
         TEST_ASSOCIATED_DEVICE_NAME_1,
         /* belongsToDriver= */ true,
         /* hasSecureChannel= */ false);
+  }
+
+  private AssociatedDeviceViewModel createViewModel(Connector connector) {
+    return new AssociatedDeviceViewModel(
+        application,
+        /* isSppEnabled= */ false,
+        TEST_BLE_DEVICE_NAME_PREFIX,
+        /* isPassengerEnabled= */ false,
+        connector);
+  }
+
+  /** Fake connector that never connects. */
+  private static class NeverConnectFakeConnector extends FakeConnector {
+    @Override
+    public void connect() {
+      // Do nothing
+    }
   }
 }

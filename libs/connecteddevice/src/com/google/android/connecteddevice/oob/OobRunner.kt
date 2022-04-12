@@ -20,6 +20,7 @@ import android.security.keystore.KeyProperties
 import androidx.annotation.VisibleForTesting
 import com.google.android.companionprotos.OutOfBandAssociationToken
 import com.google.android.connecteddevice.model.OobData
+import com.google.android.connecteddevice.transport.ProtocolDelegate
 import com.google.android.connecteddevice.transport.ProtocolDevice
 import com.google.android.connecteddevice.util.SafeLog.logd
 import com.google.android.connecteddevice.util.SafeLog.loge
@@ -32,18 +33,19 @@ import javax.crypto.SecretKey
 import javax.crypto.spec.IvParameterSpec
 
 /**
- * Manages all OOB related actions, those actions should be ordered as below:
- * 1. [generateOobData] returns [ByteArray] which contains the OOB key.
- * 2. [sendOobData] to the remote [ProtocolDevice].
- * 3. [encryptData] and [decryptData] data after the OOB data exchange succeed. Will throw
+ * Manages all OOB related actions,
+ *
+ * The actions taken by this runner should be ordered as below:
+ * 1. [sendOobData] to the remote [ProtocolDevice], OOB data is generated at the same time.
+ * 2. [encryptData] and [decryptData] data after the OOB data exchange succeed. Will throw
  * [IllegalStateException] if attempting to encrypt/decrypt without first having called
- * [generateOobData].
+ * [sendOobData].
  */
 open class OobRunner
 @JvmOverloads
 constructor(
-  private val oobChannelFactory: OobChannelFactory,
-  open val supportedTypes: List<String>,
+  private val delegate: ProtocolDelegate,
+  private val oobProtocolName: String,
   internal val keyAlgorithm: String = KeyProperties.KEY_ALGORITHM_AES
 ) {
   @VisibleForTesting internal var ihuIv = ByteArray(NONCE_LENGTH_BYTES)
@@ -58,10 +60,13 @@ constructor(
       loge(TAG, "Unable to create cipher with $ALGORITHM.", e)
       throw IllegalStateException(e)
     }
-  private var oobData: OobData? = null
 
-  /** Generate OOB data which should be exchanged with remote device. */
-  open fun generateOobData(): OobData {
+  /**
+   * Returns generates OOB data and iterates through all available OOB channels, establish OOB
+   * connections and send OOB data to remote device.
+   */
+  open fun sendOobData(): OobData {
+    logd(TAG, "Listening for OOB connection to send OOB data.")
     val keyGenerator =
       try {
         KeyGenerator.getInstance(keyAlgorithm)
@@ -75,28 +80,12 @@ constructor(
     secureRandom.nextBytes(ihuIv)
     secureRandom.nextBytes(mobileIv)
     val oobData = OobData(secretKey.encoded, ihuIv, mobileIv)
-    this.oobData = oobData
-    return oobData
-  }
-
-  /**
-   * Iterate through all available OOB channels, establish OOB channels and send OOB data to remote
-   * device.
-   */
-  open fun sendOobData(protocolDevice: ProtocolDevice) {
-    val dataToSend = oobData
-    if (dataToSend == null) {
-      loge(TAG, "OOB data unavailable, failed to send OOB data.")
-      return
-    }
     establishedOobChannels.clear()
-    for (oobType in supportedTypes) {
-      logd(TAG, "Establish OOB channel and send OOB data with $oobType.")
-      val oobChannel = oobChannelFactory.createOobChannel(oobType)
-      if (oobChannel.completeOobDataExchange(protocolDevice, toOobProto(dataToSend))) {
-        establishedOobChannels.add(oobChannel)
-      }
+    val oobChannel = TransportOobChannel(delegate, oobProtocolName)
+    if (oobChannel.completeOobDataExchange(toOobProto(oobData))) {
+      establishedOobChannels.add(oobChannel)
     }
+    return oobData
   }
 
   /** Encrypt [data] with OOB key, throw exception when encryption failed. */

@@ -32,6 +32,7 @@ import com.google.android.connecteddevice.transport.ConnectionProtocol
 import com.google.android.connecteddevice.transport.IProtocolDelegate
 import com.google.android.connecteddevice.transport.ble.BlePeripheralProtocol
 import com.google.android.connecteddevice.transport.ble.OnDeviceBlePeripheralManager
+import com.google.android.connecteddevice.transport.eap.EapProtocol
 import com.google.android.connecteddevice.transport.proxy.NetworkSocketFactory
 import com.google.android.connecteddevice.transport.proxy.ProxyBlePeripheralManager
 import com.google.android.connecteddevice.transport.spp.SppProtocol
@@ -57,9 +58,11 @@ open class TransportService : MetaDataService() {
 
   /** Maps the currently supported protocol names to the actual protocol implementation. */
   @VisibleForTesting
-  internal val supportedProtocols = ConcurrentHashMap<String, ConnectionProtocol>()
+  internal val initializedProtocols = ConcurrentHashMap<String, ConnectionProtocol>()
 
-  private lateinit var supportedTransportProtocols: Set<String>
+  private lateinit var supportedOobProtocolsName: Set<String>
+
+  private lateinit var supportedTransportProtocolsName: Set<String>
 
   private lateinit var bluetoothManager: BluetoothManager
 
@@ -77,7 +80,7 @@ open class TransportService : MetaDataService() {
       override fun onServiceConnected(name: ComponentName, service: IBinder) {
         delegate = IProtocolDelegate.Stub.asInterface(service)
         logd(TAG, "Successfully bound to service and received delegate.")
-        initializeProtocols(supportedTransportProtocols)
+        initializeProtocols(supportedTransportProtocolsName + supportedOobProtocolsName)
       }
 
       override fun onServiceDisconnected(name: ComponentName?) {
@@ -102,16 +105,17 @@ open class TransportService : MetaDataService() {
     super.onCreate()
     logd(TAG, "Service created.")
     bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-    supportedTransportProtocols =
-      getMetaStringArray(META_SUPPORTED_TRANSPORT_PROTOCOLS, DEFAULT_TRANSPORT_PROTOCOLS)?.toSet()
-        ?: emptySet()
-    if (supportedTransportProtocols.isEmpty()) {
+    supportedTransportProtocolsName =
+      getMetaStringArray(META_SUPPORTED_TRANSPORT_PROTOCOLS, DEFAULT_TRANSPORT_PROTOCOLS).toSet()
+    supportedOobProtocolsName =
+      getMetaStringArray(META_SUPPORTED_OOB_CHANNELS, emptyArray()).toSet()
+    if (supportedTransportProtocolsName.isEmpty()) {
       loge(
         TAG,
         "Transport protocols are empty. There must be at least one protocol provided to start " +
           "this service. Reverting to default values."
       )
-      supportedTransportProtocols = DEFAULT_TRANSPORT_PROTOCOLS.toSet()
+      supportedTransportProtocolsName = DEFAULT_TRANSPORT_PROTOCOLS.toSet()
     }
 
     registerReceiver(
@@ -126,7 +130,7 @@ open class TransportService : MetaDataService() {
 
   override fun onDestroy() {
     logd(TAG, "Service destroyed.")
-    disconnectProtocols(supportedTransportProtocols)
+    disconnectProtocols(initializedProtocols.keys)
     try {
       unregisterReceiver(bluetoothBroadcastReceiver)
     } catch (e: IllegalArgumentException) {
@@ -144,7 +148,8 @@ open class TransportService : MetaDataService() {
 
   private fun onBluetoothStateChanged(state: Int) {
     logd(TAG, "The bluetooth state has changed to $state.")
-    val supportedBluetoothProtocols = supportedTransportProtocols.intersect(BLUETOOTH_PROTOCOLS)
+    val supportedBluetoothProtocols =
+      (supportedTransportProtocolsName + supportedOobProtocolsName).intersect(BLUETOOTH_PROTOCOLS)
     when (state) {
       BluetoothAdapter.STATE_ON -> {
         EventLog.onBleOn()
@@ -165,26 +170,36 @@ open class TransportService : MetaDataService() {
     logd(TAG, "Processing ${targetProtocols.size} supported protocols.")
     for (protocol in targetProtocols) {
       logd(TAG, "Adding protocol $protocol to supported protocols.")
-      when (protocol) {
-        TransportProtocols.PROTOCOL_BLE_PERIPHERAL -> maybeAddBlePeripheralProtocol()
-        TransportProtocols.PROTOCOL_SPP -> maybeAddSppProtocol()
-        else -> loge(TAG, "Protocol type $protocol is not recognized. Ignoring.")
-      }
+      addBluetoothProtocol(protocol)
     }
   }
 
-  private fun maybeAddBlePeripheralProtocol() {
+  private fun addBluetoothProtocol(protocolName: String) {
     if (!bluetoothManager.adapter.isEnabled) {
-      logd(TAG, "Bluetooth adapter is currently disabled. Skipping BlePeripheralProtocol.")
+      logd(TAG, "Bluetooth adapter is currently disabled. Skipping $protocolName.")
       return
     }
-    if (supportedProtocols.containsKey(TransportProtocols.PROTOCOL_BLE_PERIPHERAL)) {
-      logd(TAG, "A BlePeripheralProtocol has already been created. Aborting.")
+    if (initializedProtocols.containsKey(protocolName)) {
+      logd(TAG, "A $protocolName has already been created. Aborting.")
       return
     }
-    val protocol = createBlePeripheralProtocol()
-    supportedProtocols[TransportProtocols.PROTOCOL_BLE_PERIPHERAL] = protocol
-    delegate?.addProtocol(protocol)
+    val protocol: ConnectionProtocol =
+      when (protocolName) {
+        TransportProtocols.PROTOCOL_BLE_PERIPHERAL -> createBlePeripheralProtocol()
+        TransportProtocols.PROTOCOL_SPP -> createSppProtocol()
+        TransportProtocols.PROTOCOL_EAP -> createEapProtocol()
+        else -> {
+          loge(TAG, "Protocol type $protocolName is not recognized. Ignoring.")
+          return
+        }
+      }
+    initializedProtocols[protocolName] = protocol
+    if (protocolName in supportedTransportProtocolsName) {
+      delegate?.addProtocol(protocol)
+    }
+    if (protocolName in supportedOobProtocolsName) {
+      delegate?.addOobProtocol(protocol)
+    }
   }
 
   private fun createBlePeripheralProtocol(): BlePeripheralProtocol {
@@ -222,29 +237,31 @@ open class TransportService : MetaDataService() {
     )
   }
 
-  private fun maybeAddSppProtocol() {
-    if (!bluetoothManager.adapter.isEnabled) {
-      logd(TAG, "Bluetooth adapter is currently disabled. Skipping SppProtocol.")
-      return
-    }
-    if (supportedProtocols.containsKey(TransportProtocols.PROTOCOL_SPP)) {
-      logd(TAG, "A SppProtocol has already been created. Aborting.")
-      return
-    }
+  private fun createSppProtocol(): SppProtocol {
     val maxSppPacketSize = getMetaInt(META_SPP_PACKET_BYTES, DEFAULT_SPP_PACKET_SIZE_BYTES)
-    val protocol = SppProtocol(context = this, maxSppPacketSize)
-    supportedProtocols[TransportProtocols.PROTOCOL_SPP] = protocol
-    delegate?.addProtocol(protocol)
+    return SppProtocol(context = this, maxSppPacketSize)
+  }
+
+  private fun createEapProtocol(): EapProtocol {
+    val maxSppPacketSize = getMetaInt(META_SPP_PACKET_BYTES, DEFAULT_SPP_PACKET_SIZE_BYTES)
+    val eapClientName = getMetaString(META_EAP_CLIENT_NAME, "")
+    val eapServiceName = getMetaString(META_EAP_SERVICE_NAME, "")
+    return EapProtocol(eapClientName, eapServiceName, maxSppPacketSize)
   }
 
   private fun disconnectProtocols(targetProtocols: Set<String>) {
     for (protocolName in targetProtocols) {
-      val protocol = supportedProtocols[protocolName]
+      val protocol = initializedProtocols[protocolName]
       if (protocol != null) {
         logd(TAG, "Disconnecting $protocolName.")
         protocol.reset()
-        delegate?.removeProtocol(protocol)
-        supportedProtocols.remove(protocolName)
+        initializedProtocols.remove(protocolName)
+        if (protocolName in supportedTransportProtocolsName) {
+          delegate?.removeProtocol(protocol)
+        }
+        if (protocolName in supportedOobProtocolsName) {
+          delegate?.removeOobProtocol(protocol)
+        }
       }
     }
   }
@@ -256,12 +273,23 @@ open class TransportService : MetaDataService() {
     const val ACTION_BIND_PROTOCOL = "com.google.android.connecteddevice.BIND_PROTOCOL"
 
     /** `string-array` Supported transport protocols. */
-    private const val META_SUPPORTED_TRANSPORT_PROTOCOLS =
+    @VisibleForTesting
+    internal const val META_SUPPORTED_TRANSPORT_PROTOCOLS =
       "com.google.android.connecteddevice.transport_protocols"
+
+    @VisibleForTesting
+    internal const val META_SUPPORTED_OOB_CHANNELS =
+      "com.google.android.connecteddevice.supported_oob_channels"
 
     // The mac address randomly rotates every 7-15 minutes. To be safe, we will rotate our
     // reconnect advertisement every 6 minutes to avoid crossing a rotation.
     private val MAX_ADVERTISEMENT_DURATION = Duration.ofMinutes(6)
+
+    private const val META_EAP_CLIENT_NAME =
+      "com.google.android.connecteddevice.car_eap_client_name"
+
+    private const val META_EAP_SERVICE_NAME =
+      "com.google.android.connecteddevice.car_eap_service_name"
 
     /** `String` UUID for reconnection advertisement. */
     private const val META_RECONNECT_SERVICE_UUID =
@@ -312,6 +340,10 @@ open class TransportService : MetaDataService() {
     private const val PROXY_ENABLED_BY_DEFAULT = false
 
     private val BLUETOOTH_PROTOCOLS =
-      listOf(TransportProtocols.PROTOCOL_BLE_PERIPHERAL, TransportProtocols.PROTOCOL_SPP)
+      setOf(
+        TransportProtocols.PROTOCOL_BLE_PERIPHERAL,
+        TransportProtocols.PROTOCOL_SPP,
+        TransportProtocols.PROTOCOL_EAP
+      )
   }
 }

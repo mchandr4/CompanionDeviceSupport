@@ -41,7 +41,6 @@ import com.google.common.util.concurrent.MoreExecutors.directExecutor
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.anyOrNull
 import com.nhaarman.mockitokotlin2.argumentCaptor
-import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.spy
@@ -70,8 +69,7 @@ class ChannelResolverTest {
   private val mockCallback = mock<ChannelResolver.Callback>()
   private val mockStreamFactory = mock<ProtocolStreamFactory>()
   private val mockStream = mock<ProtocolStream>()
-  private val mockOobRunner =
-    mock<OobRunner> { on { supportedTypes } doReturn SUPPORTED_OOB_CAPABILITIES }
+  private val mockOobRunner = mock<OobRunner>()
   private var mockEncryptionRunner = mock<FakeEncryptionRunner>()
   private val testDevice1 = ProtocolDevice(testProtocol1, TEST_PROTOCOL_ID_1)
   private val testDevice2 = ProtocolDevice(testProtocol2, TEST_PROTOCOL_ID_2)
@@ -146,7 +144,7 @@ class ChannelResolverTest {
   }
 
   @Test
-  fun receivedSupportedVersion_sendVersionMessageAndSendOobData() {
+  fun receivedSupportedVersion_sendVersionMessage() {
     channelResolver.resolveAssociation(mockOobRunner)
     argumentCaptor<IDataReceivedListener>().apply {
       verify(testProtocol1).registerDataReceivedListener(eq(TEST_PROTOCOL_ID_1), capture())
@@ -157,9 +155,8 @@ class ChannelResolverTest {
       verify(testProtocol1).sendData(eq(TEST_PROTOCOL_ID_1), capture(), anyOrNull())
       assertThat(firstValue).isEqualTo(expectedVersion)
     }
-
-    verify(mockOobRunner).sendOobData(any())
   }
+
   @Test
   fun receivedInvalidChallenge_invokeOnError() {
     channelResolver.resolveReconnect(TEST_DEVICE_ID, TEST_CHALLENGE)

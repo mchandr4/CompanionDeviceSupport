@@ -88,8 +88,8 @@
                 android:resource="@string/car_association_service_uuid" />
             <meta-data android:name="com.google.android.connecteddevice.transport_protocols"
                 android:resource="@array/transport_protocols" />
-            <meta-data android:name="com.google.android.connecteddevice.supported_oob_channels"
-                android:resource="@array/supported_oob_channels"/>
+            <meta-data android:name="com.google.android.connecteddevice.car_eap_oob_protocol_name"
+                android:resource="@string/car_eap_oob_protocol_name" />
 
         </service>
         <service
@@ -121,6 +121,12 @@
                 android:resource="@bool/enable_proxy" />
             <meta-data android:name="com.google.android.connecteddevice.transport_protocols"
                 android:resource="@array/transport_protocols" />
+            <meta-data android:name="com.google.android.connecteddevice.supported_oob_channels"
+                android:resource="@array/supported_oob_channels"/>
+            <meta-data android:name="com.google.android.connecteddevice.car_eap_client_name"
+                android:resource="@string/car_eap_client_name" />
+            <meta-data android:name="com.google.android.connecteddevice.car_eap_service_name"
+                android:resource="@string/car_eap_service_name" />
         </service>
         <activity android:name=".AssociationActivity"
                   android:exported="true"

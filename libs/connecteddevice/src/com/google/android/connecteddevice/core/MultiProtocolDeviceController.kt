@@ -208,7 +208,7 @@ constructor(
     }
     val startAssociationResponse =
       StartAssociationResponse(
-        oobRunner.generateOobData(),
+        oobRunner.sendOobData(),
         ByteUtils.hexStringToByteArray(nameForAssociation),
         nameForAssociation
       )
@@ -731,6 +731,7 @@ constructor(
       }
       newDevice
     }
+    oobRunner.reset()
   }
 
   private fun convertTempAssociationDeviceToRealDevice(

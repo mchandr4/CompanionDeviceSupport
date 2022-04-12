@@ -107,6 +107,16 @@ public class SppManagerTest {
   }
 
   @Test
+  public void
+      testReadMessageTaskCallback_onMessageReceivedWithoutConnection_doNotCallOnMessageReceivedListener()
+          throws InterruptedException {
+    sppManager.addOnMessageReceivedListener(mockListener, callbackExecutor);
+    sppManager.connectedSocket = null;
+    sppManager.readMessageTaskCallback.onMessageReceived(testData);
+    verify(mockListener, never()).onMessageReceived(any(), eq(testData));
+  }
+
+  @Test
   public void testReadMessageTaskCallback_onMessageReadError_disconnectRemoteDevice()
       throws InterruptedException {
     sppManager.readMessageTaskCallback.onMessageReadError();
@@ -146,6 +156,15 @@ public class SppManagerTest {
   }
 
   @Test
+  public void testCleanUp_doNotIssueCallbackWithoutConnection() throws IOException {
+    sppManager.connectedSocket = null;
+
+    sppManager.cleanup();
+
+    verify(mockConnectionCallback, never()).onRemoteDeviceDisconnected(any());
+  }
+
+  @Test
   public void testCleanup_clearConnectTask() {
     sppManager.connect(testBluetoothDevice, TEST_SERVICE_UUID);
 
@@ -170,5 +189,15 @@ public class SppManagerTest {
 
     sppManager.addOnMessageReceivedListener(mockListener, callbackExecutor);
     verify(mockListener).onMessageReceived(any(), eq(testData));
+  }
+
+  @Test
+  public void testAddOnMessageReceivedListenerWithoutConnection_doNotInvokeCallback() {
+    sppManager.readMessageTaskCallback.onMessageReceived(testData);
+    verify(mockListener, never()).onMessageReceived(any(), eq(testData));
+
+    sppManager.connectedSocket = null;
+    sppManager.addOnMessageReceivedListener(mockListener, callbackExecutor);
+    verify(mockListener, never()).onMessageReceived(any(), eq(testData));
   }
 }

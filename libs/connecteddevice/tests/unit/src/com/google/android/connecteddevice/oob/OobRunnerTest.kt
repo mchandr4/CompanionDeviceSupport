@@ -16,21 +16,12 @@
 
 package com.google.android.connecteddevice.oob
 
-import android.os.ParcelUuid
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.google.android.connecteddevice.core.util.mockToBeAlive
 import com.google.android.connecteddevice.model.OobData
-import com.google.android.connecteddevice.transport.ConnectChallenge
-import com.google.android.connecteddevice.transport.ConnectionProtocol
-import com.google.android.connecteddevice.transport.IDataSendCallback
-import com.google.android.connecteddevice.transport.IDiscoveryCallback
-import com.google.android.connecteddevice.transport.ProtocolDevice
+import com.google.android.connecteddevice.transport.IConnectionProtocol
+import com.google.android.connecteddevice.transport.ProtocolDelegate
 import com.google.common.truth.Truth.assertThat
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.spy
-import com.nhaarman.mockitokotlin2.times
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
@@ -38,51 +29,37 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class OobRunnerTest {
-  private val mockOobChannelFactory = mock<OobChannelFactory>()
-  private val oobRunner = OobRunner(mockOobChannelFactory, SUPPORTED_TYPES_SINGLE)
-  private lateinit var testOobChannel: TestOobChannel
-  private lateinit var testProtocolDevice: ProtocolDevice
+  private val testProtocolName = "testProtocolName"
+  private val testConnectionProtocol = mockToBeAlive<IConnectionProtocol>()
+  private val testProtocolDelegate = ProtocolDelegate()
+  private lateinit var oobRunner: OobRunner
 
   @Before
   fun setUp() {
-    testOobChannel = spy(TestOobChannel())
-    whenever(mockOobChannelFactory.createOobChannel(any())).thenReturn(testOobChannel)
-    testProtocolDevice = ProtocolDevice(TestConnectionProtocol(), "testProtocolId")
+    oobRunner = OobRunner(testProtocolDelegate, testProtocolName)
   }
 
   @Test
   fun sendOobData_startOobDataExchangeSuccessfully_addToEatablishedOobChannels() {
-    oobRunner.generateOobData()
-    testOobChannel.oobDataExchangeResult = true
-    oobRunner.sendOobData(testProtocolDevice)
+    testProtocolDelegate.addOobProtocol(testConnectionProtocol)
+
+    oobRunner.sendOobData()
 
     assertThat(oobRunner.establishedOobChannels).hasSize(1)
   }
 
   @Test
   fun sendOobData_startOobDataExchangeFailed() {
-    testOobChannel.oobDataExchangeResult = false
-    oobRunner.sendOobData(testProtocolDevice)
+    oobRunner.sendOobData()
 
     assertThat(oobRunner.establishedOobChannels).isEmpty()
   }
 
   @Test
-  fun sendOobData_tryAllSupportedChannel() {
-    val oobRunner = OobRunner(mockOobChannelFactory, SUPPORTED_TYPES_TWO)
-    oobRunner.generateOobData()
-    oobRunner.sendOobData(testProtocolDevice)
-
-    verify(mockOobChannelFactory, times(2)).createOobChannel(any())
-  }
-
-  @Test
   fun reset_resetAllStatus() {
-    testOobChannel.oobDataExchangeResult = true
-    oobRunner.generateOobData()
-    oobRunner.sendOobData(testProtocolDevice)
+    testProtocolDelegate.addOobProtocol(testConnectionProtocol)
+    oobRunner.sendOobData()
     oobRunner.reset()
-    assertThat(testOobChannel.isInterrupted).isTrue()
     assertThat(oobRunner.encryptionKey).isNull()
     assertThat(oobRunner.establishedOobChannels).isEmpty()
   }
@@ -94,14 +71,13 @@ class OobRunnerTest {
 
   @Test
   fun generateOobData_algorithmNotSupported_throwException() {
-    val oobRunner =
-      OobRunner(mockOobChannelFactory, SUPPORTED_TYPES_SINGLE, keyAlgorithm = "UNKNOWN")
-    assertThrows(IllegalStateException::class.java) { oobRunner.generateOobData() }
+    val oobRunner = OobRunner(testProtocolDelegate, testProtocolName, keyAlgorithm = "UNKNOWN")
+    assertThrows(IllegalStateException::class.java) { oobRunner.sendOobData() }
   }
 
   @Test
   fun generateOobData_keyAndNoncesAreNonNullAndOobDataIsSetCorrectly() {
-    val oobData = oobRunner.generateOobData()
+    val oobData = oobRunner.sendOobData()
     assertThat(oobRunner.encryptionKey).isNotNull()
     assertThat(oobRunner.ihuIv).isNotNull()
     assertThat(oobRunner.mobileIv).isNotNull()
@@ -114,7 +90,7 @@ class OobRunnerTest {
   @Throws(Exception::class)
   fun serverEncryptAndClientDecrypt() {
     val testMessage = "testMessage".toByteArray()
-    oobRunner.generateOobData()
+    oobRunner.sendOobData()
     val encryptedTestMessage = oobRunner.encryptData(testMessage)
 
     switchClientAndServerRole()
@@ -127,14 +103,14 @@ class OobRunnerTest {
   @Throws(Exception::class)
   fun encryptAndDecryptWithDifferentNonces_throwsException() {
     val testMessage = "testMessage".toByteArray()
-    oobRunner.generateOobData()
+    oobRunner.sendOobData()
     val encryptedMessage = oobRunner.encryptData(testMessage)
     assertThrows(IllegalStateException::class.java) { oobRunner.decryptData(encryptedMessage) }
   }
 
   @Test
   fun decryptWithShortMessage_throwsException() {
-    oobRunner.generateOobData()
+    oobRunner.sendOobData()
     assertThrows(IllegalStateException::class.java) { oobRunner.decryptData("short".toByteArray()) }
   }
 
@@ -159,44 +135,12 @@ class OobRunnerTest {
     var oobDataExchangeResult = false
     var isInterrupted = false
 
-    override fun completeOobDataExchange(
-      protocolDevice: ProtocolDevice,
-      oobData: ByteArray,
-    ): Boolean {
+    override fun completeOobDataExchange(oobData: ByteArray): Boolean {
       return oobDataExchangeResult
     }
 
     override fun interrupt() {
       isInterrupted = true
     }
-  }
-
-  private class TestConnectionProtocol : ConnectionProtocol() {
-    override fun isDeviceVerificationRequired() = false
-
-    override fun startAssociationDiscovery(
-      name: String,
-      identifier: ParcelUuid,
-      callback: IDiscoveryCallback,
-    ) {}
-    override fun startConnectionDiscovery(
-      id: ParcelUuid,
-      challenge: ConnectChallenge,
-      callback: IDiscoveryCallback,
-    ) {}
-
-    override fun stopAssociationDiscovery() {}
-    override fun stopConnectionDiscovery(id: ParcelUuid) {}
-    override fun sendData(protocolId: String, data: ByteArray, callback: IDataSendCallback?) {}
-    override fun disconnectDevice(protocolId: String) {}
-    override fun getMaxWriteSize(protocolId: String): Int {
-      return 0
-    }
-  }
-
-  companion object {
-    private val SUPPORTED_TYPES_SINGLE = listOf(OobChannelFactory.BT_RFCOMM)
-    private val SUPPORTED_TYPES_TWO =
-      listOf(OobChannelFactory.BT_RFCOMM, OobChannelFactory.PRE_ASSOCIATION)
   }
 }

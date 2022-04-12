@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.google.android.connecteddevice.model
 
-/** Constants for `String` representations of transport protocols. */
-object TransportProtocols {
-  /** BLE transport in the peripheral role. */
-  const val PROTOCOL_BLE_PERIPHERAL = "ble_peripheral"
+package com.panasonic.iapx;
 
-  /** Classic Bluetooth SPP protocol. */
-  const val PROTOCOL_SPP = "spp"
-
-  /** Classic Bluetooth protocol for iOS device. */
-  const val PROTOCOL_EAP = "eap"
+interface IServiceConnector {
+  void ConnectClient(in String uniqueClientName, in IBinder serviceDelegate, in IBinder deviceConnectionDelegate) = 0;
+  void DisconnectClient(in String uniqueClientName, in IBinder serviceDelegate) = 1;
+  const int kServiceConnectionReady = 1;
+  const int kServiceConnectionRefused = 2;
+  const int kServiceConnectionLost = 3;
 }

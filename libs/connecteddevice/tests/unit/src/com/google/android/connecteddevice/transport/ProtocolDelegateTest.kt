@@ -37,6 +37,25 @@ class ProtocolDelegateTest {
   }
 
   @Test
+  fun addOobProtocol_addedToOobList() {
+    val protocol = mockToBeAlive<IConnectionProtocol>()
+
+    delegate.addOobProtocol(protocol)
+
+    assertThat(delegate.oobProtocols).containsExactly(protocol)
+  }
+
+  @Test
+  fun removeOobProtocol_removeFromOobList() {
+    val protocol = mockToBeAlive<IConnectionProtocol>()
+
+    delegate.addOobProtocol(protocol)
+    delegate.removeOobProtocol(protocol)
+
+    assertThat(delegate.oobProtocols).isEmpty()
+  }
+
+  @Test
   fun removeProtocol_unrecognizedProtocolDoesNotInvokeCallback() {
     val protocol = mockToBeAlive<IConnectionProtocol>()
 

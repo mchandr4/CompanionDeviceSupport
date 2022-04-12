@@ -78,7 +78,7 @@ class MultiProtocolDeviceControllerTest {
   private val testConnectionProtocol: TestConnectionProtocol = spy(TestConnectionProtocol())
   private val mockCallback = mock<Callback>()
   private val mockStream = mock<ProtocolStream>()
-  private val mockOobRunner = mock<OobRunner> { on { generateOobData() } doReturn TEST_OOB_DATA }
+  private val mockOobRunner = mock<OobRunner> { on { sendOobData() } doReturn TEST_OOB_DATA }
   private val mockAssociationCallback = mockToBeAlive<IAssociationCallback>()
   private val mockDeadAssociationCallback = mockToBeDead<IAssociationCallback>()
   private val protocolDelegate = ProtocolDelegate().apply { addProtocol(testConnectionProtocol) }
@@ -251,7 +251,7 @@ class MultiProtocolDeviceControllerTest {
       firstValue.onDiscoveryStartedSuccessfully()
     }
 
-    verify(mockOobRunner).generateOobData()
+    verify(mockOobRunner).sendOobData()
     val response =
       argumentCaptor<StartAssociationResponse>().run {
         verify(mockAssociationCallback).onAssociationStartSuccess(capture())

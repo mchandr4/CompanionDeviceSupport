@@ -23,6 +23,12 @@ interface IProtocolDelegate {
   /** Add a protocol to the collection of supported protocols. */
   void addProtocol(in IConnectionProtocol protocol);
 
+  /** Add an OOB protocol to the collection of supported OOB protocols. */
+  void addOobProtocol(in IConnectionProtocol protocol);
+
   /** Remove a protocol from the collection of supported protocols. */
   void removeProtocol(in IConnectionProtocol protocol);
+
+  /** Remove an OOB protocol to the collection of supported OOB protocols. */
+  void removeOobProtocol(in IConnectionProtocol protocol);
 }

@@ -18,7 +18,6 @@ package com.google.android.connecteddevice.service;
 
 import static com.google.android.connecteddevice.util.SafeLog.logd;
 import static com.google.android.connecteddevice.util.SafeLog.loge;
-import static java.util.Objects.requireNonNull;
 
 import android.content.Intent;
 import android.os.IBinder;
@@ -30,7 +29,6 @@ import com.google.android.connecteddevice.core.FeatureCoordinator;
 import com.google.android.connecteddevice.core.MultiProtocolDeviceController;
 import com.google.android.connecteddevice.logging.LoggingFeature;
 import com.google.android.connecteddevice.logging.LoggingManager;
-import com.google.android.connecteddevice.oob.OobChannelFactory;
 import com.google.android.connecteddevice.oob.OobRunner;
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage;
 import com.google.android.connecteddevice.system.SystemFeature;
@@ -39,8 +37,6 @@ import com.google.android.connecteddevice.transport.ProtocolDelegate;
 import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelegateBinder;
 import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelegateBinder.OnRemoteCallbackSetListener;
 import com.google.android.connecteddevice.util.EventLog;
-import java.util.Arrays;
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -55,8 +51,14 @@ public final class ConnectedDeviceService extends TrunkService {
   private static final String META_ASSOCIATION_SERVICE_UUID =
       "com.google.android.connecteddevice.association_service_uuid";
 
-  private static final String META_SUPPORTED_OOB_CHANNELS =
-      "com.google.android.connecteddevice.supported_oob_channels";
+  private static final String META_EAP_OOB_PROTOCOL_NAME =
+      "com.google.android.connecteddevice.car_eap_oob_protocol_name";
+
+  // The name should be reverse-DNS strings.
+  // Source:
+  // https://developer.apple.com/library/archive/featuredarticles/ExternalAccessoryPT/Introduction/Introduction.html#//apple_ref/doc/uid/TP40009502
+  private static final String DEFAULT_EAP_OOB_PROTOCOL_NAME =
+      "com.google.companion.oob-association";
 
   private static final String META_ENABLE_PASSENGER =
       "com.google.android.connecteddevice.enable_passenger";
@@ -121,15 +123,11 @@ public final class ConnectedDeviceService extends TrunkService {
       return;
     }
     logd(TAG, "Initializing FeatureCoordinator version of the platform.");
-    List<String> oobTypes =
-        Arrays.asList(
-            requireNonNull(
-                getMetaStringArray(
-                    META_SUPPORTED_OOB_CHANNELS, /* defaultValue= */ new String[0])));
-
-    OobRunner oobRunner = new OobRunner(new OobChannelFactory(sppDelegateBinder), oobTypes);
     UUID associationUuid = UUID.fromString(requireMetaString(META_ASSOCIATION_SERVICE_UUID));
     boolean enablePassenger = getMetaBoolean(META_ENABLE_PASSENGER, ENABLE_PASSENGER_BY_DEFAULT);
+    String oobProtocolName =
+        getMetaString(META_EAP_OOB_PROTOCOL_NAME, DEFAULT_EAP_OOB_PROTOCOL_NAME);
+    OobRunner oobRunner = new OobRunner(protocolDelegate, oobProtocolName);
     DeviceController deviceController =
         new MultiProtocolDeviceController(
             protocolDelegate, storage, oobRunner, associationUuid, enablePassenger);

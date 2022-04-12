@@ -21,16 +21,19 @@ import static com.android.car.ui.core.CarUi.requireToolbar;
 import static com.android.car.ui.toolbar.Toolbar.State.SUBPAGE;
 import static com.google.android.connecteddevice.util.SafeLog.logd;
 import static com.google.android.connecteddevice.util.SafeLog.loge;
+import static com.google.android.connecteddevice.util.SafeLog.logw;
 
 import android.Manifest.permission;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.bluetooth.BluetoothAdapter;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
+import android.os.UserManager;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
@@ -40,6 +43,7 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelStoreOwner;
@@ -67,12 +71,19 @@ public class AssociationActivity extends FragmentActivity {
   private static final String TURN_ON_BLUETOOTH_FRAGMENT_TAG = "TurnOnBluetoothFragment";
   private static final String ASSOCIATION_ERROR_FRAGMENT_TAG = "AssociationErrorFragment";
   private static final String TURN_ON_BLUETOOTH_DIALOG_TAG = "TurnOnBluetoothDialog";
+  private static final String COMPANION_NOT_AVAILABLE_DIALOG_TAG = "CompanionNotAvailableDialog";
   private static final String EXTRA_AUTH_IS_SETUP_WIZARD = "is_setup_wizard";
   private static final String EXTRA_AUTH_IS_SETUP_PROFILE = "is_setup_profile_association";
   private static final String EXTRA_USE_IMMERSIVE_MODE = "useImmersiveMode";
   private static final String EXTRA_HIDE_SKIP_BUTTON = "hide_skip_button";
   private static final String ASSOCIATED_DEVICE_DETAILS_BACKSTACK_NAME =
       "AssociatedDeviceDetailsBackstack";
+
+  private static final String PROFILE_SWITCH_PACKAGE_NAME = "com.android.car.settings";
+  private static final String PROFILE_SWITCH_CLASS_NAME_R =
+      "com.android.car.settings.users.UserSwitcherActivity";
+  private static final String PROFILE_SWITCH_CLASS_NAME =
+      "com.android.car.settings.profiles.ProfileSwitcherActivity";
 
   private final List<String> requiredPermissions = new ArrayList<>();
 
@@ -148,6 +159,10 @@ public class AssociationActivity extends FragmentActivity {
   protected void onStart() {
     super.onStart();
     handleImmersive();
+    UserManager userManager = getSystemService(UserManager.class);
+    if (userManager.isGuestUser()) {
+      showCompanionNotAvailableDialog();
+    }
   }
 
   @Override
@@ -292,6 +307,7 @@ public class AssociationActivity extends FragmentActivity {
                 case STARTED:
                   runOnUiThread(
                       () -> {
+                        logd(TAG, "Association state is started; Show companion landing fragment.");
                         showCompanionLandingFragment();
                         showProgressBar();
                       });
@@ -313,7 +329,12 @@ public class AssociationActivity extends FragmentActivity {
             });
     model
         .getAssociatedDevicesDetails()
-        .observe(this, this::handleAssociatedDevicesDetailsChange);
+        .observe(
+            this,
+            devicesDetails -> {
+              boolean isServiceConnected = model.isServiceConnected().getValue();
+              handleAssociatedDevicesDetailsAndConnectionChange(devicesDetails, isServiceConnected);
+            });
     model
         .getRemovedDevice()
         .observe(
@@ -329,12 +350,9 @@ public class AssociationActivity extends FragmentActivity {
             this,
             isServiceConnected -> {
               logd(TAG, "Service connection status: " + isServiceConnected);
-              if (isServiceConnected) {
-                showCompanionLandingFragment();
-                hideProgressBar();
-              } else {
-                showLoadingScreen();
-              }
+              List<AssociatedDeviceDetails> devicesDetails =
+                  model.getAssociatedDevicesDetails().getValue();
+              handleAssociatedDevicesDetailsAndConnectionChange(devicesDetails, isServiceConnected);
             });
   }
 
@@ -349,7 +367,13 @@ public class AssociationActivity extends FragmentActivity {
     }
   }
 
-  private void handleAssociatedDevicesDetailsChange(List<AssociatedDeviceDetails> devicesDetails) {
+  private void handleAssociatedDevicesDetailsAndConnectionChange(
+      List<AssociatedDeviceDetails> devicesDetails, boolean isServiceConnected) {
+    if (!isServiceConnected) {
+      logw(TAG, "Service not connected, ignore device details change.");
+      showLoadingScreen();
+      return;
+    }
     // An empty list means that there are no more associated devices.
     if (devicesDetails.isEmpty()) {
       handleEmptyDeviceList();
@@ -440,13 +464,13 @@ public class AssociationActivity extends FragmentActivity {
           "Device list is empty, but landing fragment already showing. Nothing more to be done.");
       return;
     }
-
+    logd(TAG, "No associated device, showing landing screen.");
+    hideProgressBar();
     showCompanionLandingFragment();
   }
 
   private void showCompanionLandingFragment() {
     maybeClearDetailsFragmentFromBackstack();
-    dismissButtons();
 
     if (getResources().getBoolean(R.bool.enable_qr_code)) {
       logd(TAG, "Showing LandingFragment with QR code.");
@@ -459,6 +483,7 @@ public class AssociationActivity extends FragmentActivity {
     if (fragment != null && fragment.isVisible()) {
       return;
     }
+    dismissButtons();
     fragment = CompanionLandingFragment.newInstance(isStartedForSuw);
     launchFragment(fragment, COMPANION_LANDING_FRAGMENT_TAG);
   }
@@ -473,10 +498,9 @@ public class AssociationActivity extends FragmentActivity {
     }
     fragment =
         CompanionQrCodeLandingFragment.newInstance(isStartedForSuw, isStartedForSetupProfile);
+    dismissButtons();
     launchFragment(fragment, COMPANION_LANDING_FRAGMENT_TAG);
-    if (isStartedForSetupProfile) {
-      showSkipButton();
-    }
+    showSkipButton();
   }
 
   private void showTurnOnBluetoothFragment() {
@@ -567,6 +591,7 @@ public class AssociationActivity extends FragmentActivity {
 
   private void dismissButtons() {
     if (isStartedForSuw) {
+      logd(TAG, "Dismissing SUW toolbar buttons.");
       carSetupWizardLayout.setPrimaryToolbarButtonVisible(false);
       carSetupWizardLayout.setSecondaryToolbarButtonVisible(false);
       return;
@@ -576,8 +601,11 @@ public class AssociationActivity extends FragmentActivity {
 
   private void showSkipButton() {
     if (!isStartedForSuw || hideSkipButton) {
+      logw(TAG, "Not in SUW or hideSkipButton is true; Do not show skip button.");
       return;
     }
+    logd(TAG, "Show skip button on SUW page.");
+    carSetupWizardLayout.setPrimaryToolbarButtonFlat(true);
     carSetupWizardLayout.setPrimaryToolbarButtonText(getString(R.string.skip));
     carSetupWizardLayout.setPrimaryToolbarButtonVisible(true);
     carSetupWizardLayout.setPrimaryToolbarButtonListener(
@@ -626,6 +654,11 @@ public class AssociationActivity extends FragmentActivity {
       TurnOnBluetoothDialogFragment fragment = new TurnOnBluetoothDialogFragment();
       fragment.show(getSupportFragmentManager(), TURN_ON_BLUETOOTH_DIALOG_TAG);
     }
+  }
+
+  private void showCompanionNotAvailableDialog() {
+    CompanionNotAvailableDialogFragment fragment = new CompanionNotAvailableDialogFragment();
+    fragment.show(getSupportFragmentManager(), COMPANION_NOT_AVAILABLE_DIALOG_TAG);
   }
 
   /** Checks for the details page being shown and clears it from the Fragment backstack. */
@@ -704,6 +737,46 @@ public class AssociationActivity extends FragmentActivity {
           .setNegativeButton(getString(R.string.not_now), null)
           .setCancelable(true)
           .create();
+    }
+  }
+
+  /** Dialog fragment to notify CompanionDevice is not available to guest user. */
+  public static class CompanionNotAvailableDialogFragment extends DialogFragment {
+    @Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+      @StringRes
+      int messageResId =
+          VERSION.SDK_INT <= VERSION_CODES.R
+              ? R.string.companion_not_available_dialog_switch_user_message
+              : R.string.companion_not_available_dialog_message;
+      AlertDialog.Builder builder =
+          new AlertDialog.Builder(getActivity())
+              .setTitle(getString(R.string.companion_not_available_dialog_title))
+              .setMessage(getString(messageResId))
+              .setNegativeButton(getString(R.string.ok), (d, w) -> getActivity().finish())
+              .setCancelable(false);
+      addChangeProfileButton(builder);
+      Dialog dialog = builder.create();
+      dialog.setCanceledOnTouchOutside(/* cancel= */ false);
+      return dialog;
+    }
+
+    private void addChangeProfileButton(AlertDialog.Builder builder) {
+      if (VERSION.SDK_INT <= VERSION_CODES.Q) {
+        return;
+      }
+      String profileSwitcherClassName =
+          VERSION.SDK_INT >= VERSION_CODES.S
+              ? PROFILE_SWITCH_CLASS_NAME
+              : PROFILE_SWITCH_CLASS_NAME_R;
+      builder.setPositiveButton(
+          getString(R.string.change_profile),
+          (d, w) -> {
+            Intent intent = new Intent();
+            intent.setComponent(
+                new ComponentName(PROFILE_SWITCH_PACKAGE_NAME, profileSwitcherClassName));
+            getActivity().startActivity(intent);
+          });
     }
   }
 }

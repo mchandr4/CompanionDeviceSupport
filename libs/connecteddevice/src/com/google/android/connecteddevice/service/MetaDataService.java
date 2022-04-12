@@ -55,11 +55,10 @@ public abstract class MetaDataService extends Service {
   }
 
   /**
-   * Return a string from the service's meta-data, or default value if no meta-data matches
-   * the provided name.
+   * Return a string from the service's meta-data, or default value if no meta-data matches the
+   * provided name.
    */
-  @Nullable
-  protected final String getMetaString(@NonNull String name, @Nullable String defaultValue) {
+  protected final String getMetaString(@NonNull String name, @NonNull String defaultValue) {
     if (!bundle.containsKey(name)) {
       return defaultValue;
     }
@@ -103,10 +102,8 @@ public abstract class MetaDataService extends Service {
    * Return a string array from the service's meta-data, or default value if no meta-data matches
    * the provided name.
    */
-  @Nullable
   protected final String[] getMetaStringArray(
-      @NonNull String name,
-      @Nullable String[] defaultValue) {
+      @NonNull String name, @NonNull String[] defaultValue) {
     if (!bundle.containsKey(name)) {
       return defaultValue;
     }

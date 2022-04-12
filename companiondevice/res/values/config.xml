@@ -20,6 +20,11 @@
     <!-- Platform values -->
     <string name="car_association_service_uuid" translatable="false">5e2a68a4-27be-43f9-8d1e-4546976fabd7</string>
 
+    <!-- EAP OOB values -->
+    <string name="car_eap_oob_protocol_name" translatable="false">com.google.companion.oob-association</string>
+    <string name="car_eap_client_name" translatable="false">com.google.android.connecteddevice.transport</string>
+    <string name="car_eap_service_name" translatable="false">com.panasonic.iapx.serviceconnector</string>
+
     <!-- Services to start early in the single user (user 0). -->
     <string-array name="early_single_user_services" translatable="false">
         <item>com.google.android.companiondevicesupport/com.google.android.connecteddevice.trust.TrustedDeviceManagerService</item>
@@ -40,8 +45,8 @@
 
     <!-- Supported OOB verification approaches. -->
     <string-array name="supported_oob_channels" translatable="false">
-        <item>BT_RFCOMM</item>
-        <item>PRE_ASSOCIATION</item>
+        <item>eap</item>
+        <item>spp</item>
     </string-array>
 
     <!-- Supported transport protocols. -->

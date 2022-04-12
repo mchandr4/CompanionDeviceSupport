@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,9 @@
  * limitations under the License.
  */
 
-package com.google.android.connecteddevice.oob
+package com.panasonic.iapx;
 
-import com.google.android.connecteddevice.transport.ProtocolDevice
-
-/**
- * An out of band data exchange channel.
- *
- * This class performs no-op. [completeOobDataExchange] returns `true` immediately.
- */
-class PassThroughChannel : OobChannel {
-  override fun completeOobDataExchange(
-    protocolDevice: ProtocolDevice,
-    oobData: ByteArray
-  ): Boolean {
-    return true
-  }
-
-  override fun interrupt() {}
+interface IDeviceConnection {
+  oneway void DoNotDisturbAnymore() = 0;
+  oneway void SendEAPData(in long eapSessionId, in byte[] data) = 3000;
 }

@@ -68,7 +68,6 @@ public class SppManager {
   private final ExecutorService taskExecutor = Executors.newSingleThreadExecutor();
   private final ExecutorService writeExecutor = Executors.newSingleThreadExecutor();
   private final Executor taskCallbackExecutor;
-  private BluetoothDevice device;
   // Only the first registered {@code OnMessageReceivedListener} will receive the missed messages.
   private final ConcurrentLinkedQueue<byte[]> missedMessages = new ConcurrentLinkedQueue<>();
 
@@ -134,8 +133,13 @@ public class SppManager {
               + " is "
               + missedMessages.size());
       byte[] missedMessage = missedMessages.poll();
-      receivedListeners.invoke(
-          receivedListener -> receivedListener.onMessageReceived(device, missedMessage));
+      // Invokes message received callback only when there is currently a connection.
+      if (connectedSocket != null) {
+        receivedListeners.invoke(
+            receivedListener ->
+                receivedListener.onMessageReceived(
+                    connectedSocket.getRemoteDevice(), missedMessage));
+      }
     }
   }
 
@@ -306,6 +310,8 @@ public class SppManager {
 
     try {
       if (connectedSocket != null) {
+        callbacks.invoke(
+            callback -> callback.onRemoteDeviceDisconnected(connectedSocket.getRemoteDevice()));
         connectedSocket.close();
       }
     } catch (IOException e) {
@@ -314,8 +320,6 @@ public class SppManager {
 
     connectedSocket = null;
     state = ConnectionState.DISCONNECTED;
-
-    callbacks.invoke(callback -> callback.onRemoteDeviceDisconnected(device));
   }
 
   /**
@@ -325,14 +329,13 @@ public class SppManager {
    * @param device The BluetoothDevice that has been connected
    */
   @GuardedBy("lock")
-  private void startConnectionLocked(BluetoothSocket socket, BluetoothDevice device) {
+  private void startConnectionLocked(BluetoothSocket socket) {
     logd(TAG, "Connected over Bluetooth socket. Started listening for incoming messages");
 
-    this.device = device;
     connectedSocket = socket;
-
     state = ConnectionState.CONNECTED;
-    callbacks.invoke(callback -> callback.onRemoteDeviceConnected(device));
+    callbacks.invoke(
+        callback -> callback.onRemoteDeviceConnected(connectedSocket.getRemoteDevice()));
 
     InputStream inputStream;
     try {
@@ -366,7 +369,7 @@ public class SppManager {
               case LISTEN:
               case CONNECTING:
                 logd(TAG, "Starting connection with device " + socket.getRemoteDevice());
-                startConnectionLocked(socket, socket.getRemoteDevice());
+                startConnectionLocked(socket);
                 break;
               case CONNECTED:
                 loge(TAG, "AcceptTask completed while in CONNECTED state. Cosing socket.");
@@ -402,7 +405,10 @@ public class SppManager {
                     + " while no listener registered, storing the message");
             return;
           }
-          receivedListeners.invoke(listener -> listener.onMessageReceived(device, message));
+          if (connectedSocket != null) {
+            receivedListeners.invoke(
+                listener -> listener.onMessageReceived(connectedSocket.getRemoteDevice(), message));
+          }
         }
 
         @Override
@@ -419,7 +425,7 @@ public class SppManager {
         public void onConnectionSuccess(BluetoothSocket socket) {
           synchronized (lock) {
             logd(TAG, "onConnectionSucceeded for device " + socket.getRemoteDevice());
-            startConnectionLocked(socket, socket.getRemoteDevice());
+            startConnectionLocked(socket);
           }
         }
 

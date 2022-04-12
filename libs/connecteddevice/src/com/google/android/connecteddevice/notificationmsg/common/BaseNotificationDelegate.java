@@ -28,6 +28,8 @@ import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
+import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
@@ -374,7 +376,11 @@ public class BaseNotificationDelegate {
             .setClassName(context, context.getClass().getName())
             .putExtra(EXTRA_CONVERSATION_KEY, conversationKey);
 
-    return PendingIntent.getForegroundService(
-        context, notificationId, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+    int flags = PendingIntent.FLAG_UPDATE_CURRENT;
+    if (Build.VERSION.SDK_INT >= VERSION_CODES.S) {
+        flags |= PendingIntent.FLAG_MUTABLE;
+    }
+
+    return PendingIntent.getForegroundService(context, notificationId, intent, flags);
   }
 }

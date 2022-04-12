@@ -7,10 +7,12 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.ServiceConnection
+import android.content.res.Resources
 import android.os.Bundle
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.connecteddevice.core.util.mockToBeAlive
+import com.google.android.connecteddevice.model.TransportProtocols
 import com.google.android.connecteddevice.transport.IProtocolDelegate
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.any
@@ -21,6 +23,9 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.Robolectric
+
+private const val OOB_PROTOCOL_CHANNELS_RESOURCE_ID = 0
+private const val PROTOCOL_CHANNELS_RESOURCE_ID = 1
 
 @RunWith(AndroidJUnit4::class)
 class TransportServiceTest {
@@ -61,7 +66,7 @@ class TransportServiceTest {
     verify(mockDelegate).removeProtocol(any())
     assertThat(service.boundService).isNull()
     assertThat(service.receiver).isNull()
-    assertThat(service.supportedProtocols).isEmpty()
+    assertThat(service.initializedProtocols).isEmpty()
   }
 
   @Test
@@ -83,7 +88,7 @@ class TransportServiceTest {
 
     assertThat(service.delegate).isNull()
     assertThat(service.boundService).isNotNull()
-    assertThat(service.supportedProtocols).isEmpty()
+    assertThat(service.initializedProtocols).isEmpty()
   }
 
   @Test
@@ -118,7 +123,7 @@ class TransportServiceTest {
     issueBluetoothChangedBroadcast(BluetoothAdapter.STATE_OFF)
 
     verify(mockDelegate).removeProtocol(any())
-    assertThat(service.supportedProtocols).isEmpty()
+    assertThat(service.initializedProtocols).isEmpty()
   }
 
   @Test
@@ -140,6 +145,7 @@ class TransportServiceTest {
 }
 
 class TestTransportService : TransportService() {
+  private val context = ApplicationProvider.getApplicationContext<Context>()
 
   var boundService: ServiceConnection? = null
 
@@ -171,6 +177,29 @@ class TestTransportService : TransportService() {
   }
 
   override fun retrieveMetaDataBundle(): Bundle {
-    return Bundle()
+    val bundle = Bundle()
+    bundle.putInt(META_SUPPORTED_TRANSPORT_PROTOCOLS, PROTOCOL_CHANNELS_RESOURCE_ID)
+    bundle.putInt(META_SUPPORTED_OOB_CHANNELS, OOB_PROTOCOL_CHANNELS_RESOURCE_ID)
+    return bundle
+  }
+
+  override fun getResources(): Resources {
+    return object :
+      Resources(
+        context.getResources().getAssets(),
+        context.getResources().getDisplayMetrics(),
+        context.getResources().getConfiguration()
+      ) {
+
+      override fun getStringArray(id: Int): Array<String> {
+        when (id) {
+          OOB_PROTOCOL_CHANNELS_RESOURCE_ID ->
+            return arrayOf(TransportProtocols.PROTOCOL_EAP, TransportProtocols.PROTOCOL_SPP)
+          PROTOCOL_CHANNELS_RESOURCE_ID ->
+            return arrayOf(TransportProtocols.PROTOCOL_BLE_PERIPHERAL)
+          else -> throw NotFoundException()
+        }
+      }
+    }
   }
 }

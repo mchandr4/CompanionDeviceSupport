@@ -16,6 +16,7 @@
 package com.google.android.connecteddevice.core
 
 import android.os.ParcelUuid
+import androidx.annotation.GuardedBy
 import androidx.annotation.VisibleForTesting
 import com.google.android.connecteddevice.api.IAssociationCallback
 import com.google.android.connecteddevice.api.IConnectionCallback
@@ -34,12 +35,14 @@ import com.google.android.connecteddevice.util.AidlThreadSafeCallbacks
 import com.google.android.connecteddevice.util.ByteUtils
 import com.google.android.connecteddevice.util.SafeLog.logd
 import com.google.android.connecteddevice.util.SafeLog.loge
+import com.google.android.connecteddevice.util.SafeLog.logw
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
-import java.util.concurrent.CopyOnWriteArraySet
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 
 /** Coordinator between features and connected devices. */
 class FeatureCoordinator
@@ -59,21 +62,24 @@ constructor(
 
   private val allConnectionCallbacks = AidlThreadSafeCallbacks<IConnectionCallback>()
 
-  // deviceId -> (recipientId -> callbacks)
+  private val lock = ReentrantLock()
+
+  // deviceId -> (recipientId -> callbacks)s
+  @GuardedBy("lock")
   private val deviceCallbacks:
     MutableMap<String, MutableMap<ParcelUuid, AidlThreadSafeCallbacks<IDeviceCallback>>> =
-    ConcurrentHashMap()
-
-  // recipientId -> (deviceId -> message bytes)
-  private val recipientMissedMessages:
-    MutableMap<ParcelUuid, MutableMap<String, MutableList<DeviceMessage>>> =
     ConcurrentHashMap()
 
   // Recipient ids that received multiple callback registrations indicate that the recipient id
   // has been compromised. Another party now has access the messages intended for that recipient.
   // As a safeguard, that recipient id will be added to this list and blocked from further
   // callback notifications.
-  private val blockedRecipients: MutableSet<ParcelUuid> = CopyOnWriteArraySet()
+  @GuardedBy("lock") private val blockedRecipients = mutableSetOf<ParcelUuid>()
+
+  // recipientId -> (deviceId -> message bytes)
+  private val recipientMissedMessages:
+    MutableMap<ParcelUuid, MutableMap<String, MutableList<DeviceMessage>>> =
+    ConcurrentHashMap()
 
   init {
     controller.registerCallback(createDeviceControllerCallback(), callbackExecutor)
@@ -89,7 +95,7 @@ constructor(
   /** Disconnect all devices and reset state. */
   fun reset() {
     logd(TAG, "Resetting coordinator.")
-    deviceCallbacks.clear()
+    lock.withLock { deviceCallbacks.clear() }
     controller.reset()
     recipientMissedMessages.clear()
   }
@@ -125,18 +131,42 @@ constructor(
     recipientId: ParcelUuid,
     callback: IDeviceCallback
   ) {
-    if (blockedRecipients.contains(recipientId)) {
+    val registrationSuccessful =
+      lock.withLock { registerDeviceCallbackLocked(connectedDevice, recipientId, callback) }
+
+    if (registrationSuccessful) {
+      notifyOfMissedMessages(connectedDevice, recipientId, callback)
+    } else {
       notifyRecipientBlocked(connectedDevice, recipientId, callback)
-      return
+    }
+  }
+
+  /**
+   * Registers the given [callback] to be notified of device events on the specified
+   * [connectedDevice] that are specific to the [recipientId].
+   *
+   * If the registration is successful, then `true` is returned. The caller of this method should
+   * have acquired [lock].
+   */
+  @GuardedBy("lock")
+  private fun registerDeviceCallbackLocked(
+    connectedDevice: ConnectedDevice,
+    recipientId: ParcelUuid,
+    callback: IDeviceCallback
+  ): Boolean {
+    if (recipientId in blockedRecipients) {
+      return false
     }
 
     val recipientCallbacks =
       deviceCallbacks.computeIfAbsent(connectedDevice.deviceId) { ConcurrentHashMap() }
     val newCallbacks =
       AidlThreadSafeCallbacks<IDeviceCallback>().apply { add(callback, callbackExecutor) }
+
     recipientCallbacks.computeIfPresent(recipientId) { _, callbacks ->
       if (callbacks.isEmpty) null else callbacks
     }
+
     val previousCallbacks = recipientCallbacks.putIfAbsent(recipientId, newCallbacks)
 
     // Device already has a callback registered with this recipient UUID. For the
@@ -148,15 +178,14 @@ constructor(
       previousCallbacks.invoke {
         it.onDeviceError(connectedDevice, DEVICE_ERROR_INSECURE_RECIPIENT_ID_DETECTED)
       }
-      notifyRecipientBlocked(connectedDevice, recipientId, callback)
-      return
+      return false
     }
 
     logd(
       TAG,
       "New callback registered on device ${connectedDevice.deviceId} for recipient $recipientId."
     )
-    notifyOfMissedMessages(connectedDevice, recipientId, callback)
+    return true
   }
 
   private fun notifyRecipientBlocked(
@@ -194,14 +223,40 @@ constructor(
     recipientId: ParcelUuid,
     callback: IDeviceCallback
   ) {
+    lock.withLock { unregisterDeviceCallbackLocked(connectedDevice, recipientId, callback) }
+  }
+
+  /**
+   * Unregisters the given [callback] from being notified of device events for the specified
+   * [recipientId] on the [connectedDevice].
+   *
+   * The caller should ensure that they have acquired [lock].
+   */
+  @GuardedBy("lock")
+  private fun unregisterDeviceCallbackLocked(
+    connectedDevice: ConnectedDevice,
+    recipientId: ParcelUuid,
+    callback: IDeviceCallback
+  ) {
+    val callbacks = deviceCallbacks[connectedDevice.deviceId]?.get(recipientId)
+    if (callbacks == null) {
+      logw(
+        TAG,
+        "Request to unregister callback on device ${connectedDevice.deviceId} for recipient " +
+          "$recipientId, but none registered."
+      )
+      return
+    }
+
+    callbacks.remove(callback)
+
     logd(
       TAG,
       "Device callback unregistered on device ${connectedDevice.deviceId} for recipient " +
         "$recipientId."
     )
-    val callbacks = deviceCallbacks[connectedDevice.deviceId]?.get(recipientId)
-    callbacks?.remove(callback)
-    if (callbacks?.isEmpty == true) {
+
+    if (callbacks.isEmpty) {
       deviceCallbacks[connectedDevice.deviceId]?.remove(recipientId)
     }
   }
@@ -341,12 +396,23 @@ constructor(
 
   @VisibleForTesting
   internal fun onSecureChannelEstablishedInternal(connectedDevice: ConnectedDevice) {
+    val callbacks = lock.withLock { deviceCallbacks[connectedDevice.deviceId]?.values }
+    if (callbacks == null) {
+      logd(
+        TAG,
+        "A secure channel has been established with ${connectedDevice.deviceId}, but no " +
+          "callbacks registered to be notified."
+      )
+      return
+    }
+
     logd(
       TAG,
       "Notifying callbacks that a secure channel has been established with " +
         "${connectedDevice.deviceId}."
     )
-    deviceCallbacks[connectedDevice.deviceId]?.values?.forEach { callback ->
+
+    for (callback in callbacks) {
       callback.invoke { it.onSecureChannelEstablished(connectedDevice) }
     }
   }
@@ -360,14 +426,21 @@ constructor(
       )
       return
     }
+
     logd(TAG, "Received a new message for ${message.recipient} from ${connectedDevice.deviceId}.")
-    val callback = deviceCallbacks[connectedDevice.deviceId]?.get(ParcelUuid(message.recipient))
+
+    val callback =
+      lock.withLock {
+        deviceCallbacks[connectedDevice.deviceId]?.get(ParcelUuid(message.recipient))
+      }
 
     if (callback == null) {
       logd(TAG, "Recipient has not registered a callback yet. Saving missed message.")
       saveMissedMessage(connectedDevice, message)
       return
     }
+
+    logd(TAG, "Notifying callback for recipient ${message.recipient}")
 
     callback.invoke { it.onMessageReceived(connectedDevice, message) }
   }

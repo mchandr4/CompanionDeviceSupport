@@ -28,6 +28,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.ParcelUuid;
 import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
@@ -60,6 +62,8 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
   private static final String TAG = "AssociatedDeviceViewModel";
 
   private static final Duration DISCOVERABLE_DURATION = Duration.ofMinutes(2);
+
+  private static final Duration CONNECT_TIME_OUT_DURATION = Duration.ofSeconds(10);
 
   /** States of association process. */
   public enum AssociationState {
@@ -94,6 +98,8 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
   private final boolean isPassengerEnabled;
   private final String bleDeviceNamePrefix;
   private final BluetoothAdapter bluetoothAdapter;
+  private final Handler handler = new Handler(Looper.getMainLooper());
+  private final Runnable connectTimeoutRunnable = this::onConnectTimeout;
 
   private final Connector connector;
 
@@ -141,7 +147,7 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
     this.connector.setFeatureId(new ParcelUuid(UUID.randomUUID()));
 
     this.connector.setCallback(connectorCallback);
-    this.connector.connect();
+    connect();
   }
 
   @Override
@@ -155,6 +161,10 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
   /** Confirms that the pairing code matches. */
   public void acceptVerification() {
     pairingCode.postValue(null);
+    if (!connector.isConnected()) {
+      loge(TAG, "Failed to accept verification, connector is not connected.");
+      return;
+    }
     connector.acceptVerification();
   }
 
@@ -166,6 +176,10 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
     }
     advertisedCarName.postValue(null);
     pairingCode.postValue(null);
+    if (!connector.isConnected()) {
+      loge(TAG, "Failed to stop association, connector is not connected.");
+      return;
+    }
     connector.stopAssociation();
     associationState.postValue(AssociationState.NONE);
   }
@@ -178,11 +192,25 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
 
   /** Removes the association of the given device. */
   public void removeDevice(@NonNull AssociatedDevice device) {
+    if (!connector.isConnected()) {
+      loge(
+          TAG,
+          "Failed to remove device " + device.getDeviceId() + " , connector is not connected.");
+      return;
+    }
     connector.removeAssociatedDevice(device.getDeviceId());
   }
 
   /** Toggles connection of the given associated device. */
   public void toggleConnectionStatusForDevice(@NonNull AssociatedDevice device) {
+    if (!connector.isConnected()) {
+      loge(
+          TAG,
+          "Failed to change connection on device "
+              + device.getDeviceId()
+              + " , connector is not connected.");
+      return;
+    }
     if (device.isConnectionEnabled()) {
       connector.disableAssociatedDeviceConnection(device.getDeviceId());
     } else {
@@ -192,11 +220,24 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
 
   /** Mark the given device as belonging to the active driver. */
   public void claimDevice(@NonNull AssociatedDevice device) {
+    if (!connector.isConnected()) {
+      loge(
+          TAG, "Failed to claim device " + device.getDeviceId() + " , connector is not connected.");
+      return;
+    }
     connector.claimAssociatedDevice(device.getDeviceId());
   }
 
   /** Mark the given device as unclaimed by any user. */
   public void removeClaimOnDevice(@NonNull AssociatedDevice device) {
+    if (!connector.isConnected()) {
+      loge(
+          TAG,
+          "Failed to remove claim on device "
+              + device.getDeviceId()
+              + " , connector is not connected.");
+      return;
+    }
     connector.removeAssociatedDeviceClaim(device.getDeviceId());
   }
 
@@ -292,6 +333,10 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
       getApplication().startActivity(discoverableIntent);
     }
 
+    if (!connector.isConnected()) {
+      loge(TAG, "Failed to start association, connector is not connected.");
+      return;
+    }
     if (associationIdentifier != null) {
       connector.startAssociation(associationIdentifier, associationCallback);
     } else {
@@ -385,11 +430,22 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
     }
   }
 
+  private void connect() {
+    handler.postDelayed(connectTimeoutRunnable, CONNECT_TIME_OUT_DURATION.toMillis());
+    connector.connect();
+  }
+
+  private void onConnectTimeout() {
+    logd(TAG, "Connector failed to connect in " + CONNECT_TIME_OUT_DURATION);
+    connector.disconnect();
+  }
+
   private final Connector.Callback connectorCallback =
       new Connector.Callback() {
         @Override
         public void onConnected() {
           logd(TAG, "Connected to platform.");
+          handler.removeCallbacks(connectTimeoutRunnable);
           isServiceConnected.postValue(true);
 
           if (isPassengerEnabled) {
@@ -405,7 +461,7 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
         public void onDisconnected() {
           logd(TAG, "Disconnected from the platform.");
           isServiceConnected.postValue(false);
-          connector.connect();
+          connect();
         }
 
         @Override
@@ -443,6 +499,11 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
         public void onSecureChannelEstablished(@NonNull ConnectedDevice device) {
           logd(TAG, "Device " + device.getDeviceId() + " has established a secure channel.");
           updateDeviceDetails();
+        }
+
+        @Override
+        public void onFailedToConnect() {
+          loge(TAG, "Connector failed to connect.");
         }
       };
 

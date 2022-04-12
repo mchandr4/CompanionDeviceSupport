@@ -24,11 +24,20 @@ class ProtocolDelegate : IProtocolDelegate.Stub() {
   /** The list of currently attached [IConnectionProtocol]s. */
   val protocols: List<IConnectionProtocol>
     get() {
-      scrubDeadProtocols()
+      scrubDeadProtocols(_protocols)
       return _protocols
     }
 
-  /** `true` if there are currently no protocols attached. `false` otherwise. */
+  private val _oobProtocols = mutableListOf<IConnectionProtocol>()
+
+  /** Protocols that support OOB data exchange. */
+  val oobProtocols: List<IConnectionProtocol>
+    get() {
+      scrubDeadProtocols(_oobProtocols)
+      return _oobProtocols
+    }
+
+  /** `true` if there are currently no general transport protocols attached. `false` otherwise. */
   val isEmpty: Boolean
     get() = protocols.isEmpty()
 
@@ -39,6 +48,24 @@ class ProtocolDelegate : IProtocolDelegate.Stub() {
   /** Callback registered for protocol changes. */
   var callback: Callback? = null
 
+  override fun addOobProtocol(protocol: IConnectionProtocol) {
+    _oobProtocols.add(protocol)
+    logd(
+      TAG,
+      "Added a new OOB protocol. There are now ${oobProtocols.size} attached OOB " + "protocols."
+    )
+  }
+
+  override fun removeOobProtocol(protocol: IConnectionProtocol) {
+    scrubDeadProtocols(_oobProtocols)
+    _oobProtocols.removeAll { it.asBinder() == protocol.asBinder() }
+    logd(
+      TAG,
+      "Removed a OOB protocol. There are ${oobProtocols.size} remaining OOB attached " +
+        "protocols."
+    )
+  }
+
   override fun addProtocol(protocol: IConnectionProtocol) {
     _protocols.add(protocol)
     logd(TAG, "Added a new protocol. There are now ${protocols.size} attached protocols.")
@@ -46,7 +73,7 @@ class ProtocolDelegate : IProtocolDelegate.Stub() {
   }
 
   override fun removeProtocol(protocol: IConnectionProtocol) {
-    scrubDeadProtocols()
+    scrubDeadProtocols(_protocols)
     if (!_protocols.removeAll { it.asBinder() == protocol.asBinder() }) {
       return
     }
@@ -54,8 +81,8 @@ class ProtocolDelegate : IProtocolDelegate.Stub() {
     callback?.onProtocolRemoved(protocol)
   }
 
-  private fun scrubDeadProtocols() =
-    _protocols.removeAll {
+  private fun scrubDeadProtocols(protocols: MutableList<IConnectionProtocol>) =
+    protocols.removeAll {
       val isNotAlive = !it.asBinder().isBinderAlive
       if (isNotAlive) {
         callback?.onProtocolRemoved(it)
