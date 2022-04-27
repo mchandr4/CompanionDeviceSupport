@@ -77,6 +77,8 @@ constructor(
 
   private val isPlatformInitialized = AtomicBoolean(false)
 
+  private val waitingForConnection = AtomicBoolean(false)
+
   private val featureCoordinatorAction =
     if (isForegroundProcess) {
       ACTION_BIND_FEATURE_COORDINATOR_FG
@@ -92,6 +94,7 @@ constructor(
           IFeatureCoordinator.Stub.asInterface(service)
             ?: throw IllegalStateException("Cannot create wrapper of a null feature coordinator.")
         logd(TAG, "Feature coordinator is alive: ${featureCoordinator?.asBinder()?.isBinderAlive}")
+        waitingForConnection.set(false)
         this@CompanionConnector.onServiceConnected()
       }
 
@@ -100,8 +103,11 @@ constructor(
       }
 
       override fun onNullBinding(name: ComponentName) {
-        loge(TAG, "Received a null binding for FeatureCoordinator.")
         this@CompanionConnector.onNullBinding()
+      }
+
+      override fun onBindingDied(name: ComponentName?) {
+        this@CompanionConnector.onBindingDied()
       }
     }
 
@@ -231,7 +237,13 @@ constructor(
       initializePlatform()
       return
     }
+    if (waitingForConnection.compareAndSet(false, true)) {
+      bindAttempts = 0
+      bindToService()
+    }
+  }
 
+  private fun bindToService() {
     logd(TAG, "Platform is not currently connected. Initiating binding.")
     val intent = resolveIntent(featureCoordinatorAction)
 
@@ -250,17 +262,25 @@ constructor(
     bindAttempts++
     if (bindAttempts > MAX_BIND_ATTEMPTS) {
       loge(TAG, "Failed to bind to service after $bindAttempts attempts. Aborting.")
+      waitingForConnection.set(false)
       callback?.onFailedToConnect()
       return
     }
     logw(TAG, "Unable to bind to service with action ${intent.action}. Trying again.")
-    retryHandler.postDelayed(::connect, BIND_RETRY_DURATION.toMillis())
+    retryHandler.postDelayed(::bindToService, BIND_RETRY_DURATION.toMillis())
   }
 
   override fun disconnect() {
     logd(TAG, "Disconnecting from the companion platform.")
     val wasConnected = isBound
     logd(TAG, "FeatureCoordinator is null: ${featureCoordinator == null} isBound: $isBound")
+    unbindFromService()
+    if (wasConnected) {
+      callback?.onDisconnected()
+    }
+  }
+
+  private fun unbindFromService() {
     cleanUpFeatureCoordinator()
     retryHandler.removeCallbacksAndMessages(/* token= */ null)
     try {
@@ -268,10 +288,7 @@ constructor(
     } catch (e: IllegalArgumentException) {
       logw(TAG, "Attempted to unbind an already unbound service.")
     }
-    bindAttempts = 0
-    if (wasConnected) {
-      callback?.onDisconnected()
-    }
+    waitingForConnection.set(false)
   }
 
   private fun cleanUpFeatureCoordinator() {
@@ -301,10 +318,14 @@ constructor(
   }
 
   override fun binderForAction(action: String): IBinder? {
+    logd(TAG, "Binder for action: $action.")
     return when (action) {
       ACTION_BIND_FEATURE_COORDINATOR, ACTION_BIND_FEATURE_COORDINATOR_FG ->
         featureCoordinator?.asBinder()
-      else -> null
+      else -> {
+        loge(TAG, "Binder for unexpected action, returning null binder.")
+        null
+      }
     }
   }
 
@@ -634,8 +655,15 @@ constructor(
   }
 
   private fun onNullBinding() {
-    logd(TAG, "Issuing onFailedToConnect callback after null binding.")
+    loge(TAG, "Received a null binding for FeatureCoordinator. Unbinding service.")
+    unbindFromService()
     callback?.onFailedToConnect()
+  }
+
+  private fun onBindingDied() {
+    logw(TAG, "FeatureCoordinator binding died. Unbinding service.")
+    unbindFromService()
+    callback?.onDisconnected()
   }
 
   private fun resolveIntent(action: String): Intent? {

@@ -88,6 +88,17 @@ class CompanionConnectorTest {
   }
 
   @Test
+  fun connect_bindOnceOnlyForMultipleCalls() {
+    setQueryIntentServicesAnswer(defaultServiceAnswer)
+    val connector = CompanionConnector(context, isForegroundProcess = true)
+
+    connector.connect()
+    connector.connect()
+
+    assertThat(context.bindingActions).containsExactly(ACTION_BIND_FEATURE_COORDINATOR_FG)
+  }
+
+  @Test
   fun connect_fgRetriesBindWithRemoteFeatureActionIfFeatureCoordinatorReturnsNullBinding() {
     setQueryIntentServicesAnswer(defaultServiceAnswer)
     val connector = CompanionConnector(context, isForegroundProcess = true)
@@ -107,6 +118,54 @@ class CompanionConnectorTest {
     context.serviceConnection.firstOrNull()?.onNullBinding(ComponentName(PACKAGE_NAME, BG_NAME))
 
     assertThat(context.bindingActions).containsExactly(ACTION_BIND_FEATURE_COORDINATOR)
+  }
+
+  @Test
+  fun connect_canConnectAfterServiceDisconnect() {
+    setQueryIntentServicesAnswer(defaultServiceAnswer)
+    val connector = CompanionConnector(context, isForegroundProcess = true)
+    connector.connect()
+    val connection = context.serviceConnection.firstOrNull()
+    val component = ComponentName(PACKAGE_NAME, BG_NAME)
+    connection?.onServiceConnected(component, mockFeatureCoordinator.asBinder())
+    connection?.onServiceDisconnected(component)
+
+    connector.connect()
+
+    assertThat(context.bindingActions)
+      .containsExactly(ACTION_BIND_FEATURE_COORDINATOR_FG, ACTION_BIND_FEATURE_COORDINATOR_FG)
+  }
+
+  @Test
+  fun connect_canConnectAfterBindingDied() {
+    setQueryIntentServicesAnswer(defaultServiceAnswer)
+    val connector = CompanionConnector(context, isForegroundProcess = true)
+    connector.connect()
+    val connection = context.serviceConnection.firstOrNull()
+    val component = ComponentName(PACKAGE_NAME, BG_NAME)
+    connection?.onServiceConnected(component, mockFeatureCoordinator.asBinder())
+    connection?.onBindingDied(component)
+
+    connector.connect()
+
+    assertThat(context.bindingActions)
+      .containsExactly(ACTION_BIND_FEATURE_COORDINATOR_FG, ACTION_BIND_FEATURE_COORDINATOR_FG)
+  }
+
+  @Test
+  fun connect_canConnectAfterNullBinding() {
+    setQueryIntentServicesAnswer(defaultServiceAnswer)
+    val connector = CompanionConnector(context, isForegroundProcess = true)
+    connector.connect()
+    val connection = context.serviceConnection.firstOrNull()
+    val component = ComponentName(PACKAGE_NAME, BG_NAME)
+    connection?.onServiceConnected(component, mockFeatureCoordinator.asBinder())
+    connection?.onNullBinding(component)
+
+    connector.connect()
+
+    assertThat(context.bindingActions)
+      .containsExactly(ACTION_BIND_FEATURE_COORDINATOR_FG, ACTION_BIND_FEATURE_COORDINATOR_FG)
   }
 
   @Test
@@ -181,6 +240,18 @@ class CompanionConnectorTest {
   }
 
   @Test
+  fun onDisconnected_invokedWhenServiceBindingDied() {
+    setQueryIntentServicesAnswer(defaultServiceAnswer)
+    val connector =
+      CompanionConnector(context, isForegroundProcess = false).apply { callback = mockCallback }
+
+    connector.connect()
+    context.serviceConnection.firstOrNull()?.onBindingDied(ComponentName(PACKAGE_NAME, BG_NAME))
+
+    verify(mockCallback).onDisconnected()
+  }
+
+  @Test
   fun onFailedToConnect_invokedWhenServiceIsNotFound() {
     setQueryIntentServicesAnswer(defaultServiceAnswer)
     val connector =
@@ -218,6 +289,32 @@ class CompanionConnectorTest {
 
     assertThat(failingContext.serviceConnection).isNotNull()
     verify(mockCallback).onFailedToConnect()
+  }
+
+  @Test
+  fun unbindService_invokedWhenServiceIsNotFound() {
+    setQueryIntentServicesAnswer(defaultServiceAnswer)
+    val connector =
+      CompanionConnector(context, isForegroundProcess = false).apply { callback = mockCallback }
+
+    connector.connect()
+    val connection = context.serviceConnection.first()
+    connection.onNullBinding(ComponentName(PACKAGE_NAME, FG_NAME))
+
+    assertThat(context.unbindServiceConnection).contains(connection)
+  }
+
+  @Test
+  fun unbindService_invokedWhenServiceBindingDied() {
+    setQueryIntentServicesAnswer(defaultServiceAnswer)
+    val connector =
+      CompanionConnector(context, isForegroundProcess = false).apply { callback = mockCallback }
+
+    connector.connect()
+    val connection = context.serviceConnection.first()
+    connection.onBindingDied(ComponentName(PACKAGE_NAME, FG_NAME))
+
+    assertThat(context.unbindServiceConnection).contains(connection)
   }
 
   @Test

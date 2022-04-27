@@ -85,6 +85,10 @@ public class BaseNotificationDelegate {
   public static final String EXTRA_REMOTE_INPUT_KEY =
       "com.android.car.messenger.common.REMOTE_INPUT_KEY";
 
+    /** Used to override default notification large icon. **/
+  private static final String EXTRA_USE_LAUNCHER_ICON =
+      "com.android.car.notification.EXTRA_USE_LAUNCHER_ICON";
+
   private static final String REPLY = "Reply";
   private static final String MARK_AS_READ = "Mark As Read";
 
@@ -234,6 +238,9 @@ public class BaseNotificationDelegate {
                 notificationInfo.messageKeys.size(),
                 notificationInfo.messageKeys.size()));
 
+    Bundle avatarBundle = new Bundle();
+    avatarBundle.putBoolean(EXTRA_USE_LAUNCHER_ICON, false);
+    builder.addExtras(avatarBundle);
     if (avatarIcon != null) {
       builder.setLargeIcon(avatarIcon);
     } else if (useLetterTile) {

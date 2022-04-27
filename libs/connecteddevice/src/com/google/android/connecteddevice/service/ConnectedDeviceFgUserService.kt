@@ -89,8 +89,8 @@ class ConnectedDeviceFgUserService : TrunkService() {
   }
 
   override fun onBind(intent: Intent): IBinder? {
+    logd(TAG, "Service bound. Action: ${intent.action}")
     val action = intent.action ?: return null
-    logd(TAG, "Service bound. Action: $action")
     return connector.binderForAction(action)
   }
 

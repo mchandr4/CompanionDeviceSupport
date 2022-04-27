@@ -44,7 +44,7 @@
 
     <!-- Common -->
     <dimen name="divider_height">1dp</dimen>
-    <dimen name="qr_code_size">200dp</dimen>
+    <dimen name="qr_code_size">300dp</dimen>
     <dimen name="instruction_margin">8dp</dimen>
     <dimen name="connection_indicator_size">12dp</dimen>
     <dimen name="connection_indicator_margin_end">12dp</dimen>

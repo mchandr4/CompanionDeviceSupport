@@ -30,9 +30,11 @@ import android.bluetooth.BluetoothAdapter;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.os.UserManager;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
@@ -101,6 +103,8 @@ public class AssociationActivity extends FragmentActivity {
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
+    // TODO(b/228328725): Remove strict mode change when the violation is resolved.
+    maybeEnableStrictMode();
     resolveIntent();
 
     // Set theme before calling super.onCreate(bundle) to avoid recreating activity.
@@ -719,6 +723,14 @@ public class AssociationActivity extends FragmentActivity {
   private boolean isStartedByFeature() {
     String action = getIntent().getAction();
     return RemoteFeature.ACTION_ASSOCIATION_SETTING.equals(action);
+  }
+
+  private static void maybeEnableStrictMode() {
+    if (!Build.TYPE.equals("user")) {
+      StrictMode.setThreadPolicy(
+          new StrictMode.ThreadPolicy.Builder().detectAll().penaltyLog().penaltyDialog().build());
+      StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().detectAll().penaltyLog().build());
+    }
   }
 
   /** Dialog fragment to turn on bluetooth. */
