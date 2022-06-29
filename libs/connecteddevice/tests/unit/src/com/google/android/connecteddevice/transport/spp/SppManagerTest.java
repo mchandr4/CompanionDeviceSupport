@@ -86,6 +86,8 @@ public class SppManagerTest {
     assertThat(sppManager.acceptTask).isNotNull();
   }
 
+  // This access should be guarded by 'lock', which could not be resolved
+  @SuppressWarnings("GuardedBy")
   @Test
   public void testWrite_writeToOutputStream() throws IOException {
     shadowBluetoothSocket.connect();

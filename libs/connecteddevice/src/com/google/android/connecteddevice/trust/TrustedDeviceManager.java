@@ -26,6 +26,7 @@ import android.content.Context;
 import android.os.IInterface;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import androidx.annotation.CallSuper;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
@@ -96,8 +97,6 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
 
   private final Executor remoteCallbackExecutor;
 
-  private final AtomicBoolean isWaitingForCredentialSetUp = new AtomicBoolean(false);
-
   private final AtomicReference<String> pendingUnlockDeviceId = new AtomicReference<>(null);
 
   private final TrustedDeviceDao database;
@@ -110,7 +109,11 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
 
   private PendingCredentials pendingCredentials;
 
-  private PendingHandle pendingHandle;
+  /** If the enrollment is waiting for credential setup. */
+  protected final AtomicBoolean isWaitingForCredentialSetUp = new AtomicBoolean(false);
+
+  /** The pending handle of the token for the enrollment. */
+  protected PendingHandle pendingHandle;
 
   TrustedDeviceManager(@NonNull Context context) {
     this(
@@ -137,6 +140,7 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
     logd(TAG, "TrustedDeviceManager created successfully.");
   }
 
+  @CallSuper
   void cleanup() {
     pendingToken = null;
     pendingDevice = null;
@@ -208,8 +212,7 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
     logd(TAG, "Escrow token has been successfully added.");
     pendingHandle = new PendingHandle(userId, handle);
 
-    notifyRemoteCallbackList(
-        remoteEnrollmentCallbacks,
+    notifyRemoteEnrollmentCallbacks(
         callback -> {
           try {
             callback.onValidateCredentialsRequest();
@@ -328,8 +331,7 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
         "Request to process enrollment on insecure device. "
             + "Notifying callbacks of secure device request.");
     isWaitingForCredentialSetUp.set(true);
-    notifyRemoteCallbackList(
-        remoteEnrollmentCallbacks,
+    notifyRemoteEnrollmentCallbacks(
         callback -> {
           try {
             callback.onSecureDeviceRequest();
@@ -342,13 +344,9 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
   @Override
   public void abortEnrollment() {
     logd(TAG, "Aborting enrollment");
-    if (pendingHandle != null && trustAgentDelegate != null) {
+    if (pendingHandle != null) {
       logd(TAG, "Removing added token.");
-      try {
-        trustAgentDelegate.removeEscrowToken(pendingHandle.handle, pendingHandle.userId);
-      } catch (RemoteException e) {
-        loge(TAG, "Error while removing token through delegate.", e);
-      }
+      removeEscrowToken(pendingHandle.handle, pendingHandle.userId);
     }
     pendingToken = null;
     pendingHandle = null;
@@ -399,31 +397,10 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
 
   @Override
   public void setTrustedDeviceAgentDelegate(ITrustedDeviceAgentDelegate trustAgentDelegate) {
-    logd(TAG, "Set trusted device agent delegate: " + trustAgentDelegate + ".");
-    this.trustAgentDelegate = trustAgentDelegate;
-
-    int userId = ActivityManager.getCurrentUser();
-
-    // Remove invalid trusted devices.
-    databaseExecutor.execute(
-        () -> {
-          byte[] stateMessage = createDisabledStateSyncMessage();
-          List<TrustedDeviceEntity> entities = database.getInvalidTrustedDevicesForUser(userId);
-          for (TrustedDeviceEntity entity : entities) {
-            FeatureStateEntity stateEntity = new FeatureStateEntity(entity.id, stateMessage);
-            databaseExecutor.execute(() -> database.addOrReplaceFeatureState(stateEntity));
-            removeTrustedDeviceInternal(entity);
-          }
-        });
+    setTrustedDeviceAgentDelegateInternal(trustAgentDelegate);
 
     // Add pending token if present.
     addEscrowToken();
-
-    // Unlock with pending credentials if present.
-    if (pendingCredentials != null) {
-      unlockUser(pendingCredentials.deviceId, pendingCredentials.phoneCredentials);
-      pendingCredentials = null;
-    }
   }
 
   @Override
@@ -450,6 +427,47 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
     invalidateAllTrustedDevices();
   }
 
+  /**
+   * Set trusted device delegate.
+   *
+   * <p>This method is expect to be called when a user profile credential is created.
+   */
+  protected void setTrustedDeviceAgentDelegateInternal(
+      ITrustedDeviceAgentDelegate trustAgentDelegate) {
+    logd(TAG, "Set trusted device agent delegate: " + trustAgentDelegate + ".");
+    this.trustAgentDelegate = trustAgentDelegate;
+
+    int userId = ActivityManager.getCurrentUser();
+
+    // Remove invalid trusted devices.
+    databaseExecutor.execute(
+        () -> {
+          byte[] stateMessage = createDisabledStateSyncMessage();
+          List<TrustedDeviceEntity> entities = database.getInvalidTrustedDevicesForUser(userId);
+          for (TrustedDeviceEntity entity : entities) {
+            FeatureStateEntity stateEntity = new FeatureStateEntity(entity.id, stateMessage);
+            databaseExecutor.execute(() -> database.addOrReplaceFeatureState(stateEntity));
+            removeTrustedDeviceInternal(entity);
+          }
+        });
+
+    // Unlock with pending credentials if present.
+    if (pendingCredentials != null) {
+      unlockUser(pendingCredentials.deviceId, pendingCredentials.phoneCredentials);
+      pendingCredentials = null;
+    }
+  }
+
+  /** Get the pending token for enrollment. */
+  protected byte[] getPendingToken() {
+    return pendingToken;
+  }
+
+  /** Get trusted device database. */
+  protected TrustedDeviceDao getTrustedDeviceDatabase() {
+    return database;
+  }
+
   private void invalidateAllTrustedDevices() {
     databaseExecutor.execute(
         () -> {
@@ -461,8 +479,13 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
         });
   }
 
+  /**
+   * Invalidate a trusted device.
+   *
+   * @param entity of the trusted device to invalidate.
+   */
   @WorkerThread
-  private void invalidateTrustedDevice(TrustedDeviceEntity entity) {
+  protected void invalidateTrustedDevice(TrustedDeviceEntity entity) {
     logd(TAG, "Marking device " + entity.id + " as invalid.");
     entity.isValid = false;
     database.addOrReplaceTrustedDevice(entity);
@@ -480,22 +503,42 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
         });
   }
 
-  @WorkerThread
-  private void removeTrustedDeviceInternal(TrustedDeviceEntity entity) {
+  /**
+   * Remove an added or activated escrow token.
+   *
+   * @param handle of the token.
+   * @param userId of the user that the token is added or activated for.
+   * @return {@code true} if the token has been removed.
+   */
+  protected boolean removeEscrowToken(long handle, int userId) {
     if (trustAgentDelegate == null) {
       logw(
           TAG,
-          "No trusted device delegate set when attempting to remove trusted device "
-              + entity.id
-              + ".");
-      return;
+          "No trusted device delegate set when attempting to remove token for user "
+              + userId + ".");
+      return false;
     }
-    logd(TAG, "Removing trusted device " + entity.id + ".");
+    logd(TAG, "Removing token for user " + userId + ".");
     try {
-      trustAgentDelegate.removeEscrowToken(entity.handle, entity.userId);
-      database.removeTrustedDevice(entity);
+      trustAgentDelegate.removeEscrowToken(handle, userId);
     } catch (RemoteException e) {
       loge(TAG, "Error while removing token through delegate.", e);
+      return false;
+    }
+    return true;
+  }
+
+  /** Notify remote enrollment callbacks. */
+  protected void notifyRemoteEnrollmentCallbacks(
+      SafeConsumer<ITrustedDeviceEnrollmentCallback> notification) {
+    notifyRemoteCallbackList(remoteEnrollmentCallbacks, notification);
+  }
+
+  @WorkerThread
+  private void removeTrustedDeviceInternal(TrustedDeviceEntity entity) {
+    logd(TAG, "Removing trusted device " + entity.id + ".");
+    if (removeEscrowToken(entity.handle, entity.userId)) {
+      database.removeTrustedDevice(entity);
     }
   }
 
@@ -703,8 +746,7 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
   }
 
   private void notifyEnrollmentError(@TrustedDeviceConstants.TrustedDeviceError int error) {
-    notifyRemoteCallbackList(
-        remoteEnrollmentCallbacks,
+    notifyRemoteEnrollmentCallbacks(
         callback -> {
           try {
             callback.onTrustedDeviceEnrollmentError(error);
@@ -897,7 +939,8 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
     }
   }
 
-  private static class PendingHandle {
+  /** Handle information for a pending token. */
+  protected static class PendingHandle {
     final int userId;
     final long handle;
 

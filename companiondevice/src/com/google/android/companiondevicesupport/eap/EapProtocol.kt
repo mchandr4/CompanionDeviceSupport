@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.google.android.connecteddevice.transport.eap
+package com.google.android.companiondevicesupport.eap
 
 import android.annotation.SuppressLint
 import android.os.IBinder
@@ -65,8 +65,7 @@ class EapProtocol(
     val serviceBinder =
       Class.forName("android.os.ServiceManager")
         .getMethod("getService", java.lang.String::class.java)
-        .invoke(null, eapServiceName) as?
-        IBinder
+        .invoke(null, eapServiceName) as? IBinder
     if (serviceBinder == null) {
       loge(TAG, "Unable to bind to EAP service. Aborting.")
       return

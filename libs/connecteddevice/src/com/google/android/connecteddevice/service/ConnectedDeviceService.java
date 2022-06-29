@@ -34,8 +34,6 @@ import com.google.android.connecteddevice.storage.ConnectedDeviceStorage;
 import com.google.android.connecteddevice.system.SystemFeature;
 import com.google.android.connecteddevice.transport.IConnectionProtocol;
 import com.google.android.connecteddevice.transport.ProtocolDelegate;
-import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelegateBinder;
-import com.google.android.connecteddevice.transport.spp.ConnectedDeviceSppDelegateBinder.OnRemoteCallbackSetListener;
 import com.google.android.connecteddevice.util.EventLog;
 import java.util.UUID;
 import java.util.concurrent.Executors;
@@ -65,8 +63,6 @@ public final class ConnectedDeviceService extends TrunkService {
 
   private static final boolean ENABLE_PASSENGER_BY_DEFAULT = false;
 
-  private final AtomicBoolean isSppServiceBound = new AtomicBoolean(false);
-
   private final AtomicBoolean isEveryFeatureInitialized = new AtomicBoolean(false);
 
   private final ScheduledExecutorService scheduledExecutorService =
@@ -79,8 +75,6 @@ public final class ConnectedDeviceService extends TrunkService {
   private FeatureCoordinator featureCoordinator;
 
   private ConnectedDeviceStorage storage;
-
-  private ConnectedDeviceSppDelegateBinder sppDelegateBinder;
 
   private SystemFeature systemFeature;
 
@@ -108,10 +102,8 @@ public final class ConnectedDeviceService extends TrunkService {
             }
           }
         });
-    OnRemoteCallbackSetListener onRemoteCallbackSetListener = isSppServiceBound::set;
     loggingManager = new LoggingManager(this);
     storage = new ConnectedDeviceStorage(this);
-    sppDelegateBinder = new ConnectedDeviceSppDelegateBinder(onRemoteCallbackSetListener);
 
     initializeFeatureCoordinator();
 
@@ -159,9 +151,7 @@ public final class ConnectedDeviceService extends TrunkService {
     logd(TAG, "Service bound. Action: " + intent.getAction());
     String action = intent.getAction();
     switch (action) {
-      case ConnectedDeviceSppDelegateBinder.ACTION_BIND_SPP:
-        return sppDelegateBinder;
-      case TransportService.ACTION_BIND_PROTOCOL:
+      case CompanionProtocolRegistry.ACTION_BIND_PROTOCOL:
         return protocolDelegate;
       case CompanionConnector.ACTION_BIND_FEATURE_COORDINATOR:
         return featureCoordinator;

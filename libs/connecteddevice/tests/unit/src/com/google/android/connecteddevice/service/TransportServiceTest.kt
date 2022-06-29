@@ -1,205 +1,62 @@
 package com.google.android.connecteddevice.service
 
-import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothManager
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
-import android.content.ServiceConnection
-import android.content.res.Resources
-import android.os.Bundle
-import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.google.android.connecteddevice.core.util.mockToBeAlive
 import com.google.android.connecteddevice.model.TransportProtocols
-import com.google.android.connecteddevice.transport.IProtocolDelegate
+import com.google.android.connecteddevice.util.MetaDataProvider
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.never
+import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
-import java.lang.IllegalArgumentException
+import com.nhaarman.mockitokotlin2.whenever
+import java.util.UUID
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.Robolectric
 
-private const val OOB_PROTOCOL_CHANNELS_RESOURCE_ID = 0
-private const val PROTOCOL_CHANNELS_RESOURCE_ID = 1
-
 @RunWith(AndroidJUnit4::class)
 class TransportServiceTest {
-
-  private val context = ApplicationProvider.getApplicationContext<Context>()
-
-  private val mockDelegate = mockToBeAlive<IProtocolDelegate>()
-
   private lateinit var service: TestTransportService
-
-  private lateinit var bluetoothManager: BluetoothManager
 
   @Before
   fun setUp() {
-    bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-    service =
-      Robolectric.buildService(TestTransportService::class.java).create().get().apply {
-        delegate = mockDelegate
-        onCreate()
-      }
+    service = Robolectric.buildService(TestTransportService::class.java).create().get()
   }
 
   @Test
-  fun onCreate_bindsToPlatformService() {
-    val service =
-      Robolectric.buildService(TestTransportService::class.java).create().get().apply { onCreate() }
-
-    assertThat(service.boundService).isNotNull()
+  fun initializeProtocols_initAllAvailableProtocols() {
+    assertThat(
+        service.initializeProtocols(
+          setOf(TransportProtocols.PROTOCOL_BLE_PERIPHERAL, TransportProtocols.PROTOCOL_SPP)
+        )
+      )
+      .hasSize(2)
   }
 
   @Test
-  fun onDestroy_cleansUpService() {
-    bluetoothManager.adapter.enable()
-    issueBluetoothChangedBroadcast(BluetoothAdapter.STATE_ON)
+  fun initializeProtocols_ignoreUnavailableProtocols() {
+    assertThat(service.initializeProtocols(setOf(TransportProtocols.PROTOCOL_EAP))).isEmpty()
+  }
 
+  @Test
+  fun onDestroy_cleansUpRegistry() {
     service.onDestroy()
 
-    verify(mockDelegate).removeProtocol(any())
-    assertThat(service.boundService).isNull()
-    assertThat(service.receiver).isNull()
-    assertThat(service.initializedProtocols).isEmpty()
-  }
-
-  @Test
-  fun onDestroy_unregisterReceiverIllegalArgumentExceptionIsCaught() {
-    service.shouldThrowOnUnregisterReceiver = true
-
-    service.onDestroy()
-  }
-
-  @Test
-  fun serviceDisconnect_clearsDelegateAndRebinds() {
-    val service =
-      Robolectric.buildService(TestTransportService::class.java).create().get().apply { onCreate() }
-    val boundService = service.boundService
-    service.boundService = null
-    service.delegate = mockDelegate
-
-    boundService?.onServiceDisconnected(null)
-
-    assertThat(service.delegate).isNull()
-    assertThat(service.boundService).isNotNull()
-    assertThat(service.initializedProtocols).isEmpty()
-  }
-
-  @Test
-  fun initializeBluetoothProtocols_addsProtocolsIfBluetoothIsOn() {
-    bluetoothManager.adapter.enable()
-
-    issueBluetoothChangedBroadcast(BluetoothAdapter.STATE_ON)
-
-    verify(mockDelegate).addProtocol(any())
-  }
-
-  @Test
-  fun initializeBluetoothProtocols_doesNotAddProtocolsIfBluetoothIsOff() {
-    bluetoothManager.adapter.disable()
-    issueBluetoothChangedBroadcast(BluetoothAdapter.STATE_ON)
-
-    verify(mockDelegate, never()).addProtocol(any())
-  }
-
-  @Test
-  fun onBluetoothStateChanged_addsProtocolsWhenBluetoothIsTurnedOn() {
-    bluetoothManager.adapter.enable()
-    issueBluetoothChangedBroadcast(BluetoothAdapter.STATE_ON)
-
-    verify(mockDelegate).addProtocol(any())
-  }
-
-  @Test
-  fun onBluetoothStateChanged_removesProtocolsWhenBluetoothIsTurnedOff() {
-    bluetoothManager.adapter.enable()
-    issueBluetoothChangedBroadcast(BluetoothAdapter.STATE_ON)
-    issueBluetoothChangedBroadcast(BluetoothAdapter.STATE_OFF)
-
-    verify(mockDelegate).removeProtocol(any())
-    assertThat(service.initializedProtocols).isEmpty()
-  }
-
-  @Test
-  fun onBluetoothStateChanged_doesNotAddProtocolsMultipleTimes() {
-    bluetoothManager.adapter.enable()
-    issueBluetoothChangedBroadcast(BluetoothAdapter.STATE_ON)
-    issueBluetoothChangedBroadcast(BluetoothAdapter.STATE_ON)
-
-    verify(mockDelegate).addProtocol(any())
-  }
-
-  private fun issueBluetoothChangedBroadcast(state: Int) {
-    val intent =
-      Intent(BluetoothAdapter.ACTION_STATE_CHANGED).apply {
-        putExtra(BluetoothAdapter.EXTRA_STATE, state)
-      }
-    service.receiver?.onReceive(context, intent)
+    verify(service.mockRegistry).cleanUp()
   }
 }
 
-class TestTransportService : TransportService() {
-  private val context = ApplicationProvider.getApplicationContext<Context>()
+private class TestTransportService : TransportService() {
+  val mockRegistry = mock<ProtocolRegistry>()
+  private val mockMetaDataProvider = mock<MetaDataProvider>()
 
-  var boundService: ServiceConnection? = null
-
-  var receiver: BroadcastReceiver? = null
-
-  var shouldThrowOnUnregisterReceiver = false
-
-  override fun registerReceiver(receiver: BroadcastReceiver?, filter: IntentFilter?): Intent? {
-    this.receiver = receiver
-    return super.registerReceiver(receiver, filter)
-  }
-
-  override fun unregisterReceiver(receiver: BroadcastReceiver?) {
-    if (shouldThrowOnUnregisterReceiver) {
-      throw IllegalArgumentException()
-    }
-    this.receiver = null
-    super.unregisterReceiver(receiver)
-  }
-
-  override fun bindService(service: Intent?, conn: ServiceConnection, flags: Int): Boolean {
-    assertThat(service?.action).isEqualTo(ACTION_BIND_PROTOCOL)
-    boundService = conn
-    return true
-  }
-
-  override fun unbindService(conn: ServiceConnection) {
-    boundService = null
-  }
-
-  override fun retrieveMetaDataBundle(): Bundle {
-    val bundle = Bundle()
-    bundle.putInt(META_SUPPORTED_TRANSPORT_PROTOCOLS, PROTOCOL_CHANNELS_RESOURCE_ID)
-    bundle.putInt(META_SUPPORTED_OOB_CHANNELS, OOB_PROTOCOL_CHANNELS_RESOURCE_ID)
-    return bundle
-  }
-
-  override fun getResources(): Resources {
-    return object :
-      Resources(
-        context.getResources().getAssets(),
-        context.getResources().getDisplayMetrics(),
-        context.getResources().getConfiguration()
-      ) {
-
-      override fun getStringArray(id: Int): Array<String> {
-        when (id) {
-          OOB_PROTOCOL_CHANNELS_RESOURCE_ID ->
-            return arrayOf(TransportProtocols.PROTOCOL_EAP, TransportProtocols.PROTOCOL_SPP)
-          PROTOCOL_CHANNELS_RESOURCE_ID ->
-            return arrayOf(TransportProtocols.PROTOCOL_BLE_PERIPHERAL)
-          else -> throw NotFoundException()
-        }
-      }
-    }
+  override fun onCreate() {
+    whenever(mockMetaDataProvider.getMetaString(any(), any()))
+      .thenReturn(UUID.randomUUID().toString())
+    // Arbitrary number for test.
+    whenever(mockMetaDataProvider.getMetaInt(any(), any())).thenReturn(700)
+    whenever(mockMetaDataProvider.getMetaBoolean(any(), any())).thenReturn(false)
+    metaDataProvider = mockMetaDataProvider
+    protocolRegister = mockRegistry
   }
 }

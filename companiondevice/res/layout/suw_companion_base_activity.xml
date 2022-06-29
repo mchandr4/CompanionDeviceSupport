@@ -23,9 +23,6 @@
     android:layout_height="match_parent"
     app:showBackButton="true"
     app:showPrimaryToolbarButton="false"
+    app:supportsSplitNavLayout="true"
     tools:ignore="Overdraw">
-  <FrameLayout
-      android:id="@+id/fragment_container"
-      android:layout_width="match_parent"
-      android:layout_height="match_parent" />
 </com.android.car.setupwizardlib.CarSetupWizardCompatLayout>

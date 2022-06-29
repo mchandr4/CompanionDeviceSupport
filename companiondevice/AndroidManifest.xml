@@ -109,16 +109,22 @@
                 android:resource="@array/unlock_fg_user_services"/>
         </service>
         <service
-            android:name="com.google.android.connecteddevice.service.SppService"
-            android:exported="false">
-        </service>
-        <service
             android:name="com.google.android.connecteddevice.service.TransportService"
             android:exported="false">
             <meta-data android:name="com.google.android.connecteddevice.association_service_uuid"
                 android:resource="@string/car_association_service_uuid" />
             <meta-data android:name="com.google.android.connecteddevice.enable_proxy"
                 android:resource="@bool/enable_proxy" />
+            <meta-data android:name="com.google.android.connecteddevice.transport_protocols"
+                android:resource="@array/transport_protocols" />
+            <meta-data android:name="com.google.android.connecteddevice.supported_oob_channels"
+                android:resource="@array/supported_oob_channels"/>
+        </service>
+        <service
+            android:name="com.google.android.companiondevicesupport.eap.EapService"
+            android:exported="false">
+            <meta-data android:name="com.google.android.connecteddevice.association_service_uuid"
+                android:resource="@string/car_association_service_uuid" />
             <meta-data android:name="com.google.android.connecteddevice.transport_protocols"
                 android:resource="@array/transport_protocols" />
             <meta-data android:name="com.google.android.connecteddevice.supported_oob_channels"

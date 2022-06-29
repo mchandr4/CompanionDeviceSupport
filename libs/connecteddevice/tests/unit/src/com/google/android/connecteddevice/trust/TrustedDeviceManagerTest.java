@@ -6,6 +6,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -338,6 +339,13 @@ public final class TrustedDeviceManagerTest {
   }
 
   @Test
+  public void testRemoveEscrowToken_removeEscrowToken() throws RemoteException {
+    manager.removeEscrowToken(FAKE_HANDLE, DEFAULT_USER_ID);
+
+    verify(trustAgentDelegate).removeEscrowToken(eq(FAKE_HANDLE), eq(DEFAULT_USER_ID));
+  }
+
+  @Test
   public void testClearTrustedDeviceAgentDelegate_invalidateTrustedDevicesOnLockScreenRemoved()
       throws RemoteException {
     triggerDeviceConnected(SECURE_CONNECTED_DEVICE);
@@ -467,6 +475,56 @@ public final class TrustedDeviceManagerTest {
     verify(trustAgentDelegate).removeEscrowToken(FAKE_HANDLE, DEFAULT_USER_ID);
   }
 
+  @Test
+  public void testNotifyRemoteEnrollmentCallbacks_callbackNotified() throws RemoteException {
+    manager.notifyRemoteEnrollmentCallbacks(
+        callback -> {
+          try {
+            callback.onSecureDeviceRequest();
+          } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+          }
+        });
+    manager.notifyRemoteEnrollmentCallbacks(
+        callback -> {
+          try {
+            callback.onValidateCredentialsRequest();
+          } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+          }
+        });
+
+    verify(enrollmentCallback).onSecureDeviceRequest();
+    verify(enrollmentCallback).onValidateCredentialsRequest();
+  }
+
+  @Test
+  public void testInvalidateTrustedDevice_deviceInvalidated() throws RemoteException {
+    triggerDeviceConnected(SECURE_CONNECTED_DEVICE);
+    executeAndVerifyValidEnrollFlowOnSecureCar();
+
+    TrustedDevice testTrustedDevice =
+        new TrustedDevice(SECURE_CONNECTED_DEVICE.getDeviceId(), DEFAULT_USER_ID, FAKE_HANDLE);
+    manager.invalidateTrustedDevice(new TrustedDeviceEntity(testTrustedDevice));
+    manager.retrieveTrustedDevicesForActiveUser(trustedDeviceListener);
+    verify(trustedDeviceListener).onTrustedDevicesRetrieved(trustedDeviceListCaptor.capture());
+
+    assertThat(trustedDeviceListCaptor.getValue()).isEmpty();
+  }
+
+  @Test
+  public void testGetPendingToken() throws RemoteException {
+    triggerDeviceConnected(SECURE_CONNECTED_DEVICE);
+    executeAndVerifyTokenAddedInEnrollFlowOnSecureCar();
+
+    assertThat(manager.getPendingToken()).isEqualTo(FAKE_TOKEN);
+  }
+
+  @Test
+  public void testGetTrustedDeviceDatabase() {
+    assertThat(manager.getTrustedDeviceDatabase()).isEqualTo(database.trustedDeviceDao());
+  }
+
   /**
    * Runs through adding token flow in enrollment and verifies it is run on a secure car.
    *
@@ -533,12 +591,12 @@ public final class TrustedDeviceManagerTest {
     manager.onEscrowTokenActivated(DEFAULT_USER_ID, FAKE_HANDLE);
   }
 
-  private void triggerDeviceConnected(ConnectedDevice device) throws RemoteException {
+  private void triggerDeviceConnected(ConnectedDevice device) {
     when(fakeConnector.getConnectedDevices()).thenReturn(Arrays.asList(device));
     feature.onSecureChannelEstablished(device);
   }
 
-  private void mockNoDevicesConnected() throws RemoteException {
+  private void mockNoDevicesConnected() {
     when(fakeConnector.getConnectedDevices()).thenReturn(ImmutableList.of());
   }
 

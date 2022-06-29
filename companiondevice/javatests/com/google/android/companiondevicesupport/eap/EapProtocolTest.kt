@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.google.android.connecteddevice.transport.eap
+package com.google.android.companiondevicesupport.eap
 
 import android.os.IBinder
+import android.os.IInterface
 import android.os.ParcelUuid
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.google.android.connecteddevice.core.util.mockToBeAlive
 import com.google.android.connecteddevice.transport.IDataReceivedListener
 import com.google.android.connecteddevice.transport.IDeviceDisconnectedListener
 import com.google.android.connecteddevice.transport.IDiscoveryCallback
@@ -30,6 +30,7 @@ import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
 import com.panasonic.iapx.IDeviceConnection
 import com.panasonic.iapx.IDeviceConnectionDelegate
 import com.panasonic.iapx.IServiceConnector
@@ -46,75 +47,75 @@ class EapProtocolTest {
   private val mockDiscoveryCallback = mockToBeAlive<IDiscoveryCallback>()
   private val mockDisconnectedListener = mockToBeAlive<IDeviceDisconnectedListener>()
   private val eapProtocol =
-    EapProtocol(TEST_EAP_CLIENT_NAME, TEST_EAP_SERVICE_NAME, TEST_MAX_WRITE_SIZE)
+    EapProtocol(TEST_EAP_CLIENT_NAME, TEST_EAP_SERVICE_NAME, TEST_MAX_WRITE_SIZE_BYTES)
 
   @Test
-  fun OnEAPSessionStartWithValidProtocolName_invokeCallback() {
+  fun onEapSessionStartWithValidProtocolName_invokeCallback() {
     val deviceConnectionDelegate = captureDeviceCallback()
     eapProtocol.startAssociationDiscovery(
       TEST_EAP_PROTOCOL_NAME,
-      testIdentifier,
+      TEST_IDENTIFIER,
       mockDiscoveryCallback
     )
 
     deviceConnectionDelegate.OnEAPSessionStart(
       mockDeviceConnection,
-      testProtocolId,
+      TEST_PROTOCOL_ID,
       TEST_EAP_PROTOCOL_NAME
     )
 
-    verify(mockDiscoveryCallback).onDeviceConnected(testProtocolId.toString())
+    verify(mockDiscoveryCallback).onDeviceConnected(TEST_PROTOCOL_ID.toString())
   }
 
   @Test
-  fun OnEAPSessionStartWithInValidProtocolName_doesNotInvokeCallback() {
+  fun onEapSessionStartWithInValidProtocolName_doesNotInvokeCallback() {
     val deviceConnectionDelegate = captureDeviceCallback()
     eapProtocol.startAssociationDiscovery(
       TEST_EAP_PROTOCOL_NAME,
-      testIdentifier,
+      TEST_IDENTIFIER,
       mockDiscoveryCallback
     )
 
     deviceConnectionDelegate.OnEAPSessionStart(
       mockDeviceConnection,
-      testProtocolId,
+      TEST_PROTOCOL_ID,
       "invalidProtocolName"
     )
 
-    verify(mockDiscoveryCallback, never()).onDeviceConnected(testProtocolId.toString())
+    verify(mockDiscoveryCallback, never()).onDeviceConnected(TEST_PROTOCOL_ID.toString())
   }
 
   @Test
-  fun OnEAPSessionStop_invokeCallback() {
+  fun onEapSessionStop_invokeCallback() {
     val deviceConnectionDelegate = captureDeviceCallback()
     eapProtocol.startAssociationDiscovery(
       TEST_EAP_PROTOCOL_NAME,
-      testIdentifier,
+      TEST_IDENTIFIER,
       mockDiscoveryCallback
     )
     deviceConnectionDelegate.OnEAPSessionStart(
       mockDeviceConnection,
-      testProtocolId,
+      TEST_PROTOCOL_ID,
       TEST_EAP_PROTOCOL_NAME
     )
     eapProtocol.registerDeviceDisconnectedListener(
-      testProtocolId.toString(),
+      TEST_PROTOCOL_ID.toString(),
       mockDisconnectedListener
     )
 
-    deviceConnectionDelegate.OnEAPSessionStop(mockDeviceConnection, testProtocolId)
+    deviceConnectionDelegate.OnEAPSessionStop(mockDeviceConnection, TEST_PROTOCOL_ID)
 
-    verify(mockDisconnectedListener).onDeviceDisconnected(testProtocolId.toString())
+    verify(mockDisconnectedListener).onDeviceDisconnected(TEST_PROTOCOL_ID.toString())
   }
 
   @Test
-  fun OnEAPData_invokeCallback() {
+  fun onEapData_invokeCallback() {
     val deviceConnectionDelegate = captureDeviceCallback()
-    eapProtocol.registerDataReceivedListener(testProtocolId.toString(), mockDataReceivedListener)
+    eapProtocol.registerDataReceivedListener(TEST_PROTOCOL_ID.toString(), mockDataReceivedListener)
 
-    deviceConnectionDelegate.OnEAPData(mockDeviceConnection, testProtocolId, testMessage)
+    deviceConnectionDelegate.OnEAPData(mockDeviceConnection, TEST_PROTOCOL_ID, TEST_MESSAGE)
 
-    verify(mockDataReceivedListener).onDataReceived(testProtocolId.toString(), testMessage)
+    verify(mockDataReceivedListener).onDataReceived(TEST_PROTOCOL_ID.toString(), TEST_MESSAGE)
   }
 
   @Test
@@ -122,18 +123,18 @@ class EapProtocolTest {
     val deviceConnectionDelegate = captureDeviceCallback()
     eapProtocol.startAssociationDiscovery(
       TEST_EAP_PROTOCOL_NAME,
-      testIdentifier,
+      TEST_IDENTIFIER,
       mockDiscoveryCallback
     )
     deviceConnectionDelegate.OnEAPSessionStart(
       mockDeviceConnection,
-      testProtocolId,
+      TEST_PROTOCOL_ID,
       TEST_EAP_PROTOCOL_NAME
     )
 
-    eapProtocol.sendData(testProtocolId.toString(), testMessage, callback = null)
+    eapProtocol.sendData(TEST_PROTOCOL_ID.toString(), TEST_MESSAGE, callback = null)
 
-    verify(mockDeviceConnection).SendEAPData(testProtocolId, testMessage)
+    verify(mockDeviceConnection).SendEAPData(TEST_PROTOCOL_ID, TEST_MESSAGE)
   }
 
   @Test
@@ -141,7 +142,7 @@ class EapProtocolTest {
     val deviceConnectionDelegate = captureDeviceCallback()
     eapProtocol.startAssociationDiscovery(
       TEST_EAP_PROTOCOL_NAME,
-      testIdentifier,
+      TEST_IDENTIFIER,
       mockDiscoveryCallback
     )
 
@@ -149,10 +150,10 @@ class EapProtocolTest {
 
     deviceConnectionDelegate.OnEAPSessionStart(
       mockDeviceConnection,
-      testProtocolId,
+      TEST_PROTOCOL_ID,
       TEST_EAP_PROTOCOL_NAME
     )
-    verify(mockDiscoveryCallback, never()).onDeviceConnected(testProtocolId.toString())
+    verify(mockDiscoveryCallback, never()).onDeviceConnected(TEST_PROTOCOL_ID.toString())
   }
 
   @Test
@@ -160,7 +161,7 @@ class EapProtocolTest {
     val deviceConnectionDelegate = captureDeviceCallback()
     eapProtocol.startAssociationDiscovery(
       TEST_EAP_PROTOCOL_NAME,
-      testIdentifier,
+      TEST_IDENTIFIER,
       mockDiscoveryCallback
     )
 
@@ -168,16 +169,16 @@ class EapProtocolTest {
 
     deviceConnectionDelegate.OnEAPSessionStart(
       mockDeviceConnection,
-      testProtocolId,
+      TEST_PROTOCOL_ID,
       TEST_EAP_PROTOCOL_NAME
     )
-    verify(mockDiscoveryCallback, never()).onDeviceConnected(testProtocolId.toString())
+    verify(mockDiscoveryCallback, never()).onDeviceConnected(TEST_PROTOCOL_ID.toString())
   }
 
   @Test
   fun getMaxWriteSize_returnCorrectValue() {
-    assertThat(eapProtocol.getMaxWriteSize(testProtocolId.toString()))
-      .isEqualTo(TEST_MAX_WRITE_SIZE)
+    assertThat(eapProtocol.getMaxWriteSize(TEST_PROTOCOL_ID.toString()))
+      .isEqualTo(TEST_MAX_WRITE_SIZE_BYTES)
   }
 
   private fun captureDeviceCallback(): IDeviceConnectionDelegate {
@@ -190,13 +191,23 @@ class EapProtocolTest {
         .firstValue
     return IDeviceConnectionDelegate.Stub.asInterface(deviceDelegateBinder)
   }
+
+  /** Returns a mock of the [IInterface] `T` with a binder that is alive. */
+  private inline fun <reified T> mockToBeAlive(): T where T : IInterface {
+    val mockInterface: T = mock()
+    val mockBinder: IBinder = mock()
+    whenever(mockInterface.asBinder()).thenReturn(mockBinder)
+    whenever(mockBinder.isBinderAlive).thenReturn(true)
+    return mockInterface
+  }
+
   companion object {
     private const val TEST_EAP_CLIENT_NAME = "eapClientName"
     private const val TEST_EAP_SERVICE_NAME = "eapServiceName"
     private const val TEST_EAP_PROTOCOL_NAME = "eapProtocolName"
-    private const val TEST_MAX_WRITE_SIZE = 100
-    private val testIdentifier = ParcelUuid(UUID.randomUUID())
-    private val testProtocolId = Random.nextLong()
-    private val testMessage = "TestMessage".toByteArray()
+    private const val TEST_MAX_WRITE_SIZE_BYTES = 100
+    private val TEST_IDENTIFIER = ParcelUuid(UUID.randomUUID())
+    private val TEST_PROTOCOL_ID = Random.nextLong()
+    private val TEST_MESSAGE = "TestMessage".toByteArray()
   }
 }

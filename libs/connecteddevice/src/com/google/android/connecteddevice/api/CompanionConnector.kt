@@ -44,9 +44,7 @@ import com.google.android.connecteddevice.model.ConnectedDevice
 import com.google.android.connecteddevice.model.DeviceMessage
 import com.google.android.connecteddevice.util.ByteUtils
 import com.google.android.connecteddevice.util.Logger
-import com.google.android.connecteddevice.util.SafeLog.logd
-import com.google.android.connecteddevice.util.SafeLog.loge
-import com.google.android.connecteddevice.util.SafeLog.logw
+import com.google.android.connecteddevice.util.SafeLog
 import com.google.android.connecteddevice.util.aliveOrNull
 import com.google.protobuf.ByteString
 import com.google.protobuf.ExtensionRegistryLite
@@ -89,11 +87,11 @@ constructor(
   private val featureCoordinatorConnection =
     object : ServiceConnection {
       override fun onServiceConnected(name: ComponentName, service: IBinder) {
-        logd(TAG, "FeatureCoordinator binding has connected successfully.")
+        logd("FeatureCoordinator binding has connected successfully.")
         featureCoordinator =
           IFeatureCoordinator.Stub.asInterface(service)
             ?: throw IllegalStateException("Cannot create wrapper of a null feature coordinator.")
-        logd(TAG, "Feature coordinator is alive: ${featureCoordinator?.asBinder()?.isBinderAlive}")
+        logd("Feature coordinator is alive: ${featureCoordinator?.asBinder()?.isBinderAlive}")
         waitingForConnection.set(false)
         this@CompanionConnector.onServiceConnected()
       }
@@ -114,13 +112,13 @@ constructor(
   private val connectionCallback =
     object : IConnectionCallback.Stub() {
       override fun onDeviceConnected(device: ConnectedDevice) {
-        logd(TAG, "Device ${device.deviceId} has connected. Notifying callback.")
+        logd("Device ${device.deviceId} has connected. Notifying callback.")
         callback?.onDeviceConnected(device)
         if (device.hasSecureChannel()) {
           callback?.onSecureChannelEstablished(device)
         }
         val featureId = featureId ?: return
-        logd(TAG, "Registering device callback for $featureId on device ${device.deviceId}.")
+        logd("Registering device callback for $featureId on device ${device.deviceId}.")
 
         // Only call method once. If featureCoordinator is not null, connectedDeviceManager is a
         // wrapper and will result in a double call on featureCoordinator.
@@ -128,10 +126,10 @@ constructor(
       }
 
       override fun onDeviceDisconnected(device: ConnectedDevice) {
-        logd(TAG, "Device ${device.deviceId} has disconnected. Notifying callback.")
+        logd("Device ${device.deviceId} has disconnected. Notifying callback.")
         callback?.onDeviceDisconnected(device)
         val featureId = featureId ?: return
-        logd(TAG, "Unregistering device callback for $featureId on device ${device.deviceId}.")
+        logd("Unregistering device callback for $featureId on device ${device.deviceId}.")
 
         // Only call method once. If featureCoordinator is not null, connectedDeviceManager is a
         // wrapper and will result in a double call on featureCoordinator.
@@ -142,7 +140,7 @@ constructor(
   private val deviceCallback =
     object : IDeviceCallback.Stub() {
       override fun onSecureChannelEstablished(device: ConnectedDevice) {
-        logd(TAG, "Secure channel has been established on ${device.deviceId}. Notifying callback.")
+        logd("Secure channel has been established on ${device.deviceId}. Notifying callback.")
         callback?.onSecureChannelEstablished(device)
       }
 
@@ -151,7 +149,7 @@ constructor(
       }
 
       override fun onDeviceError(device: ConnectedDevice, error: Int) {
-        logw(TAG, "Received a device error of $error from ${device.deviceId}.")
+        logw("Received a device error of $error from ${device.deviceId}.")
         callback?.onDeviceError(device, error)
       }
     }
@@ -159,17 +157,17 @@ constructor(
   private val deviceAssociationCallback =
     object : IDeviceAssociationCallback.Stub() {
       override fun onAssociatedDeviceAdded(device: AssociatedDevice) {
-        logd(TAG, "New device ${device.deviceId} associated. Notifying callback.")
+        logd("New device ${device.deviceId} associated. Notifying callback.")
         callback?.onAssociatedDeviceAdded(device)
       }
 
       override fun onAssociatedDeviceRemoved(device: AssociatedDevice) {
-        logd(TAG, "Associated device ${device.deviceId} removed. Notifying callback.")
+        logd("Associated device ${device.deviceId} removed. Notifying callback.")
         callback?.onAssociatedDeviceRemoved(device)
       }
 
       override fun onAssociatedDeviceUpdated(device: AssociatedDevice) {
-        logd(TAG, "Associated device ${device.deviceId} updated. Notifying callback.")
+        logd("Associated device ${device.deviceId} updated. Notifying callback.")
         callback?.onAssociatedDeviceUpdated(device)
       }
     }
@@ -181,7 +179,7 @@ constructor(
         try {
           featureCoordinator?.processLogRecords(loggerId, loggerBytes)
         } catch (e: RemoteException) {
-          loge(TAG, "Failed to send log records for logger $loggerId.", e)
+          loge("Failed to send log records for logger $loggerId.", e)
         }
       }
     }
@@ -206,7 +204,6 @@ constructor(
     get() {
       if (!isConnected) {
         logw(
-          TAG,
           "Attempted to get connected devices before the platform was connected. Returning empty " +
             "list."
         )
@@ -231,9 +228,9 @@ constructor(
     get() = featureCoordinator?.aliveOrNull()
 
   override fun connect() {
-    logd(TAG, "Initiating connection to companion platform.")
+    logd("Initiating connection to companion platform.")
     if (isConnected) {
-      logd(TAG, "Platform is already connected. Skipping binding.")
+      logd("Platform is already connected. Skipping binding.")
       initializePlatform()
       return
     }
@@ -244,36 +241,36 @@ constructor(
   }
 
   private fun bindToService() {
-    logd(TAG, "Platform is not currently connected. Initiating binding.")
+    logd("Platform is not currently connected. Initiating binding.")
     val intent = resolveIntent(featureCoordinatorAction)
 
     if (intent == null) {
-      loge(TAG, "No services found supporting companion device. Aborting.")
+      loge("No services found supporting companion device. Aborting.")
       callback?.onFailedToConnect()
       return
     }
 
     val success = context.bindService(intent, featureCoordinatorConnection, /* flag= */ 0)
     if (success) {
-      logd(TAG, "Successfully started binding with ${intent.action}.")
+      logd("Successfully started binding with ${intent.action}.")
       return
     }
 
     bindAttempts++
     if (bindAttempts > MAX_BIND_ATTEMPTS) {
-      loge(TAG, "Failed to bind to service after $bindAttempts attempts. Aborting.")
+      loge("Failed to bind to service after $bindAttempts attempts. Aborting.")
       waitingForConnection.set(false)
       callback?.onFailedToConnect()
       return
     }
-    logw(TAG, "Unable to bind to service with action ${intent.action}. Trying again.")
+    logw("Unable to bind to service with action ${intent.action}. Trying again.")
     retryHandler.postDelayed(::bindToService, BIND_RETRY_DURATION.toMillis())
   }
 
   override fun disconnect() {
-    logd(TAG, "Disconnecting from the companion platform.")
+    logd("Disconnecting from the companion platform.")
     val wasConnected = isBound
-    logd(TAG, "FeatureCoordinator is null: ${featureCoordinator == null} isBound: $isBound")
+    logd("FeatureCoordinator is null: ${featureCoordinator == null} isBound: $isBound")
     unbindFromService()
     if (wasConnected) {
       callback?.onDisconnected()
@@ -286,13 +283,13 @@ constructor(
     try {
       context.unbindService(featureCoordinatorConnection)
     } catch (e: IllegalArgumentException) {
-      logw(TAG, "Attempted to unbind an already unbound service.")
+      logw("Attempted to unbind an already unbound service.")
     }
     waitingForConnection.set(false)
   }
 
   private fun cleanUpFeatureCoordinator() {
-    logd(TAG, "Cleaning up FeatureCoordinator.")
+    logd("Cleaning up FeatureCoordinator.")
     aliveFeatureCoordinator?.let {
       try {
         it.unregisterConnectionCallback(connectionCallback)
@@ -305,7 +302,7 @@ constructor(
         it.unregisterDeviceAssociationCallback(deviceAssociationCallback)
         it.unregisterOnLogRequestedListener(loggerId, logRequestedListener)
       } catch (e: RemoteException) {
-        loge(TAG, "Error while cleaning up FeatureCoordinator.", e)
+        loge("Error while cleaning up FeatureCoordinator.", e)
       }
     }
     // Only set to null if already non-null. Otherwise, this will also inadvertently null out the
@@ -318,12 +315,17 @@ constructor(
   }
 
   override fun binderForAction(action: String): IBinder? {
-    logd(TAG, "Binder for action: $action.")
+    logd("Binder for action: $action.")
+    if (featureCoordinator == null) {
+      // TODO(b/236896897): Fix this unrecoverable error state
+      loge("Not connected to system user service; returning null.")
+      return null
+    }
     return when (action) {
-      ACTION_BIND_FEATURE_COORDINATOR, ACTION_BIND_FEATURE_COORDINATOR_FG ->
-        featureCoordinator?.asBinder()
+      ACTION_BIND_FEATURE_COORDINATOR,
+      ACTION_BIND_FEATURE_COORDINATOR_FG -> aliveFeatureCoordinator?.asBinder()
       else -> {
-        loge(TAG, "Binder for unexpected action, returning null binder.")
+        loge("Binder for unexpected action, returning null binder.")
         null
       }
     }
@@ -331,14 +333,14 @@ constructor(
 
   override fun sendMessageSecurely(deviceId: String, message: ByteArray) {
     if (!isConnected) {
-      loge(TAG, "Unable to send message, the platform is not actively connected.")
-      callback?.onMessageFailedToSend(deviceId, message, /* isTransient= */ true)
+      loge("Unable to send message, the platform is not actively connected.")
+      callback?.onMessageFailedToSend(deviceId, message, isTransient = true)
       return
     }
     val device = getConnectedDeviceById(deviceId)
     if (device == null) {
-      loge(TAG, "No matching device found with id $deviceId when trying to send secure message.")
-      callback?.onMessageFailedToSend(deviceId, message, /* isTransient= */ false)
+      loge("No matching device found with id $deviceId when trying to send secure message.")
+      callback?.onMessageFailedToSend(deviceId, message, isTransient = false)
       return
     }
     sendMessageSecurely(device, message)
@@ -346,8 +348,8 @@ constructor(
 
   override fun sendMessageSecurely(device: ConnectedDevice, message: ByteArray) {
     if (!isConnected) {
-      loge(TAG, "Unable to send message, the platform is not actively connected.")
-      callback?.onMessageFailedToSend(device.deviceId, message, /* isTransient= */ true)
+      loge("Unable to send message, the platform is not actively connected.")
+      callback?.onMessageFailedToSend(device.deviceId, message, isTransient = true)
       return
     }
     val deviceMessage =
@@ -360,8 +362,8 @@ constructor(
     try {
       sendMessageInternal(device, deviceMessage)
     } catch (e: RemoteException) {
-      loge(TAG, "Error while sending secure message.", e)
-      callback?.onMessageFailedToSend(device.deviceId, message, /* isTransient= */ false)
+      loge("Error while sending secure message.", e)
+      callback?.onMessageFailedToSend(device.deviceId, message, isTransient = false)
     }
   }
 
@@ -372,14 +374,14 @@ constructor(
     callback: QueryCallback
   ) {
     if (!isConnected) {
-      loge(TAG, "Unable to send query, the platform is not actively connected.")
-      callback.onQueryFailedToSend(/* isTransient= */ true)
+      loge("Unable to send query, the platform is not actively connected.")
+      callback.onQueryFailedToSend(isTransient = true)
       return
     }
     val device = getConnectedDeviceById(deviceId)
     if (device == null) {
-      loge(TAG, "No matching device found with id $deviceId when trying to send a secure query.")
-      callback.onQueryFailedToSend(/* isTransient= */ false)
+      loge("No matching device found with id $deviceId when trying to send a secure query.")
+      callback.onQueryFailedToSend(isTransient = false)
       return
     }
     sendQuerySecurely(device, request, parameters, callback)
@@ -393,8 +395,8 @@ constructor(
   ) {
     val featureId = featureId
     if (featureId == null) {
-      loge(TAG, "Attempted to send a query with no feature id.")
-      callback.onQueryFailedToSend(/* isTransient= */ false)
+      loge("Attempted to send a query with no feature id.")
+      callback.onQueryFailedToSend(isTransient = false)
       return
     }
     sendQuerySecurelyInternal(device, featureId, request, parameters, callback)
@@ -408,14 +410,14 @@ constructor(
     callback: QueryCallback
   ) {
     if (!isConnected) {
-      loge(TAG, "Unable to send message, the platform is not actively connected.")
-      callback.onQueryFailedToSend(/* isTransient= */ true)
+      loge("Unable to send message, the platform is not actively connected.")
+      callback.onQueryFailedToSend(isTransient = true)
       return
     }
     val featureId = featureId
     if (featureId == null) {
-      loge(TAG, "Attempted to send a query with no feature id.")
-      callback.onQueryFailedToSend(/* isTransient= */ false)
+      loge("Attempted to send a query with no feature id.")
+      callback.onQueryFailedToSend(isTransient = false)
       return
     }
     val id = queryIdGenerator.next()
@@ -427,7 +429,7 @@ constructor(
     if (parameters != null) {
       builder.parameters = ByteString.copyFrom(parameters)
     }
-    logd(TAG, "Sending secure query with id $id.")
+    logd("Sending secure query with id $id.")
     val deviceMessage =
       DeviceMessage.createOutgoingMessage(
         recipient.uuid,
@@ -438,8 +440,8 @@ constructor(
     try {
       sendMessageInternal(device, deviceMessage)
     } catch (e: RemoteException) {
-      loge(TAG, "Error while sending secure query.", e)
-      callback.onQueryFailedToSend(/* isTransient= */ false)
+      loge("Error while sending secure query.", e)
+      callback.onQueryFailedToSend(isTransient = false)
       return
     }
     queryCallbacks[id] = callback
@@ -452,12 +454,12 @@ constructor(
     response: ByteArray?
   ) {
     if (!isConnected) {
-      loge(TAG, "Unable to send query response, the platform is not actively connected.")
+      loge("Unable to send query response, the platform is not actively connected.")
       return
     }
     val recipientId: ParcelUuid? = queryResponseRecipients.remove(queryId)
     if (recipientId == null) {
-      loge(TAG, "Unable to send response to unrecognized query $queryId.")
+      loge("Unable to send response to unrecognized query $queryId.")
       return
     }
     val builder = QueryResponse.newBuilder().setQueryId(queryId).setSuccess(success)
@@ -465,7 +467,7 @@ constructor(
       builder.response = ByteString.copyFrom(response)
     }
     val queryResponse = builder.build()
-    logd(TAG, "Sending response to query $queryId to $recipientId.")
+    logd("Sending response to query $queryId to $recipientId.")
     val deviceMessage =
       DeviceMessage.createOutgoingMessage(
         recipientId.uuid,
@@ -476,20 +478,20 @@ constructor(
     try {
       sendMessageInternal(device, deviceMessage)
     } catch (e: RemoteException) {
-      loge(TAG, "Error while sending query response.", e)
+      loge("Error while sending query response.", e)
     }
   }
 
   override fun getConnectedDeviceById(deviceId: String): ConnectedDevice? {
     if (!isConnected) {
-      loge(TAG, "Unable to get connected device by id. The platform is not actively connected.")
+      loge("Unable to get connected device by id. The platform is not actively connected.")
       return null
     }
     val connectedDevices =
       try {
         aliveFeatureCoordinator?.allConnectedDevices
       } catch (e: RemoteException) {
-        loge(TAG, "Exception while retrieving connected devices.", e)
+        loge("Exception while retrieving connected devices.", e)
         null
       }
 
@@ -505,26 +507,26 @@ constructor(
       device,
       SYSTEM_FEATURE_ID,
       systemQuery.toByteArray(),
-      /* parameters= */ null,
+      parameters = null,
       object : QueryCallback {
         override fun onSuccess(response: ByteArray?) {
           if (response == null || response.isEmpty()) {
-            loge(TAG, "Received a null or empty response for the application name.")
+            loge("Received a null or empty response for the application name.")
             callback.onError()
             return
           }
           val appName = String(response, StandardCharsets.UTF_8)
-          logd(TAG, "Received successful app name query response of $appName.")
+          logd("Received successful app name query response of $appName.")
           callback.onNameReceived(appName)
         }
 
         override fun onError(response: ByteArray?) {
-          loge(TAG, "Received an error response when querying for application name.")
+          loge("Received an error response when querying for application name.")
           callback.onError()
         }
 
         override fun onQueryFailedToSend(isTransient: Boolean) {
-          loge(TAG, "Failed to send the query for the application name.")
+          loge("Failed to send the query for the application name.")
           callback.onError()
         }
       }
@@ -589,7 +591,6 @@ constructor(
   private fun onServiceConnected() {
     if (!isConnected) {
       logd(
-        TAG,
         "Initialization criteria have not been met yet. Waiting for further service connections " +
           "before starting."
       )
@@ -600,13 +601,13 @@ constructor(
 
   private fun initializePlatform() {
     if (!isPlatformInitialized.compareAndSet(false, true)) {
-      logw(TAG, "Platform is already initialized. Ignoring.")
+      logw("Platform is already initialized. Ignoring.")
       return
     }
-    logd(TAG, "Initializing FeatureCoordinator.")
+    logd("Initializing FeatureCoordinator.")
     val featureCoordinator = featureCoordinator
     if (featureCoordinator == null) {
-      logd(TAG, "Unable to initialize null FeatureCoordinator. Ignoring.")
+      logd("Unable to initialize null FeatureCoordinator. Ignoring.")
       return
     }
     try {
@@ -625,7 +626,7 @@ constructor(
           connectedDevices = featureCoordinator.allConnectedDevices
         }
         else -> {
-          loge(TAG, "Unknown user type $userType detected.")
+          loge("Unknown user type $userType detected.")
           connectedDevices = emptyList()
         }
       }
@@ -638,30 +639,30 @@ constructor(
           callback?.onSecureChannelEstablished(device)
         }
         if (featureId == null) {
-          logd(TAG, "There is currently no feature id set. Skipping device registration.")
+          logd("There is currently no feature id set. Skipping device registration.")
           continue
         }
         featureCoordinator.registerDeviceCallback(device, featureId, deviceCallback)
       }
     } catch (e: RemoteException) {
-      loge(TAG, "Error while initializing FeatureCoordinator.", e)
+      loge("Error while initializing FeatureCoordinator.", e)
     }
     callback?.onConnected()
   }
 
   private fun onServiceDisconnected() {
-    logd(TAG, "Service has disconnected. Cleaning up.")
+    logd("Service has disconnected. Cleaning up.")
     disconnect()
   }
 
   private fun onNullBinding() {
-    loge(TAG, "Received a null binding for FeatureCoordinator. Unbinding service.")
+    loge("Received a null binding for FeatureCoordinator. Unbinding service.")
     unbindFromService()
     callback?.onFailedToConnect()
   }
 
   private fun onBindingDied() {
-    logw(TAG, "FeatureCoordinator binding died. Unbinding service.")
+    logw("FeatureCoordinator binding died. Unbinding service.")
     unbindFromService()
     callback?.onDisconnected()
   }
@@ -671,10 +672,10 @@ constructor(
     val intent = Intent(action)
     val services = packageManager.queryIntentServices(intent, PackageManager.MATCH_DEFAULT_ONLY)
     if (services.isEmpty()) {
-      logw(TAG, "There are no services supporting the $action action installed on this device.")
+      logw("There are no services supporting the $action action installed on this device.")
       return null
     }
-    logd(TAG, "Found ${services.size} service(s) supporting $action. Choosing the first one.")
+    logd("Found ${services.size} service(s) supporting $action. Choosing the first one.")
     val service = services[0]
     return intent.apply {
       component = ComponentName(service.serviceInfo.packageName, service.serviceInfo.name)
@@ -686,7 +687,7 @@ constructor(
     val message = deviceMessage.message
     when (operationType) {
       DeviceMessage.OperationType.CLIENT_MESSAGE -> {
-        logd(TAG, "Received client message. Passing on to feature.")
+        logd("Received client message. Passing on to feature.")
         callback?.onMessageReceived(device, message)
         return
       }
@@ -695,7 +696,7 @@ constructor(
           val query = Query.parseFrom(message, ExtensionRegistryLite.getEmptyRegistry())
           processQuery(device, query)
         } catch (e: InvalidProtocolBufferException) {
-          loge(TAG, "Unable to parse query.", e)
+          loge("Unable to parse query.", e)
         }
         return
       }
@@ -704,16 +705,16 @@ constructor(
           val response = QueryResponse.parseFrom(message, ExtensionRegistryLite.getEmptyRegistry())
           processQueryResponse(response)
         } catch (e: InvalidProtocolBufferException) {
-          loge(TAG, "Unable to parse query response.", e)
+          loge("Unable to parse query response.", e)
         }
         return
       }
-      else -> loge(TAG, "Received unknown type of message: $operationType. Ignoring.")
+      else -> loge("Received unknown type of message: $operationType. Ignoring.")
     }
   }
 
   private fun processQuery(device: ConnectedDevice, query: Query) {
-    logd(TAG, "Received a new query with id ${query.id}. Passing on to feature.")
+    logd("Received a new query with id ${query.id}. Passing on to feature.")
     val sender = ParcelUuid(ByteUtils.bytesToUUID(query.sender.toByteArray()))
     queryResponseRecipients[query.id] = sender
     callback?.onQueryReceived(
@@ -725,10 +726,10 @@ constructor(
   }
 
   private fun processQueryResponse(response: QueryResponse) {
-    logd(TAG, "Received a query response. Issuing registered callback.")
+    logd("Received a query response. Issuing registered callback.")
     val callback = queryCallbacks.remove(response.queryId)
     if (callback == null) {
-      loge(TAG, "Unable to locate callback for query ${response.queryId}.")
+      loge("Unable to locate callback for query ${response.queryId}.")
       return
     }
     if (response.success) {
@@ -736,6 +737,18 @@ constructor(
     } else {
       callback.onError(response.response.toByteArray())
     }
+  }
+
+  private fun logd(message: String) {
+    SafeLog.logd(TAG, "$message [Feature ID: $featureId]")
+  }
+
+  private fun logw(message: String) {
+    SafeLog.logw(TAG, "$message [Feature ID: $featureId]")
+  }
+
+  private fun loge(message: String, e: Exception? = null) {
+    SafeLog.loge(TAG, "$message [Feature ID: $featureId]", e)
   }
 
   companion object {

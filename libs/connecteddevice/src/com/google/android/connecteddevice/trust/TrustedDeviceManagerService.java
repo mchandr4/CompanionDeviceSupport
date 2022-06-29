@@ -34,7 +34,7 @@ public class TrustedDeviceManagerService extends Service {
     super.onCreate();
     logd(TAG, "Starting trusted device manager service.");
     TrustedDeviceEventLog.onTrustedDeviceServiceStarted();
-    trustedDeviceManager = new TrustedDeviceManager(this);
+    trustedDeviceManager = createTrustedDeviceManager();
   }
 
   @Override
@@ -46,5 +46,9 @@ public class TrustedDeviceManagerService extends Service {
   @Override
   public IBinder onBind(Intent intent) {
     return trustedDeviceManager.asBinder();
+  }
+
+  private TrustedDeviceManager createTrustedDeviceManager() {
+    return new TrustedDeviceManager(this);
   }
 }

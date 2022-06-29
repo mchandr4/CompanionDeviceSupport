@@ -14,7 +14,7 @@ android {
         applicationId "com.google.android.companiondevicesupport"
         minSdkVersion 29
         targetSdkVersion 31
-        versionCode 1477
+        versionCode 1597
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -30,7 +30,7 @@ android {
             manifest.srcFile 'AndroidManifest.xml'
             res.srcDirs = ['res', 'config/dev/res']
             java.srcDirs = ['src']
-            aidl.srcDirs = java.srcDirs
+            aidl.srcDirs = [java.srcDirs, 'src/com/google/android/companiondevicesupport/eap']
         }
     }
 

@@ -108,7 +108,7 @@ public class NotificationMsgDelegate extends BaseNotificationDelegate {
       float letterToTileRatio,
       int contentTextResourceId) {
     super(
-        context, /* useLetterTile */ false, bitmapSize, cornerRadiusPercent, avatarNumberOfLetters);
+        context, /* useLetterTile= */ true, bitmapSize, cornerRadiusPercent, avatarNumberOfLetters);
     projectionStateListener = new ProjectionStateListener(context);
     this.defaultIconResourceId = defaultIconResourceId;
     this.defaultColor = defaultColor;
@@ -312,8 +312,12 @@ public class NotificationMsgDelegate extends BaseNotificationDelegate {
   }
 
   private void storeIcon(ConversationKey convoKey, AvatarIconSync iconSync) {
-    if (!Utils.isValidAvatarIconSync(iconSync) || !notificationInfos.containsKey(convoKey)) {
-      logw(TAG, "storeIcon: invalid AvatarIconSync obj or no conversation found.");
+    if (!Utils.isValidAvatarIconSync(iconSync)) {
+      logw(TAG, "storeIcon: invalid AvatarIconSync obj.");
+      return;
+    }
+    if (!notificationInfos.containsKey(convoKey)) {
+      logw(TAG, "storeIcon: no conversation found.");
       return;
     }
     if (notificationInfos.get(convoKey).isGroupConvo()) {

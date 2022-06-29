@@ -88,12 +88,15 @@ constructor(
       }
 
       override fun onRemoteDeviceConnected(device: BluetoothDevice) {
-        logd(TAG, "Remote device ${device.address} connected.")
         bluetoothDevice = device
         val currentProtocolId = createProtocolId()
         protocolId = currentProtocolId
+
+        logd(TAG, "Remote device ${device.address} connected. Protocol ID: $protocolId")
+
         stopAdvertising()
         discoveryCallback?.onDeviceConnected(currentProtocolId)
+
         blePeripheralManager.addOnCharacteristicWriteListener(
           this@BlePeripheralProtocol::onCharacteristicWrite
         )
@@ -104,7 +107,8 @@ constructor(
       }
 
       override fun onRemoteDeviceDisconnected(device: BluetoothDevice) {
-        logd(TAG, "Remote device ${device.address} disconnected.")
+        logd(TAG, "Remote device ${device.address} disconnected. Protocol ID: $protocolId")
+
         if (device != bluetoothDevice) {
           loge(
             TAG,
@@ -113,9 +117,26 @@ constructor(
           )
           return
         }
-        protocolId?.let { id ->
-          deviceDisconnectedListeners[id]?.invoke { it.onDeviceDisconnected(id) }
+
+        val currentProtocolId = protocolId
+        if (currentProtocolId == null) {
+          logw(
+            TAG,
+            "Device disconnected but no protocol ID. Cannot notify disconnect listeners. " +
+              "Resetting."
+          )
+          reset()
+          return
         }
+
+        val listener = deviceDisconnectedListeners[currentProtocolId]
+        if (listener != null) {
+          logd(TAG, "Valid disconnect listener exists for protocolId $protocolId. Notifying.")
+          listener.invoke { it.onDeviceDisconnected(currentProtocolId) }
+        } else {
+          logw(TAG, "No disconnect listener exists for protocolId $protocolId.")
+        }
+
         reset()
       }
     }

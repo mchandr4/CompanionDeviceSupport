@@ -15,7 +15,9 @@
   ~ limitations under the License.
   -->
 
-<resources>
-    <!-- Current version of the SDK -->
-    <string name="hu_companion_sdk_version" translatable="false">1.4.0</string>
-</resources>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:gravity="center"
+    android:id="@+id/fragment_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" />

@@ -41,6 +41,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import android.view.View;
+import android.view.ViewStub;
 import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -186,6 +187,10 @@ public class AssociationActivity extends FragmentActivity {
   /** Performs permission checks and starts association flow. */
   void startAssociation() {
     logd(TAG, "Starting association.");
+    if (pendingAssociationAfterPerms) {
+      logd(TAG, "Pending on user grant permission, ignore start association request.");
+      return;
+    }
     if (maybeAskForPermissions()) {
       logd(TAG, "Waiting for permissions to be granted before association can be started.");
       pendingAssociationAfterPerms = true;
@@ -242,6 +247,13 @@ public class AssociationActivity extends FragmentActivity {
     if (isStartedForSuw) {
       setContentView(R.layout.suw_companion_base_activity);
       carSetupWizardLayout = findViewById(R.id.car_setup_wizard_layout);
+      ViewStub content = carSetupWizardLayout.getContentViewStub();
+      if (content != null) {
+        content.setLayoutResource(R.layout.suw_splitnav_fragment_container);
+        content.inflate();
+      } else {
+        loge(TAG, "Couldn't find ViewStub in suw_companion_base_activity.");
+      }
       carSetupWizardLayout.setBackButtonListener(l -> onBackPressed());
       return;
     }

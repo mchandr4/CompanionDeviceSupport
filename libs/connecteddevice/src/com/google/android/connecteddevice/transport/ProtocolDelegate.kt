@@ -16,25 +16,26 @@
 
 package com.google.android.connecteddevice.transport
 
+import com.google.android.connecteddevice.util.BinderUtils.registerBinderDiedListener
 import com.google.android.connecteddevice.util.SafeLog.logd
+import com.google.android.connecteddevice.util.SafeLog.logw
+import java.util.concurrent.CopyOnWriteArrayList
 
 /** Delegate for registering protocols to the platform. */
 class ProtocolDelegate : IProtocolDelegate.Stub() {
-  private val _protocols = mutableListOf<IConnectionProtocol>()
+  private val _protocols = CopyOnWriteArrayList<IConnectionProtocol>()
   /** The list of currently attached [IConnectionProtocol]s. */
   val protocols: List<IConnectionProtocol>
     get() {
-      scrubDeadProtocols(_protocols)
-      return _protocols
+      return _protocols.toList()
     }
 
-  private val _oobProtocols = mutableListOf<IConnectionProtocol>()
+  private val _oobProtocols = CopyOnWriteArrayList<IConnectionProtocol>()
 
   /** Protocols that support OOB data exchange. */
   val oobProtocols: List<IConnectionProtocol>
     get() {
-      scrubDeadProtocols(_oobProtocols)
-      return _oobProtocols
+      return _oobProtocols.toList()
     }
 
   /** `true` if there are currently no general transport protocols attached. `false` otherwise. */
@@ -49,46 +50,62 @@ class ProtocolDelegate : IProtocolDelegate.Stub() {
   var callback: Callback? = null
 
   override fun addOobProtocol(protocol: IConnectionProtocol) {
+    val success =
+      protocol.asBinder().registerBinderDiedListener {
+        logd(
+          TAG,
+          "Remote OOB protocol $protocol process is dead; clear the reference of this protocol."
+        )
+        removeOobProtocol(protocol)
+      }
+    if (!success) {
+      logw(TAG, "Protocol $protocol process already died. Ignore the request to add protocol.")
+      return
+    }
+
     _oobProtocols.add(protocol)
     logd(
       TAG,
-      "Added a new OOB protocol. There are now ${oobProtocols.size} attached OOB " + "protocols."
+      "Added a new OOB protocol. There are now ${_oobProtocols.size} attached OOB protocols."
     )
   }
 
   override fun removeOobProtocol(protocol: IConnectionProtocol) {
-    scrubDeadProtocols(_oobProtocols)
-    _oobProtocols.removeAll { it.asBinder() == protocol.asBinder() }
-    logd(
-      TAG,
-      "Removed a OOB protocol. There are ${oobProtocols.size} remaining OOB attached " +
-        "protocols."
-    )
+    for (current in _oobProtocols) {
+      if (current.asBinder().equals(protocol.asBinder())) {
+        _oobProtocols.remove(current)
+        logd(
+          TAG,
+          "Removed a protocol. There are ${_oobProtocols.size} remaining attached protocols."
+        )
+      }
+    }
   }
 
   override fun addProtocol(protocol: IConnectionProtocol) {
+    val success =
+      protocol.asBinder().registerBinderDiedListener {
+        logd(TAG, "Remote protocol $protocol process dead, clear the reference this protocol.")
+        removeProtocol(protocol)
+      }
+    if (!success) {
+      logw(TAG, "Protocol $protocol process already died. Ignore the request to add protocol.")
+      return
+    }
     _protocols.add(protocol)
-    logd(TAG, "Added a new protocol. There are now ${protocols.size} attached protocols.")
+    logd(TAG, "Added a new protocol. There are now ${_protocols.size} attached protocols.")
     callback?.onProtocolAdded(protocol)
   }
 
   override fun removeProtocol(protocol: IConnectionProtocol) {
-    scrubDeadProtocols(_protocols)
-    if (!_protocols.removeAll { it.asBinder() == protocol.asBinder() }) {
-      return
-    }
-    logd(TAG, "Removed a protocol. There are ${protocols.size} remaining attached protocols.")
-    callback?.onProtocolRemoved(protocol)
-  }
-
-  private fun scrubDeadProtocols(protocols: MutableList<IConnectionProtocol>) =
-    protocols.removeAll {
-      val isNotAlive = !it.asBinder().isBinderAlive
-      if (isNotAlive) {
-        callback?.onProtocolRemoved(it)
+    for (current in _protocols) {
+      if (current.asBinder().equals(protocol.asBinder())) {
+        _protocols.remove(current)
+        logd(TAG, "Removed a protocol. There are ${_protocols.size} remaining attached protocols.")
+        callback?.onProtocolRemoved(protocol)
       }
-      isNotAlive
     }
+  }
 
   /** Callback to be invoked for protocol changes. */
   interface Callback {

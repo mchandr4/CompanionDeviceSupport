@@ -58,14 +58,12 @@
       android:layout_width="0dp"
       android:layout_height="match_parent"
       android:layout_weight="@integer/suw_content_column_weight"
-      android:layout_marginVertical="?attr/pageMarginVertical"
       android:gravity="center">
     <TextView
         android:id="@+id/pairing_code"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
         android:gravity="center"
-        android:layout_marginStart="@dimen/suw_column_inner_padding_horizontal"
         android:textAppearance="@style/PairingCodeTextStyle"/>
   </LinearLayout>
 </LinearLayout>

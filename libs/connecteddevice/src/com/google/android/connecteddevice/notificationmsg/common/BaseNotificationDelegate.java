@@ -16,6 +16,7 @@
 
 package com.google.android.connecteddevice.notificationmsg.common;
 
+import static com.google.android.connecteddevice.util.SafeLog.logd;
 import static com.google.common.base.Strings.isNullOrEmpty;
 
 import android.app.Notification;
@@ -61,6 +62,7 @@ import java.util.function.Predicate;
  */
 @SuppressWarnings("PendingIntentMutability") // SaferPendingIntent is not available in AOSP
 public class BaseNotificationDelegate {
+  private static final String TAG = "BaseNotificationDelegate";
 
   /** Used to reply to message. */
   public static final String ACTION_REPLY = "com.android.car.messenger.common.ACTION_REPLY";
@@ -180,6 +182,10 @@ public class BaseNotificationDelegate {
    */
   protected void excludeFromNotification(ConversationKey convoKey) {
     ConversationNotificationInfo info = notificationInfos.get(convoKey);
+    if (info == null) {
+      logd(TAG, "ConversationNotificationInfo is null for: " + convoKey);
+      return;
+    }
     for (MessageKey key : info.messageKeys) {
       Message message = messages.get(key);
       message.excludeFromNotification();
@@ -388,6 +394,6 @@ public class BaseNotificationDelegate {
         flags |= PendingIntent.FLAG_MUTABLE;
     }
 
-    return PendingIntent.getForegroundService(context, notificationId, intent, flags);
+    return PendingIntent.getService(context, notificationId, intent, flags);
   }
 }
