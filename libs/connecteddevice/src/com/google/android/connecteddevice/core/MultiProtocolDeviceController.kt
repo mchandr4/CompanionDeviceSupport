@@ -41,6 +41,7 @@ import com.google.android.connecteddevice.transport.IDiscoveryCallback
 import com.google.android.connecteddevice.transport.ProtocolDelegate
 import com.google.android.connecteddevice.transport.ProtocolDevice
 import com.google.android.connecteddevice.util.ByteUtils
+import com.google.android.connecteddevice.util.EventLog
 import com.google.android.connecteddevice.util.SafeLog.logd
 import com.google.android.connecteddevice.util.SafeLog.loge
 import com.google.android.connecteddevice.util.SafeLog.logw
@@ -393,6 +394,7 @@ constructor(
           TAG,
           "New connection protocol connected for $deviceId. id: $protocolId, protocol: $protocol"
         )
+        EventLog.onDeviceConnected()
         protocol.registerDeviceDisconnectedListener(
           protocolId,
           generateDeviceDisconnectedListener(deviceId, protocol)
@@ -649,6 +651,7 @@ constructor(
         invokeCallbacksWithDevice(device) { connectedDevice, callback ->
           callback.onSecureChannelEstablished(connectedDevice)
         }
+        EventLog.onSecureChannelEstablished()
       }
 
       override fun onEstablishSecureChannelFailure(error: ChannelError) {

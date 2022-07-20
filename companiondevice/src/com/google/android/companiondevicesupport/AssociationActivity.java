@@ -716,14 +716,15 @@ public class AssociationActivity extends FragmentActivity {
         .commit();
   }
 
-  private void retryAssociation() {
+  public void retryAssociation() {
     dismissButtons();
     showProgressBar();
     Fragment fragment = getSupportFragmentManager().findFragmentByTag(PAIRING_CODE_FRAGMENT_TAG);
     if (fragment != null) {
       getSupportFragmentManager().beginTransaction().remove(fragment).commit();
     }
-    model.retryAssociation();
+    model.stopAssociation();
+    startAssociation();
   }
 
   private void setDeviceToReturn(AssociatedDevice device) {

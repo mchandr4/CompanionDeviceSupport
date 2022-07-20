@@ -14,7 +14,7 @@ android {
         applicationId "com.google.android.companiondevicesupport"
         minSdkVersion 29
         targetSdkVersion 31
-        versionCode 1597
+        versionCode 1633
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

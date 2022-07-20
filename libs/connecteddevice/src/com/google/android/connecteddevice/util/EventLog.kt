@@ -25,34 +25,16 @@ object EventLog {
     SafeLog.logi(TAG, "SERVICE_STARTED")
   }
 
-  /** Mark in log that the ConnectedDeviceManager has started. */
-  @JvmStatic
-  fun onConnectedDeviceManagerStarted() {
-    SafeLog.logi(TAG, "CONNECTED_DEVICE_MANAGER_STARTED")
-  }
-
   /** Mark in the log that BLE is on. */
   @JvmStatic
   fun onBleOn() {
     SafeLog.logi(TAG, "BLE_ON")
   }
 
-  /** Mark in the log that a search for the user's device has started. */
-  @JvmStatic
-  fun onStartDeviceSearchStarted() {
-    SafeLog.logi(TAG, "SEARCHING_FOR_DEVICE")
-  }
-
   /** Mark in the log that a device connected. */
   @JvmStatic
   fun onDeviceConnected() {
     SafeLog.logi(TAG, "DEVICE_CONNECTED")
-  }
-
-  /** Mark in the log that the device challenge has been received. */
-  @JvmStatic
-  fun onDeviceChallengeReceived() {
-    SafeLog.logi(TAG, "DEVICE_CHALLENGE_RECEIVED")
   }
 
   /** Mark in the log that a secure channel has been established with a device. */

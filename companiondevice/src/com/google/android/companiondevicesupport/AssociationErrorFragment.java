@@ -21,12 +21,6 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import androidx.lifecycle.ViewModelProvider;
-import com.google.android.connecteddevice.model.TransportProtocols;
-import com.google.android.connecteddevice.ui.AssociatedDeviceViewModel;
-import com.google.android.connecteddevice.ui.AssociatedDeviceViewModelFactory;
-import java.util.Arrays;
-import java.util.List;
 
 /** Fragment that displays when an error happens during association. */
 public class AssociationErrorFragment extends Fragment {
@@ -39,21 +33,7 @@ public class AssociationErrorFragment extends Fragment {
 
   @Override
   public void onViewCreated(View view, Bundle savedInstanceState) {
-    List<String> transportProtocols =
-        Arrays.asList(getResources().getStringArray(R.array.transport_protocols));
     view.findViewById(R.id.retry_button)
-        .setOnClickListener(
-            v -> {
-              AssociatedDeviceViewModel model =
-                  new ViewModelProvider(
-                          requireActivity(),
-                          new AssociatedDeviceViewModelFactory(
-                              requireActivity().getApplication(),
-                              transportProtocols.contains(TransportProtocols.PROTOCOL_SPP),
-                              getResources().getString(R.string.ble_device_name_prefix),
-                              getResources().getBoolean(R.bool.enable_passenger)))
-                      .get(AssociatedDeviceViewModel.class);
-              model.retryAssociation();
-            });
+        .setOnClickListener(v -> ((AssociationActivity) requireActivity()).retryAssociation());
   }
 }
