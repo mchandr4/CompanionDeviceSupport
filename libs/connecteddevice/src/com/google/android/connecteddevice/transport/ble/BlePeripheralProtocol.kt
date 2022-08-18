@@ -299,7 +299,7 @@ constructor(
 
   override fun disconnectDevice(protocolId: String) {
     if (protocolId == this.protocolId) {
-      reset()
+      blePeripheralManager.cleanup()
     }
   }
 

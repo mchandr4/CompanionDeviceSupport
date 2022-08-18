@@ -25,6 +25,7 @@ import android.os.IBinder
 import android.os.Looper
 import android.os.ParcelUuid
 import android.os.RemoteException
+import androidx.annotation.GuardedBy
 import androidx.annotation.VisibleForTesting
 import com.google.android.companionprotos.Query
 import com.google.android.companionprotos.QueryResponse
@@ -54,9 +55,14 @@ import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 
 /**
  * Class for establishing and maintaining a connection to the companion device platform.
+ *
+ * This connector will return different binders based on binding actions. Only foreground process
+ * should register listeners for feature coordinator initialization.
  *
  * @param context [Context] of the hosting process.
  * @param isForegroundProcess Set to `true` if running from outside of the companion application.
@@ -67,8 +73,10 @@ class CompanionConnector
 constructor(
   private val context: Context,
   private val isForegroundProcess: Boolean = false,
-  private val userType: @UserType Int = USER_TYPE_DRIVER
+  private val userType: @UserType Int = USER_TYPE_DRIVER,
 ) : Connector {
+  private val lock = ReentrantLock()
+
   private val retryHandler = Handler(Looper.getMainLooper())
 
   private val loggerId = Logger.getLogger().loggerId
@@ -87,13 +95,11 @@ constructor(
   private val featureCoordinatorConnection =
     object : ServiceConnection {
       override fun onServiceConnected(name: ComponentName, service: IBinder) {
-        logd("FeatureCoordinator binding has connected successfully.")
-        featureCoordinator =
-          IFeatureCoordinator.Stub.asInterface(service)
-            ?: throw IllegalStateException("Cannot create wrapper of a null feature coordinator.")
-        logd("Feature coordinator is alive: ${featureCoordinator?.asBinder()?.isBinderAlive}")
-        waitingForConnection.set(false)
-        this@CompanionConnector.onServiceConnected()
+        if (isForegroundProcess) {
+          handleForegroundUserConnection(service)
+        } else {
+          handleFeatureCoordinatorConnection(service)
+        }
       }
 
       override fun onServiceDisconnected(name: ComponentName) {
@@ -194,7 +200,47 @@ constructor(
 
   private var bindAttempts = 0
 
+  // Binder returned for foreground users. Allow binding services/activities to register listeners
+  // and get notified when feature coordinator is initialized.
+  @VisibleForTesting
+  internal val foregroundUserBinder =
+    object : IFeatureCoordinatorStatusNotifier.Stub() {
+      override fun registerFeatureCoordinatorListener(listener: IFeatureCoordinatorListener) {
+        logd("Register feature coordinator listener.")
+        lock.withLock { registeredListeners.add(listener) }
+        if (isConnected) {
+          logd("Feature coordinator has already been initialized, notifying listeners.")
+          notifyFeatureCoordinatorListeners()
+        }
+      }
+
+      override fun unregisterFeatureCoordinatorListener(listener: IFeatureCoordinatorListener) {
+        logd("Unregister feature coordinator listener.")
+        lock.withLock { registeredListeners.removeIf { it.asBinder() == listener.asBinder() } }
+      }
+    }
+
+  @VisibleForTesting
+  internal var featureCoordinatorListener =
+    object : IFeatureCoordinatorListener.Stub() {
+      override fun onFeatureCoordinatorInitialized(featureCoordinator: IFeatureCoordinator) {
+        if (!isConnected) {
+          this@CompanionConnector.featureCoordinator = featureCoordinator
+          onServiceConnected()
+        }
+      }
+    }
+
+  @VisibleForTesting
+  @GuardedBy("lock")
+  internal var registeredListeners = mutableListOf<IFeatureCoordinatorListener>()
+
+  // Binder returned for system users. Allow binding services to access ConnectedDeviceService's
+  // feature coordinator.
   @VisibleForTesting internal var featureCoordinator: IFeatureCoordinator? = null
+
+  @VisibleForTesting
+  internal var featureCoordinatorStatusNotifier: IFeatureCoordinatorStatusNotifier? = null
 
   override var featureId: ParcelUuid? = null
 
@@ -226,6 +272,9 @@ constructor(
 
   private val aliveFeatureCoordinator
     get() = featureCoordinator?.aliveOrNull()
+
+  private val aliveFeatureCoordinatorStatusNotifier
+    get() = featureCoordinatorStatusNotifier?.aliveOrNull()
 
   override fun connect() {
     logd("Initiating connection to companion platform.")
@@ -279,6 +328,7 @@ constructor(
 
   private fun unbindFromService() {
     cleanUpFeatureCoordinator()
+    cleanUpFeatureCoordinatorStatusNotifier()
     retryHandler.removeCallbacksAndMessages(/* token= */ null)
     try {
       context.unbindService(featureCoordinatorConnection)
@@ -314,16 +364,18 @@ constructor(
     isPlatformInitialized.set(false)
   }
 
+  private fun cleanUpFeatureCoordinatorStatusNotifier() {
+    logd("Clean up feature coordinator status notifier")
+    aliveFeatureCoordinatorStatusNotifier?.unregisterFeatureCoordinatorListener(
+      featureCoordinatorListener
+    )
+  }
+
   override fun binderForAction(action: String): IBinder? {
     logd("Binder for action: $action.")
-    if (featureCoordinator == null) {
-      // TODO(b/236896897): Fix this unrecoverable error state
-      loge("Not connected to system user service; returning null.")
-      return null
-    }
     return when (action) {
-      ACTION_BIND_FEATURE_COORDINATOR,
-      ACTION_BIND_FEATURE_COORDINATOR_FG -> aliveFeatureCoordinator?.asBinder()
+      ACTION_BIND_FEATURE_COORDINATOR -> aliveFeatureCoordinator?.asBinder()
+      ACTION_BIND_FEATURE_COORDINATOR_FG -> foregroundUserBinder.asBinder()
       else -> {
         loge("Binder for unexpected action, returning null binder.")
         null
@@ -371,7 +423,7 @@ constructor(
     deviceId: String,
     request: ByteArray,
     parameters: ByteArray?,
-    callback: QueryCallback
+    callback: QueryCallback,
   ) {
     if (!isConnected) {
       loge("Unable to send query, the platform is not actively connected.")
@@ -391,7 +443,7 @@ constructor(
     device: ConnectedDevice,
     request: ByteArray,
     parameters: ByteArray?,
-    callback: QueryCallback
+    callback: QueryCallback,
   ) {
     val featureId = featureId
     if (featureId == null) {
@@ -407,7 +459,7 @@ constructor(
     recipient: ParcelUuid,
     request: ByteArray,
     parameters: ByteArray?,
-    callback: QueryCallback
+    callback: QueryCallback,
   ) {
     if (!isConnected) {
       loge("Unable to send message, the platform is not actively connected.")
@@ -451,7 +503,7 @@ constructor(
     device: ConnectedDevice,
     queryId: Int,
     success: Boolean,
-    response: ByteArray?
+    response: ByteArray?,
   ) {
     if (!isConnected) {
       loge("Unable to send query response, the platform is not actively connected.")
@@ -500,7 +552,7 @@ constructor(
 
   override fun retrieveCompanionApplicationName(
     device: ConnectedDevice,
-    callback: AppNameCallback
+    callback: AppNameCallback,
   ) {
     val systemQuery = SystemQuery.newBuilder().setType(SystemQueryType.APP_NAME).build()
     sendQuerySecurelyInternal(
@@ -570,7 +622,7 @@ constructor(
   }
 
   override fun retrieveAssociatedDevicesForPassengers(
-    listener: IOnAssociatedDevicesRetrievedListener
+    listener: IOnAssociatedDevicesRetrievedListener,
   ) {
     aliveFeatureCoordinator?.retrieveAssociatedDevicesForPassengers(listener)
       ?: listener.onAssociatedDevicesRetrieved(emptyList())
@@ -597,6 +649,28 @@ constructor(
       return
     }
     initializePlatform()
+  }
+
+  private fun handleFeatureCoordinatorConnection(service: IBinder) {
+    logd("Feature coordinator binder connected.")
+    featureCoordinator =
+      checkNotNull(IFeatureCoordinator.Stub.asInterface(service)) {
+        "Cannot create wrapper of a null feature coordinator."
+      }
+    logd("Feature coordinator is alive: $isConnected")
+    waitingForConnection.set(false)
+    onServiceConnected()
+    notifyFeatureCoordinatorListeners()
+  }
+
+  private fun handleForegroundUserConnection(service: IBinder) {
+    logd("Foreground user service connection connected.")
+    val featureCoordinatorStatusNotifier =
+      IFeatureCoordinatorStatusNotifier.Stub.asInterface(service)
+    featureCoordinatorStatusNotifier.registerFeatureCoordinatorListener(featureCoordinatorListener)
+    this@CompanionConnector.featureCoordinatorStatusNotifier = featureCoordinatorStatusNotifier
+    waitingForConnection.set(false)
+    onServiceConnected()
   }
 
   private fun initializePlatform() {
@@ -739,6 +813,21 @@ constructor(
     }
   }
 
+  private fun notifyFeatureCoordinatorListeners() {
+    logd("Feature coordinator has been initiated, notifying listeners.")
+    scrubDeadListeners()
+    lock.withLock {
+      for (listener in registeredListeners) {
+        listener.onFeatureCoordinatorInitialized(aliveFeatureCoordinator)
+      }
+    }
+  }
+
+  private fun scrubDeadListeners() {
+    logd("Remove disconnected registered feature coordinator listeners")
+    lock.withLock { registeredListeners.removeIf { !it.asBinder().isBinderAlive } }
+  }
+
   private fun logd(message: String) {
     SafeLog.logd(TAG, "$message [Feature ID: $featureId]")
   }
@@ -763,7 +852,7 @@ constructor(
     fun createLocalConnector(
       context: Context,
       userType: @UserType Int,
-      featureCoordinator: IFeatureCoordinator
+      featureCoordinator: IFeatureCoordinator,
     ): CompanionConnector =
       CompanionConnector(context, userType = userType).apply {
         this.featureCoordinator = featureCoordinator

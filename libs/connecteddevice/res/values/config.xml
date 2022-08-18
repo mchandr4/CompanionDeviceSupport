@@ -17,5 +17,5 @@
 
 <resources>
     <!-- Current version of the SDK -->
-    <string name="hu_companion_sdk_version" translatable="false">1.4.1</string>
+    <string name="hu_companion_sdk_version" translatable="false">1.4.2</string>
 </resources>

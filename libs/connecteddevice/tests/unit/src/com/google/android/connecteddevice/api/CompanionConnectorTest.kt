@@ -21,6 +21,7 @@ import com.google.android.connecteddevice.api.Connector.Companion.USER_TYPE_ALL
 import com.google.android.connecteddevice.api.Connector.Companion.USER_TYPE_DRIVER
 import com.google.android.connecteddevice.api.Connector.Companion.USER_TYPE_PASSENGER
 import com.google.android.connecteddevice.core.util.mockToBeAlive
+import com.google.android.connecteddevice.core.util.mockToBeDead
 import com.google.android.connecteddevice.model.AssociatedDevice
 import com.google.android.connecteddevice.model.ConnectedDevice
 import com.google.android.connecteddevice.model.DeviceMessage
@@ -52,6 +53,8 @@ class CompanionConnectorTest {
   private val mockCallback = mock<Connector.Callback>()
 
   private val mockFeatureCoordinator = mockToBeAlive<IFeatureCoordinator>()
+
+  private val mockFeatureCoordinatorListener = mockToBeAlive<IFeatureCoordinatorListener.Stub>()
 
   private val context = FakeContext(mockPackageManager)
 
@@ -104,7 +107,7 @@ class CompanionConnectorTest {
     val connector = CompanionConnector(context, isForegroundProcess = true)
 
     connector.connect()
-    context.serviceConnection.firstOrNull()?.onNullBinding(ComponentName(PACKAGE_NAME, FG_NAME))
+    context.serviceConnection.firstOrNull()!!.onNullBinding(ComponentName(PACKAGE_NAME, FG_NAME))
 
     assertThat(context.bindingActions).containsExactly(ACTION_BIND_FEATURE_COORDINATOR_FG)
   }
@@ -115,7 +118,7 @@ class CompanionConnectorTest {
     val connector = CompanionConnector(context, isForegroundProcess = false)
 
     connector.connect()
-    context.serviceConnection.firstOrNull()?.onNullBinding(ComponentName(PACKAGE_NAME, BG_NAME))
+    context.serviceConnection.firstOrNull()!!.onNullBinding(ComponentName(PACKAGE_NAME, BG_NAME))
 
     assertThat(context.bindingActions).containsExactly(ACTION_BIND_FEATURE_COORDINATOR)
   }
@@ -175,8 +178,7 @@ class CompanionConnectorTest {
       CompanionConnector(context, isForegroundProcess = false).apply { callback = mockCallback }
 
     connector.connect()
-    context
-      .serviceConnection
+    context.serviceConnection
       .firstOrNull()
       ?.onServiceConnected(ComponentName(PACKAGE_NAME, BG_NAME), mockFeatureCoordinator.asBinder())
     connector.disconnect()
@@ -214,8 +216,7 @@ class CompanionConnectorTest {
       CompanionConnector(context, isForegroundProcess = false).apply { callback = mockCallback }
 
     connector.connect()
-    context
-      .serviceConnection
+    context.serviceConnection
       .firstOrNull()
       ?.onServiceConnected(ComponentName(PACKAGE_NAME, BG_NAME), mockFeatureCoordinator.asBinder())
 
@@ -230,11 +231,10 @@ class CompanionConnectorTest {
 
     connector.connect()
     val componentName = ComponentName(PACKAGE_NAME, BG_NAME)
-    context
-      .serviceConnection
+    context.serviceConnection
       .firstOrNull()
       ?.onServiceConnected(componentName, mockFeatureCoordinator.asBinder())
-    context.serviceConnection.firstOrNull()?.onServiceDisconnected(componentName)
+    context.serviceConnection.firstOrNull()!!.onServiceDisconnected(componentName)
 
     verify(mockCallback).onDisconnected()
   }
@@ -246,7 +246,7 @@ class CompanionConnectorTest {
       CompanionConnector(context, isForegroundProcess = false).apply { callback = mockCallback }
 
     connector.connect()
-    context.serviceConnection.firstOrNull()?.onBindingDied(ComponentName(PACKAGE_NAME, BG_NAME))
+    context.serviceConnection.firstOrNull()!!.onBindingDied(ComponentName(PACKAGE_NAME, BG_NAME))
 
     verify(mockCallback).onDisconnected()
   }
@@ -258,7 +258,7 @@ class CompanionConnectorTest {
       CompanionConnector(context, isForegroundProcess = false).apply { callback = mockCallback }
 
     connector.connect()
-    context.serviceConnection.firstOrNull()?.onNullBinding(ComponentName(PACKAGE_NAME, BG_NAME))
+    context.serviceConnection.firstOrNull()!!.onNullBinding(ComponentName(PACKAGE_NAME, BG_NAME))
 
     verify(mockCallback).onFailedToConnect()
   }
@@ -323,8 +323,7 @@ class CompanionConnectorTest {
     val connector = CompanionConnector(context, isForegroundProcess = false)
 
     connector.connect()
-    context
-      .serviceConnection
+    context.serviceConnection
       .firstOrNull()
       ?.onServiceConnected(ComponentName(PACKAGE_NAME, BG_NAME), mockFeatureCoordinator.asBinder())
 
@@ -804,6 +803,7 @@ class CompanionConnectorTest {
 
     defaultConnector.sendMessageSecurely(deviceId, message)
 
+    // TODO: b/242360799 to fix the argument lint issue.
     verify(mockCallback).onMessageFailedToSend(deviceId, message, /* isTransient= */ false)
   }
 
@@ -1660,7 +1660,7 @@ class CompanionConnectorTest {
     assertThat(defaultConnector.binderForAction(ACTION_BIND_FEATURE_COORDINATOR))
       .isEqualTo(defaultConnector.featureCoordinator?.asBinder())
     assertThat(defaultConnector.binderForAction(ACTION_BIND_FEATURE_COORDINATOR_FG))
-      .isEqualTo(defaultConnector.featureCoordinator?.asBinder())
+      .isEqualTo(defaultConnector.foregroundUserBinder.asBinder())
     assertThat(defaultConnector.binderForAction("")).isNull()
   }
 
@@ -1767,6 +1767,125 @@ class CompanionConnectorTest {
     defaultConnector.removeAssociatedDeviceClaim(deviceId)
 
     verify(mockFeatureCoordinator).removeAssociatedDeviceClaim(deviceId)
+  }
+
+  @Test
+  fun notifyListeners_onFeatureCoordinatorAlreadyInitialized() {
+    setQueryIntentServicesAnswer(defaultServiceAnswer)
+    val connectorForeground = CompanionConnector(context, isForegroundProcess = true)
+    val connectorBackground =
+      CompanionConnector(context, isForegroundProcess = false).apply {
+        featureCoordinator = mockFeatureCoordinator
+      }
+    val foregroundBinder = connectorBackground.foregroundUserBinder.asBinder()
+
+    connectorForeground.connect()
+    context.serviceConnection
+      .firstOrNull()!!
+      .onServiceConnected(ComponentName(PACKAGE_NAME, FG_NAME), foregroundBinder)
+
+    assertThat(connectorForeground.featureCoordinatorStatusNotifier).isNotNull()
+    assertThat(connectorBackground.registeredListeners.size).isEqualTo(1)
+    assertThat(connectorForeground.featureCoordinator).isEqualTo(mockFeatureCoordinator)
+  }
+
+  @Test
+  fun notifyListeners_onFeatureCoordinatorInitialized() {
+    setQueryIntentServicesAnswer(defaultServiceAnswer)
+    val connector =
+      CompanionConnector(context, isForegroundProcess = false).apply {
+        featureCoordinatorListener = mockFeatureCoordinatorListener
+        registeredListeners = mutableListOf(mockFeatureCoordinatorListener)
+      }
+
+    connector.connect()
+    context.serviceConnection
+      .firstOrNull()!!
+      .onServiceConnected(ComponentName(PACKAGE_NAME, BG_NAME), mockFeatureCoordinator.asBinder())
+
+    verify(mockFeatureCoordinatorListener).onFeatureCoordinatorInitialized(any())
+  }
+
+  @Test
+  fun doNotNotifyListeners_onFeatureCoordinatorNotInitialized() {
+    setQueryIntentServicesAnswer(defaultServiceAnswer)
+    val mockFeatureCoordinatorStatusNotifier = mockToBeAlive<IFeatureCoordinatorStatusNotifier>()
+    val connector =
+      CompanionConnector(context, isForegroundProcess = true).apply {
+        featureCoordinatorListener = mockFeatureCoordinatorListener
+      }
+
+    connector.connect()
+    context.serviceConnection
+      .firstOrNull()!!
+      .onServiceConnected(
+        ComponentName(PACKAGE_NAME, FG_NAME),
+        mockFeatureCoordinatorStatusNotifier.asBinder()
+      )
+
+    verify(mockFeatureCoordinatorListener, never()).onFeatureCoordinatorInitialized(any())
+  }
+
+  @Test
+  fun unregisterListener_onForegroundUserServiceDisconnected() {
+    setQueryIntentServicesAnswer(defaultServiceAnswer)
+    val connectorForeground = CompanionConnector(context, isForegroundProcess = true)
+    val connectorBackground = CompanionConnector(context, isForegroundProcess = false)
+    val foregroundBinder = connectorBackground.foregroundUserBinder.asBinder()
+
+    connectorForeground.connect()
+    context.serviceConnection
+      .firstOrNull()!!
+      .onServiceConnected(ComponentName(PACKAGE_NAME, FG_NAME), foregroundBinder)
+    context.serviceConnection
+      .firstOrNull()!!
+      .onServiceDisconnected(ComponentName(PACKAGE_NAME, FG_NAME))
+
+    assertThat(connectorBackground.registeredListeners.size).isEqualTo(0)
+  }
+
+  @Test
+  fun scrubDeadListeners_onNotifyListeners() {
+    setQueryIntentServicesAnswer(defaultServiceAnswer)
+    val mockListenerDeadA = mockToBeDead<IFeatureCoordinatorListener.Stub>()
+    val mockListenerDeadB = mockToBeDead<IFeatureCoordinatorListener.Stub>()
+    val mockListenerAlive = mockToBeAlive<IFeatureCoordinatorListener.Stub>()
+    val connector =
+      CompanionConnector(context, isForegroundProcess = false).apply {
+        registeredListeners = mutableListOf(mockListenerDeadA, mockListenerDeadB, mockListenerAlive)
+      }
+
+    connector.connect()
+    context.serviceConnection
+      .firstOrNull()!!
+      .onServiceConnected(ComponentName(PACKAGE_NAME, BG_NAME), mockFeatureCoordinator.asBinder())
+
+    assertThat(connector.registeredListeners.size).isEqualTo(1)
+    assertThat(connector.registeredListeners.firstOrNull()).isEqualTo(mockListenerAlive)
+  }
+
+  @Test
+  fun updateFeatureCoordinator_onPrevioulyNotConnected() {
+    setQueryIntentServicesAnswer(defaultServiceAnswer)
+    val connector = CompanionConnector(context, isForegroundProcess = true)
+
+    connector.connect()
+    connector.featureCoordinatorListener.onFeatureCoordinatorInitialized(mockFeatureCoordinator)
+
+    assertThat(connector.featureCoordinator).isEqualTo(mockFeatureCoordinator)
+  }
+
+  @Test
+  fun doNotUpdateFeatureCoordinator_onPreviouslyConnected() {
+    setQueryIntentServicesAnswer(defaultServiceAnswer)
+    val connector = CompanionConnector(context, isForegroundProcess = true)
+    val mockFeatureCoordinatorConnected = mockToBeAlive<IFeatureCoordinator>()
+
+    connector.connect()
+    connector.featureCoordinator = mockFeatureCoordinatorConnected
+    connector.featureCoordinatorListener.onFeatureCoordinatorInitialized(mockFeatureCoordinator)
+
+    assertThat(connector.featureCoordinator).isNotEqualTo(mockFeatureCoordinator)
   }
 
   private fun setQueryIntentServicesAnswer(answer: Answer<List<ResolveInfo>>) {

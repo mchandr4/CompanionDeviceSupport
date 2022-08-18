@@ -296,6 +296,20 @@ class BlePeripheralProtocolTest {
   }
 
   @Test
+  fun disconnectDevice_onDeviceDisconnected_invokeListener() {
+    val protocolId = establishConnection(testBluetoothDevice)
+    blePeripheralProtocol.registerDeviceDisconnectedListener(protocolId, mockDisconnectedListener)
+
+    blePeripheralProtocol.disconnectDevice(protocolId)
+    argumentCaptor<BlePeripheralManager.Callback>().apply {
+      verify(mockBlePeripheralManager).registerCallback(capture())
+      firstValue.onRemoteDeviceDisconnected(testBluetoothDevice)
+    }
+
+    verify(mockDisconnectedListener).onDeviceDisconnected(eq(protocolId))
+  }
+
+  @Test
   fun reset_stopStartedAdvertising() {
     blePeripheralProtocol.startAssociationDiscovery(
       TEST_DEVICE_NAME,
