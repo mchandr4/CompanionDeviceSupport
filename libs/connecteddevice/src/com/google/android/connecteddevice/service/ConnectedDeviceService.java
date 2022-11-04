@@ -22,6 +22,7 @@ import static com.google.android.connecteddevice.util.SafeLog.loge;
 import android.content.Intent;
 import android.os.IBinder;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import com.google.android.connecteddevice.api.CompanionConnector;
 import com.google.android.connecteddevice.api.Connector;
 import com.google.android.connecteddevice.core.DeviceController;
@@ -30,11 +31,14 @@ import com.google.android.connecteddevice.core.MultiProtocolDeviceController;
 import com.google.android.connecteddevice.logging.LoggingFeature;
 import com.google.android.connecteddevice.logging.LoggingManager;
 import com.google.android.connecteddevice.oob.OobRunner;
+import com.google.android.connecteddevice.R;
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage;
 import com.google.android.connecteddevice.system.SystemFeature;
 import com.google.android.connecteddevice.transport.IConnectionProtocol;
 import com.google.android.connecteddevice.transport.ProtocolDelegate;
 import com.google.android.connecteddevice.util.EventLog;
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -83,7 +87,10 @@ public final class ConnectedDeviceService extends TrunkService {
   @Override
   public void onCreate() {
     super.onCreate();
-    logd(TAG, "Service created.");
+    logd(
+        TAG,
+        "Service created. Companion SDK version is "
+            + getResources().getString(R.string.hu_companion_sdk_version));
     EventLog.onServiceStarted();
     protocolDelegate.setCallback(
         new ProtocolDelegate.Callback() {
@@ -143,9 +150,11 @@ public final class ConnectedDeviceService extends TrunkService {
                 this, Connector.USER_TYPE_ALL, featureCoordinator));
   }
 
+  @Nullable
   @Override
   public IBinder onBind(Intent intent) {
     if (intent == null || intent.getAction() == null) {
+      logd(TAG, "Unidentified service bound request. Return null binder.");
       return null;
     }
     logd(TAG, "Service bound. Action: " + intent.getAction());
@@ -167,6 +176,23 @@ public final class ConnectedDeviceService extends TrunkService {
     scheduledExecutorService.shutdown();
     cleanup();
     super.onDestroy();
+  }
+
+  /**
+   * Writes the Companion library version for dumpsys or bug reports.
+   *
+   * <p>Dump for this service can be viewed using this command: {@code adb shell dumpsys activity
+   * service com.google.android.connecteddevice.service.ConnectedDeviceService} 
+   */
+  @Override
+  protected void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
+    super.dump(fd, writer, args);
+    if (writer == null) {
+      loge(TAG, "Failed to dump service info: writer is null.");
+      return;
+    }
+    writer.printf(
+        "Companion SDK version is %s", getResources().getString(R.string.hu_companion_sdk_version));
   }
 
   private void cleanup() {

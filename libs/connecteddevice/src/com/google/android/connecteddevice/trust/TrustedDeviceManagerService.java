@@ -20,6 +20,7 @@ import static com.google.android.connecteddevice.util.SafeLog.logd;
 
 import android.app.Service;
 import android.content.Intent;
+import android.os.Build;
 import android.os.IBinder;
 
 /** Service that provides an instance of {@link TrustedDeviceManager}. */
@@ -49,6 +50,9 @@ public class TrustedDeviceManagerService extends Service {
   }
 
   private TrustedDeviceManager createTrustedDeviceManager() {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+      return new TrustedDeviceManagerApi33(this);
+    }
     return new TrustedDeviceManager(this);
   }
 }

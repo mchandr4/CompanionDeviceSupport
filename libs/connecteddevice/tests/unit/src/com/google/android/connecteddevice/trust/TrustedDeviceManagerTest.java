@@ -33,6 +33,7 @@ import com.google.android.connecteddevice.trust.proto.PhoneAuthProto.PhoneCreden
 import com.google.android.connecteddevice.trust.proto.TrustedDeviceMessageProto.TrustedDeviceMessage;
 import com.google.android.connecteddevice.trust.proto.TrustedDeviceMessageProto.TrustedDeviceMessage.MessageType;
 import com.google.android.connecteddevice.trust.proto.TrustedDeviceMessageProto.TrustedDeviceState;
+import com.google.android.connecteddevice.trust.storage.FeatureStateEntity;
 import com.google.android.connecteddevice.trust.storage.TrustedDeviceDatabase;
 import com.google.android.connecteddevice.trust.storage.TrustedDeviceEntity;
 import com.google.android.connecteddevice.trust.storage.TrustedDeviceTokenEntity;
@@ -58,8 +59,14 @@ public final class TrustedDeviceManagerTest {
   // Note: This token needs to be of length 8 to be valid.
   private static final byte[] FAKE_TOKEN = "12345678".getBytes(UTF_8);
 
+  // Note: The value of this state is arbitrary.
+  private static final byte[] FAKE_STATE = "state".getBytes(UTF_8);
+
   // Note: The value of this handle is arbitrary.
   private static final long FAKE_HANDLE = 111L;
+
+  // Note: The value of this ID is arbitrary.
+  private static final int FAKE_USER_ID = 12;
 
   private static final int DEFAULT_USER_ID = ActivityManager.getCurrentUser();
 
@@ -124,6 +131,65 @@ public final class TrustedDeviceManagerTest {
   @After
   public void tearDown() {
     database.close();
+  }
+
+  @Test
+  public void testDeviceCanStillConnect_whenNotTrustedDevice() throws RemoteException {
+    // In this test and next, should populate stateEntity and ensure that
+    //  trustedDeviceFeature.sendMessageSecurely(device, stateEntity.state) get triggered
+    //  (message is sent)
+
+    mockNoDevicesConnected();
+    FeatureStateEntity stateEntity = new FeatureStateEntity(DEFAULT_DEVICE_ID, FAKE_STATE);
+    database.trustedDeviceDao().addOrReplaceFeatureState(stateEntity);
+    triggerDeviceConnected(SECURE_CONNECTED_DEVICE);
+
+    // Make sure message is sent upon successful device connection
+    verify(feature).sendMessageSecurely(SECURE_CONNECTED_DEVICE, FAKE_STATE);
+  }
+
+  @Test
+  public void testDeviceRemainsAsTrustedDevice_ifAssociatedWithCurrentUser()
+      throws RemoteException {
+    // Insert new phone into database
+    TrustedDeviceEntity phoneEntity =
+        new TrustedDeviceEntity(DEFAULT_DEVICE_ID, DEFAULT_USER_ID, FAKE_HANDLE, true);
+    database.trustedDeviceDao().addOrReplaceTrustedDevice(phoneEntity);
+
+    FeatureStateEntity stateEntity = new FeatureStateEntity(DEFAULT_DEVICE_ID, FAKE_STATE);
+    database.trustedDeviceDao().addOrReplaceFeatureState(stateEntity);
+
+    // Run through device connection
+    triggerDeviceConnected(SECURE_CONNECTED_DEVICE);
+
+    // Make sure message is sent upon successful device connection
+    verify(feature).sendMessageSecurely(SECURE_CONNECTED_DEVICE, FAKE_STATE);
+  }
+
+  @Test
+  public void testDeviceRemovedAsTrustedDevice_ifAssociatedWithOtherUser() throws RemoteException {
+    // Insert new phone into database with different user ID than default
+    TrustedDeviceEntity phoneEntity =
+        new TrustedDeviceEntity(DEFAULT_DEVICE_ID, FAKE_USER_ID, FAKE_HANDLE, true);
+    database.trustedDeviceDao().addOrReplaceTrustedDevice(phoneEntity);
+
+    TrustedDeviceEntity phoneInDb =
+        database.trustedDeviceDao().getTrustedDeviceIfValid(DEFAULT_DEVICE_ID);
+
+    // Make sure phone is in the database
+    assertThat(phoneInDb).isNotNull();
+
+    // onSecureChannelEstablished called here
+    triggerDeviceConnected(SECURE_CONNECTED_DEVICE);
+
+    // Grab phone from database now that we connected to different user
+    phoneInDb = database.trustedDeviceDao().getTrustedDeviceIfValid(DEFAULT_DEVICE_ID);
+
+    // Assert that the phone has successfully been removed from database
+    assertThat(phoneInDb).isNull();
+
+    // Code should return before hitting this method in this case.
+    verify(feature, never()).sendMessageSecurely(SECURE_CONNECTED_DEVICE, FAKE_STATE);
   }
 
   @Test

@@ -8,13 +8,13 @@ buildscript {
 }
 
 android {
-    compileSdkVersion 31
+    compileSdkVersion 33
 
     defaultConfig {
         applicationId "com.google.android.companiondevicesupport"
         minSdkVersion 29
-        targetSdkVersion 31
-        versionCode 1669
+        targetSdkVersion 33
+        versionCode 1885
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
