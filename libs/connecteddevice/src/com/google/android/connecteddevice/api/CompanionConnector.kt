@@ -665,10 +665,19 @@ constructor(
 
   private fun handleForegroundUserConnection(service: IBinder) {
     logd("Foreground user service connection connected.")
-    val featureCoordinatorStatusNotifier =
-      IFeatureCoordinatorStatusNotifier.Stub.asInterface(service)
-    featureCoordinatorStatusNotifier.registerFeatureCoordinatorListener(featureCoordinatorListener)
-    this@CompanionConnector.featureCoordinatorStatusNotifier = featureCoordinatorStatusNotifier
+    try {
+      val featureCoordinatorStatusNotifier =
+        IFeatureCoordinatorStatusNotifier.Stub.asInterface(service)
+      featureCoordinatorStatusNotifier.registerFeatureCoordinatorListener(
+        featureCoordinatorListener
+      )
+      this@CompanionConnector.featureCoordinatorStatusNotifier = featureCoordinatorStatusNotifier
+    } catch (e: SecurityException) {
+      loge("Incompatible binder, invoking failure callback.", e)
+      callback?.onFailedToConnect()
+      unbindFromService()
+      return
+    }
     waitingForConnection.set(false)
     onServiceConnected()
   }

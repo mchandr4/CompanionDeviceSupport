@@ -158,7 +158,7 @@ public class OnDeviceBlePeripheralManager extends BlePeripheralManager {
 
     BluetoothGattServer gattServer = this.gattServer.getAndSet(null);
     if (gattServer == null) {
-      loge(TAG, "BluetoothGattServer was null. Connection has already been cleaned up.");
+      logw(TAG, "BluetoothGattServer was null. Connection has already been cleaned up.");
       return;
     }
     BluetoothDevice device = connectedDevice.getAndSet(null);
@@ -178,29 +178,36 @@ public class OnDeviceBlePeripheralManager extends BlePeripheralManager {
 
   private void openGattServer() {
     // Only open one Gatt server.
-    boolean isNew =
-        gattServer.compareAndSet(
-            null, bluetoothManager.openGattServer(context, gattServerCallback));
-    if (!isNew) {
-      BluetoothGattServer server = gattServer.get();
-      logd(TAG, "Gatt Server created, retry count: " + gattServerRetryStartCount);
-      server.clearServices();
-      server.addService(bluetoothGattService);
-      AdvertiseSettings settings =
-          new AdvertiseSettings.Builder()
-              .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY)
-              .setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_HIGH)
-              .setConnectable(true)
-              .build();
-      advertiserStartCount = 0;
-      startAdvertisingInternally(settings, advertiseData, scanResponse, advertiseCallback);
-      gattServerRetryStartCount = 0;
-    } else if (gattServerRetryStartCount < GATT_SERVER_RETRY_LIMIT) {
-      gattServerRetryStartCount++;
-      handler.postDelayed(this::openGattServer, GATT_SERVER_RETRY_DELAY_MS);
-    } else {
-      loge(TAG, "Gatt server not created - exceeded retry limit.");
+    if (this.gattServer.get() == null) {
+      BluetoothGattServer newGatt = bluetoothManager.openGattServer(context, gattServerCallback);
+      if (newGatt != null) {
+        this.gattServer.set(newGatt);
+      } else if (gattServerRetryStartCount < GATT_SERVER_RETRY_LIMIT) {
+        logw(
+            TAG,
+            "Failed to create Gatt server now, retry in " + GATT_SERVER_RETRY_DELAY_MS + "ms.");
+        gattServerRetryStartCount++;
+        handler.postDelayed(this::openGattServer, GATT_SERVER_RETRY_DELAY_MS);
+        return;
+      } else {
+        loge(TAG, "Gatt server not created - exceeded retry limit.");
+        return;
+      }
     }
+    BluetoothGattServer gattServer = this.gattServer.get();
+    logd(TAG, "Gatt Server created, retry count: " + gattServerRetryStartCount);
+    gattServerRetryStartCount = 0;
+
+    gattServer.clearServices();
+    gattServer.addService(bluetoothGattService);
+    AdvertiseSettings settings =
+        new AdvertiseSettings.Builder()
+            .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY)
+            .setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_HIGH)
+            .setConnectable(true)
+            .build();
+    advertiserStartCount = 0;
+    startAdvertisingInternally(settings, advertiseData, scanResponse, advertiseCallback);
   }
 
   private void startAdvertisingInternally(

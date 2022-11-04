@@ -34,6 +34,6 @@ public class AssociationErrorFragment extends Fragment {
   @Override
   public void onViewCreated(View view, Bundle savedInstanceState) {
     view.findViewById(R.id.retry_button)
-        .setOnClickListener(v -> ((AssociationActivity) requireActivity()).retryAssociation());
+        .setOnClickListener(v -> ((AssociationBaseActivity) requireActivity()).retryAssociation());
   }
 }

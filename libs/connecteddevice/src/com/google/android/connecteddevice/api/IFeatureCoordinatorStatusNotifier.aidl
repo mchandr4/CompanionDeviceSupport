@@ -22,7 +22,7 @@ import com.google.android.connecteddevice.api.IFeatureCoordinatorListener;
 interface IFeatureCoordinatorStatusNotifier {
     /**
     * Registers listeners to be notified when feature coordinator is
-    * initialized. Each listener will receive a feature coordinator upon
+    * initialized. Eeach listener will receive a feature coordinator upon
     * notification.
     */
     void registerFeatureCoordinatorListener(IFeatureCoordinatorListener listener);
