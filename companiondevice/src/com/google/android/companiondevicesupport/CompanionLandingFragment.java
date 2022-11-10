@@ -83,7 +83,7 @@ public class CompanionLandingFragment extends Fragment {
         .getAdvertisedCarName()
         .observe(/* owner= */ this, carName -> setCarName(connectToCarTextView, carName));
     view.findViewById(R.id.add_associated_device_button)
-        .setOnClickListener(l -> ((AssociationBaseActivity) getActivity()).startAssociation());
+        .setOnClickListener(l -> ((AssociationActivity) getActivity()).startAssociation());
   }
 
   private void setCarName(TextView textView, String carName) {

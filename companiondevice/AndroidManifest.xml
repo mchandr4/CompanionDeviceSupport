@@ -42,8 +42,6 @@
 
     <!-- Needed for the trusted device feature -->
     <uses-permission android:name="android.permission.PROVIDE_TRUST_AGENT"/>
-    <uses-permission android:name="android.permission.MANAGE_WEAK_ESCROW_TOKEN"/>
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
     <!-- Needed for the notification message feature -->
     <uses-permission android:name="android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME"/>
@@ -153,14 +151,6 @@
                        android:resource="@string/settings_entry_title" />
             <meta-data android:name="com.android.settings.category"
                        android:value="com.android.settings.category.personal" />
-        </activity>
-        <activity android:name=".SetupWizardAssociationActivity"
-            android:exported="true"
-            android:launchMode="singleInstance">
-            <intent-filter>
-                <action android:name="com.google.android.connecteddevice.api.SETUP_WIZARD_ASSOCIATION_ACTIVITY" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
         </activity>
 
         <!-- Feature specific elements below here -->

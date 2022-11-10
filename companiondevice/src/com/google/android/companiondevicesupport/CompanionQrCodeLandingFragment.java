@@ -108,7 +108,7 @@ public class CompanionQrCodeLandingFragment extends Fragment {
         .getAdvertisedCarName()
         .observe(/* owner= */ this, carName -> setCarName(connectToCarTextView, carName));
     model.getAssociationResponse().observe(/* owner= */ this, this::processAssociationResponse);
-    AssociationBaseActivity activity = (AssociationBaseActivity) requireActivity();
+    AssociationActivity activity = (AssociationActivity) requireActivity();
     if (isStartedForSetupProfile) {
       // Directly start advertisement in SUW setup profile association flow.
       activity.startAssociation();

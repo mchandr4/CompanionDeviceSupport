@@ -804,7 +804,7 @@ class CompanionConnectorTest {
     defaultConnector.sendMessageSecurely(deviceId, message)
 
     // TODO: b/242360799 to fix the argument lint issue.
-    verify(mockCallback).onMessageFailedToSend(deviceId, message, isTransient = false)
+    verify(mockCallback).onMessageFailedToSend(deviceId, message, /* isTransient= */ false)
   }
 
   @Test
@@ -823,7 +823,7 @@ class CompanionConnectorTest {
 
     defaultConnector.sendMessageSecurely(device.deviceId, message)
 
-    verify(mockCallback).onMessageFailedToSend(device.deviceId, message, isTransient = false)
+    verify(mockCallback).onMessageFailedToSend(device.deviceId, message, /* isTransient= */ false)
   }
 
   @Test
@@ -842,7 +842,7 @@ class CompanionConnectorTest {
 
     defaultConnector.sendMessageSecurely(device, message)
 
-    verify(mockCallback).onMessageFailedToSend(device.deviceId, message, isTransient = false)
+    verify(mockCallback).onMessageFailedToSend(device.deviceId, message, /* isTransient= */ false)
   }
 
   @Test
@@ -854,7 +854,7 @@ class CompanionConnectorTest {
 
     defaultConnector.sendMessageSecurely(deviceId, message)
 
-    verify(mockCallback).onMessageFailedToSend(deviceId, message, isTransient = false)
+    verify(mockCallback).onMessageFailedToSend(deviceId, message, /* isTransient= */ false)
   }
 
   @Test
@@ -865,7 +865,7 @@ class CompanionConnectorTest {
 
     defaultConnector.sendMessageSecurely(deviceId, message)
 
-    verify(mockCallback).onMessageFailedToSend(deviceId, message, isTransient = true)
+    verify(mockCallback).onMessageFailedToSend(deviceId, message, /* isTransient= */ true)
   }
 
   @Test
@@ -882,7 +882,7 @@ class CompanionConnectorTest {
 
     defaultConnector.sendMessageSecurely(device, message)
 
-    verify(mockCallback).onMessageFailedToSend(device.deviceId, message, isTransient = true)
+    verify(mockCallback).onMessageFailedToSend(device.deviceId, message, /* isTransient= */ true)
   }
 
   @Test
@@ -1136,7 +1136,7 @@ class CompanionConnectorTest {
 
     defaultConnector.sendQuerySecurely(deviceId, request, parameters, callback)
 
-    verify(callback).onQueryFailedToSend(isTransient = true)
+    verify(callback).onQueryFailedToSend(/* isTransient= */ true)
   }
 
   @Test
@@ -1155,7 +1155,7 @@ class CompanionConnectorTest {
 
     defaultConnector.sendQuerySecurely(device, request, parameters, callback)
 
-    verify(callback).onQueryFailedToSend(isTransient = true)
+    verify(callback).onQueryFailedToSend(/* isTransient= */ true)
   }
 
   @Test
@@ -1177,7 +1177,7 @@ class CompanionConnectorTest {
 
     defaultConnector.sendQuerySecurely(device.deviceId, request, parameters, callback)
 
-    verify(callback).onQueryFailedToSend(isTransient = false)
+    verify(callback).onQueryFailedToSend(/* isTransient= */ false)
   }
 
   @Test
@@ -1196,7 +1196,7 @@ class CompanionConnectorTest {
 
     defaultConnector.sendQuerySecurely(device.deviceId, request, parameters, callback)
 
-    verify(callback).onQueryFailedToSend(isTransient = false)
+    verify(callback).onQueryFailedToSend(/* isTransient= */ false)
   }
 
   @Test
@@ -1257,7 +1257,7 @@ class CompanionConnectorTest {
     defaultConnector.respondToQuerySecurely(
       device,
       nonExistentQueryId,
-      success = true,
+      /* success= */ true,
       response
     )
 
@@ -1302,7 +1302,7 @@ class CompanionConnectorTest {
 
     callbackCaptor.firstValue.onMessageReceived(device, deviceMessage)
     val response = ByteUtils.randomBytes(10)
-    defaultConnector.respondToQuerySecurely(device, queryId, success = true, response)
+    defaultConnector.respondToQuerySecurely(device, queryId, /* success= */ true, response)
     val messageCaptor =
       argumentCaptor<DeviceMessage> {
         verify(mockFeatureCoordinator).sendMessage(eq(device), capture())
@@ -1357,7 +1357,7 @@ class CompanionConnectorTest {
     callbackCaptor.firstValue.onMessageReceived(device, deviceMessage)
     val response = ByteUtils.randomBytes(10)
 
-    defaultConnector.respondToQuerySecurely(device, queryId, success = true, response)
+    defaultConnector.respondToQuerySecurely(device, queryId, /* success= */ true, response)
     val messageCaptor =
       argumentCaptor<DeviceMessage> {
         verify(mockFeatureCoordinator).sendMessage(eq(device), capture())
@@ -1386,7 +1386,7 @@ class CompanionConnectorTest {
     val queryId = 0
     val response = ByteUtils.randomBytes(10)
 
-    defaultConnector.respondToQuerySecurely(device, queryId, success = true, response)
+    defaultConnector.respondToQuerySecurely(device, queryId, /* success= */ true, response)
   }
 
   @Test
@@ -1886,22 +1886,6 @@ class CompanionConnectorTest {
     connector.featureCoordinatorListener.onFeatureCoordinatorInitialized(mockFeatureCoordinator)
 
     assertThat(connector.featureCoordinator).isNotEqualTo(mockFeatureCoordinator)
-  }
-
-  @Test
-  fun invokeCallback_binderIsIncompatible() {
-    setQueryIntentServicesAnswer(defaultServiceAnswer)
-    val mockBinder: IFeatureCoordinator.Stub = mock()
-    whenever(mockBinder.queryLocalInterface(any())).thenThrow(SecurityException())
-    whenever(mockBinder.isBinderAlive).thenReturn(true)
-    val connector =
-      CompanionConnector(context, isForegroundProcess = true).apply { callback = mockCallback }
-    connector.connect()
-    val connection = context.serviceConnection.firstOrNull()
-    val component = ComponentName(PACKAGE_NAME, FG_NAME)
-    connection?.onServiceConnected(component, mockBinder)
-
-    verify(mockCallback).onFailedToConnect()
   }
 
   private fun setQueryIntentServicesAnswer(answer: Answer<List<ResolveInfo>>) {

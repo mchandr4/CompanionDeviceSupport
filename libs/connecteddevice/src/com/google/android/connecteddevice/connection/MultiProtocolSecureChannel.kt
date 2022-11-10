@@ -34,11 +34,9 @@ import java.security.SignatureException
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicReference
-import java.util.concurrent.locks.ReentrantLock
 import java.util.zip.DataFormatException
 import java.util.zip.Deflater
 import java.util.zip.Inflater
-import kotlin.concurrent.withLock
 import kotlin.math.roundToLong
 
 /**
@@ -87,8 +85,8 @@ open class MultiProtocolSecureChannel(
     MESSAGE_ERROR_DECOMPRESSION_FAILURE
   }
 
-  private val encryptionKeyLock = ReentrantLock()
   private val streams = ConcurrentHashMap.newKeySet<ProtocolStream>()
+
   private val encryptionKey = AtomicReference<Key>()
 
   private var visualVerificationCode: String? = null
@@ -424,21 +422,16 @@ open class MultiProtocolSecureChannel(
     if (isCompressionEnabled) {
       compressMessage(deviceMessage)
     }
-    encryptionKeyLock.withLock {
-      if (deviceMessage.isMessageEncrypted) {
-        try {
-          encryptMessage(deviceMessage)
-        } catch (e: IllegalStateException) {
-          loge(TAG, "Secure channel has not been established.")
-          return false
-        }
+    if (deviceMessage.isMessageEncrypted) {
+      try {
+        encryptMessage(deviceMessage)
+      } catch (e: IllegalStateException) {
+        loge(TAG, "Secure channel has not been established.")
+        return false
       }
-      // Include the call to send the message in the lock, because the call chops the message into
-      // packets and queues them to be sent out. Proper locking ensures the order of encryption is
-      // the same as delivery.
-      // TODO(b/189247832): Send message through one of the connected streams for now.
-      stream.sendMessage(deviceMessage)
     }
+    // TODO(b/189247832): Send message through one of the connected streams for now.
+    stream.sendMessage(deviceMessage)
     return true
   }
 
@@ -499,7 +492,7 @@ open class MultiProtocolSecureChannel(
       loge(TAG, "Received empty message, ignored.")
       return
     }
-    var success = encryptionKeyLock.withLock { decryptMessage(deviceMessage) }
+    var success = decryptMessage(deviceMessage)
     if (success) {
       success = decompressMessage(deviceMessage)
     }
@@ -524,9 +517,7 @@ open class MultiProtocolSecureChannel(
           notifySecureChannelFailure(ChannelError.CHANNEL_ERROR_INVALID_HANDSHAKE)
         }
       }
-      OperationType.CLIENT_MESSAGE,
-      OperationType.QUERY,
-      OperationType.QUERY_RESPONSE -> {
+      OperationType.CLIENT_MESSAGE, OperationType.QUERY, OperationType.QUERY_RESPONSE -> {
         if (!success) {
           loge(TAG, "Invalid message received. Ignored.")
           return

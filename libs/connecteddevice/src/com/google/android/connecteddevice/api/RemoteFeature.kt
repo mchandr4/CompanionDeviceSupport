@@ -253,10 +253,6 @@ protected constructor(
     const val ACTION_ASSOCIATION_SETTING =
       "com.google.android.connecteddevice.api.ASSOCIATION_ACTIVITY"
 
-    /** Intent action used to request a device be associated. */
-    const val ACTION_ASSOCIATION_SETUP_WIZARD =
-      "com.google.android.connecteddevice.api.SETUP_WIZARD_ASSOCIATION_ACTIVITY"
-
     /** Data name for associated device. */
     const val ASSOCIATED_DEVICE_DATA_NAME_EXTRA =
       "com.google.android.connecteddevice.api.ASSOCIATED_DEVICE"

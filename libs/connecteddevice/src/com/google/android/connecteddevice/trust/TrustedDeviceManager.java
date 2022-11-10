@@ -770,21 +770,10 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
     databaseExecutor.execute(
         () -> {
           String deviceId = device.getDeviceId();
-          TrustedDeviceEntity entity = database.getTrustedDeviceIfValid(deviceId);
-
-          if (entity != null && entity.userId != ActivityManager.getCurrentUser()) {
-            logd(TAG, "UserID of trusted device is different than current user." 
-                        + "Removing device and clearing state.");
-            database.removeFeatureState(deviceId);
-            removeTrustedDevice(entity.toTrustedDevice());
-            return;
-          }
-          
           FeatureStateEntity stateEntity = database.getFeatureState(deviceId);
-          
+
           if (stateEntity == null) {
-            logd(TAG,
-                "A device has connected securely. No feature state messages to send to it.");
+            logd(TAG, "A device has connected securely. No feature state messages to send to it.");
             return;
           }
 
