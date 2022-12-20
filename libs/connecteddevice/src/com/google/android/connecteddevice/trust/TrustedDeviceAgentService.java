@@ -68,15 +68,12 @@ public class TrustedDeviceAgentService extends TrustAgentService {
 
   private UserManager userManager;
 
-  private KeyguardManager keyguardManager;
-
   @SuppressLint("UnprotectedReceiver") // Broadcast is protected.
   @Override
   public void onCreate() {
     super.onCreate();
     logd(TAG, "Starting trust agent service.");
     userManager = (UserManager) getSystemService(Context.USER_SERVICE);
-    keyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
     TrustedDeviceEventLog.onTrustAgentStarted();
     registerReceiver(userUnlockedReceiver, new IntentFilter(Intent.ACTION_USER_UNLOCKED));
     retryThread = new HandlerThread(RETRY_HANDLER_THREAD_NAME);
@@ -224,10 +221,6 @@ public class TrustedDeviceAgentService extends TrustAgentService {
 
         @Override
         public void unlockUserWithToken(byte[] token, long handle, int userId) {
-          if (!keyguardManager.isDeviceLocked()) {
-            logd(TAG, "Received an escrow token while no lockscreen was visible. Ignoring.");
-            return;
-          }
           logd(TAG, "Received an escrow token for user " + userId + ".");
           isManagingTrust.set(true);
           setManagingTrust(true);

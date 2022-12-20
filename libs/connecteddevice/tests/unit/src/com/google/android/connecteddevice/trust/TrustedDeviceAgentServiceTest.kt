@@ -1,7 +1,6 @@
 package com.google.android.connecteddevice.trust
 
 import android.app.ActivityManager
-import android.app.KeyguardManager
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.connecteddevice.trust.api.ITrustedDeviceAgentDelegate
@@ -18,8 +17,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.Shadows.shadowOf
-import org.robolectric.shadows.ShadowKeyguardManager
 
 @RunWith(RobolectricTestRunner::class)
 class TrustedDeviceAgentServiceTest {
@@ -30,16 +27,12 @@ class TrustedDeviceAgentServiceTest {
 
   private val mockTrustedDeviceManager = mock<ITrustedDeviceManager>()
 
-  private lateinit var keyguardManager: ShadowKeyguardManager
-
   private lateinit var service: TestTrustedDeviceAgentService
 
   private lateinit var delegate: ITrustedDeviceAgentDelegate
 
   @Before
   fun setup() {
-    keyguardManager =
-      shadowOf(context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager)
     service =
       Robolectric.buildService(TestTrustedDeviceAgentService::class.java)
         .apply { get().trustedDeviceManager = mockTrustedDeviceManager }
@@ -63,8 +56,7 @@ class TrustedDeviceAgentServiceTest {
   }
 
   @Test
-  fun unlockUserWithToken_invokesCallbackAfterTokenReceived_DeviceIsLockedAndUserIsUnlocked() {
-    keyguardManager.setIsDeviceLocked(true)
+  fun unlockUserWithToken_invokesCallbackAfterTokenReceived_UserIsUnlocked() {
     service.isUserUnlocked = true
 
     sendToken()
@@ -73,19 +65,7 @@ class TrustedDeviceAgentServiceTest {
   }
 
   @Test
-  fun unlockUserWithToken_doesNotInvokeCallbackIfDeviceIsNotLocked() {
-    keyguardManager.setIsDeviceLocked(false)
-
-    sendToken()
-    unlockUser()
-
-    verify(mockTrustedDeviceManager, never()).onUserUnlocked()
-  }
-
-  @Test
   fun onUserUnlock_doesNotInvokeCallbackIfTokenWasNotUsed() {
-    keyguardManager.setIsDeviceLocked(true)
-
     unlockUser()
 
     verify(mockTrustedDeviceManager, never()).onUserUnlocked()
@@ -97,7 +77,6 @@ class TrustedDeviceAgentServiceTest {
   }
 
   private fun lockUser() {
-    keyguardManager.setIsDeviceLocked(true)
     service.isUserUnlocked = false
   }
 
