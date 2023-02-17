@@ -91,6 +91,10 @@ class ConnectedDeviceFgUserService : TrunkService() {
   override fun onBind(intent: Intent): IBinder? {
     logd(TAG, "Service bound. Action: ${intent.action}")
     val action = intent.action ?: return null
+    if (action == ACTION_QUERY_API_VERSION) {
+      logd(TAG, "Return binder version to remote process")
+      return binderVersion.asBinder()
+    }
     return connector.binderForAction(action)
   }
 

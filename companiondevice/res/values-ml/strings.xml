@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">സഹകാരി ആപ്പ് തുറക്കുക</string>
   <string name="enable_bluetooth_instruction_text">Bluetooth കണക്ഷൻ അനുവദിക്കുക</string>
   <string name="connect_to_targe_car_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s എന്നതിലേക്ക് കണക്റ്റ് ചെയ്യുക</string>
-  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s എന്നതിലേക്ക് കണക്റ്റ് ചെയ്യാൻ QR കോഡ് സ്‌കാൻ ചെയ്യുകയോ MyCompanion തുറക്കുകയോ ചെയ്യുക</string>
+  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s എന്നതിലേക്ക് കണക്റ്റ് ചെയ്യുന്നതിന് ഫോൺ ഉപയോഗിച്ച് QR കോഡ് സ്കാൻ ചെയ്യുകയോ MyCompanion തുറക്കുകയോ ചെയ്യുക</string>
   <string name="connect_to_car_instruction_text">കാറിലേക്ക് കണക്‌റ്റ് ചെയ്യുക</string>
   <string name="associated_device_pairing_code_title">ഫോണിലെ കോഡ് സ്ഥിരീകരിക്കുക</string>
   <string name="associated_device_pairing_message">നിങ്ങളുടെ ഫോണിൽ കാണിക്കുന്ന കോഡുമായി ഇത് പൊരുത്തപ്പെടുന്നുണ്ടെന്ന് സ്ഥിരീകരിക്കുക</string>
@@ -43,6 +43,9 @@
   <string name="turn_on_bluetooth_message">നിങ്ങളുടെ ഫോണിനെ സഹകാരി ഉപകരണമായി സജ്ജീകരിക്കാൻ, കാറിന് Bluetooth ആവശ്യമാണ്.</string>
   <string name="turn_on_bluetooth_dialog_title">Bluetooth ഓണാക്കണോ?</string>
   <string name="turn_on_bluetooth_dialog_message">നിങ്ങളുടെ സഹകാരി ഉപകരണവുമായി കണക്റ്റ് ചെയ്യാൻ, കാറിന് Bluetooth ആവശ്യമാണ്.</string>
+  <string name="companion_not_available_dialog_title">ഈ ക്രമീകരണം ലഭ്യമല്ല</string>
+  <string name="companion_not_available_dialog_message">അതിഥി പ്രൊഫെെലുകൾക്ക് CompanionDevice ആക്‌സസ് ചെയ്യാനാകില്ല</string>
+  <string name="companion_not_available_dialog_switch_user_message">അതിഥി പ്രൊഫെെലുകൾക്ക് CompanionDevice ആക്‌സസ് ചെയ്യാനാകില്ല. നിങ്ങളുടെ പ്രൊഫെെൽ മാറ്റാൻ, ക്രമീകരണം &gt; ഉപയോക്താക്കൾ എന്നതിലേക്ക് പോകുക.</string>
   <string name="accept">അംഗീകരിക്കുക</string>
   <string name="reject">നിരസിക്കുക</string>
   <string name="confirm">സ്ഥിരീകരിക്കുക</string>
@@ -60,7 +63,9 @@
   <string name="not_now">ഇപ്പോൾ വേണ്ട</string>
   <string name="connect">കണക്‌റ്റ് ചെയ്യുക</string>
   <string name="disconnect">വിച്ഛേദിക്കുക</string>
+  <string name="disconnecting">Disconnecting</string>
   <string name="skip">ഒഴിവാക്കുക</string>
+  <string name="change_profile">പ്രൊഫൈൽ മാറ്റുക</string>
   <string name="connected">കണക്റ്റ് ചെയ്‌തു</string>
   <string name="notDetected">കണ്ടെത്തിയില്ല</string>
   <string name="disconnected">വിച്ഛേദിച്ചു</string>

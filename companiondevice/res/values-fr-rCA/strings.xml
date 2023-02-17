@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">Ouvrir l\'application compagnon</string>
   <string name="enable_bluetooth_instruction_text">Autoriser la connexion Bluetooth</string>
   <string name="connect_to_targe_car_instruction_text">Connectez à &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
-  <string name="qr_instruction_text">Numérisez le code QR ou ouvrez MyCompanion pour vous connecter à &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">Utilisez votre téléphone pour numériser le code QR ou ouvrez MyCompanion pour vous connecter à &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
   <string name="connect_to_car_instruction_text">Effectuez la connexion au véhicule</string>
   <string name="associated_device_pairing_code_title">Confirmer le code sur votre téléphone</string>
   <string name="associated_device_pairing_message">Confirmez si ce code correspond à celui affiché sur votre téléphone</string>
@@ -43,6 +43,9 @@
   <string name="turn_on_bluetooth_message">Pour configurer votre téléphone comme appareil compagnon, vous devez activer le Bluetooth dans votre voiture.</string>
   <string name="turn_on_bluetooth_dialog_title">Activer le Bluetooth?</string>
   <string name="turn_on_bluetooth_dialog_message">Pour connecter votre appareil compagnon, vous devez activer le Bluetooth dans votre voiture.</string>
+  <string name="companion_not_available_dialog_title">Ce paramètre n\'est pas disponible</string>
+  <string name="companion_not_available_dialog_message">Les profils d\'invités ne peuvent pas accéder à AppareilCompagnon</string>
+  <string name="companion_not_available_dialog_switch_user_message">Les profils d\'invités ne peuvent pas accéder à AppareilCompagnon. Pour modifier votre profil, accédez à Paramètres &gt; Utilisateurs.</string>
   <string name="accept">Accepter</string>
   <string name="reject">Refuser</string>
   <string name="confirm">Confirmer</string>
@@ -60,7 +63,9 @@
   <string name="not_now">Pas maintenant</string>
   <string name="connect">Associer</string>
   <string name="disconnect">Dissocier</string>
+  <string name="disconnecting">Disconnecting</string>
   <string name="skip">Ignorer</string>
+  <string name="change_profile">Modifier le profil</string>
   <string name="connected">Connecté</string>
   <string name="notDetected">Non détecté</string>
   <string name="disconnected">Déconnecté</string>

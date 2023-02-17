@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">Otevřete doprovodnou aplikaci</string>
   <string name="enable_bluetooth_instruction_text">Povolte připojení přes Bluetooth</string>
   <string name="connect_to_targe_car_instruction_text">Připojte se k autu &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
-  <string name="qr_instruction_text">Naskenujte QR kód nebo otevřete aplikaci MyCompanion a připojte se k autu &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">Naskenujte QR kód pomocí telefonu nebo otevřete aplikaci MyCompanion a připojte se k autu &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
   <string name="connect_to_car_instruction_text">Připojte se k autu</string>
   <string name="associated_device_pairing_code_title">Ověření kódu v telefonu</string>
   <string name="associated_device_pairing_message">Ověřte, zda se kód shoduje s kódem v telefonu</string>
@@ -43,6 +43,9 @@
   <string name="turn_on_bluetooth_message">Chcete-li telefon nastavit jako doprovodné zařízení, zapněte v autě Bluetooth.</string>
   <string name="turn_on_bluetooth_dialog_title">Zapnout Bluetooth?</string>
   <string name="turn_on_bluetooth_dialog_message">Chcete-li se připojit k doprovodnému zařízení, zapněte v autě Bluetooth.</string>
+  <string name="companion_not_available_dialog_title">Toto nastavení není k dispozici</string>
+  <string name="companion_not_available_dialog_message">Profily hostů nemají k doprovodnému zařízení přístup</string>
+  <string name="companion_not_available_dialog_switch_user_message">Profily hostů nemají k doprovodnému zařízení přístup. Profil můžete změnit v sekci Nastavení &gt; Uživatelé.</string>
   <string name="accept">Přijmout</string>
   <string name="reject">Zamítnout</string>
   <string name="confirm">Potvrdit</string>
@@ -60,7 +63,9 @@
   <string name="not_now">Teď ne</string>
   <string name="connect">Připojit</string>
   <string name="disconnect">Odpojit</string>
+  <string name="disconnecting">Odpojování</string>
   <string name="skip">Přeskočit</string>
+  <string name="change_profile">Změnit profil</string>
   <string name="connected">Připojeno</string>
   <string name="notDetected">Nerozpoznáno</string>
   <string name="disconnected">Odpojeno</string>

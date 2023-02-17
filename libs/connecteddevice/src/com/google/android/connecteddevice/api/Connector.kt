@@ -152,7 +152,12 @@ interface Connector {
     /** Invoked when no connection to the platform could be established. */
     fun onFailedToConnect() {}
 
-    /** Called when a new [ConnectedDevice] is connected. */
+    /**
+     * Called when a new [ConnectedDevice] is connected.
+     *
+     * This callback only indicates a plain device connection. Most features should wait for
+     * callback [onSecureChannelEstablished] to start a secure communication.
+     */
     fun onDeviceConnected(device: ConnectedDevice) {}
 
     /** Called when a [ConnectedDevice] disconnects. */

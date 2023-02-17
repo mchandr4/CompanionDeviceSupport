@@ -2,6 +2,7 @@ package com.google.android.connecteddevice.trust;
 
 import static android.os.Looper.getMainLooper;
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -22,6 +23,7 @@ import com.google.android.connecteddevice.trust.api.ITrustedDeviceCallback;
 import com.google.android.connecteddevice.trust.api.ITrustedDeviceEnrollmentCallback;
 import com.google.android.connecteddevice.trust.api.ITrustedDeviceManager;
 import com.google.android.connecteddevice.trust.api.TrustedDevice;
+import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.Collections;
 import org.junit.Before;
@@ -168,30 +170,62 @@ public final class TrustedDeviceViewModelTest {
   }
 
   @Test
-  public void trustedDeviceEnabled_valueUpdated() throws RemoteException {
-    TrustedDevice testDevice = createTrustedDevice();
-    trustedDeviceCallback.onTrustedDeviceAdded(testDevice);
-    viewModel.getEnabledDevice().observeForever(v -> {});
-    waitForLiveDataUpdate();
-    assertThat(viewModel.getEnabledDevice().getValue().equals(testDevice)).isTrue();
-  }
-
-  @Test
-  public void trustedDeviceDisabled_valueUpdated() throws RemoteException {
-    TrustedDevice testDevice = createTrustedDevice();
-    trustedDeviceCallback.onTrustedDeviceRemoved(testDevice);
-    viewModel.getDisabledDevice().observeForever(v -> {});
-    waitForLiveDataUpdate();
-    assertThat(viewModel.getDisabledDevice().getValue().equals(testDevice)).isTrue();
-  }
-
-  @Test
   public void trustedDeviceRetrieved_valueUpdated() throws RemoteException {
     TrustedDevice testDevice = createTrustedDevice();
     devicesRetrievedListener.onTrustedDevicesRetrieved(Collections.singletonList(testDevice));
     viewModel.getTrustedDevices().observeForever(v -> {});
     waitForLiveDataUpdate();
     assertThat(viewModel.getTrustedDevices().getValue().get(0).equals(testDevice)).isTrue();
+  }
+
+  @Test
+  public void onTrustedDeviceAdded_retrieveDeviceFromManager_updateLiveData()
+      throws RemoteException {
+    TrustedDevice testDevice = createTrustedDevice();
+    trustedDeviceCallback.onTrustedDeviceAdded(testDevice);
+
+    ArgumentCaptor<IOnTrustedDevicesRetrievedListener> devicesRetrievedListenerCaptor =
+        ArgumentCaptor.forClass(IOnTrustedDevicesRetrievedListener.class);
+    verify(mockTrustedDeviceManager, times(2))
+        .retrieveTrustedDevicesForActiveUser(devicesRetrievedListenerCaptor.capture());
+    devicesRetrievedListenerCaptor
+        .getValue()
+        .onTrustedDevicesRetrieved(Collections.singletonList(testDevice));
+    viewModel.getTrustedDevices().observeForever(v -> {});
+    waitForLiveDataUpdate();
+    assertThat(viewModel.getTrustedDevices().getValue().get(0).equals(testDevice)).isTrue();
+  }
+
+  @Test
+  public void onTrustedDeviceRemoved_retrieveDeviceFromManager() throws RemoteException {
+    TrustedDevice testDevice = createTrustedDevice();
+    devicesRetrievedListener.onTrustedDevicesRetrieved(Collections.singletonList(testDevice));
+
+    trustedDeviceCallback.onTrustedDeviceRemoved(testDevice);
+    ArgumentCaptor<IOnTrustedDevicesRetrievedListener> devicesRetrievedListenerCaptor =
+        ArgumentCaptor.forClass(IOnTrustedDevicesRetrievedListener.class);
+    verify(mockTrustedDeviceManager, times(2))
+        .retrieveTrustedDevicesForActiveUser(devicesRetrievedListenerCaptor.capture());
+    devicesRetrievedListenerCaptor.getValue().onTrustedDevicesRetrieved(ImmutableList.of());
+    viewModel.getTrustedDevices().observeForever(v -> {});
+    waitForLiveDataUpdate();
+    assertThat(viewModel.getTrustedDevices().getValue()).isEmpty();
+  }
+
+  @Test
+  public void onCleared_unregisterCallbacks() throws RemoteException {
+    viewModel.onCleared();
+
+    verify(mockTrustedDeviceManager).unregisterTrustedDeviceCallback(any());
+    verify(mockTrustedDeviceManager).unregisterTrustedDeviceEnrollmentCallback(any());
+    verify(mockTrustedDeviceManager).unregisterAssociatedDeviceCallback(any());
+  }
+
+  @Test
+  public void abortEnrollment_updateTrustedDeviceFromServer() throws RemoteException {
+    viewModel.abortEnrollment();
+
+    verify(mockTrustedDeviceManager, times(2)).retrieveTrustedDevicesForActiveUser(any());
   }
 
   private static void waitForLiveDataUpdate() {

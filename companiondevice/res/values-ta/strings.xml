@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">கம்பேனியன் ஆப்ஸைத் திறக்கவும்</string>
   <string name="enable_bluetooth_instruction_text">புளூடூத் இணைப்பை அனுமதிக்கவும்</string>
   <string name="connect_to_targe_car_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s உடன் இணைக்கவும்</string>
-  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s உடன் இணைக்க QR குறியீட்டை ஸ்கேன் செய்யவும் அல்லது MyCompanion ஆப்ஸைத் திறக்கவும்</string>
+  <string name="qr_instruction_text">உங்கள் மொபைல் மூலம் QR குறியீட்டை ஸ்கேன் செய்யவும் அல்லது &lt;b&gt;%1$s&lt;/b&gt; %2$s உடன் இணைக்க MyCompanion ஆப்ஸைத் திறக்கவும்</string>
   <string name="connect_to_car_instruction_text">காருடன் இணைக்கவும்</string>
   <string name="associated_device_pairing_code_title">மொபைலில் காட்டும் குறியீட்டை உறுதிசெய்தல்</string>
   <string name="associated_device_pairing_message">மொபைலில் காட்டும் குறியீட்டுடன் இது பொருந்துகிறது என்பதை உறுதிசெய்யவும்</string>
@@ -43,6 +43,9 @@
   <string name="turn_on_bluetooth_message">உங்கள் மொபைலைத் தொடர்புடைய சாதனமாக அமைக்க, உங்கள் காரில் புளூடூத் இருக்க வேண்டும்.</string>
   <string name="turn_on_bluetooth_dialog_title">புளூடூத்தை ஆன் செய்யவா?</string>
   <string name="turn_on_bluetooth_dialog_message">தொடர்புடைய சாதனத்துடன் இணைக்க, உங்கள் காரில் புளூடூத் இருக்க வேண்டும்.</string>
+  <string name="companion_not_available_dialog_title">இந்த அமைப்பு இல்லை</string>
+  <string name="companion_not_available_dialog_message">விருந்தினர் சுயவிவரங்களால் தொடர்புடைய சாதனத்தை அணுக முடியாது</string>
+  <string name="companion_not_available_dialog_switch_user_message">விருந்தினர் சுயவிவரங்களால் தொடர்புடைய சாதனத்தை அணுக முடியாது. உங்கள் சுயவிவரத்தை மாற்ற, அமைப்புகள் &gt; பயனர்கள் என்பதற்குச் செல்லவும்.</string>
   <string name="accept">ஏற்கிறேன்</string>
   <string name="reject">நிராகரி</string>
   <string name="confirm">சரி</string>
@@ -60,7 +63,9 @@
   <string name="not_now">இப்போது வேண்டாம்</string>
   <string name="connect">இணை</string>
   <string name="disconnect">துண்டி</string>
+  <string name="disconnecting">Disconnecting</string>
   <string name="skip">தவிர்</string>
+  <string name="change_profile">சுயவிவரத்தை மாற்ற</string>
   <string name="connected">இணைக்கப்பட்டது</string>
   <string name="notDetected">கண்டறிய முடியவில்லை</string>
   <string name="disconnected">துண்டிக்கப்பட்டது</string>

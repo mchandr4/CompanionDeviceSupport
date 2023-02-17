@@ -2,12 +2,17 @@ package com.google.android.connecteddevice.core
 
 import android.os.ParcelUuid
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.google.android.companionprotos.DeviceMessageProto
+import com.google.android.companionprotos.OperationProto.OperationType
 import com.google.android.connecteddevice.api.IAssociationCallback
 import com.google.android.connecteddevice.api.IConnectionCallback
 import com.google.android.connecteddevice.api.IDeviceAssociationCallback
 import com.google.android.connecteddevice.api.IDeviceCallback
 import com.google.android.connecteddevice.api.IOnAssociatedDevicesRetrievedListener
-import com.google.android.connecteddevice.api.IOnLogRequestedListener
+import com.google.android.connecteddevice.api.external.ISafeConnectionCallback
+import com.google.android.connecteddevice.api.external.ISafeDeviceCallback
+import com.google.android.connecteddevice.api.external.ISafeOnAssociatedDevicesRetrievedListener
+import com.google.android.connecteddevice.api.external.ISafeOnLogRequestedListener
 import com.google.android.connecteddevice.core.FeatureCoordinator.Companion.DEVICE_NAME_LENGTH
 import com.google.android.connecteddevice.core.util.mockToBeAlive
 import com.google.android.connecteddevice.core.util.mockToBeDead
@@ -21,6 +26,7 @@ import com.google.android.connecteddevice.storage.ConnectedDeviceStorage
 import com.google.android.connecteddevice.util.ByteUtils
 import com.google.common.truth.Truth.assertThat
 import com.google.common.util.concurrent.MoreExecutors.directExecutor
+import com.google.protobuf.ByteString
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.eq
@@ -43,6 +49,8 @@ class FeatureCoordinatorTest {
 
   private val coordinator =
     FeatureCoordinator(mockController, mockStorage, mockLoggingManager, directExecutor())
+
+  private val safeCoordinator = coordinator.safeFeatureCoordinator
 
   @Test
   fun connectedDevicesForDriver_returnsOnlyDriverDevices() {
@@ -591,6 +599,37 @@ class FeatureCoordinatorTest {
   }
 
   @Test
+  fun onMessageReceived_blockedRecipientRecoverFromResetCallbacksInvoked() {
+    val deviceCallback: IDeviceCallback = mockToBeAlive()
+    val duplicateDeviceCallback: IDeviceCallback = mockToBeAlive()
+    val recipientId = ParcelUuid(UUID.randomUUID())
+    val connectedDevice =
+      ConnectedDevice(
+        UUID.randomUUID().toString(),
+        "testDeviceName",
+        /* belongsToDriver= */ true,
+        /* hasSecureChannel= */ true
+      )
+    coordinator.registerDeviceCallback(connectedDevice, recipientId, deviceCallback)
+    coordinator.registerDeviceCallback(connectedDevice, recipientId, duplicateDeviceCallback)
+
+    /* Clear the blocked recipient list. */
+    coordinator.reset()
+    coordinator.registerDeviceCallback(connectedDevice, recipientId, deviceCallback)
+    val message =
+      DeviceMessage.createOutgoingMessage(
+        recipientId.uuid,
+        /* isMessageEncrypted= */ true,
+        CLIENT_MESSAGE,
+        ByteUtils.randomBytes(10)
+      )
+    coordinator.onMessageReceivedInternal(connectedDevice, message)
+
+    verify(deviceCallback).onMessageReceived(any(), any())
+    verify(duplicateDeviceCallback, never()).onMessageReceived(any(), any())
+  }
+
+  @Test
   fun onMessageReceived_nullRecipientDoesNotThrow() {
     val connectedDevice =
       ConnectedDevice(
@@ -897,7 +936,7 @@ class FeatureCoordinatorTest {
   @Test
   fun registerOnLogRequestedListener() {
     val testLoggerId = 0
-    val listener: IOnLogRequestedListener = mockToBeAlive()
+    val listener: ISafeOnLogRequestedListener = mockToBeAlive()
 
     coordinator.registerOnLogRequestedListener(testLoggerId, listener)
 
@@ -907,7 +946,7 @@ class FeatureCoordinatorTest {
   @Test
   fun unregisterOnLogRequestedListener() {
     val testLoggerId = 0
-    val listener: IOnLogRequestedListener = mockToBeAlive()
+    val listener: ISafeOnLogRequestedListener = mockToBeAlive()
 
     coordinator.unregisterOnLogRequestedListener(testLoggerId, listener)
 
@@ -965,5 +1004,450 @@ class FeatureCoordinatorTest {
     verify(mockController).disconnectDevice(deviceId)
     verify(mockStorage).removeAssociatedDeviceClaim(deviceId.toString())
     verify(mockController).initiateConnectionToDevice(deviceId)
+  }
+
+  // The following tests are for the SafeFeatureCoordinator contained in FeatureCoordinator.
+
+  @Test
+  fun safeFC_getConnectedDevices_returnsOnlyDriverDevices() {
+    val driverDevice1 =
+      ConnectedDevice(
+        UUID.randomUUID().toString(),
+        "driverDeviceName1",
+        /* belongsToDriver= */ true,
+        /* hasSecureChannel= */ true
+      )
+    val driverDevice2 =
+      ConnectedDevice(
+        UUID.randomUUID().toString(),
+        "driverDeviceName2",
+        /* belongsToDriver= */ true,
+        /* hasSecureChannel= */ true
+      )
+    val passengerDevice =
+      ConnectedDevice(
+        UUID.randomUUID().toString(),
+        "passengerDeviceName",
+        /* belongsToDriver= */ false,
+        /* hasSecureChannel= */ true
+      )
+    whenever(mockController.connectedDevices)
+      .thenReturn(listOf(driverDevice1, passengerDevice, driverDevice2))
+
+    val driverDevices = safeCoordinator.getConnectedDevices()
+
+    assertThat(driverDevices).containsExactly(driverDevice1.deviceId, driverDevice2.deviceId)
+  }
+
+  @Test
+  fun safeFC_onDeviceConnected_connectionCallbacksInvoked() {
+    val mockConnectionCallback: ISafeConnectionCallback = mockToBeAlive()
+    safeCoordinator.registerConnectionCallback(mockConnectionCallback)
+    val deviceId = UUID.randomUUID().toString()
+
+    coordinator.safeOnDeviceConnectedInternal(deviceId)
+
+    verify(mockConnectionCallback).onDeviceConnected(deviceId)
+  }
+
+  @Test
+  fun safeFC_onDeviceDisconnected_connectionCallbacksInvoked() {
+    val mockConnectionCallback: ISafeConnectionCallback = mockToBeAlive()
+    safeCoordinator.registerConnectionCallback(mockConnectionCallback)
+    val deviceId = UUID.randomUUID().toString()
+
+    coordinator.safeOnDeviceDisconnectedInternal(deviceId)
+
+    verify(mockConnectionCallback).onDeviceDisconnected(deviceId)
+  }
+
+  @Test
+  fun safeFC_unregisterConnectionCallback_connectionCallbackNotInvokedWhenDeviceConnects() {
+    val mockConnectionCallback: ISafeConnectionCallback = mockToBeAlive()
+    safeCoordinator.registerConnectionCallback(mockConnectionCallback)
+    val deviceId = UUID.randomUUID().toString()
+
+    safeCoordinator.unregisterConnectionCallback(mockConnectionCallback)
+    coordinator.safeOnDeviceConnectedInternal(deviceId)
+
+    verify(mockConnectionCallback, never()).onDeviceConnected(deviceId)
+  }
+
+  @Test
+  fun safeFC_registerDeviceCallback_sendsMissedMessages() {
+    val deviceCallback: ISafeDeviceCallback = mockToBeAlive()
+    val recipientId = ParcelUuid(UUID.randomUUID())
+    val connectedDevice =
+      ConnectedDevice(
+        UUID.randomUUID().toString(),
+        "testDeviceName",
+        /* belongsToDriver= */ true,
+        /* hasSecureChannel= */ true
+      )
+    val message =
+      DeviceMessageProto.Message.newBuilder()
+        .setRecipient(ByteString.copyFrom(ByteUtils.uuidToBytes(recipientId.uuid)))
+        .setIsPayloadEncrypted(true)
+        .setOperation(
+          OperationType.forNumber(/* CLIENT_MESSAGE */ 4) ?: OperationType.OPERATION_TYPE_UNKNOWN
+        )
+        .setPayload(ByteString.copyFrom(ByteUtils.randomBytes(10)))
+        .build()
+
+    val rawBytes = message.toByteArray()
+
+    val missedMessage =
+      DeviceMessage.createOutgoingMessage(
+        ByteUtils.bytesToUUID(message.recipient.toByteArray()),
+        message.isPayloadEncrypted,
+        DeviceMessage.OperationType.fromValue(message.operation.number),
+        message.payload.toByteArray()
+      )
+
+    coordinator.onMessageReceivedInternal(connectedDevice, missedMessage)
+    safeCoordinator.registerDeviceCallback(connectedDevice.deviceId, recipientId, deviceCallback)
+
+    verify(deviceCallback).onMessageReceived(connectedDevice.deviceId, rawBytes)
+  }
+
+  @Test
+  fun safeFC_registerDeviceCallback_blocksRecipientAndAlivePreviousRegistererIfAlreadyRegistered() {
+    val deviceCallback: ISafeDeviceCallback = mockToBeAlive()
+    val duplicateDeviceCallback: ISafeDeviceCallback = mockToBeAlive()
+    val recipientId = ParcelUuid(UUID.randomUUID())
+    val connectedDevice =
+      ConnectedDevice(
+        UUID.randomUUID().toString(),
+        "testDeviceName",
+        /* belongsToDriver= */ true,
+        /* hasSecureChannel= */ true
+      )
+
+    safeCoordinator.registerDeviceCallback(connectedDevice.deviceId, recipientId, deviceCallback)
+    safeCoordinator.registerDeviceCallback(
+      connectedDevice.deviceId,
+      recipientId,
+      duplicateDeviceCallback
+    )
+
+    verify(deviceCallback)
+      .onDeviceError(connectedDevice.deviceId, DEVICE_ERROR_INSECURE_RECIPIENT_ID_DETECTED)
+    verify(duplicateDeviceCallback)
+      .onDeviceError(connectedDevice.deviceId, DEVICE_ERROR_INSECURE_RECIPIENT_ID_DETECTED)
+  }
+
+  @Test
+  fun safeFC_registerDeviceCallback_ignoreDeadPreviousRegistererIfAlreadyRegistered() {
+    val deadDeviceCallback: ISafeDeviceCallback = mockToBeDead()
+    val duplicateDeviceCallback: ISafeDeviceCallback = mockToBeAlive()
+    val recipientId = ParcelUuid(UUID.randomUUID())
+    val connectedDevice =
+      ConnectedDevice(
+        UUID.randomUUID().toString(),
+        "testDeviceName",
+        /* belongsToDriver= */ true,
+        /* hasSecureChannel= */ true
+      )
+
+    safeCoordinator.registerDeviceCallback(
+      connectedDevice.deviceId,
+      recipientId,
+      deadDeviceCallback
+    )
+    safeCoordinator.registerDeviceCallback(
+      connectedDevice.deviceId,
+      recipientId,
+      duplicateDeviceCallback
+    )
+
+    verify(duplicateDeviceCallback, never())
+      .onDeviceError(connectedDevice.deviceId, DEVICE_ERROR_INSECURE_RECIPIENT_ID_DETECTED)
+  }
+
+  @Test
+  fun safeFC_registerDeviceCallback_alreadyBlockedRecipientNotifiedOnRegistration() {
+    val deviceCallback: ISafeDeviceCallback = mockToBeAlive()
+    val duplicateDeviceCallback: ISafeDeviceCallback = mockToBeAlive()
+    val secondDuplicateDeviceCallback: ISafeDeviceCallback = mockToBeAlive()
+    val recipientId = ParcelUuid(UUID.randomUUID())
+    val connectedDevice =
+      ConnectedDevice(
+        UUID.randomUUID().toString(),
+        "testDeviceName",
+        /* belongsToDriver= */ true,
+        /* hasSecureChannel= */ true
+      )
+    safeCoordinator.registerDeviceCallback(connectedDevice.deviceId, recipientId, deviceCallback)
+    safeCoordinator.registerDeviceCallback(
+      connectedDevice.deviceId,
+      recipientId,
+      duplicateDeviceCallback
+    )
+
+    safeCoordinator.registerDeviceCallback(
+      connectedDevice.deviceId,
+      recipientId,
+      secondDuplicateDeviceCallback
+    )
+
+    verify(secondDuplicateDeviceCallback)
+      .onDeviceError(connectedDevice.deviceId, DEVICE_ERROR_INSECURE_RECIPIENT_ID_DETECTED)
+  }
+
+  @Test
+  fun safeFC_unregisterDeviceCallback_callbackNotInvokedAfterUnregistering() {
+    val deviceCallback: ISafeDeviceCallback = mockToBeAlive()
+    val recipientId = ParcelUuid(UUID.randomUUID())
+    val connectedDevice =
+      ConnectedDevice(
+        UUID.randomUUID().toString(),
+        "testDeviceName",
+        /* belongsToDriver= */ true,
+        /* hasSecureChannel= */ true
+      )
+    val message =
+      DeviceMessage.createOutgoingMessage(
+        recipientId.uuid,
+        /* isMessageEncrypted= */ true,
+        CLIENT_MESSAGE,
+        ByteUtils.randomBytes(10)
+      )
+
+    safeCoordinator.registerDeviceCallback(connectedDevice.deviceId, recipientId, deviceCallback)
+    safeCoordinator.unregisterDeviceCallback(connectedDevice.deviceId, recipientId, deviceCallback)
+    coordinator.onMessageReceivedInternal(connectedDevice, message)
+
+    verify(deviceCallback, never()).onMessageReceived(any(), any())
+  }
+
+  @Test
+  fun safeFC_onMessageReceived_callbackInvokedWhenMessageReceivedForRecipient() {
+    val deviceCallback: ISafeDeviceCallback = mockToBeAlive()
+    val recipientId = ParcelUuid(UUID.randomUUID())
+    val connectedDevice =
+      ConnectedDevice(
+        UUID.randomUUID().toString(),
+        "testDeviceName",
+        /* belongsToDriver= */ true,
+        /* hasSecureChannel= */ true
+      )
+    val message =
+      DeviceMessage.createOutgoingMessage(
+        recipientId.uuid,
+        /* isMessageEncrypted= */ true,
+        CLIENT_MESSAGE,
+        ByteUtils.randomBytes(10)
+      )
+
+    safeCoordinator.registerDeviceCallback(connectedDevice.deviceId, recipientId, deviceCallback)
+    coordinator.onMessageReceivedInternal(connectedDevice, message)
+
+    verify(deviceCallback).onMessageReceived(connectedDevice.deviceId, message.message)
+  }
+
+  @Test
+  fun safeFC_onMessageReceived_callbackNotInvokedWhenMessageReceivedForDifferentRecipient() {
+    val deviceCallback: ISafeDeviceCallback = mockToBeAlive()
+    val recipientId = ParcelUuid(UUID.randomUUID())
+    val otherRecipientId = ParcelUuid(UUID.randomUUID())
+    val connectedDevice =
+      ConnectedDevice(
+        UUID.randomUUID().toString(),
+        "testDeviceName",
+        /* belongsToDriver= */ true,
+        /* hasSecureChannel= */ true
+      )
+    val message =
+      DeviceMessage.createOutgoingMessage(
+        otherRecipientId.uuid,
+        /* isMessageEncrypted= */ true,
+        CLIENT_MESSAGE,
+        ByteUtils.randomBytes(10)
+      )
+
+    safeCoordinator.registerDeviceCallback(connectedDevice.deviceId, recipientId, deviceCallback)
+    coordinator.onMessageReceivedInternal(connectedDevice, message)
+
+    verify(deviceCallback, never()).onMessageReceived(any(), any())
+  }
+
+  @Test
+  fun safeFC_onMessageReceived_blockedRecipientCallbacksNotInvoked() {
+    val deviceCallback: ISafeDeviceCallback = mockToBeAlive()
+    val duplicateDeviceCallback: ISafeDeviceCallback = mockToBeAlive()
+    val recipientId = ParcelUuid(UUID.randomUUID())
+    val connectedDevice =
+      ConnectedDevice(
+        UUID.randomUUID().toString(),
+        "testDeviceName",
+        /* belongsToDriver= */ true,
+        /* hasSecureChannel= */ true
+      )
+    val message =
+      DeviceMessage.createOutgoingMessage(
+        recipientId.uuid,
+        /* isMessageEncrypted= */ true,
+        CLIENT_MESSAGE,
+        ByteUtils.randomBytes(10)
+      )
+    safeCoordinator.registerDeviceCallback(connectedDevice.deviceId, recipientId, deviceCallback)
+    safeCoordinator.registerDeviceCallback(
+      connectedDevice.deviceId,
+      recipientId,
+      duplicateDeviceCallback
+    )
+
+    coordinator.onMessageReceivedInternal(connectedDevice, message)
+
+    verify(deviceCallback, never()).onMessageReceived(any(), any())
+    verify(duplicateDeviceCallback, never()).onMessageReceived(any(), any())
+  }
+
+  @Test
+  fun safeFC_onMessageReceived_blockedRecipientRecoverFromResetCallbacksInvoked() {
+    val deviceCallback: ISafeDeviceCallback = mockToBeAlive()
+    val duplicateDeviceCallback: ISafeDeviceCallback = mockToBeAlive()
+    val recipientId = ParcelUuid(UUID.randomUUID())
+    val connectedDevice =
+      ConnectedDevice(
+        UUID.randomUUID().toString(),
+        "testDeviceName",
+        /* belongsToDriver= */ true,
+        /* hasSecureChannel= */ true
+      )
+    safeCoordinator.registerDeviceCallback(connectedDevice.deviceId, recipientId, deviceCallback)
+    safeCoordinator.registerDeviceCallback(
+      connectedDevice.deviceId,
+      recipientId,
+      duplicateDeviceCallback
+    )
+
+    // Clear the blocked recipient list.
+    coordinator.reset()
+    safeCoordinator.registerDeviceCallback(connectedDevice.deviceId, recipientId, deviceCallback)
+    val message =
+      DeviceMessage.createOutgoingMessage(
+        recipientId.uuid,
+        /* isMessageEncrypted= */ true,
+        CLIENT_MESSAGE,
+        ByteUtils.randomBytes(10)
+      )
+    coordinator.onMessageReceivedInternal(connectedDevice, message)
+
+    verify(deviceCallback).onMessageReceived(any(), any())
+    verify(duplicateDeviceCallback, never()).onMessageReceived(any(), any())
+  }
+
+  @Test
+  fun safeFC_onMessageReceived_nullRecipientDoesNotThrow() {
+    val connectedDevice =
+      ConnectedDevice(
+        UUID.randomUUID().toString(),
+        "testDeviceName",
+        /* belongsToDriver= */ true,
+        /* hasSecureChannel= */ true
+      )
+    val nullRecipientMessage =
+      DeviceMessage.createOutgoingMessage(
+        /* recipient= */ null,
+        /* isMessageEncrypted= */ true,
+        CLIENT_MESSAGE,
+        ByteUtils.randomBytes(10)
+      )
+    coordinator.onMessageReceivedInternal(connectedDevice, nullRecipientMessage)
+  }
+
+  @Test
+  fun safeFC_sendMessage_sendsMessageToController() {
+    val connectedDevice =
+      ConnectedDevice(
+        UUID.randomUUID().toString(),
+        "testDeviceName",
+        /* belongsToDriver= */ true,
+        /* hasSecureChannel= */ true
+      )
+    val message =
+      DeviceMessageProto.Message.newBuilder()
+        .setRecipient(ByteString.copyFrom(ByteUtils.uuidToBytes(UUID.randomUUID())))
+        .setIsPayloadEncrypted(true)
+        .setOperation(
+          OperationType.forNumber(/* CLIENT_MESSAGE */ 4) ?: OperationType.OPERATION_TYPE_UNKNOWN
+        )
+        .setPayload(ByteString.copyFrom(ByteUtils.randomBytes(10)))
+        .build()
+
+    val rawBytes = message.toByteArray()
+
+    val messageSent = safeCoordinator.sendMessage(connectedDevice.deviceId, rawBytes)
+
+    val deviceMessage =
+      DeviceMessage.createOutgoingMessage(
+        ByteUtils.bytesToUUID(message.recipient.toByteArray()),
+        message.isPayloadEncrypted,
+        DeviceMessage.OperationType.fromValue(message.operation.number),
+        message.payload.toByteArray()
+      )
+
+    assertThat(messageSent).isFalse() // Recipient not registered so this will return false
+    verify(mockController).sendMessage(UUID.fromString(connectedDevice.deviceId), deviceMessage)
+  }
+
+  @Test
+  fun safeFC_registerOnLogRequestedListener() {
+    val testLoggerId = 0
+    val listener: ISafeOnLogRequestedListener = mockToBeAlive()
+
+    safeCoordinator.registerOnLogRequestedListener(testLoggerId, listener)
+
+    verify(mockLoggingManager).registerLogRequestedListener(eq(testLoggerId), eq(listener), any())
+  }
+
+  @Test
+  fun safeFC_unregisterOnLogRequestedListener() {
+    val testLoggerId = 0
+    val listener: ISafeOnLogRequestedListener = mockToBeAlive()
+
+    safeCoordinator.unregisterOnLogRequestedListener(testLoggerId, listener)
+
+    verify(mockLoggingManager).unregisterLogRequestedListener(eq(testLoggerId), eq(listener))
+  }
+
+  @Test
+  fun safeFC_processLogRecords() {
+    val testLoggerId = 0
+    val testLogs = "test logs".toByteArray()
+
+    safeCoordinator.processLogRecords(testLoggerId, testLogs)
+
+    verify(mockLoggingManager).prepareLocalLogRecords(eq(testLoggerId), eq(testLogs))
+  }
+
+  @Test
+  fun safeFC_retrieveAssociatedDevices_returnsOnlyDriverDevicesInStorage() {
+    val driverDevices =
+      listOf(
+        AssociatedDevice(
+          UUID.randomUUID().toString(),
+          /* deviceAddress= */ "",
+          /* deviceName= */ null,
+          /* isConnectionEnabled= */ true
+        ),
+        AssociatedDevice(
+          UUID.randomUUID().toString(),
+          /* deviceAddress= */ "",
+          /* deviceName= */ null,
+          /* isConnectionEnabled= */ false
+        )
+      )
+    val listener: ISafeOnAssociatedDevicesRetrievedListener = mockToBeAlive()
+    whenever(mockStorage.driverAssociatedDevices).thenReturn(driverDevices)
+
+    safeCoordinator.retrieveAssociatedDevices(listener)
+
+    verify(listener).onAssociatedDevicesRetrieved(driverDevices.map { it.deviceId })
+  }
+
+  companion object {
+    private const val TAG = "FeatureCoordinatorTest"
   }
 }

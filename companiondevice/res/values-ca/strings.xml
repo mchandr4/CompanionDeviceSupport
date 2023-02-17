@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">Obre l\'aplicació complementària</string>
   <string name="enable_bluetooth_instruction_text">Permet la connexió Bluetooth</string>
   <string name="connect_to_targe_car_instruction_text">Connecta a &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
-  <string name="qr_instruction_text">Escaneja el codi QR o obre MyCompanion per connectar-te a &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">Utilitza el telèfon per escanejar el codi QR o obre MyCompanion per connectar-te a &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
   <string name="connect_to_car_instruction_text">Connecta al cotxe</string>
   <string name="associated_device_pairing_code_title">Confirma el codi al telèfon</string>
   <string name="associated_device_pairing_message">Confirma que coincideix amb el codi que es mostra al teu telèfon</string>
@@ -43,6 +43,9 @@
   <string name="turn_on_bluetooth_message">Per configurar el telèfon com a dispositiu complementari, el teu cotxe necessita el Bluetooth.</string>
   <string name="turn_on_bluetooth_dialog_title">Vols activar el Bluetooth?</string>
   <string name="turn_on_bluetooth_dialog_message">Per connectar el dispositiu complementari, el teu cotxe necessita el Bluetooth.</string>
+  <string name="companion_not_available_dialog_title">Aquesta opció no està disponible</string>
+  <string name="companion_not_available_dialog_message">Els perfils de convidat no poden accedir a CompanionDevice</string>
+  <string name="companion_not_available_dialog_switch_user_message">Els perfils de convidat no poden accedir a CompanionDevice. Per canviar el teu perfil, ves a Configuració &gt; Usuaris.</string>
   <string name="accept">Accepta</string>
   <string name="reject">Rebutja</string>
   <string name="confirm">Confirma</string>
@@ -60,7 +63,9 @@
   <string name="not_now">Ara no</string>
   <string name="connect">Connecta</string>
   <string name="disconnect">Desconnecta</string>
+  <string name="disconnecting">Disconnecting</string>
   <string name="skip">Omet</string>
+  <string name="change_profile">Canvia el perfil</string>
   <string name="connected">Connectat</string>
   <string name="notDetected">No detectat</string>
   <string name="disconnected">Desconnectat</string>

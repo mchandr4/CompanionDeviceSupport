@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">Отворете придружаващото приложение</string>
   <string name="enable_bluetooth_instruction_text">Разрешете връзка през Bluetooth</string>
   <string name="connect_to_targe_car_instruction_text">Свържете се с(ъс) &lt;b&gt;%1$s&lt;/b&gt;%2$s</string>
-  <string name="qr_instruction_text">Сканирайте кода за бърза реакция или отворете MyCompanion, за да се свържете с(ъс) &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">Използвайте телефона си, за да сканирате QR кода или отворете MyCompanion, за да се свържете с(ъс) &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
   <string name="connect_to_car_instruction_text">Свържете се с автомобила</string>
   <string name="associated_device_pairing_code_title">Потвърждаване на кода за сдвояване на телефона</string>
   <string name="associated_device_pairing_message">Потвърдете, че кодът съвпада с този, показан на телефона ви</string>
@@ -43,6 +43,9 @@
   <string name="turn_on_bluetooth_message">За да настроите телефона си като придружаващото устройство, функцията за Bluetooth трябва да е включена на автомобила ви.</string>
   <string name="turn_on_bluetooth_dialog_title">Да се включи ли Bluetooth?</string>
   <string name="turn_on_bluetooth_dialog_message">За да свържете придружаващото си устройство, функцията за Bluetooth трябва да е включена на автомобила ви.</string>
+  <string name="companion_not_available_dialog_title">Тази настройка не е налице</string>
+  <string name="companion_not_available_dialog_message">Потребителските профили нямат достъп до придружаващото устройство</string>
+  <string name="companion_not_available_dialog_switch_user_message">Потребителските профили нямат достъп до придружаващото устройство. За да промените потребителския си профил, отворете „Настройки &gt; Потребители“.</string>
   <string name="accept">Приемам</string>
   <string name="reject">Отхвърляне</string>
   <string name="confirm">Потвърждаване</string>
@@ -60,7 +63,9 @@
   <string name="not_now">Не сега</string>
   <string name="connect">Свързване</string>
   <string name="disconnect">Прекр. на връзката</string>
+  <string name="disconnecting">Disconnecting</string>
   <string name="skip">Пропускане</string>
+  <string name="change_profile">Промяна на потребителския профил</string>
   <string name="connected">Свързано</string>
   <string name="notDetected">Не е открито</string>
   <string name="disconnected">Няма връзка</string>

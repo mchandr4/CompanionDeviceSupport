@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">ସହଯୋଗୀ ଆପ୍ ଖୋଲନ୍ତୁ</string>
   <string name="enable_bluetooth_instruction_text">ବ୍ଲୁଟୁଥ୍ ସଂଯୋଗକୁ ଅନୁମତି ଦିଅନ୍ତୁ</string>
   <string name="connect_to_targe_car_instruction_text">&lt;b&gt;%1$s&lt;/b&gt;%2$s ସହ ସଂଯୋଗ କରନ୍ତୁ</string>
-  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s ସହ ସଂଯୋଗ କରିବାକୁ QR କୋଡ ସ୍କାନ କରନ୍ତୁ କିମ୍ବା MyCompanion ଖୋଲନ୍ତୁ</string>
+  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s ସହ ସଂଯୋଗ କରିବାକୁ ଆପଣଙ୍କ ଫୋନ ବ୍ୟବହାର କରି QR କୋଡ ସ୍କାନ କରନ୍ତୁ କିମ୍ବା MyCompanion ଖୋଲନ୍ତୁ</string>
   <string name="connect_to_car_instruction_text">କାର ସହ ସଂଯୋଗ କରନ୍ତୁ</string>
   <string name="associated_device_pairing_code_title">ଫୋନରେ କୋଡ୍ ସୁନିଶ୍ଚିତ କରନ୍ତୁ</string>
   <string name="associated_device_pairing_message">ଆପଣଙ୍କ ଫୋନରେ ଦେଖାଯାଉଥିବା କୋଡ୍ ସହିତ ଏହା ମେଳ ହେଉଛି ବୋଲି ସୁନିଶ୍ଚିତ କରନ୍ତୁ</string>
@@ -43,10 +43,13 @@
   <string name="turn_on_bluetooth_message">ଆପଣଙ୍କ ଫୋନକୁ ଏକ ସହଯୋଗୀ ଡିଭାଇସ୍ ରୂପେ ସେଟ୍ ଅପ୍ କରିବାକୁ, ଆପଣଙ୍କ କାର ବ୍ଲୁଟୁଥ୍ ଆବଶ୍ୟକ କରେ।</string>
   <string name="turn_on_bluetooth_dialog_title">ବ୍ଲୁଟୁଥ୍ ଚାଲୁ କରିବେ?</string>
   <string name="turn_on_bluetooth_dialog_message">ଆପଣଙ୍କ ସହଯୋଗୀ ଡିଭାଇସ୍ ସହିତ ସଂଯୋଗ କରିବାକୁ, ଆପଣଙ୍କ କାର ବ୍ଲୁଟୁଥ୍ ଆବଶ୍ୟକ କରେ।</string>
+  <string name="companion_not_available_dialog_title">ଏହି ସେଟିଂ ଉପଲବ୍ଧ ନାହିଁ</string>
+  <string name="companion_not_available_dialog_message">ଅତିଥି ପ୍ରୋଫାଇଲଗୁଡ଼ିକ CompanionDeviceକୁ ଆକ୍ସେସ କରିପାରିବ ନାହିଁ</string>
+  <string name="companion_not_available_dialog_switch_user_message">ଅତିଥି ପ୍ରୋଫାଇଲଗୁଡ଼ିକ CompanionDeviceକୁ ଆକ୍ସେସ କରିପାରିବ ନାହିଁ। ଆପଣଙ୍କ ପ୍ରୋଫାଇଲ ବଦଳାଇବା ପାଇଁ, \"ସେଟିଂସ\" &gt; \"ଉପଯୋଗକର୍ତ୍ତା\"କୁ ଯାଆନ୍ତୁ।</string>
   <string name="accept">ଗ୍ରହଣ କରନ୍ତୁ</string>
   <string name="reject">ଅଗ୍ରାହ୍ୟ କରନ୍ତୁ</string>
   <string name="confirm">ସୁନିଶ୍ଚିତ କରନ୍ତୁ</string>
-  <string name="cancel">ବାତିଲ୍ କରନ୍ତୁ</string>
+  <string name="cancel">ବାତିଲ କରନ୍ତୁ</string>
   <string name="remove">କାଢ଼ି ଦିଅନ୍ତୁ</string>
   <string name="ok">ଠିକ୍ ଅଛି</string>
   <string name="connection">ସଂଯୋଗ</string>
@@ -60,7 +63,9 @@
   <string name="not_now">ବର୍ତ୍ତମାନ ନୁହେଁ</string>
   <string name="connect">ସଂଯୋଗ କରନ୍ତୁ</string>
   <string name="disconnect">ବିଚ୍ଛିନ୍ନ କରନ୍ତୁ</string>
+  <string name="disconnecting">ଡିସକନେକ୍ଟ କରାଯାଉଛି</string>
   <string name="skip">ବାଦ୍ ଦିଅନ୍ତୁ</string>
+  <string name="change_profile">ପ୍ରୋଫାଇଲ ବଦଳାନ୍ତୁ</string>
   <string name="connected">ସଂଯୋଗ କରାଯାଇଛି</string>
   <string name="notDetected">ଚିହ୍ନଟ କରାଯାଇନାହିଁ</string>
   <string name="disconnected">ବିଚ୍ଛିନ୍ନ କରାଯାଇଛି</string>

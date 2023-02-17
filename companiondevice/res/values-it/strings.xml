@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">Apri l\'app complementare</string>
   <string name="enable_bluetooth_instruction_text">Consenti la connessione Bluetooth</string>
   <string name="connect_to_targe_car_instruction_text">Connettiti a &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
-  <string name="qr_instruction_text">Scansiona il codice QR oppure apri MyCompanion per connetterti a &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">Scansiona il codice QR con il tuo telefono oppure apri MyCompanion per connetterti a &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
   <string name="connect_to_car_instruction_text">Connettiti all\'auto</string>
   <string name="associated_device_pairing_code_title">Conferma il codice sul telefono</string>
   <string name="associated_device_pairing_message">Conferma che questo codice corrisponde a quello visualizzato sul telefono</string>
@@ -43,6 +43,9 @@
   <string name="turn_on_bluetooth_message">La tua auto deve disporre del Bluetooth per poter configurare il telefono come dispositivo complementare.</string>
   <string name="turn_on_bluetooth_dialog_title">Vuoi attivare il Bluetooth?</string>
   <string name="turn_on_bluetooth_dialog_message">La tua auto deve disporre del Bluetooth per potersi connettere al dispositivo complementare.</string>
+  <string name="companion_not_available_dialog_title">Questa impostazione non è disponibile</string>
+  <string name="companion_not_available_dialog_message">I profili ospite non possono accedere a CompanionDevice</string>
+  <string name="companion_not_available_dialog_switch_user_message">I profili ospite non possono accedere a CompanionDevice. Per modificare il tuo profilo vai su Impostazioni &gt; Utenti.</string>
   <string name="accept">Accetta</string>
   <string name="reject">Rifiuta</string>
   <string name="confirm">Conferma</string>
@@ -60,7 +63,9 @@
   <string name="not_now">Non ora</string>
   <string name="connect">Connetti</string>
   <string name="disconnect">Disconnetti</string>
+  <string name="disconnecting">Disconnessione…</string>
   <string name="skip">Salta</string>
+  <string name="change_profile">Modifica profilo</string>
   <string name="connected">Connesso</string>
   <string name="notDetected">Non rilevato</string>
   <string name="disconnected">Disconnesso</string>
@@ -89,7 +94,7 @@
   <string name="create_phone_lock_dialog_title">Crea un blocco schermo sul telefono</string>
   <string name="create_phone_lock_dialog_message">Sul telefono non è configurato un blocco schermo. Per sbloccare il profilo della tua auto con il telefono, devi prima creare un blocco schermo (chiamato anche passcode) nelle impostazioni del telefono.</string>
   <plurals name="notification_new_message">
-    <item quantity="one">%d nuovi messaggi</item>
+    <item quantity="one">Nuovo messaggio</item>
     <item quantity="other">%d nuovi messaggi</item>
   </plurals>
   <string name="name_not_available">Nome non disponibile</string>

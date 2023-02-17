@@ -18,21 +18,28 @@ package com.google.android.connecteddevice.api;
 
 import com.google.android.connecteddevice.model.StartAssociationResponse;
 
-/** Callback for triggered association events. */
+/**
+ * Callback for triggered association events.
+ *
+ * Only make additive changes to maintain backward compatibility.
+ * The added function needs to be assigned the transaction value noted below,
+ * and the value needs to be appropriately incremented.
+ *
+ * Next transaction value: 5
+ */
 oneway interface IAssociationCallback {
-
     /** Triggered when IHU starts advertising for association successfully. */
-    void onAssociationStartSuccess(in StartAssociationResponse response);
+    void onAssociationStartSuccess(in StartAssociationResponse response) = 0;
 
     /** Triggered when IHU failed to start advertising for association. */
-    void onAssociationStartFailure();
+    void onAssociationStartFailure() = 1;
 
     /** Triggered when an error has been encountered during association with a new device. */
-    void onAssociationError(in int error);
+    void onAssociationError(in int error) = 2;
 
     /**  Triggered when a pairing code is available to be present. */
-    void onVerificationCodeAvailable(in String code);
+    void onVerificationCodeAvailable(in String code) = 3;
 
     /** Triggered when the association has completed */
-    void onAssociationCompleted();
+    void onAssociationCompleted() = 4;
 }

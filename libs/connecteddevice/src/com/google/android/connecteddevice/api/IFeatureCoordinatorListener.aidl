@@ -18,7 +18,17 @@ package com.google.android.connecteddevice.api;
 
 import com.google.android.connecteddevice.api.IFeatureCoordinator;
 
+/**
+ * Listener for feature coordinator initialization.
+ *
+ * Only make additive changes to maintain backward compatibility.
+ * The added function needs to be assigned the transaction value noted below,
+ * and the value needs to be appropriately incremented.
+ *
+ * Next transaction value: 1
+ */
 interface IFeatureCoordinatorListener {
     /** Callback when feature coordinator is initialized. */
-    void onFeatureCoordinatorInitialized(IFeatureCoordinator featureCoordinator);
+    void onFeatureCoordinatorInitialized(
+            IFeatureCoordinator featureCoordinator) = 0;
 }

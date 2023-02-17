@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">Қосымша қолданбаны ашыңыз.</string>
   <string name="enable_bluetooth_instruction_text">Bluetooth байланысына рұқсат беріңіз.</string>
   <string name="connect_to_targe_car_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s көлігіне қосылыңыз.</string>
-  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s көлігіне қосылу үшін QR кодын сканерлеңіз немесе MyCompanion қолданбасын ашыңыз.</string>
+  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s көлігіне қосылу үшін телефон арқылы QR кодын сканерлеңіз немесе MyCompanion қолданбасын ашыңыз.</string>
   <string name="connect_to_car_instruction_text">Көлікке қосылыңыз.</string>
   <string name="associated_device_pairing_code_title">Кодты телефоннан растау</string>
   <string name="associated_device_pairing_message">Мұның телефонда көрсетілетін кодқа сәйкес келетінін растаңыз.</string>
@@ -43,6 +43,9 @@
   <string name="turn_on_bluetooth_message">Телефонды көмекші құрылғы ретінде реттеу үшін Bluetooth функциясы қажет.</string>
   <string name="turn_on_bluetooth_dialog_title">Bluetooth функциясын қосу керек пе?</string>
   <string name="turn_on_bluetooth_dialog_message">Көмекші құрылғыны байланыстыру үшін көлігіңізге Bluetooth қажет.</string>
+  <string name="companion_not_available_dialog_title">Бұл параметр қолжетімсіз</string>
+  <string name="companion_not_available_dialog_message">Қонақ профильдеріне CompanionDevice қолжетімсіз.</string>
+  <string name="companion_not_available_dialog_switch_user_message">Қонақ профильдеріне CompanionDevice қолжетімсіз. Профильді өзгерту үшін \"Параметрлер &gt; Пайдаланушылар\" бөліміне өтіңіз.</string>
   <string name="accept">Қабылдау</string>
   <string name="reject">Қабылдамау</string>
   <string name="confirm">Растау</string>
@@ -60,7 +63,9 @@
   <string name="not_now">Қазір емес</string>
   <string name="connect">Қосылу</string>
   <string name="disconnect">Ажырау</string>
+  <string name="disconnecting">Disconnecting</string>
   <string name="skip">Өткізіп жіберу</string>
+  <string name="change_profile">Профильді өзгерту</string>
   <string name="connected">Қосулы</string>
   <string name="notDetected">Анықталмаған</string>
   <string name="disconnected">Ажыратулы</string>

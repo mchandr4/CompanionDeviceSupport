@@ -34,6 +34,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 private const val TEST_REMOTE_DEVICE_ADDRESS = "00:11:22:33:AA:BB"
+private const val TEST_ALTERNATIVE_REMOTE_DEVICE_ADDRESS = "00:11:22:33:AA:CC"
 private const val TEST_DEFAULT_MTU_SIZE = 23
 private const val TEST_DEVICE_NAME = "TestName"
 
@@ -60,6 +61,7 @@ class BlePeripheralProtocolTest {
 
   private lateinit var blePeripheralProtocol: BlePeripheralProtocol
   private lateinit var testBluetoothDevice: BluetoothDevice
+  private lateinit var unknownBluetoothDevice: BluetoothDevice
 
   @Before
   fun setUp() {
@@ -67,6 +69,8 @@ class BlePeripheralProtocolTest {
       ApplicationProvider.getApplicationContext<Context>()
         .getSystemService(BluetoothManager::class.java)
     testBluetoothDevice = bluetoothManager.adapter.getRemoteDevice(TEST_REMOTE_DEVICE_ADDRESS)
+    unknownBluetoothDevice =
+      bluetoothManager.adapter.getRemoteDevice(TEST_ALTERNATIVE_REMOTE_DEVICE_ADDRESS)
     blePeripheralProtocol =
       BlePeripheralProtocol(
         mockBlePeripheralManager,
@@ -93,6 +97,17 @@ class BlePeripheralProtocolTest {
       verify(mockBlePeripheralManager).startAdvertising(capture(), any(), any(), any())
       assertThat(firstValue.uuid).isEqualTo(testIdentifier.uuid)
     }
+  }
+
+  @Test
+  fun startAssociationDiscovery_doNotReset() {
+    blePeripheralProtocol.startAssociationDiscovery(
+      TEST_DEVICE_NAME,
+      testIdentifier,
+      mockDiscoveryCallback
+    )
+
+    verify(mockBlePeripheralManager, never()).cleanup()
   }
 
   @Test
@@ -131,8 +146,9 @@ class BlePeripheralProtocolTest {
       testIdentifier,
       mockDiscoveryCallback
     )
-    // Should only be invoked once for establishing connection.
-    verify(mockBlePeripheralManager).startAdvertising(any(), any(), any(), any())
+    // Discovery can be started even when there is a connection. This could be cause by a late
+    // disconnect callback.
+    verify(mockBlePeripheralManager, times(2)).startAdvertising(any(), any(), any(), any())
   }
 
   @Test
@@ -215,8 +231,9 @@ class BlePeripheralProtocolTest {
       testChallenge,
       mockDiscoveryCallback
     )
-    // Should only be invoked once for establishing connection.
-    verify(mockBlePeripheralManager).startAdvertising(any(), any(), any(), any())
+    // Discovery can be started even when there is a connection. This could be cause by a late
+    // disconnect callback.
+    verify(mockBlePeripheralManager, times(2)).startAdvertising(any(), any(), any(), any())
   }
 
   @Test
@@ -287,12 +304,21 @@ class BlePeripheralProtocolTest {
   }
 
   @Test
-  fun disconnectDevice_cleanupBlePeripheralManager() {
+  fun disconnectDevice_disconnect() {
     val protocolId = establishConnection(testBluetoothDevice)
+
     blePeripheralProtocol.disconnectDevice(protocolId)
-    // First cleanup for establishing the new connection
-    // Second cleanup for disconnection
-    verify(mockBlePeripheralManager, times(2)).cleanup()
+
+    verify(mockBlePeripheralManager).disconnect()
+  }
+
+  @Test
+  fun disconnectDevice_unknownProtocolId_ignore() {
+    establishConnection(testBluetoothDevice)
+
+    blePeripheralProtocol.disconnectDevice("unknownId")
+
+    verify(mockBlePeripheralManager, never()).disconnect()
   }
 
   @Test
@@ -300,13 +326,50 @@ class BlePeripheralProtocolTest {
     val protocolId = establishConnection(testBluetoothDevice)
     blePeripheralProtocol.registerDeviceDisconnectedListener(protocolId, mockDisconnectedListener)
 
-    blePeripheralProtocol.disconnectDevice(protocolId)
     argumentCaptor<BlePeripheralManager.Callback>().apply {
       verify(mockBlePeripheralManager).registerCallback(capture())
       firstValue.onRemoteDeviceDisconnected(testBluetoothDevice)
     }
 
     verify(mockDisconnectedListener).onDeviceDisconnected(eq(protocolId))
+  }
+
+  @Test
+  fun onDeviceDisconnected_unknownDevice_ignore() {
+    val protocolId = establishConnection(testBluetoothDevice)
+    blePeripheralProtocol.registerDeviceDisconnectedListener(protocolId, mockDisconnectedListener)
+
+    argumentCaptor<BlePeripheralManager.Callback>().apply {
+      verify(mockBlePeripheralManager).registerCallback(capture())
+      firstValue.onRemoteDeviceDisconnected(unknownBluetoothDevice)
+    }
+
+    verify(mockDisconnectedListener, never()).onDeviceDisconnected(any())
+  }
+
+  @Test
+  fun onDeviceDisconnected_removeListeners() {
+    val protocolId = establishConnection(testBluetoothDevice)
+    blePeripheralProtocol.registerDeviceDisconnectedListener(protocolId, mockDisconnectedListener)
+
+    val managerCallback =
+      argumentCaptor<BlePeripheralManager.Callback>()
+        .apply { verify(mockBlePeripheralManager).registerCallback(capture()) }
+        .firstValue
+    val testMtuSize = 20
+    blePeripheralProtocol.registerDeviceMaxDataSizeChangedListener(
+      protocolId,
+      mockMaxDataSizeChangedListener
+    )
+
+    managerCallback.onRemoteDeviceDisconnected(testBluetoothDevice)
+    managerCallback.onMtuSizeChanged(testMtuSize)
+
+    verify(mockMaxDataSizeChangedListener, never())
+      .onDeviceMaxDataSizeChanged(
+        eq(protocolId),
+        eq(testMtuSize - BlePeripheralProtocol.ATT_PROTOCOL_BYTES)
+      )
   }
 
   @Test
@@ -354,6 +417,24 @@ class BlePeripheralProtocolTest {
       firstValue.onCharacteristicWrite(testBluetoothDevice, testReadCharacteristic, testMessage)
     }
     verify(mockDataReceivedListener).onDataReceived(testProtocolId, testMessage)
+  }
+
+  @Test
+  fun onMessageReceived_unknownDevice_disconnect() {
+    val testReadCharacteristic =
+      BluetoothGattCharacteristic(
+        testReadCharacteristicUuid,
+        BluetoothGattCharacteristic.PROPERTY_WRITE or
+          BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE,
+        BluetoothGattCharacteristic.PERMISSION_WRITE
+      )
+    val testProtocolId = establishConnection(testBluetoothDevice)
+    blePeripheralProtocol.registerDataReceivedListener(testProtocolId, mockDataReceivedListener)
+    argumentCaptor<BlePeripheralManager.OnCharacteristicWriteListener>().apply {
+      verify(mockBlePeripheralManager).addOnCharacteristicWriteListener(capture())
+      firstValue.onCharacteristicWrite(unknownBluetoothDevice, testReadCharacteristic, testMessage)
+    }
+    verify(mockBlePeripheralManager).disconnect()
   }
 
   @Test

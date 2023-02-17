@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">Mở ứng dụng đồng hành</string>
   <string name="enable_bluetooth_instruction_text">Cho phép kết nối Bluetooth</string>
   <string name="connect_to_targe_car_instruction_text">Kết nối với &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
-  <string name="qr_instruction_text">Quét mã QR hoặc mở MyCompanion để kết nối với &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">Dùng điện thoại để quét mã QR hoặc mở MyCompanion để kết nối với &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
   <string name="connect_to_car_instruction_text">Kết nối với ô tô</string>
   <string name="associated_device_pairing_code_title">Xác nhận mã trên điện thoại</string>
   <string name="associated_device_pairing_message">Xác nhận rằng mã này khớp với mã hiện trên điện thoại của bạn</string>
@@ -43,6 +43,9 @@
   <string name="turn_on_bluetooth_message">Để thiết lập điện thoại làm thiết bị đồng hành, bạn cần bật Bluetooth cho ô tô của mình.</string>
   <string name="turn_on_bluetooth_dialog_title">Bật Bluetooth?</string>
   <string name="turn_on_bluetooth_dialog_message">Để kết nối với thiết bị đồng hành, bạn cần bật Bluetooth cho ô tô của mình.</string>
+  <string name="companion_not_available_dialog_title">Không dùng được chế độ cài đặt này</string>
+  <string name="companion_not_available_dialog_message">Hồ sơ khách không truy cập được CompanionDevice</string>
+  <string name="companion_not_available_dialog_switch_user_message">Hồ sơ khách không truy cập được CompanionDevice. Để thay đổi hồ sơ, hãy truy cập phần Cài đặt &gt; Người dùng.</string>
   <string name="accept">Chấp nhận</string>
   <string name="reject">Từ chối</string>
   <string name="confirm">Xác nhận</string>
@@ -60,7 +63,9 @@
   <string name="not_now">Để sau</string>
   <string name="connect">Kết nối</string>
   <string name="disconnect">Ngắt kết nối</string>
+  <string name="disconnecting">Disconnecting</string>
   <string name="skip">Bỏ qua</string>
+  <string name="change_profile">Thay đổi hồ sơ</string>
   <string name="connected">Đã kết nối</string>
   <string name="notDetected">Không tìm thấy</string>
   <string name="disconnected">Đã ngắt kết nối</string>

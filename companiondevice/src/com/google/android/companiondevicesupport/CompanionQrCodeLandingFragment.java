@@ -16,6 +16,7 @@
 
 package com.google.android.companiondevicesupport;
 
+import static com.google.android.connecteddevice.util.SafeLog.logd;
 import static com.google.android.connecteddevice.util.SafeLog.loge;
 
 import android.bluetooth.BluetoothAdapter;
@@ -143,11 +144,12 @@ public class CompanionQrCodeLandingFragment extends Fragment {
    * Set the QR code image view when the association response is available. Hide the instruction and
    * add button if they are not null.
    *
-   * @param response the association started successfully response.
+   * @param response the association started successfully response. Will be null when association
+   *     has not been started.
    */
-  private void processAssociationResponse(StartAssociationResponse response) {
+  private void processAssociationResponse(@Nullable StartAssociationResponse response) {
     if (response == null) {
-      loge(
+      logd(
           TAG,
           "Association response is null during QR code generation when association "
               + "started successfully, ignore.");

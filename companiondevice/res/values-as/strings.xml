@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">সহযোগী এপ্‌টো খোলক।</string>
   <string name="enable_bluetooth_instruction_text">ব্লুটুথ সংযোগৰ অনুমতি দিয়ক</string>
   <string name="connect_to_targe_car_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$sৰ সৈতে সংযোগ কৰক</string>
-  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$sৰ সৈতে সংযোগ কৰিবলৈ কিউআৰ ক’ডটো স্কেন কৰক অথবা MyCompanion খোলক</string>
+  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$sৰ সৈতে সংযোগ কৰিবলৈ কিউআৰ ক’ডটো স্কেন কৰিবলৈ আপোনাৰ ফ’নটো ব্যৱহাৰ কৰক অথবা MyCompanion খোলক</string>
   <string name="connect_to_car_instruction_text">গাড়ীখনৰ সৈতে সংযোগ কৰক</string>
   <string name="associated_device_pairing_code_title">ক’ডটো ফ’নত নিশ্চিত কৰক</string>
   <string name="associated_device_pairing_message">এইটো আপোনাৰ ফ’নটোত দেখুওৱা ক’ডটোৰ সৈতে মিলাটো নিশ্চিত কৰক</string>
@@ -43,6 +43,9 @@
   <string name="turn_on_bluetooth_message">আপোনাৰ ফ’নটো এটা সহযোগী ডিভাইচ হিচাপে ছেট আপ কৰিবলৈ আপোনাৰ গাড়ীখনক ব্লুটুথৰ প্ৰয়োজন।</string>
   <string name="turn_on_bluetooth_dialog_title">ব্লুটুথ অন কৰিবনে?</string>
   <string name="turn_on_bluetooth_dialog_message">আপোনাৰ সহযোগী ডিভাইচটোৰ সৈতে সংযোগ কৰিবলৈ আপোনাৰ গাড়ীখনক ব্লুটুথৰ প্ৰয়োজন।</string>
+  <string name="companion_not_available_dialog_title">এই ছেটিংটো উপলব্ধ নহয়</string>
+  <string name="companion_not_available_dialog_message">অতিথি প্ৰ’ফাইলে CompanionDevice এক্সেছ কৰিব নোৱাৰে</string>
+  <string name="companion_not_available_dialog_switch_user_message">অতিথি প্ৰ’ফাইলে CompanionDevice এক্সেছ কৰিব নোৱাৰে। আপোনাৰ প্ৰ’ফাইল সলনি কৰিবলৈ ছেটিঙ &gt; ব্যৱহাৰকাৰীলৈ যাওক।</string>
   <string name="accept">গ্ৰহণ কৰক</string>
   <string name="reject">প্ৰত্যাখ্যান কৰক</string>
   <string name="confirm">নিশ্চিত কৰক</string>
@@ -60,7 +63,9 @@
   <string name="not_now">এতিয়া নহয়</string>
   <string name="connect">সংযোগ কৰক</string>
   <string name="disconnect">সংযোগ বিচ্ছিন্ন কৰক</string>
+  <string name="disconnecting">Disconnecting</string>
   <string name="skip">এৰি যাওক</string>
+  <string name="change_profile">প্ৰ’ফাইল সলনি কৰক</string>
   <string name="connected">সংযোগ কৰা হ’ল</string>
   <string name="notDetected">চিনাক্ত কৰা হোৱা নাই</string>
   <string name="disconnected">সংযোগ বিচ্ছিন্ন হৈছে</string>

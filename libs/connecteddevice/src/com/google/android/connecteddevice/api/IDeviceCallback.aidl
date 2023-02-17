@@ -19,17 +19,26 @@ package com.google.android.connecteddevice.api;
 import com.google.android.connecteddevice.model.ConnectedDevice;
 import com.google.android.connecteddevice.model.DeviceMessage;
 
-/** Triggered companionDevice events for a connected companionDevice. */
+/**
+ * Triggered companionDevice events for a connected companionDevice.
+ *
+ * Only make additive changes to maintain backward compatibility.
+ * The added function needs to be assigned the transaction value noted below,
+ * and the value needs to be appropriately incremented.
+ *
+ * Next transaction value: 3
+ */
 oneway interface IDeviceCallback {
     /**
      * Triggered when secure channel has been established on a companionDevice. Encrypted messaging
      * now available.
      */
-    void onSecureChannelEstablished(in ConnectedDevice connectedDevice);
+    void onSecureChannelEstablished(in ConnectedDevice connectedDevice) = 0;
 
     /** Triggered when a new message is received from a connectedDevice. */
-    void onMessageReceived(in ConnectedDevice connectedDevice, in DeviceMessage message);
+    void onMessageReceived(in ConnectedDevice connectedDevice,
+            in DeviceMessage message) = 1;
 
     /** Triggered when an error has occurred for a connectedDevice. */
-    void onDeviceError(in ConnectedDevice connectedDevice, int error);
+    void onDeviceError(in ConnectedDevice connectedDevice, int error) = 2;
 }

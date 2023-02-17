@@ -18,8 +18,16 @@ package com.google.android.connecteddevice.api;
 
 import com.google.android.connecteddevice.model.AssociatedDevice;
 
-/** Listener for retrieving devices associated with the active user. */
+/**
+ * Listener for retrieving devices associated with the active user.
+ *
+ * Only make additive changes to maintain backward compatibility.
+ * The added function needs to be assigned the transaction value noted below,
+ * and the value needs to be appropriately incremented.
+ *
+ * Next transaction value: 1
+ */
 oneway interface IOnAssociatedDevicesRetrievedListener {
     /** Triggered when the devices associated with the active user are retrieved. */
-    void onAssociatedDevicesRetrieved(in List<AssociatedDevice> devices);
+    void onAssociatedDevicesRetrieved(in List<AssociatedDevice> devices) = 0;
 }

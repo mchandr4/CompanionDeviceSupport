@@ -29,6 +29,8 @@ import android.os.IBinder;
 import android.os.Looper;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
+import com.google.android.connecteddevice.R;
+import com.google.android.connecteddevice.api.external.ISafeBinderVersion;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 import java.time.Duration;
@@ -48,6 +50,10 @@ public abstract class TrunkService extends MetaDataService {
   @VisibleForTesting
   static final int MAX_BIND_ATTEMPTS = 3;
 
+  // TODO(b/263392730): Move this to FeatureConnector so that client app has access.
+  protected static final String ACTION_QUERY_API_VERSION =
+      "com.google.android.connecteddevice.api.QUERY_API_VERSION";
+
   private static final Duration BIND_RETRY_DURATION = Duration.ofSeconds(1);
 
   private final Multiset<String> bindAttempts = HashMultiset.create();
@@ -55,10 +61,19 @@ public abstract class TrunkService extends MetaDataService {
   @SuppressWarnings("AndroidConcurrentHashMap")
   private final Map<ComponentName, ServiceConnection> startedServices = new ConcurrentHashMap<>();
 
+  protected ISafeBinderVersion binderVersion;
+
   @Override
   public void onCreate() {
     super.onCreate();
     startBranchServices(META_EARLY_SERVICES);
+    binderVersion =
+        new ISafeBinderVersion.Stub() {
+          @Override
+          public int getVersion() {
+            return getResources().getInteger(R.integer.hu_companion_binder_version);
+          }
+        };
   }
 
   @Override

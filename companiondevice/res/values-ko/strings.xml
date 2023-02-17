@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">호환 앱 열기</string>
   <string name="enable_bluetooth_instruction_text">블루투스 연결 허용</string>
   <string name="connect_to_targe_car_instruction_text">&lt;b&gt;%1$s&lt;/b&gt;%2$s에 연결</string>
-  <string name="qr_instruction_text">QR 코드를 스캔하거나 MyCompanion을 열고 &lt;b&gt;%1$s&lt;/b&gt;%2$s에 연결하세요.</string>
+  <string name="qr_instruction_text">휴대전화를 사용하여 QR 코드를 스캔하거나 MyCompanion을 열고 &lt;b&gt;%1$s&lt;/b&gt; %2$s에 연결하세요.</string>
   <string name="connect_to_car_instruction_text">차량에 연결</string>
   <string name="associated_device_pairing_code_title">휴대전화의 코드 확인</string>
   <string name="associated_device_pairing_message">이 코드가 휴대전화에 표시된 코드와 일치하는지 확인하세요.</string>
@@ -43,6 +43,9 @@
   <string name="turn_on_bluetooth_message">휴대전화를 호환 기기로 설정하려면 차량에 블루투스가 필요합니다.</string>
   <string name="turn_on_bluetooth_dialog_title">블루투스를 사용 설정하시겠습니까?</string>
   <string name="turn_on_bluetooth_dialog_message">호환 기기에 연결하려면 차량에 블루투스가 필요합니다.</string>
+  <string name="companion_not_available_dialog_title">사용할 수 없는 설정입니다</string>
+  <string name="companion_not_available_dialog_message">게스트 프로필은 CompanionDevice에 액세스할 수 없습니다.</string>
+  <string name="companion_not_available_dialog_switch_user_message">게스트 프로필은 CompanionDevice에 액세스할 수 없습니다. 프로필을 변경하려면 설정 &gt; 사용자로 이동하세요.</string>
   <string name="accept">동의</string>
   <string name="reject">거부</string>
   <string name="confirm">확인</string>
@@ -60,7 +63,9 @@
   <string name="not_now">나중에</string>
   <string name="connect">연결</string>
   <string name="disconnect">연결 해제</string>
+  <string name="disconnecting">Disconnecting</string>
   <string name="skip">건너뛰기</string>
+  <string name="change_profile">프로필 변경</string>
   <string name="connected">연결됨</string>
   <string name="notDetected">감지되지 않음</string>
   <string name="disconnected">연결 끊김</string>

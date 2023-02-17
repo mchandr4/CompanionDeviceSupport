@@ -116,6 +116,8 @@
     <string name="connect">Connect</string>
     <!-- Disconnect button text [CHAR LIMIT=20] -->
     <string name="disconnect">Disconnect</string>
+    <!-- Disconnecting button text [CHAR LIMIT=20] -->
+    <string name="disconnecting">Disconnecting</string>
     <!-- Skip button text [CHAR LIMIT=20] -->
     <string name="skip">Skip</string>
     <!-- change profile button text [CHAR LIMIT=40] -->

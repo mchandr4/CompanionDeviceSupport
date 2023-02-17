@@ -134,10 +134,18 @@ public abstract class BlePeripheralManager {
       @NonNull BluetoothGattCharacteristic characteristic,
       boolean confirm);
 
+  /** Disconnect the connected device. */
+  public abstract void disconnect();
+
   /** Cleans up the BLE GATT server state. */
   @CallSuper
   public void cleanup() {
     // Clears all registered listeners. IHU only supports single connection in peripheral role.
+    clearListeners();
+  }
+
+  /** Clears all registered listeners. */
+  protected void clearListeners() {
     readListeners.clear();
     writeListeners.clear();
   }

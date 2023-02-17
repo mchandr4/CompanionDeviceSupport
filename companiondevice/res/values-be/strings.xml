@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">Адкрыйце спадарожную праграму</string>
   <string name="enable_bluetooth_instruction_text">Дазвольце падключэнне праз Bluetooth</string>
   <string name="connect_to_targe_car_instruction_text">Падключыцеся да аўтамабіля &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
-  <string name="qr_instruction_text">Адсканіруйце QR-код або адкрыйце праграму MyCompanion, каб падключыцца да аўтамабіля &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">Каб падключыцца да аўтамабіля &lt;b&gt;%1$s&lt;/b&gt; %2$s, адсканіруйце QR-код з дапамогай тэлефона або адкрыйце праграму MyCompanion</string>
   <string name="connect_to_car_instruction_text">Падключыцеся да аўтамабіля</string>
   <string name="associated_device_pairing_code_title">Пацвердзіце код на тэлефоне</string>
   <string name="associated_device_pairing_message">Праверце, ці супадае гэты код з паказаным на тэлефоне</string>
@@ -43,6 +43,9 @@
   <string name="turn_on_bluetooth_message">Каб можна было наладзіць тэлефон як спадарожную прыладу, на аўтамабілі павінен працаваць Bluetooth.</string>
   <string name="turn_on_bluetooth_dialog_title">Уключыць Bluetooth?</string>
   <string name="turn_on_bluetooth_dialog_message">Каб падключыцца да спадарожнай прылады, аўтамабілю патрабуецца Bluetooth.</string>
+  <string name="companion_not_available_dialog_title">Гэта налада недаступная</string>
+  <string name="companion_not_available_dialog_message">Гасцявыя профілі не маюць доступу да налады CompanionDevice</string>
+  <string name="companion_not_available_dialog_switch_user_message">Гасцявыя профілі не маюць доступу да налады CompanionDevice. Каб змяніць свой профіль, перайдзіце ў раздзел \"Налады &gt; Карыстальнікі\".</string>
   <string name="accept">Прыняць</string>
   <string name="reject">Адхіліць</string>
   <string name="confirm">Пацвердзіць</string>
@@ -60,7 +63,9 @@
   <string name="not_now">Не зараз</string>
   <string name="connect">Падключыцца</string>
   <string name="disconnect">Адключыцца</string>
+  <string name="disconnecting">Disconnecting</string>
   <string name="skip">Прапусціць</string>
+  <string name="change_profile">Змяніць профіль</string>
   <string name="connected">Падключана</string>
   <string name="notDetected">Не знойдзена</string>
   <string name="disconnected">Адключана</string>

@@ -31,7 +31,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
-import com.google.android.connecteddevice.api.IOnLogRequestedListener;
+import com.google.android.connecteddevice.api.external.ISafeOnLogRequestedListener;
 import com.google.android.connecteddevice.logging.LoggingManager.LogFileCallback;
 import com.google.android.connecteddevice.logging.LoggingManager.LoggingEventCallback;
 import com.google.android.connecteddevice.logging.LoggingManager.OnLogRequestedListener;
@@ -69,8 +69,8 @@ public class LoggingManagerTest {
   @Mock private Logger mockLogger0;
   @Mock private OnLogRequestedListener mockListener0;
   @Mock private OnLogRequestedListener mockListener1;
-  @Mock private IOnLogRequestedListener mockRemoteListener0;
-  @Mock private IOnLogRequestedListener mockRemoteListener1;
+  @Mock private ISafeOnLogRequestedListener mockRemoteListener0;
+  @Mock private ISafeOnLogRequestedListener mockRemoteListener1;
   @Mock private IBinder mockAliveIBinder;
   @Mock private IBinder mockDeadIBinder;
   @Mock private LoggingEventCallback mockLoggingEventCallback;
@@ -264,6 +264,6 @@ public class LoggingManagerTest {
   private static ConnectedDevice createConnectedDevice() {
     String deviceId = UUID.randomUUID().toString();
     return new ConnectedDevice(
-        deviceId, TEST_DEVICE_NAME, /* belongsToActiveUser= */ true, /* hasSecureChannel= */ true);
+        deviceId, TEST_DEVICE_NAME, /* belongsToDriver= */ true, /* hasSecureChannel= */ true);
   }
 }

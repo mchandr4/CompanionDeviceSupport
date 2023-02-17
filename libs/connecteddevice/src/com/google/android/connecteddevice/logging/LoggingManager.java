@@ -26,7 +26,7 @@ import android.os.IInterface;
 import android.os.RemoteException;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
-import com.google.android.connecteddevice.api.IOnLogRequestedListener;
+import com.google.android.connecteddevice.api.external.ISafeOnLogRequestedListener;
 import com.google.android.connecteddevice.logging.util.LoggingUtils;
 import com.google.android.connecteddevice.model.ConnectedDevice;
 import com.google.android.connecteddevice.util.AidlThreadSafeCallbacks;
@@ -64,7 +64,7 @@ public class LoggingManager {
 
   private final Map<Integer, ThreadSafeLoggingCallbacks<OnLogRequestedListener>>
       registeredLogRequestedListeners = new ConcurrentHashMap<>();
-  private final Map<Integer, AidlThreadSafeLoggingCallbacks<IOnLogRequestedListener>>
+  private final Map<Integer, AidlThreadSafeLoggingCallbacks<ISafeOnLogRequestedListener>>
       registeredRemoteLogRequestedListeners = new ConcurrentHashMap<>();
   private final ThreadSafeCallbacks<LoggingEventCallback> loggingEventCallbacks =
       new ThreadSafeCallbacks<>();
@@ -225,9 +225,9 @@ public class LoggingManager {
   }
 
   public void registerLogRequestedListener(
-      int loggerId, @NonNull IOnLogRequestedListener listener, @NonNull Executor executor) {
+      int loggerId, @NonNull ISafeOnLogRequestedListener listener, @NonNull Executor executor) {
     logd(TAG, "registerOnLogRequestedListener called for logger: " + loggerId);
-    AidlThreadSafeLoggingCallbacks<IOnLogRequestedListener> listeners =
+    AidlThreadSafeLoggingCallbacks<ISafeOnLogRequestedListener> listeners =
         registeredRemoteLogRequestedListeners.get(loggerId);
     if (listeners == null) {
       listeners = new AidlThreadSafeLoggingCallbacks<>();
@@ -264,8 +264,8 @@ public class LoggingManager {
   }
 
   public void unregisterLogRequestedListener(
-      int loggerId, @NonNull IOnLogRequestedListener listener) {
-    AidlThreadSafeLoggingCallbacks<IOnLogRequestedListener> listeners =
+      int loggerId, @NonNull ISafeOnLogRequestedListener listener) {
+    AidlThreadSafeLoggingCallbacks<ISafeOnLogRequestedListener> listeners =
         registeredRemoteLogRequestedListeners.get(loggerId);
     if (listeners == null) {
       logw(

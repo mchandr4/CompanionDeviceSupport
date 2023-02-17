@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">פותחים את האפליקציה הנלווית</string>
   <string name="enable_bluetooth_instruction_text">מפעילים את חיבור ה-Bluetooth</string>
   <string name="connect_to_targe_car_instruction_text">מתחברים אל &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
-  <string name="qr_instruction_text">צריך לסרוק את קוד ה-QR או לפתוח את MyCompanion כדי להתחבר אל &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">צריך להשתמש בטלפון כדי לסרוק את קוד ה-QR או לפתוח את MyCompanion כדי להתחבר אל &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
   <string name="connect_to_car_instruction_text">מתחברים אל המכונית</string>
   <string name="associated_device_pairing_code_title">צריך לאשר את הקוד בטלפון</string>
   <string name="associated_device_pairing_message">יש לאשר שזה מתאים לקוד שמופיע בטלפון שלך</string>
@@ -43,6 +43,9 @@
   <string name="turn_on_bluetooth_message">כדי להגדיר את הטלפון כמכשיר נלווה, יש צורך ב-Bluetooth במכונית.</string>
   <string name="turn_on_bluetooth_dialog_title">האם להפעיל את Bluetooth?</string>
   <string name="turn_on_bluetooth_dialog_message">כדי להתחבר למכשיר הנלווה, יש צורך ב-Bluetooth במכונית.</string>
+  <string name="companion_not_available_dialog_title">ההגדרה הזו לא זמינה</string>
+  <string name="companion_not_available_dialog_message">אי אפשר לגשת אל CompanionDevice באמצעות פרופילים של אורחים</string>
+  <string name="companion_not_available_dialog_switch_user_message">אי אפשר לגשת אל CompanionDevice באמצעות פרופילים של אורחים. כדי לשנות את הפרופיל יש לעבור אל ההגדרות &gt; משתמשים.</string>
   <string name="accept">אישור</string>
   <string name="reject">דחייה</string>
   <string name="confirm">אישור</string>
@@ -60,7 +63,9 @@
   <string name="not_now">לא עכשיו</string>
   <string name="connect">התחברות</string>
   <string name="disconnect">התנתקות</string>
+  <string name="disconnecting">Disconnecting</string>
   <string name="skip">דילוג</string>
+  <string name="change_profile">שינוי הפרופיל</string>
   <string name="connected">מחובר</string>
   <string name="notDetected">לא מזוהה</string>
   <string name="disconnected">מנותק</string>
@@ -89,9 +94,8 @@
   <string name="create_phone_lock_dialog_title">יצירת נעילת מסך בטלפון</string>
   <string name="create_phone_lock_dialog_message">בטלפון שלך לא מוגדרת נעילת מסך. כדי לבטל את נעילת פרופיל המכונית באמצעות הטלפון, תחילה צריך ליצור נעילת מסך (או \"קוד גישה\") בהגדרות הטלפון.</string>
   <plurals name="notification_new_message">
-    <item quantity="one">הודעה חדשה</item>
+    <item quantity="one">%d הודעות חדשות</item>
     <item quantity="two">%d הודעות חדשות</item>
-    <item quantity="many">%d הודעות חדשות</item>
     <item quantity="other">%d הודעות חדשות</item>
   </plurals>
   <string name="name_not_available">השם לא זמין</string>

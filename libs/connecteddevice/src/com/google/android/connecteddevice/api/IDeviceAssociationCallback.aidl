@@ -18,14 +18,22 @@ package com.google.android.connecteddevice.api;
 
 import com.google.android.connecteddevice.model.AssociatedDevice;
 
-/** Callback for triggered associated device related events. */
+/**
+ * Callback for triggered associated device related events.
+ *
+ * Only make additive changes to maintain backward compatibility.
+ * The added function needs to be assigned the transaction value noted below,
+ * and the value needs to be appropriately incremented.
+ *
+ * Next transaction value: 3
+ */
 oneway interface IDeviceAssociationCallback {
     /** Triggered when an associated device has been added */
-    void onAssociatedDeviceAdded(in AssociatedDevice device);
+    void onAssociatedDeviceAdded(in AssociatedDevice device) = 0;
 
     /** Triggered when an associated device has been removed.  */
-    void onAssociatedDeviceRemoved(in AssociatedDevice device);
+    void onAssociatedDeviceRemoved(in AssociatedDevice device) = 1;
 
     /** Triggered when an associated device has been updated. */
-    void onAssociatedDeviceUpdated(in AssociatedDevice device);
+    void onAssociatedDeviceUpdated(in AssociatedDevice device) = 2;
 }

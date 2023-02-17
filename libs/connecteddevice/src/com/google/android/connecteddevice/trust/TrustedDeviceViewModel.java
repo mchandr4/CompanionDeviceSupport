@@ -28,7 +28,6 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.os.RemoteException;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
@@ -68,7 +67,6 @@ public class TrustedDeviceViewModel extends AndroidViewModel {
       new MutableLiveData<>(false);
 
   private ITrustedDeviceManager trustedDeviceManager;
-  private KeyguardManager keyguardManager;
 
   public TrustedDeviceViewModel(@NonNull Application application) {
     super(application);
@@ -81,11 +79,27 @@ public class TrustedDeviceViewModel extends AndroidViewModel {
       @NonNull Application application, @NonNull ITrustedDeviceManager trustedDeviceManager) {
     super(application);
     this.trustedDeviceManager = trustedDeviceManager;
+    registerCallbacks();
+    updateTrustedDevicesFromServer();
+  }
+
+  private void updateTrustedDevicesFromServer() {
+    if (trustedDeviceManager == null) {
+      loge(TAG, "Server not connected when attempting to retrieve trusted devices.");
+      return;
+    }
+    IOnTrustedDevicesRetrievedListener onTrustedDevicesRetrievedListener =
+        new IOnTrustedDevicesRetrievedListener.Stub() {
+          @Override
+          public void onTrustedDevicesRetrieved(List<TrustedDevice> devices) {
+            trustedDevices.postValue(devices);
+            logd(TAG, "on trusted devices retrieved.");
+          }
+        };
     try {
-      registerCallbacks();
       trustedDeviceManager.retrieveTrustedDevicesForActiveUser(onTrustedDevicesRetrievedListener);
     } catch (RemoteException e) {
-      loge(TAG, "Initial set up failed.", e);
+      loge(TAG, "Failed to retrieve trusted devices.", e);
     }
   }
 
@@ -93,7 +107,9 @@ public class TrustedDeviceViewModel extends AndroidViewModel {
    * Set trusted devices.
    *
    * @param devices Trusted devices.
+   * @deprecated Set trusted device from outside of view model is not supported anymore.
    */
+  @Deprecated
   public void setTrustedDevices(@NonNull List<TrustedDevice> devices) {
     trustedDevices.postValue(devices);
   }
@@ -102,17 +118,29 @@ public class TrustedDeviceViewModel extends AndroidViewModel {
    * Set current associated device.
    *
    * @param device Associated device.
+   * @deprecated Set associated device from outside of view model is not supported anymore.
    */
+  @Deprecated
   public void setAssociatedDevice(@NonNull AssociatedDevice device) {
     associatedDevice.postValue(device);
   }
 
-  /** Set the disabled trusted device. */
+  /**
+   * Set the disabled trusted device.
+   *
+   * @deprecated Set disabled trusted device from outside of view model is not supported anymore.
+   */
+  @Deprecated
   public void setDisabledDevice(TrustedDevice device) {
     deviceDisabled.postValue(device);
   }
 
-  /** Set the enabled trusted device. */
+  /**
+   * Set the enabled trusted device.
+   *
+   * @deprecated Set enabled trusted device from outside of view model is not supported anymore.
+   */
+  @Deprecated
   public void setEnabledDevice(TrustedDevice device) {
     deviceEnabled.postValue(device);
   }
@@ -127,12 +155,24 @@ public class TrustedDeviceViewModel extends AndroidViewModel {
     return associatedDevice;
   }
 
-  /** Get the disabled trusted device. */
+  /**
+   * Get the disabled trusted device
+   *
+   * @deprecated Ensure to use {@code getTrustedDevices} as the only source of truth to update
+   *     trusted device information.
+   */
+  @Deprecated
   public LiveData<TrustedDevice> getDisabledDevice() {
     return deviceDisabled;
   }
 
-  /** Get the enabled trusted device. */
+  /**
+   * Get the enabled trusted device.
+   *
+   * @deprecated Ensure to use {@code getTrustedDevices} as the only source of truth to update
+   *     trusted device information.
+   */
+  @Deprecated
   public LiveData<TrustedDevice> getEnabledDevice() {
     return deviceEnabled;
   }
@@ -191,6 +231,7 @@ public class TrustedDeviceViewModel extends AndroidViewModel {
     } catch (RemoteException e) {
       loge(TAG, "Failed to abort enrollment.", e);
     }
+    updateTrustedDevicesFromServer();
     resetEnrollmentState();
   }
 
@@ -227,11 +268,7 @@ public class TrustedDeviceViewModel extends AndroidViewModel {
 
   @Override
   protected void onCleared() {
-    try {
-      unregisterCallbacks();
-    } catch (RemoteException e) {
-      loge(TAG, "Error clearing registered callbacks.", e);
-    }
+    unregisterCallbacks();
     getApplication().unbindService(serviceConnection);
     trustedDeviceManager = null;
   }
@@ -287,58 +324,51 @@ public class TrustedDeviceViewModel extends AndroidViewModel {
   }
 
   private boolean isDeviceSecure() {
-    KeyguardManager keyguardManager = getKeyguardManager();
+    KeyguardManager keyguardManager = getApplication().getSystemService(KeyguardManager.class);
     if (keyguardManager == null) {
+      loge(TAG, "Unable to get KeyguardManager.");
       return false;
     }
     return keyguardManager.isDeviceSecure();
   }
 
-  @Nullable
-  private KeyguardManager getKeyguardManager() {
-    if (keyguardManager == null) {
-      keyguardManager = getApplication().getSystemService(KeyguardManager.class);
-    }
-    if (keyguardManager == null) {
-      loge(TAG, "Unable to get KeyguardManager.");
-    }
-    return keyguardManager;
-  }
-
-  private void registerCallbacks() throws RemoteException {
+  private void registerCallbacks() {
     if (trustedDeviceManager == null) {
       loge(TAG, "Server not connected when attempting to register callbacks.");
       return;
     }
-    trustedDeviceManager.registerTrustedDeviceEnrollmentCallback(trustedDeviceEnrollmentCallback);
-    trustedDeviceManager.registerTrustedDeviceCallback(trustedDeviceCallback);
-    trustedDeviceManager.registerAssociatedDeviceCallback(deviceAssociationCallback);
+    try {
+      trustedDeviceManager.registerTrustedDeviceEnrollmentCallback(trustedDeviceEnrollmentCallback);
+      trustedDeviceManager.registerTrustedDeviceCallback(trustedDeviceCallback);
+      trustedDeviceManager.registerAssociatedDeviceCallback(deviceAssociationCallback);
+    } catch (RemoteException e) {
+      loge(TAG, "Error registering callbacks.", e);
+    }
   }
 
-  private void unregisterCallbacks() throws RemoteException {
+  private void unregisterCallbacks() {
     if (trustedDeviceManager == null) {
       loge(TAG, "Server not connected when attempting to unregister callbacks.");
       return;
     }
-    trustedDeviceManager.unregisterTrustedDeviceEnrollmentCallback(trustedDeviceEnrollmentCallback);
-    trustedDeviceManager.unregisterTrustedDeviceCallback(trustedDeviceCallback);
-    trustedDeviceManager.unregisterAssociatedDeviceCallback(deviceAssociationCallback);
+    try {
+      trustedDeviceManager.unregisterTrustedDeviceEnrollmentCallback(
+          trustedDeviceEnrollmentCallback);
+      trustedDeviceManager.unregisterTrustedDeviceCallback(trustedDeviceCallback);
+      trustedDeviceManager.unregisterAssociatedDeviceCallback(deviceAssociationCallback);
+    } catch (RemoteException e) {
+      loge(TAG, "Error unregistering callbacks.", e);
+    }
   }
 
   private final ServiceConnection serviceConnection =
       new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-          trustedDeviceManager = ITrustedDeviceManager.Stub.asInterface(service);
-          try {
-            registerCallbacks();
-            trustedDeviceManager.retrieveTrustedDevicesForActiveUser(
-                onTrustedDevicesRetrievedListener);
-          } catch (RemoteException e) {
-            loge(TAG, "Error while connecting to service.");
-            return;
-          }
           logd(TAG, "Successfully connected to TrustedDeviceManager.");
+          trustedDeviceManager = ITrustedDeviceManager.Stub.asInterface(service);
+          registerCallbacks();
+          updateTrustedDevicesFromServer();
         }
 
         @Override
@@ -351,15 +381,15 @@ public class TrustedDeviceViewModel extends AndroidViewModel {
       new ITrustedDeviceCallback.Stub() {
         @Override
         public void onTrustedDeviceAdded(TrustedDevice device) {
-          logd(TAG, "Added trusted device: " + device.getDeviceId() + ".");
-          setEnabledDevice(device);
+          logd(TAG, "Added trusted device: " + device.getDeviceId() + ", update UI elements.");
+          updateTrustedDevicesFromServer();
           finishEnrollment();
         }
 
         @Override
         public void onTrustedDeviceRemoved(TrustedDevice device) {
-          logd(TAG, "Removed trusted device: " + device.getDeviceId() + ".");
-          setDisabledDevice(device);
+          logd(TAG, "Removed trusted device: " + device.getDeviceId() + ", update UI elements.");
+          updateTrustedDevicesFromServer();
         }
       };
 
@@ -401,16 +431,6 @@ public class TrustedDeviceViewModel extends AndroidViewModel {
         @Override
         public void onSecureDeviceRequest() {
           enrollmentState.postValue(EnrollmentState.WAITING_FOR_PASSWORD_SETUP);
-        }
-      };
-
-  private final IOnTrustedDevicesRetrievedListener onTrustedDevicesRetrievedListener =
-      new IOnTrustedDevicesRetrievedListener.Stub() {
-
-        @Override
-        public void onTrustedDevicesRetrieved(List<TrustedDevice> devices) {
-          setTrustedDevices(devices);
-          logd(TAG, "on trusted devices retrieved.");
         }
       };
 }

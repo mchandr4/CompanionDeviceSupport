@@ -49,16 +49,16 @@ import kotlin.properties.Delegates
  * 1. Process the first received data as version exchange message, send back car versions.
  * 2. Create a [ProtocolStream] with the current [ConnectionProtocol].
  * 3. Create a [MultiProtocolSecureChannel], add [ProtocolStream]s for all connected
- * [ConnectionProtocol]s and notify that the channel has been resolved.
+ *    [ConnectionProtocol]s and notify that the channel has been resolved.
  *
  * Channel resolving for reconnect:
  * 1. Process the first received data as version exchange message, send back car versions.
  * 2. Create a [ProtocolStream] with the current [ConnectionProtocol].
  * 3. If the current [ConnectionProtocol] requires device verification, process the next
- * [DeviceMessage] received over the created [ProtocolStream] as challenge message and send back new
- * challenge.
+ *    [DeviceMessage] received over the created [ProtocolStream] as challenge message and send back
+ *    new challenge.
  * 4. Create a [MultiProtocolSecureChannel], add [ProtocolStream]s for all connected
- * [ConnectionProtocol]s and notify that the channel has been resolved.
+ *    [ConnectionProtocol]s and notify that the channel has been resolved.
  */
 class ChannelResolver(
   private val protocolDevice: ProtocolDevice,
@@ -128,13 +128,15 @@ class ChannelResolver(
         onError("Received a malformed version exchange message.", e)
         return
       }
-    if (version.minSupportedMessagingVersion > MAX_MESSAGING_VERSION ||
+    if (
+      version.minSupportedMessagingVersion > MAX_MESSAGING_VERSION ||
         version.maxSupportedMessagingVersion < MIN_MESSAGING_VERSION
     ) {
       onError("Device does not have a compatible messaging version.")
       return
     }
-    if (version.minSupportedSecurityVersion > MAX_SECURITY_VERSION ||
+    if (
+      version.minSupportedSecurityVersion > MAX_SECURITY_VERSION ||
         version.maxSupportedSecurityVersion < MIN_SECURITY_VERSION
     ) {
       onError("Device does not have a compatible messaging version.")
@@ -258,10 +260,16 @@ class ChannelResolver(
   }
 
   companion object {
+    // copybara:strip_begin
+    // LINT.IfChange
+    // copybara:strip_end
     internal const val MIN_MESSAGING_VERSION = 3
     internal const val MAX_MESSAGING_VERSION = 3
     internal const val MIN_SECURITY_VERSION = 4
     internal const val MAX_SECURITY_VERSION = 4
+    // copybara:strip_begin
+    // LINT.ThenChange(//depot/google3/third_party/java_src/android_libs/connecteddevice/java/com/google/android/connecteddevice/res/values/config.xml)
+    // copybara:strip_end
     private const val TAG = "ChannelResolver"
   }
 }

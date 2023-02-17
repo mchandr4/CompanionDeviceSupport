@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">ਸੰਬੰਧੀ ਐਪ ਖੋਲ੍ਹੋ</string>
   <string name="enable_bluetooth_instruction_text">ਬਲੂਟੁੱਥ ਕਨੈਕਸ਼ਨ ਨੂੰ ਇਜਾਜ਼ਤ ਦਿਓ</string>
   <string name="connect_to_targe_car_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s ਨਾਲ ਕਨੈਕਟ ਕਰੋ</string>
-  <string name="qr_instruction_text">QR ਕੋਡ ਨੂੰ ਸਕੈਨ ਕਰੋ ਜਾਂ &lt;b&gt;%1$s&lt;/b&gt; %2$s ਨਾਲ ਕਨੈਕਟ ਕਰਨ ਲਈ MyCompanion ਖੋਲ੍ਹੋ</string>
+  <string name="qr_instruction_text">QR ਕੋਡ ਨੂੰ ਸਕੈਨ ਕਰਨ ਲਈ ਆਪਣੇ ਫ਼ੋਨ ਨੂੰ ਵਰਤੋ ਜਾਂ &lt;b&gt;%1$s&lt;/b&gt; %2$s ਨਾਲ ਕਨੈਕਟ ਕਰਨ ਲਈ MyCompanion ਖੋਲ੍ਹੋ</string>
   <string name="connect_to_car_instruction_text">ਕਾਰ ਨਾਲ ਕਨੈਕਟ ਕਰੋ</string>
   <string name="associated_device_pairing_code_title">ਫ਼ੋਨ \'ਤੇ ਕੋਡ ਦੀ ਤਸਦੀਕ ਕਰੋ</string>
   <string name="associated_device_pairing_message">ਤਸਦੀਕ ਕਰੋ ਕਿ ਇਹ ਤੁਹਾਡੇ ਫ਼ੋਨ \'ਤੇ ਦਿਖਾਏ ਜਾ ਰਹੇ ਕੋਡ ਨਾਲ ਮੇਲ ਖਾਂਦਾ ਹੈ</string>
@@ -43,6 +43,9 @@
   <string name="turn_on_bluetooth_message">ਆਪਣੇ ਫ਼ੋਨ ਨੂੰ ਸੰਬੰਧੀ ਡੀਵਾਈਸ ਵਜੋਂ ਸੈੱਟ ਕਰਨ ਲਈ, ਤੁਹਾਡੀ ਕਾਰ ਨੂੰ ਬਲੂਟੁੱਥ ਦੀ ਲੋੜ ਹੈ।</string>
   <string name="turn_on_bluetooth_dialog_title">ਕੀ ਬਲੂਟੁੱਥ ਚਾਲੂ ਕਰਨਾ ਹੈ?</string>
   <string name="turn_on_bluetooth_dialog_message">ਆਪਣੇ ਸੰਬੰਧੀ ਡੀਵਾਈਸ ਦੇ ਨਾਲ ਕਨੈਕਟ ਕਰਨ ਲਈ, ਤੁਹਾਡੀ ਕਾਰ ਨੂੰ ਬਲੂਟੁੱਥ ਦੀ ਲੋੜ ਹੈ।</string>
+  <string name="companion_not_available_dialog_title">ਇਹ ਸੈਟਿੰਗ ਉਪਲਬਧ ਨਹੀਂ ਹੈ</string>
+  <string name="companion_not_available_dialog_message">ਮਹਿਮਾਨ ਪ੍ਰੋਫਾਈਲ CompanionDevice ਤੱਕ ਪਹੁੰਚ ਨਹੀਂ ਕਰ ਸਕਦੇ</string>
+  <string name="companion_not_available_dialog_switch_user_message">ਮਹਿਮਾਨ ਪ੍ਰੋਫਾਈਲ CompanionDevice ਤੱਕ ਪਹੁੰਚ ਨਹੀਂ ਕਰ ਸਕਦੇ। ਆਪਣੇ ਪ੍ਰੋਫਾਈਲ ਨੂੰ ਬਦਲਣ ਲਈ, ਸੈਟਿੰਗਾਂ &gt; ਵਰਤੋਂਕਾਰ \'ਤੇ ਜਾਓ।</string>
   <string name="accept">ਸਵੀਕਾਰ ਕਰੋ</string>
   <string name="reject">ਅਸਵੀਕਾਰ ਕਰੋ</string>
   <string name="confirm">ਤਸਦੀਕ ਕਰੋ</string>
@@ -60,7 +63,9 @@
   <string name="not_now">ਹੁਣੇ ਨਹੀਂ</string>
   <string name="connect">ਕਨੈਕਟ ਕਰੋ</string>
   <string name="disconnect">ਡਿਸਕਨੈਕਟ ਕਰੋ</string>
+  <string name="disconnecting">Disconnecting</string>
   <string name="skip">ਛੱਡੋ</string>
+  <string name="change_profile">ਪ੍ਰੋਫਾਈਲ ਬਦਲੋ</string>
   <string name="connected">ਕਨੈਕਟ ਹੈ</string>
   <string name="notDetected">ਪਤਾ ਨਹੀਂ ਲੱਗਾ</string>
   <string name="disconnected">ਡਿਸਕਨੈਕਟ ਹੋਇਆ</string>

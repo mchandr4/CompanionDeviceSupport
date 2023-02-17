@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">បើក​កម្មវិធី​ដៃគូ</string>
   <string name="enable_bluetooth_instruction_text">អនុញ្ញាតឱ្យ​តភ្ជាប់​ប៊្លូធូស</string>
   <string name="connect_to_targe_car_instruction_text">ភ្ជាប់ទៅ &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
-  <string name="qr_instruction_text">ស្កេនកូដ QR ឬបើក MyCompanion ដើម្បីភ្ជាប់ជាមួយ &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">ប្រើទូរសព្ទ​របស់អ្នក ដើម្បីស្កេន​កូដ QR ឬបើក MyCompanion ដើម្បីភ្ជាប់​ជាមួយ &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
   <string name="connect_to_car_instruction_text">ភ្ជាប់ទៅ​រថយន្ត</string>
   <string name="associated_device_pairing_code_title">បញ្ជាក់កូដ​នៅលើ​ទូរសព្ទ</string>
   <string name="associated_device_pairing_message">បញ្ជាក់ថា​កូដនេះ​ត្រូវគ្នាជាមួយ​កូដ​ដែលបង្ហាញ​នៅលើ​ទូរសព្ទ​របស់អ្នក</string>
@@ -43,6 +43,9 @@
   <string name="turn_on_bluetooth_message">ត្រូវបើកប៊្លូធូសនៅលើរថយន្តរបស់អ្នក ដើម្បីរៀបចំ​ទូរសព្ទរបស់អ្នក​ជាឧបករណ៍ដៃគូ។</string>
   <string name="turn_on_bluetooth_dialog_title">បើកប៊្លូធូសឬ?</string>
   <string name="turn_on_bluetooth_dialog_message">​ត្រូវបើកប៊្លូធូសនៅលើរថយន្តរបស់អ្នក ដើម្បីភ្ជាប់ជាមួយ​ឧបករណ៍ដៃគូ​របស់អ្នក។</string>
+  <string name="companion_not_available_dialog_title">ការកំណត់នេះ​មិនអាចប្រើបានទេ</string>
+  <string name="companion_not_available_dialog_message">កម្រងព័ត៌មានភ្ញៀវ​មិនអាចូលប្រើ CompanionDevice បានទេ</string>
+  <string name="companion_not_available_dialog_switch_user_message">កម្រងព័ត៌មានភ្ញៀវ​មិនអាចូលប្រើ CompanionDevice បានទេ។ ដើម្បីប្ដូរ​កម្រងព័ត៌មាន​របស់អ្នក សូមចូលទៅកាន់​ការកំណត់ &gt; អ្នកប្រើប្រាស់។</string>
   <string name="accept">ទទួលយក</string>
   <string name="reject">បដិសេធ</string>
   <string name="confirm">បញ្ជាក់</string>
@@ -60,7 +63,9 @@
   <string name="not_now">កុំទាន់</string>
   <string name="connect">ភ្ជាប់</string>
   <string name="disconnect">ផ្ដាច់</string>
+  <string name="disconnecting">Disconnecting</string>
   <string name="skip">រំលង</string>
+  <string name="change_profile">ប្ដូរ​កម្រងព័ត៌មាន</string>
   <string name="connected">បានភ្ជាប់</string>
   <string name="notDetected">រកមិនឃើញទេ</string>
   <string name="disconnected">បាន​ដាច់</string>

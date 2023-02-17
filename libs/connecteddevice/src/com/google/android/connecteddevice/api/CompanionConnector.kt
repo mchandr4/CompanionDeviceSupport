@@ -40,6 +40,7 @@ import com.google.android.connecteddevice.api.Connector.Companion.USER_TYPE_DRIV
 import com.google.android.connecteddevice.api.Connector.Companion.USER_TYPE_PASSENGER
 import com.google.android.connecteddevice.api.Connector.Companion.UserType
 import com.google.android.connecteddevice.api.Connector.QueryCallback
+import com.google.android.connecteddevice.api.external.ISafeOnLogRequestedListener
 import com.google.android.connecteddevice.model.AssociatedDevice
 import com.google.android.connecteddevice.model.ConnectedDevice
 import com.google.android.connecteddevice.model.DeviceMessage
@@ -179,7 +180,7 @@ constructor(
     }
 
   private val logRequestedListener =
-    object : IOnLogRequestedListener.Stub() {
+    object : ISafeOnLogRequestedListener.Stub() {
       override fun onLogRecordsRequested() {
         val loggerBytes = Logger.getLogger().toByteArray()
         try {

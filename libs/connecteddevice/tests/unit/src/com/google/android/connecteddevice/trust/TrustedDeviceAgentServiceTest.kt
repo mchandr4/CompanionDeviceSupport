@@ -1,6 +1,8 @@
 package com.google.android.connecteddevice.trust
 
 import android.app.ActivityManager
+import android.app.KeyguardManager
+import android.os.PowerManager
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.connecteddevice.trust.api.ITrustedDeviceAgentDelegate
@@ -17,6 +19,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.shadow.api.Shadow
+import org.robolectric.shadows.ShadowKeyguardManager
+import org.robolectric.shadows.ShadowPowerManager
+
 
 @RunWith(RobolectricTestRunner::class)
 class TrustedDeviceAgentServiceTest {
@@ -30,6 +36,12 @@ class TrustedDeviceAgentServiceTest {
   private lateinit var service: TestTrustedDeviceAgentService
 
   private lateinit var delegate: ITrustedDeviceAgentDelegate
+  private val keyguardManager =
+    context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
+  private val powerManager =
+    context.getSystemService(Context.POWER_SERVICE) as PowerManager
+  private val shadowKeyguardManager = Shadow.extract<ShadowKeyguardManager>(keyguardManager)
+  private val shadowPowerManager = Shadow.extract<ShadowPowerManager>(powerManager)
 
   @Before
   fun setup() {
@@ -43,6 +55,8 @@ class TrustedDeviceAgentServiceTest {
       verify(mockTrustedDeviceManager, atLeastOnce()).setTrustedDeviceAgentDelegate(capture())
       delegate = firstValue
     }
+    shadowPowerManager.turnScreenOn(true)
+    shadowKeyguardManager.setIsDeviceLocked(false)
   }
 
   @Test
@@ -67,6 +81,26 @@ class TrustedDeviceAgentServiceTest {
   @Test
   fun onUserUnlock_doesNotInvokeCallbackIfTokenWasNotUsed() {
     unlockUser()
+
+    verify(mockTrustedDeviceManager, never()).onUserUnlocked()
+  }
+
+  @Test
+  fun unlockUserWithToken_locksScreenStillPresent_doesNotInvokeCallback() {
+    shadowKeyguardManager.setIsDeviceLocked(true)
+    service.isUserUnlocked = true
+
+    sendToken()
+
+    verify(mockTrustedDeviceManager, never()).onUserUnlocked()
+  }
+
+  @Test
+  fun unlockUserWithToken_deviceNotInteractive_doesNotDismissScreen() {
+    shadowPowerManager.turnScreenOn(false)
+    service.isUserUnlocked = true
+
+    sendToken()
 
     verify(mockTrustedDeviceManager, never()).onUserUnlocked()
   }

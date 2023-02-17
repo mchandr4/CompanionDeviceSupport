@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">Өнөктөштүн колдонмосун ачуу</string>
   <string name="enable_bluetooth_instruction_text">Bluetooth аркылуу туташууга уруксат берүү</string>
   <string name="connect_to_targe_car_instruction_text">&lt;b&gt;%1$s&lt;/b&gt;%2$s унаасына туташтыруу</string>
-  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s унаасына туташуу үчүн QR кодду скандаңыз же MyCompanion\'ду ачыңыз</string>
+  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s унаасына туташуу үчүн телефонуңуз менен QR кодду скандаңыз же MyCompanion\'ду ачыңыз</string>
   <string name="connect_to_car_instruction_text">Унаага туташтырыңыз</string>
   <string name="associated_device_pairing_code_title">Телефондогу кодду ырастоо</string>
   <string name="associated_device_pairing_message">Бул телефонуңуздагы кодго дал келерин ырастаңыз</string>
@@ -43,6 +43,9 @@
   <string name="turn_on_bluetooth_message">Телефонуңузду өнөктөш түзмөк катары жөндөө үчүн унааңыздагы Bluetooth\'ду күйгүзүү керек.</string>
   <string name="turn_on_bluetooth_dialog_title">Bluetooth күйгүзүлсүнбү?</string>
   <string name="turn_on_bluetooth_dialog_message">Өнөктөш түзмөктү туташтыруу үчүн унааңыздагы Bluetooth\'ду күйгүзүү керек.</string>
+  <string name="companion_not_available_dialog_title">Бул параметр жеткиликсиз</string>
+  <string name="companion_not_available_dialog_message">Коноктордун профилдери үчүн CompanionDevice жеткиликсиз</string>
+  <string name="companion_not_available_dialog_switch_user_message">Коноктордун профилдери үчүн CompanionDevice жеткиликсиз. Профилди өзгөртүү үчүн Параметрлер &gt; Колдонуучулар бөлүмүнө өтүңүз.</string>
   <string name="accept">Кабыл алуу</string>
   <string name="reject">Четке кагуу</string>
   <string name="confirm">Ырастоо</string>
@@ -60,7 +63,9 @@
   <string name="not_now">Азыр эмес</string>
   <string name="connect">Туташтыруу</string>
   <string name="disconnect">Ажыратуу</string>
+  <string name="disconnecting">Disconnecting</string>
   <string name="skip">Өткөрүп жиберүү</string>
+  <string name="change_profile">Профилди өзгөртүү</string>
   <string name="connected">Туташты</string>
   <string name="notDetected">Аныкталган жок</string>
   <string name="disconnected">Ажыратылды</string>
@@ -87,7 +92,7 @@
   <string name="trusted_device_enrollment_error_dialog_title">Бир жерден ката кетти</string>
   <string name="trusted_device_enrollment_error_dialog_message">Тилекке каршы, бул функция азырынча иштетилген жок. Кайталап көрүңүз.</string>
   <string name="create_phone_lock_dialog_title">Телефонуңуздун экранынын кулпусун түзүңүз</string>
-  <string name="create_phone_lock_dialog_message">Телефонуңузда экрандын кулпусу жөндөлгөн эмес. Унааңыздын профилинин кулпусун ачуу үчүн, адегенде телефонуңуздун жөндөөлөрүнө өтүп, экрандын кулпусун (өткөрүүчү кодду) түзүңүз.</string>
+  <string name="create_phone_lock_dialog_message">Телефонуңузда экрандын кулпусу жөндөлгөн эмес. Унааңыздын профилинин кулпусун ачуу үчүн адегенде телефонуңуздун параметрлерине өтүп, экрандын кулпусун (өткөрүүчү кодду) түзүңүз.</string>
   <plurals name="notification_new_message">
     <item quantity="one">Жаңы билдирүү</item>
     <item quantity="other">%d жаңы билдирүү</item>

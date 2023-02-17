@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">Buka apl rakan</string>
   <string name="enable_bluetooth_instruction_text">Benarkan sambungan Bluetooth</string>
   <string name="connect_to_targe_car_instruction_text">Sambung kepada &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
-  <string name="qr_instruction_text">Imbas kod QR atau buka MyCompanion untuk menyambung kepada &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">Gunakan telefon anda untuk mengimbas kod QR atau membuka MyCompanion untuk menyambung kepada &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
   <string name="connect_to_car_instruction_text">Sambung kepada kereta</string>
   <string name="associated_device_pairing_code_title">Sahkan kod pada telefon</string>
   <string name="associated_device_pairing_message">Sahkan kod ini sepadan dengan kod yang dipaparkan pada telefon anda</string>
@@ -43,6 +43,9 @@
   <string name="turn_on_bluetooth_message">Untuk menyediakan telefon anda sebagai peranti rakan, kereta anda memerlukan Bluetooth.</string>
   <string name="turn_on_bluetooth_dialog_title">Hidupkan Bluetooth?</string>
   <string name="turn_on_bluetooth_dialog_message">Untuk bersambung dengan peranti rakan anda, kereta anda memerlukan Bluetooth.</string>
+  <string name="companion_not_available_dialog_title">Tetapan ini tidak tersedia</string>
+  <string name="companion_not_available_dialog_message">Profil tetamu tidak dapat mengakses CompanionDevice</string>
+  <string name="companion_not_available_dialog_switch_user_message">Profil tetamu tidak dapat mengakses CompanionDevice. Untuk menukar profil anda, pergi ke Tetapan &gt; Pengguna.</string>
   <string name="accept">Terima</string>
   <string name="reject">Tolak</string>
   <string name="confirm">Sahkan</string>
@@ -60,7 +63,9 @@
   <string name="not_now">Bukan sekarang</string>
   <string name="connect">Sambung</string>
   <string name="disconnect">Putuskan sambungan</string>
+  <string name="disconnecting">Memutuskan sambungan</string>
   <string name="skip">Langkau</string>
+  <string name="change_profile">Tukar profil</string>
   <string name="connected">Disambungkan</string>
   <string name="notDetected">Tidak dikesan</string>
   <string name="disconnected">Terputus</string>

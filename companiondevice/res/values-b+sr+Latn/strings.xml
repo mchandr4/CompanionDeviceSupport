@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">Otvorite prateću aplikaciju</string>
   <string name="enable_bluetooth_instruction_text">Omogućite Bluetooth vezu</string>
   <string name="connect_to_targe_car_instruction_text">Povežite se sa automobilom &lt;b&gt;%1$s&lt;/b&gt;%2$s</string>
-  <string name="qr_instruction_text">Skenirajte QR kôd ili otvorite MyCompanion da biste se povezali sa automobilom &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">Pomoću telefona skenirajte QR kôd ili otvorite MyCompanion da biste se povezali sa automobilom &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
   <string name="connect_to_car_instruction_text">Povežite se sa automobilom</string>
   <string name="associated_device_pairing_code_title">Potvrdite kôd na telefonu</string>
   <string name="associated_device_pairing_message">Potvrdite da se ovo podudara sa kodom koji se prikazuje na telefonu</string>
@@ -43,6 +43,9 @@
   <string name="turn_on_bluetooth_message">Automobilu je potreban Bluetooth za podešavanje telefona kao pridruženog uređaja.</string>
   <string name="turn_on_bluetooth_dialog_title">Želite li da uključite Bluetooth?</string>
   <string name="turn_on_bluetooth_dialog_message">Automobilu je potreban Bluetooth za otključavanje pridruženog uređaja.</string>
+  <string name="companion_not_available_dialog_title">Ovo podešavanje nije dostupno</string>
+  <string name="companion_not_available_dialog_message">Profili gostiju ne mogu da pristupaju pratećem uređaju</string>
+  <string name="companion_not_available_dialog_switch_user_message">Profili gostiju ne mogu da pristupaju pratećem uređaju. Da biste promenili profil, idite u Podešavanja &gt; Korisnici.</string>
   <string name="accept">Prihvatam</string>
   <string name="reject">Odbij</string>
   <string name="confirm">Potvrdi</string>
@@ -60,7 +63,9 @@
   <string name="not_now">Ne sada</string>
   <string name="connect">Poveži</string>
   <string name="disconnect">Prekini vezu</string>
+  <string name="disconnecting">Prekida se veza</string>
   <string name="skip">Preskoči</string>
+  <string name="change_profile">Promenite profil</string>
   <string name="connected">Povezano</string>
   <string name="notDetected">Nije otkriveno</string>
   <string name="disconnected">Prekinuta veza</string>

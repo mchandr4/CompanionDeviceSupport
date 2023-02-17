@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">ເປີດແອັບຊ່ວຍເຫຼືອ</string>
   <string name="enable_bluetooth_instruction_text">ອະນຸຍາດການເຊື່ອມຕໍ່ Bluetooth</string>
   <string name="connect_to_targe_car_instruction_text">ເຊື່ອມຕໍ່ກັບ &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
-  <string name="qr_instruction_text">ສະແກນລະຫັດ QR ຫຼື ເປີດ MyCompanion ເພື່ອເຊື່ອມຕໍ່ກັບ &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">ໃຊ້ໂທລະສັບຂອງທ່ານສະແກນລະຫັດ QR ຫຼື ເປີດ MyCompanion ເພື່ອເຊື່ອມຕໍ່ກັບ &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
   <string name="connect_to_car_instruction_text">ເຊື່ອມຕໍ່ກັບລົດ</string>
   <string name="associated_device_pairing_code_title">ຢືນຢັນລະຫັດຜ່ານໃນໂທລະສັບ</string>
   <string name="associated_device_pairing_message">ຢືນຢັນວ່າລະຫັດນີ້ກົງກັບລະຫັດທີ່ສະແດງໃນໂທລະສັບຂອງທ່ານ</string>
@@ -43,6 +43,9 @@
   <string name="turn_on_bluetooth_message">ເພື່ອຕັ້ງຄ່າໂທລະສັບຂອງທ່ານເປັນອຸປະກອນຊ່ວຍເຫຼືອ, ລົດຂອງທ່ານຈຳເປັນຕ້ອງມີ Bluetooth.</string>
   <string name="turn_on_bluetooth_dialog_title">ເປີດໃຊ້ Bluetooth ບໍ?</string>
   <string name="turn_on_bluetooth_dialog_message">ເຊື່ອມຕໍ່ກັບອຸປະກອນຊ່ວຍຂອງທ່ານ, ລົດຂອງທ່ານຈຳເປັນຕ້ອງມີ Bluetooth.</string>
+  <string name="companion_not_available_dialog_title">ບໍ່ສາມາດໃຊ້ການຕັ້ງຄ່ານີ້ໄດ້</string>
+  <string name="companion_not_available_dialog_message">ໂປຣໄຟຣ໌ແຂກບໍ່ສາມາດເຂົ້າເຖິງ CompanionDevice ໄດ້</string>
+  <string name="companion_not_available_dialog_switch_user_message">ໂປຣໄຟລ໌ແຂກບໍ່ສາມາດເຂົ້າເຖິງ CompanionDevice ໄດ້. ເພື່ອປ່ຽນໂປຣໄຟລ໌ຂອງທ່ານ, ກະລຸນາໄປທີ່ການຕັ້ງຄ່າ &gt; ຜູ້ໃຊ້.</string>
   <string name="accept">ຍອມຮັບ</string>
   <string name="reject">ປະຕິເສດ</string>
   <string name="confirm">ຢືນຢັນ</string>
@@ -60,7 +63,9 @@
   <string name="not_now">ບໍ່ແມ່ນຕອນນີ້</string>
   <string name="connect">ເຊື່ອມຕໍ່</string>
   <string name="disconnect">ຕັດການເຊື່ອມຕໍ່</string>
+  <string name="disconnecting">Disconnecting</string>
   <string name="skip">ຂ້າມ</string>
+  <string name="change_profile">ປ່ຽນໂປຣໄຟລ໌</string>
   <string name="connected">ເຊື່ອມຕໍ່ແລ້ວ</string>
   <string name="notDetected">ກວດບໍ່ເຫັນ</string>
   <string name="disconnected">ຕັດການເຊື່ອມຕໍ່ແລ້ວ</string>

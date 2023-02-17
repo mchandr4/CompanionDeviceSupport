@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">Отворите пратећу апликацију</string>
   <string name="enable_bluetooth_instruction_text">Омогућите Bluetooth везу</string>
   <string name="connect_to_targe_car_instruction_text">Повежите се са аутомобилом &lt;b&gt;%1$s&lt;/b&gt;%2$s</string>
-  <string name="qr_instruction_text">Скенирајте QR кôд или отворите MyCompanion да бисте се повезали са аутомобилом &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">Помоћу телефона скенирајте QR кôд или отворите MyCompanion да бисте се повезали са аутомобилом &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
   <string name="connect_to_car_instruction_text">Повежите се са аутомобилом</string>
   <string name="associated_device_pairing_code_title">Потврдите кôд на телефону</string>
   <string name="associated_device_pairing_message">Потврдите да се ово подудара са кодом који се приказује на телефону</string>
@@ -43,6 +43,9 @@
   <string name="turn_on_bluetooth_message">Аутомобилу је потребан Bluetooth за подешавање телефона као придруженог уређаја.</string>
   <string name="turn_on_bluetooth_dialog_title">Желите ли да укључите Bluetooth?</string>
   <string name="turn_on_bluetooth_dialog_message">Аутомобилу је потребан Bluetooth за откључавање придруженог уређаја.</string>
+  <string name="companion_not_available_dialog_title">Ово подешавање није доступно</string>
+  <string name="companion_not_available_dialog_message">Профили гостију не могу да приступају пратећем уређају</string>
+  <string name="companion_not_available_dialog_switch_user_message">Профили гостију не могу да приступају пратећем уређају. Да бисте променили профил, идите у Подешавања &gt; Корисници.</string>
   <string name="accept">Прихватам</string>
   <string name="reject">Одбиј</string>
   <string name="confirm">Потврди</string>
@@ -60,7 +63,9 @@
   <string name="not_now">Не сада</string>
   <string name="connect">Повежи</string>
   <string name="disconnect">Прекини везу</string>
+  <string name="disconnecting">Прекида се веза</string>
   <string name="skip">Прескочи</string>
+  <string name="change_profile">Промените профил</string>
   <string name="connected">Повезано</string>
   <string name="notDetected">Није откривено</string>
   <string name="disconnected">Прекинута веза</string>

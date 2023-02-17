@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">برنامه همراه را باز کنید</string>
   <string name="enable_bluetooth_instruction_text">اتصال بلوتوث را مجاز کنید</string>
   <string name="connect_to_targe_car_instruction_text">به &lt;b&gt;%1$s&lt;/b&gt; %2$s متصل شوید</string>
-  <string name="qr_instruction_text">برای اتصال به &lt;b&gt;%1$s&lt;/b&gt; %2$s، رمزینه پاسخ‌سریع را اسکن کنید یا MyCompanion را باز کنید</string>
+  <string name="qr_instruction_text">برای اتصال به &lt;b&gt;%1$s&lt;/b&gt; %2$s، رمزینه پاسخ‌سریع را با تلفنتان اسکن کنید یا برنامه MyCompanion را باز کنید</string>
   <string name="connect_to_car_instruction_text">به خودرو متصل شوید</string>
   <string name="associated_device_pairing_code_title">تأیید کد در تلفن</string>
   <string name="associated_device_pairing_message">تأیید کنید این کد با کدی است که در تلفنتان نشان داده شده است مطابقت دارد</string>
@@ -43,6 +43,9 @@
   <string name="turn_on_bluetooth_message">برای تنظیم تلفن به‌عنوان دستگاه همراه، خودرویتان به بلوتوث نیاز دارد.</string>
   <string name="turn_on_bluetooth_dialog_title">بلوتوث روشن شود؟</string>
   <string name="turn_on_bluetooth_dialog_message">برای وصل شدن به دستگاه همراه، خودرویتان به بلوتوث نیاز دارد.</string>
+  <string name="companion_not_available_dialog_title">این تنظیم دردسترس نیست</string>
+  <string name="companion_not_available_dialog_message">نمایه مهمان نمی‌تواند به CompanionDevice دسترسی داشته باشد</string>
+  <string name="companion_not_available_dialog_switch_user_message">نمایه مهمان نمی‌تواند به CompanionDevice دسترسی داشته باشد. برای تغییر نمایه‌تان، به «تنظیمات &gt; کاربران» بروید.</string>
   <string name="accept">پذیرفتن</string>
   <string name="reject">رد کردن</string>
   <string name="confirm">تأیید کردن</string>
@@ -57,13 +60,15 @@
   <string name="continue_button">ادامه دادن</string>
   <string name="retry">امتحان مجدد</string>
   <string name="turn_on">روشن کردن</string>
-  <string name="not_now">الآن نه</string>
+  <string name="not_now">حالا نه</string>
   <string name="connect">اتصال</string>
   <string name="disconnect">قطع اتصال</string>
+  <string name="disconnecting">Disconnecting</string>
   <string name="skip">رد شدن</string>
+  <string name="change_profile">تغییر نمایه</string>
   <string name="connected">متصل</string>
   <string name="notDetected">چیزی شناسایی نشد</string>
-  <string name="disconnected">قطع اتصال</string>
+  <string name="disconnected">متصل نیست</string>
   <string name="detected">شناسایی شد</string>
   <string name="unknown">نامشخص</string>
   <string name="app_running_msg_channel_name">سرویس پیامک تلفن درحال اجرا است</string>

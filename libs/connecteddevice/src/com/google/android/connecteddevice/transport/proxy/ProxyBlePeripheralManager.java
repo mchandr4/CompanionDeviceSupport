@@ -135,6 +135,11 @@ public class ProxyBlePeripheralManager extends BlePeripheralManager {
     return MTU_SIZE;
   }
 
+  @Override
+  public void disconnect() {
+    // No-op
+  }
+
   /**
    * Requests to start advertising.
    *

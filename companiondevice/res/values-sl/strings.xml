@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">Odprite spremljevalno aplikacijo</string>
   <string name="enable_bluetooth_instruction_text">Dovolite povezavo Bluetooth</string>
   <string name="connect_to_targe_car_instruction_text">Povežite se z vozilom &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
-  <string name="qr_instruction_text">Optično preberite kodo QR ali odprite MyCompanion, če se želite povezati z avtomobilom &lt;b&gt;%1$s&lt;/b&gt; %2$s.</string>
+  <string name="qr_instruction_text">S telefonom optično preberite kodo QR ali odprite MyCompanion, če se želite povezati z avtomobilom &lt;b&gt;%1$s&lt;/b&gt; %2$s.</string>
   <string name="connect_to_car_instruction_text">Povežite se z avtomobilom</string>
   <string name="associated_device_pairing_code_title">Potrditev kode v telefonu</string>
   <string name="associated_device_pairing_message">Potrdite, da se ujema s kodo, prikazano v telefonu.</string>
@@ -43,6 +43,9 @@
   <string name="turn_on_bluetooth_message">Če želite nastaviti telefon kot spremljevalno napravo, avtomobil potrebuje Bluetooth.</string>
   <string name="turn_on_bluetooth_dialog_title">Želite vklopiti Bluetooth?</string>
   <string name="turn_on_bluetooth_dialog_message">Če želite povezati spremljevalno napravo, avtomobil potrebuje Bluetooth.</string>
+  <string name="companion_not_available_dialog_title">Ta nastavitev ni na voljo</string>
+  <string name="companion_not_available_dialog_message">Profili gosta ne morejo dostopati do spremljevalne naprave.</string>
+  <string name="companion_not_available_dialog_switch_user_message">Profili gosta ne morejo dostopati do spremljevalne naprave. Če želite spremeniti profil, odprite »Nastavitve &gt; Uporabniki«.</string>
   <string name="accept">Sprejmi</string>
   <string name="reject">Zavrni</string>
   <string name="confirm">Potrdi</string>
@@ -60,7 +63,9 @@
   <string name="not_now">Ne zdaj</string>
   <string name="connect">Poveži</string>
   <string name="disconnect">Prekini povezavo</string>
+  <string name="disconnecting">Disconnecting</string>
   <string name="skip">Preskoči</string>
+  <string name="change_profile">Spremeni profil</string>
   <string name="connected">Povezano</string>
   <string name="notDetected">Ni zaznano</string>
   <string name="disconnected">Prekinjeno</string>

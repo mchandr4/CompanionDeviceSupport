@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">Otvorite popratnu aplikaciju</string>
   <string name="enable_bluetooth_instruction_text">Dopustite Bluetooth vezu</string>
   <string name="connect_to_targe_car_instruction_text">Povežite se s automobilom &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
-  <string name="qr_instruction_text">Skenirajte QR kôd ili otvorite MyCompanion da biste se povezali s automobilom &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">Upotrijebite telefon da biste skenirali QR kôd ili otvorite MyCompanion da biste se povezali s automobilom &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
   <string name="connect_to_car_instruction_text">Povežite se s automobilom</string>
   <string name="associated_device_pairing_code_title">Potvrdite kôd na telefonu</string>
   <string name="associated_device_pairing_message">Potvrdite podudara li se ovo s kodom prikazanim na telefonu</string>
@@ -43,6 +43,9 @@
   <string name="turn_on_bluetooth_message">Da biste svoj telefon postavili kao popratni uređaj, vaš automobil treba imati Bluetooth.</string>
   <string name="turn_on_bluetooth_dialog_title">Želite li uključiti Bluetooth?</string>
   <string name="turn_on_bluetooth_dialog_message">Da bi se povezao s popratnim uređajem, vaš automobil treba imati Bluetooth.</string>
+  <string name="companion_not_available_dialog_title">Ta postavka nije dostupna</string>
+  <string name="companion_not_available_dialog_message">Profili gosta ne mogu pristupiti CompanionDeviceu</string>
+  <string name="companion_not_available_dialog_switch_user_message">Profili gosta ne mogu pristupiti CompanionDeviceu. Da biste promijenili profil, otvorite Postavke &gt; Korisnici.</string>
   <string name="accept">Prihvati</string>
   <string name="reject">Odbij</string>
   <string name="confirm">Potvrdi</string>
@@ -60,7 +63,9 @@
   <string name="not_now">Ne sad</string>
   <string name="connect">Poveži</string>
   <string name="disconnect">Prekini vezu</string>
+  <string name="disconnecting">Prekid veze</string>
   <string name="skip">Preskoči</string>
+  <string name="change_profile">Promijeni profil</string>
   <string name="connected">Povezan</string>
   <string name="notDetected">Nije otkriveno</string>
   <string name="disconnected">Nije povezano</string>

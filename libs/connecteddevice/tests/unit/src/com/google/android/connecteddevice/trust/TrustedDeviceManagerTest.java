@@ -591,6 +591,33 @@ public final class TrustedDeviceManagerTest {
     assertThat(manager.getTrustedDeviceDatabase()).isEqualTo(database.trustedDeviceDao());
   }
 
+  @Test
+  public void testSetTrustAgentDelegateAfterDisconnect_pendingCredentialsIsCleared()
+      throws RemoteException {
+    triggerDeviceConnected(SECURE_CONNECTED_DEVICE);
+    executeAndVerifyValidEnrollFlowOnSecureCar();
+    manager.setTrustedDeviceAgentDelegate(null);
+
+    TrustedDeviceMessage unlockMessage =
+        TrustedDeviceMessage.newBuilder()
+            .setType(MessageType.UNLOCK_CREDENTIALS)
+            .setPayload(
+                PhoneCredentials.newBuilder()
+                    .setEscrowToken(ByteString.copyFrom(FAKE_TOKEN))
+                    .setHandle(ByteString.copyFrom(ByteUtils.longToBytes(FAKE_HANDLE)))
+                    .build()
+                    .toByteString())
+            .build();
+    featureCallback.onMessageReceived(SECURE_CONNECTED_DEVICE, unlockMessage.toByteArray());
+    // Pending credentials stored
+    feature.onDeviceDisconnected(SECURE_CONNECTED_DEVICE);
+    // Pending credentials cleared
+    manager.setTrustedDeviceAgentDelegate(trustAgentDelegate);
+
+    verify(trustAgentDelegate, never())
+        .unlockUserWithToken(FAKE_TOKEN, FAKE_HANDLE, DEFAULT_USER_ID);
+  }
+
   /**
    * Runs through adding token flow in enrollment and verifies it is run on a secure car.
    *

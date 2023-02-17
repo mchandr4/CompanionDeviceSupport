@@ -31,6 +31,7 @@ import com.google.android.connecteddevice.transport.ConnectionProtocol
 import com.google.android.connecteddevice.transport.IDataSendCallback
 import com.google.android.connecteddevice.transport.IDiscoveryCallback
 import com.google.android.connecteddevice.util.ByteUtils
+import com.google.android.connecteddevice.util.EventLog
 import com.google.android.connecteddevice.util.SafeLog.logd
 import com.google.android.connecteddevice.util.SafeLog.loge
 import com.google.android.connecteddevice.util.SafeLog.logw
@@ -94,7 +95,6 @@ constructor(
 
         logd(TAG, "Remote device ${device.address} connected. Protocol ID: $protocolId")
 
-        stopAdvertising()
         discoveryCallback?.onDeviceConnected(currentProtocolId)
 
         blePeripheralManager.addOnCharacteristicWriteListener(
@@ -103,11 +103,15 @@ constructor(
         blePeripheralManager.addOnCharacteristicReadListener(
           this@BlePeripheralProtocol::onCharacteristicRead
         )
-        advertiseCallback = null
+        stopAdvertising()
       }
 
       override fun onRemoteDeviceDisconnected(device: BluetoothDevice) {
-        logd(TAG, "Remote device ${device.address} disconnected. Protocol ID: $protocolId")
+        logd(
+          TAG,
+          "Remote device ${device.address} disconnected. Current connected device: " +
+            "${bluetoothDevice?.address}"
+        )
 
         if (device != bluetoothDevice) {
           loge(
@@ -117,18 +121,18 @@ constructor(
           )
           return
         }
+        bluetoothDevice = null
 
         val currentProtocolId = protocolId
         if (currentProtocolId == null) {
           logw(
             TAG,
-            "Device disconnected but no protocol ID. Cannot notify disconnect listeners. " +
-              "Resetting."
+            "Device disconnected but no protocol ID. Cannot notify disconnect listeners. Ignore."
           )
-          reset()
           return
         }
 
+        protocolId = null
         val listener = deviceDisconnectedListeners[currentProtocolId]
         if (listener != null) {
           logd(TAG, "Valid disconnect listener exists for protocolId $protocolId. Notifying.")
@@ -136,44 +140,32 @@ constructor(
         } else {
           logw(TAG, "No disconnect listener exists for protocolId $protocolId.")
         }
-
-        reset()
+        removeListeners(currentProtocolId)
       }
     }
 
-  private val timeoutRunnable: Runnable = Runnable {
-    logd(TAG, "Timeout period expired without a connection. Restarting advertisement.")
-    stopAdvertising()
-    val currentDeviceId = deviceId
-    val currentDiscoveryCallback = discoveryCallback
-    val currentChallenge = connectChallenge
-    if (currentDeviceId != null && currentDiscoveryCallback != null && currentChallenge != null) {
-      reset()
-      startConnectionDiscovery(
-        ParcelUuid(currentDeviceId),
-        currentChallenge,
-        currentDiscoveryCallback
-      )
-    }
-  }
-
-  private val timeoutHandlerThread: HandlerThread = HandlerThread(TIMEOUT_HANDLER_THREAD_NAME)
+  private val timeoutHandlerThread: HandlerThread =
+    HandlerThread(TIMEOUT_HANDLER_THREAD_NAME).apply { start() }
   private var maxWriteSize: Int = defaultMtuSize - ATT_PROTOCOL_BYTES
+  // Indicates ongoing connection discovery if not null
   private var deviceId: UUID? = null
+  /** Current connected bluetooth device */
   private var bluetoothDevice: BluetoothDevice? = null
+  /** The id of the current connection */
   private var protocolId: String? = null
-  private var connectChallenge: ConnectChallenge? = null
-  private var advertiseCallback: AdvertiseCallback? = null
+  // Indicates ongoing association advertising if not null
+  private var associationAdvertiseCallback: AdvertiseCallback? = null
+  // Indicates ongoing reconnect advertising if not null
+  private var connectionAdvertiseCallback: AdvertiseCallback? = null
+  /** Indicates ongoing discovery if not null */
   private var discoveryCallback: IDiscoveryCallback? = null
-  private var timeoutHandler: Handler? = null
+  private var timeoutHandler = Handler(timeoutHandlerThread.looper)
   private var dataSendCallback: IDataSendCallback? = null
 
   init {
     writeCharacteristic.addDescriptor(createBluetoothGattDescriptor())
     readCharacteristic.addDescriptor(createBluetoothGattDescriptor())
     advertiseDataCharacteristic.addDescriptor(createBluetoothGattDescriptor())
-    timeoutHandlerThread.start()
-    timeoutHandler = Handler(timeoutHandlerThread.looper)
   }
 
   override fun startAssociationDiscovery(
@@ -181,13 +173,9 @@ constructor(
     identifier: ParcelUuid,
     callback: IDiscoveryCallback,
   ) {
-    if (!isReadyToStartDiscovery()) {
-      return
-    }
-    reset()
     discoveryCallback = callback
     blePeripheralManager.registerCallback(peripheralCallback)
-    val associationAdvertiseCallback =
+    val advertiseCallback =
       object : AdvertiseCallback() {
         override fun onStartSuccess(settingsInEffect: AdvertiseSettings?) {
           super.onStartSuccess(settingsInEffect)
@@ -201,10 +189,10 @@ constructor(
           callback.onDiscoveryFailedToStart()
         }
       }
-    advertiseCallback = associationAdvertiseCallback
+    associationAdvertiseCallback = advertiseCallback
     startAdvertising(
       identifier.uuid,
-      associationAdvertiseCallback,
+      advertiseCallback,
       scanResponse = ByteUtils.hexStringToByteArray(name),
       scanResponseUuid = reconnectDataUuid
     )
@@ -215,19 +203,20 @@ constructor(
     challenge: ConnectChallenge,
     callback: IDiscoveryCallback
   ) {
-    if (!isReadyToStartDiscovery()) {
-      return
-    }
-    reset()
     deviceId = id.uuid
     discoveryCallback = callback
-    connectChallenge = challenge
     blePeripheralManager.registerCallback(peripheralCallback)
-    val connectionAdvertiseCallback =
+    val advertiseCallback =
       object : AdvertiseCallback() {
         override fun onStartSuccess(settingsInEffect: AdvertiseSettings?) {
           super.onStartSuccess(settingsInEffect)
-          timeoutHandler?.postDelayed(timeoutRunnable, maxReconnectAdvertisementDuration.toMillis())
+          timeoutHandler.postDelayed(
+            {
+              logd(TAG, "Timeout period expired without a connection. Restarting advertisement.")
+              retryConnectionDiscovery(id.uuid, challenge, callback)
+            },
+            maxReconnectAdvertisementDuration.toMillis()
+          )
           logd(TAG, "Successfully started advertising for device $id.")
           callback.onDiscoveryStartedSuccessfully()
         }
@@ -237,35 +226,51 @@ constructor(
           callback.onDiscoveryFailedToStart()
         }
       }
-    advertiseCallback = connectionAdvertiseCallback
+    connectionAdvertiseCallback = advertiseCallback
     val advertiseData = createConnectData(challenge)
     if (advertiseData == null) {
       loge(TAG, "Unable to create advertisement data. Aborting connecting.")
       callback.onDiscoveryFailedToStart()
       return
     }
+    EventLog.onDeviceSearchStarted()
     startAdvertising(
       reconnectServiceUuid,
-      connectionAdvertiseCallback,
+      advertiseCallback,
       advertiseData,
       reconnectDataUuid
     )
   }
 
+  private fun retryConnectionDiscovery(
+    deviceId: UUID,
+    connectChallenge: ConnectChallenge,
+    discoveryCallback: IDiscoveryCallback
+  ) {
+    stopConnectionDiscovery(ParcelUuid(deviceId))
+    startConnectionDiscovery(ParcelUuid(deviceId), connectChallenge, discoveryCallback)
+  }
+
   override fun stopAssociationDiscovery() {
-    if (deviceId != null || advertiseCallback == null) {
+    if (associationAdvertiseCallback == null) {
       logd(TAG, "No association discovery is happening, ignoring.")
       return
     }
-    reset()
+    blePeripheralManager.stopAdvertising(associationAdvertiseCallback)
+    associationAdvertiseCallback = null
+    discoveryCallback = null
   }
 
   override fun stopConnectionDiscovery(id: ParcelUuid) {
-    if (id.uuid != deviceId || advertiseCallback == null) {
+    if (id.uuid != deviceId || connectionAdvertiseCallback == null) {
       logd(TAG, "No connection discovery is happening for device $id, ignoring.")
       return
     }
-    reset()
+    timeoutHandler.removeCallbacksAndMessages(null)
+    blePeripheralManager.stopAdvertising(connectionAdvertiseCallback)
+    connectionAdvertiseCallback = null
+    discoveryCallback = null
+    deviceId = null
   }
 
   override fun sendData(protocolId: String, data: ByteArray, callback: IDataSendCallback?) {
@@ -299,42 +304,28 @@ constructor(
 
   override fun disconnectDevice(protocolId: String) {
     if (protocolId == this.protocolId) {
-      blePeripheralManager.cleanup()
+      blePeripheralManager.disconnect()
     }
   }
 
+  /**
+   * Resets all internal states.
+   *
+   * Please be cautious when calling this method, a disconnect usually does not need a reset,
+   * please call [disconnectDevice] instead. This should only be called when Bluetooth is turned
+   * off.
+   */
   override fun reset() {
     super.reset()
     logd(TAG, "Resetting protocol.")
     stopAdvertising()
-    timeoutHandler?.removeCallbacks(timeoutRunnable)
     blePeripheralManager.cleanup()
-    deviceId = null
     bluetoothDevice = null
-    connectChallenge = null
     protocolId = null
-    advertiseCallback = null
-    discoveryCallback = null
     dataSendCallback = null
   }
 
   override fun getMaxWriteSize(protocolId: String): Int = maxWriteSize
-
-  private fun isReadyToStartDiscovery(): Boolean {
-    if (protocolId != null) {
-      logd(
-        TAG,
-        "A device is already in connection with protocol id $protocolId." +
-          " Ignore the start association request."
-      )
-      return false
-    }
-    if (advertiseCallback != null) {
-      logd(TAG, "There is already a ongoing discovery. Ignore the start association request.")
-      return false
-    }
-    return true
-  }
 
   override fun isDeviceVerificationRequired(): Boolean = true
 
@@ -377,12 +368,12 @@ constructor(
   }
 
   private fun stopAdvertising() {
-    logd(TAG, "Attempting to stop advertising.")
-    timeoutHandler?.removeCallbacks(timeoutRunnable)
-    advertiseCallback?.let { blePeripheralManager.stopAdvertising(it) }
-    advertiseCallback = null
+    logd(TAG, "Attempting to stop all ongoing advertising.")
+    stopAssociationDiscovery()
+    if (deviceId != null) {
+      stopConnectionDiscovery(ParcelUuid(deviceId))
+    }
   }
-
   private fun onCharacteristicRead(device: BluetoothDevice) {
     if (device != bluetoothDevice) {
       logw(
@@ -407,9 +398,10 @@ constructor(
     if (device != bluetoothDevice) {
       logw(
         TAG,
-        "Received a message from device ${device.address} that is not the expected" +
-          " device ${bluetoothDevice?.address}. Ignoring."
+        "Received a message from device ${device.address} that is not expected" +
+          " device ${bluetoothDevice?.address}. Disconnect."
       )
+      blePeripheralManager.disconnect()
       return
     }
     if (characteristic.uuid != readCharacteristic.uuid) {

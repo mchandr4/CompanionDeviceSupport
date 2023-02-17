@@ -18,11 +18,19 @@ package com.google.android.connecteddevice.api;
 
 import com.google.android.connecteddevice.model.ConnectedDevice;
 
-/** Callback for triggered connection events. */
+/**
+ * Callback for triggered connection events.
+ *
+ * Only make additive changes to maintain backward compatibility.
+ * The added function needs to be assigned the transaction value noted below,
+ * and the value needs to be appropriately incremented.
+ *
+ * Next transaction value: 2
+ */
 oneway interface IConnectionCallback {
     /** Triggered when a new connectedDevice has connected. */
-    void onDeviceConnected(in ConnectedDevice connectedDevice);
+    void onDeviceConnected(in ConnectedDevice connectedDevice) = 0;
 
     /** Triggered when a connectedDevice has disconnected. */
-    void onDeviceDisconnected(in ConnectedDevice connectedDevice);
+    void onDeviceDisconnected(in ConnectedDevice connectedDevice) = 1;
 }

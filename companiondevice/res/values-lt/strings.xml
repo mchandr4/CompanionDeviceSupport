@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">Atidaryti papildomą programą</string>
   <string name="enable_bluetooth_instruction_text">Leisti „Bluetooth“ ryšį</string>
   <string name="connect_to_targe_car_instruction_text">Prisijunkite prie automobilio &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
-  <string name="qr_instruction_text">Nuskaitykite QR kodą arba atidarykite „MyCompanion“, kad prisijungtumėte prie &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">Telefonu nuskaitykite QR kodą arba atidarykite „MyCompanion“, kad prisijungtumėte prie &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
   <string name="connect_to_car_instruction_text">Prisijunkite prie automobilio</string>
   <string name="associated_device_pairing_code_title">Kodo patvirtinimas telefonu</string>
   <string name="associated_device_pairing_message">Patvirtinkite, kad kodas atitinka telefone rodomą kodą</string>
@@ -43,6 +43,9 @@
   <string name="turn_on_bluetooth_message">Norint nustatyti telefoną kaip papildomą įrenginį, automobilyje turi veikti „Bluetooth“ ryšys.</string>
   <string name="turn_on_bluetooth_dialog_title">Įjungti „Bluetooth“?</string>
   <string name="turn_on_bluetooth_dialog_message">Norint prisijungti prie papildomo įrenginio, automobilyje turi veikti „Bluetooth“ ryšys.</string>
+  <string name="companion_not_available_dialog_title">Šis nustatymas nepasiekiamas</string>
+  <string name="companion_not_available_dialog_message">Naudojant svečių profilius negalima pasiekti papildomo įrenginio</string>
+  <string name="companion_not_available_dialog_switch_user_message">Naudojant svečių profilius negalima pasiekti papildomo įrenginio. Jei norite pakeisti profilį, eikite į skiltį „Nustatymai“ &gt; „Naudotojai“.</string>
   <string name="accept">Sutikti</string>
   <string name="reject">Atmesti</string>
   <string name="confirm">Patvirtinti</string>
@@ -60,7 +63,9 @@
   <string name="not_now">Ne dabar</string>
   <string name="connect">Prisijungti</string>
   <string name="disconnect">Atsijungti</string>
+  <string name="disconnecting">Disconnecting</string>
   <string name="skip">Praleisti</string>
+  <string name="change_profile">Pakeisti profilio nuotrauką</string>
   <string name="connected">Susieta</string>
   <string name="notDetected">Neaptikta</string>
   <string name="disconnected">Atjungta</string>

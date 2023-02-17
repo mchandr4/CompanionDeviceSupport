@@ -174,14 +174,12 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
     if (state != AssociationState.STARTING && state != AssociationState.STARTED) {
       return;
     }
-    advertisedCarName.postValue(null);
-    pairingCode.postValue(null);
     if (!connector.isConnected()) {
       loge(TAG, "Failed to stop association, connector is not connected.");
       return;
     }
     connector.stopAssociation();
-    associationState.postValue(AssociationState.NONE);
+    resetAssociationState();
   }
 
   /** Retries association. */
@@ -265,10 +263,12 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
     getApplication().startActivity(intent);
   }
 
-  /** Resets the value of {@link #associationState} and {@link #associationResponse}. */
+  /** Resets association related states. */
   public void resetAssociationState() {
     associationState.postValue(AssociationState.NONE);
     associationResponse.postValue(null);
+    advertisedCarName.postValue(null);
+    pairingCode.postValue(null);
   }
 
   /** Gets the name that is being advertised by the car. */
@@ -529,8 +529,11 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
 
         @Override
         public void onAssociationError(int error) {
-          associationState.postValue(AssociationState.ERROR);
           loge(TAG, "Error during association: " + error + ".");
+          associationState.postValue(AssociationState.ERROR);
+          associationResponse.postValue(null);
+          advertisedCarName.postValue(null);
+          pairingCode.postValue(null);
         }
 
         @Override

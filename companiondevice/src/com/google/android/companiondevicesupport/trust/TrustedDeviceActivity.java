@@ -372,8 +372,7 @@ public class TrustedDeviceActivity extends FragmentActivity {
     String message =
         getString(R.string.trusted_device_enrollment_success_message, addedDevice.getDeviceName());
     Spanned styledMessage = Html.fromHtml(message, Html.FROM_HTML_MODE_LEGACY);
-    runOnUiThread(
-        () -> Toast.makeText(getApplicationContext(), styledMessage, Toast.LENGTH_SHORT).show());
+    runOnUiThread(() -> Toast.makeText(this, styledMessage, Toast.LENGTH_SHORT).show());
   }
 
   private void showEnrollmentErrorDialogFragment(int error) {

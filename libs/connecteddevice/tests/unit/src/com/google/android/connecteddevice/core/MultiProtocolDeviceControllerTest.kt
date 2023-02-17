@@ -430,6 +430,7 @@ class MultiProtocolDeviceControllerTest {
     listeners.invoke { listener -> listener.onDeviceDisconnected(testProtocolId.toString()) }
 
     verify(mockAssociationCallback).onAssociationError(Errors.DEVICE_ERROR_UNEXPECTED_DISCONNECTION)
+    verify(testConnectionProtocol).stopAssociationDiscovery()
   }
 
   @Test
@@ -706,6 +707,7 @@ class MultiProtocolDeviceControllerTest {
     )
 
     verify(mockAssociationCallback).onAssociationError(any())
+    verify(testConnectionProtocol).disconnectDevice(any())
   }
 
   @Test
@@ -993,69 +995,6 @@ class MultiProtocolDeviceControllerTest {
   }
 
   @Test
-  fun disconnectDevice_invokesOnDeviceDisconnected() {
-    val deviceId = UUID.randomUUID()
-    val testProtocolId = UUID.randomUUID().toString()
-    deviceController =
-      MultiProtocolDeviceController(
-          protocolDelegate,
-          spyStorage,
-          mockOobRunner,
-          testAssociationServiceUuid.uuid,
-          enablePassenger = false,
-          callbackExecutor = directExecutor()
-        )
-        .apply { registerCallback(mockCallback, directExecutor()) }
-    deviceController.initiateConnectionToDevice(deviceId)
-    argumentCaptor<IDiscoveryCallback>().apply {
-      verify(testConnectionProtocol).startConnectionDiscovery(any(), any(), capture())
-      firstValue.onDeviceConnected(testProtocolId)
-    }
-
-    deviceController.disconnectDevice(deviceId)
-
-    argumentCaptor<ConnectedDevice>().apply {
-      verify(mockCallback).onDeviceDisconnected(capture())
-      assertThat(firstValue.deviceId).isEqualTo(deviceId.toString())
-    }
-  }
-
-  @Test
-  fun disconnectDevice_removesDeviceFromConnectedDevices() {
-    val deviceId = UUID.randomUUID()
-    val testProtocolId = UUID.randomUUID().toString()
-    val associatedDevice =
-      AssociatedDevice(
-        deviceId.toString(),
-        "userDeviceAddress",
-        "userDeviceName",
-        /* isConnectionEnabled= */ true
-      )
-    whenever(spyStorage.driverAssociatedDevices).thenReturn(listOf(associatedDevice))
-    whenever(spyStorage.allAssociatedDevices).thenReturn(listOf(associatedDevice))
-    deviceController =
-      MultiProtocolDeviceController(
-          protocolDelegate,
-          spyStorage,
-          mockOobRunner,
-          testAssociationServiceUuid.uuid,
-          enablePassenger = false,
-          callbackExecutor = directExecutor()
-        )
-        .apply { registerCallback(mockCallback, directExecutor()) }
-    deviceController.start()
-    argumentCaptor<IDiscoveryCallback>().apply {
-      verify(testConnectionProtocol).startConnectionDiscovery(any(), any(), capture())
-      firstValue.onDeviceConnected(testProtocolId)
-    }
-    assertThat(deviceController.connectedDevices).isNotEmpty()
-
-    deviceController.disconnectDevice(deviceId)
-
-    assertThat(deviceController.connectedDevices).isEmpty()
-  }
-
-  @Test
   fun stopAssociation_disconnectPendingDeviceAndClearOobRunner() {
     val deviceName = "TestDeviceName"
     val testIdentifier = ParcelUuid(UUID.randomUUID())
@@ -1135,6 +1074,7 @@ class MultiProtocolDeviceControllerTest {
     callback.onEstablishSecureChannelFailure(error)
 
     verify(mockAssociationCallback).onAssociationError(error.ordinal)
+    verify(testConnectionProtocol).disconnectDevice(any())
   }
 
   @Test
@@ -1152,6 +1092,7 @@ class MultiProtocolDeviceControllerTest {
     )
 
     verify(mockAssociationCallback).onAssociationError(Errors.DEVICE_ERROR_INVALID_HANDSHAKE)
+    verify(testConnectionProtocol).disconnectDevice(any())
   }
 
   private fun startAssociation() {

@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">တွဲဖက် အက်ပ် ဖွင့်ပါ</string>
   <string name="enable_bluetooth_instruction_text">ဘလူးတုသ် ချိတ်ဆက်မှုကို ခွင့်ပြုပါ</string>
   <string name="connect_to_targe_car_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s နှင့် ချိတ်ဆက်ပါ</string>
-  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s သို့ချိတ်ဆက်ရန် QR ကုဒ်ကို စကင်ဖတ်ပါ သို့မဟုတ် MyCompanion ကိုဖွင့်ပါ</string>
+  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s သို့ချိတ်ဆက်ရန် သင့်ဖုန်းသုံး၍ QR ကုဒ်ကို စကင်ဖတ်ပါ (သို့) MyCompanion ကိုဖွင့်ပါ</string>
   <string name="connect_to_car_instruction_text">ကားနှင့် ချိတ်ဆက်ပါ</string>
   <string name="associated_device_pairing_code_title">ဖုန်းတွင် ကုဒ်ကိုအတည်ပြုပါ</string>
   <string name="associated_device_pairing_message">ဤကုဒ်သည် သင့်ဖုန်းတွင်ပြသည့်ကုဒ်နှင့် တူညီကြောင်း အတည်ပြုပါ</string>
@@ -43,6 +43,9 @@
   <string name="turn_on_bluetooth_message">သင်၏ဖုန်းကို တွဲဖက်စက်ပစ္စည်းအဖြစ် စနစ်ထည့်သွင်းရန် သင့်ကားတွင် ဘလူးတုသ်လိုအပ်သည်။</string>
   <string name="turn_on_bluetooth_dialog_title">ဘလူးတုသ် ဖွင့်မလား။</string>
   <string name="turn_on_bluetooth_dialog_message">သင်၏တွဲဖက်စက်ပစ္စည်းသို့ ချိတ်ဆက်ရန် သင့်ကားတွင် ဘလူးတုသ်လိုအပ်သည်။</string>
+  <string name="companion_not_available_dialog_title">ဤဆက်တင်ကို မရနိုင်ပါ</string>
+  <string name="companion_not_available_dialog_message">ဧည့်သည်ပရိုဖိုင်များက CompanionDevice ကို သုံးခွင့်မရှိပါ</string>
+  <string name="companion_not_available_dialog_switch_user_message">ဧည့်သည်ပရိုဖိုင်များက CompanionDevice ကို သုံးခွင့်မရှိပါ။ သင့်ပရိုဖိုင်ကို ပြောင်းလိုပါက ‘ဆက်တင်များ &gt; အသုံးပြုသူများ’ သို့ သွားပါ။</string>
   <string name="accept">လက်ခံရန်</string>
   <string name="reject">ပယ်ရန်</string>
   <string name="confirm">အတည်ပြုရန်</string>
@@ -60,7 +63,9 @@
   <string name="not_now">ယခုမလုပ်ပါ</string>
   <string name="connect">ချိတ်ဆက်ရန်</string>
   <string name="disconnect">ချိတ်ဆက်မှု ဖြုတ်ရန်</string>
+  <string name="disconnecting">Disconnecting</string>
   <string name="skip">ကျော်ရန်</string>
+  <string name="change_profile">ပရိုဖိုင်ပြောင်းရန်</string>
   <string name="connected">ချိတ်ဆက်ထားသည်</string>
   <string name="notDetected">ရှာမတွေ့ပါ</string>
   <string name="disconnected">ချိတ်ဆက်မှု မရှိပါ</string>

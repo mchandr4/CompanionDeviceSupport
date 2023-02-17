@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">Åbn den medfølgende app</string>
   <string name="enable_bluetooth_instruction_text">Tillad Bluetooth-forbindelse</string>
   <string name="connect_to_targe_car_instruction_text">Opret forbindelse til &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
-  <string name="qr_instruction_text">Scan QR-koden, eller åbn MyCompanion for at oprette forbindelse til &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">Scan QR-koden med din telefon, eller åbn MyCompanion for at oprette forbindelse til &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
   <string name="connect_to_car_instruction_text">Opret forbindelse til bilen</string>
   <string name="associated_device_pairing_code_title">Bekræft koden på telefonen</string>
   <string name="associated_device_pairing_message">Bekræft, at dette stemmer overens med den kode, der vises på din telefon</string>
@@ -43,6 +43,9 @@
   <string name="turn_on_bluetooth_message">Bluetooth skal aktiveres i din bil, før din telefon kan konfigureres som en medfølgende enhed.</string>
   <string name="turn_on_bluetooth_dialog_title">Vil du aktivere Bluetooth?</string>
   <string name="turn_on_bluetooth_dialog_message">Bluetooth skal aktiveres i din bil, før der kan oprettes forbindelse til din medfølgende enhed.</string>
+  <string name="companion_not_available_dialog_title">Denne indstilling er ikke tilgængelig</string>
+  <string name="companion_not_available_dialog_message">Gæsteprofiler kan ikke tilgå CompanionDevice</string>
+  <string name="companion_not_available_dialog_switch_user_message">Gæsteprofiler kan ikke tilgå CompanionDevice. Du kan skifte profil ved at gå til Indstillinger &gt; Brugere.</string>
   <string name="accept">Acceptér</string>
   <string name="reject">Afvis</string>
   <string name="confirm">Bekræft</string>
@@ -60,7 +63,9 @@
   <string name="not_now">Ikke nu</string>
   <string name="connect">Opret forbindelse</string>
   <string name="disconnect">Afbryd</string>
+  <string name="disconnecting">Disconnecting</string>
   <string name="skip">Spring over</string>
+  <string name="change_profile">Skift profil</string>
   <string name="connected">Forbundet</string>
   <string name="notDetected">Ikke registreret</string>
   <string name="disconnected">Afbrudt</string>

@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">Дэмжигч аппыг нээх</string>
   <string name="enable_bluetooth_instruction_text">Bluetooth холболтыг зөвшөөрөх</string>
   <string name="connect_to_targe_car_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s-д холбогдох</string>
-  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s-д холбогдохын тулд доорх QR кодыг скан хийх эсвэл MyCompanion-г нээнэ үү</string>
+  <string name="qr_instruction_text">QR кодыг скан хийхийн тулд утсаа ашиглана уу эсвэл &lt;b&gt;%1$s&lt;/b&gt; %2$s-д холбогдохын тулд MyCompanion-г нээнэ үү</string>
   <string name="connect_to_car_instruction_text"> машинд холбох</string>
   <string name="associated_device_pairing_code_title">Утсан дээрх кодыг баталгаажуулна уу</string>
   <string name="associated_device_pairing_message">Энэ нь таны утсан дээр харуулсан кодтой таарч байгаа эсэхийг баталгаажуулна уу</string>
@@ -43,6 +43,9 @@
   <string name="turn_on_bluetooth_message">Таны утсыг дэмжигч төхөөрөмжөөр тохируулахын тулд таны машинд Bluetooth шаардлагатай.</string>
   <string name="turn_on_bluetooth_dialog_title">Bluetooth-г асаах уу?</string>
   <string name="turn_on_bluetooth_dialog_message">Таны дэмжигч төхөөрөмжид холбогдохын тулд таны машинд Bluetooth шаардлагатай.</string>
+  <string name="companion_not_available_dialog_title">Энэ тохиргоо боломжгүй байна</string>
+  <string name="companion_not_available_dialog_message">Зочин профайлууд CompanionDevice-д хандах боломжгүй байна</string>
+  <string name="companion_not_available_dialog_switch_user_message">Зочин профайлууд CompanionDevice-д хандах боломжгүй байна. Профайлаа өөрчлөхийн тулд Тохиргоо &gt; Хэрэглэгч хэсэг рүү очно уу.</string>
   <string name="accept">Зөвшөөрөх</string>
   <string name="reject">Татгалзах</string>
   <string name="confirm">Баталгаажуулах</string>
@@ -60,7 +63,9 @@
   <string name="not_now">Одоо биш</string>
   <string name="connect">Холбогдох</string>
   <string name="disconnect">Салгах</string>
+  <string name="disconnecting">Disconnecting</string>
   <string name="skip">Алгасах</string>
+  <string name="change_profile">Профайлыг өөрчлөх</string>
   <string name="connected">Холбогдсон</string>
   <string name="notDetected">Илрээгүй</string>
   <string name="disconnected">Салсан</string>

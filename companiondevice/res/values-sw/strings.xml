@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">Fungua progamu saidizi</string>
   <string name="enable_bluetooth_instruction_text">Ruhusu muunganisho wa Bluetooth</string>
   <string name="connect_to_targe_car_instruction_text">Unganisha kwenye &lt;b&gt;%1$s&lt;/b&gt;%2$s</string>
-  <string name="qr_instruction_text">Changanua msimbo wa QR au ufungue programu ya MyCompanion ili uunganishe kwenye &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">Tumia simu yako kuchanganua msimbo wa QR au ufungue programu ya MyCompanion ili uunganishe kwenye &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
   <string name="connect_to_car_instruction_text">Unganisha kwenye gari</string>
   <string name="associated_device_pairing_code_title">Thibitisha msimbo kwenye simu</string>
   <string name="associated_device_pairing_message">Thibitisha kuwa msimbo huu unalingana na msimbo unaoonyeshwa kwenye simu yako</string>
@@ -43,6 +43,9 @@
   <string name="turn_on_bluetooth_message">Ili uweke simu yako kama kifaa kisaidizi, linahitaji Bluetooth.</string>
   <string name="turn_on_bluetooth_dialog_title">Je, ungependa kuwasha Bluetooth?</string>
   <string name="turn_on_bluetooth_dialog_message">Ili uunganishe kifaa chako kisaidizi, gari lako linahitaji Bluetooth.</string>
+  <string name="companion_not_available_dialog_title">Mipangilio hii haipatikani</string>
+  <string name="companion_not_available_dialog_message">Wasifu wa wageni hauwezi kufikia CompanionDevice</string>
+  <string name="companion_not_available_dialog_switch_user_message">Wasifu wa wageni hauwezi kufikia CompanionDevice. Ili ubadilishe wasifu wako, nenda kwenye Mipangilio &gt; Watumiaji.</string>
   <string name="accept">Kubali</string>
   <string name="reject">Kataa</string>
   <string name="confirm">Thibitisha</string>
@@ -60,7 +63,9 @@
   <string name="not_now">Si sasa</string>
   <string name="connect">Unganisha</string>
   <string name="disconnect">Ondoa</string>
+  <string name="disconnecting">Disconnecting</string>
   <string name="skip">Ruka</string>
+  <string name="change_profile">Badilisha wasifu</string>
   <string name="connected">Imeunganishwa</string>
   <string name="notDetected">Haijagunduliwa</string>
   <string name="disconnected">Imetenganishwa</string>

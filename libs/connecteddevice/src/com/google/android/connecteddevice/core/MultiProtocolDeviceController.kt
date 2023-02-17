@@ -64,14 +64,14 @@ import kotlin.concurrent.withLock
  *
  * It is responsible for:
  * 1. Establish a connection: Handle Association/Reconnection request and communicate with
- * [IConnectionProtocol].
+ *    [IConnectionProtocol].
  * 2. Maintain the connection: Manage all connected devices with [ConnectedRemoteDevice]; Dispatch
- * [Callback.onMessageReceived] callback; Enable to disconnect specific devices.
+ *    [Callback.onMessageReceived] callback; Enable to disconnect specific devices.
  *
  * @property protocolDelegate Delegate for interacting with protocols.
  * @property storage Storage necessary to generate reconnect challenge.
  * @property enablePassenger Whether passenger devices automatically connect. When `true`, newly
- * associated devices will remain unclaimed by default.
+ *   associated devices will remain unclaimed by default.
  * @property callbackExecutor Executor on which callbacks are executed.
  */
 class MultiProtocolDeviceController
@@ -278,7 +278,7 @@ constructor(
     for (protocol in protocolDelegate.protocols) {
       protocol.stopConnectionDiscovery(ParcelUuid(deviceId))
     }
-    val device = connectedRemoteDevices.remove(deviceId)
+    val device = connectedRemoteDevices.get(deviceId)
     if (device == null) {
       loge(TAG, "Attempted to disconnect an unrecognized device. Ignored.")
       return
@@ -286,10 +286,6 @@ constructor(
 
     for ((protocol, protocolId) in device.protocolDevices) {
       protocol.disconnectDevice(protocolId)
-    }
-
-    invokeCallbacksWithDevice(device) { connectedDevice, callback ->
-      callback.onDeviceDisconnected(connectedDevice)
     }
   }
 
@@ -366,7 +362,6 @@ constructor(
    * Create challenge for connection advertisement.
    *
    * Process:
-   *
    * 1. Generate random [SALT_BYTES] byte salt and zero-pad to [TOTAL_AD_DATA_BYTES] bytes.
    * 2. Hash with stored challenge secret to generate challenge.
    * 3. Return the challenge and salt.
@@ -542,20 +537,8 @@ constructor(
         }
 
         override fun onChannelResolutionError() {
-          loge(TAG, "Failed to resolve channel, disconnecting device $device.")
-          for ((protocol, protocolId) in device.protocolDevices) {
-            protocol.disconnectDevice(protocolId)
-          }
-          device
-            .callback
-            ?.aliveOrNull()
-            ?.onAssociationError(Errors.DEVICE_ERROR_INVALID_CHANNEL_STATE)
-            ?: run {
-              loge(
-                TAG,
-                "Association callback binder has died. Unable to issue association error callback."
-              )
-            }
+          loge(TAG, "Failed to resolve channel with device $device.")
+          handleAssociationError(Errors.DEVICE_ERROR_INVALID_CHANNEL_STATE, device)
         }
       }
     )
@@ -580,11 +563,8 @@ constructor(
           }
           if (device.protocolDevices.isEmpty()) {
             onLastProtocolDisconnected(device)
-            if (associationPendingDeviceId.compareAndSet(deviceId, null)) {
-              device
-                .callback
-                ?.aliveOrNull()
-                ?.onAssociationError(Errors.DEVICE_ERROR_UNEXPECTED_DISCONNECTION)
+            if (associationPendingDeviceId.get() == deviceId) {
+              handleAssociationError(Errors.DEVICE_ERROR_UNEXPECTED_DISCONNECTION, device)
             }
           } else {
             logd(
@@ -627,6 +607,17 @@ constructor(
     }
   }
 
+  private fun handleAssociationError(error: Int, device: ConnectedRemoteDevice) {
+    device.callback?.aliveOrNull()?.onAssociationError(error)
+      ?: run {
+        loge(
+          TAG,
+          "Association callback binder has died. Unable to issue association error callback."
+        )
+      }
+    stopAssociation()
+  }
+
   @VisibleForTesting
   internal fun generateSecureChannelCallback(device: ConnectedRemoteDevice) =
     object : MultiProtocolSecureChannel.Callback {
@@ -655,7 +646,8 @@ constructor(
       }
 
       override fun onEstablishSecureChannelFailure(error: ChannelError) {
-        device.callback?.aliveOrNull()?.onAssociationError(error.ordinal)
+        // TODO(b/267814661): action items for this error.
+        handleAssociationError(error.ordinal, device)
       }
 
       override fun onMessageReceived(deviceMessage: DeviceMessage) {
@@ -664,7 +656,7 @@ constructor(
 
       override fun onMessageReceivedError(error: MultiProtocolSecureChannel.MessageError) {
         loge(TAG, "Error while receiving message.")
-        device.callback?.aliveOrNull()?.onAssociationError(Errors.DEVICE_ERROR_INVALID_HANDSHAKE)
+        handleAssociationError(Errors.DEVICE_ERROR_INVALID_HANDSHAKE, device)
       }
     }
 
@@ -685,12 +677,12 @@ constructor(
   }
 
   private fun handleAssociationMessage(deviceMessage: DeviceMessage) {
-    val pendingDeviceId = associationPendingDeviceId.getAndSet(null)
+    val pendingDeviceId = associationPendingDeviceId.get()
     if (pendingDeviceId == null) {
       loge(TAG, "Received an association message with no pending association device. Ignoring.")
       return
     }
-    val device = connectedRemoteDevices.remove(pendingDeviceId)
+    val device = connectedRemoteDevices.get(pendingDeviceId)
     if (device == null) {
       loge(TAG, "Received an association message and the device was missing!.")
       return
@@ -698,10 +690,7 @@ constructor(
     val deviceId = ByteUtils.bytesToUUID(deviceMessage.message.copyOf(DEVICE_ID_BYTES))
     if (deviceId == null) {
       loge(TAG, "Received invalid device id. Aborting.")
-      device
-        .callback
-        ?.aliveOrNull()
-        ?.onAssociationError(ChannelError.CHANNEL_ERROR_INVALID_DEVICE_ID.ordinal)
+      handleAssociationError(ChannelError.CHANNEL_ERROR_INVALID_DEVICE_ID.ordinal, device)
       return
     }
 
@@ -717,12 +706,12 @@ constructor(
       } catch (e: InvalidParameterException) {
         loge(TAG, "Error saving challenge secret.", e)
         // Call on old device since it had the original association callback.
-        device
-          .callback
-          ?.aliveOrNull()
-          ?.onAssociationError(ChannelError.CHANNEL_ERROR_INVALID_ENCRYPTION_KEY.ordinal)
+        handleAssociationError(ChannelError.CHANNEL_ERROR_INVALID_ENCRYPTION_KEY.ordinal, device)
         return@computeIfAbsent newDevice
       }
+      connectedRemoteDevices.remove(pendingDeviceId)
+      associationPendingDeviceId.set(null)
+      oobRunner.reset()
       newDevice.secureChannel?.setDeviceIdDuringAssociation(deviceId)
       persistAssociatedDevice(deviceId.toString())
       newDevice.callback?.onAssociationCompleted()
@@ -734,7 +723,6 @@ constructor(
       }
       newDevice
     }
-    oobRunner.reset()
   }
 
   private fun convertTempAssociationDeviceToRealDevice(

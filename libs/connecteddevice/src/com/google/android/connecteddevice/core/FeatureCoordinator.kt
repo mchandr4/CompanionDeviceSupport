@@ -15,16 +15,23 @@
  */
 package com.google.android.connecteddevice.core
 
+import android.os.IInterface
 import android.os.ParcelUuid
 import androidx.annotation.GuardedBy
 import androidx.annotation.VisibleForTesting
+import com.google.android.companionprotos.DeviceMessageProto
+import com.google.android.companionprotos.OperationProto.OperationType
 import com.google.android.connecteddevice.api.IAssociationCallback
 import com.google.android.connecteddevice.api.IConnectionCallback
 import com.google.android.connecteddevice.api.IDeviceAssociationCallback
 import com.google.android.connecteddevice.api.IDeviceCallback
 import com.google.android.connecteddevice.api.IFeatureCoordinator
 import com.google.android.connecteddevice.api.IOnAssociatedDevicesRetrievedListener
-import com.google.android.connecteddevice.api.IOnLogRequestedListener
+import com.google.android.connecteddevice.api.external.ISafeConnectionCallback
+import com.google.android.connecteddevice.api.external.ISafeDeviceCallback
+import com.google.android.connecteddevice.api.external.ISafeFeatureCoordinator
+import com.google.android.connecteddevice.api.external.ISafeOnAssociatedDevicesRetrievedListener
+import com.google.android.connecteddevice.api.external.ISafeOnLogRequestedListener
 import com.google.android.connecteddevice.logging.LoggingManager
 import com.google.android.connecteddevice.model.AssociatedDevice
 import com.google.android.connecteddevice.model.ConnectedDevice
@@ -36,6 +43,8 @@ import com.google.android.connecteddevice.util.ByteUtils
 import com.google.android.connecteddevice.util.SafeLog.logd
 import com.google.android.connecteddevice.util.SafeLog.loge
 import com.google.android.connecteddevice.util.SafeLog.logw
+import com.google.protobuf.ByteString
+import com.google.protobuf.InvalidProtocolBufferException
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
@@ -62,12 +71,18 @@ constructor(
 
   private val allConnectionCallbacks = AidlThreadSafeCallbacks<IConnectionCallback>()
 
+  private val safeConnectionCallbacks = AidlThreadSafeCallbacks<ISafeConnectionCallback>()
+
   private val lock = ReentrantLock()
 
-  // deviceId -> (recipientId -> callbacks)s
+  // deviceId -> (recipientId -> callback)s
   @GuardedBy("lock")
-  private val deviceCallbacks:
-    MutableMap<String, MutableMap<ParcelUuid, AidlThreadSafeCallbacks<IDeviceCallback>>> =
+  private val deviceCallbacks: MutableMap<String, MutableMap<ParcelUuid, IDeviceCallback>> =
+    ConcurrentHashMap()
+
+  // deviceId -> (recipientId -> callback)s
+  @GuardedBy("lock")
+  private val safeDeviceCallbacks: MutableMap<String, MutableMap<ParcelUuid, ISafeDeviceCallback>> =
     ConcurrentHashMap()
 
   // Recipient ids that received multiple callback registrations indicate that the recipient id
@@ -80,6 +95,115 @@ constructor(
   private val recipientMissedMessages:
     MutableMap<ParcelUuid, MutableMap<String, MutableList<DeviceMessage>>> =
     ConcurrentHashMap()
+
+  /**
+   * Coordinator between external features and connected devices.
+   *
+   * FeatureCoordinator exposes some APIs meant for Companion Platform features and some APIs meant
+   * for external features (SUW, Account Transfer, etc.). SafeFeatureCoordinator only implements the
+   * subset of APIs meant for external features, providing a better Feature Coordinator for
+   * Companion to give to these external features. "Safe" simply means "Safe for External Features
+   * to use."
+   */
+  public val safeFeatureCoordinator =
+    object : ISafeFeatureCoordinator.Stub() {
+
+      // Retrieves Connected Devices for Driver
+      override fun getConnectedDevices(): List<String> =
+        this@FeatureCoordinator.getConnectedDevicesForDriver().map { it.deviceId }
+
+      override fun registerConnectionCallback(callback: ISafeConnectionCallback) {
+        safeConnectionCallbacks.add(callback, callbackExecutor)
+      }
+
+      override fun unregisterConnectionCallback(callback: ISafeConnectionCallback) {
+        safeConnectionCallbacks.remove(callback)
+      }
+
+      override fun registerDeviceCallback(
+        deviceId: String,
+        recipientId: ParcelUuid,
+        callback: ISafeDeviceCallback
+      ) {
+        val connectedDevice =
+          ConnectedDevice(
+            deviceId,
+            /* deviceName= */ null,
+            /* belongsToDriver= */ false,
+            /* hasSecureChannel= */ false
+          )
+
+        val registrationSuccessful =
+          lock.withLock { registerDeviceCallbackLocked(connectedDevice, recipientId, callback) }
+
+        if (registrationSuccessful) {
+          notifyOfMissedMessages(connectedDevice, recipientId, callback)
+        } else {
+          loge(
+            TAG,
+            "Multiple callbacks registered for recipient $recipientId! " +
+              "Your recipient id is no longer secure and has been blocked from future use."
+          )
+          callbackExecutor.execute {
+            callback.onDeviceError(deviceId, DEVICE_ERROR_INSECURE_RECIPIENT_ID_DETECTED)
+          }
+        }
+      }
+
+      override fun unregisterDeviceCallback(
+        deviceId: String,
+        recipientId: ParcelUuid,
+        callback: ISafeDeviceCallback
+      ) {
+        lock.withLock { unregisterDeviceCallbackLocked(deviceId, recipientId, callback) }
+      }
+
+      override fun sendMessage(deviceId: String, message: ByteArray): Boolean {
+        // TODO(b/265862484): Deprecate DeviceMessage in favor of byte arrays.
+        val parsedMessage =
+          try {
+            DeviceMessageProto.Message.parseFrom(message)
+          } catch (e: InvalidProtocolBufferException) {
+            loge(TAG, "Cannot parse device message to send.", e)
+            return false
+          }
+        val deviceMessage =
+          DeviceMessage.createOutgoingMessage(
+            ByteUtils.bytesToUUID(parsedMessage.recipient.toByteArray()),
+            parsedMessage.isPayloadEncrypted,
+            DeviceMessage.OperationType.fromValue(parsedMessage.operation.number),
+            parsedMessage.payload.toByteArray()
+          )
+        return controller.sendMessage(UUID.fromString(deviceId), deviceMessage)
+      }
+
+      override fun registerOnLogRequestedListener(
+        loggerId: Int,
+        listener: ISafeOnLogRequestedListener
+      ) {
+        this@FeatureCoordinator.registerOnLogRequestedListener(loggerId, listener)
+      }
+
+      override fun unregisterOnLogRequestedListener(
+        loggerId: Int,
+        listener: ISafeOnLogRequestedListener
+      ) {
+        this@FeatureCoordinator.unregisterOnLogRequestedListener(loggerId, listener)
+      }
+
+      override fun processLogRecords(loggerId: Int, logRecords: ByteArray) {
+        this@FeatureCoordinator.processLogRecords(loggerId, logRecords)
+      }
+
+      // Retrieves Associated Devices for Driver
+      override fun retrieveAssociatedDevices(listener: ISafeOnAssociatedDevicesRetrievedListener) {
+        callbackExecutor.execute {
+          listener.onAssociatedDevicesRetrieved(
+            storage.getDriverAssociatedDevices().map { it.deviceId }
+          )
+        }
+      }
+    }
 
   init {
     controller.registerCallback(createDeviceControllerCallback(), callbackExecutor)
@@ -95,7 +219,11 @@ constructor(
   /** Disconnect all devices and reset state. */
   fun reset() {
     logd(TAG, "Resetting coordinator.")
-    lock.withLock { deviceCallbacks.clear() }
+    lock.withLock {
+      deviceCallbacks.clear()
+      safeDeviceCallbacks.clear()
+      blockedRecipients.clear()
+    }
     controller.reset()
     recipientMissedMessages.clear()
   }
@@ -137,46 +265,79 @@ constructor(
     if (registrationSuccessful) {
       notifyOfMissedMessages(connectedDevice, recipientId, callback)
     } else {
-      notifyRecipientBlocked(connectedDevice, recipientId, callback)
+      loge(
+        TAG,
+        "Multiple callbacks registered for recipient $recipientId! " +
+          "Your recipient id is no longer secure and has been blocked from future use."
+      )
+      callbackExecutor.execute {
+        callback.onDeviceError(connectedDevice, DEVICE_ERROR_INSECURE_RECIPIENT_ID_DETECTED)
+      }
     }
   }
 
-  /**
-   * Registers the given [callback] to be notified of device events on the specified
-   * [connectedDevice] that are specific to the [recipientId].
-   *
-   * If the registration is successful, then `true` is returned. The caller of this method should
-   * have acquired [lock].
-   */
   @GuardedBy("lock")
   private fun registerDeviceCallbackLocked(
     connectedDevice: ConnectedDevice,
     recipientId: ParcelUuid,
-    callback: IDeviceCallback
+    callback: IInterface
   ): Boolean {
     if (recipientId in blockedRecipients) {
+      logw(TAG, "Recipient $recipientId is already blocked. Request to register callback ignored.")
+      return false
+    }
+
+    // TODO(b/266652724): Replace this with AidlCallback; isBinderAlive might not always be
+    // accurate.
+    if (!callback.asBinder().isBinderAlive) {
+      logd(TAG, "Attempted to register dead callback. Request to register callback ignored.")
       return false
     }
 
     val recipientCallbacks =
-      deviceCallbacks.computeIfAbsent(connectedDevice.deviceId) { ConcurrentHashMap() }
-    val newCallbacks =
-      AidlThreadSafeCallbacks<IDeviceCallback>().apply { add(callback, callbackExecutor) }
+      when (callback) {
+        is IDeviceCallback ->
+          deviceCallbacks.computeIfAbsent(connectedDevice.deviceId) { ConcurrentHashMap() }
+        is ISafeDeviceCallback ->
+          safeDeviceCallbacks.computeIfAbsent(connectedDevice.deviceId) { ConcurrentHashMap() }
+        else -> {
+          logd(
+            TAG,
+            "Attempted to use unsupported callback type. Request to register callback ignored."
+          )
+          return false
+        }
+      }
 
-    recipientCallbacks.computeIfPresent(recipientId) { _, callbacks ->
-      if (callbacks.isEmpty) null else callbacks
-    }
-
-    val previousCallbacks = recipientCallbacks.putIfAbsent(recipientId, newCallbacks)
+    @Suppress("UNCHECKED_CAST") // Cast will always succeed because of the type check above.
+    val previousCallback =
+      (recipientCallbacks as? MutableMap<ParcelUuid, IInterface>)?.putIfAbsent(
+        recipientId,
+        callback
+      )
 
     // Device already has a callback registered with this recipient UUID. For the
     // protection of the user, this UUID is now deny listed from future subscriptions
     // and the original subscription is notified and removed.
-    if (previousCallbacks != null) {
+    if (previousCallback != null) {
+      logd(TAG, "A callback already existed for recipient $recipientId. Block the recipient.")
       blockedRecipients.add(recipientId)
       recipientCallbacks.remove(recipientId)
-      previousCallbacks.invoke {
-        it.onDeviceError(connectedDevice, DEVICE_ERROR_INSECURE_RECIPIENT_ID_DETECTED)
+      when (previousCallback) {
+        is IDeviceCallback ->
+          callbackExecutor.execute {
+            previousCallback.onDeviceError(
+              connectedDevice,
+              DEVICE_ERROR_INSECURE_RECIPIENT_ID_DETECTED
+            )
+          }
+        is ISafeDeviceCallback ->
+          callbackExecutor.execute {
+            previousCallback.onDeviceError(
+              connectedDevice.deviceId,
+              DEVICE_ERROR_INSECURE_RECIPIENT_ID_DETECTED
+            )
+          }
       }
       return false
     }
@@ -185,36 +346,53 @@ constructor(
       TAG,
       "New callback registered on device ${connectedDevice.deviceId} for recipient $recipientId."
     )
-    return true
-  }
 
-  private fun notifyRecipientBlocked(
-    connectedDevice: ConnectedDevice,
-    recipientId: ParcelUuid,
-    callback: IDeviceCallback
-  ) {
-    loge(
-      TAG,
-      "Multiple callbacks registered for recipient $recipientId! Your recipient id is no " +
-        "longer secure and has been blocked from future use."
-    )
-    callbackExecutor.execute {
-      callback.onDeviceError(connectedDevice, DEVICE_ERROR_INSECURE_RECIPIENT_ID_DETECTED)
-    }
+    return true
   }
 
   private fun notifyOfMissedMessages(
     connectedDevice: ConnectedDevice,
     recipientId: ParcelUuid,
-    callback: IDeviceCallback
+    callback: IInterface
   ) {
     val missedMessages = recipientMissedMessages[recipientId]?.remove(connectedDevice.deviceId)
     if (missedMessages?.isNotEmpty() != true) {
       return
     }
     logd(TAG, "Notifying $recipientId of missed messages.")
-    callbackExecutor.execute {
-      missedMessages.forEach { callback.onMessageReceived(connectedDevice, it) }
+    when (callback) {
+      is IDeviceCallback ->
+        callbackExecutor.execute {
+          for (deviceMessage in missedMessages) {
+            callback.onMessageReceived(connectedDevice, deviceMessage)
+          }
+        }
+      is ISafeDeviceCallback -> {
+        for (deviceMessage in missedMessages) {
+          val builder =
+            DeviceMessageProto.Message.newBuilder()
+              .setOperation(
+                OperationType.forNumber(deviceMessage.operationType.value)
+                  ?: OperationType.OPERATION_TYPE_UNKNOWN
+              )
+              .setIsPayloadEncrypted(deviceMessage.isMessageEncrypted)
+              .setPayload(ByteString.copyFrom(deviceMessage.message))
+              .setOriginalSize(deviceMessage.originalMessageSize)
+          deviceMessage.recipient?.let {
+            builder.recipient = ByteString.copyFrom(ByteUtils.uuidToBytes(it))
+          }
+          val message = builder.build()
+          val rawBytes = message.toByteArray()
+          callbackExecutor.execute {
+            callback.onMessageReceived(connectedDevice.deviceId, rawBytes)
+          }
+        }
+      }
+      else ->
+        logd(
+          TAG,
+          "Attempted to use unsupported callback type. Request to notify of missed messsages ignored."
+        )
     }
   }
 
@@ -223,42 +401,58 @@ constructor(
     recipientId: ParcelUuid,
     callback: IDeviceCallback
   ) {
-    lock.withLock { unregisterDeviceCallbackLocked(connectedDevice, recipientId, callback) }
+    lock.withLock {
+      unregisterDeviceCallbackLocked(connectedDevice.deviceId, recipientId, callback)
+    }
   }
 
   /**
    * Unregisters the given [callback] from being notified of device events for the specified
-   * [recipientId] on the [connectedDevice].
+   * [recipientId] on the connected device with ID [deviceId].
    *
    * The caller should ensure that they have acquired [lock].
    */
   @GuardedBy("lock")
   private fun unregisterDeviceCallbackLocked(
-    connectedDevice: ConnectedDevice,
+    deviceId: String,
     recipientId: ParcelUuid,
-    callback: IDeviceCallback
+    callback: IInterface
   ) {
-    val callbacks = deviceCallbacks[connectedDevice.deviceId]?.get(recipientId)
-    if (callbacks == null) {
+    val deviceCallback =
+      when (callback) {
+        is IDeviceCallback -> deviceCallbacks[deviceId]?.get(recipientId)
+        is ISafeDeviceCallback -> safeDeviceCallbacks[deviceId]?.get(recipientId)
+        else -> {
+          logd(
+            TAG,
+            "Attempted to use unsupported callback type. Request to unregister callback ignored."
+          )
+          return
+        }
+      }
+
+    if (deviceCallback == null || callback.asBinder() != deviceCallback.asBinder()) {
       logw(
         TAG,
-        "Request to unregister callback on device ${connectedDevice.deviceId} for recipient " +
-          "$recipientId, but none registered."
+        "Request to unregister callback on device ${deviceId} for recipient $recipientId, but " +
+          "this callback is not registered. Request to unregister callback ignored."
       )
       return
     }
 
-    callbacks.remove(callback)
-
-    logd(
-      TAG,
-      "Device callback unregistered on device ${connectedDevice.deviceId} for recipient " +
-        "$recipientId."
-    )
-
-    if (callbacks.isEmpty) {
-      deviceCallbacks[connectedDevice.deviceId]?.remove(recipientId)
+    when (callback) {
+      is IDeviceCallback -> deviceCallbacks[deviceId]?.remove(recipientId)
+      is ISafeDeviceCallback -> safeDeviceCallbacks[deviceId]?.remove(recipientId)
+      else -> {
+        logd(
+          TAG,
+          "Attempted to use unsupported callback type. Request to unregister callback ignored."
+        )
+        return
+      }
     }
+
+    logd(TAG, "Device callback unregistered on device ${deviceId} for recipient " + "$recipientId.")
   }
 
   override fun sendMessage(connectedDevice: ConnectedDevice, message: DeviceMessage): Boolean =
@@ -272,11 +466,17 @@ constructor(
     deviceAssociationCallbacks.remove(callback)
   }
 
-  override fun registerOnLogRequestedListener(loggerId: Int, listener: IOnLogRequestedListener) {
+  override fun registerOnLogRequestedListener(
+    loggerId: Int,
+    listener: ISafeOnLogRequestedListener
+  ) {
     loggingManager.registerLogRequestedListener(loggerId, listener, callbackExecutor)
   }
 
-  override fun unregisterOnLogRequestedListener(loggerId: Int, listener: IOnLogRequestedListener) {
+  override fun unregisterOnLogRequestedListener(
+    loggerId: Int,
+    listener: ISafeOnLogRequestedListener
+  ) {
     loggingManager.unregisterLogRequestedListener(loggerId, listener)
   }
 
@@ -383,6 +583,12 @@ constructor(
   }
 
   @VisibleForTesting
+  internal fun safeOnDeviceConnectedInternal(connectedDevice: String) {
+    logd(TAG, "Notifying callbacks that a new device has connected.")
+    safeConnectionCallbacks.invoke { it.onDeviceConnected(connectedDevice) }
+  }
+
+  @VisibleForTesting
   internal fun onDeviceDisconnectedInternal(connectedDevice: ConnectedDevice) {
     if (connectedDevice.isAssociatedWithDriver) {
       logd(TAG, "Notifying callbacks that a device has disconnected for the driver.")
@@ -392,6 +598,12 @@ constructor(
       passengerConnectionCallbacks.invoke { it.onDeviceDisconnected(connectedDevice) }
     }
     allConnectionCallbacks.invoke { it.onDeviceDisconnected(connectedDevice) }
+  }
+
+  @VisibleForTesting
+  internal fun safeOnDeviceDisconnectedInternal(connectedDevice: String) {
+    logd(TAG, "Notifying callbacks that a new device has disconnected.")
+    safeConnectionCallbacks.invoke { it.onDeviceDisconnected(connectedDevice) }
   }
 
   @VisibleForTesting
@@ -413,7 +625,7 @@ constructor(
     )
 
     for (callback in callbacks) {
-      callback.invoke { it.onSecureChannelEstablished(connectedDevice) }
+      callback.onSecureChannelEstablished(connectedDevice)
     }
   }
 
@@ -434,7 +646,12 @@ constructor(
         deviceCallbacks[connectedDevice.deviceId]?.get(ParcelUuid(message.recipient))
       }
 
-    if (callback == null) {
+    val safeCallback =
+      lock.withLock {
+        safeDeviceCallbacks[connectedDevice.deviceId]?.get(ParcelUuid(message.recipient))
+      }
+
+    if (callback == null && safeCallback == null) {
       logd(TAG, "Recipient has not registered a callback yet. Saving missed message.")
       saveMissedMessage(connectedDevice, message)
       return
@@ -442,7 +659,10 @@ constructor(
 
     logd(TAG, "Notifying callback for recipient ${message.recipient}")
 
-    callback.invoke { it.onMessageReceived(connectedDevice, message) }
+    callbackExecutor.execute {
+      safeCallback?.onMessageReceived(connectedDevice.deviceId, message.message)
+      callback?.onMessageReceived(connectedDevice, message)
+    }
   }
 
   @VisibleForTesting

@@ -8,6 +8,7 @@ import android.content.res.Resources
 import android.os.Bundle
 import android.os.Looper
 import androidx.test.core.app.ApplicationProvider
+import com.google.android.connecteddevice.R;
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
@@ -30,6 +31,18 @@ class TrunkServiceTest {
 
     assertThat(service.boundServices).containsKey(component1.flattenToString())
     assertThat(service.boundServices).containsKey(component2.flattenToString())
+  }
+
+   @Test
+  fun onCreate_retrieveBinderVersionFromResource() {
+    val component1 = ComponentName("package", "class1")
+    val service =
+      createTrunkService(arrayOf(component1.flattenToString()))
+
+    service.onCreate()
+
+    assertThat(service.binderVersion.getVersion())
+      .isEqualTo(COMPANION_BINDER_VERSION)
   }
 
   @Test
@@ -57,11 +70,13 @@ class TrunkServiceTest {
       )
 
     service.onCreate()
-    val boundService1 = service.boundServices[component1.flattenToString()]
-      ?: fail("Expected service1 was not bound.")
+    val boundService1 =
+      service.boundServices[component1.flattenToString()]
+        ?: fail("Expected service1 was not bound.")
     boundService1.onNullBinding(component1)
-    val boundService2 = service.boundServices[component2.flattenToString()]
-      ?: fail("Expected service2 was not bound.")
+    val boundService2 =
+      service.boundServices[component2.flattenToString()]
+        ?: fail("Expected service2 was not bound.")
     boundService2.onServiceConnected(component2, mock())
     service.onDestroy()
 
@@ -71,12 +86,12 @@ class TrunkServiceTest {
   @Test
   fun onServiceDisconnected_attemptsToRestartService() {
     val component = ComponentName("package", "class")
-    val service =
-      createTrunkService(arrayOf(component.flattenToString()))
+    val service = createTrunkService(arrayOf(component.flattenToString()))
 
     service.onCreate()
-    val boundService = service.boundServices.remove(component.flattenToString())
-      ?: fail("Expected service was not bound.")
+    val boundService =
+      service.boundServices.remove(component.flattenToString())
+        ?: fail("Expected service was not bound.")
     boundService.onServiceDisconnected(component)
 
     assertThat(service.boundServices).containsKey(component.flattenToString())
@@ -85,10 +100,11 @@ class TrunkServiceTest {
   @Test
   fun startBranchServices_retriesBindingIfUnsuccessful() {
     val component = ComponentName("package", "class")
-    val service = FailingBindTrunkService().apply {
-      context = ApplicationProvider.getApplicationContext()
-      earlyStartServices = arrayOf(component.flattenToString())
-    }
+    val service =
+      FailingBindTrunkService().apply {
+        context = ApplicationProvider.getApplicationContext()
+        earlyStartServices = arrayOf(component.flattenToString())
+      }
     val shadowLooper = Shadows.shadowOf(Looper.getMainLooper())
 
     service.onCreate()
@@ -128,16 +144,23 @@ class TrunkServiceTest {
     }
 
     override fun getResources(): Resources {
-      return object : Resources(
-        context.resources.assets,
-        context.resources.displayMetrics,
-        context.resources.configuration
-      ) {
+      return object :
+        Resources(
+          context.resources.assets,
+          context.resources.displayMetrics,
+          context.resources.configuration
+        ) {
         override fun getStringArray(id: Int): Array<String> {
           if (id == EARLY_START_SERVICES_ID) {
             return earlyStartServices
           }
           return super.getStringArray(id)
+        }
+        override fun getInteger(id: Int): Int {
+          if (id == R.integer.hu_companion_binder_version) {
+            return COMPANION_BINDER_VERSION
+          }
+          return super.getInteger(id)
         }
       }
     }
@@ -152,5 +175,6 @@ class TrunkServiceTest {
 
   companion object {
     const val EARLY_START_SERVICES_ID = 99999
+    private const val COMPANION_BINDER_VERSION = 9
   }
 }

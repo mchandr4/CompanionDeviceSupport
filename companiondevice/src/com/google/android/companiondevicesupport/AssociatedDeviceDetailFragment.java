@@ -32,6 +32,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -58,9 +59,11 @@ public class AssociatedDeviceDetailFragment extends Fragment {
   private ImageView connectionStatusIndicator;
   private TextView connectionText;
   private ImageView connectionIcon;
+  private LinearLayout connectionButton;
   private AssociatedDeviceViewModel model;
   private TextView claimText;
   private ImageView claimIcon;
+  private Context context;
 
   /**
    * Returns an instance of the {@link AssociatedDeviceDetailFragment} that will display the details
@@ -84,11 +87,13 @@ public class AssociatedDeviceDetailFragment extends Fragment {
 
   @Override
   public void onViewCreated(View view, Bundle savedInstanceState) {
+    context = getContext();
     deviceName = view.findViewById(R.id.device_name);
     connectionIcon = view.findViewById(R.id.connection_button_icon);
     connectionText = view.findViewById(R.id.connection_button_text);
     connectionStatusText = view.findViewById(R.id.connection_status_text);
     connectionStatusIndicator = view.findViewById(R.id.connection_status_indicator);
+    connectionButton = view.findViewById(R.id.connection_button);
     claimText = view.findViewById(R.id.claim_button_text);
     claimIcon = view.findViewById(R.id.claim_button_icon);
     List<String> transportProtocols =
@@ -104,9 +109,8 @@ public class AssociatedDeviceDetailFragment extends Fragment {
             .get(AssociatedDeviceViewModel.class);
     model.getAssociatedDevicesDetails().observe(this, this::setDeviceDetails);
 
-    view.findViewById(R.id.connection_button)
-        .setOnClickListener(
-            l -> model.toggleConnectionStatusForDevice(deviceDetails.getAssociatedDevice()));
+    connectionButton.setOnClickListener(
+        l -> model.toggleConnectionStatusForDevice(deviceDetails.getAssociatedDevice()));
     view.findViewById(R.id.forget_button).setOnClickListener(v -> showRemoveDeviceDialog());
     view.findViewById(R.id.trusted_device_feature_button).setOnClickListener(
         v ->
@@ -141,37 +145,15 @@ public class AssociatedDeviceDetailFragment extends Fragment {
       return;
     }
     deviceDetails = associatedDevicesDetails.get(index);
-
-    Context context = getContext();
     if (context == null) {
       return;
     }
     deviceName.setText(deviceDetails.getDeviceName());
 
-    if (!deviceDetails.isConnectionEnabled()) {
-      setConnectionStatus(
-          ContextCompat.getColor(context, R.color.connection_color_disconnected),
-          getString(R.string.disconnected),
-          ContextCompat.getDrawable(context, R.drawable.ic_phonelink_ring_24dp),
-          getString(R.string.connect));
-    } else if (deviceDetails.getConnectionState() == ConnectionState.CONNECTED) {
-      setConnectionStatus(
-          ContextCompat.getColor(context, R.color.connection_color_connected),
-          getString(R.string.connected),
-          ContextCompat.getDrawable(context, R.drawable.ic_phonelink_erase_24dp),
-          getString(R.string.disconnect));
-    } else if (deviceDetails.getConnectionState() == ConnectionState.DETECTED) {
-      setConnectionStatus(
-          ContextCompat.getColor(getContext(), R.color.connection_color_detected),
-          getString(R.string.detected),
-          ContextCompat.getDrawable(getContext(), R.drawable.ic_phonelink_erase_24dp),
-          getString(R.string.disconnect));
+    if (deviceDetails.isConnectionEnabled()) {
+      setEnabledConnectionStatus(deviceDetails);
     } else {
-      setConnectionStatus(
-          ContextCompat.getColor(context, R.color.connection_color_not_detected),
-          getString(R.string.notDetected),
-          ContextCompat.getDrawable(context, R.drawable.ic_phonelink_erase_24dp),
-          getString(R.string.disconnect));
+      setDisabledConnectionStatus(deviceDetails);
     }
 
     if (deviceDetails.belongsToDriver()) {
@@ -185,11 +167,56 @@ public class AssociatedDeviceDetailFragment extends Fragment {
     }
   }
 
+  private void setDisabledConnectionStatus(AssociatedDeviceDetails deviceDetails) {
+    if (deviceDetails.getConnectionState() == ConnectionState.CONNECTED) {
+      // The connection status will remain connected during the disconnecting process until the
+      // device get disconnected, which means when the connection state is
+      // {@code ConnectionState.DISCONNECTED}.
+      setConnectionStatus(
+          ContextCompat.getColor(context, R.color.connection_color_connected),
+          getString(R.string.connected),
+          ContextCompat.getDrawable(context, R.drawable.ic_phonelink_erase_24dp),
+          getString(R.string.disconnecting));
+      // Disable the button to avoid user action interrupting the process. The button will be
+      // re-enabled when the connection state is updated.
+      this.connectionButton.setEnabled(false);
+    } else {
+      setConnectionStatus(
+          ContextCompat.getColor(context, R.color.connection_color_disconnected),
+          getString(R.string.disconnected),
+          ContextCompat.getDrawable(context, R.drawable.ic_phonelink_ring_24dp),
+          getString(R.string.connect));
+    }
+  }
+
+  private void setEnabledConnectionStatus(AssociatedDeviceDetails deviceDetails) {
+    if (deviceDetails.getConnectionState() == ConnectionState.CONNECTED) {
+      setConnectionStatus(
+          ContextCompat.getColor(context, R.color.connection_color_connected),
+          getString(R.string.connected),
+          ContextCompat.getDrawable(context, R.drawable.ic_phonelink_erase_24dp),
+          getString(R.string.disconnect));
+    } else if (deviceDetails.getConnectionState() == ConnectionState.DETECTED) {
+      setConnectionStatus(
+          ContextCompat.getColor(context, R.color.connection_color_detected),
+          getString(R.string.detected),
+          ContextCompat.getDrawable(context, R.drawable.ic_phonelink_erase_24dp),
+          getString(R.string.disconnect));
+    } else {
+      setConnectionStatus(
+          ContextCompat.getColor(context, R.color.connection_color_not_detected),
+          getString(R.string.notDetected),
+          ContextCompat.getDrawable(context, R.drawable.ic_phonelink_erase_24dp),
+          getString(R.string.disconnect));
+    }
+  }
+
   private void setConnectionStatus(
       int connectionStatusColor,
       String connectionStatusText,
       Drawable connectionIcon,
       String connectionText) {
+    this.connectionButton.setEnabled(true);
     this.connectionStatusText.setText(connectionStatusText);
     connectionStatusIndicator.setColorFilter(connectionStatusColor);
     this.connectionText.setText(connectionText);

@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">Abre a aplicación complementaria</string>
   <string name="enable_bluetooth_instruction_text">Permite a conexión mediante Bluetooth</string>
   <string name="connect_to_targe_car_instruction_text">Conéctate a: &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
-  <string name="qr_instruction_text">Escanea o código QR ou abre MyCompanion para conectarte a: &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">Usa o teléfono para escanear o código QR ou abre MyCompanion para conectarte a: &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
   <string name="connect_to_car_instruction_text">Conéctate ao coche</string>
   <string name="associated_device_pairing_code_title">Confirmar o código do teléfono</string>
   <string name="associated_device_pairing_message">Confirma que este código coincide co que che aparece no teléfono</string>
@@ -43,6 +43,9 @@
   <string name="turn_on_bluetooth_message">O teu coche necesita o Bluetooth para poder configurar o teu teléfono como dispositivo complementario.</string>
   <string name="turn_on_bluetooth_dialog_title">Queres activar o Bluetooth?</string>
   <string name="turn_on_bluetooth_dialog_message">O teu coche necesita o Bluetooth para poder conectarse ao teu dispositivo complementario.</string>
+  <string name="companion_not_available_dialog_title">Esta opción non está dispoñible</string>
+  <string name="companion_not_available_dialog_message">Os perfís de convidado non poden acceder ao dispositivo complementario</string>
+  <string name="companion_not_available_dialog_switch_user_message">Os perfís de convidado non poden acceder ao dispositivo complementario. Para cambiar o perfil, accede a Configuración &gt; Usuarios.</string>
   <string name="accept">Aceptar</string>
   <string name="reject">Rexeitar</string>
   <string name="confirm">Confirmar</string>
@@ -60,7 +63,9 @@
   <string name="not_now">Agora non</string>
   <string name="connect">Conectar</string>
   <string name="disconnect">Desconectar</string>
+  <string name="disconnecting">Disconnecting</string>
   <string name="skip">Omitir</string>
+  <string name="change_profile">Cambiar perfil</string>
   <string name="connected">Conectado</string>
   <string name="notDetected">Non se detectou</string>
   <string name="disconnected">Desconectado</string>

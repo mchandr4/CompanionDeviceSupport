@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.os.IBinder;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import com.google.android.connecteddevice.R;
 import com.google.android.connecteddevice.api.CompanionConnector;
 import com.google.android.connecteddevice.api.Connector;
 import com.google.android.connecteddevice.core.DeviceController;
@@ -31,7 +32,6 @@ import com.google.android.connecteddevice.core.MultiProtocolDeviceController;
 import com.google.android.connecteddevice.logging.LoggingFeature;
 import com.google.android.connecteddevice.logging.LoggingManager;
 import com.google.android.connecteddevice.oob.OobRunner;
-import com.google.android.connecteddevice.R;
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage;
 import com.google.android.connecteddevice.system.SystemFeature;
 import com.google.android.connecteddevice.transport.IConnectionProtocol;
@@ -164,6 +164,9 @@ public final class ConnectedDeviceService extends TrunkService {
         return protocolDelegate;
       case CompanionConnector.ACTION_BIND_FEATURE_COORDINATOR:
         return featureCoordinator;
+      case  ACTION_QUERY_API_VERSION:
+        logd(TAG, "Return binder version to remote process");
+        return binderVersion.asBinder();
       default:
         loge(TAG, "Unexpected action found while binding: " + action);
         return null;
@@ -182,7 +185,7 @@ public final class ConnectedDeviceService extends TrunkService {
    * Writes the Companion library version for dumpsys or bug reports.
    *
    * <p>Dump for this service can be viewed using this command: {@code adb shell dumpsys activity
-   * service com.google.android.connecteddevice.service.ConnectedDeviceService} 
+   * service com.google.android.connecteddevice.service.ConnectedDeviceService}
    */
   @Override
   protected void dump(FileDescriptor fd, PrintWriter writer, String[] args) {

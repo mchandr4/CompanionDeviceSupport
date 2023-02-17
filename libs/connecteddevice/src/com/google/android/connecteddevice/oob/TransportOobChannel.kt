@@ -41,6 +41,7 @@ class TransportOobChannel(
       return false
     }
     for (protocol in protocols) {
+      logd(TAG, "Start OOB discovery with protocol: $protocol.")
       protocol.startAssociationDiscovery(
         protocolName,
         DEFAULT_UUID,

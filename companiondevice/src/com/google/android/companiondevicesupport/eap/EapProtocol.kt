@@ -27,6 +27,7 @@ import com.google.android.connecteddevice.transport.IDiscoveryCallback
 import com.google.android.connecteddevice.util.DirectExecutor
 import com.google.android.connecteddevice.util.SafeLog.logd
 import com.google.android.connecteddevice.util.SafeLog.loge
+import com.google.android.connecteddevice.util.SafeLog.logw
 import com.panasonic.iapx.IDeviceConnection
 import com.panasonic.iapx.IDeviceConnectionDelegate
 import com.panasonic.iapx.IServiceConnector
@@ -93,6 +94,7 @@ class EapProtocol(
     identifier: ParcelUuid,
     callback: IDiscoveryCallback,
   ) {
+    logd(TAG, "Request to start EAP discovery, register discovery callback.")
     ongoingDiscoveries[name] = callback
   }
 
@@ -111,10 +113,16 @@ class EapProtocol(
         eapSessionId: Long,
         eapProtocolName: String?
       ) {
-        logd(TAG, "Starting new session $eapSessionId with protocol $eapProtocolName.")
+        logd(
+          TAG,
+          "Starting new session $eapSessionId with protocol $eapProtocolName. Currently " +
+            "${ongoingDiscoveries.size} callbacks registered."
+        )
         if (ongoingDiscoveries.containsKey(eapProtocolName)) {
           sessions[eapSessionId] = connection
           ongoingDiscoveries[eapProtocolName]?.onDeviceConnected(eapSessionId.toString())
+        } else {
+          logw(TAG, "Did not find matching callback; ignoring the connection.")
         }
       }
 
@@ -147,6 +155,7 @@ class EapProtocol(
 
   override fun reset() {
     super.reset()
+    logd(TAG, "Reset the protocol.")
     sessions.clear()
     ongoingDiscoveries.clear()
   }

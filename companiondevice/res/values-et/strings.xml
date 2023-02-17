@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">Avage kaasrakendus</string>
   <string name="enable_bluetooth_instruction_text">Lubage Bluetooth-ühendus</string>
   <string name="connect_to_targe_car_instruction_text">Ühendage autoga &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
-  <string name="qr_instruction_text">Skannige QR-kood või avage rakendus MyCompanion, et ühendada autoga &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">Skannige oma telefoniga QR-kood või avage rakendus MyCompanion, et ühendada autoga &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
   <string name="connect_to_car_instruction_text">Ühendage autoga</string>
   <string name="associated_device_pairing_code_title">Kinnitage kood telefonis</string>
   <string name="associated_device_pairing_message">Veenduge, et see ühtiks teie telefonis kuvatud koodiga</string>
@@ -43,6 +43,9 @@
   <string name="turn_on_bluetooth_message">Telefoni seadistamiseks kaasseadmena vajab auto Bluetoothi.</string>
   <string name="turn_on_bluetooth_dialog_title">Kas lülitada Bluetooth sisse?</string>
   <string name="turn_on_bluetooth_dialog_message">Kaasseadme ühendamiseks vajab auto Bluetoothi.</string>
+  <string name="companion_not_available_dialog_title">See seade ei ole saadaval</string>
+  <string name="companion_not_available_dialog_message">Külalisprofiilid ei pääse seadmele CompanionDevice juurde</string>
+  <string name="companion_not_available_dialog_switch_user_message">Külalisprofiilid ei pääse seadmele CompanionDevice juurde. Profiili vahetamiseks tehke valikud Seaded &gt; Kasutajad.</string>
   <string name="accept">Nõustu</string>
   <string name="reject">Keeldu</string>
   <string name="confirm">Kinnita</string>
@@ -60,7 +63,9 @@
   <string name="not_now">Mitte praegu</string>
   <string name="connect">Ühenda</string>
   <string name="disconnect">Katkesta ühendus</string>
+  <string name="disconnecting">Disconnecting</string>
   <string name="skip">Jäta vahele</string>
+  <string name="change_profile">Vaheta profiili</string>
   <string name="connected">Ühendatud</string>
   <string name="notDetected">Ei tuvastatud</string>
   <string name="disconnected">Pole ühendatud</string>

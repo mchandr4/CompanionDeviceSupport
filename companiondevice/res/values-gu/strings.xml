@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">સાથી ઍપ ખોલો</string>
   <string name="enable_bluetooth_instruction_text">બ્લૂટૂથ કનેક્શનને મંજૂરી આપો</string>
   <string name="connect_to_targe_car_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s સાથે કનેક્ટ કરો</string>
-  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s સાથે કનેક્ટ કરવા માટે, QR કોડ સ્કૅન કરો અથવા MyCompanion ખોલો</string>
+  <string name="qr_instruction_text">QR કોડ સ્કૅન કરવા માટે, તમારા ફોનનો ઉપયોગ કરો અથવા &lt;b&gt;%1$s&lt;/b&gt; %2$s સાથે કનેક્ટ કરવા માટે, MyCompanion ખોલો</string>
   <string name="connect_to_car_instruction_text">કાર સાથે કનેક્ટ કરો</string>
   <string name="associated_device_pairing_code_title">ફોન પર કોડ કન્ફર્મ કરો</string>
   <string name="associated_device_pairing_message">તમારા ફોન પર બતાવેલા કોડ સાથે આનો મેળ બેસતો હોવાનું કન્ફર્મ કરો</string>
@@ -43,6 +43,9 @@
   <string name="turn_on_bluetooth_message">તમારા ફોનને સાથી ડિવાઇસ તરીકે સેટ કરવા, તમારી કારમાં બ્લૂટૂથ જરૂરી છે.</string>
   <string name="turn_on_bluetooth_dialog_title">બ્લૂટૂથ ચાલુ કરીએ?</string>
   <string name="turn_on_bluetooth_dialog_message">તમારું સાથી ડિવાઇસ કનેક્ટ કરવા માટે, તમારી કારમાં બ્લૂટૂથ જરૂરી છે.</string>
+  <string name="companion_not_available_dialog_title">આ સેટિંગ ઉપલબ્ધ નથી</string>
+  <string name="companion_not_available_dialog_message">અતિથિની પ્રોફાઇલ CompanionDeviceને ઍક્સેસ કરી શકતી નથી</string>
+  <string name="companion_not_available_dialog_switch_user_message">અતિથિની પ્રોફાઇલ CompanionDeviceને ઍક્સેસ કરી શકતી નથી. તમારી પ્રોફાઇલ બદલવા માટે, સેટિંગ &gt; વપરાશકર્તાઓ પર જાઓ.</string>
   <string name="accept">સ્વીકારો</string>
   <string name="reject">નકારો</string>
   <string name="confirm">કન્ફર્મ કરો</string>
@@ -60,7 +63,9 @@
   <string name="not_now">હમણાં નહીં</string>
   <string name="connect">કનેક્ટ કરો</string>
   <string name="disconnect">ડિસ્કનેક્ટ કરો</string>
+  <string name="disconnecting">Disconnecting</string>
   <string name="skip">છોડો</string>
+  <string name="change_profile">પ્રોફાઇલ બદલો</string>
   <string name="connected">કનેક્ટ કરેલું</string>
   <string name="notDetected">મળ્યું નથી</string>
   <string name="disconnected">ડિસ્કનેક્ટ કરેલું</string>

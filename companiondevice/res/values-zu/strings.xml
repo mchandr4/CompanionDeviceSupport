@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">Vula i-companion app</string>
   <string name="enable_bluetooth_instruction_text">Vumela uxhumo lwe-Bluetooth</string>
   <string name="connect_to_targe_car_instruction_text">Xhuma ku-&lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
-  <string name="qr_instruction_text">Skena ikhodi ye-QR noma vula i-MyCompanion ukuze uxhumeke ku-&lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">Sebenzisa ifoni yakho ukuskena ikhodi ye-QR noma uvule i-MyCompanion ukuze uxhume ku-&lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
   <string name="connect_to_car_instruction_text">Xhuma emotweni</string>
   <string name="associated_device_pairing_code_title">Qinisekisa ikhodi kufoni</string>
   <string name="associated_device_pairing_message">Qinisekisa ukuthi lokhu kufana nekhodi eboniswe kufoni yakho</string>
@@ -43,6 +43,9 @@
   <string name="turn_on_bluetooth_message">Ukusetha ifoni yakho njengedivayisi engumngane, imoto yakho idinga i-Bluetooth.</string>
   <string name="turn_on_bluetooth_dialog_title">Vula i-Bluetooth?</string>
   <string name="turn_on_bluetooth_dialog_message">Ukuxhuma kudivayisi yakho engumngane, imoto yakho idinga i-Bluetooth.</string>
+  <string name="companion_not_available_dialog_title">Le sethingi ayi\tholakali</string>
+  <string name="companion_not_available_dialog_message">Amaphrofayela esivakashi aw\akwazi ukufinyelela i-CompanionDevice</string>
+  <string name="companion_not_available_dialog_switch_user_message">Amaphrofayela esivakashi aw\akwazi ukufinyelela i-CompanionDevice. Ukuze ushintshe iphrofayela yakho, iya Kuzilungiselelo &gt; Abasebenzisi.</string>
   <string name="accept">Yamukela</string>
   <string name="reject">Nqaba</string>
   <string name="confirm">Qinisekisa</string>
@@ -60,7 +63,9 @@
   <string name="not_now">Hhayi manje</string>
   <string name="connect">Xhuma</string>
   <string name="disconnect">Nqamula</string>
+  <string name="disconnecting">Disconnecting</string>
   <string name="skip">Yeqa</string>
+  <string name="change_profile">Shintsha iphrofayela</string>
   <string name="connected">Ixhunyiwe</string>
   <string name="notDetected">Ayitholiwe</string>
   <string name="disconnected">Inqamukile</string>

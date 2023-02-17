@@ -86,6 +86,7 @@ public final class AssociatedDeviceViewModelTest {
   @Mock private Observer<AssociationState> mockAssociationStateObserver;
   @Mock private Observer<List<AssociatedDeviceDetails>> mockDeviceDetailsObserver;
   @Mock private Observer<String> mockCarNameObserver;
+  @Mock private Observer<StartAssociationResponse> mockAssociationResponseObserver;
   @Mock private Observer<String> mockPairingCodeObserver;
   @Mock private Observer<AssociatedDevice> mockRemovedDeviceObserver;
 
@@ -231,6 +232,21 @@ public final class AssociatedDeviceViewModelTest {
     associationCallback.onAssociationCompleted();
     viewModel.getAssociationState().observeForever(mockAssociationStateObserver);
     verify(mockAssociationStateObserver).onChanged(AssociationState.COMPLETED);
+  }
+
+  @Test
+  public void startAssociation_associationError_resetAdvertisingData() throws RemoteException {
+    viewModel.startAssociation();
+    captureAssociationCallback();
+    viewModel.getAssociationResponse().observeForever(mockAssociationResponseObserver);
+    viewModel.getAssociationState().observeForever(mockAssociationStateObserver);
+    viewModel.getAdvertisedCarName().observeForever(mockCarNameObserver);
+    viewModel.getPairingCode().observeForever(mockPairingCodeObserver);
+    associationCallback.onAssociationError(0);
+    verify(mockAssociationStateObserver).onChanged(AssociationState.ERROR);
+    verify(mockAssociationResponseObserver, times(2)).onChanged(null);
+    verify(mockCarNameObserver, times(2)).onChanged(null);
+    verify(mockPairingCodeObserver, times(2)).onChanged(null);
   }
 
   @Test

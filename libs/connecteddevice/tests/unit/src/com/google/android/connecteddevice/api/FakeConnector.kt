@@ -18,6 +18,8 @@ open class FakeConnector : Connector {
   override val connectedDevices = mutableListOf<ConnectedDevice>()
   override var isConnected = false
 
+  val sentMessages = mutableMapOf<String, MutableList<ByteArray>>()
+
   override fun connect() {
     callback?.onConnected()
     isConnected = true
@@ -33,9 +35,13 @@ open class FakeConnector : Connector {
 
   override fun binderForAction(action: String): IBinder? = null
 
-  override fun sendMessageSecurely(deviceId: String, message: ByteArray) {}
+  override fun sendMessageSecurely(deviceId: String, message: ByteArray) {
+    sentMessages.getOrPut(deviceId) { mutableListOf() }.add(message)
+  }
 
-  override fun sendMessageSecurely(device: ConnectedDevice, message: ByteArray) {}
+  override fun sendMessageSecurely(device: ConnectedDevice, message: ByteArray) {
+    sentMessages.getOrPut(device.deviceId) { mutableListOf() }.add(message)
+  }
 
   override fun sendQuerySecurely(
     deviceId: String,

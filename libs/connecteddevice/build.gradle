@@ -51,7 +51,7 @@ android {
         main {
             manifest.srcFile 'AndroidManifest.xml'
             java.srcDirs = ['src']
-            res.srcDirs = ['src/com/google/android/connecteddevice/service/res']
+            res.srcDirs = ['res']
             aidl.srcDirs = java.srcDirs
             proto {
                 srcDir java.srcDirs

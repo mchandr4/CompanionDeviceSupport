@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">Abra a app associada</string>
   <string name="enable_bluetooth_instruction_text">Permita a ligação Bluetooth</string>
   <string name="connect_to_targe_car_instruction_text">Estabeleça ligação a &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
-  <string name="qr_instruction_text">Leia o código QR ou abra o MyCompanion para se ligar a &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">Use o telemóvel para ler o código QR ou abra o MyCompanion para se ligar a &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
   <string name="connect_to_car_instruction_text">Estabeleça ligação ao carro</string>
   <string name="associated_device_pairing_code_title">Confirme o código no telemóvel</string>
   <string name="associated_device_pairing_message">Confirme se este código corresponde ao código apresentado no seu telemóvel.</string>
@@ -41,8 +41,11 @@
   <string name="error_screen_message">Infelizmente, não foi possível apresentar este ecrã corretamente. Tente novamente.</string>
   <string name="turn_on_bluetooth_title">Ative o Bluetooth</string>
   <string name="turn_on_bluetooth_message">Para configurar o telemóvel como dispositivo associado, o seu carro precisa do Bluetooth.</string>
-  <string name="turn_on_bluetooth_dialog_title">Pretende ativar o Bluetooth?</string>
+  <string name="turn_on_bluetooth_dialog_title">Ativar o Bluetooth?</string>
   <string name="turn_on_bluetooth_dialog_message">Para ligar ao dispositivo associado, o seu carro precisa do Bluetooth.</string>
+  <string name="companion_not_available_dialog_title">Esta definição não está disponível</string>
+  <string name="companion_not_available_dialog_message">Os perfis de convidado não podem aceder ao CompanionDevice</string>
+  <string name="companion_not_available_dialog_switch_user_message">Os perfis de convidado não podem aceder ao CompanionDevice. Para alterar o seu perfil, aceda a Definições &gt; Utilizadores.</string>
   <string name="accept">Aceitar</string>
   <string name="reject">Rejeitar</string>
   <string name="confirm">Confirmar</string>
@@ -60,7 +63,9 @@
   <string name="not_now">Agora não</string>
   <string name="connect">Ligar</string>
   <string name="disconnect">Desligar</string>
+  <string name="disconnecting">A desligar</string>
   <string name="skip">Ignorar</string>
+  <string name="change_profile">Alterar perfil</string>
   <string name="connected">Ligado</string>
   <string name="notDetected">Não detetado</string>
   <string name="disconnected">Desligado</string>
@@ -89,7 +94,7 @@
   <string name="create_phone_lock_dialog_title">Crie um bloqueio de ecrã no telemóvel</string>
   <string name="create_phone_lock_dialog_message">O seu telemóvel não tem um bloqueio de ecrã definido. Para desbloquear o perfil do seu carro com o telemóvel, crie primeiro um bloqueio de ecrã (também conhecido como código secreto) nas definições do telemóvel.</string>
   <plurals name="notification_new_message">
-    <item quantity="one">%d nova(s) mensagem(ns)</item>
+    <item quantity="one">Nova mensagem</item>
     <item quantity="other">%d novas mensagens</item>
   </plurals>
   <string name="name_not_available">Nome não disponível</string>

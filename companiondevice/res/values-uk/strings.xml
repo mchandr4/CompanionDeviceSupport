@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">Відкрийте супутній додаток</string>
   <string name="enable_bluetooth_instruction_text">Дозвольте Bluetooth-з’єднання</string>
   <string name="connect_to_targe_car_instruction_text">Підключіться до автомобіля &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
-  <string name="qr_instruction_text">Щоб підключитися до автомобіля &lt;b&gt;%1$s&lt;/b&gt; %2$s, проскануйте QR-код або відкрийте MyCompanion</string>
+  <string name="qr_instruction_text">Проскануйте QR-код за допомогою телефона або відкрийте MyCompanion, щоб підключитися до автомобіля &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
   <string name="connect_to_car_instruction_text">Підключіться до автомобіля</string>
   <string name="associated_device_pairing_code_title">Підтвердьте код на телефоні</string>
   <string name="associated_device_pairing_message">Підтвердьте, що на телефоні з\'явився такий самий код</string>
@@ -43,6 +43,9 @@
   <string name="turn_on_bluetooth_message">Щоб налаштувати телефон як супутній пристрій, в автомобілі потрібно ввімкнути Bluetooth.</string>
   <string name="turn_on_bluetooth_dialog_title">Увімкнути Bluetooth?</string>
   <string name="turn_on_bluetooth_dialog_message">Щоб підключитися до супутнього пристрою, в автомобілі потрібно ввімкнути Bluetooth.</string>
+  <string name="companion_not_available_dialog_title">Це налаштування недоступне</string>
+  <string name="companion_not_available_dialog_message">Профілі гостей не мають доступу до супутнього пристрою</string>
+  <string name="companion_not_available_dialog_switch_user_message">Профілі гостей не мають доступу до супутнього пристрою. Щоб перейти в інший профіль, виберіть \"Налаштування\" &gt; \"Користувачі\".</string>
   <string name="accept">Прийняти</string>
   <string name="reject">Відхилити</string>
   <string name="confirm">Підтвердити</string>
@@ -60,7 +63,9 @@
   <string name="not_now">Не зараз</string>
   <string name="connect">Підключити</string>
   <string name="disconnect">Відключити</string>
+  <string name="disconnecting">Disconnecting</string>
   <string name="skip">Пропустити</string>
+  <string name="change_profile">Перейти в інший профіль</string>
   <string name="connected">Підключено</string>
   <string name="notDetected">Не знайдено</string>
   <string name="disconnected">Від\'єднано</string>

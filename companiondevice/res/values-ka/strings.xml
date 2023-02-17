@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">გახსენით კომპანიონი აპი</string>
   <string name="enable_bluetooth_instruction_text">დაუშვით Bluetooth კავშირი</string>
   <string name="connect_to_targe_car_instruction_text">დაუკავშირდით &lt;b&gt;%1$s&lt;/b&gt;-ს %2$s</string>
-  <string name="qr_instruction_text">დაასკანირეთ QR კოდი ან გახსენით MyCompanion, რომ დაუკავშირდეთ &lt;b&gt;%1$s&lt;/b&gt;-ს %2$s</string>
+  <string name="qr_instruction_text">დაასკანირეთ QR კოდი ტელეფონით ან გახსენით MyCompanion, რათა დაუკავშირდეთ &lt;b&gt;%1$s&lt;/b&gt;-ს %2$s</string>
   <string name="connect_to_car_instruction_text">დაუკავშირდით მანქანას</string>
   <string name="associated_device_pairing_code_title">დაადასტურეთ კოდი ტელეფონზე</string>
   <string name="associated_device_pairing_message">დაადასტურეთ, რომ ეს ემთხვევა თქვენს ტელეფონზე ნაჩვენებ კოდს</string>
@@ -43,6 +43,9 @@
   <string name="turn_on_bluetooth_message">თქვენი ტელეფონის კომპანიონ მოწყობილობად დასაყენებლად თქვენს მანქანას Bluetooth სჭირდება.</string>
   <string name="turn_on_bluetooth_dialog_title">ჩაირთოს Bluetooth?</string>
   <string name="turn_on_bluetooth_dialog_message">თქვენს კომპანიონ მოწყობილობასთან დასაკავშირებლად თქვენს მანქანას Bluetooth სჭირდება.</string>
+  <string name="companion_not_available_dialog_title">ეს პარამეტრი მიუწვდომელია</string>
+  <string name="companion_not_available_dialog_message">სტუმრის პროფილებს არ აქვთ წვდომა CompanionDevice-ზე</string>
+  <string name="companion_not_available_dialog_switch_user_message">სტუმრის პროფილებს არ აქვთ წვდომა CompanionDevice-ზე. თქვენი პროფილის შესაცვლელად გადადით: პარამეტრები &gt; მომხმარებლები.</string>
   <string name="accept">დათანხმება</string>
   <string name="reject">უარყოფა</string>
   <string name="confirm">დადასტურება</string>
@@ -60,7 +63,9 @@
   <string name="not_now">ახლა არა</string>
   <string name="connect">დაკავშირება</string>
   <string name="disconnect">კავშირის გაწყვეტა</string>
+  <string name="disconnecting">ითიშება</string>
   <string name="skip">გამოტოვება</string>
+  <string name="change_profile">პროფილის შეცვლა</string>
   <string name="connected">დაკავშირებული</string>
   <string name="notDetected">აღმოჩენილი არ არის</string>
   <string name="disconnected">კავშირი გაწყვეტილია</string>

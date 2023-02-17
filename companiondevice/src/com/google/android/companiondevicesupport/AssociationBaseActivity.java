@@ -160,7 +160,9 @@ public abstract class AssociationBaseActivity extends FragmentActivity {
   @Override
   protected void onStop() {
     super.onStop();
+    // Resets the UI/model when activity goes into the background during association.
     model.stopAssociation();
+    finish();
   }
 
   /** Companion activity is not supported under guest profile. */

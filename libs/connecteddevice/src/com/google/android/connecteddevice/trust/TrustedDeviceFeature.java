@@ -85,6 +85,13 @@ class TrustedDeviceFeature extends RemoteFeature {
   }
 
   @Override
+  protected void onDeviceDisconnected(@NonNull ConnectedDevice device) {
+    if (callback != null) {
+      callback.onDeviceDisconnected();
+    }
+  }
+
+  @Override
   protected void onAssociatedDeviceAdded(AssociatedDevice device) {
     if (associatedDeviceCallback != null) {
       associatedDeviceCallback.onAssociatedDeviceAdded(device);
@@ -108,6 +115,9 @@ class TrustedDeviceFeature extends RemoteFeature {
   interface Callback {
     /** Called when a new device has connected and can be sent secure messages. */
     void onSecureChannelEstablished(@NonNull ConnectedDevice device);
+
+    /** Called when a device get disconnected. */
+    void onDeviceDisconnected();
 
     /** Called when a new {@link byte[]} message is received for this feature. */
     void onMessageReceived(@NonNull ConnectedDevice device, @NonNull byte[] message);

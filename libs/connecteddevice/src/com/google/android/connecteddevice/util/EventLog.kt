@@ -31,6 +31,12 @@ object EventLog {
     SafeLog.logi(TAG, "BLE_ON")
   }
 
+  /** Mark in the log that a search for the user's device has started. */
+  @JvmStatic
+  fun onDeviceSearchStarted() {
+    SafeLog.logi(TAG, "SEARCHING_FOR_DEVICE")
+  }
+
   /** Mark in the log that a device connected. */
   @JvmStatic
   fun onDeviceConnected() {

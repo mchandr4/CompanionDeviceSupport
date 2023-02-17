@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">Tamamlayıcı uygulamayı açın</string>
   <string name="enable_bluetooth_instruction_text">Bluetooth bağlantısına izin verin</string>
   <string name="connect_to_targe_car_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s aracına bağlanın</string>
-  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s adlı arabaya bağlanmak için QR kodunu tarayın veya MyCompanion\'u açın</string>
+  <string name="qr_instruction_text">QR kodunu taramak için telefonunuzu kullanın veya &lt;b&gt;%1$s&lt;/b&gt; %2$s adlı arabaya bağlanmak için MyCompanion\'ı açın.</string>
   <string name="connect_to_car_instruction_text">Arabaya bağlanın</string>
   <string name="associated_device_pairing_code_title">Kodu telefonda onaylayın</string>
   <string name="associated_device_pairing_message">Bunun telefonunuzda gösterilen kodla aynı olduğunu onaylayın</string>
@@ -43,6 +43,9 @@
   <string name="turn_on_bluetooth_message">Telefonunuzu tamamlayıcı cihaz olarak ayarlamak için aracınızın Bluetooth\'a ihtiyacı var.</string>
   <string name="turn_on_bluetooth_dialog_title">Bluetooth açılsın mı?</string>
   <string name="turn_on_bluetooth_dialog_message">Aracınızın, tamamlayıcı cihazınıza bağlanması için Bluetooth\'a ihtiyacı var.</string>
+  <string name="companion_not_available_dialog_title">Bu ayar kullanılamıyor</string>
+  <string name="companion_not_available_dialog_message">Misafir profilleri CompanionDevice\'a erişemez</string>
+  <string name="companion_not_available_dialog_switch_user_message">Misafir profilleri CompanionDevice\'a erişemez. Profilinizi değiştirmek için Ayarlar &gt; Kullanıcılar\'a gidin.</string>
   <string name="accept">Kabul et</string>
   <string name="reject">Reddet</string>
   <string name="confirm">Onayla</string>
@@ -60,7 +63,9 @@
   <string name="not_now">Şimdi değil</string>
   <string name="connect">Bağlan</string>
   <string name="disconnect">Bağlantıyı kes</string>
+  <string name="disconnecting">Disconnecting</string>
   <string name="skip">Atla</string>
+  <string name="change_profile">Profili değiştir</string>
   <string name="connected">Bağlı</string>
   <string name="notDetected">Algılanmadı</string>
   <string name="disconnected">Bağlı değil</string>

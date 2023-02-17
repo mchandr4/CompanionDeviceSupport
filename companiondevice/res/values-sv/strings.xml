@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">Öppna kompletterande app</string>
   <string name="enable_bluetooth_instruction_text">Tillåt Bluetooth-anslutning</string>
   <string name="connect_to_targe_car_instruction_text">Anslut till &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
-  <string name="qr_instruction_text">Skanna QR-koden eller öppna MyCompanion för att ansluta till &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">Skanna QR-koden med telefonen eller öppna MyCompanion för att ansluta till &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
   <string name="connect_to_car_instruction_text">Anslut till bilen</string>
   <string name="associated_device_pairing_code_title">Kolla koden på telefonen</string>
   <string name="associated_device_pairing_message">Kontrollera att detta är samma kod som visas på telefonen</string>
@@ -43,6 +43,9 @@
   <string name="turn_on_bluetooth_message">Bilen måste ha Bluetooth om det ska gå att konfigurera telefonen som hjälpenhet.</string>
   <string name="turn_on_bluetooth_dialog_title">Vill du aktivera Bluetooth?</string>
   <string name="turn_on_bluetooth_dialog_message">Bilen måste ha Bluetooth om det ska gå att ansluta till hjälpenheten.</string>
+  <string name="companion_not_available_dialog_title">Inställningen är inte tillgänglig</string>
+  <string name="companion_not_available_dialog_message">Gästprofiler har inte åtkomst till CompanionDevice</string>
+  <string name="companion_not_available_dialog_switch_user_message">Gästprofiler har inte åtkomst till CompanionDevice. Byt profil genom att öppna Inställningar &gt; Användare.</string>
   <string name="accept">Godkänn</string>
   <string name="reject">Godkänn inte</string>
   <string name="confirm">Bekräfta</string>
@@ -60,7 +63,9 @@
   <string name="not_now">Inte nu</string>
   <string name="connect">Anslut</string>
   <string name="disconnect">Koppla från</string>
+  <string name="disconnecting">Disconnecting</string>
   <string name="skip">Hoppa över</string>
+  <string name="change_profile">Byt profil</string>
   <string name="connected">Ansluten</string>
   <string name="notDetected">Ingen hittades</string>
   <string name="disconnected">Frånkopplad</string>

@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">सहयोगी एप खोल्नुहोस्</string>
   <string name="enable_bluetooth_instruction_text">ब्लुटुथ कनेक्ट गर्ने अनुमति दिनुहोस्</string>
   <string name="connect_to_targe_car_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s मा कनेक्ट गर्नुहोस्</string>
-  <string name="qr_instruction_text">तपाईं आफ्नो डिभाइस &lt;b&gt;%1$s&lt;/b&gt; %2$s सँग कनेक्ट गर्न चाहनुहुन्छ भने यो QR कोड स्क्यान गर्नुहोस् वा MyCompanion खोल्नुहोस्</string>
+  <string name="qr_instruction_text">तपाईं आफ्नो डिभाइस &lt;b&gt;%1$s&lt;/b&gt; %2$s सँग कनेक्ट गर्न चाहनुहुन्छ भने आफ्नो फोनमार्फत यो QR कोड स्क्यान गर्नुहोस् वा MyCompanion खोल्नुहोस्</string>
   <string name="connect_to_car_instruction_text">कारमा कनेक्ट गर्नुहोस्</string>
   <string name="associated_device_pairing_code_title">फोनमा देखाइएको कोड पुष्टि गर्नुहोस्</string>
   <string name="associated_device_pairing_message">यो कोड तपाईंको फोनमा देखाइएको कोडसँग मिल्छ भन्ने कुरा पुष्टि गर्नुहोस्</string>
@@ -43,6 +43,9 @@
   <string name="turn_on_bluetooth_message">फोनलाई सहयोगी डिभाइसका रूपमा सेटअप गर्न तपाईंले आफ्नो कारको ब्लुटुथ अन गर्नु पर्ने हुन्छ।</string>
   <string name="turn_on_bluetooth_dialog_title">ब्लुटुथ अन गर्ने हो?</string>
   <string name="turn_on_bluetooth_dialog_message">सहयोगी यन्त्रसँग कनेक्ट गर्न तपाईंले आफ्नो कारको ब्लुटुथ अन गर्नु पर्ने हुन्छ।</string>
+  <string name="companion_not_available_dialog_title">यो सेटिङ उपलब्ध छैन</string>
+  <string name="companion_not_available_dialog_message">गेस्ट प्रोफाइलमार्फत CompanionDevice चलाउन मिल्दैन</string>
+  <string name="companion_not_available_dialog_switch_user_message">गेस्ट प्रोफाइलमार्फत CompanionDevice चलाउन मिल्दैन। तपाईं आफ्नो प्रोफाइल बदल्न चाहनुहुन्छ भने \"सेटिङ &gt; प्रयोगकर्ता\" मा जानुहोस्।</string>
   <string name="accept">स्वीकार गर्नुहोस्</string>
   <string name="reject">अस्वीकार गर्नुहोस्</string>
   <string name="confirm">पुष्टि गर्नुहोस्</string>
@@ -60,7 +63,9 @@
   <string name="not_now">अहिले होइन</string>
   <string name="connect">कनेक्ट गर्नुहोस्</string>
   <string name="disconnect">डिस्कनेक्ट गर्नुहोस्</string>
+  <string name="disconnecting">Disconnecting</string>
   <string name="skip">स्किप गर्नुहोस्</string>
+  <string name="change_profile">प्रोफाइल बदल्नुहोस्</string>
   <string name="connected">कनेक्ट गरियो</string>
   <string name="notDetected">पत्ता लागेन</string>
   <string name="disconnected">डिस्कनेक्ट भयो</string>

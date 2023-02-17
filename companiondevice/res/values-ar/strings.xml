@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">افتح التطبيق المصاحب.</string>
   <string name="enable_bluetooth_instruction_text">اسمَح باتصال البلوتوث.</string>
   <string name="connect_to_targe_car_instruction_text">اتّصِل بـ &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
-  <string name="qr_instruction_text">امسح رمز الاستجابة السريعة ضوئيًا أو افتح تطبيق MyCompanion لربطه بالسيارة &lt;b&gt;%1$s&lt;/b&gt; %2$s.</string>
+  <string name="qr_instruction_text">استخدم هاتفك لمسح رمز الاستجابة السريعة ضوئيًا أو افتح MyCompanion للاتصال بـ &lt;b&gt;%1$s&lt;/b&gt; %2$s.</string>
   <string name="connect_to_car_instruction_text">الاتصال بالسيارة</string>
   <string name="associated_device_pairing_code_title">تأكيد الرمز على الهاتف</string>
   <string name="associated_device_pairing_message">أكِّد تطابق هذا الرمز مع الرمز الموضّح على هاتفك.</string>
@@ -43,6 +43,9 @@
   <string name="turn_on_bluetooth_message">لإعداد هاتفك كجهاز مصاحب، يجب تفعيل البلوتوث في سيارتك.</string>
   <string name="turn_on_bluetooth_dialog_title">هل تريد تفعيل البلوتوث؟</string>
   <string name="turn_on_bluetooth_dialog_message">يجب تفعيل البلوتوث في سيارتك لتتمكّن من إنشاء اتصال بينها وبين الجهاز المصاحب.</string>
+  <string name="companion_not_available_dialog_title">هذا الإعداد غير متوفّر</string>
+  <string name="companion_not_available_dialog_message">لا يمكن للملفات الشخصية للضيوف الوصول إلى CompanionDevice.</string>
+  <string name="companion_not_available_dialog_switch_user_message">لا يمكن للملفات الشخصية للضيوف الوصول إلى CompanionDevice. لتغيير ملفك الشخصي، انتقِل إلى الإعدادات &gt; المستخدمون.</string>
   <string name="accept">قبول</string>
   <string name="reject">رفض</string>
   <string name="confirm">تأكيد</string>
@@ -60,7 +63,9 @@
   <string name="not_now">لاحقًا</string>
   <string name="connect">اتصال</string>
   <string name="disconnect">قطع الاتصال</string>
+  <string name="disconnecting">Disconnecting</string>
   <string name="skip">التخطّي</string>
+  <string name="change_profile">تغيير الملف الشخصي</string>
   <string name="connected">متصل بالسيارة</string>
   <string name="notDetected">لم ترصده السيارة</string>
   <string name="disconnected">غير متصل بالسيارة</string>

@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">ಕಂಪ್ಯಾನಿಯನ್ ಆ್ಯಪ್ ಅನ್ನು ತೆರೆಯಿರಿ</string>
   <string name="enable_bluetooth_instruction_text">ಬ್ಲೂಟೂತ್ ಕನೆಕ್ಷನ್ ಅನ್ನು ಅನುಮತಿಸಿ</string>
   <string name="connect_to_targe_car_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s ಗೆ ಕನೆಕ್ಟ್ ಮಾಡಿ</string>
-  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s ಗೆ ಸಂಪರ್ಕಿಸಲು QR ಕೋಡ್ ಅನ್ನು ಸ್ಕ್ಯಾನ್ ಮಾಡಿ ಅಥವಾ MyCompanion ಅನ್ನು ತೆರೆಯಿರಿ</string>
+  <string name="qr_instruction_text">QR ಕೋಡ್ ಅನ್ನು ಸ್ಕ್ಯಾನ್ ಮಾಡಲು ನಿಮ್ಮ ಫೋನ್ ಅನ್ನು ಬಳಸಿ ಅಥವಾ &lt;b&gt;%1$s&lt;/b&gt;%2$s ಗೆ ಕನೆಕ್ಟ್ ಮಾಡಲು MyCompanion ಅನ್ನು ತೆರೆಯಿರಿ</string>
   <string name="connect_to_car_instruction_text">ಕಾರ್‌ಗೆ ಕನೆಕ್ಟ್ ಮಾಡಿ</string>
   <string name="associated_device_pairing_code_title">ಫೋನ್‌ನಲ್ಲಿ ಕೋಡ್ ಅನ್ನು ದೃಢೀಕರಿಸಿ</string>
   <string name="associated_device_pairing_message">ನಿಮ್ಮ ಫೋನ್‌ನಲ್ಲಿ ತೋರಿಸಲಾಗುವ ಕೋಡ್‌ಗೆ ಇದು ಹೊಂದಾಣಿಕೆಯಾಗುತ್ತಿದೆ ಎಂದು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ</string>
@@ -43,6 +43,9 @@
   <string name="turn_on_bluetooth_message">ನಿಮ್ಮ ಫೋನ್ ಅನ್ನು ಕಂಪ್ಯಾನಿಯನ್ ಸಾಧನವಾಗಿ ಸೆಟಪ್ ಮಾಡಲು, ನಿಮ್ಮ ಕಾರ್‌ಗೆ ಬ್ಲೂಟೂತ್ ಬೇಕಾಗುತ್ತದೆ.</string>
   <string name="turn_on_bluetooth_dialog_title">ಬ್ಲೂಟೂತ್ ಆನ್ ಮಾಡಬೇಕೇ?</string>
   <string name="turn_on_bluetooth_dialog_message">ನಿಮ್ಮ ಕಂಪ್ಯಾನಿಯನ್ ಸಾಧನಕ್ಕೆ ಕನೆಕ್ಟ್ ಮಾಡಲು, ನಿಮ್ಮ ಕಾರ್‌ಗೆ ಬ್ಲೂಟೂತ್ ಬೇಕಾಗುತ್ತದೆ.</string>
+  <string name="companion_not_available_dialog_title">ಈ ಸೆಟ್ಟಿಂಗ್ ಲಭ್ಯವಿಲ್ಲ</string>
+  <string name="companion_not_available_dialog_message">ಅತಿಥಿ ಪ್ರೊಫೈಲ್‌ಗಳಿಗೆ ಕಂಪ್ಯಾನಿಯನ್ ಸಾಧನವನ್ನು ಪ್ರವೇಶಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ</string>
+  <string name="companion_not_available_dialog_switch_user_message">ಅತಿಥಿ ಪ್ರೊಫೈಲ್‌ಗಳಿಗೆ ಕಂಪ್ಯಾನಿಯನ್ ಸಾಧನವನ್ನು ಪ್ರವೇಶಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ನಿಮ್ಮ ಪ್ರೊಫೈಲ್ ಅನ್ನು ಬದಲಾಯಿಸಲು ಸೆಟ್ಟಿಂಗ್‌ಗಳು &gt; ಬಳಕೆದಾರರು ಎಂಬಲ್ಲಿಗೆ ಹೋಗಿ.</string>
   <string name="accept">ಸಮ್ಮತಿಸಿ</string>
   <string name="reject">ತಿರಸ್ಕರಿಸಿ</string>
   <string name="confirm">ಖಚಿತಪಡಿಸಿ</string>
@@ -60,7 +63,9 @@
   <string name="not_now">ಈಗ ಬೇಡ</string>
   <string name="connect">ಕನೆಕ್ಟ್ ಮಾಡಿ</string>
   <string name="disconnect">ಡಿಸ್‌ಕನೆಕ್ಟ್ ಮಾಡಿ</string>
+  <string name="disconnecting">Disconnecting</string>
   <string name="skip">ಸ್ಕಿಪ್ ಮಾಡಿ</string>
+  <string name="change_profile">ಪ್ರೊಫೈಲ್ ಅನ್ನು ಬದಲಾಯಿಸಿ</string>
   <string name="connected">ಕನೆಕ್ಟ್ ಆಗಿದೆ</string>
   <string name="notDetected">ಪತ್ತೆಯಾಗಲಿಲ್ಲ</string>
   <string name="disconnected">ಡಿಸ್‌ಕನೆಕ್ಟ್ ಆಗಿದೆ</string>

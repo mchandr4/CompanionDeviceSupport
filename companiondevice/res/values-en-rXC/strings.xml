@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‏‎‎‏‎‎‏‎‎‎‎‎‏‏‏‏‏‏‏‎‎‎‎‏‏‎‏‎‎‏‎‎‏‎‏‏‎‏‏‎‏‎‏‏‏‎‎‏‎‎‏‎‎‎‏‏‏‏‎‏‏‎‎‎‏‎‏‏‎‎‏‎‏‎‎‎‏‏‏‎‏‎Open the companion app‎‏‎‎‏‎</string>
   <string name="enable_bluetooth_instruction_text">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‏‎‎‏‎‎‏‎‎‎‎‎‏‏‏‏‏‎‏‏‏‎‏‏‎‎‎‏‎‎‎‎‏‎‎‏‎‎‎‏‏‎‏‏‎‎‎‎‎‏‎‏‎‏‎‎‏‎‎‏‎‎‎‏‎‏‎‏‎‎‏‏‎‏‏‏‎‎‎‏‎Allow Bluetooth connection‎‏‎‎‏‎</string>
   <string name="connect_to_targe_car_instruction_text">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‏‎‎‏‎‎‏‎‎‎‎‎‏‏‏‏‏‎‏‎‏‏‏‏‎‏‎‎‏‏‏‏‎‏‏‏‏‏‏‏‏‏‏‏‎‏‏‏‏‏‏‎‎‎‏‎‎‎‎‎‎‏‏‎‎‎‎‏‏‎‎‏‏‏‎‎‎‏‏‏‎Connect to &lt;b&gt;‎‏‎‎‏‏‎%1$s‎‏‎‎‏‏‏‎&lt;/b&gt; ‎‏‎‎‏‏‎%2$s‎‏‎‎‏‏‏‎‎‏‎‎‏‎</string>
-  <string name="qr_instruction_text">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‏‎‎‏‎‎‏‎‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‎‏‎‎‎‎‎‏‎‎‏‎‎‏‎‎‎‎‎‎‏‏‎‏‏‏‏‏‎‏‎‏‎‏‏‎‏‏‎‏‏‏‎‎‎‏‎‎‎‏‎‎‎‏‏‎‎‎Scan the QR code or open MyCompanion to connect to &lt;b&gt;‎‏‎‎‏‏‎%1$s‎‏‎‎‏‏‏‎&lt;/b&gt; ‎‏‎‎‏‏‎%2$s‎‏‎‎‏‏‏‎‎‏‎‎‏‎</string>
+  <string name="qr_instruction_text">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‏‎‎‏‎‎‏‎‎‎‎‎‏‏‏‏‏‎‏‎‏‏‎‏‎‎‎‏‎‎‎‎‏‎‏‏‎‏‏‎‏‏‎‏‎‎‏‏‎‏‏‎‎‎‏‎‏‎‎‏‏‎‏‏‏‏‏‏‏‎‎‏‎‏‏‏‏‏‏‎‎Use your phone to scan the QR code or open MyCompanion to connect to &lt;b&gt;‎‏‎‎‏‏‎%1$s‎‏‎‎‏‏‏‎&lt;/b&gt; ‎‏‎‎‏‏‎%2$s‎‏‎‎‏‏‏‎‎‏‎‎‏‎</string>
   <string name="connect_to_car_instruction_text">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‏‎‎‏‎‎‏‎‎‎‎‎‏‏‏‏‏‏‏‎‎‎‎‏‏‎‏‎‎‎‏‎‎‏‏‎‏‏‏‎‏‎‏‏‎‎‏‏‎‏‎‎‏‎‏‏‏‏‏‏‎‎‎‏‎‎‏‏‎‎‏‏‏‎‏‎‏‏‏‏‏‎Connect to the car‎‏‎‎‏‎</string>
   <string name="associated_device_pairing_code_title">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‏‎‎‏‎‎‏‎‎‎‎‎‏‏‏‏‏‎‏‎‏‎‏‏‎‏‎‎‏‏‎‏‎‏‏‏‎‎‎‏‏‏‎‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‎‎‏‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‎‎‏‎Confirm code on phone‎‏‎‎‏‎</string>
   <string name="associated_device_pairing_message">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‏‎‎‏‎‎‏‎‎‎‎‎‏‏‏‎‏‎‏‎‏‎‏‏‏‏‎‎‎‎‏‎‏‏‏‎‎‎‏‎‎‎‎‏‏‎‏‎‏‎‏‏‎‎‏‏‎‎‏‏‏‎‎‎‎‎‎‏‏‏‏‎‏‎‏‏‎Confirm that this matches the code shown on your phone‎‏‎‎‏‎</string>
@@ -43,6 +43,9 @@
   <string name="turn_on_bluetooth_message">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‏‎‎‏‎‎‏‎‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‏‎‏‎‎‎‏‏‎‏‏‏‎‎‏‎‏‏‏‎‏‎‏‏‎‎‎‏‏‎‏‏‎‏‎‏‎‎‎‏‎‏‎‏‎‏‏‏‎‎‎‎‏‏‎‏‏‎‎To set up your phone as a companion device, your car needs Bluetooth.‎‏‎‎‏‎</string>
   <string name="turn_on_bluetooth_dialog_title">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‏‎‎‏‎‎‏‎‎‎‎‎‏‏‏‏‏‏‏‎‏‏‏‏‎‎‏‏‎‏‏‏‏‎‎‎‎‏‎‎‎‏‎‏‎‏‏‏‎‎‎‏‎‏‏‎‏‎‏‏‎‎‏‎‎‎‎‏‏‎‎‎‏‎‎‎‎‎‏‎‏‎Turn on Bluetooth?‎‏‎‎‏‎</string>
   <string name="turn_on_bluetooth_dialog_message">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‏‎‎‏‎‎‏‎‎‎‎‎‏‏‏‎‏‎‏‏‎‎‏‏‏‏‏‎‏‏‎‏‎‏‏‏‏‏‏‏‏‏‏‎‎‎‏‏‏‎‏‎‎‏‏‏‎‎‏‏‎‎‏‎‏‏‏‎‏‏‎‎‎‎‏‎‎To connect to your companion device, your car needs Bluetooth.‎‏‎‎‏‎</string>
+  <string name="companion_not_available_dialog_title">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‏‎‎‏‎‎‏‎‎‎‎‎‏‏‏‏‏‏‏‎‏‏‎‎‎‏‎‏‏‎‏‏‎‎‎‏‎‏‏‎‏‎‎‏‎‎‏‎‎‏‏‎‏‎‎‏‎‎‎‏‎‎‎‏‎‏‏‎‎‏‏‏‏‏‎‎‏‎‎‎‎‎This setting isn\’t available‎‏‎‎‏‎</string>
+  <string name="companion_not_available_dialog_message">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‏‎‎‏‎‎‏‎‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‏‏‏‎‎‎‏‎‎‎‏‎‎‎‏‏‏‏‎‎‏‎‏‏‎‏‎‏‎‏‎‎‏‏‎‏‎‏‏‏‎‏‏‎‎‎‎‏‎‏‏‎‎‎‏‏‎‎Guest profiles can\’t access CompanionDevice‎‏‎‎‏‎</string>
+  <string name="companion_not_available_dialog_switch_user_message">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‏‎‎‏‎‎‏‎‎‎‎‎‏‏‏‏‎‏‏‎‏‎‏‎‎‎‎‎‏‏‎‏‏‏‏‏‏‏‎‎‎‎‎‎‎‏‏‎‎‏‏‎‏‎‏‎‏‎‏‎‎‎‏‎‎‎‎‎‎‏‏‏‏‎‏‏‏‏‏‎Guest profiles can\’t access CompanionDevice. To change your profile, go to Settings &gt; Users.‎‏‎‎‏‎</string>
   <string name="accept">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‏‎‎‏‎‎‏‎‎‎‎‎‏‏‏‏‏‏‏‎‎‎‏‎‎‏‏‎‏‎‏‏‏‎‏‎‎‎‏‎‎‎‎‏‎‏‏‏‏‏‏‎‏‎‎‎‎‎‏‎‎‎‎‏‏‏‎‎‏‏‎‎‎‏‎‏‎‎‏‎‎‎Accept‎‏‎‎‏‎</string>
   <string name="reject">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‏‎‎‏‎‎‏‎‎‎‎‎‏‏‏‏‏‏‏‎‎‎‎‏‎‎‎‎‎‎‏‏‏‎‎‎‎‏‏‏‏‎‎‏‎‎‏‎‎‏‎‎‎‏‏‎‏‏‏‎‏‏‏‎‎‏‎‎‏‏‏‏‏‎‎‏‏‏‏‏‏‎Reject‎‏‎‎‏‎</string>
   <string name="confirm">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‏‎‎‏‎‎‏‎‎‎‎‎‏‏‏‏‏‎‏‎‎‏‎‎‏‎‏‏‎‏‎‏‏‏‎‎‎‏‏‏‎‏‎‏‎‏‎‏‏‏‏‏‏‎‏‎‏‏‎‏‏‏‏‏‎‏‏‏‏‎‏‎‏‎‎‏‏‏‎‏‎Confirm‎‏‎‎‏‎</string>
@@ -60,7 +63,9 @@
   <string name="not_now">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‏‎‎‏‎‎‏‎‎‎‎‎‏‏‏‏‏‏‏‎‎‎‎‎‎‏‎‏‏‎‏‏‏‏‎‏‎‎‎‎‎‎‏‎‏‏‎‎‎‏‎‏‎‏‏‎‎‎‏‏‎‏‎‏‏‎‎‏‏‏‎‎‏‏‎‎‏‏‎‎‏‎Not now‎‏‎‎‏‎</string>
   <string name="connect">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‏‎‎‏‎‎‏‎‎‎‎‎‏‏‏‏‎‏‏‎‎‏‏‏‏‏‏‏‎‎‎‏‏‏‏‎‎‏‎‏‏‏‎‏‏‏‎‎‎‎‏‏‎‎‏‎‏‏‎‎‎‏‎‎‏‎‏‎‏‏‏‏‏‏‏‏‏‎‏‎Connect‎‏‎‎‏‎</string>
   <string name="disconnect">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‏‎‎‏‎‎‏‎‎‎‎‎‏‏‏‏‎‏‏‏‎‏‎‏‏‎‏‎‎‏‏‏‏‎‏‎‏‏‎‎‏‎‏‏‎‎‏‎‏‎‎‎‎‏‏‏‏‎‎‎‏‎‎‏‎‏‎‎‎‎‎‎‏‎‎‏‏‏‎‎Disconnect‎‏‎‎‏‎</string>
+  <string name="disconnecting">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‏‎‎‏‎‎‏‎‎‎‎‎‏‏‏‏‎‏‏‎‎‎‎‏‎‎‏‎‎‏‎‏‏‏‏‎‎‏‎‎‎‏‎‎‏‏‏‏‎‏‎‏‎‏‏‏‏‎‏‎‏‎‏‏‎‏‏‎‏‏‎‎‏‏‏‏‎‏‎‎Disconnecting‎‏‎‎‏‎</string>
   <string name="skip">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‏‎‎‏‎‎‏‎‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‏‎‎‏‎‏‎‏‎‏‏‎‎‏‏‎‏‎‎‏‎‎‎‏‎‏‎‏‏‏‎‏‏‏‎‏‏‏‎‎‎‏‎‏‏‏‏‏‏‎‏‏‎‎‎‏‎‎Skip‎‏‎‎‏‎</string>
+  <string name="change_profile">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‏‎‎‏‎‎‏‎‎‎‎‎‏‏‏‏‏‎‏‏‏‏‏‎‏‎‎‎‎‏‏‎‏‏‏‎‎‎‎‎‎‎‎‏‎‎‏‎‏‏‏‏‎‎‎‎‏‏‏‏‎‏‎‎‎‎‎‎‏‎‎‎‏‎‏‎‏‎‎‏‎Change profile‎‏‎‎‏‎</string>
   <string name="connected">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‏‎‎‏‎‎‏‎‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‎‏‏‏‏‎‏‏‏‏‏‎‎‏‎‎‎‏‏‏‎‎‎‏‏‎‎‏‏‎‏‏‏‎‎‏‎‎‏‎‏‎‎‎‎‎‎‎‎‎‏‎‎‎‏‏‏‏‎Connected‎‏‎‎‏‎</string>
   <string name="notDetected">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‏‎‎‏‎‎‏‎‎‎‎‎‏‏‏‏‎‏‏‎‎‎‎‏‏‎‏‏‎‏‏‎‎‎‏‎‏‎‏‏‏‎‎‎‎‏‏‎‎‎‎‏‎‏‎‏‎‏‏‎‎‏‎‏‏‎‏‎‎‎‏‏‎‏‏‏‏‎‎‎Not detected‎‏‎‎‏‎</string>
   <string name="disconnected">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‏‎‎‏‎‎‏‎‎‎‎‎‏‏‏‏‏‎‏‎‏‎‎‏‏‎‏‏‎‏‏‎‏‎‏‏‎‎‏‏‏‎‏‎‏‎‏‎‏‎‎‎‎‏‏‎‎‏‏‏‎‎‏‎‏‎‎‏‏‏‏‏‎‎‏‏‏‎‏‎‎Disconnected‎‏‎‎‏‎</string>

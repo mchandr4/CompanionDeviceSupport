@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">Opnaðu fylgiforritið</string>
   <string name="enable_bluetooth_instruction_text">Leyfðu Bluetooth-tengingu</string>
   <string name="connect_to_targe_car_instruction_text">Tengjast &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
-  <string name="qr_instruction_text">Skannaðu QR-kóðann eða opnaðu MyCompanion til að tengjast &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">Notaðu símann til að skanna QR-kóðann eða opnaðu MyCompanion til að tengjast &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
   <string name="connect_to_car_instruction_text">Tengstu bílnum</string>
   <string name="associated_device_pairing_code_title">Staðfesta kóða í síma</string>
   <string name="associated_device_pairing_message">Staðfestu að hann stemmi við kóðann í símanum þínum</string>
@@ -43,6 +43,9 @@
   <string name="turn_on_bluetooth_message">Bíllinn þarf að vera með Bluetooth svo hægt sé að setja símann upp sem fylgitæki.</string>
   <string name="turn_on_bluetooth_dialog_title">Kveikja á Bluetooth?</string>
   <string name="turn_on_bluetooth_dialog_message">Bíllinn þarf að vera með Bluetooth svo hægt sé að tengja fylgitæki.</string>
+  <string name="companion_not_available_dialog_title">Þessi stilling er ekki í boði</string>
+  <string name="companion_not_available_dialog_message">Gestaprófílar hafa ekki aðgang að CompanionDevice</string>
+  <string name="companion_not_available_dialog_switch_user_message">Gestaprófílar hafa ekki aðgang að CompanionDevice. Til að breyta prófílnum skaltu fara í Stillingar &gt; Notendur.</string>
   <string name="accept">Samþykkja</string>
   <string name="reject">Hafna</string>
   <string name="confirm">Staðfesta</string>
@@ -60,7 +63,9 @@
   <string name="not_now">Ekki núna</string>
   <string name="connect">Tengja</string>
   <string name="disconnect">Aftengja</string>
+  <string name="disconnecting">Disconnecting</string>
   <string name="skip">Sleppa</string>
+  <string name="change_profile">Breyta prófíl</string>
   <string name="connected">Tengt</string>
   <string name="notDetected">Fannst ekki</string>
   <string name="disconnected">Aftengt</string>

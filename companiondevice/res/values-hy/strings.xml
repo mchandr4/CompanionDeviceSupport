@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">Բացեք ուղեկցող հավելվածը</string>
   <string name="enable_bluetooth_instruction_text">Թույլատրեք Bluetooth միացումը</string>
   <string name="connect_to_targe_car_instruction_text">Միացեք &lt;b&gt;%1$s&lt;/b&gt; (%2$s) մեքենային</string>
-  <string name="qr_instruction_text">Սկանավորեք QR կոդը կամ բացեք MyCompanion հավելվածը, որպեսզի միանաք &lt;b&gt;%1$s&lt;/b&gt; %2$s ավտոմեքենային։</string>
+  <string name="qr_instruction_text">Հեռախոսով սկանավորեք QR կոդը կամ բացեք MyCompanion հավելվածը, որպեսզի միանաք &lt;b&gt;%1$s&lt;/b&gt; %2$s ավտոմեքենային։</string>
   <string name="connect_to_car_instruction_text">Միացեք մեքենային</string>
   <string name="associated_device_pairing_code_title">Հաստատեք կոդը հեռախոսում</string>
   <string name="associated_device_pairing_message">Հաստատեք, որ հեռախոսում նույն կոդն է ցուցադրվում</string>
@@ -43,6 +43,9 @@
   <string name="turn_on_bluetooth_message">Ձեր հեռախոսը որպես ուղեկցող սարք կարգավորելու համար մեքենային անհրաժեշտ է Bluetooth։</string>
   <string name="turn_on_bluetooth_dialog_title">Միացնե՞լ Bluetooth-ը</string>
   <string name="turn_on_bluetooth_dialog_message">Ուղեկցող սարքին միանալու համար մեքենային անհրաժեշտ է Bluetooth։</string>
+  <string name="companion_not_available_dialog_title">Այս կարգավորումը հասանելի չէ</string>
+  <string name="companion_not_available_dialog_message">Հյուրի պրոֆիլով հնարավոր չէ օգտվել CompanionDevice-ից</string>
+  <string name="companion_not_available_dialog_switch_user_message">Հյուրի պրոֆիլով հնարավոր չէ օգտվել CompanionDevice-ից։ Ձեր պրոֆիլը փոխելու համար անցեք Կարգավորումներ &gt; Օգտատերեր։</string>
   <string name="accept">Ընդունել</string>
   <string name="reject">Մերժել</string>
   <string name="confirm">Հաստատել</string>
@@ -60,7 +63,9 @@
   <string name="not_now">Ոչ հիմա</string>
   <string name="connect">Միանալ</string>
   <string name="disconnect">Անջատել</string>
+  <string name="disconnecting">Disconnecting</string>
   <string name="skip">Բաց թողնել</string>
+  <string name="change_profile">Փոխել պրոֆիլը</string>
   <string name="connected">Միացված է</string>
   <string name="notDetected">Չի հայտնաբերվել</string>
   <string name="disconnected">Անջատված է</string>

@@ -19,14 +19,25 @@ package com.google.android.connecteddevice.api;
 import com.google.android.connecteddevice.api.IFeatureCoordinator;
 import com.google.android.connecteddevice.api.IFeatureCoordinatorListener;
 
+/**
+ * Creates listeners for feature coordinator initialization.
+ *
+ * Only make additive changes to maintain backward compatibility.
+ * The added function needs to be assigned the transaction value noted below,
+ * and the value needs to be appropriately incremented.
+ *
+ * Next transaction value: 2
+ */
 interface IFeatureCoordinatorStatusNotifier {
     /**
     * Registers listeners to be notified when feature coordinator is
     * initialized. Eeach listener will receive a feature coordinator upon
     * notification.
     */
-    void registerFeatureCoordinatorListener(IFeatureCoordinatorListener listener);
+    void registerFeatureCoordinatorListener(
+            IFeatureCoordinatorListener listener) = 0;
 
     /** Unregisters listener. */
-    void unregisterFeatureCoordinatorListener(IFeatureCoordinatorListener listeners);
+    void unregisterFeatureCoordinatorListener(
+            IFeatureCoordinatorListener listeners) = 1;
 }

@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">Hap aplikacionin shoqërues</string>
   <string name="enable_bluetooth_instruction_text">Lejo lidhjen me Bluetooth</string>
   <string name="connect_to_targe_car_instruction_text">Lidhe me &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
-  <string name="qr_instruction_text">Skano kodin QR ose hap MyCompanion për t\'u lidhur me &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">Përdor telefonin për të skanuar kodin QR ose hap MyCompanion për t\'u lidhur me &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
   <string name="connect_to_car_instruction_text">Lidhe me makinën</string>
   <string name="associated_device_pairing_code_title">Konfirmo kodin në telefonin tënd</string>
   <string name="associated_device_pairing_message">Konfirmo që ky përputhet me kodin e shfaqur në telefonin tënd</string>
@@ -43,6 +43,9 @@
   <string name="turn_on_bluetooth_message">Për ta konfiguruar telefonin si pajisje shoqëruese, makina jote ka nevojë për Bluetooth-in.</string>
   <string name="turn_on_bluetooth_dialog_title">Të aktivizohet Bluetooth-i?</string>
   <string name="turn_on_bluetooth_dialog_message">Për t\'u lidhur me pajisjen shoqëruese, makina jote ka nevojë për Bluetooth.</string>
+  <string name="companion_not_available_dialog_title">Ky cilësim nuk ofrohet</string>
+  <string name="companion_not_available_dialog_message">Profilet e vizitorëve nuk kanë qasje te Companion Device</string>
+  <string name="companion_not_available_dialog_switch_user_message">Profilet e vizitorëve nuk kanë qasje te Companion Device. Për të ndryshuar profilin, shko te \"Cilësimet &gt; Përdoruesit\".</string>
   <string name="accept">Prano</string>
   <string name="reject">Refuzo</string>
   <string name="confirm">Konfirmo</string>
@@ -60,7 +63,9 @@
   <string name="not_now">Jo tani</string>
   <string name="connect">Lidh</string>
   <string name="disconnect">Shkëput</string>
+  <string name="disconnecting">Disconnecting</string>
   <string name="skip">Kapërce</string>
+  <string name="change_profile">Ndrysho profilin</string>
   <string name="connected">Lidhur</string>
   <string name="notDetected">Nuk u zbulua</string>
   <string name="disconnected">Shkëputur</string>

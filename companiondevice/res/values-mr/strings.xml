@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">सहयोगी अ‍ॅप उघडा</string>
   <string name="enable_bluetooth_instruction_text">ब्लूटूथ कनेक्शनला अनुमती द्या</string>
   <string name="connect_to_targe_car_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s सोबत कनेक्ट करा</string>
-  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s शी कनेक्ट करण्यासाठी QR कोड स्कॅन करा किंवा MyCompanion उघडा</string>
+  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s शी कनेक्ट करण्यासाठी QR कोड स्कॅन करण्याकरिता तुमचा फोन वापरा किंवा MyCompanion उघडा</string>
   <string name="connect_to_car_instruction_text">कारशी कनेक्ट करा</string>
   <string name="associated_device_pairing_code_title">फोनवरील कोडची खात्री करा</string>
   <string name="associated_device_pairing_message">तुमच्या फोनवर दाखवलेल्या कोडशी हा जुळत असल्याची खात्री करा</string>
@@ -43,6 +43,9 @@
   <string name="turn_on_bluetooth_message">तुमचा फोन सहयोगी डिव्हाइस म्हणून सेट करण्यासाठी, तुमच्या कारला ब्लूटूथ आवश्यक आहे.</string>
   <string name="turn_on_bluetooth_dialog_title">ब्लूटूथ सुरू करायचे का?</string>
   <string name="turn_on_bluetooth_dialog_message">तुमच्या सहयोगी डिव्हाइससह कनेक्ट करण्यासाठी तुमच्या कारला ब्लूटूथ आवश्यक आहे.</string>
+  <string name="companion_not_available_dialog_title">हे सेटिंग उपलब्ध नाही</string>
+  <string name="companion_not_available_dialog_message">अतिथी प्रोफाइल CompanionDevice अ‍ॅक्सेस करू शकत नाहीत</string>
+  <string name="companion_not_available_dialog_switch_user_message">अतिथी प्रोफाइल CompanionDevice अ‍ॅक्सेस करू शकत नाहीत. तुमची प्रोफाइल बदलण्यासाठी, सेटिंग्ज &gt; वापरकर्ते यावर जा.</string>
   <string name="accept">स्वीकारा</string>
   <string name="reject">नकार द्या</string>
   <string name="confirm">निश्चित करा</string>
@@ -60,7 +63,9 @@
   <string name="not_now">आता नको</string>
   <string name="connect">कनेक्ट करा</string>
   <string name="disconnect">‍डिस्कनेक्ट करा</string>
+  <string name="disconnecting">Disconnecting</string>
   <string name="skip">वगळा</string>
+  <string name="change_profile">प्रोफाइल बदला</string>
   <string name="connected">कनेक्ट केले आहे</string>
   <string name="notDetected">आढळले नाही</string>
   <string name="disconnected">डिस्कनेक्ट केले आहे</string>

@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">Atveriet palīglietotni.</string>
   <string name="enable_bluetooth_instruction_text">Atļaujiet Bluetooth savienojuma izveidi.</string>
   <string name="connect_to_targe_car_instruction_text">Izveidojiet savienojumu ar automašīnu &lt;b&gt;%1$s&lt;/b&gt; (%2$s)</string>
-  <string name="qr_instruction_text">Skenējiet ātrās atbildes kodu vai atveriet lietotni MyCompanion, lai izveidotu savienojumu ar &lt;b&gt;%1$s&lt;/b&gt; %2$s.</string>
+  <string name="qr_instruction_text">Skenējiet kvadrātkodu, izmantojot savu tālruni, vai atveriet lietotni MyCompanion, lai izveidotu savienojumu ar &lt;b&gt;%1$s&lt;/b&gt; %2$s.</string>
   <string name="connect_to_car_instruction_text">Izveidojiet savienojumu ar automašīnu</string>
   <string name="associated_device_pairing_code_title">Koda apstiprināšana tālrunī</string>
   <string name="associated_device_pairing_message">Apstipriniet, ka šis kods atbilst jūsu tālrunī redzamajam kodam.</string>
@@ -43,6 +43,9 @@
   <string name="turn_on_bluetooth_message">Lai iestatītu tālruni kā palīgierīci, automašīnai ir nepieciešams Bluetooth savienojums.</string>
   <string name="turn_on_bluetooth_dialog_title">Vai ieslēgt Bluetooth?</string>
   <string name="turn_on_bluetooth_dialog_message">Lai pievienotu palīgierīci, automašīnai ir nepieciešams Bluetooth savienojums.</string>
+  <string name="companion_not_available_dialog_title">Šis iestatījums nav pieejams</string>
+  <string name="companion_not_available_dialog_message">Viesu profili nevar piekļūt palīgierīcei.</string>
+  <string name="companion_not_available_dialog_switch_user_message">Viesu profili nevar piekļūt palīgierīcei. Lai mainītu profilu, pārejiet uz sadaļu Iestatījumi &gt; Lietotāji.</string>
   <string name="accept">Piekrist</string>
   <string name="reject">Noraidīt</string>
   <string name="confirm">Apstiprināt</string>
@@ -60,7 +63,9 @@
   <string name="not_now">Vēlāk</string>
   <string name="connect">Izveidot savienojumu</string>
   <string name="disconnect">Atvienot</string>
+  <string name="disconnecting">Disconnecting</string>
   <string name="skip">Izlaist</string>
+  <string name="change_profile">Mainīt profilu</string>
   <string name="connected">Pievienots</string>
   <string name="notDetected">Netika atrasts</string>
   <string name="disconnected">Atvienots</string>
@@ -96,6 +101,6 @@
   <string name="name_not_available">Vārds nav pieejams.</string>
   <string name="ble_device_name_prefix">Transportlīdzeklis\u00A0</string>
   <string name="suw_setup_profile_title">Profila iestatīšana, izmantojot tālruni</string>
-  <string name="suw_setup_profile_content">Skenējiet ātrās atbildes kodu, lai sāktu darbu. Ja jums nav lietotnes MyCompanion, varat to lejupielādēt pakalpojumā Google Play vai veikalā App Store.</string>
-  <string name="suw_qr_instruction_text">Skenējiet ātrās atbildes kodu, lai izveidotu savienojumu ar&lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="suw_setup_profile_content">Skenējiet kvadrātkodu, lai sāktu darbu. Ja jums nav lietotnes MyCompanion, varat to lejupielādēt pakalpojumā Google Play vai veikalā App Store.</string>
+  <string name="suw_qr_instruction_text">Skenējiet kvadrātkodu, lai izveidotu savienojumu ar&lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
 </resources>

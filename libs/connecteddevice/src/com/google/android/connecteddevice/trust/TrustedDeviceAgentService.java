@@ -32,6 +32,7 @@ import android.content.ServiceConnection;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -68,14 +69,21 @@ public class TrustedDeviceAgentService extends TrustAgentService {
 
   private UserManager userManager;
 
+  private KeyguardManager keyguardManager;
+
+  private PowerManager powerManager;
+
   @SuppressLint("UnprotectedReceiver") // Broadcast is protected.
   @Override
   public void onCreate() {
     super.onCreate();
     logd(TAG, "Starting trust agent service.");
     userManager = (UserManager) getSystemService(Context.USER_SERVICE);
+    keyguardManager = getSystemService(KeyguardManager.class);
+    powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
     TrustedDeviceEventLog.onTrustAgentStarted();
     registerReceiver(userUnlockedReceiver, new IntentFilter(Intent.ACTION_USER_UNLOCKED));
+    registerReceiver(screenOnReceiver, new IntentFilter(Intent.ACTION_SCREEN_ON));
     retryThread = new HandlerThread(RETRY_HANDLER_THREAD_NAME);
     retryThread.start();
     retryHandler = new Handler(retryThread.getLooper());
@@ -85,7 +93,6 @@ public class TrustedDeviceAgentService extends TrustAgentService {
   @Override
   public void onDestroy() {
     logd(TAG, "Destroying trust agent service.");
-    KeyguardManager keyguardManager = getSystemService(KeyguardManager.class);
     boolean isDeviceSecure = keyguardManager != null && keyguardManager.isDeviceSecure();
     logd(TAG, "Device secure status: " + isDeviceSecure + ".");
     if (trustedDeviceManager != null) {
@@ -102,6 +109,7 @@ public class TrustedDeviceAgentService extends TrustAgentService {
       retryThread.quit();
     }
     unregisterReceiver(userUnlockedReceiver);
+    unregisterReceiver(screenOnReceiver);
     super.onDestroy();
   }
 
@@ -137,6 +145,13 @@ public class TrustedDeviceAgentService extends TrustAgentService {
 
   @VisibleForTesting
   void maybeDismissLockscreen() {
+    // Keyguard will ignore the dismissed request if the device is not in interactive mode, e.g.
+    // dozing or asleep.
+    if (!powerManager.isInteractive()) {
+      logw(TAG, "Screen is not on when try to dismiss lock screen, waiting for screen on.");
+      return;
+    }
+
     if (!isManagingTrust.compareAndSet(true, false)) {
       logd(TAG, "User was unlocked before receiving an escrow token.");
       return;
@@ -146,12 +161,21 @@ public class TrustedDeviceAgentService extends TrustAgentService {
         "Granting trust from escrow token for user.",
         TRUST_DURATION_MS,
         FLAG_GRANT_TRUST_DISMISS_KEYGUARD);
-    TrustedDeviceEventLog.onUserUnlocked();
     setManagingTrust(false);
     if (trustedDeviceManager == null) {
       loge(TAG, "Manager was null when device was unlocked. Ignoring.");
       return;
     }
+    // Other locking schemas, e.g. primary authentication, might keep the device locked even after
+    // granting trust.
+    if (keyguardManager == null || keyguardManager.isDeviceLocked()) {
+      logw(
+          TAG,
+          "Device is still locked after granting trust. Primary authentication may be enforced."
+              + "Skip the ACK message to the phone.");
+      return;
+    }
+    TrustedDeviceEventLog.onUserUnlocked();
     try {
       trustedDeviceManager.onUserUnlocked();
     } catch (RemoteException e) {
@@ -244,7 +268,28 @@ public class TrustedDeviceAgentService extends TrustAgentService {
       new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+          logd(TAG, "User unlocked; try to dismiss the lock screen.");
           maybeDismissLockscreen();
+        }
+      };
+
+  /**
+   * Indicating the lock screen is ready to be dismissed.
+   *
+   * <p>Dismissing lock screen without screen on will fail silently.
+   */
+  private final BroadcastReceiver screenOnReceiver =
+      new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+          logd(TAG, "Screen on; device entered interactive mode.");
+          if (isUserUnlocked(ActivityManager.getCurrentUser())) {
+            logd(TAG, "User is already unlocked; dismiss the lock screen.");
+            //  Make sure the user is unlocked before dismiss, otherwise the device will be in a
+            // strange state where the user storage is locked but the keyguard does not show up,
+            // which will probably leading to a black screen.
+            maybeDismissLockscreen();
+          }
         }
       };
 }

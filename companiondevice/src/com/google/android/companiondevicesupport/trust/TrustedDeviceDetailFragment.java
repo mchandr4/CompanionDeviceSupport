@@ -78,12 +78,10 @@ public class TrustedDeviceDetailFragment extends Fragment {
             // When the current device has not been enrolled as trusted device, turning on the
             // switch is for enrolling the current device.
             model.enrollTrustedDevice(associatedDevice);
-            trustedDeviceSwitch.setChecked(false);
           } else if (!isChecked && trustedDevice != null) {
             // When the current device has been enrolled as trusted device, turning off the
             // switch is for disable trusted device feature for the current device.
             model.disableTrustedDevice(trustedDevice);
-            trustedDeviceSwitch.setChecked(true);
           }
           // Ignore other conditions as {@link Switch#setChecked(boolean)} will always trigger
           // this listener.
@@ -102,12 +100,7 @@ public class TrustedDeviceDetailFragment extends Fragment {
   }
 
   private void setTrustedDevices(List<TrustedDevice> devices) {
-    if (devices == null) {
-      trustedDeviceSwitch.setChecked(false);
-      trustedDevice = null;
-      return;
-    }
-    if (devices.isEmpty()) {
+    if (devices == null || devices.isEmpty()) {
       trustedDeviceSwitch.setChecked(false);
       trustedDevice = null;
       return;
@@ -142,35 +135,5 @@ public class TrustedDeviceDetailFragment extends Fragment {
             });
 
     model.getTrustedDevices().observe(this, this::setTrustedDevices);
-
-    model
-        .getDisabledDevice()
-        .observe(
-            this,
-            device -> {
-              if (device == null) {
-                return;
-              }
-              model.setDisabledDevice(null);
-              if (trustedDevice.equals(device)) {
-                trustedDevice = null;
-                trustedDeviceSwitch.setChecked(false);
-              }
-            });
-
-    model
-        .getEnabledDevice()
-        .observe(
-            this,
-            device -> {
-              if (device == null) {
-                return;
-              }
-              model.setEnabledDevice(null);
-              if (device.getDeviceId().equals(associatedDevice.getDeviceId())) {
-                trustedDevice = device;
-                trustedDeviceSwitch.setChecked(true);
-              }
-            });
   }
 }

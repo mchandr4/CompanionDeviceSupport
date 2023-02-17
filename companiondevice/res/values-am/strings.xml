@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">አጃቢ መተግበሪያውን ይክፈቱ</string>
   <string name="enable_bluetooth_instruction_text">የብሉቱዝ ግንኙነትን ይፍቀዱ</string>
   <string name="connect_to_targe_car_instruction_text">ከ&lt;b&gt;%1$s&lt;/b&gt;%2$s ጋር ይገናኙ</string>
-  <string name="qr_instruction_text">ከ&lt;b&gt;%1$s&lt;/b&gt; %2$s ጋር ለመገናኘት QR ኮዱን ይቃኙት ወይም MyCompanionን ይክፈቱ</string>
+  <string name="qr_instruction_text">QR ኮዱን ለመቃኘት ስልክዎን ይጠቀሙ ወይም ከ&lt;b&gt;%1$s&lt;/b&gt; %2$s ጋር ለመገናኘት MyCompanionን ይክፈቱ</string>
   <string name="connect_to_car_instruction_text">ከመኪናው ጋር ይገናኙ</string>
   <string name="associated_device_pairing_code_title">በስልክ ላይ ኮድ ያረጋግጡ</string>
   <string name="associated_device_pairing_message">ይህ በስልክዎ ላይ ከሚታየው ኮድ ጋር እንደሚዛመድ ያረጋግጡ</string>
@@ -43,6 +43,9 @@
   <string name="turn_on_bluetooth_message">ስልክዎን እንደ አጃቢ መሣሪያ ለማቀናበር መኪናዎ ብሉቱዝ ያስፈልገዋል።</string>
   <string name="turn_on_bluetooth_dialog_title">ብሉቱዝ ይብራ?</string>
   <string name="turn_on_bluetooth_dialog_message">አጃቢ መሣሪያዎን ለማገናኘት መኪናዎ ብሉቱዝ ያስፈልገዋል።</string>
+  <string name="companion_not_available_dialog_title">ይህ ቅንብር አይገኝም</string>
+  <string name="companion_not_available_dialog_message">እንግዳ መገለጫዎች CompanionDeviceን መድረስ አይችሉም</string>
+  <string name="companion_not_available_dialog_switch_user_message">እንግዳ መገለጫዎች CompanionDeviceን መድረስ አይችሉም። መገለጫዎን ለመቀየር ወደ ቅንብሮች &gt; ተጠቃሚዎች ይሂዱ።</string>
   <string name="accept">ተቀበል</string>
   <string name="reject">አትቀበል</string>
   <string name="confirm">አረጋግጥ</string>
@@ -60,14 +63,16 @@
   <string name="not_now">አሁን አይደለም</string>
   <string name="connect">አገናኝ</string>
   <string name="disconnect">ግንኙነት አቋርጥ</string>
+  <string name="disconnecting">Disconnecting</string>
   <string name="skip">ዝለል</string>
+  <string name="change_profile">መገለጫን ቀይር</string>
   <string name="connected">ተገናኝቷል</string>
   <string name="notDetected">አልተገኘም</string>
   <string name="disconnected">ተቋርጧል</string>
   <string name="detected">ተገኝቷል</string>
   <string name="unknown">ያልታወቀ</string>
-  <string name="app_running_msg_channel_name">የስልክ ጽሑፍ መልዕክት አገልግሎት በማሄድ ላይ</string>
-  <string name="app_running_msg_notification_title">የስልክ ጽሑፍ መልዕክት መላላኪያ አገልግሎት ገቢር ነው</string>
+  <string name="app_running_msg_channel_name">የስልክ ጽሁፍ መልዕክት አገልግሎት በማሄድ ላይ</string>
+  <string name="app_running_msg_notification_title">የስልክ ጽሁፍ መልዕክት መላላኪያ አገልግሎት ገቢር ነው</string>
   <string name="app_running_msg_notification_content">በአጃቢ መሣሪያ በኩል የጽሑፍ መልዕክቶችን በመቀበል ላይ</string>
   <string name="trusted_device_feature_title">መገለጫውን በስልክ ይክፈቱት</string>
   <string name="trusted_device_feature_instruction">የመክፈቻ አማራጮችን ለማቀናበር አጃቢ መተግበሪያዎን ይፈትሹ</string>

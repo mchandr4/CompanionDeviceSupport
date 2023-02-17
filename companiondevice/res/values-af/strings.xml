@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">Maak die metgeselprogram oop</string>
   <string name="enable_bluetooth_instruction_text">Laat Bluetooth-verbinding toe</string>
   <string name="connect_to_targe_car_instruction_text">Koppel aan &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
-  <string name="qr_instruction_text">Skandeer die QR-kode of maak MyCompanion oop om te koppel aan &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">Gebruik jou foon om die QR-kode te skandeer, of maak MyCompanion oop om te koppel aan &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
   <string name="connect_to_car_instruction_text">Koppel aan die motor</string>
   <string name="associated_device_pairing_code_title">Bevestig kode op foon</string>
   <string name="associated_device_pairing_message">Maak seker dat dit ooreenstem met die kode wat op jou foon gewys word</string>
@@ -43,6 +43,9 @@
   <string name="turn_on_bluetooth_message">Jou motor moet Bluetooth hê om jou foon as \'n metgeseltoestel op te stel.</string>
   <string name="turn_on_bluetooth_dialog_title">Skakel Bluetooth aan?</string>
   <string name="turn_on_bluetooth_dialog_message">Jou motor moet Bluetooth hê om aan jou metgeseltoestel te koppel.</string>
+  <string name="companion_not_available_dialog_title">Hierdie instelling is nie beskikbaar nie</string>
+  <string name="companion_not_available_dialog_message">Gasprofiele het nie toegang tot metgeseltoestel nie</string>
+  <string name="companion_not_available_dialog_switch_user_message">Gasprofiele het nie toegang tot metgeseltoestel nie. Gaan na Instellings &gt; Gebruikers om jou profiel te verander.</string>
   <string name="accept">Aanvaar</string>
   <string name="reject">Weier</string>
   <string name="confirm">Bevestig</string>
@@ -60,7 +63,9 @@
   <string name="not_now">Nie nou nie</string>
   <string name="connect">Koppel</string>
   <string name="disconnect">Ontkoppel</string>
+  <string name="disconnecting">Disconnecting</string>
   <string name="skip">Slaan oor</string>
+  <string name="change_profile">Verander profiel</string>
   <string name="connected">Gekoppel</string>
   <string name="notDetected">Nie bespeur nie</string>
   <string name="disconnected">Ontkoppel</string>

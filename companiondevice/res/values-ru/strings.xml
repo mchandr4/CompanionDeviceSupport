@@ -43,6 +43,9 @@
   <string name="turn_on_bluetooth_message">Чтобы настроить телефон в качестве вспомогательного устройства, нужно включить Bluetooth автомобиля.</string>
   <string name="turn_on_bluetooth_dialog_title">Включить Bluetooth?</string>
   <string name="turn_on_bluetooth_dialog_message">Чтобы установить связь со вспомогательным устройством, нужно включить Bluetooth автомобиля.</string>
+  <string name="companion_not_available_dialog_title">Эта настройка недоступна</string>
+  <string name="companion_not_available_dialog_message">У гостевых профилей нет доступа к вспомогательному устройству.</string>
+  <string name="companion_not_available_dialog_switch_user_message">У гостевых профилей нет доступа к вспомогательному устройству. Чтобы выбрать другой профиль, перейдите в настройки и нажмите \"Пользователи\".</string>
   <string name="accept">Принять</string>
   <string name="reject">Отклонить</string>
   <string name="confirm">Подтвердить</string>
@@ -60,7 +63,9 @@
   <string name="not_now">Не сейчас</string>
   <string name="connect">Подключить</string>
   <string name="disconnect">Отключить</string>
+  <string name="disconnecting">Disconnecting</string>
   <string name="skip">Пропустить</string>
+  <string name="change_profile">Сменить профиль</string>
   <string name="connected">Подключено</string>
   <string name="notDetected">Не обнаружено</string>
   <string name="disconnected">Отключено</string>

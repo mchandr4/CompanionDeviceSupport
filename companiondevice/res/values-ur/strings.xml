@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">ساتھی ایپ کھولیں</string>
   <string name="enable_bluetooth_instruction_text">بلوٹوتھ کنکشن کی اجازت دیں</string>
   <string name="connect_to_targe_car_instruction_text">%2$s&lt;b&gt;%1$s&lt;/b&gt; سے منسلک کریں</string>
-  <string name="qr_instruction_text">QR کوڈ کو اسکین کریں یا &lt;b&gt;%1$s&lt;/b&gt; %2$s سے منسلک کرنے کے لیے MyCompanion کو کھولیں</string>
+  <string name="qr_instruction_text">‎&lt;b&gt;%1$s&lt;/b&gt; %2$s‎ سے منسلک ہونے کے لیے QR کوڈ اسکین کرنے کی خاطر اپنا فون استعمال کریں یا MyCompanion کھولیں</string>
   <string name="connect_to_car_instruction_text">کار سے منسلک ہوں</string>
   <string name="associated_device_pairing_code_title">فون پر کوڈ کی تصدیق کریں</string>
   <string name="associated_device_pairing_message">تصدیق کریں کہ یہ آپ کے فون پر دکھائے گئے کوڈ سے مماثل ہے</string>
@@ -43,6 +43,9 @@
   <string name="turn_on_bluetooth_message">اپنے فون کو بطور ساتھی آلہ سیٹ اپ کرنے کے ليے، آپ کی کار کو بلوٹوتھ کی ضرورت ہے۔</string>
   <string name="turn_on_bluetooth_dialog_title">بلوٹوتھ آن کریں؟</string>
   <string name="turn_on_bluetooth_dialog_message">اپنے ساتھی آلے کو منسلک کرنے کے لیے، آپ کی کار کو بلوٹوتھ کی ضرورت ہے۔</string>
+  <string name="companion_not_available_dialog_title">یہ ترتیب دستیاب نہیں ہے</string>
+  <string name="companion_not_available_dialog_message">مہمان پروفائلز Companion Device تک رسائی حاصل نہیں کر سکتیں</string>
+  <string name="companion_not_available_dialog_switch_user_message">مہمان پروفائلز Companion Device تک رسائی حاصل نہیں کر سکتیں۔ اپنی پروفائل تبدیل کرنے کیلئے ترتیبات &gt; صارفین پر جائیں۔</string>
   <string name="accept">قبول کریں</string>
   <string name="reject">مسترد کریں</string>
   <string name="confirm">تصدیق کریں</string>
@@ -60,7 +63,9 @@
   <string name="not_now">ابھی نہیں</string>
   <string name="connect">منسلک کریں</string>
   <string name="disconnect">غیر منسلک کریں</string>
+  <string name="disconnecting">Disconnecting</string>
   <string name="skip">نظر انداز کریں</string>
+  <string name="change_profile">پروفائل تبدیل کریں</string>
   <string name="connected">منسلک ہے</string>
   <string name="notDetected">پتہ نہیں چلا</string>
   <string name="disconnected">غیر منسلک ہے</string>

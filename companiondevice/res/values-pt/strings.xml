@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">Abra o aplicativo Companion</string>
   <string name="enable_bluetooth_instruction_text">Autorize a conexão Bluetooth</string>
   <string name="connect_to_targe_car_instruction_text">Conectar ao &lt;b&gt;%1$s&lt;/b&gt;%2$s</string>
-  <string name="qr_instruction_text">Leia o código QR ou abra o MyCompanion para se conectar ao veículo &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">Use seu smartphone para ler o código QR ou abra o MyCompanion para se conectar ao veículo &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
   <string name="connect_to_car_instruction_text">Conecte-se ao carro</string>
   <string name="associated_device_pairing_code_title">Confirmar o código no smartphone</string>
   <string name="associated_device_pairing_message">Confirme se este valor corresponde ao código exibido no smartphone</string>
@@ -43,6 +43,9 @@
   <string name="turn_on_bluetooth_message">Para configurar o smartphone como dispositivo complementar, o carro precisa usar o recurso de Bluetooth.</string>
   <string name="turn_on_bluetooth_dialog_title">Ativar o Bluetooth?</string>
   <string name="turn_on_bluetooth_dialog_message">Para fazer a conexão com o dispositivo complementar, o carro precisa usar o recurso de Bluetooth.</string>
+  <string name="companion_not_available_dialog_title">Essa configuração não está disponível</string>
+  <string name="companion_not_available_dialog_message">Os perfis de convidados não podem acessar o CompanionDevice</string>
+  <string name="companion_not_available_dialog_switch_user_message">Os perfis de convidados não podem acessar o CompanionDevice. Para mudar seu perfil, acesse Configurações &gt; Usuários.</string>
   <string name="accept">Aceitar</string>
   <string name="reject">Recusar</string>
   <string name="confirm">Confirmar</string>
@@ -60,7 +63,9 @@
   <string name="not_now">Agora não</string>
   <string name="connect">Conectar</string>
   <string name="disconnect">Desconectar</string>
+  <string name="disconnecting">Disconnecting</string>
   <string name="skip">Pular</string>
+  <string name="change_profile">Alterar perfil</string>
   <string name="connected">Conectado</string>
   <string name="notDetected">Não detectado</string>
   <string name="disconnected">Desconectado</string>

@@ -54,7 +54,6 @@
     </string-array>
 
     <bool name="enable_proxy">false</bool>
-
-    <bool name="enable_qr_code">false</bool>
+    <bool name="enable_qr_code">true</bool>
     <bool name="enable_passenger">false</bool>
 </resources>

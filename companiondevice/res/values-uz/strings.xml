@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">Hamroh ilovani ochish</string>
   <string name="enable_bluetooth_instruction_text">Bluetooth ulanishga ruxsat berish</string>
   <string name="connect_to_targe_car_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s avtomobiliga ulanish</string>
-  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s avtomobiliga ulanish uchun QR-kodni skanerlang yoki MyCompanion ilovasini oching</string>
+  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s avtomobiliga ulanish uchun telefon orqali QR-kodni skanerlang yoki MyCompanion ilovasini oching</string>
   <string name="connect_to_car_instruction_text">Avtomobilga ulanish</string>
   <string name="associated_device_pairing_code_title">Kodni telefoningizda tasdiqlang</string>
   <string name="associated_device_pairing_message">Bu kod telefoningizdagi bilan mos ekanini tasdiqlang</string>
@@ -43,6 +43,9 @@
   <string name="turn_on_bluetooth_message">Telefoningizni hamroh qurilma sifatida sozlash uchun avtomobilingizga Bluetooth zarur.</string>
   <string name="turn_on_bluetooth_dialog_title">Bluetooth yoqilsinmi?</string>
   <string name="turn_on_bluetooth_dialog_message">Hamroh qurilmaga ulanish uchun avtomobilga Bluetooth zarur.</string>
+  <string name="companion_not_available_dialog_title">Bu sozlama mavjud emas</string>
+  <string name="companion_not_available_dialog_message">Mehmon profillari bilan CompanionDevice qurilmasiga kirib boʻlmaydi</string>
+  <string name="companion_not_available_dialog_switch_user_message">Mehmon profillari bilan CompanionDevice qurilmasiga kirib boʻlmaydi. Profilni oʻzgartirish uchun Sozlamalar &gt; Foydalanuvchilarga kiring.</string>
   <string name="accept">Qabul qilish</string>
   <string name="reject">Rad etish</string>
   <string name="confirm">Tasdiqlash</string>
@@ -60,7 +63,9 @@
   <string name="not_now">Hozir emas</string>
   <string name="connect">Ulash</string>
   <string name="disconnect">Uzish</string>
+  <string name="disconnecting">Disconnecting</string>
   <string name="skip">Tashlab ketish</string>
+  <string name="change_profile">Profilni oʻzgartirish</string>
   <string name="connected">Ulandi</string>
   <string name="notDetected">Aniqlanmadi</string>
   <string name="disconnected">Uzildi</string>

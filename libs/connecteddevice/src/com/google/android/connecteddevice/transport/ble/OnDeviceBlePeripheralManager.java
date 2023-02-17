@@ -25,10 +25,8 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
-import android.bluetooth.BluetoothGattServer;
 import android.bluetooth.BluetoothGattServerCallback;
 import android.bluetooth.BluetoothGattService;
-import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.le.AdvertiseCallback;
 import android.bluetooth.le.AdvertiseData;
@@ -37,7 +35,9 @@ import android.bluetooth.le.BluetoothLeAdvertiser;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Handler;
-import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
+import com.google.android.connecteddevice.transport.ble.testable.BluetoothGattServerHandler;
+import com.google.android.connecteddevice.transport.ble.testable.BluetoothManagerHandler;
 import com.google.android.connecteddevice.util.ByteUtils;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -54,24 +54,26 @@ public class OnDeviceBlePeripheralManager extends BlePeripheralManager {
   private final Handler handler;
 
   private final Context context;
-  private final AtomicReference<BluetoothGattServer> gattServer = new AtomicReference<>();
+  private final AtomicReference<BluetoothGattServerHandler> gattServer = new AtomicReference<>();
   private final AtomicReference<BluetoothLeAdvertiser> advertiser = new AtomicReference<>();
   private final AtomicReference<BluetoothDevice> connectedDevice = new AtomicReference<>();
-  private final BluetoothManager bluetoothManager;
+  private final BluetoothManagerHandler bluetoothManager;
 
   private int mtuSize = 20;
 
   private int advertiserStartCount;
   private int gattServerRetryStartCount;
-  private BluetoothGattService bluetoothGattService;
   private AdvertiseCallback advertiseCallback;
-  private AdvertiseData advertiseData;
-  private AdvertiseData scanResponse;
 
   public OnDeviceBlePeripheralManager(Context context) {
+    this(context, new BluetoothManagerHandler(context));
+  }
+
+  @VisibleForTesting
+  public OnDeviceBlePeripheralManager(Context context, BluetoothManagerHandler bluetoothManager) {
     this.context = context;
+    this.bluetoothManager = bluetoothManager;
     handler = new Handler(this.context.getMainLooper());
-    bluetoothManager = context.getSystemService(BluetoothManager.class);
   }
 
   /**
@@ -108,13 +110,47 @@ public class OnDeviceBlePeripheralManager extends BlePeripheralManager {
       return;
     }
     // Clears previous session before starting advertising.
-    cleanup();
-    bluetoothGattService = service;
+    stopAdvertisement();
     this.advertiseCallback = advertiseCallback;
-    this.advertiseData = advertiseData;
-    this.scanResponse = scanResponse;
     gattServerRetryStartCount = 0;
-    openGattServer();
+    openGattServerAndStartAdvertising(service, advertiseData, scanResponse);
+  }
+
+  private void openGattServerAndStartAdvertising(
+      BluetoothGattService service, AdvertiseData advertiseData, AdvertiseData scanResponse) {
+    // Only open one Gatt server.
+    if (this.gattServer.get() == null) {
+      BluetoothGattServerHandler newGatt = bluetoothManager.openGattServer(gattServerCallback);
+      if (newGatt != null) {
+        this.gattServer.set(newGatt);
+        logd(TAG, "Gatt Server created, retry count: " + gattServerRetryStartCount);
+        gattServerRetryStartCount = 0;
+      } else if (gattServerRetryStartCount < GATT_SERVER_RETRY_LIMIT) {
+        logw(
+            TAG,
+            "Failed to create Gatt server now, retry in " + GATT_SERVER_RETRY_DELAY_MS + "ms.");
+        gattServerRetryStartCount++;
+        handler.postDelayed(
+            () -> openGattServerAndStartAdvertising(service, advertiseData, scanResponse),
+            GATT_SERVER_RETRY_DELAY_MS);
+        return;
+      } else {
+        loge(TAG, "Gatt server not created - exceeded retry limit.");
+        return;
+      }
+    }
+    BluetoothGattServerHandler gattServer = this.gattServer.get();
+
+    gattServer.clearServices();
+    gattServer.addService(service);
+    AdvertiseSettings settings =
+        new AdvertiseSettings.Builder()
+            .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY)
+            .setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_HIGH)
+            .setConnectable(true)
+            .build();
+    advertiserStartCount = 0;
+    startAdvertisingInternally(settings, advertiseData, scanResponse, advertiseCallback);
   }
 
   /**
@@ -131,13 +167,11 @@ public class OnDeviceBlePeripheralManager extends BlePeripheralManager {
     }
   }
 
-  /** Notifies the characteristic change via {@link BluetoothGattServer} */
+  /** Notifies the characteristic change via {@link BluetoothGattServerHandler} */
   @Override
   public void notifyCharacteristicChanged(
-      @NonNull BluetoothDevice device,
-      @NonNull BluetoothGattCharacteristic characteristic,
-      boolean confirm) {
-    BluetoothGattServer gattServer = this.gattServer.get();
+      BluetoothDevice device, BluetoothGattCharacteristic characteristic, boolean confirm) {
+    BluetoothGattServerHandler gattServer = this.gattServer.get();
     if (gattServer == null) {
       return;
     }
@@ -147,67 +181,53 @@ public class OnDeviceBlePeripheralManager extends BlePeripheralManager {
     }
   }
 
-  /** Cleans up the BLE GATT server state. */
+  private void stopAdvertisement() {
+    logd(TAG, "Stop Gatt server advertisement.");
+    if (advertiseCallback != null) {
+      stopAdvertising(advertiseCallback);
+      advertiseCallback = null;
+    }
+    BluetoothGattServerHandler gattServer = this.gattServer.get();
+    if (gattServer != null) {
+      gattServer.clearServices();
+    }
+  }
+
+  @Override
+  public void disconnect() {
+    BluetoothGattServerHandler gattServer = this.gattServer.get();
+    if (gattServer == null) {
+      logw(TAG, "BluetoothGattServer was null. Ignore the disconnect request.");
+      return;
+    }
+    BluetoothDevice device = connectedDevice.get();
+    if (device != null) {
+      logd(TAG, "Canceling connection on currently connected device.");
+      gattServer.cancelConnection(device);
+    } else {
+      logd(TAG, "No device currently connected. Ignore the disconnect request.");
+    }
+  }
+
+  /**
+   * Cleans up the BLE GATT server state. This will clear all the callbacks registered with the
+   * {@code gattServer}.
+   */
   @Override
   public void cleanup() {
     super.cleanup();
 
     logd(TAG, "Cleaning up manager.");
-    // Stops the advertiser, scanner and GATT server. This needs to be done to avoid leaks.
-    stopAdvertising(advertiseCallback);
+    stopAdvertisement();
+    disconnect();
+    BluetoothGattServerHandler gattServer = this.gattServer.getAndSet(null);
 
-    BluetoothGattServer gattServer = this.gattServer.getAndSet(null);
     if (gattServer == null) {
       logw(TAG, "BluetoothGattServer was null. Connection has already been cleaned up.");
       return;
     }
-    BluetoothDevice device = connectedDevice.getAndSet(null);
-    if (device != null) {
-      logd(TAG, "Canceling connection on currently connected device.");
-      gattServer.cancelConnection(device);
-      for (Callback callback : callbacks) {
-        callback.onRemoteDeviceDisconnected(device);
-      }
-    } else {
-      logd(TAG, "No device currently connected.");
-    }
     logd(TAG, "Closing gatt server.");
-    gattServer.clearServices();
     gattServer.close();
-  }
-
-  private void openGattServer() {
-    // Only open one Gatt server.
-    if (this.gattServer.get() == null) {
-      BluetoothGattServer newGatt = bluetoothManager.openGattServer(context, gattServerCallback);
-      if (newGatt != null) {
-        this.gattServer.set(newGatt);
-      } else if (gattServerRetryStartCount < GATT_SERVER_RETRY_LIMIT) {
-        logw(
-            TAG,
-            "Failed to create Gatt server now, retry in " + GATT_SERVER_RETRY_DELAY_MS + "ms.");
-        gattServerRetryStartCount++;
-        handler.postDelayed(this::openGattServer, GATT_SERVER_RETRY_DELAY_MS);
-        return;
-      } else {
-        loge(TAG, "Gatt server not created - exceeded retry limit.");
-        return;
-      }
-    }
-    BluetoothGattServer gattServer = this.gattServer.get();
-    logd(TAG, "Gatt Server created, retry count: " + gattServerRetryStartCount);
-    gattServerRetryStartCount = 0;
-
-    gattServer.clearServices();
-    gattServer.addService(bluetoothGattService);
-    AdvertiseSettings settings =
-        new AdvertiseSettings.Builder()
-            .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY)
-            .setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_HIGH)
-            .setConnectable(true)
-            .build();
-    advertiserStartCount = 0;
-    startAdvertisingInternally(settings, advertiseData, scanResponse, advertiseCallback);
   }
 
   private void startAdvertisingInternally(
@@ -251,12 +271,13 @@ public class OnDeviceBlePeripheralManager extends BlePeripheralManager {
           }
           switch (newState) {
             case BluetoothProfile.STATE_CONNECTED:
-              logd(TAG, "BLE Connection State Change: CONNECTED");
-              BluetoothGattServer gattServer = OnDeviceBlePeripheralManager.this.gattServer.get();
+              logd(TAG, "BLE Connection State Change: CONNECTED, Device: " + device.getAddress());
+              BluetoothGattServerHandler gattServer =
+                  OnDeviceBlePeripheralManager.this.gattServer.get();
               if (gattServer == null) {
                 return;
               }
-              gattServer.connect(device, /* autoConnect= */ false);
+              gattServer.connect(device);
               boolean isNew = connectedDevice.compareAndSet(null, device);
               if (!isNew) {
                 logd(TAG, "This device has already connected. No further action required.");
@@ -267,8 +288,19 @@ public class OnDeviceBlePeripheralManager extends BlePeripheralManager {
               }
               break;
             case BluetoothProfile.STATE_DISCONNECTED:
-              logd(TAG, "BLE Connection State Change: DISCONNECTED");
-              cleanup();
+              logd(
+                  TAG, "BLE Connection State Change: DISCONNECTED, Device: " + device.getAddress());
+              BluetoothDevice currentDevice = connectedDevice.get();
+              if (!device.equals(currentDevice)) {
+                logw(TAG, "Unknown device disconnected; ignored. Device: " + device.getAddress());
+                return;
+              }
+              for (Callback callback : callbacks) {
+                logd(TAG, "Issue disconnected callback.");
+                callback.onRemoteDeviceDisconnected(device);
+              }
+              connectedDevice.set(null);
+              clearListeners();
               break;
             default:
               logw(TAG, "Connection state not connecting or disconnecting; ignoring: " + newState);
@@ -289,10 +321,13 @@ public class OnDeviceBlePeripheralManager extends BlePeripheralManager {
             boolean responseNeeded,
             int offset,
             byte[] value) {
-          BluetoothGattServer gattServer = OnDeviceBlePeripheralManager.this.gattServer.get();
+          logd(TAG, "Received a characteristic write request from Device: " + device.getAddress());
+          BluetoothGattServerHandler gattServer =
+              OnDeviceBlePeripheralManager.this.gattServer.get();
           if (gattServer == null) {
             return;
           }
+          logd(TAG, "Send response and notifying all listeners.");
           gattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, value);
           for (OnCharacteristicWriteListener listener : writeListeners) {
             listener.onCharacteristicWrite(device, characteristic, value);
@@ -314,7 +349,8 @@ public class OnDeviceBlePeripheralManager extends BlePeripheralManager {
                   + descriptor.getUuid()
                   + "; value: "
                   + ByteUtils.byteArrayToHexString(value));
-          BluetoothGattServer gattServer = OnDeviceBlePeripheralManager.this.gattServer.get();
+          BluetoothGattServerHandler gattServer =
+              OnDeviceBlePeripheralManager.this.gattServer.get();
           if (gattServer == null) {
             return;
           }
