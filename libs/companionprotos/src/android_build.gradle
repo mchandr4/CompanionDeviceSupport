@@ -1,0 +1,34 @@
+apply plugin: 'java-library'
+apply plugin: 'com.google.protobuf'
+
+sourceCompatibility = '1.8'
+
+sourceSets {
+    main {
+        proto {
+            srcDir 'src'
+        }
+    }
+}
+
+dependencies {
+    implementation "com.google.protobuf:protobuf-java:3.21.12"
+}
+
+protobuf {
+    protoc {
+        artifact = rootProject.ext.protocVersion
+    }
+    generateProtoTasks {
+        all().each { task ->
+            task.builtins {
+                java {
+                    option "lite"
+                }
+                kotlin {
+                    option "lite"
+                }
+            }
+        }
+    }
+}

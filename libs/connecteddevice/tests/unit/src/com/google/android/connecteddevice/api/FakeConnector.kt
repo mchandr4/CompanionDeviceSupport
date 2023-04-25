@@ -4,6 +4,11 @@ import android.os.IBinder
 import android.os.ParcelUuid
 import com.google.android.connecteddevice.model.AssociatedDevice
 import com.google.android.connecteddevice.model.ConnectedDevice
+import com.google.common.util.concurrent.ListenableFuture
+import java.util.UUID
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.guava.future
 
 /** Fake implementation of a [Connector] to be used in tests. */
 open class FakeConnector : Connector {
@@ -63,6 +68,17 @@ open class FakeConnector : Connector {
     success: Boolean,
     response: ByteArray?
   ) {}
+
+  override suspend fun isFeatureSupported(device: ConnectedDevice): Boolean = featureId != null
+
+  override suspend fun queryFeatureSupportStatuses(
+    device: ConnectedDevice,
+    queriedFeatures: List<UUID>
+  ): List<Pair<UUID, Boolean>> = emptyList()
+
+  override fun isFeatureSupportedFuture(device: ConnectedDevice): ListenableFuture<Boolean> {
+    return CoroutineScope(Dispatchers.Main).future { isFeatureSupported(device) }
+  }
 
   override fun getConnectedDeviceById(deviceId: String): ConnectedDevice? {
     return connectedDevices.find { it.deviceId == deviceId }

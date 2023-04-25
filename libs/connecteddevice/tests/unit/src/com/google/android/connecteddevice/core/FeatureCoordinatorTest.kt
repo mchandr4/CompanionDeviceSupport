@@ -2,8 +2,9 @@ package com.google.android.connecteddevice.core
 
 import android.os.ParcelUuid
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.google.android.companionprotos.DeviceMessageProto
 import com.google.android.companionprotos.OperationProto.OperationType
+import com.google.android.companionprotos.message
+import com.google.android.connecteddevice.api.Connector.Companion.SYSTEM_FEATURE_ID
 import com.google.android.connecteddevice.api.IAssociationCallback
 import com.google.android.connecteddevice.api.IConnectionCallback
 import com.google.android.connecteddevice.api.IDeviceAssociationCallback
@@ -21,6 +22,8 @@ import com.google.android.connecteddevice.model.AssociatedDevice
 import com.google.android.connecteddevice.model.ConnectedDevice
 import com.google.android.connecteddevice.model.DeviceMessage
 import com.google.android.connecteddevice.model.DeviceMessage.OperationType.CLIENT_MESSAGE
+import com.google.android.connecteddevice.model.DeviceMessage.OperationType.QUERY
+import com.google.android.connecteddevice.model.DeviceMessage.OperationType.QUERY_RESPONSE
 import com.google.android.connecteddevice.model.Errors.DEVICE_ERROR_INSECURE_RECIPIENT_ID_DETECTED
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage
 import com.google.android.connecteddevice.util.ByteUtils
@@ -42,13 +45,18 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class FeatureCoordinatorTest {
   private val mockController: DeviceController = mock()
-
   private val mockStorage: ConnectedDeviceStorage = mock()
-
   private val mockLoggingManager: LoggingManager = mock()
+  private val mockSystemQueryCache: SystemQueryCache = mock()
 
   private val coordinator =
-    FeatureCoordinator(mockController, mockStorage, mockLoggingManager, directExecutor())
+    FeatureCoordinator(
+      mockController,
+      mockStorage,
+      mockSystemQueryCache,
+      mockLoggingManager,
+      directExecutor()
+    )
 
   private val safeCoordinator = coordinator.safeFeatureCoordinator
 
@@ -59,21 +67,21 @@ class FeatureCoordinatorTest {
         UUID.randomUUID().toString(),
         "driverDeviceName1",
         /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
+        /* hasSecureChannel= */ true,
       )
     val driverDevice2 =
       ConnectedDevice(
         UUID.randomUUID().toString(),
         "driverDeviceName2",
         /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
+        /* hasSecureChannel= */ true,
       )
     val passengerDevice =
       ConnectedDevice(
         UUID.randomUUID().toString(),
         "passengerDeviceName",
         /* belongsToDriver= */ false,
-        /* hasSecureChannel= */ true
+        /* hasSecureChannel= */ true,
       )
     whenever(mockController.connectedDevices)
       .thenReturn(listOf(driverDevice1, passengerDevice, driverDevice2))
@@ -90,21 +98,21 @@ class FeatureCoordinatorTest {
         UUID.randomUUID().toString(),
         "passengerDevice1",
         /* belongsToDriver= */ false,
-        /* hasSecureChannel= */ true
+        /* hasSecureChannel= */ true,
       )
     val passengerDevice2 =
       ConnectedDevice(
         UUID.randomUUID().toString(),
         "passengerDevice2",
         /* belongsToDriver= */ false,
-        /* hasSecureChannel= */ true
+        /* hasSecureChannel= */ true,
       )
     val driverDevice =
       ConnectedDevice(
         UUID.randomUUID().toString(),
         "driverDevice",
         /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
+        /* hasSecureChannel= */ true,
       )
     whenever(mockController.connectedDevices)
       .thenReturn(listOf(passengerDevice1, driverDevice, passengerDevice2))
@@ -121,21 +129,21 @@ class FeatureCoordinatorTest {
         UUID.randomUUID().toString(),
         "driverDeviceName1",
         /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
+        /* hasSecureChannel= */ true,
       )
     val driverDevice2 =
       ConnectedDevice(
         UUID.randomUUID().toString(),
         "driverDeviceName2",
         /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
+        /* hasSecureChannel= */ true,
       )
     val passengerDevice =
       ConnectedDevice(
         UUID.randomUUID().toString(),
         "passengerDeviceName",
         /* belongsToDriver= */ false,
-        /* hasSecureChannel= */ true
+        /* hasSecureChannel= */ true,
       )
     whenever(mockController.connectedDevices)
       .thenReturn(listOf(driverDevice1, passengerDevice, driverDevice2))
@@ -154,7 +162,7 @@ class FeatureCoordinatorTest {
         UUID.randomUUID().toString(),
         "driverDeviceName",
         /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
+        /* hasSecureChannel= */ true,
       )
 
     coordinator.onDeviceConnectedInternal(driverDevice)
@@ -170,9 +178,9 @@ class FeatureCoordinatorTest {
     val passengerDevice =
       ConnectedDevice(
         UUID.randomUUID().toString(),
-        "driverDeviceName",
+        "passengerDeviceName",
         /* belongsToDriver= */ false,
-        /* hasSecureChannel= */ true
+        /* hasSecureChannel= */ true,
       )
 
     coordinator.onDeviceConnectedInternal(passengerDevice)
@@ -189,7 +197,7 @@ class FeatureCoordinatorTest {
         UUID.randomUUID().toString(),
         "driverDeviceName",
         /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
+        /* hasSecureChannel= */ true,
       )
 
     coordinator.onDeviceConnectedInternal(driverDevice)
@@ -204,9 +212,9 @@ class FeatureCoordinatorTest {
     val passengerDevice =
       ConnectedDevice(
         UUID.randomUUID().toString(),
-        "driverDeviceName",
+        "passengerDeviceName",
         /* belongsToDriver= */ false,
-        /* hasSecureChannel= */ true
+        /* hasSecureChannel= */ true,
       )
 
     coordinator.onDeviceConnectedInternal(passengerDevice)
@@ -223,7 +231,7 @@ class FeatureCoordinatorTest {
         UUID.randomUUID().toString(),
         "driverDeviceName",
         /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
+        /* hasSecureChannel= */ true,
       )
 
     coordinator.onDeviceConnectedInternal(driverDevice)
@@ -238,9 +246,9 @@ class FeatureCoordinatorTest {
     val passengerDevice =
       ConnectedDevice(
         UUID.randomUUID().toString(),
-        "driverDeviceName",
+        "passengerDeviceName",
         /* belongsToDriver= */ false,
-        /* hasSecureChannel= */ true
+        /* hasSecureChannel= */ true,
       )
 
     coordinator.onDeviceConnectedInternal(passengerDevice)
@@ -257,7 +265,7 @@ class FeatureCoordinatorTest {
         UUID.randomUUID().toString(),
         "driverDeviceName",
         /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
+        /* hasSecureChannel= */ true,
       )
 
     coordinator.onDeviceDisconnectedInternal(driverDevice)
@@ -272,9 +280,9 @@ class FeatureCoordinatorTest {
     val passengerDevice =
       ConnectedDevice(
         UUID.randomUUID().toString(),
-        "driverDeviceName",
+        "passengerDeviceName",
         /* belongsToDriver= */ false,
-        /* hasSecureChannel= */ true
+        /* hasSecureChannel= */ true,
       )
 
     coordinator.onDeviceDisconnectedInternal(passengerDevice)
@@ -291,7 +299,7 @@ class FeatureCoordinatorTest {
         UUID.randomUUID().toString(),
         "driverDeviceName",
         /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
+        /* hasSecureChannel= */ true,
       )
 
     coordinator.onDeviceDisconnectedInternal(driverDevice)
@@ -306,9 +314,9 @@ class FeatureCoordinatorTest {
     val passengerDevice =
       ConnectedDevice(
         UUID.randomUUID().toString(),
-        "driverDeviceName",
+        "passengerDeviceName",
         /* belongsToDriver= */ false,
-        /* hasSecureChannel= */ true
+        /* hasSecureChannel= */ true,
       )
 
     coordinator.onDeviceDisconnectedInternal(passengerDevice)
@@ -325,7 +333,7 @@ class FeatureCoordinatorTest {
         UUID.randomUUID().toString(),
         "driverDeviceName",
         /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
+        /* hasSecureChannel= */ true,
       )
 
     coordinator.onDeviceDisconnectedInternal(driverDevice)
@@ -340,9 +348,9 @@ class FeatureCoordinatorTest {
     val passengerDevice =
       ConnectedDevice(
         UUID.randomUUID().toString(),
-        "driverDeviceName",
+        "passengerDeviceName",
         /* belongsToDriver= */ false,
-        /* hasSecureChannel= */ true
+        /* hasSecureChannel= */ true,
       )
 
     coordinator.onDeviceDisconnectedInternal(passengerDevice)
@@ -359,7 +367,7 @@ class FeatureCoordinatorTest {
         UUID.randomUUID().toString(),
         "driverDeviceName",
         /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
+        /* hasSecureChannel= */ true,
       )
 
     coordinator.unregisterConnectionCallback(mockConnectionCallback)
@@ -375,9 +383,9 @@ class FeatureCoordinatorTest {
     val passengerDevice =
       ConnectedDevice(
         UUID.randomUUID().toString(),
-        "driverDeviceName",
+        "passengerDeviceName",
         /* belongsToDriver= */ false,
-        /* hasSecureChannel= */ true
+        /* hasSecureChannel= */ true,
       )
 
     coordinator.unregisterConnectionCallback(mockConnectionCallback)
@@ -395,7 +403,7 @@ class FeatureCoordinatorTest {
         UUID.randomUUID().toString(),
         "driverDeviceName",
         /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
+        /* hasSecureChannel= */ true,
       )
 
     coordinator.unregisterConnectionCallback(mockConnectionCallback)
@@ -413,14 +421,14 @@ class FeatureCoordinatorTest {
         UUID.randomUUID().toString(),
         "testDeviceName",
         /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
+        /* hasSecureChannel= */ true,
       )
     val missedMessage =
       DeviceMessage.createOutgoingMessage(
         recipientId.uuid,
         /* isMessageEncrypted= */ true,
         CLIENT_MESSAGE,
-        ByteUtils.randomBytes(10)
+        ByteUtils.randomBytes(10),
       )
 
     coordinator.onMessageReceivedInternal(connectedDevice, missedMessage)
@@ -439,7 +447,7 @@ class FeatureCoordinatorTest {
         UUID.randomUUID().toString(),
         "testDeviceName",
         /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
+        /* hasSecureChannel= */ true,
       )
 
     coordinator.registerDeviceCallback(connectedDevice, recipientId, deviceCallback)
@@ -461,7 +469,7 @@ class FeatureCoordinatorTest {
         UUID.randomUUID().toString(),
         "testDeviceName",
         /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
+        /* hasSecureChannel= */ true,
       )
 
     coordinator.registerDeviceCallback(connectedDevice, recipientId, deadDeviceCallback)
@@ -482,7 +490,7 @@ class FeatureCoordinatorTest {
         UUID.randomUUID().toString(),
         "testDeviceName",
         /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
+        /* hasSecureChannel= */ true,
       )
     coordinator.registerDeviceCallback(connectedDevice, recipientId, deviceCallback)
     coordinator.registerDeviceCallback(connectedDevice, recipientId, duplicateDeviceCallback)
@@ -490,6 +498,36 @@ class FeatureCoordinatorTest {
     coordinator.registerDeviceCallback(connectedDevice, recipientId, secondDuplicateDeviceCallback)
 
     verify(secondDuplicateDeviceCallback)
+      .onDeviceError(connectedDevice, DEVICE_ERROR_INSECURE_RECIPIENT_ID_DETECTED)
+  }
+
+  @Test
+  fun registerDuplicateDeviceCallback_onDeviceDisconnected_clearBlockedRecipients() {
+    val mockConnectionCallback: IConnectionCallback = mockToBeAlive()
+    coordinator.registerDriverConnectionCallback(mockConnectionCallback)
+    val deviceCallback: IDeviceCallback = mockToBeAlive()
+    val duplicateDeviceCallback: IDeviceCallback = mockToBeAlive()
+    val callbackAfterReconnection: IDeviceCallback = mockToBeAlive()
+    val recipientId = ParcelUuid(UUID.randomUUID())
+    val connectedDevice =
+      ConnectedDevice(
+        UUID.randomUUID().toString(),
+        "testDeviceName",
+        /* belongsToDriver= */ true,
+        /* hasSecureChannel= */ true,
+      )
+
+    coordinator.registerDeviceCallback(connectedDevice, recipientId, deviceCallback)
+    coordinator.registerDeviceCallback(connectedDevice, recipientId, duplicateDeviceCallback)
+
+    verify(deviceCallback)
+      .onDeviceError(connectedDevice, DEVICE_ERROR_INSECURE_RECIPIENT_ID_DETECTED)
+    verify(duplicateDeviceCallback)
+      .onDeviceError(connectedDevice, DEVICE_ERROR_INSECURE_RECIPIENT_ID_DETECTED)
+
+    coordinator.onDeviceDisconnectedInternal(connectedDevice)
+    coordinator.registerDeviceCallback(connectedDevice, recipientId, callbackAfterReconnection)
+    verify(callbackAfterReconnection, never())
       .onDeviceError(connectedDevice, DEVICE_ERROR_INSECURE_RECIPIENT_ID_DETECTED)
   }
 
@@ -502,14 +540,14 @@ class FeatureCoordinatorTest {
         UUID.randomUUID().toString(),
         "testDeviceName",
         /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
+        /* hasSecureChannel= */ true,
       )
     val message =
       DeviceMessage.createOutgoingMessage(
         recipientId.uuid,
         /* isMessageEncrypted= */ true,
         CLIENT_MESSAGE,
-        ByteUtils.randomBytes(10)
+        ByteUtils.randomBytes(10),
       )
 
     coordinator.registerDeviceCallback(connectedDevice, recipientId, deviceCallback)
@@ -528,14 +566,14 @@ class FeatureCoordinatorTest {
         UUID.randomUUID().toString(),
         "testDeviceName",
         /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
+        /* hasSecureChannel= */ true,
       )
     val message =
       DeviceMessage.createOutgoingMessage(
         recipientId.uuid,
         /* isMessageEncrypted= */ true,
         CLIENT_MESSAGE,
-        ByteUtils.randomBytes(10)
+        ByteUtils.randomBytes(10),
       )
 
     coordinator.registerDeviceCallback(connectedDevice, recipientId, deviceCallback)
@@ -554,14 +592,14 @@ class FeatureCoordinatorTest {
         UUID.randomUUID().toString(),
         "testDeviceName",
         /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
+        /* hasSecureChannel= */ true,
       )
     val message =
       DeviceMessage.createOutgoingMessage(
         otherRecipientId.uuid,
         /* isMessageEncrypted= */ true,
         CLIENT_MESSAGE,
-        ByteUtils.randomBytes(10)
+        ByteUtils.randomBytes(10),
       )
 
     coordinator.registerDeviceCallback(connectedDevice, recipientId, deviceCallback)
@@ -580,14 +618,14 @@ class FeatureCoordinatorTest {
         UUID.randomUUID().toString(),
         "testDeviceName",
         /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
+        /* hasSecureChannel= */ true,
       )
     val message =
       DeviceMessage.createOutgoingMessage(
         recipientId.uuid,
         /* isMessageEncrypted= */ true,
         CLIENT_MESSAGE,
-        ByteUtils.randomBytes(10)
+        ByteUtils.randomBytes(10),
       )
     coordinator.registerDeviceCallback(connectedDevice, recipientId, deviceCallback)
     coordinator.registerDeviceCallback(connectedDevice, recipientId, duplicateDeviceCallback)
@@ -608,7 +646,7 @@ class FeatureCoordinatorTest {
         UUID.randomUUID().toString(),
         "testDeviceName",
         /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
+        /* hasSecureChannel= */ true,
       )
     coordinator.registerDeviceCallback(connectedDevice, recipientId, deviceCallback)
     coordinator.registerDeviceCallback(connectedDevice, recipientId, duplicateDeviceCallback)
@@ -621,7 +659,7 @@ class FeatureCoordinatorTest {
         recipientId.uuid,
         /* isMessageEncrypted= */ true,
         CLIENT_MESSAGE,
-        ByteUtils.randomBytes(10)
+        ByteUtils.randomBytes(10),
       )
     coordinator.onMessageReceivedInternal(connectedDevice, message)
 
@@ -636,16 +674,60 @@ class FeatureCoordinatorTest {
         UUID.randomUUID().toString(),
         "testDeviceName",
         /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
+        /* hasSecureChannel= */ true,
       )
     val nullRecipientMessage =
       DeviceMessage.createOutgoingMessage(
         /* recipient= */ null,
         /* isMessageEncrypted= */ true,
         CLIENT_MESSAGE,
-        ByteUtils.randomBytes(10)
+        ByteUtils.randomBytes(10),
       )
     coordinator.onMessageReceivedInternal(connectedDevice, nullRecipientMessage)
+  }
+
+  @Test
+  fun onMessageReceived_shouldCacheMessage_cachesMessage() {
+    val connectedDevice =
+      ConnectedDevice(
+        UUID.randomUUID().toString(),
+        "testDeviceName",
+        /* belongsToDriver= */ true,
+        /* hasSecureChannel= */ true,
+      )
+    val message =
+      DeviceMessage.createIncomingMessage(
+        /* recipient= */ UUID.randomUUID(),
+        /* isMessageEncrypted= */ false,
+        /* operationType= */ QUERY_RESPONSE,
+        /* message= */ ByteArray(0),
+        /* originalMessageSize= */ 0,
+      )
+    coordinator.onMessageReceivedInternal(connectedDevice, message, shouldCacheMessage = true)
+
+    verify(mockSystemQueryCache).maybeCacheResponse(connectedDevice, message)
+  }
+
+  @Test
+  fun onMessageReceived_shouldNotCacheMessage_skipsCache() {
+    val connectedDevice =
+      ConnectedDevice(
+        UUID.randomUUID().toString(),
+        "testDeviceName",
+        /* belongsToDriver= */ true,
+        /* hasSecureChannel= */ true,
+      )
+    val message =
+      DeviceMessage.createIncomingMessage(
+        /* recipient= */ UUID.randomUUID(),
+        /* isMessageEncrypted= */ false,
+        /* operationType= */ QUERY_RESPONSE,
+        /* message= */ ByteArray(0),
+        /* originalMessageSize= */ 0,
+      )
+    coordinator.onMessageReceivedInternal(connectedDevice, message, shouldCacheMessage = false)
+
+    verify(mockSystemQueryCache, never()).maybeCacheResponse(any(), any())
   }
 
   @Test
@@ -655,19 +737,55 @@ class FeatureCoordinatorTest {
         UUID.randomUUID().toString(),
         "testDeviceName",
         /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
+        /* hasSecureChannel= */ true,
       )
     val message =
       DeviceMessage.createOutgoingMessage(
         UUID.randomUUID(),
         /* isMessageEncrypted= */ true,
         CLIENT_MESSAGE,
-        ByteUtils.randomBytes(10)
+        ByteUtils.randomBytes(10),
       )
 
     coordinator.sendMessage(connectedDevice, message)
 
     verify(mockController).sendMessage(UUID.fromString(connectedDevice.deviceId), message)
+  }
+
+  @Test
+  fun sendMessage_cachedQueryResponse_skipsController() {
+    val connectedDevice =
+      ConnectedDevice(
+        UUID.randomUUID().toString(),
+        "testDeviceName",
+        /* belongsToDriver= */ true,
+        /* hasSecureChannel= */ true,
+      )
+    val sender = UUID.randomUUID()
+    val deviceCallback: IDeviceCallback = mockToBeAlive()
+    coordinator.registerDeviceCallback(connectedDevice, ParcelUuid(sender), deviceCallback)
+
+    val cachedResponse =
+      DeviceMessage.createIncomingMessage(
+        /* recipient= */ sender,
+        /* isMessageEncrypted= */ false,
+        /* operationType= */ QUERY_RESPONSE,
+        /* message= */ ByteArray(0),
+        /* originalMessageSize= */ 0,
+      )
+    whenever(mockSystemQueryCache.getCachedResponse(any(), any())).thenReturn(cachedResponse)
+
+    val message =
+      DeviceMessage.createOutgoingMessage(
+        SYSTEM_FEATURE_ID.uuid,
+        /* isMessageEncrypted= */ true,
+        QUERY,
+        ByteUtils.randomBytes(10),
+      )
+    coordinator.sendMessage(connectedDevice, message)
+
+    verify(mockController, never()).sendMessage(any(), any())
+    verify(deviceCallback).onMessageReceived(connectedDevice, cachedResponse)
   }
 
   @Test
@@ -707,7 +825,7 @@ class FeatureCoordinatorTest {
         UUID.randomUUID().toString(),
         "testDeviceName",
         /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
+        /* hasSecureChannel= */ true,
       )
     coordinator.registerDeviceCallback(connectedDevice, recipientId, deviceCallback)
     coordinator.registerDeviceCallback(connectedDevice, secondRecipientId, secondDeviceCallback)
@@ -729,14 +847,14 @@ class FeatureCoordinatorTest {
         UUID.randomUUID().toString(),
         "testDeviceName",
         /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
+        /* hasSecureChannel= */ true,
       )
     val otherConnectedDevice =
       ConnectedDevice(
         UUID.randomUUID().toString(),
         "testDeviceName",
         /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
+        /* hasSecureChannel= */ true,
       )
     coordinator.registerDeviceCallback(connectedDevice, recipientId, deviceCallback)
     coordinator.registerDeviceCallback(otherConnectedDevice, otherRecipientId, otherDeviceCallback)
@@ -756,7 +874,7 @@ class FeatureCoordinatorTest {
         UUID.randomUUID().toString(),
         "deviceAddress",
         "deviceName",
-        /* isConnectionEnabled= */ true
+        /* isConnectionEnabled= */ true,
       )
 
     coordinator.onAssociatedDeviceAddedInternal(associatedDevice)
@@ -773,7 +891,7 @@ class FeatureCoordinatorTest {
         UUID.randomUUID().toString(),
         "deviceAddress",
         "deviceName",
-        /* isConnectionEnabled= */ true
+        /* isConnectionEnabled= */ true,
       )
 
     coordinator.onAssociatedDeviceRemovedInternal(associatedDevice)
@@ -790,7 +908,7 @@ class FeatureCoordinatorTest {
         UUID.randomUUID().toString(),
         "deviceAddress",
         "deviceName",
-        /* isConnectionEnabled= */ true
+        /* isConnectionEnabled= */ true,
       )
 
     coordinator.onAssociatedDeviceUpdatedInternal(associatedDevice)
@@ -807,7 +925,7 @@ class FeatureCoordinatorTest {
         UUID.randomUUID().toString(),
         "deviceAddress",
         "deviceName",
-        /* isConnectionEnabled= */ true
+        /* isConnectionEnabled= */ true,
       )
 
     coordinator.unregisterDeviceAssociationCallback(callback)
@@ -866,13 +984,13 @@ class FeatureCoordinatorTest {
           UUID.randomUUID().toString(),
           /* deviceAddress= */ "",
           /* deviceName= */ null,
-          /* isConnectionEnabled= */ true
+          /* isConnectionEnabled= */ true,
         ),
         AssociatedDevice(
           UUID.randomUUID().toString(),
           /* deviceAddress= */ "",
           /* deviceName= */ null,
-          /* isConnectionEnabled= */ false
+          /* isConnectionEnabled= */ false,
         )
       )
     val listener: IOnAssociatedDevicesRetrievedListener = mockToBeAlive()
@@ -891,13 +1009,13 @@ class FeatureCoordinatorTest {
           UUID.randomUUID().toString(),
           /* deviceAddress= */ "",
           /* deviceName= */ null,
-          /* isConnectionEnabled= */ true
+          /* isConnectionEnabled= */ true,
         ),
         AssociatedDevice(
           UUID.randomUUID().toString(),
           /* deviceAddress= */ "",
           /* deviceName= */ null,
-          /* isConnectionEnabled= */ false
+          /* isConnectionEnabled= */ false,
         )
       )
     val listener: IOnAssociatedDevicesRetrievedListener = mockToBeAlive()
@@ -916,13 +1034,13 @@ class FeatureCoordinatorTest {
           UUID.randomUUID().toString(),
           /* deviceAddress= */ "",
           /* deviceName= */ null,
-          /* isConnectionEnabled= */ true
+          /* isConnectionEnabled= */ true,
         ),
         AssociatedDevice(
           UUID.randomUUID().toString(),
           /* deviceAddress= */ "",
           /* deviceName= */ null,
-          /* isConnectionEnabled= */ false
+          /* isConnectionEnabled= */ false,
         )
       )
     val listener: IOnAssociatedDevicesRetrievedListener = mockToBeAlive()
@@ -1015,21 +1133,21 @@ class FeatureCoordinatorTest {
         UUID.randomUUID().toString(),
         "driverDeviceName1",
         /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
+        /* hasSecureChannel= */ true,
       )
     val driverDevice2 =
       ConnectedDevice(
         UUID.randomUUID().toString(),
         "driverDeviceName2",
         /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
+        /* hasSecureChannel= */ true,
       )
     val passengerDevice =
       ConnectedDevice(
         UUID.randomUUID().toString(),
         "passengerDeviceName",
         /* belongsToDriver= */ false,
-        /* hasSecureChannel= */ true
+        /* hasSecureChannel= */ true,
       )
     whenever(mockController.connectedDevices)
       .thenReturn(listOf(driverDevice1, passengerDevice, driverDevice2))
@@ -1082,17 +1200,15 @@ class FeatureCoordinatorTest {
         UUID.randomUUID().toString(),
         "testDeviceName",
         /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
+        /* hasSecureChannel= */ true,
       )
-    val message =
-      DeviceMessageProto.Message.newBuilder()
-        .setRecipient(ByteString.copyFrom(ByteUtils.uuidToBytes(recipientId.uuid)))
-        .setIsPayloadEncrypted(true)
-        .setOperation(
-          OperationType.forNumber(/* CLIENT_MESSAGE */ 4) ?: OperationType.OPERATION_TYPE_UNKNOWN
-        )
-        .setPayload(ByteString.copyFrom(ByteUtils.randomBytes(10)))
-        .build()
+    val message = message {
+      operation =
+        OperationType.forNumber(/* CLIENT_MESSAGE */ 4) ?: OperationType.OPERATION_TYPE_UNKNOWN
+      isPayloadEncrypted = true
+      recipient = ByteString.copyFrom(ByteUtils.uuidToBytes(recipientId.uuid))
+      payload = ByteString.copyFrom(ByteUtils.randomBytes(10))
+    }
 
     val rawBytes = message.toByteArray()
 
@@ -1120,7 +1236,7 @@ class FeatureCoordinatorTest {
         UUID.randomUUID().toString(),
         "testDeviceName",
         /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
+        /* hasSecureChannel= */ true,
       )
 
     safeCoordinator.registerDeviceCallback(connectedDevice.deviceId, recipientId, deviceCallback)
@@ -1137,6 +1253,32 @@ class FeatureCoordinatorTest {
   }
 
   @Test
+  fun safeFC_registerDeviceCallback_blocksRecipientIfRegisteredWithNonSafeDeviceCallback() {
+    val deviceCallback: IDeviceCallback = mockToBeAlive()
+    val duplicateDeviceCallback: ISafeDeviceCallback = mockToBeAlive()
+    val recipientId = ParcelUuid(UUID.randomUUID())
+    val connectedDevice =
+      ConnectedDevice(
+        UUID.randomUUID().toString(),
+        "testDeviceName",
+        /* belongsToDriver= */ true,
+        /* hasSecureChannel= */ true,
+      )
+
+    coordinator.registerDeviceCallback(connectedDevice, recipientId, deviceCallback)
+    safeCoordinator.registerDeviceCallback(
+      connectedDevice.deviceId,
+      recipientId,
+      duplicateDeviceCallback
+    )
+
+    verify(deviceCallback)
+      .onDeviceError(connectedDevice, DEVICE_ERROR_INSECURE_RECIPIENT_ID_DETECTED)
+    verify(duplicateDeviceCallback)
+      .onDeviceError(connectedDevice.deviceId, DEVICE_ERROR_INSECURE_RECIPIENT_ID_DETECTED)
+  }
+
+  @Test
   fun safeFC_registerDeviceCallback_ignoreDeadPreviousRegistererIfAlreadyRegistered() {
     val deadDeviceCallback: ISafeDeviceCallback = mockToBeDead()
     val duplicateDeviceCallback: ISafeDeviceCallback = mockToBeAlive()
@@ -1146,7 +1288,7 @@ class FeatureCoordinatorTest {
         UUID.randomUUID().toString(),
         "testDeviceName",
         /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
+        /* hasSecureChannel= */ true,
       )
 
     safeCoordinator.registerDeviceCallback(
@@ -1175,7 +1317,7 @@ class FeatureCoordinatorTest {
         UUID.randomUUID().toString(),
         "testDeviceName",
         /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
+        /* hasSecureChannel= */ true,
       )
     safeCoordinator.registerDeviceCallback(connectedDevice.deviceId, recipientId, deviceCallback)
     safeCoordinator.registerDeviceCallback(
@@ -1203,14 +1345,14 @@ class FeatureCoordinatorTest {
         UUID.randomUUID().toString(),
         "testDeviceName",
         /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
+        /* hasSecureChannel= */ true,
       )
     val message =
       DeviceMessage.createOutgoingMessage(
         recipientId.uuid,
         /* isMessageEncrypted= */ true,
         CLIENT_MESSAGE,
-        ByteUtils.randomBytes(10)
+        ByteUtils.randomBytes(10),
       )
 
     safeCoordinator.registerDeviceCallback(connectedDevice.deviceId, recipientId, deviceCallback)
@@ -1229,14 +1371,14 @@ class FeatureCoordinatorTest {
         UUID.randomUUID().toString(),
         "testDeviceName",
         /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
+        /* hasSecureChannel= */ true,
       )
     val message =
       DeviceMessage.createOutgoingMessage(
         recipientId.uuid,
         /* isMessageEncrypted= */ true,
         CLIENT_MESSAGE,
-        ByteUtils.randomBytes(10)
+        ByteUtils.randomBytes(10),
       )
 
     safeCoordinator.registerDeviceCallback(connectedDevice.deviceId, recipientId, deviceCallback)
@@ -1255,14 +1397,14 @@ class FeatureCoordinatorTest {
         UUID.randomUUID().toString(),
         "testDeviceName",
         /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
+        /* hasSecureChannel= */ true,
       )
     val message =
       DeviceMessage.createOutgoingMessage(
         otherRecipientId.uuid,
         /* isMessageEncrypted= */ true,
         CLIENT_MESSAGE,
-        ByteUtils.randomBytes(10)
+        ByteUtils.randomBytes(10),
       )
 
     safeCoordinator.registerDeviceCallback(connectedDevice.deviceId, recipientId, deviceCallback)
@@ -1281,14 +1423,14 @@ class FeatureCoordinatorTest {
         UUID.randomUUID().toString(),
         "testDeviceName",
         /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
+        /* hasSecureChannel= */ true,
       )
     val message =
       DeviceMessage.createOutgoingMessage(
         recipientId.uuid,
         /* isMessageEncrypted= */ true,
         CLIENT_MESSAGE,
-        ByteUtils.randomBytes(10)
+        ByteUtils.randomBytes(10),
       )
     safeCoordinator.registerDeviceCallback(connectedDevice.deviceId, recipientId, deviceCallback)
     safeCoordinator.registerDeviceCallback(
@@ -1313,13 +1455,13 @@ class FeatureCoordinatorTest {
         UUID.randomUUID().toString(),
         "testDeviceName",
         /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
+        /* hasSecureChannel= */ true,
       )
     safeCoordinator.registerDeviceCallback(connectedDevice.deviceId, recipientId, deviceCallback)
     safeCoordinator.registerDeviceCallback(
       connectedDevice.deviceId,
       recipientId,
-      duplicateDeviceCallback
+      duplicateDeviceCallback,
     )
 
     // Clear the blocked recipient list.
@@ -1330,7 +1472,7 @@ class FeatureCoordinatorTest {
         recipientId.uuid,
         /* isMessageEncrypted= */ true,
         CLIENT_MESSAGE,
-        ByteUtils.randomBytes(10)
+        ByteUtils.randomBytes(10),
       )
     coordinator.onMessageReceivedInternal(connectedDevice, message)
 
@@ -1345,36 +1487,70 @@ class FeatureCoordinatorTest {
         UUID.randomUUID().toString(),
         "testDeviceName",
         /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
+        /* hasSecureChannel= */ true,
       )
     val nullRecipientMessage =
       DeviceMessage.createOutgoingMessage(
         /* recipient= */ null,
         /* isMessageEncrypted= */ true,
         CLIENT_MESSAGE,
-        ByteUtils.randomBytes(10)
+        ByteUtils.randomBytes(10),
       )
     coordinator.onMessageReceivedInternal(connectedDevice, nullRecipientMessage)
   }
 
   @Test
-  fun safeFC_sendMessage_sendsMessageToController() {
+  fun safeFC_sendMessage_succeedsOnRegisteredDevice() {
+    val deviceId = UUID.randomUUID().toString()
+    val connectedDevice =
+      ConnectedDevice(
+        deviceId,
+        "testDeviceName",
+        /* belongsToDriver= */ true,
+        /* hasSecureChannel= */ true,
+      )
+    val message = message {
+      operation =
+        OperationType.forNumber(/* CLIENT_MESSAGE */ 4) ?: OperationType.OPERATION_TYPE_UNKNOWN
+      isPayloadEncrypted = true
+      recipient = ByteString.copyFrom(ByteUtils.uuidToBytes(UUID.randomUUID()))
+      payload = ByteString.copyFrom(ByteUtils.randomBytes(10))
+    }
+
+    val rawBytes = message.toByteArray()
+
+    whenever(mockController.connectedDevices).thenReturn(listOf(connectedDevice))
+    whenever(mockController.sendMessage(any(), any())).thenReturn(true)
+    val messageSent = safeCoordinator.sendMessage(deviceId, rawBytes)
+
+    val deviceMessage =
+      DeviceMessage.createOutgoingMessage(
+        ByteUtils.bytesToUUID(message.recipient.toByteArray()),
+        message.isPayloadEncrypted,
+        DeviceMessage.OperationType.fromValue(message.operation.number),
+        message.payload.toByteArray(),
+      )
+
+    assertThat(messageSent).isTrue()
+    verify(mockController).sendMessage(UUID.fromString(deviceId), deviceMessage)
+  }
+
+  @Test
+  fun safeFC_sendMessage_failsOnUnregisteredDevice() {
     val connectedDevice =
       ConnectedDevice(
         UUID.randomUUID().toString(),
         "testDeviceName",
         /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
+        /* hasSecureChannel= */ true,
       )
-    val message =
-      DeviceMessageProto.Message.newBuilder()
-        .setRecipient(ByteString.copyFrom(ByteUtils.uuidToBytes(UUID.randomUUID())))
-        .setIsPayloadEncrypted(true)
-        .setOperation(
-          OperationType.forNumber(/* CLIENT_MESSAGE */ 4) ?: OperationType.OPERATION_TYPE_UNKNOWN
-        )
-        .setPayload(ByteString.copyFrom(ByteUtils.randomBytes(10)))
-        .build()
+    val message = message {
+      operation =
+        OperationType.forNumber(/* CLIENT_MESSAGE */ 4) ?: OperationType.OPERATION_TYPE_UNKNOWN
+      isPayloadEncrypted = true
+      recipient = ByteString.copyFrom(ByteUtils.uuidToBytes(UUID.randomUUID()))
+      payload = ByteString.copyFrom(ByteUtils.randomBytes(10))
+    }
 
     val rawBytes = message.toByteArray()
 
@@ -1385,11 +1561,12 @@ class FeatureCoordinatorTest {
         ByteUtils.bytesToUUID(message.recipient.toByteArray()),
         message.isPayloadEncrypted,
         DeviceMessage.OperationType.fromValue(message.operation.number),
-        message.payload.toByteArray()
+        message.payload.toByteArray(),
       )
 
-    assertThat(messageSent).isFalse() // Recipient not registered so this will return false
-    verify(mockController).sendMessage(UUID.fromString(connectedDevice.deviceId), deviceMessage)
+    assertThat(messageSent).isFalse()
+    verify(mockController, never())
+      .sendMessage(UUID.fromString(connectedDevice.deviceId), deviceMessage)
   }
 
   @Test
@@ -1430,13 +1607,13 @@ class FeatureCoordinatorTest {
           UUID.randomUUID().toString(),
           /* deviceAddress= */ "",
           /* deviceName= */ null,
-          /* isConnectionEnabled= */ true
+          /* isConnectionEnabled= */ true,
         ),
         AssociatedDevice(
           UUID.randomUUID().toString(),
           /* deviceAddress= */ "",
           /* deviceName= */ null,
-          /* isConnectionEnabled= */ false
+          /* isConnectionEnabled= */ false,
         )
       )
     val listener: ISafeOnAssociatedDevicesRetrievedListener = mockToBeAlive()

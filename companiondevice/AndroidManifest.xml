@@ -223,8 +223,6 @@
                 android:resource="@string/trusted_device_notification_title"/>
             <meta-data android:name="com.google.android.connecteddevice.trust.enrollment_notification_content"
                 android:resource="@string/trusted_device_notification_content"/>
-            <meta-data android:name="com.google.android.connecteddevice.trust.enrollment_notification_color"
-                android:resource="@color/car_red_300"/>
         </service>
         <activity
             android:name=".trust.TrustedDeviceActivity"

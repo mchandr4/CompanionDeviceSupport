@@ -101,12 +101,13 @@ class MultiProtocolDeviceControllerTest {
     whenever(spyStorage.hashWithChallengeSecret(any(), any())).thenReturn(TEST_CHALLENGE)
     deviceController =
       MultiProtocolDeviceController(
+        context,
         protocolDelegate,
         spyStorage,
         mockOobRunner,
         testAssociationServiceUuid.uuid,
         enablePassenger = false,
-        callbackExecutor = directExecutor()
+        storageExecutor = directExecutor()
       )
     deviceController.registerCallback(mockCallback, directExecutor())
     secureChannel =
@@ -143,12 +144,13 @@ class MultiProtocolDeviceControllerTest {
       }
 
     MultiProtocolDeviceController(
+        context,
         protocolDelegate,
         transientErrorStorage,
         mockOobRunner,
         testAssociationServiceUuid.uuid,
         enablePassenger = false,
-        callbackExecutor = directExecutor()
+        storageExecutor = directExecutor()
       )
       .start()
 
@@ -178,12 +180,13 @@ class MultiProtocolDeviceControllerTest {
     whenever(spyStorage.allAssociatedDevices).thenReturn(listOf(driverDevice, passengerDevice))
     deviceController =
       MultiProtocolDeviceController(
+        context,
         protocolDelegate,
         spyStorage,
         mockOobRunner,
         testAssociationServiceUuid.uuid,
         enablePassenger = true,
-        callbackExecutor = directExecutor()
+        storageExecutor = directExecutor()
       )
 
     deviceController.start()
@@ -215,12 +218,13 @@ class MultiProtocolDeviceControllerTest {
     whenever(spyStorage.allAssociatedDevices).thenReturn(listOf(driverDevice, passengerDevice))
     deviceController =
       MultiProtocolDeviceController(
+        context,
         protocolDelegate,
         spyStorage,
         mockOobRunner,
         testAssociationServiceUuid.uuid,
         enablePassenger = false,
-        callbackExecutor = directExecutor()
+        storageExecutor = directExecutor()
       )
 
     deviceController.start()
@@ -350,12 +354,13 @@ class MultiProtocolDeviceControllerTest {
       )
     deviceController =
       MultiProtocolDeviceController(
+        context,
         protocolDelegate,
         spyStorage,
         mockOobRunner,
         testAssociationServiceUuid.uuid,
         enablePassenger = false,
-        callbackExecutor = directExecutor()
+        storageExecutor = directExecutor()
       )
     deviceController.registerCallback(mockCallback, directExecutor())
     deviceController.start()
@@ -672,9 +677,32 @@ class MultiProtocolDeviceControllerTest {
     )
 
     verify(spyStorage).saveChallengeSecret(deviceId.toString(), secret)
-    verify(mockCallback).onDeviceConnected(any())
+    assertThat(deviceController.getConnectedDevice(deviceId)).isNotNull()
+    verify(mockAssociationCallback).onAssociationCompleted()
+  }
+
+  @Test
+  fun onAssociatedDeviceAdded_issuesDeviceConnectedCallback() {
+    val deviceId = UUID.randomUUID()
+    val deviceName = "TestDeviceName"
+    val associatedDevice =
+      AssociatedDevice(
+        deviceId.toString(),
+        "deviceAddress",
+        deviceName,
+        /* isConnectionEnabled= */ true
+      )
+    argumentCaptor<ConnectedDeviceStorage.AssociatedDeviceCallback>().apply {
+      verify(spyStorage).registerAssociatedDeviceCallback(capture())
+      firstValue.onAssociatedDeviceAdded(associatedDevice)
+    }
+    argumentCaptor<ConnectedDevice>().apply {
+      verify(mockCallback).onDeviceConnected(capture())
+      assertThat(firstValue.deviceId).isEqualTo(associatedDevice.deviceId)
+      assertThat(firstValue.hasSecureChannel()).isFalse()
+    }
     verify(mockCallback).onSecureChannelEstablished(any())
-    assertThat(deviceController.connectedDevices).isNotEmpty()
+    verify(spyStorage).getAllAssociatedDevices()
   }
 
   @Test
@@ -762,12 +790,13 @@ class MultiProtocolDeviceControllerTest {
       )
     deviceController =
       MultiProtocolDeviceController(
+        context,
         protocolDelegate,
         spyStorage,
         mockOobRunner,
         testAssociationServiceUuid.uuid,
         enablePassenger = false,
-        callbackExecutor = directExecutor()
+        storageExecutor = directExecutor()
       )
 
     deviceController.startAssociation(deviceName, mockAssociationCallback, testIdentifier.uuid)
@@ -806,12 +835,13 @@ class MultiProtocolDeviceControllerTest {
       )
     deviceController =
       MultiProtocolDeviceController(
+        context,
         protocolDelegate,
         spyStorage,
         mockOobRunner,
         testAssociationServiceUuid.uuid,
         enablePassenger = true,
-        callbackExecutor = directExecutor()
+        storageExecutor = directExecutor()
       )
 
     deviceController.startAssociation(deviceName, mockAssociationCallback, testIdentifier.uuid)
@@ -868,12 +898,13 @@ class MultiProtocolDeviceControllerTest {
     // Recreate controller after registering mock returns since they are used in the constructor.
     deviceController =
       MultiProtocolDeviceController(
+        context,
         protocolDelegate,
         spyStorage,
         mockOobRunner,
         testAssociationServiceUuid.uuid,
         enablePassenger = false,
-        callbackExecutor = directExecutor()
+        storageExecutor = directExecutor()
       )
     deviceController.registerCallback(mockCallback, directExecutor())
     deviceController.start()
@@ -963,12 +994,13 @@ class MultiProtocolDeviceControllerTest {
     protocolDelegate.addProtocol(protocol2)
     deviceController =
       MultiProtocolDeviceController(
+          context,
           protocolDelegate,
           spyStorage,
           mockOobRunner,
           testAssociationServiceUuid.uuid,
           enablePassenger = false,
-          callbackExecutor = directExecutor()
+          storageExecutor = directExecutor()
         )
         .apply { registerCallback(mockCallback, directExecutor()) }
     deviceController.initiateConnectionToDevice(deviceId.uuid)

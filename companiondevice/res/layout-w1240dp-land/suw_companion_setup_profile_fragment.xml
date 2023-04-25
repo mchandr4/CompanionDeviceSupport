@@ -28,6 +28,14 @@
         android:layout_weight="@integer/suw_title_column_weight"
         android:paddingVertical="?attr/pageMarginVertical"
         android:layout_marginEnd="@dimen/suw_column_inner_padding_horizontal">
+      <ImageView
+        android:id="@+id/device_icon"
+        android:layout_width="?attr/companionPrimaryIconSize"
+        android:layout_height="?attr/companionPrimaryIconSize"
+        android:gravity="center"
+        android:src="@drawable/ic_smartphone_24dp"
+        android:tint="?attr/companionColorAccent"
+        tools:ignore="ContentDescription" />
       <TextView
           android:id="@+id/suw_setup_profile_title"
           android:text="@string/suw_setup_profile_title"
@@ -44,10 +52,9 @@
           android:gravity="left"
           style="@style/CompanionSubtitleTextStyle" />
     </LinearLayout>
-    <View style="@style/SuwVerticalDividerStyle"/>
     <LinearLayout
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:orientation="vertical"
         android:gravity="center"
         android:layout_weight="@integer/suw_content_column_weight"
@@ -61,7 +68,7 @@
       <TextView
           android:id="@+id/connect_to_car_instruction"
           android:text="@string/suw_qr_instruction_text"
-          android:layout_width="match_parent"
+          android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:layout_marginVertical="?attr/contentMarginVertical"
           android:gravity="center"

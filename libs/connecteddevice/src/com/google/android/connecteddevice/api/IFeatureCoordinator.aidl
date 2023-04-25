@@ -85,6 +85,9 @@ interface IFeatureCoordinator {
     /**
      * Registers a callback for a specific connectedDevice and recipient.
      *
+     * Duplicate registration with the same [recipientId] will block the
+     * recipient and prevent it from receiving callbacks.
+     *
      * @param connectedDevice {@link ConnectedDevice} to register triggers on.
      * @param recipientId {@link ParcelUuid} to register as recipient of.
      * @param callback {@link IDeviceCallback} to register.
@@ -112,7 +115,7 @@ interface IFeatureCoordinator {
             in DeviceMessage message) = 9;
 
     /**
-     * Registers a callback for associated devic related events.
+     * Registers a callback for associated device related events.
      *
      * @param callback {@link IDeviceAssociationCallback} to register.
      */

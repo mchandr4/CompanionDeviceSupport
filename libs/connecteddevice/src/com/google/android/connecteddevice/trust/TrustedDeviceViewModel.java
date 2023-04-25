@@ -241,6 +241,7 @@ public class TrustedDeviceViewModel extends AndroidViewModel {
    * @param device The associated device to be enrolled.
    */
   public void enrollTrustedDevice(AssociatedDevice device) {
+    updateTrustedDevicesFromServer();
     attemptInitiatingEnrollment(device);
   }
 

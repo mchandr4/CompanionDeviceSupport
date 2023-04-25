@@ -19,13 +19,19 @@ package com.google.android.connecteddevice.service;
 import static com.google.android.connecteddevice.util.SafeLog.logd;
 import static com.google.android.connecteddevice.util.SafeLog.loge;
 
+import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.IBinder;
+import android.os.UserHandle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.google.android.connecteddevice.R;
 import com.google.android.connecteddevice.api.CompanionConnector;
 import com.google.android.connecteddevice.api.Connector;
+import com.google.android.connecteddevice.api.FeatureConnector;
 import com.google.android.connecteddevice.core.DeviceController;
 import com.google.android.connecteddevice.core.FeatureCoordinator;
 import com.google.android.connecteddevice.core.MultiProtocolDeviceController;
@@ -39,9 +45,10 @@ import com.google.android.connecteddevice.transport.ProtocolDelegate;
 import com.google.android.connecteddevice.util.EventLog;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /** Early start service that hosts the core companion platform. */
@@ -69,10 +76,19 @@ public final class ConnectedDeviceService extends TrunkService {
 
   private final AtomicBoolean isEveryFeatureInitialized = new AtomicBoolean(false);
 
-  private final ScheduledExecutorService scheduledExecutorService =
-      Executors.newSingleThreadScheduledExecutor();
+  private final ExecutorService databaseExecutor = Executors.newSingleThreadExecutor();
 
   private final ProtocolDelegate protocolDelegate = new ProtocolDelegate();
+
+  private final BroadcastReceiver userRemovedBroadcastReceiver =
+      new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+          logd(TAG, "Received USER_REMOVED broadcast.");
+          UserHandle userHandle = intent.getParcelableExtra(Intent.EXTRA_USER);
+          onUserRemoved(userHandle);
+        }
+      };
 
   private LoggingManager loggingManager;
 
@@ -85,6 +101,7 @@ public final class ConnectedDeviceService extends TrunkService {
   private LoggingFeature loggingFeature;
 
   @Override
+  @SuppressLint("UnprotectedReceiver") // ACTION_USER_REMOVED is a protected broadcast.
   public void onCreate() {
     super.onCreate();
     logd(
@@ -113,8 +130,9 @@ public final class ConnectedDeviceService extends TrunkService {
     storage = new ConnectedDeviceStorage(this);
 
     initializeFeatureCoordinator();
-
     populateFeatures();
+    logd(TAG, "Registering broadcast receiver for intent " + Intent.ACTION_USER_REMOVED);
+    registerReceiver(userRemovedBroadcastReceiver, new IntentFilter(Intent.ACTION_USER_REMOVED));
   }
 
   private void initializeFeatureCoordinator() {
@@ -129,7 +147,7 @@ public final class ConnectedDeviceService extends TrunkService {
     OobRunner oobRunner = new OobRunner(protocolDelegate, oobProtocolName);
     DeviceController deviceController =
         new MultiProtocolDeviceController(
-            protocolDelegate, storage, oobRunner, associationUuid, enablePassenger);
+            this, protocolDelegate, storage, oobRunner, associationUuid, enablePassenger);
     featureCoordinator = new FeatureCoordinator(deviceController, storage, loggingManager);
     logd(TAG, "Wrapping FeatureCoordinator in legacy binders for backwards compatibility.");
   }
@@ -150,6 +168,24 @@ public final class ConnectedDeviceService extends TrunkService {
                 this, Connector.USER_TYPE_ALL, featureCoordinator));
   }
 
+  private void onUserRemoved(UserHandle userHandle) {
+    databaseExecutor.execute(
+        () -> {
+          FeatureCoordinator featurecoordinator = this.featureCoordinator;
+          if (featurecoordinator == null) {
+            logd(TAG, "User removed before feature coordinator is initiated. Ignored");
+            return;
+          }
+
+          int userId = userHandle.getIdentifier();
+          List<String> deviceIds = storage.getAssociatedDeviceIdsForUser(userId);
+          for (String deviceId : deviceIds) {
+            logd(TAG, "Delete data from database; userId=" + userId + ", deviceId=" + deviceId);
+            featurecoordinator.removeAssociatedDevice(deviceId);
+          }
+        });
+  }
+
   @Nullable
   @Override
   public IBinder onBind(Intent intent) {
@@ -164,7 +200,7 @@ public final class ConnectedDeviceService extends TrunkService {
         return protocolDelegate;
       case CompanionConnector.ACTION_BIND_FEATURE_COORDINATOR:
         return featureCoordinator;
-      case  ACTION_QUERY_API_VERSION:
+      case FeatureConnector.ACTION_QUERY_API_VERSION:
         logd(TAG, "Return binder version to remote process");
         return binderVersion.asBinder();
       default:
@@ -176,7 +212,8 @@ public final class ConnectedDeviceService extends TrunkService {
   @Override
   public void onDestroy() {
     logd(TAG, "Service was destroyed.");
-    scheduledExecutorService.shutdown();
+    unregisterReceiver(userRemovedBroadcastReceiver);
+    databaseExecutor.shutdown();
     cleanup();
     super.onDestroy();
   }

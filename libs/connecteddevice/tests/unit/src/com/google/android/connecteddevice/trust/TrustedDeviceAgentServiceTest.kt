@@ -3,6 +3,9 @@ package com.google.android.connecteddevice.trust
 import android.app.ActivityManager
 import android.app.KeyguardManager
 import android.os.PowerManager
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import android.os.Build;
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.connecteddevice.trust.api.ITrustedDeviceAgentDelegate
@@ -18,6 +21,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.Robolectric
+import org.robolectric.annotation.Config
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.shadow.api.Shadow
 import org.robolectric.shadows.ShadowKeyguardManager
@@ -25,6 +29,7 @@ import org.robolectric.shadows.ShadowPowerManager
 
 
 @RunWith(RobolectricTestRunner::class)
+@Config(sdk=[Build.VERSION_CODES.S, Build.VERSION_CODES.R, Build.VERSION_CODES.Q])
 class TrustedDeviceAgentServiceTest {
 
   private val context = ApplicationProvider.getApplicationContext<Context>()
@@ -60,7 +65,7 @@ class TrustedDeviceAgentServiceTest {
   }
 
   @Test
-  fun unlockUserWithToken_invokesCallbackAfterTokenReceived_DeviceAndUserAreLocked() {
+  fun unlockUserWithToken_invokesCallbackAfterTokenReceived_deviceAndUserAreLocked() {
     lockUser()
 
     sendToken()
@@ -70,12 +75,22 @@ class TrustedDeviceAgentServiceTest {
   }
 
   @Test
-  fun unlockUserWithToken_invokesCallbackAfterTokenReceived_UserIsUnlocked() {
+  fun unlockUserWithTokenBeforeAndroidT_invokesCallbackAfterTokenReceived_userIsUnlocked() {
     service.isUserUnlocked = true
 
     sendToken()
 
     verify(mockTrustedDeviceManager).onUserUnlocked()
+  }
+
+  @Config(sdk=[Build.VERSION_CODES.TIRAMISU])
+  @Test
+  fun unlockUserWithTokenAfterAndroidT_doNotInvokesCallbackAfterTokenReceivedImmediately() {
+    service.isUserUnlocked = true
+
+    sendToken()
+
+    verify(mockTrustedDeviceManager, never()).onUserUnlocked()
   }
 
   @Test

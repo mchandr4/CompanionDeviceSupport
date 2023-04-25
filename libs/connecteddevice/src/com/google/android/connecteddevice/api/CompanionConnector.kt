@@ -27,6 +27,7 @@ import android.os.ParcelUuid
 import android.os.RemoteException
 import androidx.annotation.GuardedBy
 import androidx.annotation.VisibleForTesting
+import com.google.android.companionprotos.FeatureSupportResponse
 import com.google.android.companionprotos.Query
 import com.google.android.companionprotos.QueryResponse
 import com.google.android.companionprotos.SystemQuery
@@ -48,16 +49,23 @@ import com.google.android.connecteddevice.util.ByteUtils
 import com.google.android.connecteddevice.util.Logger
 import com.google.android.connecteddevice.util.SafeLog
 import com.google.android.connecteddevice.util.aliveOrNull
+import com.google.common.util.concurrent.ListenableFuture
 import com.google.protobuf.ByteString
 import com.google.protobuf.ExtensionRegistryLite
 import com.google.protobuf.InvalidProtocolBufferException
 import java.nio.charset.StandardCharsets
 import java.time.Duration
+import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
+import kotlin.coroutines.resume
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.guava.future
+import kotlinx.coroutines.suspendCancellableCoroutine
 
 /**
  * Class for establishing and maintaining a connection to the companion device platform.
@@ -440,6 +448,79 @@ constructor(
     sendQuerySecurely(device, request, parameters, callback)
   }
 
+  override suspend fun isFeatureSupported(device: ConnectedDevice): Boolean {
+    val queriedFeatureId = featureId?.uuid ?: return false
+    val status =
+      queryFeatureSupportStatuses(device, listOf(queriedFeatureId)).firstOrNull {
+        it.first == queriedFeatureId
+      }
+    return status?.second ?: false
+  }
+
+  override suspend fun queryFeatureSupportStatuses(
+    device: ConnectedDevice,
+    queriedFeatures: List<UUID>
+  ): List<Pair<UUID, Boolean>> {
+    val payloads =
+      queriedFeatures.map {
+        logd("Batch querying support status for feature $it.")
+        ByteString.copyFrom(it.toString().toByteArray(StandardCharsets.UTF_8))
+      }
+
+    val systemQuery =
+      SystemQuery.newBuilder().run {
+        setType(SystemQueryType.IS_FEATURE_SUPPORTED)
+        addAllPayloads(payloads)
+        build()
+      }
+
+    return suspendCancellableCoroutine<List<Pair<UUID, Boolean>>> { continuation ->
+      sendQuerySecurelyInternal(
+        device,
+        SYSTEM_FEATURE_ID,
+        systemQuery.toByteArray(),
+        parameters = null,
+        object : QueryCallback {
+          override fun onSuccess(response: ByteArray) {
+            if (response.isEmpty()) {
+              loge("Received an empty response for feature support query.")
+              continuation.resume(emptyList())
+              return
+            }
+
+            val supportResponse =
+              try {
+                FeatureSupportResponse.parseFrom(response)
+              } catch (e: InvalidProtocolBufferException) {
+                loge("Could not parse query response as proto.", e)
+                continuation.resume(emptyList())
+                return
+              }
+            val statuses =
+              supportResponse.statusesList.map { status ->
+                Pair(UUID.fromString(status.featureId), status.isSupported)
+              }
+            continuation.resume(statuses)
+          }
+
+          override fun onError(response: ByteArray) {
+            loge("Received an error response when querying for feature support.")
+            continuation.resume(emptyList())
+          }
+
+          override fun onQueryFailedToSend(isTransient: Boolean) {
+            loge("Failed to send the query for the feature support status.")
+            continuation.resume(emptyList())
+          }
+        }
+      )
+    }
+  }
+
+  override fun isFeatureSupportedFuture(device: ConnectedDevice): ListenableFuture<Boolean> {
+    return CoroutineScope(Dispatchers.Main).future { isFeatureSupported(device) }
+  }
+
   override fun sendQuerySecurely(
     device: ConnectedDevice,
     request: ByteArray,
@@ -562,7 +643,7 @@ constructor(
       systemQuery.toByteArray(),
       parameters = null,
       object : QueryCallback {
-        override fun onSuccess(response: ByteArray?) {
+        override fun onSuccess(response: ByteArray) {
           if (response == null || response.isEmpty()) {
             loge("Received a null or empty response for the application name.")
             callback.onError()
@@ -573,7 +654,7 @@ constructor(
           callback.onNameReceived(appName)
         }
 
-        override fun onError(response: ByteArray?) {
+        override fun onError(response: ByteArray) {
           loge("Received an error response when querying for application name.")
           callback.onError()
         }

@@ -31,7 +31,6 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.os.RemoteException;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import com.google.android.connecteddevice.service.MetaDataService;
 import com.google.android.connecteddevice.trust.api.IOnTrustedDeviceEnrollmentNotificationRequestListener;
 import com.google.android.connecteddevice.trust.api.ITrustedDeviceManager;
@@ -54,9 +53,6 @@ public class TrustedDeviceUiDelegateService extends MetaDataService {
   /** {@code String} Content for the enrollment notification. */
   private static final String META_ENROLLMENT_NOTIFICATION_CONTENT =
       "com.google.android.connecteddevice.trust.enrollment_notification_content";
-  /** {@code Color} Color for the enrollment notification. */
-  private static final String META_ENROLLMENT_NOTIFICATION_COLOR =
-      "com.google.android.connecteddevice.trust.enrollment_notification_color";
 
   private NotificationManager notificationManager;
   private ITrustedDeviceManager trustedDeviceManager;
@@ -102,9 +98,6 @@ public class TrustedDeviceUiDelegateService extends MetaDataService {
     Notification notification =
         new Notification.Builder(this, CHANNEL_ID)
             .setSmallIcon(requireMetaResourceId(META_ENROLLMENT_NOTIFICATION_ICON))
-            .setColor(
-                ContextCompat.getColor(
-                    getBaseContext(), requireMetaResourceId(META_ENROLLMENT_NOTIFICATION_COLOR)))
             .setContentTitle(requireMetaString(META_ENROLLMENT_NOTIFICATION_TITLE))
             .setContentText(requireMetaString(META_ENROLLMENT_NOTIFICATION_CONTENT))
             .setContentIntent(pendingIntent)

@@ -39,7 +39,7 @@
     <!-- Instruction for connecting to car [CHAR LIMIT=100] -->
     <string name="connect_to_targe_car_instruction_text">Connect to &lt;b><xliff:g id="car_name" example="MyVehicle">%1$s</xliff:g>&lt;/b> <xliff:g id="advertised_car_name" example="(Vehicle 0000)">%2$s</xliff:g></string>
     <!-- Instruction for scanning QR code [CHAR LIMIT=150] -->
-    <string name="qr_instruction_text">Use your phone to scan the QR code or open MyCompanion to connect to &lt;b><xliff:g id="car_name" example="MyVehicle">%1$s</xliff:g>&lt;/b> <xliff:g id="advertised_car_name" example="(Vehicle 0000)">%2$s</xliff:g></string>
+    <string name="qr_instruction_text">Use your phone to scan the QR code or open MyCompanion to connect to &lt;b><xliff:g id="advertised_car_name" example="Vehicle 0000">%1$s</xliff:g>&lt;/b></string>
     <!-- Instruction for connecting to car [CHAR LIMIT=100] -->
     <string name="connect_to_car_instruction_text">Connect to the&#160;car</string>
     <!-- Title for confirm pairing code fragment [CHAR LIMIT=60]-->
@@ -207,12 +207,12 @@
     <!-- QR code uri path. -->
     <string name="uri_path"  translatable="false">associate</string>
 
-    <!-- Car SUW setup profile page title. [CHAR LIMIT=40]-->
-    <string name="suw_setup_profile_title">Setup profile with phone</string>
+    <!-- Car SUW setup profile page title. [CHAR LIMIT=100]-->
+    <string name="suw_setup_profile_title">Finish setup on your phone or car</string>
     <!-- Car SUW setup profile page content. [CHAR LIMIT=200]-->
-    <string name="suw_setup_profile_content">Scan QR code to get started. If you don\'t have a MyCompanion app, you can download it on Google Play and the App Store.</string>
+    <string name="suw_setup_profile_content">If you\’ve already started set up on your phone, open your Companion App and scan the QR code.\n\nOr, you can finish setting up your profile in your car.</string>
     <!-- Car SUW setup profile page instructions for user to scan the QR code. [CHAR LIMIT=150]-->
-    <string name="suw_qr_instruction_text">Scan QR code to connect to&lt;br /&gt; &lt;b><xliff:g id="car_name" example="MyVehicle">%1$s</xliff:g>&lt;/b> <xliff:g id="advertised_car_name" example="(Vehicle 0000)">%2$s</xliff:g></string>
+    <string name="suw_qr_instruction_text">Scan to connect to &lt;b><xliff:g id="advertised_car_name" example="Vehicle 0000">%1$s</xliff:g>&lt;/b></string>
 
     <!-- Setting passenger strings' translatable to false until reference UI has been defined. -->
     <!-- Text for a claim button on a device that has been claimed by the current user. [CHAR LIMIT=30] -->

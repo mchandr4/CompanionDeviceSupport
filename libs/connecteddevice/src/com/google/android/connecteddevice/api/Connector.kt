@@ -22,6 +22,8 @@ import android.os.ParcelUuid
 import androidx.annotation.IntDef
 import com.google.android.connecteddevice.model.AssociatedDevice
 import com.google.android.connecteddevice.model.ConnectedDevice
+import com.google.common.util.concurrent.ListenableFuture
+import java.util.UUID
 
 /** Class for establishing and maintaining a connection to the companion device platform. */
 interface Connector {
@@ -56,6 +58,29 @@ interface Connector {
 
   /** Securely sends message to a device. */
   fun sendMessageSecurely(device: ConnectedDevice, message: ByteArray)
+
+  /** Returns whether this feature is supported by the [device]. */
+  suspend fun isFeatureSupported(device: ConnectedDevice): Boolean
+
+  /**
+   * Checks whether this feature is supported by the [device].
+   *
+   * This method is added for java-compatibility; prefer the suspend version in Kotlin.
+   */
+  fun isFeatureSupportedFuture(device: ConnectedDevice): ListenableFuture<Boolean>
+
+  /**
+   * Batch queries whether the listed features are supported by the [device].
+   *
+   * Returns an empty list if there was any error during the query.
+   *
+   * Use [isFeatureSupported] instead. This API is intended for the companion platform
+   * functionality.
+   */
+  suspend fun queryFeatureSupportStatuses(
+    device: ConnectedDevice,
+    queriedFeatures: List<UUID>
+  ): List<Pair<UUID, Boolean>>
 
   /** Securely send a query to a device and registers a [QueryCallback] for a response. */
   fun sendQuerySecurely(
@@ -105,7 +130,7 @@ interface Connector {
   /** Stops the association process. */
   fun stopAssociation()
 
-  /** Confirms the paring code. */
+  /** Confirms the pairing code. */
   fun acceptVerification()
 
   /** Remove the associated device of the given [deviceId]. */
@@ -172,7 +197,7 @@ interface Connector {
      * @param deviceId Id of the device the message failed to send to.
      * @param message Message to send.
      * @param isTransient `true` if cause of failure is transient and can be retried. `false` if
-     * failure is permanent.
+     *   failure is permanent.
      */
     fun onMessageFailedToSend(deviceId: String, message: ByteArray, isTransient: Boolean) {}
 
@@ -203,10 +228,10 @@ interface Connector {
   /** Callback for a query response. */
   interface QueryCallback {
     /** Invoked with a successful response to a query. */
-    fun onSuccess(response: ByteArray?) {}
+    fun onSuccess(response: ByteArray) {}
 
     /** Invoked with an unsuccessful response to a query. */
-    fun onError(response: ByteArray?) {}
+    fun onError(response: ByteArray) {}
 
     /**
      * Invoked when a query failed to send to the device. `isTransient` is set to `true` if cause of

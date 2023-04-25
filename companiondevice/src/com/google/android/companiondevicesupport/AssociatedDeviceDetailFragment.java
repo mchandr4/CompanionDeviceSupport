@@ -169,17 +169,16 @@ public class AssociatedDeviceDetailFragment extends Fragment {
 
   private void setDisabledConnectionStatus(AssociatedDeviceDetails deviceDetails) {
     if (deviceDetails.getConnectionState() == ConnectionState.CONNECTED) {
-      // The connection status will remain connected during the disconnecting process until the
-      // device get disconnected, which means when the connection state is
-      // {@code ConnectionState.DISCONNECTED}.
+      // The connection status will changed to disconnecting until the device get disconnected.
       setConnectionStatus(
-          ContextCompat.getColor(context, R.color.connection_color_connected),
-          getString(R.string.connected),
-          ContextCompat.getDrawable(context, R.drawable.ic_phonelink_erase_24dp),
-          getString(R.string.disconnecting));
+          ContextCompat.getColor(context, R.color.connection_color_disconnected),
+          getString(R.string.disconnecting),
+          ContextCompat.getDrawable(context, R.drawable.ic_phonelink_ring_24dp),
+          getString(R.string.connect));
       // Disable the button to avoid user action interrupting the process. The button will be
       // re-enabled when the connection state is updated.
       this.connectionButton.setEnabled(false);
+      this.connectionButton.setAlpha(.46f);
     } else {
       setConnectionStatus(
           ContextCompat.getColor(context, R.color.connection_color_disconnected),
@@ -202,6 +201,10 @@ public class AssociatedDeviceDetailFragment extends Fragment {
           getString(R.string.detected),
           ContextCompat.getDrawable(context, R.drawable.ic_phonelink_erase_24dp),
           getString(R.string.disconnect));
+      // Disable the button to avoid user action interrupting the process. The button will be
+      // re-enabled when the connection state is updated.
+      this.connectionButton.setEnabled(false);
+      this.connectionButton.setAlpha(.46f);
     } else {
       setConnectionStatus(
           ContextCompat.getColor(context, R.color.connection_color_not_detected),
@@ -217,6 +220,7 @@ public class AssociatedDeviceDetailFragment extends Fragment {
       Drawable connectionIcon,
       String connectionText) {
     this.connectionButton.setEnabled(true);
+    this.connectionButton.setAlpha(1.0f);
     this.connectionStatusText.setText(connectionStatusText);
     connectionStatusIndicator.setColorFilter(connectionStatusColor);
     this.connectionText.setText(connectionText);

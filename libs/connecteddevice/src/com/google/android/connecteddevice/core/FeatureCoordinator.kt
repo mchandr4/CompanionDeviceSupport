@@ -59,8 +59,9 @@ class FeatureCoordinator
 constructor(
   private val controller: DeviceController,
   private val storage: ConnectedDeviceStorage,
+  private val systemQueryCache: SystemQueryCache = SystemQueryCache.create(),
   private val loggingManager: LoggingManager,
-  private val callbackExecutor: Executor = Executors.newCachedThreadPool()
+  private val callbackExecutor: Executor = Executors.newCachedThreadPool(),
 ) : IFeatureCoordinator.Stub() {
 
   private val deviceAssociationCallbacks = AidlThreadSafeCallbacks<IDeviceAssociationCallback>()
@@ -159,6 +160,11 @@ constructor(
       }
 
       override fun sendMessage(deviceId: String, message: ByteArray): Boolean {
+        val connectedDevice = controller.connectedDevices.firstOrNull { it.deviceId == deviceId }
+        if (connectedDevice == null) {
+          loge(TAG, "Device $deviceId not found. Unable to send message.")
+          return false
+        }
         // TODO(b/265862484): Deprecate DeviceMessage in favor of byte arrays.
         val parsedMessage =
           try {
@@ -174,6 +180,20 @@ constructor(
             DeviceMessage.OperationType.fromValue(parsedMessage.operation.number),
             parsedMessage.payload.toByteArray()
           )
+        val cachedResponse = systemQueryCache.getCachedResponse(connectedDevice, deviceMessage)
+        if (cachedResponse != null) {
+          // If a system query has a cached answer, short-circuit the query/response flow by faking
+          // a response. Using the cached response allows us to speed up queries by features when
+          // the response time is limited (e.g. time for SecondDeviceSignInUrlFeature to be
+          // "ready").
+          //
+          // Schedule the response callback on a different executor to avoid the callback is
+          // delivered before this sendMessage method completes/returns.
+          callbackExecutor.execute {
+            onMessageReceivedInternal(connectedDevice, cachedResponse, shouldCacheMessage = false)
+          }
+          return true
+        }
         return controller.sendMessage(UUID.fromString(deviceId), deviceMessage)
       }
 
@@ -309,12 +329,9 @@ constructor(
         }
       }
 
-    @Suppress("UNCHECKED_CAST") // Cast will always succeed because of the type check above.
     val previousCallback =
-      (recipientCallbacks as? MutableMap<ParcelUuid, IInterface>)?.putIfAbsent(
-        recipientId,
-        callback
-      )
+      deviceCallbacks[connectedDevice.deviceId]?.get(recipientId)
+        ?: safeDeviceCallbacks[connectedDevice.deviceId]?.get(recipientId)
 
     // Device already has a callback registered with this recipient UUID. For the
     // protection of the user, this UUID is now deny listed from future subscriptions
@@ -346,7 +363,8 @@ constructor(
       TAG,
       "New callback registered on device ${connectedDevice.deviceId} for recipient $recipientId."
     )
-
+    @Suppress("UNCHECKED_CAST") // Cast will always succeed because of the type check above.
+    (recipientCallbacks as? MutableMap<ParcelUuid, IInterface>)?.put(recipientId, callback)
     return true
   }
 
@@ -455,8 +473,22 @@ constructor(
     logd(TAG, "Device callback unregistered on device ${deviceId} for recipient " + "$recipientId.")
   }
 
-  override fun sendMessage(connectedDevice: ConnectedDevice, message: DeviceMessage): Boolean =
-    controller.sendMessage(UUID.fromString(connectedDevice.deviceId), message)
+  override fun sendMessage(connectedDevice: ConnectedDevice, message: DeviceMessage): Boolean {
+    val cachedResponse = systemQueryCache.getCachedResponse(connectedDevice, message)
+    if (cachedResponse != null) {
+      // If a system query has a cached answer, short-circuit the query/response flow by faking a
+      // response. Using the cached response allows us to speed up queries by features when the
+      // response time is limited (e.g. time for SecondDeviceSignInUrlFeature to be "ready").
+      //
+      // Schedule the response callback on a different executor to avoid the callback is delivered
+      // before this sendMessage method completes/returns.
+      callbackExecutor.execute {
+        onMessageReceivedInternal(connectedDevice, cachedResponse, shouldCacheMessage = false)
+      }
+      return true
+    }
+    return controller.sendMessage(UUID.fromString(connectedDevice.deviceId), message)
+  }
 
   override fun registerDeviceAssociationCallback(callback: IDeviceAssociationCallback) {
     deviceAssociationCallbacks.add(callback, callbackExecutor)
@@ -590,6 +622,8 @@ constructor(
 
   @VisibleForTesting
   internal fun onDeviceDisconnectedInternal(connectedDevice: ConnectedDevice) {
+    systemQueryCache.clearCache(connectedDevice)
+
     if (connectedDevice.isAssociatedWithDriver) {
       logd(TAG, "Notifying callbacks that a device has disconnected for the driver.")
       driverConnectionCallbacks.invoke { it.onDeviceDisconnected(connectedDevice) }
@@ -598,6 +632,8 @@ constructor(
       passengerConnectionCallbacks.invoke { it.onDeviceDisconnected(connectedDevice) }
     }
     allConnectionCallbacks.invoke { it.onDeviceDisconnected(connectedDevice) }
+    // Clear blocked recipients for the next connection so the state is easier to recover.
+    lock.withLock { blockedRecipients.clear() }
   }
 
   @VisibleForTesting
@@ -630,7 +666,16 @@ constructor(
   }
 
   @VisibleForTesting
-  internal fun onMessageReceivedInternal(connectedDevice: ConnectedDevice, message: DeviceMessage) {
+  internal fun onMessageReceivedInternal(
+    connectedDevice: ConnectedDevice,
+    message: DeviceMessage,
+    shouldCacheMessage: Boolean = true
+  ) {
+    if (shouldCacheMessage) {
+      // Cache the received message for a faster response if queried again by another feature.
+      systemQueryCache.maybeCacheResponse(connectedDevice, message)
+    }
+
     if (message.recipient == null) {
       loge(
         TAG,

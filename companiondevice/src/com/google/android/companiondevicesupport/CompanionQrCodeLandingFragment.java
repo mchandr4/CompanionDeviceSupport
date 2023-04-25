@@ -19,7 +19,6 @@ package com.google.android.companiondevicesupport;
 import static com.google.android.connecteddevice.util.SafeLog.logd;
 import static com.google.android.connecteddevice.util.SafeLog.loge;
 
-import android.bluetooth.BluetoothAdapter;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
@@ -127,15 +126,9 @@ public class CompanionQrCodeLandingFragment extends Fragment {
     if (carName == null) {
       return;
     }
-    if (!carName.isEmpty()) {
-      // Embedded BLE name inside the parenthesis indicating it is just another representatives of
-      // the device.
-      carName = "(" + carName + ")";
-    }
-    String bluetoothName = BluetoothAdapter.getDefaultAdapter().getName();
     int textId =
         isStartedForSetupProfile ? R.string.suw_qr_instruction_text : R.string.qr_instruction_text;
-    String connectToCarText = getString(textId, bluetoothName, carName);
+    String connectToCarText = getString(textId, carName);
     Spanned styledConnectToCarText = Html.fromHtml(connectToCarText, Html.FROM_HTML_MODE_LEGACY);
     textView.setText(styledConnectToCarText);
   }

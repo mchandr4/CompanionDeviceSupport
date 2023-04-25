@@ -160,9 +160,7 @@ public abstract class AssociationBaseActivity extends FragmentActivity {
   @Override
   protected void onStop() {
     super.onStop();
-    // Resets the UI/model when activity goes into the background during association.
     model.stopAssociation();
-    finish();
   }
 
   /** Companion activity is not supported under guest profile. */
@@ -256,7 +254,7 @@ public abstract class AssociationBaseActivity extends FragmentActivity {
                   runOnUiThread(
                       () ->
                           Toast.makeText(
-                                  getApplicationContext(),
+                                  this,
                                   getString(R.string.continue_setup_toast_text),
                                   Toast.LENGTH_SHORT)
                               .show());
@@ -451,24 +449,7 @@ public abstract class AssociationBaseActivity extends FragmentActivity {
 
   private void showCompanionLandingFragment() {
     maybeClearDetailsFragmentFromBackstack();
-
-    if (getResources().getBoolean(R.bool.enable_qr_code)) {
-      logd(TAG, "Showing LandingFragment with QR code.");
-      showCompanionQrCodeLandingFragment();
-      return;
-    }
-    CompanionLandingFragment fragment =
-        (CompanionLandingFragment)
-            getSupportFragmentManager().findFragmentByTag(COMPANION_LANDING_FRAGMENT_TAG);
-    if (fragment != null && fragment.isVisible()) {
-      return;
-    }
-    dismissButtons();
-    fragment = CompanionLandingFragment.newInstance(isStartedForSuw);
-    launchFragment(fragment, COMPANION_LANDING_FRAGMENT_TAG);
-  }
-
-  private void showCompanionQrCodeLandingFragment() {
+    logd(TAG, "Showing LandingFragment with QR code.");
     CompanionQrCodeLandingFragment fragment =
         (CompanionQrCodeLandingFragment)
             getSupportFragmentManager().findFragmentByTag(COMPANION_LANDING_FRAGMENT_TAG);

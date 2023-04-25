@@ -1,0 +1,40 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion rootProject.ext.sdkVersion
+
+    defaultConfig {
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.sdkVersion
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = ['src']
+        }
+
+        androidTest {
+            java.srcDirs = ['tests/unit/src']
+        }
+    }
+}
+
+dependencies {
+    implementation files('ukey2.jar')
+
+    implementation libs.guava
+    implementation libs.androidx.annotation
+
+    androidTestImplementation libs.bundles.androidx.testing
+    androidTestImplementation libs.truth
+}

@@ -50,10 +50,6 @@ public abstract class TrunkService extends MetaDataService {
   @VisibleForTesting
   static final int MAX_BIND_ATTEMPTS = 3;
 
-  // TODO(b/263392730): Move this to FeatureConnector so that client app has access.
-  protected static final String ACTION_QUERY_API_VERSION =
-      "com.google.android.connecteddevice.api.QUERY_API_VERSION";
-
   private static final Duration BIND_RETRY_DURATION = Duration.ofSeconds(1);
 
   private final Multiset<String> bindAttempts = HashMultiset.create();

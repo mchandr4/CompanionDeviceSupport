@@ -77,8 +77,9 @@ public final class CalendarSyncService extends Service {
       StrictMode.setThreadPolicy(
           new StrictMode.ThreadPolicy.Builder().detectAll().penaltyDialog().build());
 
-      // Settings for the entire application process.
-      StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().detectAll().penaltyDeath().build());
+      // Settings for the entire application process. StrictMode.VmPolicy.Builder().penaltyDeath()
+      // will block general companion testing.
+      StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().detectAll().penaltyLog().build());
     }
   }
 

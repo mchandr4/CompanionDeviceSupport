@@ -137,9 +137,9 @@ public class LoggingFeatureTest {
   @NonNull
   private static ConnectedDevice createConnectedDevice() {
     return new ConnectedDevice(
-        /* deviceId = */ "TEST_ID",
-        /* deviceName = */ "TEST_NAME",
-        /* belongsToActiveUser = */ true,
-        /* hasSecureChannel = */ true);
+        /* deviceId= */ "TEST_ID",
+        /* deviceName= */ "TEST_NAME",
+        /* belongsToDriver= */ true,
+        /* hasSecureChannel= */ true);
   }
 }

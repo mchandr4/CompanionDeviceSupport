@@ -18,6 +18,7 @@ package com.google.android.connecteddevice.notificationmsg;
 
 import static com.google.android.connecteddevice.util.SafeLog.logd;
 import static com.google.android.connecteddevice.util.SafeLog.loge;
+import static com.google.android.connecteddevice.util.SafeLog.logi;
 import static com.google.android.connecteddevice.util.SafeLog.logw;
 
 import android.content.Context;
@@ -58,6 +59,7 @@ public class NotificationMsgFeature extends RemoteFeature {
     // clear all notifications and local data on start of the feature.
     notificationMsgDelegate.cleanupMessagesAndNotifications(key -> true);
     super.start();
+    logi(TAG, "Feature started");
   }
 
   @Override
@@ -66,6 +68,17 @@ public class NotificationMsgFeature extends RemoteFeature {
     // after the feature is stopped.
     notificationMsgDelegate.onDestroy();
     super.stop();
+    logi(TAG, "Feature stopped");
+  }
+
+  @Override
+  public void onReady() {
+    logi(TAG, "Feature ready");
+  }
+
+  @Override
+  public void onNotReady() {
+    logi(TAG, "Feature not ready");
   }
 
   @Override

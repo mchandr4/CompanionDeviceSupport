@@ -29,6 +29,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -36,6 +37,7 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.service.trust.GrantTrustResult;
 import android.service.trust.TrustAgentService;
 import androidx.annotation.VisibleForTesting;
 import com.google.android.connecteddevice.trust.api.ITrustedDeviceAgentDelegate;
@@ -157,15 +159,26 @@ public class TrustedDeviceAgentService extends TrustAgentService {
       return;
     }
     logd(TAG, "Dismissing the lockscreen.");
-    grantTrust(
-        "Granting trust from escrow token for user.",
-        TRUST_DURATION_MS,
-        FLAG_GRANT_TRUST_DISMISS_KEYGUARD);
-    setManagingTrust(false);
-    if (trustedDeviceManager == null) {
-      loge(TAG, "Manager was null when device was unlocked. Ignoring.");
-      return;
-    }
+    // To avoid unreliable system lock status check impacting automated test metrics, invoking the
+    // user unlocked event before granting trust.
+    TrustedDeviceEventLog.onUserUnlocked();
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+      logd(TAG, "Grant trust with result callback.");
+      grantTrust(
+          "Granting trust from escrow token for user.",
+          TRUST_DURATION_MS,
+          FLAG_GRANT_TRUST_DISMISS_KEYGUARD,
+          (result) -> {
+            logd(TAG, "GrantTrust return with Result: " + result.getStatus() + ".");
+            if (result.getStatus() == GrantTrustResult.STATUS_UNLOCKED_BY_GRANT) {
+              notifyLockScreenDismissed();
+            }
+          });
+    } else {
+      grantTrust(
+          "Granting trust from escrow token for user.",
+          TRUST_DURATION_MS,
+          FLAG_GRANT_TRUST_DISMISS_KEYGUARD);
     // Other locking schemas, e.g. primary authentication, might keep the device locked even after
     // granting trust.
     if (keyguardManager == null || keyguardManager.isDeviceLocked()) {
@@ -175,7 +188,16 @@ public class TrustedDeviceAgentService extends TrustAgentService {
               + "Skip the ACK message to the phone.");
       return;
     }
-    TrustedDeviceEventLog.onUserUnlocked();
+      notifyLockScreenDismissed();
+    }
+    setManagingTrust(false);
+  }
+
+  private void notifyLockScreenDismissed() {
+    if (trustedDeviceManager == null) {
+      loge(TAG, "Manager was null when device was unlocked. Ignoring.");
+      return;
+    }
     try {
       trustedDeviceManager.onUserUnlocked();
     } catch (RemoteException e) {

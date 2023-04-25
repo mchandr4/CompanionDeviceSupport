@@ -2,6 +2,7 @@ package com.google.android.connecteddevice.system
 
 import android.bluetooth.BluetoothManager
 import android.content.Context
+import android.os.Looper
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.companionprotos.SystemQuery
@@ -24,12 +25,15 @@ import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.spy
+import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import java.nio.charset.StandardCharsets
 import java.util.UUID
+import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.Shadows.shadowOf
 
 @RunWith(AndroidJUnit4::class)
 class SystemFeatureTest {
@@ -46,13 +50,17 @@ class SystemFeatureTest {
       /* hasSecureChannel= */ true
     )
 
+  private val queriedFeature1 = UUID.randomUUID()
+  private val queriedFeature2 = UUID.randomUUID()
+  private val onConnectionQueriedFeatures = listOf(queriedFeature1, queriedFeature2)
+
   private lateinit var systemFeature: SystemFeature
 
   @Before
   fun setUp() {
     val context = ApplicationProvider.getApplicationContext<Context>()
     context.getSystemService(BluetoothManager::class.java).adapter.name = TEST_DEVICE_NAME
-    systemFeature = SystemFeature(context, mockStorage, fakeConnector)
+    systemFeature = SystemFeature(context, mockStorage, fakeConnector, onConnectionQueriedFeatures)
     assertThat(fakeConnector.callback).isNotNull()
   }
 
@@ -76,9 +84,22 @@ class SystemFeatureTest {
 
     argumentCaptor<ByteArray>() {
       verify(fakeConnector).sendQuerySecurely(eq(device), capture(), anyOrNull(), any())
-      val systemQuery =
-        SystemQuery.parseFrom(firstValue, ExtensionRegistryLite.getEmptyRegistry())
+      val systemQuery = SystemQuery.parseFrom(firstValue, ExtensionRegistryLite.getEmptyRegistry())
       assertThat(systemQuery.type).isEqualTo(DEVICE_NAME)
+    }
+  }
+
+  @Test
+  fun onSecureChannelEstablished_sendsQueryForFeatureSupportStatus() {
+    runBlocking {
+      fakeConnector.callback?.onSecureChannelEstablished(device)
+      shadowOf(Looper.getMainLooper()).idle()
+
+      argumentCaptor<List<UUID>>() {
+        verify(fakeConnector).queryFeatureSupportStatuses(eq(device), capture())
+        val queriedFeatures = firstValue
+        assertThat(queriedFeatures).isEqualTo(onConnectionQueriedFeatures)
+      }
     }
   }
 
@@ -112,7 +133,7 @@ class SystemFeatureTest {
 
     argumentCaptor<Connector.QueryCallback>() {
       verify(fakeConnector).sendQuerySecurely(eq(device), any(), anyOrNull(), capture())
-      firstValue.onError(/* response= */ null)
+      firstValue.onError(ByteArray(0))
       verify(mockStorage, never()).updateAssociatedDeviceName(any(), any())
     }
   }
@@ -123,8 +144,8 @@ class SystemFeatureTest {
 
     argumentCaptor<Connector.QueryCallback>() {
       verify(fakeConnector).sendQuerySecurely(eq(device), any(), anyOrNull(), capture())
-      firstValue.onQueryFailedToSend(/* isTransient= */ false)
-      firstValue.onQueryFailedToSend(/* isTransient= */ true)
+      firstValue.onQueryFailedToSend(isTransient = false)
+      firstValue.onQueryFailedToSend(isTransient = true)
       verify(mockStorage, never()).updateAssociatedDeviceName(any(), any())
     }
   }
@@ -137,8 +158,7 @@ class SystemFeatureTest {
     fakeConnector.callback?.onQueryReceived(device, queryId, query.toByteArray(), null)
 
     argumentCaptor<ByteArray> {
-      verify(fakeConnector)
-        .respondToQuerySecurely(eq(device), eq(queryId), eq(true), capture())
+      verify(fakeConnector).respondToQuerySecurely(eq(device), eq(queryId), eq(true), capture())
       assertThat(firstValue).isEqualTo(TEST_DEVICE_NAME.toByteArray(StandardCharsets.UTF_8))
     }
   }

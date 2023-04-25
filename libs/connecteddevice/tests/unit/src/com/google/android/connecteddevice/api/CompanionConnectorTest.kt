@@ -11,6 +11,8 @@ import android.os.Looper
 import android.os.ParcelUuid
 import android.os.RemoteException
 import androidx.test.core.app.ApplicationProvider
+import com.google.android.companionprotos.FeatureSupportResponse
+import com.google.android.companionprotos.FeatureSupportStatus
 import com.google.android.companionprotos.Query
 import com.google.android.companionprotos.QueryResponse
 import com.google.android.companionprotos.SystemQuery
@@ -39,6 +41,11 @@ import com.nhaarman.mockitokotlin2.whenever
 import java.nio.charset.StandardCharsets
 import java.util.UUID
 import kotlin.test.fail
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -58,15 +65,17 @@ class CompanionConnectorTest {
 
   private val context = FakeContext(mockPackageManager)
 
+  private lateinit var featureId: UUID
   private lateinit var defaultConnector: CompanionConnector
 
   @Before
   fun setUp() {
+    featureId = UUID.randomUUID()
     defaultConnector =
       CompanionConnector(context).apply {
         featureCoordinator = mockFeatureCoordinator
         callback = mockCallback
-        featureId = ParcelUuid(UUID.randomUUID())
+        featureId = ParcelUuid(this@CompanionConnectorTest.featureId)
       }
   }
 
@@ -346,13 +355,7 @@ class CompanionConnectorTest {
         featureCoordinator = mockFeatureCoordinator
         this.featureId = featureId
       }
-    val device =
-      ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ false
-      )
+    val device = createConnectedDevice()
     whenever(mockFeatureCoordinator.connectedDevicesForDriver).thenReturn(listOf(device))
 
     connector.connect()
@@ -402,13 +405,7 @@ class CompanionConnectorTest {
         featureCoordinator = mockFeatureCoordinator
         this.featureId = featureId
       }
-    val device =
-      ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ false
-      )
+    val device = createConnectedDevice()
     whenever(mockFeatureCoordinator.connectedDevicesForDriver).thenReturn(listOf(device))
 
     connector.connect()
@@ -424,13 +421,7 @@ class CompanionConnectorTest {
         featureCoordinator = mockFeatureCoordinator
         this.featureId = featureId
       }
-    val device =
-      ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToDriver= */ false,
-        /* hasSecureChannel= */ false
-      )
+    val device = createConnectedDevice(belongsToDriver = false)
     whenever(mockFeatureCoordinator.connectedDevicesForPassengers).thenReturn(listOf(device))
 
     connector.connect()
@@ -446,13 +437,7 @@ class CompanionConnectorTest {
         featureCoordinator = mockFeatureCoordinator
         this.featureId = featureId
       }
-    val device =
-      ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ false
-      )
+    val device = createConnectedDevice()
     whenever(mockFeatureCoordinator.allConnectedDevices).thenReturn(listOf(device))
 
     connector.connect()
@@ -463,13 +448,7 @@ class CompanionConnectorTest {
   @Test
   fun connect_deviceCallbacksNotRegisteredWhenMissingFeatureId() {
     defaultConnector.featureId = null
-    val device =
-      ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ false
-      )
+    val device = createConnectedDevice()
     whenever(mockFeatureCoordinator.connectedDevicesForDriver).thenReturn(listOf(device))
 
     defaultConnector.connect()
@@ -479,13 +458,7 @@ class CompanionConnectorTest {
 
   @Test
   fun disconnect_unregistersFeatureCoordinatorCallbacks() {
-    val device =
-      ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ false
-      )
+    val device = createConnectedDevice()
     whenever(mockFeatureCoordinator.allConnectedDevices).thenReturn(listOf(device))
 
     defaultConnector.disconnect()
@@ -500,13 +473,7 @@ class CompanionConnectorTest {
   @Test
   fun disconnect_featureCoordinatorWithoutFeatureIdDoesNotThrow() {
     defaultConnector.featureId = null
-    val device =
-      ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ false
-      )
+    val device = createConnectedDevice()
     whenever(mockFeatureCoordinator.allConnectedDevices).thenReturn(listOf(device))
 
     defaultConnector.disconnect()
@@ -514,13 +481,7 @@ class CompanionConnectorTest {
 
   @Test
   fun disconnect_featureCoordinatorRemoteExceptionIsCaught() {
-    val device =
-      ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ false
-      )
+    val device = createConnectedDevice()
     whenever(mockFeatureCoordinator.allConnectedDevices).thenReturn(listOf(device))
     whenever(mockFeatureCoordinator.unregisterConnectionCallback(any()))
       .thenThrow(RemoteException())
@@ -530,13 +491,7 @@ class CompanionConnectorTest {
 
   @Test
   fun onDeviceConnected_registersDeviceCallbackWithFeatureId() {
-    val device =
-      ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ false
-      )
+    val device = createConnectedDevice()
 
     defaultConnector.connect()
 
@@ -551,13 +506,7 @@ class CompanionConnectorTest {
 
   @Test
   fun onDeviceConnected_doesNotRegisterDeviceCallbackWithoutFeatureId() {
-    val device =
-      ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ false
-      )
+    val device = createConnectedDevice()
     defaultConnector.featureId = null
     defaultConnector.connect()
 
@@ -571,13 +520,7 @@ class CompanionConnectorTest {
 
   @Test
   fun onDeviceDisconnected_invokedWhenDeviceDisconnects() {
-    val device =
-      ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ false
-      )
+    val device = createConnectedDevice()
     defaultConnector.connect()
 
     argumentCaptor<IConnectionCallback> {
@@ -590,13 +533,7 @@ class CompanionConnectorTest {
 
   @Test
   fun onDeviceDisconnected_unregistersDeviceCallback() {
-    val device =
-      ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ false
-      )
+    val device = createConnectedDevice()
     defaultConnector.connect()
 
     argumentCaptor<IConnectionCallback> {
@@ -610,20 +547,8 @@ class CompanionConnectorTest {
 
   @Test
   fun onSecureChannelEstablished_invokedWhenChannelEstablished() {
-    val device =
-      ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ false
-      )
-    val secureDevice =
-      ConnectedDevice(
-        device.deviceId,
-        /* deviceName= */ "",
-        /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
-      )
+    val device = createConnectedDevice()
+    val secureDevice = createConnectedDevice(hasSecureChannel = true)
     whenever(mockFeatureCoordinator.connectedDevicesForDriver).thenReturn(listOf(device))
     defaultConnector.connect()
 
@@ -637,13 +562,7 @@ class CompanionConnectorTest {
 
   @Test
   fun onSecureChannelEstablished_invokedOnStartupIfChannelAlreadyEstablished() {
-    val device =
-      ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
-      )
+    val device = createConnectedDevice(hasSecureChannel = true)
     whenever(mockFeatureCoordinator.connectedDevicesForDriver).thenReturn(listOf(device))
     defaultConnector.connect()
 
@@ -652,13 +571,7 @@ class CompanionConnectorTest {
 
   @Test
   fun onSecureChannelEstablished_invokedOnDeviceConnectedIfChannelAlreadyEstablished() {
-    val device =
-      ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
-      )
+    val device = createConnectedDevice(hasSecureChannel = true)
     defaultConnector.connect()
 
     argumentCaptor<IConnectionCallback> {
@@ -670,13 +583,7 @@ class CompanionConnectorTest {
 
   @Test
   fun onDeviceError_invokedOnError() {
-    val device =
-      ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ false
-      )
+    val device = createConnectedDevice()
     whenever(mockFeatureCoordinator.connectedDevicesForDriver).thenReturn(listOf(device))
     defaultConnector.connect()
     val error = -1
@@ -748,13 +655,7 @@ class CompanionConnectorTest {
 
   @Test
   fun sendMessageSecurelyWithId_sendsMessageSecurelyToDevice() {
-    val device =
-      ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
-      )
+    val device = createConnectedDevice(hasSecureChannel = true)
     whenever(mockFeatureCoordinator.allConnectedDevices).thenReturn(listOf(device))
     defaultConnector.connect()
     val message = ByteUtils.randomBytes(10)
@@ -773,13 +674,7 @@ class CompanionConnectorTest {
 
   @Test
   fun sendMessageSecurely_sendsMessageSecurelyToDevice() {
-    val device =
-      ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
-      )
+    val device = createConnectedDevice(hasSecureChannel = true)
     defaultConnector.connect()
     val message = ByteUtils.randomBytes(10)
 
@@ -809,13 +704,7 @@ class CompanionConnectorTest {
 
   @Test
   fun onMessageFailedToSend_invokedWhenRemoteExceptionThrownId() {
-    val device =
-      ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
-      )
+    val device = createConnectedDevice(hasSecureChannel = true)
     whenever(mockFeatureCoordinator.connectedDevicesForDriver).thenReturn(listOf(device))
     whenever(mockFeatureCoordinator.sendMessage(any(), any())).thenThrow(RemoteException())
     val message = ByteUtils.randomBytes(10)
@@ -828,13 +717,7 @@ class CompanionConnectorTest {
 
   @Test
   fun onMessageFailedToSend_invokedWhenRemoteExceptionThrown() {
-    val device =
-      ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
-      )
+    val device = createConnectedDevice(hasSecureChannel = true)
     whenever(mockFeatureCoordinator.connectedDevicesForDriver).thenReturn(listOf(device))
     whenever(mockFeatureCoordinator.sendMessage(any(), any())).thenThrow(RemoteException())
     val message = ByteUtils.randomBytes(10)
@@ -871,13 +754,7 @@ class CompanionConnectorTest {
   @Test
   fun onMessageFailedToSend_invokedWhenSendMessageCalledBeforeServiceConnection() {
     defaultConnector.featureCoordinator = null
-    val device =
-      ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
-      )
+    val device = createConnectedDevice(hasSecureChannel = true)
     val message = ByteUtils.randomBytes(10)
 
     defaultConnector.sendMessageSecurely(device, message)
@@ -887,13 +764,7 @@ class CompanionConnectorTest {
 
   @Test
   fun onMessageReceived_invokedWhenGenericMessageReceived() {
-    val device =
-      ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
-      )
+    val device = createConnectedDevice(hasSecureChannel = true)
     val message = ByteUtils.randomBytes(10)
     whenever(mockFeatureCoordinator.connectedDevicesForDriver).thenReturn(listOf(device))
     defaultConnector.connect()
@@ -916,13 +787,7 @@ class CompanionConnectorTest {
 
   @Test
   fun getConnectedDeviceById_returnsDeviceWhenConnected() {
-    val device =
-      ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ false
-      )
+    val device = createConnectedDevice()
     whenever(mockFeatureCoordinator.allConnectedDevices).thenReturn(listOf(device))
     defaultConnector.connect()
 
@@ -931,13 +796,7 @@ class CompanionConnectorTest {
 
   @Test
   fun getConnectedDeviceById_returnsNullWhenNotConnected() {
-    val device =
-      ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ false
-      )
+    val device = createConnectedDevice()
     whenever(mockFeatureCoordinator.connectedDevicesForDriver).thenReturn(listOf(device))
     defaultConnector.connect()
 
@@ -961,13 +820,7 @@ class CompanionConnectorTest {
 
   @Test
   fun sendQuerySecurely_sendsQueryToOwnFeatureId() {
-    val device =
-      ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
-      )
+    val device = createConnectedDevice(hasSecureChannel = true)
     whenever(mockFeatureCoordinator.allConnectedDevices).thenReturn(listOf(device))
     val request = ByteUtils.randomBytes(10)
     val parameters = ByteUtils.randomBytes(10)
@@ -986,13 +839,7 @@ class CompanionConnectorTest {
 
   @Test
   fun sendQuery_queryCallbackOnSuccessInvoked() {
-    val device =
-      ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
-      )
+    val device = createConnectedDevice(hasSecureChannel = true)
     val request = ByteUtils.randomBytes(10)
     val response = ByteUtils.randomBytes(10)
     val parameters = ByteUtils.randomBytes(10)
@@ -1033,13 +880,7 @@ class CompanionConnectorTest {
 
   @Test
   fun sendQuery_queryCallbackOnErrorInvoked() {
-    val device =
-      ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
-      )
+    val device = createConnectedDevice(hasSecureChannel = true)
     whenever(mockFeatureCoordinator.connectedDevicesForDriver).thenReturn(listOf(device))
     whenever(mockFeatureCoordinator.allConnectedDevices).thenReturn(listOf(device))
     defaultConnector.connect()
@@ -1080,13 +921,7 @@ class CompanionConnectorTest {
 
   @Test
   fun sendQuery_queryCallbackNotInvokedOnDifferentQueryIdResponse() {
-    val device =
-      ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
-      )
+    val device = createConnectedDevice(hasSecureChannel = true)
     whenever(mockFeatureCoordinator.connectedDevicesForDriver).thenReturn(listOf(device))
     whenever(mockFeatureCoordinator.allConnectedDevices).thenReturn(listOf(device))
     defaultConnector.connect()
@@ -1142,13 +977,7 @@ class CompanionConnectorTest {
   @Test
   fun sendQuery_queryCallbackOnQueryNotSentInvokedBeforeServiceConnectionWithDevice() {
     defaultConnector.featureCoordinator = null
-    val device =
-      ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
-      )
+    val device = createConnectedDevice(hasSecureChannel = true)
     val request = ByteUtils.randomBytes(10)
     val parameters = ByteUtils.randomBytes(10)
     val callback = mock<Connector.QueryCallback>()
@@ -1160,13 +989,7 @@ class CompanionConnectorTest {
 
   @Test
   fun sendQuery_queryCallbackOnQueryNotSentInvokedIfSendMessageThrowsRemoteException() {
-    val device =
-      ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
-      )
+    val device = createConnectedDevice(hasSecureChannel = true)
     whenever(mockFeatureCoordinator.connectedDevicesForDriver).thenReturn(listOf(device))
     whenever(mockFeatureCoordinator.allConnectedDevices).thenReturn(listOf(device))
     whenever(mockFeatureCoordinator.sendMessage(any(), any())).thenThrow(RemoteException())
@@ -1182,13 +1005,7 @@ class CompanionConnectorTest {
 
   @Test
   fun sendQuery_queryCallbackOnQueryNotSentInvokedIfDeviceNotFound() {
-    val device =
-      ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
-      )
+    val device = createConnectedDevice(hasSecureChannel = true)
     defaultConnector.connect()
     val request = ByteUtils.randomBytes(10)
     val parameters = ByteUtils.randomBytes(10)
@@ -1201,13 +1018,7 @@ class CompanionConnectorTest {
 
   @Test
   fun onQueryReceived_invokedWithQueryFields() {
-    val device =
-      ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
-      )
+    val device = createConnectedDevice(hasSecureChannel = true)
     whenever(mockFeatureCoordinator.connectedDevicesForDriver).thenReturn(listOf(device))
     whenever(mockFeatureCoordinator.allConnectedDevices).thenReturn(listOf(device))
     defaultConnector.connect()
@@ -1241,38 +1052,21 @@ class CompanionConnectorTest {
 
   @Test
   fun respondToQuery_doesNotSendResponseWithUnrecognizedQueryId() {
-    val device =
-      ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
-      )
+    val device = createConnectedDevice(hasSecureChannel = true)
     whenever(mockFeatureCoordinator.connectedDevicesForDriver).thenReturn(listOf(device))
     whenever(mockFeatureCoordinator.allConnectedDevices).thenReturn(listOf(device))
     defaultConnector.connect()
     val nonExistentQueryId = 0
     val response = ByteUtils.randomBytes(10)
 
-    defaultConnector.respondToQuerySecurely(
-      device,
-      nonExistentQueryId,
-      success = true,
-      response
-    )
+    defaultConnector.respondToQuerySecurely(device, nonExistentQueryId, success = true, response)
 
     verify(mockFeatureCoordinator, never()).sendMessage(any(), any())
   }
 
   @Test
   fun respondToQuery_sendsResponseToSenderIfSameFeatureId() {
-    val device =
-      ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
-      )
+    val device = createConnectedDevice(hasSecureChannel = true)
     whenever(mockFeatureCoordinator.connectedDevicesForDriver).thenReturn(listOf(device))
     whenever(mockFeatureCoordinator.allConnectedDevices).thenReturn(listOf(device))
     defaultConnector.connect()
@@ -1320,13 +1114,7 @@ class CompanionConnectorTest {
 
   @Test
   fun respondToQuery_sendResponseToSenderIfDifferentFeatureId() {
-    val device =
-      ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
-      )
+    val device = createConnectedDevice(hasSecureChannel = true)
     whenever(mockFeatureCoordinator.connectedDevicesForDriver).thenReturn(listOf(device))
     whenever(mockFeatureCoordinator.allConnectedDevices).thenReturn(listOf(device))
     defaultConnector.connect()
@@ -1376,13 +1164,7 @@ class CompanionConnectorTest {
   @Test
   fun respondToQuery_doesNotThrowBeforeServiceConnectionWithDevice() {
     defaultConnector.featureCoordinator = null
-    val device =
-      ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
-      )
+    val device = createConnectedDevice(hasSecureChannel = true)
     val queryId = 0
     val response = ByteUtils.randomBytes(10)
 
@@ -1391,13 +1173,7 @@ class CompanionConnectorTest {
 
   @Test
   fun retrieveCompanionApplicationName_sendsAppNameQueryToSystemFeature() {
-    val device =
-      ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
-      )
+    val device = createConnectedDevice(hasSecureChannel = true)
     whenever(mockFeatureCoordinator.connectedDevicesForDriver).thenReturn(listOf(device))
     whenever(mockFeatureCoordinator.allConnectedDevices).thenReturn(listOf(device))
     defaultConnector.connect()
@@ -1420,13 +1196,7 @@ class CompanionConnectorTest {
 
   @Test
   fun retrieveCompanionApplicationName_appNameCallbackOnNameReceivedInvokedWithName() {
-    val device =
-      ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
-      )
+    val device = createConnectedDevice(hasSecureChannel = true)
     whenever(mockFeatureCoordinator.connectedDevicesForDriver).thenReturn(listOf(device))
     whenever(mockFeatureCoordinator.allConnectedDevices).thenReturn(listOf(device))
     defaultConnector.connect()
@@ -1466,13 +1236,7 @@ class CompanionConnectorTest {
 
   @Test
   fun retrieveCompanionApplicationName_appNameCallbackOnErrorInvokedWithEmptyResponse() {
-    val device =
-      ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
-      )
+    val device = createConnectedDevice(hasSecureChannel = true)
     whenever(mockFeatureCoordinator.connectedDevicesForDriver).thenReturn(listOf(device))
     defaultConnector.connect()
     val callbackCaptor =
@@ -1512,13 +1276,7 @@ class CompanionConnectorTest {
 
   @Test
   fun retrieveCompanionApplicationName_appNameCallbackOnErrorInvokedWithErrorResponse() {
-    val device =
-      ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
-      )
+    val device = createConnectedDevice(hasSecureChannel = true)
     whenever(mockFeatureCoordinator.connectedDevicesForDriver).thenReturn(listOf(device))
     defaultConnector.connect()
     val callbackCaptor =
@@ -1557,13 +1315,7 @@ class CompanionConnectorTest {
 
   @Test
   fun retrieveCompanionApplicationName_appNameCallbackOnErrorInvokedWhenQueryFailedToSend() {
-    val device =
-      ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
-      )
+    val device = createConnectedDevice(hasSecureChannel = true)
     whenever(mockFeatureCoordinator.connectedDevicesForDriver).thenReturn(listOf(device))
     whenever(mockFeatureCoordinator.allConnectedDevices).thenReturn(listOf(device))
     whenever(mockFeatureCoordinator.sendMessage(any(), any())).thenThrow(RemoteException())
@@ -1577,13 +1329,7 @@ class CompanionConnectorTest {
 
   @Test
   fun createLocalConnector_createsConnectorWithFeatureCoordinator() {
-    val device =
-      ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
-      )
+    val device = createConnectedDevice(hasSecureChannel = true)
     whenever(mockFeatureCoordinator.allConnectedDevices).thenReturn(listOf(device))
 
     val connector =
@@ -1607,13 +1353,7 @@ class CompanionConnectorTest {
       CompanionConnector(context, userType = USER_TYPE_DRIVER).apply {
         featureCoordinator = mockFeatureCoordinator
       }
-    val device =
-      ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
-      )
+    val device = createConnectedDevice(hasSecureChannel = true)
     whenever(mockFeatureCoordinator.connectedDevicesForDriver).thenReturn(listOf(device))
 
     assertThat(connector.connectedDevices).containsExactly(device)
@@ -1625,13 +1365,7 @@ class CompanionConnectorTest {
       CompanionConnector(context, userType = USER_TYPE_PASSENGER).apply {
         featureCoordinator = mockFeatureCoordinator
       }
-    val device =
-      ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
-      )
+    val device = createConnectedDevice(hasSecureChannel = true)
     whenever(mockFeatureCoordinator.connectedDevicesForPassengers).thenReturn(listOf(device))
 
     assertThat(connector.connectedDevices).containsExactly(device)
@@ -1643,13 +1377,7 @@ class CompanionConnectorTest {
       CompanionConnector(context, userType = USER_TYPE_ALL).apply {
         featureCoordinator = mockFeatureCoordinator
       }
-    val device =
-      ConnectedDevice(
-        UUID.randomUUID().toString(),
-        /* deviceName= */ "",
-        /* belongsToDriver= */ true,
-        /* hasSecureChannel= */ true
-      )
+    val device = createConnectedDevice(hasSecureChannel = true)
     whenever(mockFeatureCoordinator.allConnectedDevices).thenReturn(listOf(device))
 
     assertThat(connector.connectedDevices).containsExactly(device)
@@ -1904,6 +1632,250 @@ class CompanionConnectorTest {
     verify(mockCallback).onFailedToConnect()
   }
 
+  @Test
+  fun isFeatureSupported_noFeatureId_notSupported() = runBlocking {
+    val connector = CompanionConnector(context)
+    val device = createConnectedDevice()
+
+    assertThat(connector.isFeatureSupported(device)).isFalse()
+  }
+
+  @Test
+  fun isFeatureSupported_sendsSystemQuery() = runBlocking {
+    val device = createConnectedDevice(hasSecureChannel = true)
+    whenever(mockFeatureCoordinator.connectedDevicesForDriver).thenReturn(listOf(device))
+    whenever(mockFeatureCoordinator.allConnectedDevices).thenReturn(listOf(device))
+    defaultConnector.connect()
+
+    // Immediate execution to send out the query.
+    CoroutineScope(Dispatchers.Main.immediate).launch {
+      val unused = defaultConnector.isFeatureSupported(device)
+    }
+
+    // Assertion: successfully parse the outbound message as a SystemQuery for the feature status.
+    val messageCaptor =
+      argumentCaptor<DeviceMessage> {
+        verify(mockFeatureCoordinator).sendMessage(eq(device), capture())
+      }
+    val query =
+      Query.parseFrom(messageCaptor.firstValue.message, ExtensionRegistryLite.getEmptyRegistry())
+    val systemQuery = SystemQuery.parseFrom(query.request, ExtensionRegistryLite.getEmptyRegistry())
+    assertThat(systemQuery.type).isEqualTo(SystemQueryType.IS_FEATURE_SUPPORTED)
+    assertThat(systemQuery.payloadsList.size).isEqualTo(1)
+
+    val queriedFeatureId =
+      UUID.fromString(
+        systemQuery.payloadsList.first().toByteArray().toString(StandardCharsets.UTF_8)
+      )
+    assertThat(queriedFeatureId).isEqualTo(featureId)
+  }
+
+  @Test
+  fun isFeatureSupported_emptyResponse_notSupported() {
+    // Arrange.
+    val device = createConnectedDevice(hasSecureChannel = true)
+    whenever(mockFeatureCoordinator.connectedDevicesForDriver).thenReturn(listOf(device))
+    whenever(mockFeatureCoordinator.allConnectedDevices).thenReturn(listOf(device))
+    defaultConnector.connect()
+
+    // Action - immediate execution to send out the query.
+    val deferred =
+      CoroutineScope(Dispatchers.Main.immediate).async {
+        defaultConnector.isFeatureSupported(device)
+      }
+
+    // Generate an empty response.
+    val response = ByteArray(0)
+
+    val messageCaptor =
+      argumentCaptor<DeviceMessage> {
+        verify(mockFeatureCoordinator).sendMessage(eq(device), capture())
+      }
+    val query =
+      Query.parseFrom(messageCaptor.firstValue.message, ExtensionRegistryLite.getEmptyRegistry())
+    val queryResponse =
+      QueryResponse.newBuilder()
+        .setQueryId(query.id)
+        .setSuccess(true)
+        .setResponse(ByteString.copyFrom(response))
+        .build()
+    val deviceMessage =
+      DeviceMessage.createOutgoingMessage(
+        defaultConnector.featureId?.uuid,
+        /* isMessageEncrypted= */ true,
+        DeviceMessage.OperationType.QUERY_RESPONSE,
+        queryResponse.toByteArray()
+      )
+    val callbackCaptor =
+      argumentCaptor<IDeviceCallback> {
+        verify(mockFeatureCoordinator)
+          .registerDeviceCallback(eq(device), eq(defaultConnector.featureId), capture())
+      }
+    callbackCaptor.firstValue.onMessageReceived(device, deviceMessage)
+
+    // Assert
+    runBlocking { assertThat(deferred.await()).isFalse() }
+  }
+
+  @Test
+  fun isFeatureSupported_nonProtoResponse_notSupported() {
+    // Arrange.
+    val device = createConnectedDevice(hasSecureChannel = true)
+    whenever(mockFeatureCoordinator.connectedDevicesForDriver).thenReturn(listOf(device))
+    whenever(mockFeatureCoordinator.allConnectedDevices).thenReturn(listOf(device))
+    defaultConnector.connect()
+
+    // Action - immediate execution to send out the query.
+    val deferred =
+      CoroutineScope(Dispatchers.Main.immediate).async {
+        defaultConnector.isFeatureSupported(device)
+      }
+
+    // Generate a response that cannot be parsed (should at least contain UUID, which is 16 bytes).
+    val response = ByteUtils.randomBytes(10)
+
+    val messageCaptor =
+      argumentCaptor<DeviceMessage> {
+        verify(mockFeatureCoordinator).sendMessage(eq(device), capture())
+      }
+    val query =
+      Query.parseFrom(messageCaptor.firstValue.message, ExtensionRegistryLite.getEmptyRegistry())
+    val queryResponse =
+      QueryResponse.newBuilder()
+        .setQueryId(query.id)
+        .setSuccess(true)
+        .setResponse(ByteString.copyFrom(response))
+        .build()
+    val deviceMessage =
+      DeviceMessage.createOutgoingMessage(
+        defaultConnector.featureId?.uuid,
+        /* isMessageEncrypted= */ true,
+        DeviceMessage.OperationType.QUERY_RESPONSE,
+        queryResponse.toByteArray()
+      )
+    val callbackCaptor =
+      argumentCaptor<IDeviceCallback> {
+        verify(mockFeatureCoordinator)
+          .registerDeviceCallback(eq(device), eq(defaultConnector.featureId), capture())
+      }
+    callbackCaptor.firstValue.onMessageReceived(device, deviceMessage)
+
+    // Assert
+    runBlocking { assertThat(deferred.await()).isFalse() }
+  }
+
+  @Test
+  fun isFeatureSupported_notSupportedResponse_notSupported() {
+    // Arrange.
+    val device = createConnectedDevice(hasSecureChannel = true)
+    whenever(mockFeatureCoordinator.connectedDevicesForDriver).thenReturn(listOf(device))
+    whenever(mockFeatureCoordinator.allConnectedDevices).thenReturn(listOf(device))
+    defaultConnector.connect()
+
+    // Action - immediate execution to send out the query.
+    val deferred =
+      CoroutineScope(Dispatchers.Main.immediate).async {
+        defaultConnector.isFeatureSupported(device)
+      }
+
+    val status =
+      FeatureSupportStatus.newBuilder().run {
+        featureId = defaultConnector.featureId!!.uuid.toString()
+        isSupported = false
+        build()
+      }
+    val response =
+      FeatureSupportResponse.newBuilder().run {
+        addStatuses(status)
+        build()
+      }
+
+    val messageCaptor =
+      argumentCaptor<DeviceMessage> {
+        verify(mockFeatureCoordinator).sendMessage(eq(device), capture())
+      }
+    val query =
+      Query.parseFrom(messageCaptor.firstValue.message, ExtensionRegistryLite.getEmptyRegistry())
+    val queryResponse =
+      QueryResponse.newBuilder()
+        .setQueryId(query.id)
+        .setSuccess(true)
+        .setResponse(ByteString.copyFrom(response.toByteArray()))
+        .build()
+    val deviceMessage =
+      DeviceMessage.createOutgoingMessage(
+        defaultConnector.featureId?.uuid,
+        /* isMessageEncrypted= */ true,
+        DeviceMessage.OperationType.QUERY_RESPONSE,
+        queryResponse.toByteArray()
+      )
+    val callbackCaptor =
+      argumentCaptor<IDeviceCallback> {
+        verify(mockFeatureCoordinator)
+          .registerDeviceCallback(eq(device), eq(defaultConnector.featureId), capture())
+      }
+    callbackCaptor.firstValue.onMessageReceived(device, deviceMessage)
+
+    // Assert
+    runBlocking { assertThat(deferred.await()).isFalse() }
+  }
+
+  @Test
+  fun isFeatureSupported_supportedResponse_featureSupported() {
+    // Arrange.
+    val device = createConnectedDevice(hasSecureChannel = true)
+    whenever(mockFeatureCoordinator.connectedDevicesForDriver).thenReturn(listOf(device))
+    whenever(mockFeatureCoordinator.allConnectedDevices).thenReturn(listOf(device))
+    defaultConnector.connect()
+
+    // Action - immediate execution to send out the query.
+    val deferred =
+      CoroutineScope(Dispatchers.Main.immediate).async {
+        defaultConnector.isFeatureSupported(device)
+      }
+
+    val status =
+      FeatureSupportStatus.newBuilder().run {
+        featureId = defaultConnector.featureId!!.uuid.toString()
+        isSupported = true
+        build()
+      }
+    val response =
+      FeatureSupportResponse.newBuilder().run {
+        addStatuses(status)
+        build()
+      }
+
+    val messageCaptor =
+      argumentCaptor<DeviceMessage> {
+        verify(mockFeatureCoordinator).sendMessage(eq(device), capture())
+      }
+    val query =
+      Query.parseFrom(messageCaptor.firstValue.message, ExtensionRegistryLite.getEmptyRegistry())
+    val queryResponse =
+      QueryResponse.newBuilder()
+        .setQueryId(query.id)
+        .setSuccess(true)
+        .setResponse(ByteString.copyFrom(response.toByteArray()))
+        .build()
+    val deviceMessage =
+      DeviceMessage.createOutgoingMessage(
+        defaultConnector.featureId?.uuid,
+        /* isMessageEncrypted= */ true,
+        DeviceMessage.OperationType.QUERY_RESPONSE,
+        queryResponse.toByteArray()
+      )
+    val callbackCaptor =
+      argumentCaptor<IDeviceCallback> {
+        verify(mockFeatureCoordinator)
+          .registerDeviceCallback(eq(device), eq(defaultConnector.featureId), capture())
+      }
+    callbackCaptor.firstValue.onMessageReceived(device, deviceMessage)
+
+    // Assert
+    runBlocking { assertThat(deferred.await()).isTrue() }
+  }
+
   private fun setQueryIntentServicesAnswer(answer: Answer<List<ResolveInfo>>) {
     whenever(mockPackageManager.queryIntentServices(any(), any<Int>())).thenAnswer(answer)
   }
@@ -1968,5 +1940,16 @@ class CompanionConnectorTest {
     private const val PACKAGE_NAME = "com.test.package"
     private const val BG_NAME = "background"
     private const val FG_NAME = "foreground"
+
+    private fun createConnectedDevice(
+      belongsToDriver: Boolean = true,
+      hasSecureChannel: Boolean = false
+    ) =
+      ConnectedDevice(
+        UUID.randomUUID().toString(),
+        /* deviceName= */ "",
+        /* belongsToDriver= */ belongsToDriver,
+        hasSecureChannel,
+      )
   }
 }

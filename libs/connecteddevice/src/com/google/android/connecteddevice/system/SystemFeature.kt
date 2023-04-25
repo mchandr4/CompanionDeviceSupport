@@ -33,16 +33,47 @@ import com.google.android.connecteddevice.util.SafeLog.loge
 import com.google.protobuf.ExtensionRegistryLite
 import com.google.protobuf.InvalidProtocolBufferException
 import java.nio.charset.StandardCharsets
+import java.util.UUID
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 
-/** Feature responsible for system queries. */
-open class SystemFeature(
+/**
+ * Feature responsible for system queries.
+ *
+ * @param queryFeatureSupportOnConnection Feature IDs that should be queried when this SystemFeature
+ *   is notified of a connected device. The support status should be cached internally so that when
+ *   the support status is queried again later (by the actual feature), the result is immediately
+ *   available.
+ */
+open class SystemFeature
+// @VisibleForTesting
+internal constructor(
   context: Context,
   private val storage: ConnectedDeviceStorage,
-  private val connector: Connector
+  private val connector: Connector,
+  private val queryFeatureSupportOnConnection: List<UUID>,
 ) {
 
   private val bluetoothAdapter: BluetoothAdapter =
     context.getSystemService(BluetoothManager::class.java).adapter
+
+  constructor(
+    context: Context,
+    storage: ConnectedDeviceStorage,
+    connector: Connector,
+  ) : this(
+    context,
+    storage,
+    connector,
+    listOf(
+      // SecondDeviceSignInUrlFeature
+      //   This feature is started by UI (not always running in the background), so it has a limited
+      //   amount of time to initialize. We can speed up the process by preheating the system query
+      //   cache, namely querying the feature status here so when the feature checks, the response
+      //   is cached.
+      UUID.fromString("524a5d28-b208-449c-bb54-cd89498d3b1b"),
+    ),
+  )
 
   init {
     connector.featureId = SYSTEM_FEATURE_ID
@@ -73,16 +104,22 @@ open class SystemFeature(
   }
 
   private fun onSecureChannelEstablishedInternal(device: ConnectedDevice) {
-    logd(TAG, "Secure channel has been established. Issuing device name query.")
+    logd(TAG, "Secure channel has been established. ")
+    queryDeviceName(device)
+    queryFeatureSupportStatusToPreheatCache(device)
+  }
+
+  private fun queryDeviceName(device: ConnectedDevice) {
+    logd(TAG, "Issuing device name query.")
     val deviceNameQuery = SystemQuery.newBuilder().setType(DEVICE_NAME).build()
     connector.sendQuerySecurely(
       device,
       deviceNameQuery.toByteArray(),
-      /* parameters= */ null,
+      parameters = null,
       object : QueryCallback {
-        override fun onSuccess(response: ByteArray?) {
-          if (response?.isNotEmpty() != true) {
-            loge(TAG, "Received a null or empty device name query response. Ignoring.")
+        override fun onSuccess(response: ByteArray) {
+          if (response.isEmpty()) {
+            loge(TAG, "Received an empty device name query response. Ignoring.")
             return
           }
           val deviceName = String(response, StandardCharsets.UTF_8)
@@ -91,6 +128,14 @@ open class SystemFeature(
         }
       }
     )
+  }
+
+  private fun queryFeatureSupportStatusToPreheatCache(device: ConnectedDevice) {
+    logd(TAG, "Issuing query for feature support status.")
+    // Ignore the result because we are only calling to preheat the status cache.
+    MainScope().launch {
+      val unused = connector.queryFeatureSupportStatuses(device, queryFeatureSupportOnConnection)
+    }
   }
 
   private fun onQueryReceivedInternal(
@@ -133,16 +178,11 @@ open class SystemFeature(
       if (device.isAssociatedWithDriver) SystemUserRole.DRIVER else SystemUserRole.PASSENGER
     val response = SystemUserRoleResponse.newBuilder().setRole(role).build()
     logd(TAG, "Responding to query for user role with $role.")
-    connector.respondToQuerySecurely(
-      device,
-      queryId,
-      success = true,
-      response.toByteArray()
-    )
+    connector.respondToQuerySecurely(device, queryId, success = true, response.toByteArray())
   }
 
   private fun respondWithError(device: ConnectedDevice, queryId: Int) =
-    connector.respondToQuerySecurely(device, queryId, /* success= */ false, /* response= */ null)
+    connector.respondToQuerySecurely(device, queryId, success = false, response = null)
 
   companion object {
     private const val TAG = "SystemFeature"

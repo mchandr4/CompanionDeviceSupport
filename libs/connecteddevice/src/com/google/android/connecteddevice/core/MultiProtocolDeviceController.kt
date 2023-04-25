@@ -15,6 +15,7 @@
  */
 package com.google.android.connecteddevice.core
 
+import android.content.Context
 import android.database.sqlite.SQLiteCantOpenDatabaseException
 import android.os.ParcelUuid
 import androidx.annotation.GuardedBy
@@ -26,6 +27,7 @@ import com.google.android.connecteddevice.connection.MultiProtocolSecureChannel.
 import com.google.android.connecteddevice.connection.MultiProtocolSecureChannel.ShowVerificationCodeListener
 import com.google.android.connecteddevice.connection.ProtocolStream
 import com.google.android.connecteddevice.core.DeviceController.Callback
+import com.google.android.connecteddevice.metrics.EventMetricLogger
 import com.google.android.connecteddevice.model.AssociatedDevice
 import com.google.android.connecteddevice.model.ConnectedDevice
 import com.google.android.connecteddevice.model.DeviceMessage
@@ -72,17 +74,18 @@ import kotlin.concurrent.withLock
  * @property storage Storage necessary to generate reconnect challenge.
  * @property enablePassenger Whether passenger devices automatically connect. When `true`, newly
  *   associated devices will remain unclaimed by default.
- * @property callbackExecutor Executor on which callbacks are executed.
+ * @property storageExecutor Executor on which storage related tasks are executed.
  */
 class MultiProtocolDeviceController
 @JvmOverloads
 constructor(
+  private val context: Context,
   private val protocolDelegate: ProtocolDelegate,
   private val storage: ConnectedDeviceStorage,
   private val oobRunner: OobRunner,
   private val associationServiceUuid: UUID,
   private val enablePassenger: Boolean,
-  private val callbackExecutor: Executor = Executors.newSingleThreadExecutor()
+  private val storageExecutor: Executor = Executors.newSingleThreadExecutor()
 ) : DeviceController {
   private val connectedRemoteDevices = ConcurrentHashMap<UUID, ConnectedRemoteDevice>()
 
@@ -91,24 +94,29 @@ constructor(
   @VisibleForTesting internal val associationPendingDeviceId = AtomicReference<UUID?>(null)
 
   private val lock = ReentrantLock()
+  private val metricLogger = EventMetricLogger(context)
 
   @GuardedBy("lock") private val associatedDevices = mutableListOf<AssociatedDevice>()
   @GuardedBy("lock") private val driverDevices = mutableListOf<AssociatedDevice>()
+  @GuardedBy("lock") private val passengerDevices = mutableListOf<AssociatedDevice>()
 
   private val storageCallback =
     object : ConnectedDeviceStorage.AssociatedDeviceCallback {
       override fun onAssociatedDeviceAdded(device: AssociatedDevice) {
-        // Device population is handled locally when a new device is added.
+        logd(TAG, "An associated device has been added. Repopulating devices from storage.")
+        populateDevicesWithExecutor()
+        // Make sure the internal status are synched from storage before invoking callbacks.
+        storageExecutor.execute { invokeCallbacksWithAssociatedDevice(device) }
       }
 
       override fun onAssociatedDeviceRemoved(device: AssociatedDevice) {
         logd(TAG, "An associated device has been removed. Repopulating devices from storage.")
-        populateDevices()
+        populateDevicesWithExecutor()
       }
 
       override fun onAssociatedDeviceUpdated(device: AssociatedDevice) {
         logd(TAG, "An associated device has been updated. Repopulating devices from storage.")
-        populateDevices()
+        populateDevicesWithExecutor()
       }
     }
 
@@ -149,7 +157,7 @@ constructor(
 
   override fun start() {
     logd(TAG, "Starting controller and initiating connections with driver devices.")
-    populateDevices()
+    populateDevicesWithExecutor()
     val driverDevices = storage.driverAssociatedDevices
     for (device in driverDevices) {
       if (device.isConnectionEnabled) {
@@ -324,20 +332,29 @@ constructor(
     callbacks.remove(callback)
   }
 
-  private fun populateDevices() {
-    callbackExecutor.execute {
+  /**
+   * Populates associated devices from the storage.
+   *
+   * Any logic following this which relies on the data refreshness needs to run on the
+   * same executor to avoid race conditions.
+   */
+  private fun populateDevicesWithExecutor() {
+    storageExecutor.execute {
       while (true) {
         try {
           logd(TAG, "Populating associated devices from storage.")
 
           // Fetch devices prior to applying lock to reduce lock time.
           val driverOnlyDevices = storage.driverAssociatedDevices
+          val passengerOnlyDevices = storage.passengerAssociatedDevices
           val allDevices = storage.allAssociatedDevices
           lock.withLock {
             associatedDevices.clear()
             associatedDevices.addAll(allDevices)
             driverDevices.clear()
             driverDevices.addAll(driverOnlyDevices)
+            passengerDevices.clear()
+            passengerDevices.addAll(passengerOnlyDevices)
           }
           logd(TAG, "Devices populated successfully.")
           break
@@ -589,7 +606,7 @@ constructor(
     invokeCallbacksWithDevice(device) { connectedDevice, callback ->
       callback.onDeviceDisconnected(connectedDevice)
     }
-    callbackExecutor.execute {
+    storageExecutor.execute {
       val associatedDevice = storage.getAssociatedDevice(disconnectedDeviceId.toString())
       if (associatedDevice == null) {
         loge(
@@ -643,6 +660,7 @@ constructor(
           callback.onSecureChannelEstablished(connectedDevice)
         }
         EventLog.onSecureChannelEstablished()
+        metricLogger.onSecureChannelEstablished()
       }
 
       override fun onEstablishSecureChannelFailure(error: ChannelError) {
@@ -693,36 +711,33 @@ constructor(
       handleAssociationError(ChannelError.CHANNEL_ERROR_INVALID_DEVICE_ID.ordinal, device)
       return
     }
-
-    connectedRemoteDevices.computeIfAbsent(deviceId) {
-      logd(TAG, "Assigning newly-associated device to its real device id.")
-      val newDevice = convertTempAssociationDeviceToRealDevice(device, deviceId)
-      logd(TAG, "Received device id and secret from $deviceId.")
-      try {
-        storage.saveChallengeSecret(
-          deviceId.toString(),
-          deviceMessage.message.copyOfRange(DEVICE_ID_BYTES, deviceMessage.message.size)
-        )
-      } catch (e: InvalidParameterException) {
-        loge(TAG, "Error saving challenge secret.", e)
-        // Call on old device since it had the original association callback.
-        handleAssociationError(ChannelError.CHANNEL_ERROR_INVALID_ENCRYPTION_KEY.ordinal, device)
-        return@computeIfAbsent newDevice
-      }
-      connectedRemoteDevices.remove(pendingDeviceId)
-      associationPendingDeviceId.set(null)
-      oobRunner.reset()
-      newDevice.secureChannel?.setDeviceIdDuringAssociation(deviceId)
-      persistAssociatedDevice(deviceId.toString())
-      newDevice.callback?.onAssociationCompleted()
-      invokeCallbacksWithDevice(newDevice) { connectedDevice, callback ->
-        callback.onDeviceConnected(connectedDevice)
-      }
-      invokeCallbacksWithDevice(newDevice) { connectedDevice, callback ->
-        callback.onSecureChannelEstablished(connectedDevice)
-      }
-      newDevice
+    if (connectedRemoteDevices.containsKey(deviceId)) {
+      logd(TAG, "This device $deviceId already exist in the connected device list. Ignore.")
+      return
     }
+    logd(TAG, "Assigning newly-associated device to its real device id.")
+    val newDevice = convertTempAssociationDeviceToRealDevice(device, deviceId)
+    logd(TAG, "Received device id and secret from $deviceId.")
+    try {
+      storage.saveChallengeSecret(
+        deviceId.toString(),
+        deviceMessage.message.copyOfRange(DEVICE_ID_BYTES, deviceMessage.message.size)
+      )
+    } catch (e: InvalidParameterException) {
+      loge(TAG, "Error saving challenge secret.", e)
+      // Call on old device since it had the original association callback.
+      handleAssociationError(ChannelError.CHANNEL_ERROR_INVALID_ENCRYPTION_KEY.ordinal, device)
+      return
+    }
+    connectedRemoteDevices.remove(pendingDeviceId)
+    associationPendingDeviceId.set(null)
+    connectedRemoteDevices.put(deviceId, newDevice)
+    oobRunner.reset()
+    newDevice.secureChannel?.setDeviceIdDuringAssociation(deviceId)
+    persistAssociatedDevice(deviceId.toString())
+
+    // Invoke callbacks after internal states are updated to avoid race conditions.
+    device.callback?.onAssociationCompleted()
   }
 
   private fun convertTempAssociationDeviceToRealDevice(
@@ -771,8 +786,27 @@ constructor(
     device: ConnectedRemoteDevice,
     onCallback: (ConnectedDevice, Callback) -> Unit
   ) {
-    val connectedDevice = lock.withLock { device.toConnectedDevice(driverDevices) }
+    val connectedDevice = lock.withLock { device.toConnectedDevice(passengerDevices) }
     callbacks.invoke { onCallback(connectedDevice, it) }
+  }
+
+  private fun invokeCallbacksWithAssociatedDevice(associatedDevice: AssociatedDevice) {
+    logd(TAG, "Invovke callbacks with associated device")
+    val hasSecureChannel =
+      connectedRemoteDevices.get(UUID.fromString(associatedDevice.deviceId))?.secureChannel != null
+    lock.withLock {
+      val belongsToDriver =
+        passengerDevices.none { device -> device.deviceId == associatedDevice.deviceId }
+      val connectedDevice =
+        ConnectedDevice(
+          associatedDevice.deviceId,
+          associatedDevice.deviceName,
+          belongsToDriver,
+          hasSecureChannel
+        )
+      callbacks.invoke { it.onDeviceConnected(connectedDevice) }
+      callbacks.invoke { it.onSecureChannelEstablished(connectedDevice) }
+    }
   }
 
   /** Container class to hold information about a connected device. */
@@ -786,8 +820,12 @@ constructor(
     var channelResolver: ChannelResolver? = null
 
     /** Returns the [ConnectedDevice] equivalent or `null` if the conversion failed. */
-    fun toConnectedDevice(driverDevices: List<AssociatedDevice>): ConnectedDevice {
-      val belongsToDriver = driverDevices.any { device -> device.deviceId == deviceId.toString() }
+    fun toConnectedDevice(passengerDevices: List<AssociatedDevice>): ConnectedDevice {
+      // TODO(b/269484772): During device removal, the device record might have already been cleared
+      // so we have to do a reversed check against passenger device. This value may still be true if
+      // device is already disassociated.
+      val belongsToDriver =
+        passengerDevices.none { device -> device.deviceId == deviceId.toString() }
       val hasSecureChannel = secureChannel != null
       return ConnectedDevice(deviceId.toString(), name, belongsToDriver, hasSecureChannel)
     }
@@ -807,6 +845,7 @@ constructor(
       return newDevice
     }
   }
+
   companion object {
     private const val TAG = "MultiProtocolDeviceController"
     private const val SALT_BYTES = 8

@@ -52,7 +52,6 @@
           style="@style/CompanionSubtitleTextStyle" />
     </LinearLayout>
   </ScrollView>
-  <View style="@style/SuwVerticalDividerStyle"/>
   <LinearLayout
       android:orientation="vertical"
       android:layout_width="0dp"

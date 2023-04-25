@@ -26,6 +26,7 @@ import com.google.android.connecteddevice.trust.api.TrustedDevice;
 import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,6 +45,7 @@ public final class TrustedDeviceViewModelTest {
   @Mock private ITrustedDeviceManager mockTrustedDeviceManager;
   private KeyguardManager keyguardManager;
   @Mock private Observer<EnrollmentState> mockEnrollmentStateObserver;
+  @Mock private Observer<List<TrustedDevice>> mockTrustedDevicesObserver;
 
   private TrustedDeviceViewModel viewModel;
 
@@ -76,6 +78,22 @@ public final class TrustedDeviceViewModelTest {
     viewModel.getEnrollmentState().observeForever(mockEnrollmentStateObserver);
     waitForLiveDataUpdate();
     verify(mockEnrollmentStateObserver).onChanged(EnrollmentState.NO_CONNECTION);
+  }
+
+  @Test
+  public void enrollTrustedDevice_beforeProcessEscrowToken_setEmptyTrustedDevices()
+      throws RemoteException {
+    List<TrustedDevice> emptyList = new ArrayList<>();
+    ArgumentCaptor<IOnTrustedDevicesRetrievedListener> listenerCaptor =
+        ArgumentCaptor.forClass(IOnTrustedDevicesRetrievedListener.class);
+    viewModel.enrollTrustedDevice(createAssociatedDevice());
+    // This first call is when the view model is initialized.
+    verify(mockTrustedDeviceManager, times(2))
+        .retrieveTrustedDevicesForActiveUser(listenerCaptor.capture());
+    listenerCaptor.getAllValues().get(1).onTrustedDevicesRetrieved(emptyList);
+    viewModel.getTrustedDevices().observeForever(mockTrustedDevicesObserver);
+    waitForLiveDataUpdate();
+    verify(mockTrustedDevicesObserver).onChanged(emptyList);
   }
 
   @Test

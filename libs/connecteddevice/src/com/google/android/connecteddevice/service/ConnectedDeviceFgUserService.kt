@@ -26,6 +26,7 @@ import android.os.Looper
 import android.os.UserManager
 import com.google.android.connecteddevice.api.CompanionConnector
 import com.google.android.connecteddevice.api.Connector
+import com.google.android.connecteddevice.api.SafeConnector
 import com.google.android.connecteddevice.util.SafeLog.logd
 import com.google.android.connecteddevice.util.SafeLog.loge
 import java.time.Duration
@@ -91,7 +92,7 @@ class ConnectedDeviceFgUserService : TrunkService() {
   override fun onBind(intent: Intent): IBinder? {
     logd(TAG, "Service bound. Action: ${intent.action}")
     val action = intent.action ?: return null
-    if (action == ACTION_QUERY_API_VERSION) {
+    if (action == SafeConnector.ACTION_QUERY_API_VERSION) {
       logd(TAG, "Return binder version to remote process")
       return binderVersion.asBinder()
     }
