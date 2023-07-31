@@ -16,6 +16,10 @@
 
 package com.google.android.connecteddevice.trust;
 
+import static com.google.android.connecteddevice.trust.TrustedDeviceConstants.TRUSTED_DEVICE_ERROR_DEVICE_NOT_SECURED;
+import static com.google.android.connecteddevice.trust.TrustedDeviceConstants.TRUSTED_DEVICE_ERROR_DISCONNECTED_DURING_ENROLLMENT;
+import static com.google.android.connecteddevice.trust.TrustedDeviceConstants.TRUSTED_DEVICE_ERROR_MESSAGE_TYPE_UNKNOWN;
+import static com.google.android.connecteddevice.trust.TrustedDeviceConstants.TRUSTED_DEVICE_ERROR_UNKNOWN;
 import static com.google.android.connecteddevice.util.SafeLog.logd;
 import static com.google.android.connecteddevice.util.SafeLog.loge;
 import static com.google.android.connecteddevice.util.SafeLog.logi;
@@ -34,7 +38,7 @@ import androidx.annotation.WorkerThread;
 import com.google.android.connecteddevice.api.IDeviceAssociationCallback;
 import com.google.android.connecteddevice.model.AssociatedDevice;
 import com.google.android.connecteddevice.model.ConnectedDevice;
-import com.google.android.connecteddevice.trust.api.IOnTrustedDeviceEnrollmentNotificationRequestListener;
+import com.google.android.connecteddevice.trust.api.IOnTrustedDeviceEnrollmentNotificationCallback;
 import com.google.android.connecteddevice.trust.api.IOnTrustedDevicesRetrievedListener;
 import com.google.android.connecteddevice.trust.api.ITrustedDeviceAgentDelegate;
 import com.google.android.connecteddevice.trust.api.ITrustedDeviceCallback;
@@ -67,6 +71,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.ReentrantLock;
 
 /** Manager for the feature of unlocking the head unit with a user's trusted device. */
 public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
@@ -85,8 +90,8 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
   private final RemoteCallbackList<ITrustedDeviceEnrollmentCallback> remoteEnrollmentCallbacks =
       new RemoteCallbackList<>();
 
-  private final RemoteCallbackList<IOnTrustedDeviceEnrollmentNotificationRequestListener>
-      remoteEnrollmentNotificationRequestListeners = new RemoteCallbackList<>();
+  private final RemoteCallbackList<IOnTrustedDeviceEnrollmentNotificationCallback>
+      remoteEnrollmentNotificationCallbacks = new RemoteCallbackList<>();
 
   private final RemoteCallbackList<IDeviceAssociationCallback> remoteDeviceAssociationCallbacks =
       new RemoteCallbackList<>();
@@ -108,6 +113,21 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
   private byte[] pendingToken;
 
   private PendingCredentials pendingCredentials;
+
+  private final ReentrantLock enrollConditionsLock = new ReentrantLock();
+
+  /**
+   * Enrollment will only be processed when both [isEscrowTokenActivated] and [isCredentialVerified]
+   * are set to true.
+   *
+   * <p>Implicitly, by the design of Android system, both [onEscrowTokenActivated] and
+   * [onCredentialVerified] should be invoked on the main thread which would make the two calls
+   * synchronized. However, to make sure Trusted Device will be enrolled and enrolled only once when
+   * all conditions are met, we still guard each call by a lock .
+   */
+  private boolean isEscrowTokenActivated;
+
+  protected boolean isCredentialVerified;
 
   /** If the enrollment is waiting for credential setup. */
   protected final AtomicBoolean isWaitingForCredentialSetUp = new AtomicBoolean(false);
@@ -152,7 +172,7 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
     remoteDeviceAssociationCallbacks.kill();
     remoteTrustedDeviceCallbacks.kill();
     remoteEnrollmentCallbacks.kill();
-    remoteEnrollmentNotificationRequestListeners.kill();
+    remoteEnrollmentNotificationCallbacks.kill();
   }
 
   private void startEnrollment(@NonNull ConnectedDevice device, @NonNull byte[] token) {
@@ -161,10 +181,10 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
     pendingToken = token;
 
     notifyRemoteCallbackList(
-        remoteEnrollmentNotificationRequestListeners,
-        listener -> {
+        remoteEnrollmentNotificationCallbacks,
+        callback -> {
           try {
-            listener.onTrustedDeviceEnrollmentNotificationRequest();
+            callback.onTrustedDeviceEnrollmentNotificationRequest();
           } catch (RemoteException e) {
             loge(TAG, "Failed to notify the enrollment notification request.");
           }
@@ -173,9 +193,12 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
 
   private void addEscrowToken() {
     if (pendingToken == null) {
-      loge(TAG, "No pending token can be added.");
+      loge(TAG, "No pending token to be added.");
+      notifyEnrollmentError(TRUSTED_DEVICE_ERROR_UNKNOWN);
       return;
     }
+    // Do not notify enrollment error if TrustAgentService is not ready yet.
+    // We'll make another attempt when the service is up.
     if (trustAgentDelegate == null) {
       logd(
           TAG,
@@ -189,6 +212,7 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
         trustAgentDelegate.addEscrowToken(pendingToken, ActivityManager.getCurrentUser());
       } catch (RemoteException e) {
         loge(TAG, "Error while adding token through delegate.", e);
+        notifyEnrollmentError(TRUSTED_DEVICE_ERROR_UNKNOWN);
       }
     }
   }
@@ -208,6 +232,19 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
   }
 
   @Override
+  public void sendUnlockRequest() {
+    List<ConnectedDevice> devices = getActiveUserConnectedDevices();
+    if (devices.size() != 1) {
+      loge(TAG, "Cannot resolve recipient device, cannot send unlock request.");
+      return;
+    }
+
+    String deviceId = devices.get(0).getDeviceId();
+    logd(TAG, "Sending unlock request to device " + deviceId);
+    trustedDeviceFeature.sendMessageSecurely(deviceId, createUnlockRequestMessage());
+  }
+
+  @Override
   public void onEscrowTokenAdded(int userId, long handle) {
     logd(TAG, "Escrow token has been successfully added.");
     pendingHandle = new PendingHandle(userId, handle);
@@ -222,51 +259,52 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
         });
   }
 
+  /**
+   * Implicitly, by the design of Android system, both [onEscrowTokenActivated] and
+   * [onCredentialVerified] should be invoked on the main thread which would make the two calls
+   * synchronized. However, to make sure Trusted Device will be enrolled and enrolled only once when
+   * all conditions are met, we still guard each call by a lock .
+   */
   @Override
   public void onEscrowTokenActivated(int userId, long handle) {
-    if (pendingDevice == null) {
-      loge(TAG, "Unable to complete device enrollment. Pending device was null.");
-      return;
+    logd(TAG, "Escrow token has been activated");
+    enrollConditionsLock.lock();
+    try {
+      isEscrowTokenActivated = true;
+      if (!isCredentialVerified) {
+        logd(
+            TAG,
+            "User "
+                + userId
+                + " hasn't confirmed their credential yet. Waiting for the user to confirm.");
+        return;
+      }
+      logd(TAG, "Enroll in Trusted Device for user " + userId);
+      enrollInTrustedDevice(userId, handle);
+    } finally {
+      enrollConditionsLock.unlock();
     }
-    byte[] hashedToken = hashToken(pendingToken, UUID.fromString(pendingDevice.getDeviceId()));
-    if (hashedToken == null) {
-      loge(TAG, "Unable to hash pending token. Aborting enrollment.");
-      return;
+  }
+
+  @Override
+  public void onCredentialVerified() {
+    logd(TAG, "User has verified their credential.");
+    enrollConditionsLock.lock();
+    try {
+      isCredentialVerified = true;
+      if (!isEscrowTokenActivated) {
+        logd(TAG, "Escrow token is not activated. Waiting for system to activate the token.");
+        return;
+      }
+      if (pendingHandle == null) {
+        loge(TAG, "Pending handle not found. Abort enrollment.");
+        notifyEnrollmentError(TRUSTED_DEVICE_ERROR_UNKNOWN);
+      } else {
+        enrollInTrustedDevice(pendingHandle.userId, pendingHandle.handle);
+      }
+    } finally {
+      enrollConditionsLock.unlock();
     }
-
-    logd(
-        TAG,
-        "Enrollment completed successfully! Sending handle to connected device and "
-            + "persisting trusted device record.");
-
-    trustedDeviceFeature.sendMessageSecurely(pendingDevice, createHandleMessage(handle));
-
-    String deviceId = pendingDevice.getDeviceId();
-
-    TrustedDeviceEntity entity = new TrustedDeviceEntity(deviceId, userId, handle);
-    TrustedDeviceTokenEntity tokenEntity =
-        new TrustedDeviceTokenEntity(deviceId, ByteUtils.byteArrayToHexString(hashedToken));
-    databaseExecutor.execute(
-        () -> {
-          database.removeFeatureState(deviceId);
-          database.addOrReplaceTrustedDevice(entity);
-          database.addOrReplaceTrustedDeviceHashedToken(tokenEntity);
-        });
-
-    pendingDevice = null;
-    pendingToken = null;
-    pendingHandle = null;
-
-    TrustedDevice trustedDevice = new TrustedDevice(deviceId, userId, handle);
-    notifyRemoteCallbackList(
-        remoteTrustedDeviceCallbacks,
-        callback -> {
-          try {
-            callback.onTrustedDeviceAdded(trustedDevice);
-          } catch (RemoteException e) {
-            loge(TAG, "Failed to notify that enrollment completed successfully.", e);
-          }
-        });
   }
 
   @Override
@@ -348,9 +386,7 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
       logd(TAG, "Removing added token.");
       removeEscrowToken(pendingHandle.handle, pendingHandle.userId);
     }
-    pendingToken = null;
-    pendingHandle = null;
-    isWaitingForCredentialSetUp.set(false);
+    reset();
   }
 
   @Override
@@ -384,15 +420,15 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
   }
 
   @Override
-  public void registerTrustedDeviceEnrollmentNotificationRequestListener(
-      IOnTrustedDeviceEnrollmentNotificationRequestListener listener) {
-    remoteEnrollmentNotificationRequestListeners.register(listener);
+  public void registerTrustedDeviceEnrollmentNotificationCallback(
+      IOnTrustedDeviceEnrollmentNotificationCallback callback) {
+    remoteEnrollmentNotificationCallbacks.register(callback);
   }
 
   @Override
-  public void unregisterTrustedDeviceEnrollmentNotificationRequestListener(
-      IOnTrustedDeviceEnrollmentNotificationRequestListener listener) {
-    remoteEnrollmentNotificationRequestListeners.unregister(listener);
+  public void unregisterTrustedDeviceEnrollmentNotificationCallback(
+      IOnTrustedDeviceEnrollmentNotificationCallback callback) {
+    remoteEnrollmentNotificationCallbacks.unregister(callback);
   }
 
   @Override
@@ -534,6 +570,15 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
     notifyRemoteCallbackList(remoteEnrollmentCallbacks, notification);
   }
 
+  private void reset() {
+    pendingToken = null;
+    pendingHandle = null;
+    pendingDevice = null;
+    isEscrowTokenActivated = false;
+    isCredentialVerified = false;
+    isWaitingForCredentialSetUp.set(false);
+  }
+
   @WorkerThread
   private void removeTrustedDeviceInternal(TrustedDeviceEntity entity) {
     logd(TAG, "Removing trusted device " + entity.id + ".");
@@ -628,6 +673,52 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
     startEnrollment(device, message);
   }
 
+  private void enrollInTrustedDevice(int userId, long handle) {
+    if (pendingDevice == null) {
+      loge(TAG, "Unable to complete device enrollment. Pending device is null.");
+      notifyEnrollmentError(TRUSTED_DEVICE_ERROR_UNKNOWN);
+      return;
+    }
+    byte[] hashedToken = hashToken(pendingToken, UUID.fromString(pendingDevice.getDeviceId()));
+    if (hashedToken == null) {
+      loge(TAG, "Unable to hash pending token. Aborting enrollment.");
+      notifyEnrollmentError(TRUSTED_DEVICE_ERROR_UNKNOWN);
+      return;
+    }
+
+    logd(
+        TAG,
+        "Enrollment completed successfully! Sending handle to connected device and "
+            + "persisting trusted device record.");
+
+    trustedDeviceFeature.sendMessageSecurely(pendingDevice, createHandleMessage(handle));
+
+    String deviceId = pendingDevice.getDeviceId();
+
+    TrustedDeviceEntity entity = new TrustedDeviceEntity(deviceId, userId, handle);
+    TrustedDeviceTokenEntity tokenEntity =
+        new TrustedDeviceTokenEntity(deviceId, ByteUtils.byteArrayToHexString(hashedToken));
+    databaseExecutor.execute(
+        () -> {
+          database.removeFeatureState(deviceId);
+          database.addOrReplaceTrustedDevice(entity);
+          database.addOrReplaceTrustedDeviceHashedToken(tokenEntity);
+        });
+
+    reset();
+
+    TrustedDevice trustedDevice = new TrustedDevice(deviceId, userId, handle);
+    notifyRemoteCallbackList(
+        remoteTrustedDeviceCallbacks,
+        callback -> {
+          try {
+            callback.onTrustedDeviceAdded(trustedDevice);
+          } catch (RemoteException e) {
+            loge(TAG, "Failed to notify that enrollment completed successfully.", e);
+          }
+        });
+  }
+
   private void processUnlockMessage(@NonNull ConnectedDevice device, @Nullable ByteString payload) {
     if (payload == null) {
       logw(TAG, "Received unlock message with null payload. Ignoring.");
@@ -652,7 +743,6 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
 
     if (entity == null) {
       logw(TAG, "Received unlock request from an untrusted device.");
-      // TODO(b/145618412) Notify device that it is no longer trusted.
       return;
     }
 
@@ -726,21 +816,21 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
           TrustedDeviceError.parseFrom(payload, ExtensionRegistryLite.getEmptyRegistry());
     } catch (InvalidProtocolBufferException e) {
       loge(TAG, "Received error message from client, but cannot parse.", e);
-      notifyEnrollmentError(TrustedDeviceConstants.TRUSTED_DEVICE_ERROR_UNKNOWN);
+      notifyEnrollmentError(TRUSTED_DEVICE_ERROR_UNKNOWN);
       return;
     }
     int errorType = trustedDeviceError.getTypeValue();
     int error;
     switch (errorType) {
       case ErrorType.MESSAGE_TYPE_UNKNOWN_VALUE:
-        error = TrustedDeviceConstants.TRUSTED_DEVICE_ERROR_MESSAGE_TYPE_UNKNOWN;
+        error = TRUSTED_DEVICE_ERROR_MESSAGE_TYPE_UNKNOWN;
         break;
       case ErrorType.DEVICE_NOT_SECURED_VALUE:
-        error = TrustedDeviceConstants.TRUSTED_DEVICE_ERROR_DEVICE_NOT_SECURED;
+        error = TRUSTED_DEVICE_ERROR_DEVICE_NOT_SECURED;
         break;
       default:
         loge(TAG, "Encountered unexpected error type: " + errorType + ".");
-        error = TrustedDeviceConstants.TRUSTED_DEVICE_ERROR_UNKNOWN;
+        error = TRUSTED_DEVICE_ERROR_UNKNOWN;
     }
     notifyEnrollmentError(error);
   }
@@ -833,6 +923,14 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
         .toByteArray();
   }
 
+  private static byte[] createUnlockRequestMessage() {
+    return TrustedDeviceMessage.newBuilder()
+        .setVersion(TRUSTED_DEVICE_MESSAGE_VERSION)
+        .setType(MessageType.UNLOCK_REQUEST)
+        .build()
+        .toByteArray();
+  }
+
   @VisibleForTesting
   final TrustedDeviceFeature.Callback featureCallback =
       new TrustedDeviceFeature.Callback() {
@@ -883,14 +981,35 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
 
         @Override
         public void onDeviceDisconnected() {
-          logd(TAG, "Clear pending tokens when device disconnected.");
-          // Pending credentials should only be kept within the connected session.
-          TrustedDeviceManager.this.pendingCredentials = null;
+          handleDisconnection();
         }
 
         @Override
         public void onDeviceError(ConnectedDevice device, int error) {}
       };
+
+  private void handleDisconnection() {
+    // Pending credentials should only be kept within the connected session.
+    pendingCredentials = null;
+
+    // If it's not enrollment flow, return directly.
+    if (pendingToken == null) {
+      logd(TAG, "Disconnected not during enrollment, ignore.");
+      return;
+    }
+
+    logd(TAG, "Disconnected during enrollment, abort enrollment.");
+    notifyEnrollmentError(TRUSTED_DEVICE_ERROR_DISCONNECTED_DURING_ENROLLMENT);
+    notifyRemoteCallbackList(
+        remoteEnrollmentNotificationCallbacks,
+        callback -> {
+          try {
+            callback.onTrustedDeviceEnrollmentNotificationCancellation();
+          } catch (RemoteException e) {
+            loge(TAG, "Failed to notify the enrollment notification request.");
+          }
+        });
+  }
 
   private final TrustedDeviceFeature.AssociatedDeviceCallback associatedDeviceCallback =
       new TrustedDeviceFeature.AssociatedDeviceCallback() {

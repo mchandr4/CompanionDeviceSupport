@@ -72,7 +72,8 @@ constructor(
 
   private val allConnectionCallbacks = AidlThreadSafeCallbacks<IConnectionCallback>()
 
-  private val safeConnectionCallbacks = AidlThreadSafeCallbacks<ISafeConnectionCallback>()
+  @VisibleForTesting
+  internal val safeConnectionCallbacks = AidlThreadSafeCallbacks<ISafeConnectionCallback>()
 
   private val lock = ReentrantLock()
 
@@ -611,19 +612,16 @@ constructor(
       logd(TAG, "Notifying callbacks that a new device has connected for a passenger.")
       passengerConnectionCallbacks.invoke { it.onDeviceConnected(connectedDevice) }
     }
+    // Passenger mode is currently not supported for external features, therefore some callbacks
+    // may be missed in the above invocations. Will need the following invocations until passenger
+    // mode becomes officially supported.
     allConnectionCallbacks.invoke { it.onDeviceConnected(connectedDevice) }
-  }
-
-  @VisibleForTesting
-  internal fun safeOnDeviceConnectedInternal(connectedDevice: String) {
-    logd(TAG, "Notifying callbacks that a new device has connected.")
-    safeConnectionCallbacks.invoke { it.onDeviceConnected(connectedDevice) }
+    safeConnectionCallbacks.invoke { it.onDeviceConnected(connectedDevice.deviceId) }
   }
 
   @VisibleForTesting
   internal fun onDeviceDisconnectedInternal(connectedDevice: ConnectedDevice) {
     systemQueryCache.clearCache(connectedDevice)
-
     if (connectedDevice.isAssociatedWithDriver) {
       logd(TAG, "Notifying callbacks that a device has disconnected for the driver.")
       driverConnectionCallbacks.invoke { it.onDeviceDisconnected(connectedDevice) }
@@ -631,21 +629,20 @@ constructor(
       logd(TAG, "Notifying callbacks that a device has disconnected for a passenger.")
       passengerConnectionCallbacks.invoke { it.onDeviceDisconnected(connectedDevice) }
     }
+    // Passenger mode is currently not supported for external features, therefore some callbacks
+    // may be missed in the above invocations. Will need the following invocations until passenger
+    // mode becomes officially supported.
     allConnectionCallbacks.invoke { it.onDeviceDisconnected(connectedDevice) }
+    safeConnectionCallbacks.invoke { it.onDeviceDisconnected(connectedDevice.deviceId) }
     // Clear blocked recipients for the next connection so the state is easier to recover.
     lock.withLock { blockedRecipients.clear() }
   }
 
   @VisibleForTesting
-  internal fun safeOnDeviceDisconnectedInternal(connectedDevice: String) {
-    logd(TAG, "Notifying callbacks that a new device has disconnected.")
-    safeConnectionCallbacks.invoke { it.onDeviceDisconnected(connectedDevice) }
-  }
-
-  @VisibleForTesting
   internal fun onSecureChannelEstablishedInternal(connectedDevice: ConnectedDevice) {
     val callbacks = lock.withLock { deviceCallbacks[connectedDevice.deviceId]?.values }
-    if (callbacks == null) {
+    val safeCallbacks = lock.withLock { safeDeviceCallbacks[connectedDevice.deviceId]?.values }
+    if (callbacks == null && safeCallbacks == null) {
       logd(
         TAG,
         "A secure channel has been established with ${connectedDevice.deviceId}, but no " +
@@ -653,15 +650,22 @@ constructor(
       )
       return
     }
-
     logd(
       TAG,
       "Notifying callbacks that a secure channel has been established with " +
         "${connectedDevice.deviceId}."
     )
-
-    for (callback in callbacks) {
-      callback.onSecureChannelEstablished(connectedDevice)
+    if (callbacks != null) {
+      for (callback in callbacks) {
+        callbackExecutor.execute { callback.onSecureChannelEstablished(connectedDevice) }
+      }
+    }
+    if (safeCallbacks != null) {
+      for (safeCallback in safeCallbacks) {
+        callbackExecutor.execute {
+          safeCallback.onSecureChannelEstablished(connectedDevice.deviceId)
+        }
+      }
     }
   }
 
@@ -669,7 +673,7 @@ constructor(
   internal fun onMessageReceivedInternal(
     connectedDevice: ConnectedDevice,
     message: DeviceMessage,
-    shouldCacheMessage: Boolean = true
+    shouldCacheMessage: Boolean = true,
   ) {
     if (shouldCacheMessage) {
       // Cache the received message for a faster response if queried again by another feature.
@@ -690,7 +694,6 @@ constructor(
       lock.withLock {
         deviceCallbacks[connectedDevice.deviceId]?.get(ParcelUuid(message.recipient))
       }
-
     val safeCallback =
       lock.withLock {
         safeDeviceCallbacks[connectedDevice.deviceId]?.get(ParcelUuid(message.recipient))
@@ -705,8 +708,8 @@ constructor(
     logd(TAG, "Notifying callback for recipient ${message.recipient}")
 
     callbackExecutor.execute {
-      safeCallback?.onMessageReceived(connectedDevice.deviceId, message.message)
       callback?.onMessageReceived(connectedDevice, message)
+      safeCallback?.onMessageReceived(connectedDevice.deviceId, message.message)
     }
   }
 

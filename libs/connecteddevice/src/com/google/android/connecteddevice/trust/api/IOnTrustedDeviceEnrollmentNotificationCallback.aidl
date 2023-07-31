@@ -17,7 +17,10 @@
 package com.google.android.connecteddevice.trust.api;
 
 /** Listnener for trusted device enrollment notification request. */
-oneway interface IOnTrustedDeviceEnrollmentNotificationRequestListener {
+oneway interface IOnTrustedDeviceEnrollmentNotificationCallback {
     /** Triggered when enrollment notification is needed to continue trusted device enrollment. */
     void onTrustedDeviceEnrollmentNotificationRequest();
+
+    /** Triggered when the pending enrollment is aborted. */
+    void onTrustedDeviceEnrollmentNotificationCancellation();
 }

@@ -31,13 +31,6 @@ import com.google.android.connecteddevice.util.ByteUtils
 import com.google.common.truth.Truth.assertThat
 import com.google.protobuf.ByteString
 import com.google.protobuf.ExtensionRegistryLite
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.argumentCaptor
-import com.nhaarman.mockitokotlin2.eq
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.never
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.whenever
 import java.nio.charset.StandardCharsets
 import java.util.UUID
 import kotlin.test.fail
@@ -49,6 +42,13 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.mockito.stubbing.Answer
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows
@@ -1911,7 +1911,7 @@ class CompanionConnectorTest {
 
     override fun getPackageManager(): PackageManager = mockPackageManager
 
-    override fun bindService(service: Intent?, conn: ServiceConnection, flags: Int): Boolean {
+    override fun bindService(service: Intent, conn: ServiceConnection, flags: Int): Boolean {
       service?.action?.let { bindingActions.add(it) }
       serviceConnection.add(conn)
       return super.bindService(service, conn, flags)
@@ -1926,7 +1926,7 @@ class CompanionConnectorTest {
   private class FailingContext(mockPackageManager: PackageManager) :
     FakeContext(mockPackageManager) {
 
-    override fun bindService(service: Intent?, conn: ServiceConnection, flags: Int): Boolean {
+    override fun bindService(service: Intent, conn: ServiceConnection, flags: Int): Boolean {
       serviceConnection.add(conn)
       return false
     }

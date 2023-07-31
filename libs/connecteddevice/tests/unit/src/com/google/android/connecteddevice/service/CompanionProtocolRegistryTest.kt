@@ -24,13 +24,13 @@ import com.google.android.connecteddevice.transport.IDiscoveryCallback
 import com.google.android.connecteddevice.transport.ProtocolDelegate
 import com.google.android.connecteddevice.util.MetaDataProvider
 import com.google.common.truth.Truth.assertThat
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.eq
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 
 @RunWith(AndroidJUnit4::class)
 class CompanionProtocolRegistryTest {
@@ -168,7 +168,7 @@ private open class FakeContext(val mockPackageManager: PackageManager) :
 
   override fun getPackageManager(): PackageManager = mockPackageManager
 
-  override fun bindService(service: Intent?, conn: ServiceConnection, flags: Int): Boolean {
+  override fun bindService(service: Intent, conn: ServiceConnection, flags: Int): Boolean {
     assertThat(service?.action).isEqualTo(ACTION_BIND_PROTOCOL)
     boundService = conn
     bindAttempts++

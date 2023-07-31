@@ -32,6 +32,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.LayoutRes;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 import com.google.android.connecteddevice.model.StartAssociationResponse;
 import com.google.android.connecteddevice.model.TransportProtocols;
@@ -167,7 +168,10 @@ public class CompanionQrCodeLandingFragment extends Fragment {
             .build();
     Bitmap bitmap =
         QrCodeGenerator.createQrCode(
-            uri.toString(), getResources().getDimensionPixelSize(R.dimen.qr_code_size));
+            /* content= */ uri.toString(),
+            /* sizeInPixels= */ getResources().getDimensionPixelSize(R.dimen.qr_code_size),
+            /* foregroundColor= */ ContextCompat.getColor(
+                getActivity(), R.color.settings_color_primary));
     if (bitmap == null) {
       loge(TAG, "QR code could not be generated, ignore.");
       return;

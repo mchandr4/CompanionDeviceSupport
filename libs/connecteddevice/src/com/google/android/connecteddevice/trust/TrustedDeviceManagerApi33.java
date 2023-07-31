@@ -78,6 +78,11 @@ public class TrustedDeviceManagerApi33 extends TrustedDeviceManager {
     }
     if (!isDeviceSecure) {
       logd(TAG, "Processing enrollment on insecure device.");
+      // For API 33+, instead of using escrow token, we use weak escrow token which will be
+      // activated instantly if the device is not secure. Therefore in the enrolling insecure device
+      // flow, no credential confirmation page will be shown because weak escrow token is added and
+      // activated before the user sets up their credential.
+      isCredentialVerified = true;
       addWeakEscrowToken(token, /* isDeviceSecure= */ false);
       return;
     }

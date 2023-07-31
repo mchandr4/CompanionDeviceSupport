@@ -34,11 +34,6 @@ import com.google.common.truth.Truth.assertThat
 import com.google.common.util.concurrent.MoreExecutors.directExecutor
 import com.google.protobuf.ByteString
 import com.google.protobuf.ExtensionRegistryLite
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.argumentCaptor
-import com.nhaarman.mockitokotlin2.eq
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.never
 import java.util.UUID
 import java.util.concurrent.ThreadLocalRandom
 import org.junit.Test
@@ -46,6 +41,11 @@ import org.junit.runner.RunWith
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 
 private const val PROTOCOL_ID = "testDevice"
 private const val MAX_WRITE_SIZE = 185

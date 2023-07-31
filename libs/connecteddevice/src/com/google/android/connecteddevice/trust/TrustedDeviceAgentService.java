@@ -179,15 +179,15 @@ public class TrustedDeviceAgentService extends TrustAgentService {
           "Granting trust from escrow token for user.",
           TRUST_DURATION_MS,
           FLAG_GRANT_TRUST_DISMISS_KEYGUARD);
-    // Other locking schemas, e.g. primary authentication, might keep the device locked even after
-    // granting trust.
-    if (keyguardManager == null || keyguardManager.isDeviceLocked()) {
-      logw(
-          TAG,
-          "Device is still locked after granting trust. Primary authentication may be enforced."
-              + "Skip the ACK message to the phone.");
-      return;
-    }
+      // Other locking schemas, e.g. primary authentication, might keep the device locked even after
+      // granting trust.
+      if (keyguardManager == null || keyguardManager.isDeviceLocked()) {
+        logw(
+            TAG,
+            "Device is still locked after granting trust. Primary authentication may be enforced. "
+                + "Skip the ACK message to the phone.");
+        return;
+      }
       notifyLockScreenDismissed();
     }
     setManagingTrust(false);
@@ -305,13 +305,32 @@ public class TrustedDeviceAgentService extends TrustAgentService {
         @Override
         public void onReceive(Context context, Intent intent) {
           logd(TAG, "Screen on; device entered interactive mode.");
-          if (isUserUnlocked(ActivityManager.getCurrentUser())) {
-            logd(TAG, "User is already unlocked; dismiss the lock screen.");
-            //  Make sure the user is unlocked before dismiss, otherwise the device will be in a
-            // strange state where the user storage is locked but the keyguard does not show up,
-            // which will probably leading to a black screen.
-            maybeDismissLockscreen();
+          if (isManagingTrust.get()) {
+            continueDismissLockScreen();
+          } else {
+            sendUnlockRequest();
           }
         }
       };
+
+  private void continueDismissLockScreen() {
+    if (!isUserUnlocked(ActivityManager.getCurrentUser())) {
+      logd(TAG, "User hasn't been unlocked. Ignored.");
+      return;
+    }
+    maybeDismissLockscreen();
+  }
+
+  private void sendUnlockRequest() {
+    if (trustedDeviceManager == null) {
+      loge(TAG, "Trusted Device manager is null, cannot send unlock request.");
+      return;
+    }
+    try {
+      trustedDeviceManager.sendUnlockRequest();
+      logd(TAG, "Successfully initiated sending unlock request by TrustedDeviceManager.");
+    } catch (RemoteException e) {
+      loge(TAG, "Error while establishing connection to TrustedDeviceManager.", e);
+    }
+  }
 }

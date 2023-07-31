@@ -6,6 +6,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.robolectric.Shadows.shadowOf;
 
+import android.Manifest.permission;
+import android.app.Application;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
@@ -17,6 +19,7 @@ import android.bluetooth.le.AdvertiseCallback;
 import android.bluetooth.le.AdvertiseData;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.ParcelUuid;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -32,10 +35,12 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
+import org.robolectric.annotation.Config;
 
 @RunWith(AndroidJUnit4.class)
 public class OnDeviceBlePeripheralManagerTest {
   @Rule public final MockitoRule mockito = MockitoJUnit.rule();
+  private Application application = ApplicationProvider.getApplicationContext();
   private BluetoothAdapter adapter;
   @Mock private AdvertiseCallback mockAdvertiseCallback;
   @Mock private BlePeripheralManager.Callback mockCallback;
@@ -60,6 +65,37 @@ public class OnDeviceBlePeripheralManagerTest {
     when(mockBluetoothManager.getAdapter()).thenReturn(adapter);
     when(mockBluetoothManager.openGattServer(any())).thenReturn(mockGattServer);
     blePeripheralManager.addOnCharacteristicReadListener(mockOnCharacteristicReadListener);
+  }
+
+  @Test
+  @Config(sdk = Build.VERSION_CODES.S)
+  public void startAdvertising_androidS_doNotAdvertiseWithoutAdvertisePermission() {
+    shadowOf(application).grantPermissions(permission.BLUETOOTH_CONNECT);
+    UUID uuid = UUID.randomUUID();
+    AdvertiseData advertiseData =
+        new AdvertiseData.Builder().addServiceUuid(new ParcelUuid(uuid)).build();
+    AdvertiseData scanResponse =
+        new AdvertiseData.Builder().addServiceUuid(new ParcelUuid(uuid)).build();
+    BluetoothGattService service =
+        new BluetoothGattService(uuid, BluetoothGattService.SERVICE_TYPE_PRIMARY);
+    blePeripheralManager.startAdvertising(
+        service, advertiseData, scanResponse, mockAdvertiseCallback);
+    verify(mockBluetoothManager, never()).openGattServer(any());
+  }
+
+  @Test
+  @Config(sdk = Build.VERSION_CODES.R)
+  public void startAdvertising_belowAndroidS_advertiseWithoutNearbyDevicePermission() {
+    UUID uuid = UUID.randomUUID();
+    AdvertiseData advertiseData =
+        new AdvertiseData.Builder().addServiceUuid(new ParcelUuid(uuid)).build();
+    AdvertiseData scanResponse =
+        new AdvertiseData.Builder().addServiceUuid(new ParcelUuid(uuid)).build();
+    BluetoothGattService service =
+        new BluetoothGattService(uuid, BluetoothGattService.SERVICE_TYPE_PRIMARY);
+    blePeripheralManager.startAdvertising(
+        service, advertiseData, scanResponse, mockAdvertiseCallback);
+    verify(mockBluetoothManager).openGattServer(any());
   }
 
   @Test
@@ -184,6 +220,8 @@ public class OnDeviceBlePeripheralManagerTest {
 
   @CanIgnoreReturnValue
   private BluetoothGattServerCallback setupGattServer() {
+    shadowOf(application)
+        .grantPermissions(permission.BLUETOOTH_CONNECT, permission.BLUETOOTH_ADVERTISE);
     UUID uuid = UUID.randomUUID();
     AdvertiseData advertiseData =
         new AdvertiseData.Builder().addServiceUuid(new ParcelUuid(uuid)).build();

@@ -19,19 +19,19 @@ import com.google.android.connecteddevice.transport.IDiscoveryCallback
 import com.google.android.connecteddevice.util.ByteUtils
 import com.google.common.truth.Truth.assertThat
 import com.google.common.util.concurrent.MoreExecutors.directExecutor
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.argumentCaptor
-import com.nhaarman.mockitokotlin2.atLeastOnce
-import com.nhaarman.mockitokotlin2.eq
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.never
-import com.nhaarman.mockitokotlin2.times
-import com.nhaarman.mockitokotlin2.verify
 import java.time.Duration
 import java.util.UUID
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.atLeastOnce
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
 
 private const val TEST_REMOTE_DEVICE_ADDRESS = "00:11:22:33:AA:BB"
 private const val TEST_ALTERNATIVE_REMOTE_DEVICE_ADDRESS = "00:11:22:33:AA:CC"
@@ -46,6 +46,7 @@ class BlePeripheralProtocolTest {
   private val testAdvertiseDataCharacteristicUuid = UUID.randomUUID()
   private val testWriteCharacteristicUuid = UUID.randomUUID()
   private val testReadCharacteristicUuid = UUID.randomUUID()
+  private val testServiceChangedCharacteristicUuid = UUID.randomUUID()
   private val testMaxReconnectAdvertisementDuration = Duration.ofMinutes(6)
   private val testMessage = "TestMessage".toByteArray()
   private val testChallenge =
@@ -79,6 +80,7 @@ class BlePeripheralProtocolTest {
         testAdvertiseDataCharacteristicUuid,
         testWriteCharacteristicUuid,
         testReadCharacteristicUuid,
+        testServiceChangedCharacteristicUuid,
         testMaxReconnectAdvertisementDuration,
         TEST_DEFAULT_MTU_SIZE,
         directExecutor()

@@ -5,12 +5,13 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.connecteddevice.core.util.mockToBeAlive
 import com.google.common.truth.Truth.assertThat
 import com.google.common.util.concurrent.MoreExecutors.directExecutor
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.never
-import com.nhaarman.mockitokotlin2.verify
+import java.util.concurrent.ThreadPoolExecutor
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
 
 @RunWith(AndroidJUnit4::class)
 class ConnectionProtocolTest {
@@ -58,6 +59,42 @@ class ConnectionProtocolTest {
 
     verify(mockDataReceivedListener).onDataReceived(testProtocolId, testData)
     verify(mockSecondDataReceivedListener, never()).onDataReceived(testProtocolId, testData)
+  }
+
+  @Test
+  fun registerDataReceivedListener_withSingleThread() {
+    val protocolWithoutDirectExecutor =
+      object : ConnectionProtocol() {
+        override fun isDeviceVerificationRequired() = false
+
+        override fun startAssociationDiscovery(
+          name: String,
+          identifier: ParcelUuid,
+          callback: IDiscoveryCallback,
+        ) {}
+
+        override fun startConnectionDiscovery(
+          id: ParcelUuid,
+          challenge: ConnectChallenge,
+          callback: IDiscoveryCallback
+        ) {}
+
+        override fun stopAssociationDiscovery() {}
+
+        override fun stopConnectionDiscovery(id: ParcelUuid) {}
+
+        override fun sendData(protocolId: String, data: ByteArray, callback: IDataSendCallback?) {}
+
+        override fun disconnectDevice(protocolId: String) {}
+
+        override fun getMaxWriteSize(protocolId: String): Int {
+          return 0
+        }
+      }
+    assertThat(
+        (protocolWithoutDirectExecutor.callbackExecutor as ThreadPoolExecutor).getMaximumPoolSize()
+      )
+      .isEqualTo(1)
   }
 
   @Test

@@ -20,6 +20,7 @@ import static com.google.android.connecteddevice.util.SafeLog.logd;
 import static com.google.android.connecteddevice.util.SafeLog.loge;
 import static com.google.android.connecteddevice.util.SafeLog.logw;
 
+import android.Manifest.permission;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
@@ -34,11 +35,15 @@ import android.bluetooth.le.AdvertiseSettings;
 import android.bluetooth.le.BluetoothLeAdvertiser;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Handler;
 import androidx.annotation.VisibleForTesting;
+import androidx.core.content.ContextCompat;
 import com.google.android.connecteddevice.transport.ble.testable.BluetoothGattServerHandler;
 import com.google.android.connecteddevice.transport.ble.testable.BluetoothManagerHandler;
 import com.google.android.connecteddevice.util.ByteUtils;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 /** An implementation that uses Android platform API for BLE peripheral operations. */
@@ -109,11 +114,32 @@ public class OnDeviceBlePeripheralManager extends BlePeripheralManager {
       loge(TAG, "Attempted to start advertising, but system does not fully support BLE. Aborting.");
       return;
     }
+    if (missingPermissionsForBleConnection()) {
+      loge(TAG, "Required Bluetooth permissions not granted. Aborting.");
+      return;
+    }
     // Clears previous session before starting advertising.
     stopAdvertisement();
     this.advertiseCallback = advertiseCallback;
     gattServerRetryStartCount = 0;
     openGattServerAndStartAdvertising(service, advertiseData, scanResponse);
+  }
+
+  /** Returns `true` if any of the required Bluetooth permissions is missing. */
+  private boolean missingPermissionsForBleConnection() {
+    List<String> requiredPermissions = new ArrayList<>();
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+      requiredPermissions.add(permission.BLUETOOTH_ADVERTISE);
+      requiredPermissions.add(permission.BLUETOOTH_CONNECT);
+    }
+    for (String permission : requiredPermissions) {
+      if (ContextCompat.checkSelfPermission(context, permission)
+          != PackageManager.PERMISSION_GRANTED) {
+        loge(TAG, "Missing required permission: " + permission + ".");
+        return true;
+      }
+    }
+    return false;
   }
 
   private void openGattServerAndStartAdvertising(

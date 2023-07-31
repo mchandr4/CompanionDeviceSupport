@@ -1,7 +1,14 @@
 package com.google.android.connecteddevice.trust;
 
 import static android.os.Looper.getMainLooper;
+import static com.google.android.connecteddevice.trust.TrustedDeviceConstants.TRUSTED_DEVICE_ERROR_DEVICE_NOT_SECURED;
+import static com.google.android.connecteddevice.trust.TrustedDeviceConstants.TRUSTED_DEVICE_ERROR_DISCONNECTED_DURING_ENROLLMENT;
+import static com.google.android.connecteddevice.trust.TrustedDeviceConstants.TRUSTED_DEVICE_ERROR_MESSAGE_TYPE_UNKNOWN;
+import static com.google.android.connecteddevice.trust.TrustedDeviceConstants.TRUSTED_DEVICE_ERROR_NO_CONNECTION;
+import static com.google.android.connecteddevice.trust.TrustedDeviceConstants.TRUSTED_DEVICE_ERROR_UNEXPECTED_STATE;
+import static com.google.android.connecteddevice.trust.TrustedDeviceConstants.TRUSTED_DEVICE_ERROR_UNKNOWN;
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -14,7 +21,6 @@ import android.app.KeyguardManager;
 import android.os.RemoteException;
 import androidx.lifecycle.Observer;
 import androidx.test.core.app.ApplicationProvider;
-import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.google.android.connecteddevice.model.AssociatedDevice;
 import com.google.android.connecteddevice.model.ConnectedDevice;
 import com.google.android.connecteddevice.trust.TrustedDeviceViewModel.EnrollmentState;
@@ -25,16 +31,21 @@ import com.google.android.connecteddevice.trust.api.ITrustedDeviceManager;
 import com.google.android.connecteddevice.trust.api.TrustedDevice;
 import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.ParameterizedRobolectricTestRunner;
+import org.robolectric.ParameterizedRobolectricTestRunner.Parameter;
+import org.robolectric.ParameterizedRobolectricTestRunner.Parameters;
 
-@RunWith(AndroidJUnit4.class)
+@RunWith(ParameterizedRobolectricTestRunner.class)
 public final class TrustedDeviceViewModelTest {
   private static final String TEST_ASSOCIATED_DEVICE_ID = "test_device_id";
   private static final String TEST_ASSOCIATED_DEVICE_NAME = "test_device_name";
@@ -45,6 +56,7 @@ public final class TrustedDeviceViewModelTest {
   @Mock private ITrustedDeviceManager mockTrustedDeviceManager;
   private KeyguardManager keyguardManager;
   @Mock private Observer<EnrollmentState> mockEnrollmentStateObserver;
+  @Mock private Observer<Integer> mockEnrollmentErrorObserver;
   @Mock private Observer<List<TrustedDevice>> mockTrustedDevicesObserver;
 
   private TrustedDeviceViewModel viewModel;
@@ -52,6 +64,19 @@ public final class TrustedDeviceViewModelTest {
   private ITrustedDeviceEnrollmentCallback enrollmentCallback;
   private ITrustedDeviceCallback trustedDeviceCallback;
   private IOnTrustedDevicesRetrievedListener devicesRetrievedListener;
+
+  @Parameters(name = "trustedDeviceError={0}")
+  public static List<Integer> parameters() {
+    return Arrays.asList(
+        TRUSTED_DEVICE_ERROR_MESSAGE_TYPE_UNKNOWN,
+        TRUSTED_DEVICE_ERROR_DEVICE_NOT_SECURED,
+        TRUSTED_DEVICE_ERROR_UNKNOWN,
+        TRUSTED_DEVICE_ERROR_UNEXPECTED_STATE,
+        TRUSTED_DEVICE_ERROR_NO_CONNECTION,
+        TRUSTED_DEVICE_ERROR_DISCONNECTED_DURING_ENROLLMENT);
+  }
+
+  @Parameter public int trustedDeviceError;
 
   @Before
   public void setUp() throws RemoteException {
@@ -75,9 +100,9 @@ public final class TrustedDeviceViewModelTest {
   public void enrollTrustedDevice_deviceNotConnected() throws RemoteException {
     when(mockTrustedDeviceManager.getActiveUserConnectedDevices()).thenReturn(new ArrayList<>());
     viewModel.enrollTrustedDevice(createAssociatedDevice());
-    viewModel.getEnrollmentState().observeForever(mockEnrollmentStateObserver);
+    viewModel.getEnrollmentError().observeForever(mockEnrollmentErrorObserver);
     waitForLiveDataUpdate();
-    verify(mockEnrollmentStateObserver).onChanged(EnrollmentState.NO_CONNECTION);
+    verify(mockEnrollmentErrorObserver).onChanged(TRUSTED_DEVICE_ERROR_NO_CONNECTION);
   }
 
   @Test
@@ -94,6 +119,19 @@ public final class TrustedDeviceViewModelTest {
     viewModel.getTrustedDevices().observeForever(mockTrustedDevicesObserver);
     waitForLiveDataUpdate();
     verify(mockTrustedDevicesObserver).onChanged(emptyList);
+  }
+
+  @Test
+  public void enrollTrustedDevice_previousEnrollmentInProgress_abortPreviousEnrollment()
+      throws RemoteException {
+    when(mockTrustedDeviceManager.getActiveUserConnectedDevices())
+        .thenReturn(Collections.singletonList(createConnectedDevice()));
+    shadowOf(keyguardManager).setIsDeviceSecure(false);
+    viewModel.processEnrollment();
+    waitForLiveDataUpdate();
+    viewModel.enrollTrustedDevice(createAssociatedDevice());
+    verify(mockTrustedDeviceManager).abortEnrollment();
+    verify(mockTrustedDeviceManager).initiateEnrollment(eq(TEST_ASSOCIATED_DEVICE_ID));
   }
 
   @Test
@@ -188,6 +226,23 @@ public final class TrustedDeviceViewModelTest {
   }
 
   @Test
+  public void receivedError_abortEnrollment() throws RemoteException {
+    ArgumentCaptor<EnrollmentState> captor = ArgumentCaptor.forClass(EnrollmentState.class);
+    shadowOf(keyguardManager).setIsDeviceSecure(false);
+    viewModel.getEnrollmentState().observeForever(mockEnrollmentStateObserver);
+    viewModel.processEnrollment();
+    waitForLiveDataUpdate();
+
+    enrollmentCallback.onTrustedDeviceEnrollmentError(trustedDeviceError);
+
+    waitForLiveDataUpdate();
+    verify(mockTrustedDeviceManager).abortEnrollment();
+    // NONE -> IN_PROGRESS -> NONE
+    verify(mockEnrollmentStateObserver, times(3)).onChanged(captor.capture());
+    assertThat(captor.getValue()).isEqualTo(EnrollmentState.NONE);
+  }
+
+  @Test
   public void trustedDeviceRetrieved_valueUpdated() throws RemoteException {
     TrustedDevice testDevice = createTrustedDevice();
     devicesRetrievedListener.onTrustedDevicesRetrieved(Collections.singletonList(testDevice));
@@ -240,6 +295,20 @@ public final class TrustedDeviceViewModelTest {
   }
 
   @Test
+  public void onCredentialVerified_forwardToTrustedDeviceManager() throws RemoteException {
+    viewModel.onCredentialVerified();
+
+    verify(mockTrustedDeviceManager).onCredentialVerified();
+  }
+
+  @Test
+  public void onCredentialVerified_nullTrustedDeviceManager_noException() throws RemoteException {
+    mockTrustedDeviceManager = null;
+
+    assertDoesNotThrow(() -> viewModel.onCredentialVerified());
+  }
+
+  @Test
   public void abortEnrollment_updateTrustedDeviceFromServer() throws RemoteException {
     viewModel.abortEnrollment();
 
@@ -268,6 +337,14 @@ public final class TrustedDeviceViewModelTest {
     verify(mockTrustedDeviceManager)
         .retrieveTrustedDevicesForActiveUser(devicesRetrievedListenerCaptor.capture());
     devicesRetrievedListener = devicesRetrievedListenerCaptor.getValue();
+  }
+
+  private static void assertDoesNotThrow(ThrowingRunnable runnable) {
+    try {
+      runnable.run();
+    } catch (Throwable e) {
+      fail("Unexpected exception: " + e);
+    }
   }
 
   private static AssociatedDevice createAssociatedDevice() {

@@ -38,7 +38,9 @@ public class TrustedDeviceConstants {
         TRUSTED_DEVICE_ERROR_MESSAGE_TYPE_UNKNOWN,
         TRUSTED_DEVICE_ERROR_DEVICE_NOT_SECURED,
         TRUSTED_DEVICE_ERROR_UNKNOWN,
-        TRUSTED_DEVICE_ERROR_UNEXPECTED_STATE
+        TRUSTED_DEVICE_ERROR_UNEXPECTED_STATE,
+        TRUSTED_DEVICE_ERROR_NO_CONNECTION,
+        TRUSTED_DEVICE_ERROR_DISCONNECTED_DURING_ENROLLMENT
       })
   @Retention(RetentionPolicy.SOURCE)
   public @interface TrustedDeviceError {}
@@ -47,4 +49,6 @@ public class TrustedDeviceConstants {
   public static final int TRUSTED_DEVICE_ERROR_DEVICE_NOT_SECURED = 1;
   public static final int TRUSTED_DEVICE_ERROR_UNKNOWN = 2;
   public static final int TRUSTED_DEVICE_ERROR_UNEXPECTED_STATE = 3;
+  public static final int TRUSTED_DEVICE_ERROR_NO_CONNECTION = 4;
+  public static final int TRUSTED_DEVICE_ERROR_DISCONNECTED_DURING_ENROLLMENT = 5;
 }

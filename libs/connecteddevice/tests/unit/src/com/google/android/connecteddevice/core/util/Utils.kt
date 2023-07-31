@@ -2,8 +2,8 @@ package com.google.android.connecteddevice.core.util
 
 import android.os.IBinder
 import android.os.IInterface
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.whenever
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 
 /** Returns a mock of the [IInterface] `T` with a binder that is alive. */
 inline fun <reified T> mockToBeAlive(): T where T : IInterface {

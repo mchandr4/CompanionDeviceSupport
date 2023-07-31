@@ -8,13 +8,13 @@ import android.content.res.Resources
 import android.os.Bundle
 import android.os.Looper
 import androidx.test.core.app.ApplicationProvider
-import com.google.android.connecteddevice.R;
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.google.android.connecteddevice.R
 import com.google.common.truth.Truth.assertThat
-import com.nhaarman.mockitokotlin2.mock
 import kotlin.test.fail
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
 import org.robolectric.Shadows
 
 @RunWith(AndroidJUnit4::class)
@@ -33,16 +33,14 @@ class TrunkServiceTest {
     assertThat(service.boundServices).containsKey(component2.flattenToString())
   }
 
-   @Test
+  @Test
   fun onCreate_retrieveBinderVersionFromResource() {
     val component1 = ComponentName("package", "class1")
-    val service =
-      createTrunkService(arrayOf(component1.flattenToString()))
+    val service = createTrunkService(arrayOf(component1.flattenToString()))
 
     service.onCreate()
 
-    assertThat(service.binderVersion.getVersion())
-      .isEqualTo(COMPANION_BINDER_VERSION)
+    assertThat(service.binderVersion.getVersion()).isEqualTo(COMPANION_BINDER_VERSION)
   }
 
   @Test
@@ -133,7 +131,7 @@ class TrunkServiceTest {
     override fun retrieveMetaDataBundle(): Bundle =
       Bundle().apply { putInt(META_EARLY_SERVICES, EARLY_START_SERVICES_ID) }
 
-    override fun bindService(service: Intent?, conn: ServiceConnection, flags: Int): Boolean {
+    override fun bindService(service: Intent, conn: ServiceConnection, flags: Int): Boolean {
       val component = service?.component ?: return false
       boundServices[component.flattenToString()] = conn
       return true
@@ -167,7 +165,7 @@ class TrunkServiceTest {
   }
 
   private class FailingBindTrunkService : TestTrunkService() {
-    override fun bindService(service: Intent?, conn: ServiceConnection, flags: Int): Boolean {
+    override fun bindService(service: Intent, conn: ServiceConnection, flags: Int): Boolean {
       super.bindService(service, conn, flags)
       return false
     }

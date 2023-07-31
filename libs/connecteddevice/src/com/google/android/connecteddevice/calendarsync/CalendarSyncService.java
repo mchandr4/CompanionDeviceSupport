@@ -24,25 +24,11 @@ import android.os.IBinder;
 import android.os.StrictMode;
 import android.util.Log;
 import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
 
 /** Early start service that provides the Calendar Sync feature to the foreground user. */
 public final class CalendarSyncService extends Service {
 
   private static final String TAG = "CalendarSyncService";
-
-  /**
-   * A flag that controls whether the new bi-directional sync implementation is used. The value
-   * should only by changed by tests before the service is created.
-   */
-  @VisibleForTesting static boolean enableBidirectionalSync = false;
-
-  /**
-   * The legacy implementation that handles only receiving a full calendar data push.
-   *
-   * <p>Only one of calendarSyncManager or calendarSyncFeature will be non-null.
-   */
-  @Nullable private CalendarSyncManager calendarSyncManager;
 
   /**
    * The development implementation that handles sending and receiving calendar changes.
@@ -61,14 +47,9 @@ public final class CalendarSyncService extends Service {
   @Override
   public void onCreate() {
     super.onCreate();
-    if (enableBidirectionalSync) {
-      logi(TAG, "Creating CalendarSyncFeature2");
-      calendarSyncFeature = new CalendarSyncFeature2(getApplicationContext());
-      calendarSyncFeature.start();
-    } else {
-      logi(TAG, "Creating CalendarSyncManager");
-      calendarSyncManager = new CalendarSyncManager(getApplicationContext());
-    }
+    logi(TAG, "Creating CalendarSyncFeature2");
+    calendarSyncFeature = new CalendarSyncFeature2(getApplicationContext());
+    calendarSyncFeature.start();
 
     // TODO(b/177819109) This setting is global and should be enabled in Application.onCreate().
     // Enable StrictMode globally when debug logging is enabled.
@@ -85,11 +66,7 @@ public final class CalendarSyncService extends Service {
 
   @Override
   public void onDestroy() {
-    if (enableBidirectionalSync) {
-      calendarSyncFeature.stop();
-    } else {
-      calendarSyncManager.cleanup();
-    }
+    calendarSyncFeature.stop();
     super.onDestroy();
   }
 

@@ -21,6 +21,7 @@ import android.os.IBinder
 import android.os.ParcelUuid
 import android.util.Base64
 import androidx.room.Room
+import java.util.concurrent.Executors
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.connecteddevice.api.IAssociationCallback
@@ -50,23 +51,23 @@ import com.google.android.connecteddevice.util.ByteUtils
 import com.google.android.encryptionrunner.EncryptionRunnerFactory
 import com.google.common.truth.Truth.assertThat
 import com.google.common.util.concurrent.MoreExecutors.directExecutor
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.argumentCaptor
-import com.nhaarman.mockitokotlin2.doReturn
-import com.nhaarman.mockitokotlin2.eq
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.never
-import com.nhaarman.mockitokotlin2.spy
-import com.nhaarman.mockitokotlin2.times
-import com.nhaarman.mockitokotlin2.validateMockitoUsage
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.whenever
 import java.util.UUID
 import kotlin.test.fail
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.spy
+import org.mockito.kotlin.times
+import org.mockito.kotlin.validateMockitoUsage
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 private val TEST_CHALLENGE = "test Challenge".toByteArray()
 private val TEST_OOB_DATA =
@@ -155,6 +156,44 @@ class MultiProtocolDeviceControllerTest {
       .start()
 
     assertThat(transientErrorStorage.attempts).isEqualTo(2)
+  }
+
+  @Test
+  fun start_accessDatabaseViaTheSameThreadToAvoidException() {
+    val transientErrorStorage =
+      object :
+        ConnectedDeviceStorage(
+          context,
+          Base64CryptoHelper(),
+          connectedDeviceDatabase.associatedDeviceDao(),
+          directExecutor()
+        ) {
+        var attempts = 0
+        override fun getAllAssociatedDevices(): MutableList<AssociatedDevice> {
+          attempts++
+          if (attempts < 10) {
+            throw SQLiteCantOpenDatabaseException()
+          }
+          return super.getAllAssociatedDevices()
+        }
+       override fun getDriverAssociatedDevices(): MutableList<AssociatedDevice> {
+         // Throws exception if this method get called before [getAllAssociatedDevices] finishes.
+         if(attempts != 10) throw SQLiteCantOpenDatabaseException()
+         return super.getDriverAssociatedDevices()
+       }
+      }
+    try{
+      MultiProtocolDeviceController(
+        context,
+        protocolDelegate,
+        transientErrorStorage,
+        mockOobRunner,
+        testAssociationServiceUuid.uuid,
+        enablePassenger = false,
+        storageExecutor = Executors.newSingleThreadExecutor()).start()
+    } catch(e: SQLiteCantOpenDatabaseException) {
+      fail("Should not have thrown any exception");
+   }
   }
 
   @Test

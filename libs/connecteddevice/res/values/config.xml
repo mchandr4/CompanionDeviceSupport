@@ -17,7 +17,7 @@
 
 <resources>
     <!-- Current version of the SDK -->
-    <string name="hu_companion_sdk_version" translatable="false">1.4.7</string>
+    <string name="hu_companion_sdk_version" translatable="false">2.0.0</string>
     <integer name="hu_companion_binder_version" translatable="false">0</integer>
     <!-- Mobile SDK of later version should be compatible with the HU SDK. -->
     <string name="compatible_min_mobile_version_android" translatable="false">1.0.0</string>

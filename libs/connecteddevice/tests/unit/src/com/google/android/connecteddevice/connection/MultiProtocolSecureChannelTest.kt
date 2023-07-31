@@ -44,15 +44,6 @@ import com.google.android.encryptionrunner.HandshakeException
 import com.google.common.truth.Truth.assertThat
 import com.google.common.util.concurrent.MoreExecutors.directExecutor
 import com.google.protobuf.ByteString
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.argumentCaptor
-import com.nhaarman.mockitokotlin2.eq
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.never
-import com.nhaarman.mockitokotlin2.spy
-import com.nhaarman.mockitokotlin2.times
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.whenever
 import java.security.SignatureException
 import java.util.UUID
 import java.util.zip.DataFormatException
@@ -61,6 +52,15 @@ import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.spy
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 private const val PROTOCOL_ID_1 = "testProtocol1"
 private const val PROTOCOL_ID_2 = "testProtocol2"
@@ -254,7 +254,7 @@ class MultiProtocolSecureChannelTest {
   @Test
   fun decompressMessage_returnsFalseWhenThereAreDataFormatException() {
     completeHandshakeAndSaveTheKey()
-    whenever(mockInflater.inflate(any())).then { throw DataFormatException() }
+    whenever(mockInflater.inflate(any<ByteArray>())).then { throw DataFormatException() }
     val deviceMessage =
       DeviceMessage.createOutgoingMessage(
         UUID.randomUUID(),

@@ -27,7 +27,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.google.android.connecteddevice.api.Connector;
 import com.google.android.connecteddevice.api.FakeConnector;
 import com.google.android.connecteddevice.model.ConnectedDevice;
-import com.google.android.connecteddevice.trust.api.IOnTrustedDeviceEnrollmentNotificationRequestListener;
+import com.google.android.connecteddevice.trust.api.IOnTrustedDeviceEnrollmentNotificationCallback;
 import com.google.android.connecteddevice.trust.api.IOnTrustedDevicesRetrievedListener;
 import com.google.android.connecteddevice.trust.api.ITrustedDeviceAgentDelegate;
 import com.google.android.connecteddevice.trust.api.ITrustedDeviceCallback;
@@ -85,7 +85,7 @@ public final class TrustedDeviceManagerApi33Test {
   @Mock private ITrustedDeviceCallback trustedDeviceCallback;
   @Mock private ITrustedDeviceAgentDelegate trustAgentDelegate;
   @Mock private IOnTrustedDevicesRetrievedListener trustedDeviceListener;
-  @Mock private IOnTrustedDeviceEnrollmentNotificationRequestListener notificationRequestListener;
+  @Mock private IOnTrustedDeviceEnrollmentNotificationCallback notificationCallback;
   @Mock private KeyguardManager keyguardManager;
 
   private TrustedDeviceManagerApi33 manager;
@@ -101,7 +101,7 @@ public final class TrustedDeviceManagerApi33Test {
     // values.
     when(enrollmentCallback.asBinder()).thenReturn(mock(IBinder.class));
     when(trustedDeviceCallback.asBinder()).thenReturn(mock(IBinder.class));
-    when(notificationRequestListener.asBinder()).thenReturn(mock(IBinder.class));
+    when(notificationCallback.asBinder()).thenReturn(mock(IBinder.class));
 
     when(keyguardManager.addWeakEscrowToken(eq(FAKE_TOKEN), eq(DEFAULT_USER), any(), any()))
         .thenReturn(FAKE_HANDLE);
@@ -125,7 +125,7 @@ public final class TrustedDeviceManagerApi33Test {
     manager.setTrustedDeviceAgentDelegate(trustAgentDelegate);
     manager.registerTrustedDeviceEnrollmentCallback(enrollmentCallback);
     manager.registerTrustedDeviceCallback(trustedDeviceCallback);
-    manager.registerTrustedDeviceEnrollmentNotificationRequestListener(notificationRequestListener);
+    manager.registerTrustedDeviceEnrollmentNotificationCallback(notificationCallback);
     ArgumentCaptor<TrustedDeviceFeature.Callback> callbackCaptor =
         ArgumentCaptor.forClass(TrustedDeviceFeature.Callback.class);
     verify(feature).setCallback(callbackCaptor.capture());
@@ -283,7 +283,7 @@ public final class TrustedDeviceManagerApi33Test {
     // First, the phone will send an escrow token to start the enrollment.
     manager.featureCallback.onMessageReceived(
         SECURE_CONNECTED_DEVICE, createTokenMessage(FAKE_TOKEN));
-    verify(notificationRequestListener).onTrustedDeviceEnrollmentNotificationRequest();
+    verify(notificationCallback).onTrustedDeviceEnrollmentNotificationRequest();
 
     // The user confirms enrollment through UI on the secure car.
     manager.processEnrollment(/* isDeviceSecure= */ true);
@@ -307,6 +307,7 @@ public final class TrustedDeviceManagerApi33Test {
     WeakEscrowTokenActivatedListener listener = executeAndVerifyTokenAddedInEnrollFlowOnSecureCar();
 
     // Now notify that the token has been activated by the user entering their credentials.
+    manager.onCredentialVerified();
     listener.onWeakEscrowTokenActivated(FAKE_HANDLE, DEFAULT_USER);
   }
 
@@ -323,7 +324,7 @@ public final class TrustedDeviceManagerApi33Test {
     // First, the phone will send an escrow token to start the enrollment.
     manager.featureCallback.onMessageReceived(
         SECURE_CONNECTED_DEVICE, createTokenMessage(FAKE_TOKEN));
-    verify(notificationRequestListener).onTrustedDeviceEnrollmentNotificationRequest();
+    verify(notificationCallback).onTrustedDeviceEnrollmentNotificationRequest();
 
     // The user confirms enrollment through UI on the insecure car.
     manager.processEnrollment(/* isDeviceSecure= */ false);

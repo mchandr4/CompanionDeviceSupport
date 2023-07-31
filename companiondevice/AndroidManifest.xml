@@ -58,12 +58,13 @@
 
     <application
         android:label="@string/app_name"
+        android:icon="@mipmap/ic_directions_car_filled"
         android:directBootAware="true"
         android:supportsRtl="true">
         <service
             android:name="com.google.android.connecteddevice.service.ConnectedDeviceService"
             android:singleUser="true"
-            android:exported="true">
+            android:exported="false">
             <intent-filter>
                 <action android:name="com.google.android.connecteddevice.BIND_ASSOCIATION" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -136,6 +137,7 @@
             <meta-data android:name="com.google.android.connecteddevice.car_eap_service_name"
                 android:resource="@string/car_eap_service_name" />
         </service>
+        <!--  Export this activity only for automated test. -->
         <activity android:name=".AssociationActivity"
                   android:exported="true"
                   android:launchMode="singleInstance">
@@ -217,6 +219,10 @@
                  android:exported="false">
             <meta-data android:name="com.google.android.connecteddevice.trust.notification_channel_name"
                 android:resource="@string/trusted_device_notification_channel_name"/>
+             <!--
+                This will only take effect below Android 31 because of some system API changes. For
+                Android 31 and above, app icon will be shown as this notification icon.
+                -->
             <meta-data android:name="com.google.android.connecteddevice.trust.enrollment_notification_icon"
                 android:resource="@drawable/ic_directions_car_filled"/>
             <meta-data android:name="com.google.android.connecteddevice.trust.enrollment_notification_title"
@@ -226,7 +232,7 @@
         </service>
         <activity
             android:name=".trust.TrustedDeviceActivity"
-            android:exported="true"
+            android:exported="false"
             android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="com.google.android.connecteddevice.trust.TRUSTED_DEVICE_ACTIVITY" />

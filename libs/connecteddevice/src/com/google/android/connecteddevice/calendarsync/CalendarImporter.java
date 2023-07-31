@@ -32,10 +32,6 @@ import android.os.RemoteException;
 import android.provider.CalendarContract;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
-import com.google.android.connecteddevice.calendarsync.proto.Attendee;
-import com.google.android.connecteddevice.calendarsync.proto.Calendar;
-import com.google.android.connecteddevice.calendarsync.proto.Calendars;
-import com.google.android.connecteddevice.calendarsync.proto.Event;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
@@ -71,27 +67,27 @@ class CalendarImporter {
    *
    * @param calendars The calendars to import.
    */
-  void importCalendars(@NonNull Calendars calendars) {
-    for (Calendar calendar : calendars.getCalendarList()) {
+  void importCalendars(@NonNull UpdateCalendars calendars) {
+    for (Calendar calendar : calendars.getCalendarsList()) {
       logd(
           TAG,
           String.format(
               "Import Calendar[title=%s, uuid=%s] with %d events",
-              calendar.getTitle(), calendar.getUuid(), calendar.getEventCount()));
-      if (calendar.getEventCount() == 0) {
+              calendar.getTitle(), calendar.getKey(), calendar.getEventsCount()));
+      if (calendar.getEventsCount() == 0) {
         logd(TAG, "Ignore calendar- has no events");
         continue;
       }
       int calId = findOrCreateCalendar(calendar);
       logd(TAG, "Importing into calendar with id: " + calId);
-      for (Event event : calendar.getEventList()) {
+      for (Event event : calendar.getEventsList()) {
         insertEvent(event, calId);
       }
     }
   }
 
   private int findOrCreateCalendar(@NonNull Calendar calendar) {
-    int calendarId = findCalendar(calendar.getUuid());
+    int calendarId = findCalendar(calendar.getKey());
     if (calendarId != INVALID_CALENDAR_ID) {
       return calendarId;
     }
@@ -138,7 +134,7 @@ class CalendarImporter {
     values.put(CalendarContract.Calendars.ACCOUNT_TYPE, CalendarContract.ACCOUNT_TYPE_LOCAL);
     values.put(CalendarContract.Calendars.NAME, calendar.getTitle());
     values.put(CalendarContract.Calendars.CALENDAR_DISPLAY_NAME, calendar.getTitle());
-    values.put(CalendarContract.Calendars._SYNC_ID, calendar.getUuid());
+    values.put(CalendarContract.Calendars._SYNC_ID, calendar.getKey());
     values.put(CalendarContract.Calendars.CALENDAR_COLOR, calendar.getColor().getArgb());
     values.put(CalendarContract.Calendars.VISIBLE, 1);
     values.put(CalendarContract.Calendars.SYNC_EVENTS, 1);
@@ -147,7 +143,7 @@ class CalendarImporter {
     Matcher matcher = CALENDAR_ID_PATTERN.matcher(uri.toString());
     return matcher.matches()
         ? Integer.parseInt(matcher.group(CALENDAR_ID_GROUP))
-        : findCalendar(calendar.getUuid());
+        : findCalendar(calendar.getKey());
   }
 
   private void insertEvent(@NonNull Event event, int calId) {
@@ -157,10 +153,10 @@ class CalendarImporter {
     values.put(CalendarContract.Events.CALENDAR_ID, calId);
     values.put(CalendarContract.Events.TITLE, event.getTitle());
     values.put(CalendarContract.Events.DESCRIPTION, event.getDescription());
-    values.put(CalendarContract.Events._SYNC_ID, event.getExternalIdentifier());
+    values.put(CalendarContract.Events._SYNC_ID, event.getKey());
     values.put(
-        CalendarContract.Events.DTSTART, SECONDS.toMillis(event.getStartDate().getSeconds()));
-    values.put(CalendarContract.Events.DTEND, SECONDS.toMillis(event.getEndDate().getSeconds()));
+        CalendarContract.Events.DTSTART, SECONDS.toMillis(event.getBeginTime().getSeconds()));
+    values.put(CalendarContract.Events.DTEND, SECONDS.toMillis(event.getEndTime().getSeconds()));
     values.put(CalendarContract.Events.EVENT_LOCATION, event.getLocation());
     values.put(CalendarContract.Events.ORGANIZER, event.getOrganizer());
     values.put(CalendarContract.Events.ALL_DAY, event.getIsAllDay() ? 1 : 0);
@@ -175,7 +171,7 @@ class CalendarImporter {
     // Insert event to calendar
     Uri eventRowUri = insertContent(CalendarContract.Events.CONTENT_URI, values);
 
-    if (event.getAttendeeCount() == 0) {
+    if (event.getAttendeesCount() == 0) {
       return;
     }
 
@@ -191,7 +187,7 @@ class CalendarImporter {
     }
 
     String eventId = matcher.group(EVENT_ID_GROUP);
-    insertAttendees(event.getAttendeeList(), eventId);
+    insertAttendees(event.getAttendeesList(), eventId);
   }
 
   private void insertAttendees(@NonNull List<Attendee> attendees, @NonNull String eventId) {

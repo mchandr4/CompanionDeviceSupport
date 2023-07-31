@@ -201,9 +201,9 @@
     <string name="ble_device_name_prefix">Vehicle\u00A0</string>
 
     <!-- QR code uri scheme. -->
-    <string name="uri_scheme" translatable="false">companion</string>
+    <string name="uri_scheme" translatable="false">https</string>
     <!-- QR code uri authority. -->
-    <string name="uri_authority"  translatable="false">demo.companiondevice.com</string>
+    <string name="uri_authority"  translatable="false">automotivecompanionapp.goog</string>
     <!-- QR code uri path. -->
     <string name="uri_path"  translatable="false">associate</string>
 

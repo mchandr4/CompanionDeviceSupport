@@ -457,7 +457,7 @@ final class EventContentDelegate extends BaseContentDelegate<Event> {
      * regular meeting.
      */
     EXCEPTION("X");
-    // LINT.ThenChange(//depot/google3/third_party/swift/AndroidAutoCalendarSync/Sources/AndroidAutoCalendarSync/EKEventStore+Extensions.swift)
+    // LINT.ThenChange(//depot/google3/third_party/swift/AndroidAutoCalendarSync/Sources/AndroidAutoCalendarSync/EventKit+Extensions.swift)
 
     /** The code to include in the key. */
     final String code;

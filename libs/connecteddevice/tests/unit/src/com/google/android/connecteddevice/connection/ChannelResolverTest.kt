@@ -38,20 +38,20 @@ import com.google.android.connecteddevice.transport.ProtocolDevice
 import com.google.android.encryptionrunner.FakeEncryptionRunner
 import com.google.common.truth.Truth.assertThat
 import com.google.common.util.concurrent.MoreExecutors.directExecutor
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.anyOrNull
-import com.nhaarman.mockitokotlin2.argumentCaptor
-import com.nhaarman.mockitokotlin2.eq
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.spy
-import com.nhaarman.mockitokotlin2.validateMockitoUsage
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.whenever
 import java.util.UUID
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.spy
+import org.mockito.kotlin.validateMockitoUsage
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 private const val TEST_PROTOCOL_ID_1 = "testDevice1"
 private const val TEST_PROTOCOL_ID_2 = "testDevice2"

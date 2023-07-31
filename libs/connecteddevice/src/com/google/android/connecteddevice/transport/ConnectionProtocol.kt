@@ -17,6 +17,7 @@ package com.google.android.connecteddevice.transport
 
 import android.os.ParcelUuid
 import androidx.annotation.CallSuper
+import androidx.annotation.VisibleForTesting
 import com.google.android.connecteddevice.util.AidlThreadSafeCallbacks
 import com.google.android.connecteddevice.util.SafeLog.logd
 import com.google.android.connecteddevice.util.SafeLog.logw
@@ -30,7 +31,7 @@ import java.util.concurrent.Executors
  * interacting with devices.
  */
 abstract class ConnectionProtocol(
-  private val callbackExecutor: Executor = Executors.newCachedThreadPool()
+  @get:VisibleForTesting internal val callbackExecutor: Executor = Executors.newFixedThreadPool(1)
 ) : IConnectionProtocol.Stub() {
   protected val dataReceivedListeners:
     MutableMap<String, AidlThreadSafeCallbacks<IDataReceivedListener>> =
@@ -204,9 +205,9 @@ abstract class ConnectionProtocol(
    * listeners registered later.
    */
   fun notifyDataReceived(protocolId: String, data: ByteArray) {
-    dataReceivedListeners[protocolId]?.takeUnless { it.isEmpty }?.invoke {
-      it.onDataReceived(protocolId, data)
-    }
+    dataReceivedListeners[protocolId]
+      ?.takeUnless { it.isEmpty }
+      ?.invoke { it.onDataReceived(protocolId, data) }
       ?: run {
         logd(
           TAG,

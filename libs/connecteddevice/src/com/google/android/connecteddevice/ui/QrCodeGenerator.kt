@@ -28,7 +28,17 @@ import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 /** Factory class of QR code. */
 object QrCodeGenerator {
   private const val TAG = "QrCodeGenerator"
-  /** Returns the [Bitmap] of the generated QR code which is encoded by [content]. */
+  /**
+   * Returns a [Bitmap] of a QR code with the given [content].
+   *
+   * @param content the data which will be rendered by the QR code.
+   * @param sizeInPixels size of the QR code image.
+   * @param foregroundColor the color of the data of the QR code, please set this according to the
+   *   app theme.
+   * @param backgroundColor the color of the background of the QR code.
+   * @param errorCorrection determines the percentage of the total QR code that is allowed to be
+   *   dirty or damaged without being unable to read.
+   */
   @JvmOverloads
   @JvmStatic
   fun createQrCode(

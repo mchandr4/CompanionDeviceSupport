@@ -103,6 +103,7 @@ open class TransportService : Service() {
       UUID.fromString(metaDataProvider.getMetaString(META_WRITE_UUID, DEFAULT_WRITE_UUID))
     val readUuid =
       UUID.fromString(metaDataProvider.getMetaString(META_READ_UUID, DEFAULT_READ_UUID))
+    val serviceChangedUuid = UUID.fromString(SERVICE_CHANGED_UUID)
     val defaultMtuSize = metaDataProvider.getMetaInt(META_DEFAULT_MTU_BYTES, DEFAULT_MTU_SIZE)
     val isProxyEnabled =
       metaDataProvider.getMetaBoolean(META_ENABLE_PROXY, PROXY_ENABLED_BY_DEFAULT)
@@ -120,6 +121,7 @@ open class TransportService : Service() {
       advertiseDataCharacteristicUuid,
       writeUuid,
       readUuid,
+      serviceChangedUuid,
       MAX_ADVERTISEMENT_DURATION,
       defaultMtuSize
     )
@@ -176,6 +178,9 @@ open class TransportService : Service() {
     private const val DEFAULT_WRITE_UUID = "5e2a68a5-27be-43f9-8d1e-4546976fabd7"
 
     private const val DEFAULT_READ_UUID = "5e2a68a6-27be-43f9-8d1e-4546976fabd7"
+
+    /** This UUID uses `0x2a05` required by the spec. */
+    private const val SERVICE_CHANGED_UUID = "00002A05-0000-1000-8000-00805F9B34FB"
 
     private const val DEFAULT_MTU_SIZE = 185 // Max allowed for iOS.
 

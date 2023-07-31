@@ -53,6 +53,7 @@ constructor(
   advertiseDataCharacteristicUuid: UUID,
   writeCharacteristicUuid: UUID,
   readCharacteristicUuid: UUID,
+  serviceChangedCharacteristicUuid: UUID,
   private val maxReconnectAdvertisementDuration: Duration,
   defaultMtuSize: Int,
   callbackExecutor: Executor = Executors.newCachedThreadPool()
@@ -69,6 +70,12 @@ constructor(
       BluetoothGattCharacteristic.PROPERTY_WRITE or
         BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE,
       BluetoothGattCharacteristic.PERMISSION_WRITE
+    )
+  private val serviceChangedCharacteristic =
+    BluetoothGattCharacteristic(
+      serviceChangedCharacteristicUuid,
+      BluetoothGattCharacteristic.PROPERTY_NOTIFY or BluetoothGattCharacteristic.PROPERTY_READ,
+      BluetoothGattCharacteristic.PERMISSION_READ
     )
   private val advertiseDataCharacteristic =
     BluetoothGattCharacteristic(
@@ -234,12 +241,7 @@ constructor(
       return
     }
     EventLog.onDeviceSearchStarted()
-    startAdvertising(
-      reconnectServiceUuid,
-      advertiseCallback,
-      advertiseData,
-      reconnectDataUuid
-    )
+    startAdvertising(reconnectServiceUuid, advertiseCallback, advertiseData, reconnectDataUuid)
   }
 
   private fun retryConnectionDiscovery(
@@ -311,9 +313,8 @@ constructor(
   /**
    * Resets all internal states.
    *
-   * Please be cautious when calling this method, a disconnect usually does not need a reset,
-   * please call [disconnectDevice] instead. This should only be called when Bluetooth is turned
-   * off.
+   * Please be cautious when calling this method, a disconnect usually does not need a reset, please
+   * call [disconnectDevice] instead. This should only be called when Bluetooth is turned off.
    */
   override fun reset() {
     super.reset()
@@ -341,6 +342,7 @@ constructor(
     val gattService = BluetoothGattService(serviceUuid, BluetoothGattService.SERVICE_TYPE_PRIMARY)
     gattService.addCharacteristic(writeCharacteristic)
     gattService.addCharacteristic(readCharacteristic)
+    gattService.addCharacteristic(serviceChangedCharacteristic)
     val uuid = ParcelUuid(serviceUuid)
     val advertiseDataBuilder = AdvertiseData.Builder().addServiceUuid(uuid)
 

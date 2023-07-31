@@ -19,6 +19,7 @@ package com.google.android.connecteddevice.trust;
 import static com.google.android.connecteddevice.trust.TrustedDeviceConstants.INTENT_ACTION_TRUSTED_DEVICE_SETTING;
 import static com.google.android.connecteddevice.util.SafeLog.logd;
 import static com.google.android.connecteddevice.util.SafeLog.loge;
+import static com.google.android.connecteddevice.util.SafeLog.logw;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -32,7 +33,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import androidx.annotation.Nullable;
 import com.google.android.connecteddevice.service.MetaDataService;
-import com.google.android.connecteddevice.trust.api.IOnTrustedDeviceEnrollmentNotificationRequestListener;
+import com.google.android.connecteddevice.trust.api.IOnTrustedDeviceEnrollmentNotificationCallback;
 import com.google.android.connecteddevice.trust.api.ITrustedDeviceManager;
 
 /** Service to provide UI functionality to the {@link TrustedDeviceManagerService}. */
@@ -112,8 +113,8 @@ public class TrustedDeviceUiDelegateService extends MetaDataService {
       return;
     }
     try {
-      trustedDeviceManager.registerTrustedDeviceEnrollmentNotificationRequestListener(
-          enrollmentNotificationListener);
+      trustedDeviceManager.registerTrustedDeviceEnrollmentNotificationCallback(
+          enrollmentNotificationCallback);
     } catch (RemoteException e) {
       loge(TAG, "Failed to register enrollment callback.", e);
     }
@@ -125,8 +126,8 @@ public class TrustedDeviceUiDelegateService extends MetaDataService {
       return;
     }
     try {
-      trustedDeviceManager.unregisterTrustedDeviceEnrollmentNotificationRequestListener(
-          enrollmentNotificationListener);
+      trustedDeviceManager.unregisterTrustedDeviceEnrollmentNotificationCallback(
+          enrollmentNotificationCallback);
     } catch (RemoteException e) {
       loge(TAG, "Failed to unregister callbacks.", e);
     }
@@ -152,12 +153,21 @@ public class TrustedDeviceUiDelegateService extends MetaDataService {
         }
       };
 
-  private final IOnTrustedDeviceEnrollmentNotificationRequestListener
-      enrollmentNotificationListener =
-          new IOnTrustedDeviceEnrollmentNotificationRequestListener.Stub() {
-            @Override
-            public void onTrustedDeviceEnrollmentNotificationRequest() {
-              showEnrollmentNotification();
-            }
-          };
+  private final IOnTrustedDeviceEnrollmentNotificationCallback enrollmentNotificationCallback =
+      new IOnTrustedDeviceEnrollmentNotificationCallback.Stub() {
+        @Override
+        public void onTrustedDeviceEnrollmentNotificationRequest() {
+          showEnrollmentNotification();
+        }
+
+        @Override
+        public void onTrustedDeviceEnrollmentNotificationCancellation() {
+          logd(TAG, "Device disconnected during enrollment, cancel notification.");
+          if (notificationManager == null) {
+            logw(TAG, "Notification manager is null, cannot cancel notification.");
+            return;
+          }
+          notificationManager.cancel(ENROLLMENT_NOTIFICATION_ID);
+        }
+      };
 }

@@ -20,8 +20,11 @@ import static com.android.car.ui.core.CarUi.requireToolbar;
 import static com.android.car.ui.toolbar.Toolbar.State.SUBPAGE;
 import static com.google.android.connecteddevice.api.RemoteFeature.ACTION_ASSOCIATION_SETTING;
 import static com.google.android.connecteddevice.api.RemoteFeature.ASSOCIATED_DEVICE_DATA_NAME_EXTRA;
+import static com.google.android.connecteddevice.trust.TrustedDeviceConstants.TRUSTED_DEVICE_ERROR_DISCONNECTED_DURING_ENROLLMENT;
+import static com.google.android.connecteddevice.trust.TrustedDeviceConstants.TRUSTED_DEVICE_ERROR_NO_CONNECTION;
 import static com.google.android.connecteddevice.util.SafeLog.logd;
 import static com.google.android.connecteddevice.util.SafeLog.loge;
+import static com.google.android.connecteddevice.util.SafeLog.logw;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -187,8 +190,17 @@ public class TrustedDeviceActivity extends FragmentActivity {
   }
 
   private void onEnrollmentError(Integer error) {
-    if (error != null) {
-      runOnUiThread(() -> showEnrollmentErrorDialogFragment(error));
+    if (error == null) {
+      return;
+    }
+    logd(TAG, "Got enrollment error: " + error);
+    switch (error) {
+      case TRUSTED_DEVICE_ERROR_DISCONNECTED_DURING_ENROLLMENT:
+      case TRUSTED_DEVICE_ERROR_NO_CONNECTION:
+        handleNoConnectionError();
+        break;
+      default:
+        runOnUiThread(() -> showEnrollmentErrorDialogFragment(error));
     }
   }
 
@@ -197,9 +209,6 @@ public class TrustedDeviceActivity extends FragmentActivity {
     switch (state) {
       case WAITING_FOR_PASSWORD_SETUP:
         runOnUiThread(this::promptToCreatePassword);
-        break;
-      case NO_CONNECTION:
-        runOnUiThread(this::showDeviceNotConnectedDialog);
         break;
       case CREDENTIAL_PENDING:
         validateCredential();
@@ -227,6 +236,18 @@ public class TrustedDeviceActivity extends FragmentActivity {
       return;
     }
     model.setAssociatedDevice(device);
+  }
+
+  private void handleNoConnectionError() {
+    logd(TAG, "Phone disconnected");
+    CreateProfileLockDialogFragment fragment =
+        (CreateProfileLockDialogFragment)
+            getSupportFragmentManager().findFragmentByTag(CREATE_PROFILE_LOCK_DIALOG_TAG);
+    if (fragment != null) {
+      logd(TAG, "Dismiss create lock screen dialogue");
+      fragment.dismiss();
+    }
+    runOnUiThread(this::showDeviceNotConnectedDialog);
   }
 
   private void validateCredential() {
@@ -260,8 +281,14 @@ public class TrustedDeviceActivity extends FragmentActivity {
   }
 
   private void onCredentialVerified(int resultCode) {
+    EnrollmentState state = model.getEnrollmentState().getValue();
+    if (state != EnrollmentState.CREDENTIAL_PENDING) {
+      logw(TAG, "Credential verified but enrollment in incorrect state: " + state + ", ignore.");
+      return;
+    }
     if (resultCode == RESULT_OK) {
-      logd(TAG, "Credentials accepted. Waiting for TrustAgent to activate " + "token.");
+      logd(TAG, "Credentials accepted.");
+      model.onCredentialVerified();
       return;
     }
     loge(TAG, "Lock screen was unsuccessful. Returned result code: " + resultCode + ".");
@@ -306,6 +333,11 @@ public class TrustedDeviceActivity extends FragmentActivity {
   }
 
   private void onLockScreenCreated() {
+    EnrollmentState state = model.getEnrollmentState().getValue();
+    if (state != EnrollmentState.WAITING_FOR_PASSWORD_SETUP) {
+      logw(TAG, "Lockscreen created but enrollment in incorrect state: " + state + ", ignore.");
+      return;
+    }
     if (!isDeviceSecure()) {
       loge(TAG, "Failed to create lock screen.");
       isScreenLockNewlyCreated.set(false);

@@ -104,19 +104,19 @@ constructor(
     object : ConnectedDeviceStorage.AssociatedDeviceCallback {
       override fun onAssociatedDeviceAdded(device: AssociatedDevice) {
         logd(TAG, "An associated device has been added. Repopulating devices from storage.")
-        populateDevicesWithExecutor()
+        populateDevicesWithStorageExecutor()
         // Make sure the internal status are synched from storage before invoking callbacks.
         storageExecutor.execute { invokeCallbacksWithAssociatedDevice(device) }
       }
 
       override fun onAssociatedDeviceRemoved(device: AssociatedDevice) {
         logd(TAG, "An associated device has been removed. Repopulating devices from storage.")
-        populateDevicesWithExecutor()
+        populateDevicesWithStorageExecutor()
       }
 
       override fun onAssociatedDeviceUpdated(device: AssociatedDevice) {
         logd(TAG, "An associated device has been updated. Repopulating devices from storage.")
-        populateDevicesWithExecutor()
+        populateDevicesWithStorageExecutor()
       }
     }
 
@@ -157,21 +157,25 @@ constructor(
 
   override fun start() {
     logd(TAG, "Starting controller and initiating connections with driver devices.")
-    populateDevicesWithExecutor()
-    val driverDevices = storage.driverAssociatedDevices
-    for (device in driverDevices) {
-      if (device.isConnectionEnabled) {
+    // Runs as the first line of the function to avoid the following database interaction from
+    // throwing exception.
+    populateDevicesWithStorageExecutor()
+    storageExecutor.execute {
+      val driverDevices = storage.driverAssociatedDevices
+      for (device in driverDevices) {
+        if (device.isConnectionEnabled) {
         initiateConnectionToDevice(UUID.fromString(device.deviceId))
+        }
       }
-    }
-    if (!enablePassenger) {
-      logd(TAG, "The passenger experience is disabled. Skipping discovery of passenger devices.")
-      return
-    }
-    logd(TAG, "Initiating connections with passenger devices.")
-    val passengerDevices = storage.passengerAssociatedDevices
-    for (device in passengerDevices) {
-      initiateConnectionToDevice(UUID.fromString(device.deviceId))
+      if (!enablePassenger) {
+        logd(TAG, "The passenger experience is disabled. Skipping discovery of passenger devices.")
+        return@execute
+      }
+      logd(TAG, "Initiating connections with passenger devices.")
+      val passengerDevices = storage.passengerAssociatedDevices
+      for (device in passengerDevices) {
+          initiateConnectionToDevice(UUID.fromString(device.deviceId))
+      }
     }
   }
 
@@ -335,10 +339,10 @@ constructor(
   /**
    * Populates associated devices from the storage.
    *
-   * Any logic following this which relies on the data refreshness needs to run on the
-   * same executor to avoid race conditions.
+   * Any logic following this which relies on the data refreshness needs to run on the same executor
+   * to avoid race conditions.
    */
-  private fun populateDevicesWithExecutor() {
+  private fun populateDevicesWithStorageExecutor() {
     storageExecutor.execute {
       while (true) {
         try {

@@ -16,17 +16,16 @@ import com.google.android.connecteddevice.model.DeviceMessage.OperationType.CLIE
 import com.google.android.connecteddevice.util.ByteUtils
 import com.google.common.truth.Truth.assertThat
 import com.google.protobuf.ByteString
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.eq
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.never
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.whenever
 import java.util.UUID
-import java.util.concurrent.ConcurrentHashMap
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 @RunWith(AndroidJUnit4::class)
 class LegacyApiProxyTest {
@@ -65,13 +64,7 @@ class LegacyApiProxyTest {
     whenever(versionOneMockCoordinator.getConnectedDevicesForDriver())
       .thenReturn(listOf(connectedDevice))
     defaultProxyVersionNegative =
-      LegacyApiProxy(
-        negativeMockCoordinator,
-        recipientId,
-        mockConnectorCallback,
-        testLoggerId,
-        -1
-      )
+      LegacyApiProxy(negativeMockCoordinator, recipientId, mockConnectorCallback, testLoggerId, -1)
     defaultProxyVersion0 =
       LegacyApiProxy(
         versionZeroMockCoordinator,
@@ -81,13 +74,7 @@ class LegacyApiProxyTest {
         0
       )
     defaultProxyVersion1 =
-      LegacyApiProxy(
-        versionOneMockCoordinator,
-        recipientId,
-        mockConnectorCallback,
-        testLoggerId,
-        1
-      )
+      LegacyApiProxy(versionOneMockCoordinator, recipientId, mockConnectorCallback, testLoggerId, 1)
   }
 
   @Test

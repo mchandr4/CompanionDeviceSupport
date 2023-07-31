@@ -21,10 +21,10 @@ import androidx.annotation.NonNull;
 
 /** A manager class handling the {@link CalendarSyncFeature}. */
 final class CalendarSyncManager {
-  private final CalendarSyncFeature feature;
+  private final CalendarSyncFeature2 feature;
 
   CalendarSyncManager(@NonNull Context context) {
-    feature = new CalendarSyncFeature(context);
+    feature = new CalendarSyncFeature2(context);
     feature.start();
   }
 

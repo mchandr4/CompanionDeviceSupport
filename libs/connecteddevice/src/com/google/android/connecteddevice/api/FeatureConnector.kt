@@ -25,7 +25,6 @@ import android.os.IBinder
 import android.os.IInterface
 import android.os.Looper
 import android.os.ParcelUuid
-import android.os.RemoteException
 import androidx.annotation.VisibleForTesting
 import com.google.android.companionprotos.Query
 import com.google.android.companionprotos.QueryResponse
@@ -38,7 +37,6 @@ import com.google.android.connecteddevice.api.SafeConnector.QueryCallback
 import com.google.android.connecteddevice.api.external.ISafeBinderVersion
 import com.google.android.connecteddevice.api.external.ISafeFeatureCoordinator
 import com.google.android.connecteddevice.api.external.ISafeOnAssociatedDevicesRetrievedListener
-import com.google.android.connecteddevice.api.external.ISafeOnLogRequestedListener
 import com.google.android.connecteddevice.util.ByteUtils
 import com.google.android.connecteddevice.util.Logger
 import com.google.android.connecteddevice.util.SafeLog
@@ -58,7 +56,7 @@ import java.util.concurrent.locks.ReentrantLock
  * @param callback Callback associated with this connector.
  * @param minSupportedVersion External feature's minimum supported Companion API version.
  */
-class FeatureConnector (
+class FeatureConnector(
   private val context: Context,
   override val featureId: ParcelUuid,
   override val callback: SafeConnector.Callback,

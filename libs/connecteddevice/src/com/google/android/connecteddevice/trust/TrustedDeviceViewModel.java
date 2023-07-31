@@ -16,9 +16,11 @@
 
 package com.google.android.connecteddevice.trust;
 
+import static com.google.android.connecteddevice.trust.TrustedDeviceConstants.TRUSTED_DEVICE_ERROR_NO_CONNECTION;
 import static com.google.android.connecteddevice.trust.TrustedDeviceConstants.TRUSTED_DEVICE_ERROR_UNEXPECTED_STATE;
 import static com.google.android.connecteddevice.util.SafeLog.logd;
 import static com.google.android.connecteddevice.util.SafeLog.loge;
+import static com.google.android.connecteddevice.util.SafeLog.logw;
 
 import android.app.Application;
 import android.app.KeyguardManager;
@@ -52,8 +54,7 @@ public class TrustedDeviceViewModel extends AndroidViewModel {
     WAITING_FOR_PASSWORD_SETUP,
     IN_PROGRESS,
     CREDENTIAL_PENDING,
-    FINISHED,
-    NO_CONNECTION
+    FINISHED
   }
 
   private final MutableLiveData<List<TrustedDevice>> trustedDevices = new MutableLiveData<>();
@@ -182,7 +183,10 @@ public class TrustedDeviceViewModel extends AndroidViewModel {
     return enrollmentState;
   }
 
-  /** Get enrollment error. */
+  /**
+   * Get enrollment error. Enrollment error will always result in enrollment aborted and enrollment
+   * state reset. Caller only needs to do error handling in UI.
+   */
   public LiveData<Integer> getEnrollmentError() {
     return enrollmentError;
   }
@@ -214,9 +218,32 @@ public class TrustedDeviceViewModel extends AndroidViewModel {
         processEnrollmentInternal();
         break;
       default:
-        loge(TAG, "Attempted to process enrollment with unexpected state, aborting enrollment.");
+        loge(
+            TAG,
+            "Attempted to process enrollment with unexpected state: "
+                + enrollmentState.getValue()
+                + ", aborting enrollment.");
         abortEnrollment();
         enrollmentError.postValue(TRUSTED_DEVICE_ERROR_UNEXPECTED_STATE);
+    }
+  }
+
+  /**
+   * Must be called when the user has successfully confirmed their credential via lock screen
+   * launched by [createConfirmDeviceCredentialIntent]. Otherwise, the enrollment will not proceed.
+   */
+  public void onCredentialVerified() {
+    if (trustedDeviceManager == null) {
+      loge(
+          TAG,
+          "Failed to send credential verification confirmation to TrustedDeviceManager. "
+              + "Service not connected.");
+      return;
+    }
+    try {
+      trustedDeviceManager.onCredentialVerified();
+    } catch (RemoteException e) {
+      loge(TAG, "Failed to confirm credential verification.", e);
     }
   }
 
@@ -241,6 +268,14 @@ public class TrustedDeviceViewModel extends AndroidViewModel {
    * @param device The associated device to be enrolled.
    */
   public void enrollTrustedDevice(AssociatedDevice device) {
+    // Clean up pending enrollment before starting a new enrollment.
+    if (enrollmentState.getValue() != EnrollmentState.NONE) {
+      logw(
+          TAG,
+          "Attempting to enroll trusted device while enrollment is still in progress. Clear"
+              + " previous enrollment and proceed.");
+       abortEnrollment();
+    }
     updateTrustedDevicesFromServer();
     attemptInitiatingEnrollment(device);
   }
@@ -289,7 +324,7 @@ public class TrustedDeviceViewModel extends AndroidViewModel {
 
   private void attemptInitiatingEnrollment(AssociatedDevice device) {
     if (!isCompanionDeviceConnected(device.getDeviceId())) {
-      enrollmentState.postValue(EnrollmentState.NO_CONNECTION);
+      enrollmentError.postValue(TRUSTED_DEVICE_ERROR_NO_CONNECTION);
       return;
     }
     try {
@@ -426,6 +461,7 @@ public class TrustedDeviceViewModel extends AndroidViewModel {
         @Override
         public void onTrustedDeviceEnrollmentError(int error) {
           loge(TAG, "Failed to enroll trusted device, encountered error: " + error + ".");
+          abortEnrollment();
           enrollmentError.postValue(error);
         }
 

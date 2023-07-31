@@ -30,17 +30,17 @@ import com.google.android.connecteddevice.util.ByteUtils
 import com.google.common.truth.Truth.assertThat
 import com.google.common.util.concurrent.MoreExecutors.directExecutor
 import com.google.protobuf.ByteString
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.argumentCaptor
-import com.nhaarman.mockitokotlin2.eq
-import com.nhaarman.mockitokotlin2.isNull
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.never
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.whenever
 import java.util.UUID
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.isNull
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 @RunWith(AndroidJUnit4::class)
 class FeatureCoordinatorTest {
@@ -703,7 +703,11 @@ class FeatureCoordinatorTest {
         /* message= */ ByteArray(0),
         /* originalMessageSize= */ 0,
       )
-    coordinator.onMessageReceivedInternal(connectedDevice, message, shouldCacheMessage = true)
+    coordinator.onMessageReceivedInternal(
+      connectedDevice,
+      message,
+      shouldCacheMessage = true,
+    )
 
     verify(mockSystemQueryCache).maybeCacheResponse(connectedDevice, message)
   }
@@ -725,7 +729,11 @@ class FeatureCoordinatorTest {
         /* message= */ ByteArray(0),
         /* originalMessageSize= */ 0,
       )
-    coordinator.onMessageReceivedInternal(connectedDevice, message, shouldCacheMessage = false)
+    coordinator.onMessageReceivedInternal(
+      connectedDevice,
+      message,
+      shouldCacheMessage = false,
+    )
 
     verify(mockSystemQueryCache, never()).maybeCacheResponse(any(), any())
   }
@@ -1163,7 +1171,7 @@ class FeatureCoordinatorTest {
     safeCoordinator.registerConnectionCallback(mockConnectionCallback)
     val deviceId = UUID.randomUUID().toString()
 
-    coordinator.safeOnDeviceConnectedInternal(deviceId)
+    coordinator.safeConnectionCallbacks.invoke { it.onDeviceConnected(deviceId) }
 
     verify(mockConnectionCallback).onDeviceConnected(deviceId)
   }
@@ -1174,7 +1182,7 @@ class FeatureCoordinatorTest {
     safeCoordinator.registerConnectionCallback(mockConnectionCallback)
     val deviceId = UUID.randomUUID().toString()
 
-    coordinator.safeOnDeviceDisconnectedInternal(deviceId)
+    coordinator.safeConnectionCallbacks.invoke { it.onDeviceDisconnected(deviceId) }
 
     verify(mockConnectionCallback).onDeviceDisconnected(deviceId)
   }
@@ -1186,7 +1194,7 @@ class FeatureCoordinatorTest {
     val deviceId = UUID.randomUUID().toString()
 
     safeCoordinator.unregisterConnectionCallback(mockConnectionCallback)
-    coordinator.safeOnDeviceConnectedInternal(deviceId)
+    coordinator.safeConnectionCallbacks.invoke { it.onDeviceConnected(deviceId) }
 
     verify(mockConnectionCallback, never()).onDeviceConnected(deviceId)
   }

@@ -17,7 +17,7 @@
 package com.google.android.connecteddevice.transport;
 
 /** Listener to be invoked when data has been received from a device. */
-oneway interface IDataReceivedListener {
+interface IDataReceivedListener {
   /** Called when [data] is received from the remote device on protocol protocolId. */
   void onDataReceived(in String protocolId, in byte[] data);
 }
