@@ -59,7 +59,6 @@ import java.util.concurrent.locks.ReentrantLock
 class FeatureConnector(
   private val context: Context,
   override val featureId: ParcelUuid,
-  override val callback: SafeConnector.Callback,
   private val minSupportedVersion: Int = 0
 ) : SafeConnector {
 
@@ -74,6 +73,11 @@ class FeatureConnector(
   private val waitingForConnection = AtomicBoolean(true)
 
   private val queryIdGenerator = QueryIdGenerator()
+
+  override lateinit var callback: SafeConnector.Callback
+
+  override val isConnected: Boolean
+    get() = coordinatorProxy != null && !waitingForConnection.get()
 
   override val connectedDevices: List<String>
     get() = coordinatorProxy?.getConnectedDevices() ?: emptyList()
@@ -128,6 +132,10 @@ class FeatureConnector(
           loge("Incompatible companion platform version. Aborting.")
           return
         }
+        if (!this@FeatureConnector::callback.isInitialized) {
+          loge("FeatureConnector callback was not initialized. Aborting.")
+          return
+        }
         coordinatorProxy =
           when {
             platformVersion > 0 ->
@@ -169,8 +177,9 @@ class FeatureConnector(
       }
     }
 
-  init {
-    logd("Initiating connection to companion platform.")
+  override fun connect(callback: SafeConnector.Callback) {
+    logd("Initiating connection to companion platform and initializing callback.")
+    this.callback = callback
     bindToService(ACTION_QUERY_API_VERSION, versionCheckConnection)
   }
 
@@ -220,7 +229,7 @@ class FeatureConnector(
     }
   }
 
-  override fun cleanUp() {
+  override fun disconnect() {
     logd("Disconnecting from the companion platform.")
     coordinatorProxy?.cleanUp()
     coordinatorProxy = null
@@ -240,7 +249,7 @@ class FeatureConnector(
 
   private fun onServiceDisconnected() {
     logd("Service has disconnected. Cleaning up.")
-    cleanUp()
+    disconnect()
   }
 
   private fun onNullBinding() {
@@ -411,6 +420,7 @@ class FeatureConnector(
     /** A generator of unique IDs for queries. */
     private class QueryIdGenerator {
       private val messageId = AtomicInteger(0)
+
       fun next(): Int {
         val current = messageId.getAndIncrement()
         messageId.compareAndSet(Int.MAX_VALUE, 0)

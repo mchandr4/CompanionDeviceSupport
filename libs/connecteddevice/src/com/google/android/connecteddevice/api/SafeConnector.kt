@@ -32,18 +32,23 @@ interface SafeConnector {
   val featureId: ParcelUuid
 
   /** [Callback] for connection events. */
-  val callback: Callback
+  var callback: Callback
 
   /** List of ids for the currently connected devices. */
   val connectedDevices: List<String>
 
+  /** Whether this [SafeConnector] is currently connected and ready for interaction. */
+  val isConnected: Boolean
+
+  /** Establishes a connection to the companion platform. */
+  fun connect(callback: Callback)
+
   /**
-  * Cleans up services and feature coordinators attached to the companion platform.
-  * Calling cleanUp will disconnect the feature from the platform and prevent it from receiving
-  * Companion related events. Expectation is that cleanUp will only be called before the
-  * SafeConnector object is disposed.
-  */
-  fun cleanUp()
+   * Cleans up services and feature coordinators attached to the companion platform. Will disconnect
+   * the feature from the platform and prevent it from receiving Companion-related events.
+   * Expectation is that disconnect will only be called before the SafeConnector object is disposed.
+   */
+  fun disconnect()
 
   /** Sends message to a device. */
   fun sendMessage(deviceId: String, message: ByteArray)

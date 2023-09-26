@@ -164,7 +164,7 @@ constructor(
       val driverDevices = storage.driverAssociatedDevices
       for (device in driverDevices) {
         if (device.isConnectionEnabled) {
-        initiateConnectionToDevice(UUID.fromString(device.deviceId))
+          initiateConnectionToDevice(UUID.fromString(device.deviceId))
         }
       }
       if (!enablePassenger) {
@@ -174,7 +174,7 @@ constructor(
       logd(TAG, "Initiating connections with passenger devices.")
       val passengerDevices = storage.passengerAssociatedDevices
       for (device in passengerDevices) {
-          initiateConnectionToDevice(UUID.fromString(device.deviceId))
+        initiateConnectionToDevice(UUID.fromString(device.deviceId))
       }
     }
   }
@@ -406,6 +406,7 @@ constructor(
   ) =
     object : IDiscoveryCallback.Stub() {
       override fun onDeviceConnected(protocolId: String) {
+        metricLogger.pushConnectedEvent()
         logd(
           TAG,
           "New connection protocol connected for $deviceId. id: $protocolId, protocol: $protocol"
@@ -443,6 +444,7 @@ constructor(
       }
 
       override fun onDiscoveryStartedSuccessfully() {
+        metricLogger.pushDiscoveryStartedEvent()
         logd(TAG, "Connection discovery started successfully.")
       }
 
@@ -507,6 +509,7 @@ constructor(
       }
 
       override fun onDiscoveryStartedSuccessfully() {
+        metricLogger.pushAssociationStartedEvent()
         associationCallback.aliveOrNull()?.onAssociationStartSuccess(response)
           ?: run {
             loge(
@@ -629,6 +632,7 @@ constructor(
   }
 
   private fun handleAssociationError(error: Int, device: ConnectedRemoteDevice) {
+    metricLogger.pushCompanionErrorEvent(error, duringAssociation = device.callback != null)
     device.callback?.aliveOrNull()?.onAssociationError(error)
       ?: run {
         loge(
@@ -664,7 +668,7 @@ constructor(
           callback.onSecureChannelEstablished(connectedDevice)
         }
         EventLog.onSecureChannelEstablished()
-        metricLogger.onSecureChannelEstablished()
+        metricLogger.pushSecureChannelEstablishedEvent()
       }
 
       override fun onEstablishSecureChannelFailure(error: ChannelError) {

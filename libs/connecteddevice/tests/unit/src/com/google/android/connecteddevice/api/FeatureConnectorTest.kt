@@ -28,6 +28,7 @@ import com.google.common.truth.Truth.assertThat
 import com.google.protobuf.ExtensionRegistryLite
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
@@ -64,11 +65,23 @@ class FeatureConnectorTest {
 
   private val testCoordinatorProxy = spy(TestCompanionApiProxy(true, listOf(testDeviceId)))
 
+  private lateinit var versionZeroConnector: FeatureConnector
+  private lateinit var versionOneConnector: FeatureConnector
+  private lateinit var versionTwoConnector: FeatureConnector
+
+  @Before
+  fun setUp() {
+    versionZeroConnector = FeatureConnector(context, testFeatureId, minSupportedVersion = 0)
+    versionOneConnector = FeatureConnector(context, testFeatureId, minSupportedVersion = 1)
+    versionTwoConnector = FeatureConnector(context, testFeatureId, minSupportedVersion  = 2)
+  }
+
   @Test
-  fun onInit_negativeVersions_aborts() {
+  fun onConnect_negativeVersions_aborts() {
     setQueryIntentServicesAnswer(defaultServiceAnswer)
     mockPlatformVersion = -1
-    val connector = FeatureConnector(context, testFeatureId, mockCallback, -1)
+    val connector = FeatureConnector(context, testFeatureId, minSupportedVersion = -1)
+    connector.connect(mockCallback)
 
     assertThat(context.bindingActions)
       .containsExactly(ACTION_QUERY_API_VERSION, ACTION_BIND_FEATURE_COORDINATOR)
@@ -76,10 +89,11 @@ class FeatureConnectorTest {
   }
 
   @Test
-  fun onInit_clientV1_platformV0_bindToFeatureCoordinator() {
+  fun onConnect_clientV1_platformV0_bindToFeatureCoordinator() {
     setQueryIntentServicesAnswer(defaultServiceAnswer)
     mockPlatformVersion = 0
-    val connector = FeatureConnector(context, testFeatureId, mockCallback, 1)
+    val connector = versionOneConnector
+    connector.connect(mockCallback)
 
     assertThat(connector.coordinatorProxy is LegacyApiProxy).isTrue()
     assertThat(context.bindingActions)
@@ -87,10 +101,11 @@ class FeatureConnectorTest {
   }
 
   @Test
-  fun onInit_clientV1_platformV1_bindToFeatureCoordinator() {
+  fun onConnect_clientV1_platformV1_bindToFeatureCoordinator() {
     setQueryIntentServicesAnswer(defaultServiceAnswer)
     mockPlatformVersion = 1
-    val connector = FeatureConnector(context, testFeatureId, mockCallback, 1)
+    val connector = versionOneConnector
+    connector.connect(mockCallback)
 
     assertThat(connector.coordinatorProxy is SafeApiProxy).isTrue()
     assertThat(context.bindingActions)
@@ -98,10 +113,11 @@ class FeatureConnectorTest {
   }
 
   @Test
-  fun onInit_clientV1_platformV2_bindToFeatureCoordinator() {
+  fun onConnect_clientV1_platformV2_bindToFeatureCoordinator() {
     setQueryIntentServicesAnswer(defaultServiceAnswer)
     mockPlatformVersion = 2
-    val connector = FeatureConnector(context, testFeatureId, mockCallback, 1)
+    val connector = versionOneConnector
+    connector.connect(mockCallback)
 
     assertThat(connector.coordinatorProxy is SafeApiProxy).isTrue()
     assertThat(context.bindingActions)
@@ -109,10 +125,11 @@ class FeatureConnectorTest {
   }
 
   @Test
-  fun onInit_clientV2_platformV0_bindToFeatureCoordinator() {
+  fun onConnect_clientV2_platformV0_bindToFeatureCoordinator() {
     setQueryIntentServicesAnswer(defaultServiceAnswer)
     mockPlatformVersion = 0
-    val connector = FeatureConnector(context, testFeatureId, mockCallback, 2)
+    val connector = versionTwoConnector
+    connector.connect(mockCallback)
 
     assertThat(connector.coordinatorProxy is LegacyApiProxy).isTrue()
     assertThat(context.bindingActions)
@@ -120,11 +137,12 @@ class FeatureConnectorTest {
   }
 
   @Test
-  fun onInit_clientV1_platformV1_incorrectServiceIssuesApiNotSupportedCallback() {
+  fun onConnect_clientV1_platformV1_incorrectServiceIssuesApiNotSupportedCallback() {
     setQueryIntentServicesAnswer(defaultServiceAnswer)
     mockPlatformVersion = 1
     val incorrectServiceContext = IncorrectServiceContext(mockPackageManager)
-    val connector = FeatureConnector(incorrectServiceContext, testFeatureId, mockCallback, 1)
+    val connector = FeatureConnector(incorrectServiceContext, testFeatureId, 1)
+    connector.connect(mockCallback)
 
     assertThat(connector.coordinatorProxy).isNull()
     assertThat(connector.platformVersion).isNull()
@@ -133,10 +151,11 @@ class FeatureConnectorTest {
   }
 
   @Test
-  fun onInit_clientV2_platformV1_issuesApiNotSupportedCallback() {
+  fun onConnect_clientV2_platformV1_issuesApiNotSupportedCallback() {
     setQueryIntentServicesAnswer(defaultServiceAnswer)
     mockPlatformVersion = 1
-    val connector = FeatureConnector(context, testFeatureId, mockCallback, 2)
+    val connector = versionTwoConnector
+    connector.connect(mockCallback)
 
     assertThat(connector.coordinatorProxy).isNull()
     assertThat(connector.platformVersion).isNull()
@@ -145,10 +164,11 @@ class FeatureConnectorTest {
   }
 
   @Test
-  fun onInit_clientV2_platformV2_bindToFeatureCoordinator() {
+  fun onConnect_clientV2_platformV2_bindToFeatureCoordinator() {
     setQueryIntentServicesAnswer(defaultServiceAnswer)
     mockPlatformVersion = 2
-    val connector = FeatureConnector(context, testFeatureId, mockCallback, 2)
+    val connector = versionTwoConnector
+    connector.connect(mockCallback)
 
     assertThat(connector.coordinatorProxy is SafeApiProxy).isTrue()
     assertThat(context.bindingActions)
@@ -156,10 +176,11 @@ class FeatureConnectorTest {
   }
 
   @Test
-  fun onInit_clientV2_platformV3_bindToFeatureCoordinator() {
+  fun onConnect_clientV2_platformV3_bindToFeatureCoordinator() {
     setQueryIntentServicesAnswer(defaultServiceAnswer)
     mockPlatformVersion = 3
-    val connector = FeatureConnector(context, testFeatureId, mockCallback, 2)
+    val connector = versionTwoConnector
+    connector.connect(mockCallback)
 
     assertThat(connector.coordinatorProxy is SafeApiProxy).isTrue()
     assertThat(context.bindingActions)
@@ -182,17 +203,19 @@ class FeatureConnectorTest {
     }
     setQueryIntentServicesAnswer(nullIntentAnswer)
     mockPlatformVersion = 0
-    val connector = FeatureConnector(context, testFeatureId, mockCallback, 1)
+    val connector = versionOneConnector
+    connector.connect(mockCallback)
 
     assertThat(connector.coordinatorProxy).isNull()
     verify(mockCallback).onFailedToConnect()
   }
 
   @Test
-  fun onSuccessfulInit_doesNotRetryBind() {
+  fun onSuccessfulConnect_doesNotRetryBind() {
     setQueryIntentServicesAnswer(defaultServiceAnswer)
     mockPlatformVersion = 1
-    val connector = FeatureConnector(context, testFeatureId, mockCallback, 1)
+    val connector = versionOneConnector
+    connector.connect(mockCallback)
 
     assertThat(connector.bindAttempts == 0).isTrue()
     assertThat(context.bindingActions)
@@ -205,7 +228,8 @@ class FeatureConnectorTest {
     mockPlatformVersion = 1
     val failingContext = FailingContext(mockPackageManager)
     val shadowLooper = Shadows.shadowOf(Looper.getMainLooper())
-    val connector = FeatureConnector(failingContext, testFeatureId, mockCallback, 1)
+    val connector = FeatureConnector(failingContext, testFeatureId, 1)
+    connector.connect(mockCallback)
 
     repeat(FeatureConnector.MAX_BIND_ATTEMPTS) { shadowLooper.runToEndOfTasks() }
 
@@ -220,7 +244,8 @@ class FeatureConnectorTest {
     mockPlatformVersion = 0
     val flakyContext = FailingLegacyContext(mockPackageManager)
     val shadowLooper = Shadows.shadowOf(Looper.getMainLooper())
-    val connector = FeatureConnector(flakyContext, testFeatureId, mockCallback, 1)
+    val connector = FeatureConnector(flakyContext, testFeatureId, 1)
+    connector.connect(mockCallback)
 
     repeat(FeatureConnector.MAX_BIND_ATTEMPTS) { shadowLooper.runToEndOfTasks() }
 
@@ -237,7 +262,8 @@ class FeatureConnectorTest {
     mockPlatformVersion = 0
     val flakyContext = FlakyLegacyContext(mockPackageManager)
     val shadowLooper = Shadows.shadowOf(Looper.getMainLooper())
-    val connector = FeatureConnector(flakyContext, testFeatureId, mockCallback, 1)
+    val connector = FeatureConnector(flakyContext, testFeatureId, 1)
+    connector.connect(mockCallback)
 
     // Should repeat once for version query bind attempt, then reset, then MAX_BIND_ATTEMPTS times
     // for feature coordinator bind attempt.
@@ -261,7 +287,8 @@ class FeatureConnectorTest {
   fun onDisconnected_invokedOnVersionCheckServiceDisconnected() {
     setQueryIntentServicesAnswer(defaultServiceAnswer)
     mockPlatformVersion = 1
-    val connector = FeatureConnector(context, testFeatureId, mockCallback, 1)
+    val connector = versionOneConnector
+    connector.connect(mockCallback)
 
     connector.versionCheckConnection.onServiceDisconnected(
       ComponentName(PACKAGE_NAME, VERSION_NAME)
@@ -273,7 +300,8 @@ class FeatureConnectorTest {
   fun onDisconnected_invokedOnVersionCheckDeadBinding() {
     setQueryIntentServicesAnswer(defaultServiceAnswer)
     mockPlatformVersion = 1
-    val connector = FeatureConnector(context, testFeatureId, mockCallback, 1)
+    val connector = versionOneConnector
+    connector.connect(mockCallback)
 
     connector.versionCheckConnection.onBindingDied(ComponentName(PACKAGE_NAME, VERSION_NAME))
     verify(mockCallback).onDisconnected()
@@ -283,7 +311,8 @@ class FeatureConnectorTest {
   fun onDisconnected_invokedOnFeatureCoordinatorServiceDisconnected() {
     setQueryIntentServicesAnswer(defaultServiceAnswer)
     mockPlatformVersion = 1
-    val connector = FeatureConnector(context, testFeatureId, mockCallback, 1)
+    val connector = versionOneConnector
+    connector.connect(mockCallback)
 
     connector.featureCoordinatorConnection.onServiceDisconnected(
       ComponentName(PACKAGE_NAME, FC_NAME)
@@ -295,7 +324,8 @@ class FeatureConnectorTest {
   fun onFailedToConnect_invokedOnFeatureCoordinatorNullBinding() {
     setQueryIntentServicesAnswer(defaultServiceAnswer)
     mockPlatformVersion = 1
-    val connector = FeatureConnector(context, testFeatureId, mockCallback, 1)
+    val connector = versionOneConnector
+    connector.connect(mockCallback)
 
     connector.featureCoordinatorConnection.onNullBinding(ComponentName(PACKAGE_NAME, FC_NAME))
     verify(mockCallback).onFailedToConnect()
@@ -305,7 +335,8 @@ class FeatureConnectorTest {
   fun onDisconnected_invokedOnFeatureCoordinatorDeadBinding() {
     setQueryIntentServicesAnswer(defaultServiceAnswer)
     mockPlatformVersion = 1
-    val connector = FeatureConnector(context, testFeatureId, mockCallback, 1)
+    val connector = versionOneConnector
+    connector.connect(mockCallback)
 
     connector.featureCoordinatorConnection.onBindingDied(ComponentName(PACKAGE_NAME, FC_NAME))
     verify(mockCallback).onDisconnected()
@@ -315,7 +346,8 @@ class FeatureConnectorTest {
   fun onConnected_invokedAfterSuccessfulBind() {
     setQueryIntentServicesAnswer(defaultServiceAnswer)
     mockPlatformVersion = 1
-    val connector = FeatureConnector(context, testFeatureId, mockCallback, 1)
+    val connector = versionOneConnector
+    connector.connect(mockCallback)
 
     assertThat(connector.coordinatorProxy is SafeApiProxy).isTrue()
     verify(mockCallback).onConnected()
@@ -325,7 +357,8 @@ class FeatureConnectorTest {
   fun onConnected_invokedAfterSuccessfulLegacyBind() {
     setQueryIntentServicesAnswer(defaultServiceAnswer)
     mockPlatformVersion = 0
-    val connector = FeatureConnector(context, testFeatureId, mockCallback, 1)
+    val connector = versionOneConnector
+    connector.connect(mockCallback)
 
     assertThat(connector.coordinatorProxy is LegacyApiProxy).isTrue()
     verify(mockCallback).onConnected()
@@ -335,7 +368,8 @@ class FeatureConnectorTest {
   fun sendMessage_sendsMessage() {
     setQueryIntentServicesAnswer(defaultServiceAnswer)
     mockPlatformVersion = 1
-    val connector = FeatureConnector(context, testFeatureId, mockCallback, 1)
+    val connector = versionOneConnector
+    connector.connect(mockCallback)
     connector.coordinatorProxy = testCoordinatorProxy
     connector.sendMessage(testDeviceId, testMessage)
 
@@ -346,7 +380,8 @@ class FeatureConnectorTest {
   fun onMessageFailedToSend_invokedOnNullProxy() {
     setQueryIntentServicesAnswer(defaultServiceAnswer)
     mockPlatformVersion = 1
-    val connector = FeatureConnector(context, testFeatureId, mockCallback, 1)
+    val connector = versionOneConnector
+    connector.connect(mockCallback)
     connector.coordinatorProxy = null
     connector.sendMessage(testDeviceId, testMessage)
 
@@ -357,7 +392,8 @@ class FeatureConnectorTest {
   fun onMessageFailedToSend_invokedWhenDeviceNotFound() {
     setQueryIntentServicesAnswer(defaultServiceAnswer)
     mockPlatformVersion = 1
-    val connector = FeatureConnector(context, testFeatureId, mockCallback, 1)
+    val connector = versionOneConnector
+    connector.connect(mockCallback)
     connector.coordinatorProxy = testCoordinatorProxy
     val unexpectedDevice = UUID.randomUUID().toString()
     connector.sendMessage(unexpectedDevice, testMessage)
@@ -371,7 +407,8 @@ class FeatureConnectorTest {
   fun onMessageFailedToSend_invokedWhenSendMessageFails() {
     setQueryIntentServicesAnswer(defaultServiceAnswer)
     mockPlatformVersion = 1
-    val connector = FeatureConnector(context, testFeatureId, mockCallback, 1)
+    val connector = versionOneConnector
+    connector.connect(mockCallback)
     val coordinatorProxy = TestCompanionApiProxy(false, listOf(testDeviceId))
     connector.coordinatorProxy = coordinatorProxy
     connector.sendMessage(testDeviceId, testMessage)
@@ -383,7 +420,8 @@ class FeatureConnectorTest {
   fun sendMessage_onMessageFailedToSend_invokedOnVersionMismatch() {
     setQueryIntentServicesAnswer(defaultServiceAnswer)
     mockPlatformVersion = 0
-    val connector = FeatureConnector(context, testFeatureId, mockCallback, 1)
+    val connector = versionOneConnector
+    connector.connect(mockCallback)
     connector.sendMessage(testDeviceId, testMessage)
 
     verify(mockCallback).onMessageFailedToSend(testDeviceId, testMessage, isTransient = false)
@@ -393,7 +431,8 @@ class FeatureConnectorTest {
   fun sendQuery_sendsQueryToOwnFeatureId() {
     setQueryIntentServicesAnswer(defaultServiceAnswer)
     mockPlatformVersion = 1
-    val connector = FeatureConnector(context, testFeatureId, mockCallback, 1)
+    val connector = versionOneConnector
+    connector.connect(mockCallback)
     connector.coordinatorProxy = testCoordinatorProxy
     val request = ByteUtils.randomBytes(10)
     val parameters = ByteUtils.randomBytes(10)
@@ -412,7 +451,8 @@ class FeatureConnectorTest {
   fun sendQuery_addsCallbackToCallbacksMap() {
     setQueryIntentServicesAnswer(defaultServiceAnswer)
     mockPlatformVersion = 1
-    val connector = FeatureConnector(context, testFeatureId, mockCallback, 1)
+    val connector = versionOneConnector
+    connector.connect(mockCallback)
     connector.coordinatorProxy = testCoordinatorProxy
     val request = ByteUtils.randomBytes(10)
     val parameters = ByteUtils.randomBytes(10)
@@ -426,7 +466,8 @@ class FeatureConnectorTest {
   fun sendQuery_onQueryFailedToSend_invokedOnNullProxy() {
     setQueryIntentServicesAnswer(defaultServiceAnswer)
     mockPlatformVersion = 1
-    val connector = FeatureConnector(context, testFeatureId, mockCallback, 1)
+    val connector = versionOneConnector
+    connector.connect(mockCallback)
     connector.coordinatorProxy = null
     val request = ByteUtils.randomBytes(10)
     val parameters = ByteUtils.randomBytes(10)
@@ -440,7 +481,8 @@ class FeatureConnectorTest {
   fun sendQuery_onQueryFailedToSend_invokedOnDeviceIdNotFound() {
     setQueryIntentServicesAnswer(defaultServiceAnswer)
     mockPlatformVersion = 1
-    val connector = FeatureConnector(context, testFeatureId, mockCallback, 1)
+    val connector = versionOneConnector
+    connector.connect(mockCallback)
     connector.coordinatorProxy = testCoordinatorProxy
     val request = ByteUtils.randomBytes(10)
     val parameters = ByteUtils.randomBytes(10)
@@ -454,7 +496,8 @@ class FeatureConnectorTest {
   fun respondToQuery_doesNotSendResponseWithNullProxy() {
     setQueryIntentServicesAnswer(defaultServiceAnswer)
     mockPlatformVersion = 1
-    val connector = FeatureConnector(context, testFeatureId, mockCallback, 1)
+    val connector = versionOneConnector
+    connector.connect(mockCallback)
     connector.coordinatorProxy = null
     val response = ByteUtils.randomBytes(10)
     connector.respondToQuery(testDeviceId, 1, success = true, response)
@@ -466,7 +509,8 @@ class FeatureConnectorTest {
   fun respondToQuery_doesNotSendResponseWithUnrecognizedQueryId() {
     setQueryIntentServicesAnswer(defaultServiceAnswer)
     mockPlatformVersion = 1
-    val connector = FeatureConnector(context, testFeatureId, mockCallback, 1)
+    val connector = versionOneConnector
+    connector.connect(mockCallback)
     connector.coordinatorProxy = testCoordinatorProxy
     val nonExistentQueryId = 0
     val response = ByteUtils.randomBytes(10)
@@ -481,7 +525,8 @@ class FeatureConnectorTest {
     mockPlatformVersion = 1
     val queryId = 1
     val response = ByteUtils.randomBytes(10)
-    val connector = FeatureConnector(context, testFeatureId, mockCallback, 1)
+    val connector = versionOneConnector
+    connector.connect(mockCallback)
     connector.coordinatorProxy = testCoordinatorProxy
     testCoordinatorProxy.queryResponseRecipients.put(queryId, testFeatureId)
     connector.respondToQuery(testDeviceId, queryId, success = true, response)
@@ -499,7 +544,8 @@ class FeatureConnectorTest {
     setQueryIntentServicesAnswer(defaultServiceAnswer)
     mockPlatformVersion = 1
     val queryId = 1
-    val connector = FeatureConnector(context, testFeatureId, mockCallback, 1)
+    val connector = versionOneConnector
+    connector.connect(mockCallback)
     connector.coordinatorProxy = testCoordinatorProxy
     testCoordinatorProxy.queryResponseRecipients.put(queryId, testFeatureId)
     connector.respondToQuery(testDeviceId, queryId, success = true, null)
@@ -516,7 +562,8 @@ class FeatureConnectorTest {
   fun respondToQuery_onMessageFailedToSend_invokedWhenSendMessageFailed() {
     setQueryIntentServicesAnswer(defaultServiceAnswer)
     mockPlatformVersion = 1
-    val connector = FeatureConnector(context, testFeatureId, mockCallback, 1)
+    val connector = versionOneConnector
+    connector.connect(mockCallback)
     val proxy = spy(TestCompanionApiProxy(false, listOf(testDeviceId)))
     connector.coordinatorProxy = proxy
     val queryId = 1
@@ -531,7 +578,8 @@ class FeatureConnectorTest {
   fun retrieveCompanionApplicationName_sendsAppNameQueryToSystemFeature() {
     setQueryIntentServicesAnswer(defaultServiceAnswer)
     mockPlatformVersion = 1
-    val connector = FeatureConnector(context, testFeatureId, mockCallback, 1)
+    val connector = versionOneConnector
+    connector.connect(mockCallback)
     connector.coordinatorProxy = testCoordinatorProxy
     val callback = mock<SafeConnector.AppNameCallback>()
 
@@ -551,7 +599,8 @@ class FeatureConnectorTest {
   fun retrieveCompanionApplicationName_onMessageFailedToSend_invokedWhenSendMessageFailed() {
     setQueryIntentServicesAnswer(defaultServiceAnswer)
     mockPlatformVersion = 1
-    val connector = FeatureConnector(context, testFeatureId, mockCallback, 1)
+    val connector = versionOneConnector
+    connector.connect(mockCallback)
     val proxy = spy(TestCompanionApiProxy(false, listOf(testDeviceId)))
     connector.coordinatorProxy = proxy
     val appNameCallback = mock<SafeConnector.AppNameCallback>()
@@ -564,7 +613,8 @@ class FeatureConnectorTest {
   fun retrieveAssociatedDevices_worksWithSafeListener() {
     setQueryIntentServicesAnswer(defaultServiceAnswer)
     mockPlatformVersion = 1
-    val connector = FeatureConnector(context, testFeatureId, mockCallback, 1)
+    val connector = versionOneConnector
+    connector.connect(mockCallback)
     val mockListener = mock<ISafeOnAssociatedDevicesRetrievedListener>()
     connector.coordinatorProxy = testCoordinatorProxy
 
@@ -577,7 +627,8 @@ class FeatureConnectorTest {
   fun retrieveAssociatedDevices_worksWithLegacyListener() {
     setQueryIntentServicesAnswer(defaultServiceAnswer)
     mockPlatformVersion = 0
-    val connector = FeatureConnector(context, testFeatureId, mockCallback, 1)
+    val connector = versionOneConnector
+    connector.connect(mockCallback)
     val mockListener = mock<IOnAssociatedDevicesRetrievedListener>()
     connector.coordinatorProxy = testCoordinatorProxy
 
@@ -590,7 +641,8 @@ class FeatureConnectorTest {
   fun retrieveAssociatedDevices_returnsSilentlyOnNullCoordinator() {
     setQueryIntentServicesAnswer(defaultServiceAnswer)
     mockPlatformVersion = 1
-    val connector = FeatureConnector(context, testFeatureId, mockCallback, 1)
+    val connector = versionOneConnector
+    connector.connect(mockCallback)
     val mockListener = mock<ISafeOnAssociatedDevicesRetrievedListener>()
     connector.coordinatorProxy = null
 
@@ -600,65 +652,71 @@ class FeatureConnectorTest {
   }
 
   @Test
-  fun onCleanUp_cleansUpFeatureCoordinator() {
+  fun disconnect_cleansUpFeatureCoordinator() {
     setQueryIntentServicesAnswer(defaultServiceAnswer)
     mockPlatformVersion = 1
-    val connector = FeatureConnector(context, testFeatureId, mockCallback, 1)
+    val connector = versionOneConnector
+    connector.connect(mockCallback)
 
     assertThat(connector.coordinatorProxy).isNotNull()
-    connector.cleanUp()
+    connector.disconnect()
     assertThat(connector.coordinatorProxy).isNull()
   }
 
   @Test
-  fun onCleanUp_cleansUpFeatureCoordinator_legacyPlatform() {
+  fun disconnect_cleansUpFeatureCoordinator_legacyPlatform() {
     setQueryIntentServicesAnswer(defaultServiceAnswer)
     mockPlatformVersion = 0
-    val connector = FeatureConnector(context, testFeatureId, mockCallback, 1)
+    val connector = versionOneConnector
+    connector.connect(mockCallback)
 
     assertThat(connector.coordinatorProxy).isNotNull()
-    connector.cleanUp()
+    connector.disconnect()
     assertThat(connector.coordinatorProxy).isNull()
   }
 
   @Test
-  fun onCleanUp_callsCallbackDisconnected() {
+  fun disconnect_callsCallbackDisconnected() {
     setQueryIntentServicesAnswer(defaultServiceAnswer)
     mockPlatformVersion = 1
-    val connector = FeatureConnector(context, testFeatureId, mockCallback, 1)
+    val connector = versionOneConnector
+    connector.connect(mockCallback)
 
-    connector.cleanUp()
+    connector.disconnect()
     verify(mockCallback).onDisconnected()
   }
 
   @Test
-  fun onCleanUp_callsCallbackDisconnected_legacyPlatform() {
+  fun disconnect_callsCallbackDisconnected_legacyPlatform() {
     setQueryIntentServicesAnswer(defaultServiceAnswer)
     mockPlatformVersion = 0
-    val connector = FeatureConnector(context, testFeatureId, mockCallback, 1)
+    val connector = versionOneConnector
+    connector.connect(mockCallback)
 
-    connector.cleanUp()
+    connector.disconnect()
     verify(mockCallback).onDisconnected()
   }
 
   @Test
-  fun onCleanUp_unbindsFromContext() {
+  fun disconnect_unbindsFromContext() {
     setQueryIntentServicesAnswer(defaultServiceAnswer)
     mockPlatformVersion = 1
-    val connector = FeatureConnector(context, testFeatureId, mockCallback, 1)
+    val connector = versionOneConnector
+    connector.connect(mockCallback)
 
-    connector.cleanUp()
+    connector.disconnect()
     assertThat(context.unbindServiceConnection)
       .containsExactly(connector.featureCoordinatorConnection)
   }
 
   @Test
-  fun onCleanUp_unbindsFromContext_legacyPlatform() {
+  fun disconnect_unbindsFromContext_legacyPlatform() {
     setQueryIntentServicesAnswer(defaultServiceAnswer)
     mockPlatformVersion = 0
-    val connector = FeatureConnector(context, testFeatureId, mockCallback, 1)
+    val connector = versionOneConnector
+    connector.connect(mockCallback)
 
-    connector.cleanUp()
+    connector.disconnect()
     assertThat(context.unbindServiceConnection)
       .containsExactly(connector.featureCoordinatorConnection)
   }

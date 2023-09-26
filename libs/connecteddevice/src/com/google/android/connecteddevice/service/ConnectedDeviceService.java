@@ -232,7 +232,8 @@ public final class ConnectedDeviceService extends TrunkService {
       return;
     }
     writer.printf(
-        "Companion SDK version is %s", getResources().getString(R.string.hu_companion_sdk_version));
+        "Companion SDK version is %s\n",
+        getResources().getString(R.string.hu_companion_sdk_version));
   }
 
   private void cleanup() {
