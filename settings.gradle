@@ -4,6 +4,4 @@ include ':libs:encryptionrunner'
 include ':companiondevice'
 include ':ukey2'
 project(':ukey2').projectDir = new File('../../../../external/ukey2')
-include ':car-setup-wizard-lib'
-project(':car-setup-wizard-lib').projectDir = new File('../../../../frameworks/opt/car/setupwizard/library/main')
 rootProject.name = "CompanionDeviceSupport"
