@@ -122,19 +122,6 @@ public final class TrustedDeviceViewModelTest {
   }
 
   @Test
-  public void enrollTrustedDevice_previousEnrollmentInProgress_abortPreviousEnrollment()
-      throws RemoteException {
-    when(mockTrustedDeviceManager.getActiveUserConnectedDevices())
-        .thenReturn(Collections.singletonList(createConnectedDevice()));
-    shadowOf(keyguardManager).setIsDeviceSecure(false);
-    viewModel.processEnrollment();
-    waitForLiveDataUpdate();
-    viewModel.enrollTrustedDevice(createAssociatedDevice());
-    verify(mockTrustedDeviceManager).abortEnrollment();
-    verify(mockTrustedDeviceManager).initiateEnrollment(eq(TEST_ASSOCIATED_DEVICE_ID));
-  }
-
-  @Test
   public void disableTrustedDevice() throws RemoteException {
     TrustedDevice testDevice = createTrustedDevice();
     viewModel.disableTrustedDevice(testDevice);
@@ -142,15 +129,16 @@ public final class TrustedDeviceViewModelTest {
   }
 
   @Test
-  public void testEnrollmentState_processEnrollmentOnInsecureDevice() throws RemoteException {
+  public void testEnrollmentState_onEscrowTokenReceived_noPreviousEnrollment()
+      throws RemoteException {
     shadowOf(keyguardManager).setIsDeviceSecure(false);
     viewModel.getEnrollmentState().observeForever(mockEnrollmentStateObserver);
 
-    viewModel.processEnrollment();
+    enrollmentCallback.onEscrowTokenReceived();
 
     waitForLiveDataUpdate();
-    verify(mockEnrollmentStateObserver).onChanged(EnrollmentState.IN_PROGRESS);
-    verify(mockTrustedDeviceManager).processEnrollment(eq(false));
+    // No previous enrollment. State: NONE -> NONE
+    verify(mockEnrollmentStateObserver, times(2)).onChanged(EnrollmentState.NONE);
   }
 
   @Test
@@ -162,6 +150,22 @@ public final class TrustedDeviceViewModelTest {
     waitForLiveDataUpdate();
     verify(mockEnrollmentStateObserver).onChanged(EnrollmentState.IN_PROGRESS);
     verify(mockTrustedDeviceManager).processEnrollment(eq(true));
+  }
+
+  @Test
+  public void testEnrollmentState_onEscrowTokenReceived_existsPreviousEnrollment()
+      throws RemoteException {
+    shadowOf(keyguardManager).setIsDeviceSecure(false);
+    viewModel.getEnrollmentState().observeForever(mockEnrollmentStateObserver);
+
+    viewModel.processEnrollment();
+    waitForLiveDataUpdate();
+    verify(mockEnrollmentStateObserver).onChanged(EnrollmentState.IN_PROGRESS);
+    enrollmentCallback.onEscrowTokenReceived();
+
+    waitForLiveDataUpdate();
+    // Exists previous incomplete enrollment. State: NONE -> IN_PROGRESS -> NONE
+    verify(mockEnrollmentStateObserver, times(2)).onChanged(EnrollmentState.NONE);
   }
 
   @Test

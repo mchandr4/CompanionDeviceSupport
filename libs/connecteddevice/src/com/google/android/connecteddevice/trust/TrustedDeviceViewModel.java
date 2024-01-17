@@ -20,7 +20,6 @@ import static com.google.android.connecteddevice.trust.TrustedDeviceConstants.TR
 import static com.google.android.connecteddevice.trust.TrustedDeviceConstants.TRUSTED_DEVICE_ERROR_UNEXPECTED_STATE;
 import static com.google.android.connecteddevice.util.SafeLog.logd;
 import static com.google.android.connecteddevice.util.SafeLog.loge;
-import static com.google.android.connecteddevice.util.SafeLog.logw;
 
 import android.app.Application;
 import android.app.KeyguardManager;
@@ -268,14 +267,6 @@ public class TrustedDeviceViewModel extends AndroidViewModel {
    * @param device The associated device to be enrolled.
    */
   public void enrollTrustedDevice(AssociatedDevice device) {
-    // Clean up pending enrollment before starting a new enrollment.
-    if (enrollmentState.getValue() != EnrollmentState.NONE) {
-      logw(
-          TAG,
-          "Attempting to enroll trusted device while enrollment is still in progress. Clear"
-              + " previous enrollment and proceed.");
-       abortEnrollment();
-    }
     updateTrustedDevicesFromServer();
     attemptInitiatingEnrollment(device);
   }
@@ -452,6 +443,13 @@ public class TrustedDeviceViewModel extends AndroidViewModel {
 
   private final ITrustedDeviceEnrollmentCallback trustedDeviceEnrollmentCallback =
       new ITrustedDeviceEnrollmentCallback.Stub() {
+
+        // Escrow token is the first message of enrollment. Resetting the state so the manager
+        // always accepts new enrollment.
+        @Override
+        public void onEscrowTokenReceived() {
+          resetEnrollmentState();
+        }
 
         @Override
         public void onValidateCredentialsRequest() {

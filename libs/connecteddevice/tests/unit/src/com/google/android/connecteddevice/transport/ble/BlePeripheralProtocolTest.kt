@@ -18,7 +18,6 @@ import com.google.android.connecteddevice.transport.IDeviceMaxDataSizeChangedLis
 import com.google.android.connecteddevice.transport.IDiscoveryCallback
 import com.google.android.connecteddevice.util.ByteUtils
 import com.google.common.truth.Truth.assertThat
-import com.google.common.util.concurrent.MoreExecutors.directExecutor
 import java.time.Duration
 import java.util.UUID
 import org.junit.Before
@@ -83,7 +82,6 @@ class BlePeripheralProtocolTest {
         testServiceChangedCharacteristicUuid,
         testMaxReconnectAdvertisementDuration,
         TEST_DEFAULT_MTU_SIZE,
-        directExecutor()
       )
   }
 

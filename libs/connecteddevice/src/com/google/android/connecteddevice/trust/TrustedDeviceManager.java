@@ -108,11 +108,11 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
 
   private ITrustedDeviceAgentDelegate trustAgentDelegate;
 
-  private ConnectedDevice pendingDevice;
+  @VisibleForTesting protected ConnectedDevice pendingDevice;
 
-  private byte[] pendingToken;
+  @VisibleForTesting protected byte[] pendingToken;
 
-  private PendingCredentials pendingCredentials;
+  @VisibleForTesting protected PendingCredentials pendingCredentials;
 
   private final ReentrantLock enrollConditionsLock = new ReentrantLock();
 
@@ -125,7 +125,7 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
    * synchronized. However, to make sure Trusted Device will be enrolled and enrolled only once when
    * all conditions are met, we still guard each call by a lock .
    */
-  private boolean isEscrowTokenActivated;
+  @VisibleForTesting protected boolean isEscrowTokenActivated;
 
   protected boolean isCredentialVerified;
 
@@ -947,6 +947,7 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
 
           switch (trustedDeviceMessage.getType()) {
             case ESCROW_TOKEN:
+              prepareForEnrollment();
               processEnrollmentMessage(device, trustedDeviceMessage.getPayload());
               break;
             case UNLOCK_CREDENTIALS:
@@ -987,6 +988,23 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
         @Override
         public void onDeviceError(ConnectedDevice device, int error) {}
       };
+
+  // The HU starts TrustedDevice enrollment after it receives an escrow token from the mobile side.
+  // By resetting enrollment environment, it's guaranteed every new enrollment attempt will start
+  // from a clean slate; no matter it is initiated from the mobile side or the HU side and if there
+  // was previously an incomplete attempt and no matter the new attempt.
+  private void prepareForEnrollment() {
+    notifyRemoteCallbackList(
+        remoteEnrollmentCallbacks,
+        callback -> {
+          try {
+            callback.onEscrowTokenReceived();
+          } catch (RemoteException e) {
+            loge(TAG, "Failed to notify the escrow token received event.");
+          }
+        });
+    abortEnrollment();
+  }
 
   private void handleDisconnection() {
     // Pending credentials should only be kept within the connected session.

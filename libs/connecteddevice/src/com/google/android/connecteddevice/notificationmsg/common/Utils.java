@@ -34,7 +34,6 @@ import androidx.annotation.Nullable;
 import androidx.core.graphics.drawable.RoundedBitmapDrawable;
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 import com.google.android.connecteddevice.notificationmsg.proto.NotificationMsg;
-import com.google.android.connecteddevice.notificationmsg.proto.NotificationMsg.AvatarIconSync;
 import com.google.android.connecteddevice.notificationmsg.proto.NotificationMsg.ConversationNotification;
 import com.google.android.connecteddevice.notificationmsg.proto.NotificationMsg.MessagingStyle;
 import com.google.android.connecteddevice.notificationmsg.proto.NotificationMsg.MessagingStyleMessage;
@@ -164,21 +163,6 @@ public class Utils {
   public static boolean isValidSender(Person person) {
     if (person.getName().isEmpty()) {
       logw(TAG, "Person is missing required field: name");
-      return false;
-    }
-    return true;
-  }
-
-  /** Ensure the {@link AvatarIconSync} object has all the required fields. */
-  public static boolean isValidAvatarIconSync(AvatarIconSync iconSync) {
-    if (iconSync.getMessagingAppPackageName().isEmpty()) {
-      logw(TAG, "AvatarIconSync is missing required field: appPackageName");
-      return false;
-    } else if (iconSync.getPerson().getName().isEmpty()) {
-      logw(TAG, "AvatarIconSync is missing required field: Person's name");
-      return false;
-    } else if (iconSync.getPerson().getAvatar().isEmpty()) {
-      logw(TAG, "AvatarIconSync is missing required field: Person's avatar");
       return false;
     }
     return true;

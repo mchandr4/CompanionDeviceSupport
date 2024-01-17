@@ -52,6 +52,9 @@ public class ProjectionStateListener implements CarProjectionManager.ProjectionS
 
   public ProjectionStateListener(Context context) {
     car = Car.createCar(context);
+    if (car == null) {
+      return;
+    }
     carProjectionManager = (CarProjectionManager) car.getCarManager(Car.PROJECTION_SERVICE);
     if (carProjectionManager != null) {
       carProjectionManager.registerProjectionStatusListener(this);

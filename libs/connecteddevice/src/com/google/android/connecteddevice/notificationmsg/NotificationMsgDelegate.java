@@ -132,9 +132,6 @@ public class NotificationMsgDelegate extends BaseNotificationDelegate {
       case STATUS_UPDATE:
         // TODO (b/144924164): implement Action Request tracking logic.
         return;
-      case AVATAR_ICON_SYNC:
-        // Deprecated
-        return;
       case PHONE_METADATA:
         connectedDeviceBluetoothAddress = message.getPhoneMetadata().getBluetoothDeviceAddress();
         return;

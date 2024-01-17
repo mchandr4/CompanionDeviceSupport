@@ -28,8 +28,6 @@ import com.google.android.connecteddevice.util.SafeLog.logd
 import com.google.android.connecteddevice.util.SafeLog.loge
 import com.google.android.connecteddevice.util.SafeLog.logw
 import java.util.UUID
-import java.util.concurrent.Executor
-import java.util.concurrent.Executors
 
 /**
  * Representation of a Serial Port Profile channel, which communicated with [SppService] via
@@ -43,8 +41,7 @@ class SppProtocol
 constructor(
   private val context: Context,
   private val maxWriteSize: Int,
-  callbackExecutor: Executor = Executors.newCachedThreadPool()
-) : ConnectionProtocol(callbackExecutor) {
+) : ConnectionProtocol() {
   /** Map protocolId to the [SppManager] which manages the certain connection. */
   private val connections = mutableMapOf<String, SppManager>()
   /**

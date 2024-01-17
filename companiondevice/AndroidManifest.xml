@@ -175,7 +175,7 @@
         <!-- notificationmsg -->
         <service
             android:name="com.google.android.connecteddevice.notificationmsg.NotificationMsgService"
-            android:exported="true">
+            android:exported="false">
             <meta-data android:name="com.google.android.connecteddevice.notificationmsg.notification_contact_photo_size"
                 android:resource="@dimen/notification_contact_photo_size"/>
             <meta-data android:name="com.google.android.connecteddevice.notificationmsg.default_message_icon"

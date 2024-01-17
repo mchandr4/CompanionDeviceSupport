@@ -27,7 +27,6 @@ import com.google.android.connecteddevice.transport.IDataSendCallback
 import com.google.android.connecteddevice.transport.IDeviceDisconnectedListener
 import com.google.android.connecteddevice.transport.IDiscoveryCallback
 import com.google.common.truth.Truth.assertThat
-import com.google.common.util.concurrent.MoreExecutors.directExecutor
 import java.util.UUID
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -54,7 +53,7 @@ class SppProtocolTest {
   private val testIdentifier = UUID.randomUUID()
   private val testProtocolId = UUID.randomUUID()
   private val testMessage = "TestMessage".toByteArray()
-  private val sppProtocol = SppProtocol(context, testMaxSize, directExecutor())
+  private val sppProtocol = SppProtocol(context, testMaxSize)
 
   @Test
   fun startConnection_startSuccessfully() {

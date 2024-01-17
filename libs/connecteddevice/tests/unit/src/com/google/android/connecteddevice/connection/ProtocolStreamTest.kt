@@ -31,7 +31,6 @@ import com.google.android.connecteddevice.transport.ProtocolDevice
 import com.google.android.connecteddevice.util.ByteUtils
 import com.google.common.truth.Truth
 import com.google.common.truth.Truth.assertThat
-import com.google.common.util.concurrent.MoreExecutors.directExecutor
 import com.google.protobuf.ByteString
 import com.google.protobuf.ExtensionRegistryLite
 import java.util.UUID
@@ -249,7 +248,7 @@ class ProtocolStreamTest {
     }
   }
 
-  open class TestProtocol : ConnectionProtocol(directExecutor()) {
+  open class TestProtocol : ConnectionProtocol() {
     override fun isDeviceVerificationRequired() = false
 
     fun receiveData(data: ByteArray) {
@@ -287,7 +286,7 @@ class ProtocolStreamTest {
     }
   }
 
-  open class FailingSendProtocol : ConnectionProtocol(directExecutor()) {
+  open class FailingSendProtocol : ConnectionProtocol() {
     override fun isDeviceVerificationRequired() = false
 
     override fun startAssociationDiscovery(

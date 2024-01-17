@@ -37,8 +37,6 @@ import com.google.android.connecteddevice.util.SafeLog.loge
 import com.google.android.connecteddevice.util.SafeLog.logw
 import java.time.Duration
 import java.util.UUID
-import java.util.concurrent.Executor
-import java.util.concurrent.Executors
 
 /**
  * A ble peripheral communication protocol that provides actions and event notifications for
@@ -56,8 +54,7 @@ constructor(
   serviceChangedCharacteristicUuid: UUID,
   private val maxReconnectAdvertisementDuration: Duration,
   defaultMtuSize: Int,
-  callbackExecutor: Executor = Executors.newCachedThreadPool()
-) : ConnectionProtocol(callbackExecutor) {
+) : ConnectionProtocol() {
   private val writeCharacteristic =
     BluetoothGattCharacteristic(
       writeCharacteristicUuid,
@@ -376,6 +373,7 @@ constructor(
       stopConnectionDiscovery(ParcelUuid(deviceId))
     }
   }
+
   private fun onCharacteristicRead(device: BluetoothDevice) {
     if (device != bluetoothDevice) {
       logw(
@@ -435,9 +433,12 @@ constructor(
   companion object {
     private const val TAG = "BlePeripheralProtocol"
 
-    // Attribute protocol bytes attached to message. Available write size is MTU size minus att
+    // Attribute protocol bytes attached to message. Available write size is MTU size minus ATT
     // bytes.
-    @VisibleForTesting internal const val ATT_PROTOCOL_BYTES = 3
+    // On Android 14 (U) the default MTU size is 517 bytes. For GATT writes that are longer than
+    // 255 bytes, we need to reserve 5 bytes. See:
+    // https://developer.android.com/about/versions/14/behavior-changes-all#mtu-set-to-517
+    @VisibleForTesting internal const val ATT_PROTOCOL_BYTES = 5
     private const val TRUNCATED_BYTES = 3
     private const val TIMEOUT_HANDLER_THREAD_NAME = "peripheralThread"
     private val CLIENT_CHARACTERISTIC_CONFIG: UUID =

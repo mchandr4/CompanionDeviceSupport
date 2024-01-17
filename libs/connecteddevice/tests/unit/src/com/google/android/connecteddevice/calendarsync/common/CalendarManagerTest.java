@@ -328,13 +328,18 @@ public class CalendarManagerTest {
     verify(mockCalendarContentDelegate).delete(DEVICE_ID, CALENDAR_KEY);
   }
 
+
   @Test
   public void applyUpdateMessages_noActionWithChild_deletesAndInsertsCalendar() {
     Map<String, Range<Instant>> calendarKeyToTimeRange = new HashMap<>();
     calendarKeyToTimeRange.put(CALENDAR_KEY, TIME_RANGE);
     CalendarManager manager = createCalendarManager(calendarKeyToTimeRange);
     Calendar calendarUpdate =
-        Calendar.newBuilder().addEvents(Event.getDefaultInstance()).setKey(CALENDAR_KEY).build();
+        Calendar.newBuilder()
+            .addEvents(Event.getDefaultInstance())
+            .setRange(toTimeRange(TIME_RANGE))
+            .setKey(CALENDAR_KEY)
+            .build();
 
     manager.applyUpdateMessages(DEVICE_ID, ImmutableSet.of(calendarUpdate));
 
@@ -351,7 +356,11 @@ public class CalendarManagerTest {
     calendarKeyToTimeRange.put(CALENDAR_KEY, TIME_RANGE);
     CalendarManager manager = createCalendarManager(calendarKeyToTimeRange);
     Calendar calendarUpdate =
-        Calendar.newBuilder().setAction(UpdateAction.CREATE).setKey(CALENDAR_KEY).build();
+        Calendar.newBuilder()
+            .setAction(UpdateAction.CREATE)
+            .setRange(toTimeRange(TIME_RANGE))
+            .setKey(CALENDAR_KEY)
+            .build();
 
     manager.applyUpdateMessages(DEVICE_ID, ImmutableSet.of(calendarUpdate));
 

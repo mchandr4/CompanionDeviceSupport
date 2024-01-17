@@ -4,6 +4,7 @@ apply plugin: 'kotlin-android'
 buildscript {
     repositories {
         jcenter()
+        google()
     }
 }
 
@@ -14,7 +15,7 @@ android {
         applicationId "com.google.android.companiondevicesupport"
         minSdkVersion 29
         targetSdkVersion 34
-        versionCode 2197
+        versionCode 2221
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

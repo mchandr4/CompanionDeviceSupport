@@ -21,6 +21,9 @@ import com.google.android.connecteddevice.trust.api.TrustedDevice;
 /** Callback for triggered trusted device enrollment events. */
 oneway interface ITrustedDeviceEnrollmentCallback {
 
+    /** Triggered when the HU received escrow token from the mobile side. */
+    void onEscrowTokenReceived();
+
     /** Triggered when credentials validation is needed to authenticate a new escrow token. */
     void onValidateCredentialsRequest();
 

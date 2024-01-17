@@ -4,8 +4,6 @@ import android.os.ParcelUuid
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.connecteddevice.core.util.mockToBeAlive
 import com.google.common.truth.Truth.assertThat
-import com.google.common.util.concurrent.MoreExecutors.directExecutor
-import java.util.concurrent.ThreadPoolExecutor
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -59,42 +57,6 @@ class ConnectionProtocolTest {
 
     verify(mockDataReceivedListener).onDataReceived(testProtocolId, testData)
     verify(mockSecondDataReceivedListener, never()).onDataReceived(testProtocolId, testData)
-  }
-
-  @Test
-  fun registerDataReceivedListener_withSingleThread() {
-    val protocolWithoutDirectExecutor =
-      object : ConnectionProtocol() {
-        override fun isDeviceVerificationRequired() = false
-
-        override fun startAssociationDiscovery(
-          name: String,
-          identifier: ParcelUuid,
-          callback: IDiscoveryCallback,
-        ) {}
-
-        override fun startConnectionDiscovery(
-          id: ParcelUuid,
-          challenge: ConnectChallenge,
-          callback: IDiscoveryCallback
-        ) {}
-
-        override fun stopAssociationDiscovery() {}
-
-        override fun stopConnectionDiscovery(id: ParcelUuid) {}
-
-        override fun sendData(protocolId: String, data: ByteArray, callback: IDataSendCallback?) {}
-
-        override fun disconnectDevice(protocolId: String) {}
-
-        override fun getMaxWriteSize(protocolId: String): Int {
-          return 0
-        }
-      }
-    assertThat(
-        (protocolWithoutDirectExecutor.callbackExecutor as ThreadPoolExecutor).getMaximumPoolSize()
-      )
-      .isEqualTo(1)
   }
 
   @Test
@@ -252,7 +214,7 @@ class ConnectionProtocolTest {
     verify(mockDataReceivedListener, never()).onDataReceived(testProtocolId, testData)
   }
 
-  class TestConnectionProtocol : ConnectionProtocol(directExecutor()) {
+  class TestConnectionProtocol : ConnectionProtocol() {
     override fun isDeviceVerificationRequired() = false
 
     val deviceDisconnectedListenerList = deviceDisconnectedListeners

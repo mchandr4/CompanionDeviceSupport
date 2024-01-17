@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2022 The Android Open Source Project
+  ~ Copyright (C) 2023 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -16,10 +16,11 @@
   -->
 
 <resources>
-    <!-- Current version of the SDK -->
-    <string name="hu_companion_sdk_version" translatable="false">2.0.2</string>
-    <integer name="hu_companion_binder_version" translatable="false">1</integer>
-    <!-- Mobile SDK of later version should be compatible with the HU SDK. -->
-    <string name="compatible_min_mobile_version_android" translatable="false">1.0.0</string>
-    <string name="compatible_min_mobile_version_ios" translatable="false">1.0.0</string>
+  <!-- Representation of a new message [CHAR LIMIT=NONE]-->
+  <plurals name="notification_new_message">
+    <!-- String representing exactly 1 new message [CHAR LIMIT=25]-->
+    <item quantity="one">New message</item>
+    <!-- String representing more than one new message  [CHAR LIMIT=30]-->
+    <item quantity="other">%d new messages</item>
+  </plurals>
 </resources>

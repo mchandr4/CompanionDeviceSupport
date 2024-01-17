@@ -21,7 +21,6 @@ import android.os.IBinder
 import android.os.ParcelUuid
 import android.util.Base64
 import androidx.room.Room
-import java.util.concurrent.Executors
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.connecteddevice.api.IAssociationCallback
@@ -52,6 +51,7 @@ import com.google.android.encryptionrunner.EncryptionRunnerFactory
 import com.google.common.truth.Truth.assertThat
 import com.google.common.util.concurrent.MoreExecutors.directExecutor
 import java.util.UUID
+import java.util.concurrent.Executors
 import kotlin.test.fail
 import org.junit.After
 import org.junit.Before
@@ -135,6 +135,7 @@ class MultiProtocolDeviceControllerTest {
           directExecutor()
         ) {
         var attempts = 0
+
         override fun getAllAssociatedDevices(): MutableList<AssociatedDevice> {
           attempts++
           if (attempts == 1) {
@@ -169,6 +170,7 @@ class MultiProtocolDeviceControllerTest {
           directExecutor()
         ) {
         var attempts = 0
+
         override fun getAllAssociatedDevices(): MutableList<AssociatedDevice> {
           attempts++
           if (attempts < 10) {
@@ -176,24 +178,27 @@ class MultiProtocolDeviceControllerTest {
           }
           return super.getAllAssociatedDevices()
         }
-       override fun getDriverAssociatedDevices(): MutableList<AssociatedDevice> {
-         // Throws exception if this method get called before [getAllAssociatedDevices] finishes.
-         if(attempts != 10) throw SQLiteCantOpenDatabaseException()
-         return super.getDriverAssociatedDevices()
-       }
+
+        override fun getDriverAssociatedDevices(): MutableList<AssociatedDevice> {
+          // Throws exception if this method get called before [getAllAssociatedDevices] finishes.
+          if (attempts != 10) throw SQLiteCantOpenDatabaseException()
+          return super.getDriverAssociatedDevices()
+        }
       }
-    try{
+    try {
       MultiProtocolDeviceController(
-        context,
-        protocolDelegate,
-        transientErrorStorage,
-        mockOobRunner,
-        testAssociationServiceUuid.uuid,
-        enablePassenger = false,
-        storageExecutor = Executors.newSingleThreadExecutor()).start()
-    } catch(e: SQLiteCantOpenDatabaseException) {
-      fail("Should not have thrown any exception");
-   }
+          context,
+          protocolDelegate,
+          transientErrorStorage,
+          mockOobRunner,
+          testAssociationServiceUuid.uuid,
+          enablePassenger = false,
+          storageExecutor = Executors.newSingleThreadExecutor()
+        )
+        .start()
+    } catch (e: SQLiteCantOpenDatabaseException) {
+      fail("Should not have thrown any exception")
+    }
   }
 
   @Test
@@ -501,8 +506,7 @@ class MultiProtocolDeviceControllerTest {
       testDeviceMessage,
       deviceController.getConnectedDevice(
         deviceController.associationPendingDeviceId.get() ?: fail("Null device id.")
-      )
-        ?: fail("Failed to find the device.")
+      ) ?: fail("Failed to find the device.")
     )
 
     val listeners =
@@ -658,8 +662,7 @@ class MultiProtocolDeviceControllerTest {
     val device =
       deviceController.getConnectedDevice(
         deviceController.associationPendingDeviceId.get() ?: fail("Null device id.")
-      )
-        ?: fail("Failed to find the device.")
+      ) ?: fail("Failed to find the device.")
     device.secureChannel = secureChannel
     deviceController.notifyVerificationCodeAccepted()
 
@@ -711,8 +714,7 @@ class MultiProtocolDeviceControllerTest {
       testDeviceMessage,
       deviceController.getConnectedDevice(
         deviceController.associationPendingDeviceId.get() ?: fail("Null device id.")
-      )
-        ?: fail("Failed to find the device.")
+      ) ?: fail("Failed to find the device.")
     )
 
     verify(spyStorage).saveChallengeSecret(deviceId.toString(), secret)
@@ -769,8 +771,7 @@ class MultiProtocolDeviceControllerTest {
       testDeviceMessage,
       deviceController.getConnectedDevice(
         deviceController.associationPendingDeviceId.get() ?: fail("Null device id.")
-      )
-        ?: fail("Failed to find the device.")
+      ) ?: fail("Failed to find the device.")
     )
 
     verify(mockAssociationCallback).onAssociationError(any())
@@ -849,8 +850,7 @@ class MultiProtocolDeviceControllerTest {
       testDeviceMessage,
       deviceController.getConnectedDevice(
         deviceController.associationPendingDeviceId.get() ?: fail("Null device id.")
-      )
-        ?: fail("Failed to find the device.")
+      ) ?: fail("Failed to find the device.")
     )
 
     argumentCaptor<AssociatedDevice>().apply {
@@ -894,8 +894,7 @@ class MultiProtocolDeviceControllerTest {
       testDeviceMessage,
       deviceController.getConnectedDevice(
         deviceController.associationPendingDeviceId.get() ?: fail("Null device id.")
-      )
-        ?: fail("Failed to find the device.")
+      ) ?: fail("Failed to find the device.")
     )
 
     argumentCaptor<AssociatedDevice>().apply {
@@ -1117,8 +1116,7 @@ class MultiProtocolDeviceControllerTest {
     val device =
       deviceController.getConnectedDevice(
         deviceController.associationPendingDeviceId.get() ?: fail("Null device id.")
-      )
-        ?: fail("Can not find device.")
+      ) ?: fail("Can not find device.")
     device.secureChannel = secureChannel
 
     val callback = deviceController.generateSecureChannelCallback(device)
@@ -1137,8 +1135,7 @@ class MultiProtocolDeviceControllerTest {
     val device =
       deviceController.getConnectedDevice(
         deviceController.associationPendingDeviceId.get() ?: fail("Null device id.")
-      )
-        ?: fail("Can not find device.")
+      ) ?: fail("Can not find device.")
     device.secureChannel = secureChannel
     val error = MultiProtocolSecureChannel.ChannelError.CHANNEL_ERROR_INVALID_ENCRYPTION_KEY
     val callback = deviceController.generateSecureChannelCallback(device)
@@ -1154,8 +1151,7 @@ class MultiProtocolDeviceControllerTest {
     val device =
       deviceController.getConnectedDevice(
         deviceController.associationPendingDeviceId.get() ?: fail("Null device id.")
-      )
-        ?: fail("Can not find device.")
+      ) ?: fail("Can not find device.")
     device.secureChannel = secureChannel
     val callback = deviceController.generateSecureChannelCallback(device)
     callback.onMessageReceivedError(
@@ -1184,7 +1180,7 @@ class MultiProtocolDeviceControllerTest {
     override fun decrypt(value: String?): ByteArray? = Base64.decode(value, Base64.DEFAULT)
   }
 
-  open class TestConnectionProtocol : ConnectionProtocol(directExecutor()) {
+  open class TestConnectionProtocol : ConnectionProtocol() {
     val deviceDisconnectedListenerList = deviceDisconnectedListeners
 
     override fun isDeviceVerificationRequired() = false

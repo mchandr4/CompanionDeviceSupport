@@ -24,7 +24,6 @@ import com.google.android.connecteddevice.transport.ConnectChallenge
 import com.google.android.connecteddevice.transport.ConnectionProtocol
 import com.google.android.connecteddevice.transport.IDataSendCallback
 import com.google.android.connecteddevice.transport.IDiscoveryCallback
-import com.google.android.connecteddevice.util.DirectExecutor
 import com.google.android.connecteddevice.util.SafeLog.logd
 import com.google.android.connecteddevice.util.SafeLog.loge
 import com.google.android.connecteddevice.util.SafeLog.logw
@@ -33,15 +32,13 @@ import com.panasonic.iapx.IDeviceConnectionDelegate
 import com.panasonic.iapx.IServiceConnector
 import com.panasonic.iapx.IServiceConnectorDelegate
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.Executor
 
 /** Defines how connection is established and data is transferred via EAP channel. */
 class EapProtocol(
   private val eapClientName: String,
   private val eapServiceName: String,
   private val maxPacketSize: Int,
-  callbackExecutor: Executor = DirectExecutor()
-) : ConnectionProtocol(callbackExecutor) {
+) : ConnectionProtocol() {
   // Stores the connected EAP session id to the real connection pair.
   private val sessions = ConcurrentHashMap<Long, IDeviceConnection>()
   private val ongoingDiscoveries = ConcurrentHashMap<String, IDiscoveryCallback>()

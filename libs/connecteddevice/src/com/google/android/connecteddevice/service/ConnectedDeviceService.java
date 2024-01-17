@@ -38,6 +38,7 @@ import com.google.android.connecteddevice.core.MultiProtocolDeviceController;
 import com.google.android.connecteddevice.logging.LoggingFeature;
 import com.google.android.connecteddevice.logging.LoggingManager;
 import com.google.android.connecteddevice.oob.OobRunner;
+import com.google.android.connecteddevice.ping.PeriodicPingFeature;
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage;
 import com.google.android.connecteddevice.system.SystemFeature;
 import com.google.android.connecteddevice.transport.IConnectionProtocol;
@@ -99,6 +100,8 @@ public final class ConnectedDeviceService extends TrunkService {
   private SystemFeature systemFeature;
 
   private LoggingFeature loggingFeature;
+
+  private PeriodicPingFeature periodicPingFeature;
 
   @Override
   @SuppressLint("UnprotectedReceiver") // ACTION_USER_REMOVED is a protected broadcast.
@@ -164,6 +167,10 @@ public final class ConnectedDeviceService extends TrunkService {
         new SystemFeature(
             this,
             storage,
+            CompanionConnector.createLocalConnector(
+                this, Connector.USER_TYPE_ALL, featureCoordinator));
+    periodicPingFeature =
+        new PeriodicPingFeature(
             CompanionConnector.createLocalConnector(
                 this, Connector.USER_TYPE_ALL, featureCoordinator));
   }
@@ -246,6 +253,7 @@ public final class ConnectedDeviceService extends TrunkService {
     loggingManager.reset();
     systemFeature.stop();
     loggingFeature.stop();
+    periodicPingFeature.stop();
   }
 
   private void initializeFeatures() {
@@ -262,6 +270,7 @@ public final class ConnectedDeviceService extends TrunkService {
               featureCoordinator.start();
               systemFeature.start();
               loggingFeature.start();
+              periodicPingFeature.start();
             })
         .start();
   }

@@ -63,7 +63,9 @@ public final class TrustedDeviceManagerTest {
   private static final String SECONDARY_DEVICE_ID = UUID.randomUUID().toString();
 
   // Note: This token needs to be of length 8 to be valid.
-  private static final byte[] FAKE_TOKEN = "12345678".getBytes(UTF_8);
+  private static final byte[] FAKE_TOKEN_1 = "12345678".getBytes(UTF_8);
+
+  private static final byte[] FAKE_TOKEN_2 = "23456789".getBytes(UTF_8);
 
   // Note: The value of this state is arbitrary.
   private static final byte[] FAKE_STATE = "state".getBytes(UTF_8);
@@ -206,11 +208,28 @@ public final class TrustedDeviceManagerTest {
   }
 
   @Test
+  public void testPreEnrollment_onEscrowTokenReceived_cleanUpStates() throws RemoteException {
+    // 1st enrollment attempt which did not complete.
+    executeAndVerifyTokenAddedInEnrollFlowOnSecureCar();
+    manager.onEscrowTokenActivated(DEFAULT_USER_ID, FAKE_HANDLE);
+    // 2nd enrollment attempt
+    triggerDeviceConnected(SECONDARY_SECURE_CONNECTED_DEVICE);
+    manager.featureCallback.onMessageReceived(
+        SECONDARY_SECURE_CONNECTED_DEVICE, createTokenMessage(FAKE_TOKEN_2));
+
+    // Callback is invoked twice because there are 2 enrollment attempts.
+    verify(enrollmentCallback, times(2)).onEscrowTokenReceived();
+    assertThat(manager.pendingToken).isEqualTo(FAKE_TOKEN_2);
+    assertThat(manager.pendingDevice).isEqualTo(SECONDARY_SECURE_CONNECTED_DEVICE);
+    verifyReset();
+  }
+
+  @Test
   public void testNullTrustAgentService_doNotPostError() throws RemoteException {
     triggerDeviceConnected(SECURE_CONNECTED_DEVICE);
     // First, the phone will send an escrow token to start the enrollment.
     manager.featureCallback.onMessageReceived(
-        SECURE_CONNECTED_DEVICE, createTokenMessage(FAKE_TOKEN));
+        SECURE_CONNECTED_DEVICE, createTokenMessage(FAKE_TOKEN_1));
     verify(notificationCallback).onTrustedDeviceEnrollmentNotificationRequest();
     trustAgentDelegate = null;
 
@@ -238,7 +257,7 @@ public final class TrustedDeviceManagerTest {
     triggerDeviceConnected(SECURE_CONNECTED_DEVICE);
     // First, the phone will send an escrow token to start the enrollment.
     manager.featureCallback.onMessageReceived(
-        SECURE_CONNECTED_DEVICE, createTokenMessage(FAKE_TOKEN));
+        SECURE_CONNECTED_DEVICE, createTokenMessage(FAKE_TOKEN_1));
     verify(notificationCallback).onTrustedDeviceEnrollmentNotificationRequest();
 
     // The user confirms enrollment through UI on the secure car.
@@ -429,7 +448,7 @@ public final class TrustedDeviceManagerTest {
     manager.removeTrustedDevice(trustedDevice);
     // Fresh new enrollment
     manager.featureCallback.onMessageReceived(
-        SECURE_CONNECTED_DEVICE, createTokenMessage(FAKE_TOKEN));
+        SECURE_CONNECTED_DEVICE, createTokenMessage(FAKE_TOKEN_1));
     manager.processEnrollment(/* isDeviceSecure= */ true);
     manager.onEscrowTokenAdded(DEFAULT_USER_ID, FAKE_HANDLE);
 
@@ -450,7 +469,7 @@ public final class TrustedDeviceManagerTest {
     manager.removeTrustedDevice(trustedDevice);
     // Fresh new enrollment
     manager.featureCallback.onMessageReceived(
-        SECURE_CONNECTED_DEVICE, createTokenMessage(FAKE_TOKEN));
+        SECURE_CONNECTED_DEVICE, createTokenMessage(FAKE_TOKEN_1));
     manager.processEnrollment(/* isDeviceSecure= */ true);
     manager.onEscrowTokenAdded(DEFAULT_USER_ID, FAKE_HANDLE);
 
@@ -471,7 +490,7 @@ public final class TrustedDeviceManagerTest {
     manager.removeTrustedDevice(trustedDevice);
     // Fresh new enrollment
     manager.featureCallback.onMessageReceived(
-        SECURE_CONNECTED_DEVICE, createTokenMessage(FAKE_TOKEN));
+        SECURE_CONNECTED_DEVICE, createTokenMessage(FAKE_TOKEN_1));
     manager.processEnrollment(/* isDeviceSecure= */ true);
     manager.onEscrowTokenAdded(DEFAULT_USER_ID, FAKE_HANDLE);
 
@@ -713,14 +732,14 @@ public final class TrustedDeviceManagerTest {
             .setType(MessageType.UNLOCK_CREDENTIALS)
             .setPayload(
                 PhoneCredentials.newBuilder()
-                    .setEscrowToken(ByteString.copyFrom(FAKE_TOKEN))
+                    .setEscrowToken(ByteString.copyFrom(FAKE_TOKEN_1))
                     .setHandle(ByteString.copyFrom(ByteUtils.longToBytes(FAKE_HANDLE)))
                     .build()
                     .toByteString())
             .build();
     featureCallback.onMessageReceived(SECURE_CONNECTED_DEVICE, unlockMessage.toByteArray());
 
-    verify(trustAgentDelegate).unlockUserWithToken(FAKE_TOKEN, FAKE_HANDLE, DEFAULT_USER_ID);
+    verify(trustAgentDelegate).unlockUserWithToken(FAKE_TOKEN_1, FAKE_HANDLE, DEFAULT_USER_ID);
   }
 
   @Test
@@ -755,7 +774,7 @@ public final class TrustedDeviceManagerTest {
             .setType(MessageType.UNLOCK_CREDENTIALS)
             .setPayload(
                 PhoneCredentials.newBuilder()
-                    .setEscrowToken(ByteString.copyFrom(FAKE_TOKEN))
+                    .setEscrowToken(ByteString.copyFrom(FAKE_TOKEN_1))
                     .setHandle(ByteString.copyFrom(ByteUtils.longToBytes(FAKE_HANDLE)))
                     .build()
                     .toByteString())
@@ -844,7 +863,7 @@ public final class TrustedDeviceManagerTest {
     triggerDeviceConnected(SECURE_CONNECTED_DEVICE);
     executeAndVerifyTokenAddedInEnrollFlowOnSecureCar();
 
-    assertThat(manager.getPendingToken()).isEqualTo(FAKE_TOKEN);
+    assertThat(manager.getPendingToken()).isEqualTo(FAKE_TOKEN_1);
   }
 
   @Test
@@ -864,7 +883,7 @@ public final class TrustedDeviceManagerTest {
             .setType(MessageType.UNLOCK_CREDENTIALS)
             .setPayload(
                 PhoneCredentials.newBuilder()
-                    .setEscrowToken(ByteString.copyFrom(FAKE_TOKEN))
+                    .setEscrowToken(ByteString.copyFrom(FAKE_TOKEN_1))
                     .setHandle(ByteString.copyFrom(ByteUtils.longToBytes(FAKE_HANDLE)))
                     .build()
                     .toByteString())
@@ -876,25 +895,25 @@ public final class TrustedDeviceManagerTest {
     manager.setTrustedDeviceAgentDelegate(trustAgentDelegate);
 
     verify(trustAgentDelegate, never())
-        .unlockUserWithToken(FAKE_TOKEN, FAKE_HANDLE, DEFAULT_USER_ID);
+        .unlockUserWithToken(FAKE_TOKEN_1, FAKE_HANDLE, DEFAULT_USER_ID);
   }
 
   /**
    * Runs through adding token flow in enrollment and verifies it is run on a secure car.
    *
-   * <p>At the end of this method, {@link #FAKE_TOKEN} will be added and waiting to be activated for
-   * {@link #SECURE_CONNECTED_DEVICE}.
+   * <p>At the end of this method, {@link #FAKE_TOKEN_1} will be added and waiting to be activated
+   * for {@link #SECURE_CONNECTED_DEVICE}.
    */
   private void executeAndVerifyTokenAddedInEnrollFlowOnSecureCar() throws RemoteException {
     // First, the phone will send an escrow token to start the enrollment.
     manager.featureCallback.onMessageReceived(
-        SECURE_CONNECTED_DEVICE, createTokenMessage(FAKE_TOKEN));
+        SECURE_CONNECTED_DEVICE, createTokenMessage(FAKE_TOKEN_1));
     verify(notificationCallback).onTrustedDeviceEnrollmentNotificationRequest();
 
     // The user confirms enrollment through UI on the secure car.
     manager.processEnrollment(/* isDeviceSecure= */ true);
 
-    verify(trustAgentDelegate).addEscrowToken(FAKE_TOKEN, DEFAULT_USER_ID);
+    verify(trustAgentDelegate).addEscrowToken(FAKE_TOKEN_1, DEFAULT_USER_ID);
 
     // The system should then let the manager know the add was successful.
     manager.onEscrowTokenAdded(DEFAULT_USER_ID, FAKE_HANDLE);
@@ -905,7 +924,7 @@ public final class TrustedDeviceManagerTest {
    * Runs through a valid enrollment flow and verifies that the current flow is run on a secure car.
    *
    * <p>At the end of this method, {@link #SECURE_CONNECTED_DEVICE} will be enrolled and {@link
-   * #FAKE_TOKEN} will be activated.
+   * #FAKE_TOKEN_1} will be activated.
    */
   private void executeAndVerifyValidEnrollFlowOnSecureCar() throws RemoteException {
     // Add escrow token
@@ -925,13 +944,12 @@ public final class TrustedDeviceManagerTest {
    * car.
    *
    * <p>At the end of this method, {@link #SECURE_CONNECTED_DEVICE} will be enrolled and {@link
-   * #FAKE_TOKEN} will be activated.
+   * #FAKE_TOKEN_1} will be activated.
    */
   private void executeAndVerifyValidEnrollFlowOnInsecureCar() throws RemoteException {
     // First, the phone will send an escrow token to start the enrollment.
     manager.featureCallback.onMessageReceived(
-        SECURE_CONNECTED_DEVICE,
-        createTokenMessage(FAKE_TOKEN));
+        SECURE_CONNECTED_DEVICE, createTokenMessage(FAKE_TOKEN_1));
     verify(notificationCallback).onTrustedDeviceEnrollmentNotificationRequest();
 
     // The user confirms enrollment through UI on the insecure car.
@@ -940,7 +958,7 @@ public final class TrustedDeviceManagerTest {
 
     // The user creates credential and continues enrollment on the secure car.
     manager.processEnrollment(/* isDeviceSecure= */ true);
-    verify(trustAgentDelegate).addEscrowToken(FAKE_TOKEN, DEFAULT_USER_ID);
+    verify(trustAgentDelegate).addEscrowToken(FAKE_TOKEN_1, DEFAULT_USER_ID);
 
     // The system should then let the manager know the add was successful.
     manager.onEscrowTokenAdded(DEFAULT_USER_ID, FAKE_HANDLE);
@@ -962,6 +980,13 @@ public final class TrustedDeviceManagerTest {
 
   private void mockNoDevicesConnected() {
     when(fakeConnector.getConnectedDevices()).thenReturn(ImmutableList.of());
+  }
+
+  private void verifyReset() {
+    assertThat(manager.pendingHandle).isNull();
+    assertThat(manager.isEscrowTokenActivated).isFalse();
+    assertThat(manager.isCredentialVerified).isFalse();
+    assertThat(manager.isWaitingForCredentialSetUp.get()).isFalse();
   }
 
   private static byte[] createUnlockRequestMessage() {

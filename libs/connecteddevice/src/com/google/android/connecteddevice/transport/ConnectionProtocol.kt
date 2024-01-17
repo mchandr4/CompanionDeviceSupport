@@ -17,22 +17,21 @@ package com.google.android.connecteddevice.transport
 
 import android.os.ParcelUuid
 import androidx.annotation.CallSuper
-import androidx.annotation.VisibleForTesting
 import com.google.android.connecteddevice.util.AidlThreadSafeCallbacks
+import com.google.android.connecteddevice.util.DirectExecutor
 import com.google.android.connecteddevice.util.SafeLog.logd
 import com.google.android.connecteddevice.util.SafeLog.logw
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.Executor
-import java.util.concurrent.Executors
 
 /**
  * Representation of a communication protocol that provides actions and event notifications for
  * interacting with devices.
  */
-abstract class ConnectionProtocol(
-  @get:VisibleForTesting internal val callbackExecutor: Executor = Executors.newFixedThreadPool(1)
-) : IConnectionProtocol.Stub() {
+abstract class ConnectionProtocol() : IConnectionProtocol.Stub() {
+  private val callbackExecutor: Executor = DirectExecutor()
+
   protected val dataReceivedListeners:
     MutableMap<String, AidlThreadSafeCallbacks<IDataReceivedListener>> =
     ConcurrentHashMap()
