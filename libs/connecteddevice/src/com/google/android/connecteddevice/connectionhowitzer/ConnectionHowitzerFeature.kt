@@ -318,7 +318,7 @@ class ConnectionHowitzerFeature(private val connector: Connector) : Connector.Ca
     internal fun calculateBandwidthBytesPerSecond(
       config: HowitzerConfig,
       starTime: Instant,
-      payloadTimestamps: List<Instant>
+      payloadTimestamps: List<Instant>,
     ): Double {
       require(config.payloadSize > 0 && config.payloadCount > 0) {
         "Cannot calculate bandwidth: both payloadSize and payloadCount must be positive; " +

@@ -1,5 +1,6 @@
 package com.google.android.connecteddevice.trust;
 
+import static com.google.android.connecteddevice.trust.TrustedDeviceConstants.TRUSTED_DEVICE_ERROR_UNKNOWN;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.util.concurrent.MoreExecutors.directExecutor;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -27,6 +28,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.google.android.connecteddevice.api.Connector;
 import com.google.android.connecteddevice.api.FakeConnector;
 import com.google.android.connecteddevice.model.ConnectedDevice;
+import com.google.android.connecteddevice.trust.TrustedDeviceManager.PendingToken;
 import com.google.android.connecteddevice.trust.api.IOnTrustedDeviceEnrollmentNotificationCallback;
 import com.google.android.connecteddevice.trust.api.IOnTrustedDevicesRetrievedListener;
 import com.google.android.connecteddevice.trust.api.ITrustedDeviceAgentDelegate;
@@ -61,6 +63,11 @@ public final class TrustedDeviceManagerApi33Test {
 
   // Note: This token needs to be of length 8 to be valid.
   private static final byte[] FAKE_TOKEN = "12345678".getBytes(UTF_8);
+
+  // Fake token to mimic token received for backgrounded user.
+  // Note: Default userId for unit test is 0.
+  private static final PendingToken FAKE_PENDING_TOKEN =
+      new PendingToken(1, "23456789".getBytes(UTF_8));
 
   // Note: The value of this handle is arbitrary.
   private static final long FAKE_HANDLE = 111L;
@@ -172,6 +179,15 @@ public final class TrustedDeviceManagerApi33Test {
   }
 
   @Test
+  public void testEnrollmentFlow_userBackgrounded_postEnrollmentError() throws RemoteException {
+    triggerDeviceConnected(SECURE_CONNECTED_DEVICE);
+    manager.pendingToken = FAKE_PENDING_TOKEN;
+    manager.processEnrollment(/* isDeviceSecure= */ true);
+
+    verify(enrollmentCallback).onTrustedDeviceEnrollmentError(TRUSTED_DEVICE_ERROR_UNKNOWN);
+  }
+
+  @Test
   public void testValidEnrollmentFlow_onInsecureCar_tokenAddedOneTime() throws RemoteException {
     triggerDeviceConnected(SECURE_CONNECTED_DEVICE);
     executeAndVerifyValidEnrollFlowOnInsecureCar();
@@ -191,6 +207,16 @@ public final class TrustedDeviceManagerApi33Test {
         new TrustedDevice(SECURE_CONNECTED_DEVICE.getDeviceId(), DEFAULT_USER_ID, FAKE_HANDLE);
 
     assertThat(trustedDeviceListCaptor.getValue()).containsExactly(expectedTrustedDevice);
+  }
+
+  @Test
+  public void processEnrollment_backgroundUserToken_postEnrollmentError() throws RemoteException {
+    triggerDeviceConnected(SECURE_CONNECTED_DEVICE);
+
+    manager.pendingToken = new PendingToken(1, "12345678".getBytes(UTF_8));
+    manager.processEnrollment(true);
+
+    verify(enrollmentCallback).onTrustedDeviceEnrollmentError(TRUSTED_DEVICE_ERROR_UNKNOWN);
   }
 
   @Test

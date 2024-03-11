@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">Abrir la aplicación complementaria</string>
   <string name="enable_bluetooth_instruction_text">Permitir la conexión Bluetooth</string>
   <string name="connect_to_targe_car_instruction_text">Conectarse a &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
-  <string name="qr_instruction_text">Usa el teléfono para escanear el código QR o abre MyCompanion para conectarte a &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">Usa el teléfono para escanear el código QR o abre MyCompanion para conectarte a &lt;b&gt;%1$s&lt;/b&gt;</string>
   <string name="connect_to_car_instruction_text">Conéctate al vehículo</string>
   <string name="associated_device_pairing_code_title">Confirma el código en el teléfono</string>
   <string name="associated_device_pairing_message">Confirma que el código sea el mismo que aparece en el teléfono</string>
@@ -63,7 +63,7 @@
   <string name="not_now">Ahora no</string>
   <string name="connect">Conectar</string>
   <string name="disconnect">Desconectar</string>
-  <string name="disconnecting">Disconnecting</string>
+  <string name="disconnecting">Desconectando</string>
   <string name="skip">Omitir</string>
   <string name="change_profile">Cambiar perfil</string>
   <string name="connected">Conectado</string>
@@ -99,7 +99,7 @@
   </plurals>
   <string name="name_not_available">Nombre no disponible</string>
   <string name="ble_device_name_prefix">Vehículo\u00A0</string>
-  <string name="suw_setup_profile_title">Configurar perfil con el teléfono</string>
-  <string name="suw_setup_profile_content">Para comenzar, escanea el código QR. Si no tienes la app de MyCompanion, puedes descargarla de Google Play o el App Store.</string>
-  <string name="suw_qr_instruction_text">Escanea el código QR para conectarte con&lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="suw_setup_profile_title">Termina de configurar el teléfono o vehículo</string>
+  <string name="suw_setup_profile_content">Si ya comenzaste la configuración en el teléfono, abre la aplicación complementaria y escanéa el código QR.\n\nTambién puedes terminar de configurar el perfil en el vehículo.</string>
+  <string name="suw_qr_instruction_text">Escanea este código QR para conectar a &lt;b&gt;%1$s&lt;/b&gt;</string>
 </resources>

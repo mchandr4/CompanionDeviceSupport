@@ -34,6 +34,7 @@ import androidx.annotation.Nullable;
 import androidx.core.app.RemoteInput;
 import com.google.android.connecteddevice.model.ConnectedDevice;
 import com.google.android.connecteddevice.notificationmsg.common.ConversationKey;
+import com.google.android.connecteddevice.notificationmsg.common.ProjectionStateListener;
 import com.google.android.connecteddevice.notificationmsg.proto.NotificationMsg;
 import com.google.android.connecteddevice.service.MetaDataService;
 
@@ -213,7 +214,8 @@ public class NotificationMsgService extends MetaDataService {
         requireMetaString(META_DEFAULT_DISPLAY_NAME),
         getMetaString(META_GROUP_TITLE_SEPARATOR, DEFAULT_GROUP_TITLE_SEPARATOR),
         getMetaFloat(META_LETTER_TO_TILE_RATIO, DEFAULT_LETTER_TO_TILE_RATIO),
-        requireMetaResourceId(META_CONTENT_TEXT));
+        requireMetaResourceId(META_CONTENT_TEXT),
+        new ProjectionStateListener(this));
   }
 
   private int[] getLetterTileColors() {

@@ -38,13 +38,13 @@ class ConnectionHowitzerUtilTest {
     startTime: Instant,
     config: ConnectionHowitzerFeature.HowitzerConfig,
     payloadTimeInstantList: List<Instant>,
-    expected: Double
+    expected: Double,
   ) {
     val actual =
       ConnectionHowitzerFeature.calculateBandwidthBytesPerSecond(
         config,
         startTime,
-        payloadTimeInstantList
+        payloadTimeInstantList,
       )
 
     assertEquals(actual, expected)
@@ -60,7 +60,7 @@ class ConnectionHowitzerUtilTest {
       ConnectionHowitzerFeature.calculateBandwidthBytesPerSecond(
         config,
         startTime,
-        payloadTimestamps
+        payloadTimestamps,
       )
     }
   }
@@ -75,7 +75,7 @@ class ConnectionHowitzerUtilTest {
       ConnectionHowitzerFeature.calculateBandwidthBytesPerSecond(
         config,
         startTime,
-        payloadTimestamps
+        payloadTimestamps,
       )
     }
   }
@@ -94,7 +94,7 @@ class ConnectionHowitzerUtilTest {
       ConnectionHowitzerFeature.calculateBandwidthBytesPerSecond(
         config,
         startTime,
-        payloadTimestamps
+        payloadTimestamps,
       )
     }
   }
@@ -109,7 +109,7 @@ class ConnectionHowitzerUtilTest {
       ConnectionHowitzerFeature.calculateBandwidthBytesPerSecond(
         config,
         startTime,
-        payloadTimestamps
+        payloadTimestamps,
       )
     }
   }
@@ -127,7 +127,7 @@ class ConnectionHowitzerUtilTest {
           sendPayloadFromIhu = true,
           payloadSize = 10,
           payloadCount = 1,
-          testId = TEST_ID
+          testId = TEST_ID,
         )
       val payloadTimestampList1 = listOf(startTime.plusMillis(1000))
       val expected1 = 10.0
@@ -137,7 +137,7 @@ class ConnectionHowitzerUtilTest {
           sendPayloadFromIhu = false,
           payloadSize = 17,
           payloadCount = 3,
-          testId = TEST_ID
+          testId = TEST_ID,
         )
       val payloadTimestampList2 = listOf(startTime.plusMillis(2500))
       val expected2 = 20.4
@@ -147,7 +147,7 @@ class ConnectionHowitzerUtilTest {
           sendPayloadFromIhu = true,
           payloadSize = 23,
           payloadCount = 9,
-          testId = TEST_ID
+          testId = TEST_ID,
         )
       val payloadTimestampList3 = listOf(startTime.plusMillis(5000))
       val expected3 = 41.4

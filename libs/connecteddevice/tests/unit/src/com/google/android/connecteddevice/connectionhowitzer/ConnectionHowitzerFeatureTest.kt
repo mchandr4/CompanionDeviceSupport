@@ -111,7 +111,7 @@ class ConnectionHowitzerFeatureTest {
         sendPayloadFromIhu = true,
         payloadSize = payloadSize,
         payloadCount = payloadCount,
-        testId = TEST_ID
+        testId = TEST_ID,
       )
 
     howitzerFeature.onMessageReceived(device, createConfigMessage(config).toByteArray())
@@ -145,7 +145,7 @@ class ConnectionHowitzerFeatureTest {
         sendPayloadFromIhu = false,
         payloadSize = payloadSize,
         payloadCount = payloadCount,
-        testId = TEST_ID
+        testId = TEST_ID,
       )
     howitzerFeature.onMessageReceived(device, createConfigMessage(config).toByteArray())
 
@@ -173,7 +173,7 @@ class ConnectionHowitzerFeatureTest {
         sendPayloadFromIhu = false,
         payloadSize = payloadSize,
         payloadCount = payloadCount,
-        testId = TEST_ID
+        testId = TEST_ID,
       )
     howitzerFeature.onMessageReceived(device, createConfigMessage(config).toByteArray())
 

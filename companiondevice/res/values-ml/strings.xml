@@ -25,13 +25,13 @@
   <string name="open_companion_app_instruction_text">സഹകാരി ആപ്പ് തുറക്കുക</string>
   <string name="enable_bluetooth_instruction_text">Bluetooth കണക്ഷൻ അനുവദിക്കുക</string>
   <string name="connect_to_targe_car_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s എന്നതിലേക്ക് കണക്റ്റ് ചെയ്യുക</string>
-  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s എന്നതിലേക്ക് കണക്റ്റ് ചെയ്യുന്നതിന് ഫോൺ ഉപയോഗിച്ച് QR കോഡ് സ്കാൻ ചെയ്യുകയോ MyCompanion തുറക്കുകയോ ചെയ്യുക</string>
+  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; എന്നതിലേക്ക് കണക്റ്റ് ചെയ്യുന്നതിന് നിങ്ങളുടെ ഫോൺ ഉപയോഗിച്ച് QR കോഡ് സ്‌കാൻ ചെയ്യുക അല്ലെങ്കിൽ MyCompanion തുറക്കുക</string>
   <string name="connect_to_car_instruction_text">കാറിലേക്ക് കണക്‌റ്റ് ചെയ്യുക</string>
   <string name="associated_device_pairing_code_title">ഫോണിലെ കോഡ് സ്ഥിരീകരിക്കുക</string>
   <string name="associated_device_pairing_message">നിങ്ങളുടെ ഫോണിൽ കാണിക്കുന്ന കോഡുമായി ഇത് പൊരുത്തപ്പെടുന്നുണ്ടെന്ന് സ്ഥിരീകരിക്കുക</string>
   <string name="associated_device_success">ഉപകരണം ശരിയായി ബന്ധിപ്പിച്ചു</string>
   <string name="associated_device_select_device">ആപ്പ് തുറന്ന് &lt;b&gt;%1$s&lt;/b&gt; എന്നതിലേക്ക് കണക്റ്റ് ചെയ്യൂ</string>
-  <string name="associated_device_open_app">ആപ്പ് തുറന്ന്, നിർദ്ദേശങ്ങൾ പിന്തുടരുക</string>
+  <string name="associated_device_open_app">ആപ്പ് തുറന്ന്, നിർദ്ദേശങ്ങൾ ഫോളോ ചെയ്യുക</string>
   <string name="remove_associated_device_title">&lt;b&gt;%1$s&lt;/b&gt; എന്നതിനെ മറക്കണോ?</string>
   <string name="remove_associated_device_message">ഈ കാർ ഇനി ഈ ഉപകരണവുമായി ജോടിയാകില്ല. നിങ്ങൾ സഹകാരി ആപ്പിൽ നിന്ന് ഈ കാർ നീക്കം ചെയ്യേണ്ടതുണ്ട്.</string>
   <string name="device_removed_success_toast_text">%1$s മറന്നു</string>
@@ -63,7 +63,7 @@
   <string name="not_now">ഇപ്പോൾ വേണ്ട</string>
   <string name="connect">കണക്‌റ്റ് ചെയ്യുക</string>
   <string name="disconnect">വിച്ഛേദിക്കുക</string>
-  <string name="disconnecting">Disconnecting</string>
+  <string name="disconnecting">വിച്ഛേദിക്കുന്നു</string>
   <string name="skip">ഒഴിവാക്കുക</string>
   <string name="change_profile">പ്രൊഫൈൽ മാറ്റുക</string>
   <string name="connected">കണക്റ്റ് ചെയ്‌തു</string>
@@ -99,7 +99,7 @@
   </plurals>
   <string name="name_not_available">പേര് ലഭ്യമല്ല</string>
   <string name="ble_device_name_prefix">വാഹനം\u00A0</string>
-  <string name="suw_setup_profile_title">ഫോൺ ഉപയോഗിച്ച് പ്രൊഫൈൽ സജ്ജീകരിക്കുക</string>
-  <string name="suw_setup_profile_content">ആരംഭിക്കാൻ QR കോഡ് സ്‌കാൻ ചെയ്യുക. നിങ്ങൾക്ക് MyCompanion ആപ്പില്ലെങ്കിൽ, ഇത് Google Play-ലും ആപ്പ് സ്റ്റോറിലും ഡൗൺലോഡ് ചെയ്യാം.</string>
-  <string name="suw_qr_instruction_text">&lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s എന്നതിലേക്ക് കണക്റ്റ് ചെയ്യാൻ QR കോഡ് സ്‌കാൻ ചെയ്യുക</string>
+  <string name="suw_setup_profile_title">നിങ്ങളുടെ ഫോണിലോ കാറിലോ സജ്ജീകരിക്കൽ പൂർത്തിയാക്കുക</string>
+  <string name="suw_setup_profile_content">നിങ്ങൾ ഫോണിൽ സജ്ജീകരിച്ച് തുടങ്ങിയെങ്കിൽ, നിങ്ങളുടെ സഹകാരി ആപ്പ് തുറന്ന് QR കോഡ് സ്‌കാൻ ചെയ്യുക.\n\nഅല്ലെങ്കിൽ, കാറിലെ നിങ്ങളുടെ പ്രൊഫൈൽ സജ്ജീകരിക്കുന്നത് പൂർത്തിയാക്കാവുന്നതാണ്.</string>
+  <string name="suw_qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; എന്നതിലേക്ക് കണക്റ്റ് ചെയ്യാൻ സ്‌കാൻ ചെയ്യുക</string>
 </resources>

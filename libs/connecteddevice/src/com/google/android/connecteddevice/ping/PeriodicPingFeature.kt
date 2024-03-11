@@ -23,8 +23,8 @@ import com.google.android.companionprotos.PeriodicPingProto.PeriodicPingMessage
 import com.google.android.companionprotos.PeriodicPingProto.PeriodicPingMessage.MessageType
 import com.google.android.connecteddevice.api.Connector
 import com.google.android.connecteddevice.model.ConnectedDevice
-import com.google.android.connecteddevice.util.SafeLog.logd
 import com.google.android.connecteddevice.util.SafeLog.loge
+import com.google.android.connecteddevice.util.SafeLog.logi
 import com.google.android.connecteddevice.util.SafeLog.logw
 import com.google.protobuf.InvalidProtocolBufferException
 import java.time.Duration
@@ -36,17 +36,14 @@ class PeriodicPingFeature(private val connector: Connector) : Connector.Callback
     connector.featureId = FEATURE_ID
   }
 
-  private var pingDelay = Duration.ofMillis(PING_DELAY)
   private val periodicPingTask =
     object : Runnable {
       override fun run() {
         sendPing()
-        handler.postDelayed(this, pingDelay.toMillis())
+        handler.postDelayed(this, PING_DELAY.toMillis())
       }
     }
   private val handler = Handler(Looper.getMainLooper())
-  private val pingMessage =
-    PeriodicPingMessage.newBuilder().setMessageType(MessageType.PING).build()
   private var connectedDevice: ConnectedDevice? = null
 
   fun start() {
@@ -58,19 +55,21 @@ class PeriodicPingFeature(private val connector: Connector) : Connector.Callback
   }
 
   override fun onSecureChannelEstablished(device: ConnectedDevice) {
-    logd(TAG, "onSecureChannelEstablished: ${device.deviceId}.")
     connectedDevice = device
+
     handler.post(periodicPingTask)
+    logi(TAG, "Starting periodic pings for ${device.deviceId} every $PING_DELAY.")
   }
 
   override fun onDeviceDisconnected(device: ConnectedDevice) {
-    logd(TAG, "onDeviceDisconnected: ${device.deviceId}.")
     if (connectedDevice != device) {
       logw(TAG, "A different device has disconnected. Ignore.")
       return
     }
+
     connectedDevice = null
     handler.removeCallbacks(periodicPingTask)
+    logi(TAG, "${device.deviceId} disconnected. Stopping periodic ping.")
   }
 
   override fun onMessageReceived(device: ConnectedDevice, message: ByteArray) {
@@ -83,7 +82,7 @@ class PeriodicPingFeature(private val connector: Connector) : Connector.Callback
       }
 
     when (periodicPingMessage.messageType) {
-      MessageType.ACK -> handleAckMessage(device)
+      MessageType.ACK -> {} // No-op
       else -> {
         loge(TAG, "Received invalid message type: ${periodicPingMessage.messageType}. Ignore.")
       }
@@ -95,16 +94,18 @@ class PeriodicPingFeature(private val connector: Connector) : Connector.Callback
       loge(TAG, "No device connected. Cannot send ping.")
       return
     }
-    connector.sendMessageSecurely(connectedDevice!!, pingMessage.toByteArray())
-  }
-
-  private fun handleAckMessage(device: ConnectedDevice) {
-    // No-op
+    connector.sendMessageSecurely(connectedDevice!!, PING_MESSAGE.toByteArray())
   }
 
   companion object {
+    // https://developer.apple.com/documentation/uikit/uiapplicationdelegate/1622997-applicationdidenterbackground
+    /** Delay between each ping, based on Apple developer guide. */
+    val PING_DELAY = Duration.ofSeconds(5)
+
     private const val TAG = "PeriodicPingFeature"
-    const val PING_DELAY: Long = 3000
+
     private val FEATURE_ID = ParcelUuid.fromString("9eb6528d-bb65-4239-b196-6789196cf2a9")
+    private val PING_MESSAGE =
+      PeriodicPingMessage.newBuilder().setMessageType(MessageType.PING).build()
   }
 }

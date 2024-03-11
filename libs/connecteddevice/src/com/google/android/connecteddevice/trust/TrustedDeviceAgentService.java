@@ -40,6 +40,7 @@ import android.os.UserManager;
 import android.service.trust.GrantTrustResult;
 import android.service.trust.TrustAgentService;
 import androidx.annotation.VisibleForTesting;
+import com.google.android.connecteddevice.R;
 import com.google.android.connecteddevice.trust.api.ITrustedDeviceAgentDelegate;
 import com.google.android.connecteddevice.trust.api.ITrustedDeviceManager;
 import java.time.Duration;
@@ -59,9 +60,11 @@ public class TrustedDeviceAgentService extends TrustAgentService {
 
   private static final Duration RETRY_DURATION = Duration.ofMillis(10);
 
+  @VisibleForTesting protected Duration checkIhuLockScreenDelay;
+
   private final AtomicBoolean isManagingTrust = new AtomicBoolean(false);
 
-  private HandlerThread retryThread;
+  @VisibleForTesting protected HandlerThread retryThread;
 
   private Handler retryHandler;
 
@@ -78,8 +81,8 @@ public class TrustedDeviceAgentService extends TrustAgentService {
   @SuppressLint("UnprotectedReceiver") // Broadcast is protected.
   @Override
   public void onCreate() {
+    logd(TAG, "Starting TrustedDeviceAgentService for user" + ActivityManager.getCurrentUser());
     super.onCreate();
-    logd(TAG, "Starting trust agent service.");
     userManager = (UserManager) getSystemService(Context.USER_SERVICE);
     keyguardManager = getSystemService(KeyguardManager.class);
     powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
@@ -89,12 +92,14 @@ public class TrustedDeviceAgentService extends TrustAgentService {
     retryThread = new HandlerThread(RETRY_HANDLER_THREAD_NAME);
     retryThread.start();
     retryHandler = new Handler(retryThread.getLooper());
+    checkIhuLockScreenDelay =
+        Duration.ofSeconds(getResources().getInteger(R.integer.lock_screen_check_delay_in_second));
     bindToService();
   }
 
   @Override
   public void onDestroy() {
-    logd(TAG, "Destroying trust agent service.");
+    logd(TAG, "Destroying TrustedDeviceAgentService for user" + ActivityManager.getCurrentUser());
     boolean isDeviceSecure = keyguardManager != null && keyguardManager.isDeviceSecure();
     logd(TAG, "Device secure status: " + isDeviceSecure + ".");
     if (trustedDeviceManager != null) {
@@ -158,39 +163,64 @@ public class TrustedDeviceAgentService extends TrustAgentService {
       logd(TAG, "User was unlocked before receiving an escrow token.");
       return;
     }
-    logd(TAG, "Dismissing the lockscreen.");
+
+    logd(TAG, "Try dismissing the lockscreen.");
     // To avoid unreliable system lock status check impacting automated test metrics, invoking the
     // user unlocked event before granting trust.
     TrustedDeviceEventLog.onUserUnlocked();
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-      logd(TAG, "Grant trust with result callback.");
-      grantTrust(
-          "Granting trust from escrow token for user.",
-          TRUST_DURATION_MS,
-          FLAG_GRANT_TRUST_DISMISS_KEYGUARD,
-          (result) -> {
-            logd(TAG, "GrantTrust return with Result: " + result.getStatus() + ".");
-            if (result.getStatus() == GrantTrustResult.STATUS_UNLOCKED_BY_GRANT) {
-              notifyLockScreenDismissed();
-            }
-          });
+      tryDismissingLockScreenApi33();
     } else {
-      grantTrust(
-          "Granting trust from escrow token for user.",
-          TRUST_DURATION_MS,
-          FLAG_GRANT_TRUST_DISMISS_KEYGUARD);
-      // Other locking schemas, e.g. primary authentication, might keep the device locked even after
-      // granting trust.
-      if (keyguardManager == null || keyguardManager.isDeviceLocked()) {
-        logw(
-            TAG,
-            "Device is still locked after granting trust. Primary authentication may be enforced. "
-                + "Skip the ACK message to the phone.");
-        return;
-      }
-      notifyLockScreenDismissed();
+      tryDismissingLockScreen();
     }
     setManagingTrust(false);
+  }
+
+  private void tryDismissingLockScreenApi33() {
+    logd(TAG, "Grant trust with result callback.");
+    grantTrust(
+        "Granting trust from escrow token for user.",
+        TRUST_DURATION_MS,
+        FLAG_GRANT_TRUST_DISMISS_KEYGUARD,
+        (result) -> {
+          logd(TAG, "GrantTrust return with Result: " + result.getStatus() + ".");
+          if (result.getStatus() == GrantTrustResult.STATUS_UNLOCKED_BY_GRANT) {
+            notifyLockScreenDismissed();
+          }
+        });
+  }
+
+  private void tryDismissingLockScreen() {
+    logd(TAG, "Grant trust without result callback.");
+    if (isIhuUnlocked(false)) {
+      logd(TAG, "No need to dismiss lock screen because none is present.");
+      return;
+    }
+    grantTrust(
+        "Granting trust from escrow token for user.",
+        TRUST_DURATION_MS,
+        FLAG_GRANT_TRUST_DISMISS_KEYGUARD);
+    if (!isIhuUnlocked(true)) {
+      logd(TAG, "Double check IHU locking status after " + checkIhuLockScreenDelay);
+      retryHandler.postDelayed(
+          () -> {
+            if (!isIhuUnlocked(true)) {
+              loge(TAG, "Failed to dismiss IHU lock screen.");
+            }
+          },
+          checkIhuLockScreenDelay.toMillis());
+    }
+  }
+
+  private boolean isIhuUnlocked(boolean notifyMobile) {
+    if (keyguardManager != null && !keyguardManager.isDeviceLocked()) {
+      logd(TAG, "IHU lock screen dismissed.");
+      if (notifyMobile) {
+        notifyLockScreenDismissed();
+      }
+      return true;
+    }
+    return false;
   }
 
   private void notifyLockScreenDismissed() {

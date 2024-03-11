@@ -229,7 +229,8 @@ public final class ConnectedDeviceService extends TrunkService {
    * Writes the Companion library version for dumpsys or bug reports.
    *
    * <p>Dump for this service can be viewed using this command: {@code adb shell dumpsys activity
-   * service com.google.android.connecteddevice.service.ConnectedDeviceService}
+   * service
+   * com.google.android.companiondevicesupport/com.google.android.connecteddevice.service.ConnectedDeviceService}
    */
   @Override
   protected void dump(FileDescriptor fd, PrintWriter writer, String[] args) {

@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">Өнөктөштүн колдонмосун ачуу</string>
   <string name="enable_bluetooth_instruction_text">Bluetooth аркылуу туташууга уруксат берүү</string>
   <string name="connect_to_targe_car_instruction_text">&lt;b&gt;%1$s&lt;/b&gt;%2$s унаасына туташтыруу</string>
-  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s унаасына туташуу үчүн телефонуңуз менен QR кодду скандаңыз же MyCompanion\'ду ачыңыз</string>
+  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt;  унаасына туташуу үчүн телефонуңуз менен QR кодду скандаңыз же MyCompanion\'ду ачыңыз</string>
   <string name="connect_to_car_instruction_text">Унаага туташтырыңыз</string>
   <string name="associated_device_pairing_code_title">Телефондогу кодду ырастоо</string>
   <string name="associated_device_pairing_message">Бул телефонуңуздагы кодго дал келерин ырастаңыз</string>
@@ -63,7 +63,7 @@
   <string name="not_now">Азыр эмес</string>
   <string name="connect">Туташтыруу</string>
   <string name="disconnect">Ажыратуу</string>
-  <string name="disconnecting">Disconnecting</string>
+  <string name="disconnecting">Ажыратылууда</string>
   <string name="skip">Өткөрүп жиберүү</string>
   <string name="change_profile">Профилди өзгөртүү</string>
   <string name="connected">Туташты</string>
@@ -99,7 +99,7 @@
   </plurals>
   <string name="name_not_available">Аты-жөнү жеткиликсиз</string>
   <string name="ble_device_name_prefix">Унаа\u00A0</string>
-  <string name="suw_setup_profile_title">Телефонуңузда профиль түзүңүз</string>
-  <string name="suw_setup_profile_content">Баштоо үчүн QR кодун скандаңыз. Эгер MyCompanion колдонмосу жок болсо, аны Google Play жана App Store\'дон жүктөп алсаңыз болот.</string>
-  <string name="suw_qr_instruction_text">&lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s менен туташуу үчүн QR кодун скандаңыз</string>
+  <string name="suw_setup_profile_title">Телефонуңузда же унаада тууралап бүтүрүңүз</string>
+  <string name="suw_setup_profile_content">Эгер телефонуңузда тууралап баштаган болсоңуз, Көмөкчү колдонмону ачып, QR кодду скандаңыз.\n\nЖе профилиңизди унаада тууралап бүтүрсөңүз болот.</string>
+  <string name="suw_qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; менен туташтыруу үчүн скандаңыз</string>
 </resources>

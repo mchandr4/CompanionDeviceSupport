@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">Avaa kumppanisovellus</string>
   <string name="enable_bluetooth_instruction_text">Salli Bluetooth-yhteys</string>
   <string name="connect_to_targe_car_instruction_text">Yhdistä: &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
-  <string name="qr_instruction_text">Yhdistä &lt;b&gt;%1$s&lt;/b&gt; %2$s skannaamalla QR-koodi puhelimella tai avaamalla MyCompanion</string>
+  <string name="qr_instruction_text">Yhdistä &lt;b&gt;%1$s&lt;/b&gt; skannaamalla QR-koodi puhelimella tai avaamalla MyCompanion</string>
   <string name="connect_to_car_instruction_text">Yhdistä autoon</string>
   <string name="associated_device_pairing_code_title">Vahvista koodi puhelimella</string>
   <string name="associated_device_pairing_message">Vahvista, että tämä vastaa puhelimessa näkyvää koodia</string>
@@ -63,7 +63,7 @@
   <string name="not_now">Ei nyt</string>
   <string name="connect">Yhdistä</string>
   <string name="disconnect">Katkaise yhteys</string>
-  <string name="disconnecting">Disconnecting</string>
+  <string name="disconnecting">Katkaistaan yhteyttä</string>
   <string name="skip">Ohita</string>
   <string name="change_profile">Vaihda profiilikuva</string>
   <string name="connected">Yhdistetty</string>
@@ -99,7 +99,7 @@
   </plurals>
   <string name="name_not_available">Nimi ei ole saatavilla</string>
   <string name="ble_device_name_prefix">Ajoneuvo\u00A0</string>
-  <string name="suw_setup_profile_title">Luo profiili puhelimella</string>
-  <string name="suw_setup_profile_content">Aloita skannaamalla QR-koodi. Jos sinulla ei ole MyCompanion-sovellusta, voit ladata sen Google Playsta tai App Storesta.</string>
-  <string name="suw_qr_instruction_text">Yhdistä&lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s skannaamalla QR-koodi</string>
+  <string name="suw_setup_profile_title">Käyttöönoton viimeistely puhelimella tai autolla</string>
+  <string name="suw_setup_profile_content">Jos olet jo aloittanut käyttöönoton puhelimella, avaa kumppanisovellus ja skannaa QR-koodi.\n\nVoit viimeistellä profiilin käyttöönoton myös autolla.</string>
+  <string name="suw_qr_instruction_text">Yhdistä &lt;b&gt;%1$s&lt;/b&gt; skannaamalla</string>
 </resources>

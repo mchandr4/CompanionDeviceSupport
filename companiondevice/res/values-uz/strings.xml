@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">Hamroh ilovani ochish</string>
   <string name="enable_bluetooth_instruction_text">Bluetooth ulanishga ruxsat berish</string>
   <string name="connect_to_targe_car_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s avtomobiliga ulanish</string>
-  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s avtomobiliga ulanish uchun telefon orqali QR-kodni skanerlang yoki MyCompanion ilovasini oching</string>
+  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; avtomobiliga ulanish uchun telefon orqali QR-kodni skanerlang yoki MyCompanion ilovasini oching</string>
   <string name="connect_to_car_instruction_text">Avtomobilga ulanish</string>
   <string name="associated_device_pairing_code_title">Kodni telefoningizda tasdiqlang</string>
   <string name="associated_device_pairing_message">Bu kod telefoningizdagi bilan mos ekanini tasdiqlang</string>
@@ -63,7 +63,7 @@
   <string name="not_now">Hozir emas</string>
   <string name="connect">Ulash</string>
   <string name="disconnect">Uzish</string>
-  <string name="disconnecting">Disconnecting</string>
+  <string name="disconnecting">Aloqa uzilmoqda</string>
   <string name="skip">Tashlab ketish</string>
   <string name="change_profile">Profilni oʻzgartirish</string>
   <string name="connected">Ulandi</string>
@@ -99,7 +99,7 @@
   </plurals>
   <string name="name_not_available">Bu nom mavjud emas</string>
   <string name="ble_device_name_prefix">Avtomobil\u00A0</string>
-  <string name="suw_setup_profile_title">Profilni telefon orqali sozlash</string>
-  <string name="suw_setup_profile_content">Boshlash uchun QR kodni skanerlang. MyCompanion ilovasi boʻlmasa, uni Google Play yoki App Store orqali yuklab oling.</string>
-  <string name="suw_qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s mashinasiga&lt;br /&gt;ulanish uchun QR kodni skanerlang</string>
+  <string name="suw_setup_profile_title">Sozlashni telefon yoki avtomobilida yakunlang</string>
+  <string name="suw_setup_profile_content">Agar allaqachon telefoningizda sozlashni boshlagan boʻlsangiz, hamkor ilovani oching va QR kodni skanerlang.\n\nYoki sozlashni avtomobilda yakunlash mumkin.</string>
+  <string name="suw_qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; bilan ulanish uchun skanerlang</string>
 </resources>

@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">Բացեք ուղեկցող հավելվածը</string>
   <string name="enable_bluetooth_instruction_text">Թույլատրեք Bluetooth միացումը</string>
   <string name="connect_to_targe_car_instruction_text">Միացեք &lt;b&gt;%1$s&lt;/b&gt; (%2$s) մեքենային</string>
-  <string name="qr_instruction_text">Հեռախոսով սկանավորեք QR կոդը կամ բացեք MyCompanion հավելվածը, որպեսզի միանաք &lt;b&gt;%1$s&lt;/b&gt; %2$s ավտոմեքենային։</string>
+  <string name="qr_instruction_text">Հեռախոսով սկանավորեք QR կոդը կամ բացեք MyCompanion հավելվածը, որպեսզի միանաք &lt;b&gt;%1$s&lt;/b&gt; ավտոմեքենային։</string>
   <string name="connect_to_car_instruction_text">Միացեք մեքենային</string>
   <string name="associated_device_pairing_code_title">Հաստատեք կոդը հեռախոսում</string>
   <string name="associated_device_pairing_message">Հաստատեք, որ հեռախոսում նույն կոդն է ցուցադրվում</string>
@@ -63,7 +63,7 @@
   <string name="not_now">Ոչ հիմա</string>
   <string name="connect">Միանալ</string>
   <string name="disconnect">Անջատել</string>
-  <string name="disconnecting">Disconnecting</string>
+  <string name="disconnecting">Անջատում</string>
   <string name="skip">Բաց թողնել</string>
   <string name="change_profile">Փոխել պրոֆիլը</string>
   <string name="connected">Միացված է</string>
@@ -99,7 +99,7 @@
   </plurals>
   <string name="name_not_available">Անունը հասանելի չէ</string>
   <string name="ble_device_name_prefix">Ավտոմեքենա\u00A0</string>
-  <string name="suw_setup_profile_title">Կարգավորեք պրոֆիլը հեռախոսի միջոցով</string>
-  <string name="suw_setup_profile_content">Սկսելու համար սկանավորեք QR կոդը։ Եթե չունեք MyCompanion հավելված, ներբեռնեք այն Google Play-ից կամ App Store-ից։</string>
-  <string name="suw_qr_instruction_text">Սկանավորեք QR կոդը՝&lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; (%2$s) մեքենային միանալու համար</string>
+  <string name="suw_setup_profile_title">Ավարտեք կարգավորումը ձեր հեռախոսում կամ ավտոմեքենայում</string>
+  <string name="suw_setup_profile_content">Եթե արդեն սկսել եք կարգավորել ձեր նոր հեռախոսում, բացեք ուղեկցող հավելվածը և սկանավորեք QR կոդը։\n\nԴուք կարող եք նաև ավարտել ձեր պրոֆիլի կարգավորումը ավտոմեքենայում։</string>
+  <string name="suw_qr_instruction_text">Սկանավորեք՝ &lt;b&gt;%1$s&lt;/b&gt; ավտոմեքենային միանալու համար։</string>
 </resources>

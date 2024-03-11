@@ -106,11 +106,11 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
 
   private final TrustedDeviceDao database;
 
-  private ITrustedDeviceAgentDelegate trustAgentDelegate;
+  ITrustedDeviceAgentDelegate trustAgentDelegate;
 
   @VisibleForTesting protected ConnectedDevice pendingDevice;
 
-  @VisibleForTesting protected byte[] pendingToken;
+  @VisibleForTesting protected PendingToken pendingToken;
 
   @VisibleForTesting protected PendingCredentials pendingCredentials;
 
@@ -178,7 +178,7 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
   private void startEnrollment(@NonNull ConnectedDevice device, @NonNull byte[] token) {
     logd(TAG, "Starting trusted device enrollment process.");
     pendingDevice = device;
-    pendingToken = token;
+    pendingToken = new PendingToken(ActivityManager.getCurrentUser(), token);
 
     notifyRemoteCallbackList(
         remoteEnrollmentNotificationCallbacks,
@@ -193,10 +193,23 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
 
   private void addEscrowToken() {
     if (pendingToken == null) {
-      loge(TAG, "No pending token to be added.");
+      loge(TAG, "No escrow token received. Abort.");
       notifyEnrollmentError(TRUSTED_DEVICE_ERROR_UNKNOWN);
       return;
     }
+
+    if (pendingToken.userId != ActivityManager.getCurrentUser()) {
+      loge(
+          TAG,
+          "Received escrow token from backgrounded user: "
+              + pendingToken.userId
+              + ". Current user is "
+              + ActivityManager.getCurrentUser()
+              + ". Abort.");
+      notifyEnrollmentError(TRUSTED_DEVICE_ERROR_UNKNOWN);
+      return;
+    }
+
     // Do not notify enrollment error if TrustAgentService is not ready yet.
     // We'll make another attempt when the service is up.
     if (trustAgentDelegate == null) {
@@ -206,10 +219,11 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
               + "can be taken at this time.");
       return;
     }
+
     if (!isWaitingForCredentialSetUp.get()) {
       logd(TAG, "Adding escrow token.");
       try {
-        trustAgentDelegate.addEscrowToken(pendingToken, ActivityManager.getCurrentUser());
+        trustAgentDelegate.addEscrowToken(pendingToken.escrowToken, pendingToken.userId);
       } catch (RemoteException e) {
         loge(TAG, "Error while adding token through delegate.", e);
         notifyEnrollmentError(TRUSTED_DEVICE_ERROR_UNKNOWN);
@@ -217,17 +231,39 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
     }
   }
 
-  private void unlockUser(@NonNull String deviceId, @NonNull PhoneCredentials credentials) {
-    logd(TAG, "Unlocking with credentials.");
+  private void unlockUser() {
+    if (pendingCredentials == null) {
+      loge(TAG, "No unlocking credential received. Abort.");
+      return;
+    }
+
+    if (pendingCredentials.userId != ActivityManager.getCurrentUser()) {
+      loge(TAG, "Received unlocking credentials from backgrounded user. Ignore.");
+      pendingCredentials = null;
+      return;
+    }
+
+    if (trustAgentDelegate == null) {
+      logd(TAG, "TrustedDeviceAgentService is not ready. No further action possible.");
+      return;
+    }
+
+    logd(TAG, "Unlocking with credentials using " + trustAgentDelegate);
+    // [pendingCredentials] should be cleared immediately after an unlocking attempt is carried out,
+    // regardless of the result. However [pendingUnlockDeviceId] should not be, because it will be
+    // used to send a message to the mobile side after TrustedDeviceAgentService finished unlocking.
     try {
-      pendingUnlockDeviceId.set(deviceId);
+      pendingUnlockDeviceId.set(pendingCredentials.deviceId);
       trustAgentDelegate.unlockUserWithToken(
-          credentials.getEscrowToken().toByteArray(),
-          ByteUtils.bytesToLong(credentials.getHandle().toByteArray()),
-          ActivityManager.getCurrentUser());
+          pendingCredentials.phoneCredentials.getEscrowToken().toByteArray(),
+          ByteUtils.bytesToLong(pendingCredentials.phoneCredentials.getHandle().toByteArray()),
+          pendingCredentials.userId);
     } catch (RemoteException e) {
       loge(TAG, "Error while unlocking user through delegate.", e);
       pendingUnlockDeviceId.set(null);
+    } finally {
+      logd(TAG, "An unlocking has been attempted. Discard received credentials.");
+      pendingCredentials = null;
     }
   }
 
@@ -386,7 +422,7 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
       logd(TAG, "Removing added token.");
       removeEscrowToken(pendingHandle.handle, pendingHandle.userId);
     }
-    reset();
+    resetEnrollmentFields();
   }
 
   @Override
@@ -433,10 +469,8 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
 
   @Override
   public void setTrustedDeviceAgentDelegate(ITrustedDeviceAgentDelegate trustAgentDelegate) {
+    logd(TAG, "Set trusted device agent delegate: " + trustAgentDelegate + ".");
     setTrustedDeviceAgentDelegateInternal(trustAgentDelegate);
-
-    // Add pending token if present.
-    addEscrowToken();
   }
 
   @Override
@@ -468,16 +502,20 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
    *
    * <p>This method is expect to be called when a user profile credential is created.
    */
-  protected void setTrustedDeviceAgentDelegateInternal(
-      ITrustedDeviceAgentDelegate trustAgentDelegate) {
-    logd(TAG, "Set trusted device agent delegate: " + trustAgentDelegate + ".");
-    this.trustAgentDelegate = trustAgentDelegate;
-
+  void setTrustedDeviceAgentDelegateInternal(ITrustedDeviceAgentDelegate trustAgentDelegate) {
+    logd(TAG, "setTrustedDeviceAgentDelegateInternal");
     int userId = ActivityManager.getCurrentUser();
+    this.trustAgentDelegate = trustAgentDelegate;
+    cleanUpInvalidTrustedDevices(userId);
+    maybeResumeEnrollment();
+    maybeResumeUnlocking();
+  }
 
+  void cleanUpInvalidTrustedDevices(int userId) {
     // Remove invalid trusted devices.
     databaseExecutor.execute(
         () -> {
+          logd(TAG, "Clean up trusted devices");
           byte[] stateMessage = createDisabledStateSyncMessage();
           List<TrustedDeviceEntity> entities = database.getInvalidTrustedDevicesForUser(userId);
           for (TrustedDeviceEntity entity : entities) {
@@ -486,16 +524,28 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
             removeTrustedDeviceInternal(entity);
           }
         });
+  }
 
-    // Unlock with pending credentials if present.
-    if (pendingCredentials != null) {
-      unlockUser(pendingCredentials.deviceId, pendingCredentials.phoneCredentials);
-      pendingCredentials = null;
+  void maybeResumeUnlocking() {
+    if (pendingCredentials == null) {
+      logd(TAG, "No pending unlock needs to be finished.");
+      return;
     }
+    logd(TAG, "Unlock user.");
+    unlockUser();
+  }
+
+  void maybeResumeEnrollment() {
+    if (pendingToken == null) {
+      logd(TAG, "No pending enrollment needs to be finished.");
+      return;
+    }
+    logd(TAG, "Add escrow token for user.");
+    addEscrowToken();
   }
 
   /** Get the pending token for enrollment. */
-  protected byte[] getPendingToken() {
+  protected PendingToken getPendingToken() {
     return pendingToken;
   }
 
@@ -570,7 +620,7 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
     notifyRemoteCallbackList(remoteEnrollmentCallbacks, notification);
   }
 
-  private void reset() {
+  private void resetEnrollmentFields() {
     pendingToken = null;
     pendingHandle = null;
     pendingDevice = null;
@@ -674,12 +724,18 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
   }
 
   private void enrollInTrustedDevice(int userId, long handle) {
-    if (pendingDevice == null) {
-      loge(TAG, "Unable to complete device enrollment. Pending device is null.");
+    if (pendingDevice == null || pendingToken == null) {
+      loge(
+          TAG,
+          "Unable to complete device enrollment. Pending device: "
+              + pendingDevice
+              + "; pending token: "
+              + pendingToken);
       notifyEnrollmentError(TRUSTED_DEVICE_ERROR_UNKNOWN);
       return;
     }
-    byte[] hashedToken = hashToken(pendingToken, UUID.fromString(pendingDevice.getDeviceId()));
+    byte[] hashedToken =
+        hashToken(pendingToken.escrowToken, UUID.fromString(pendingDevice.getDeviceId()));
     if (hashedToken == null) {
       loge(TAG, "Unable to hash pending token. Aborting enrollment.");
       notifyEnrollmentError(TRUSTED_DEVICE_ERROR_UNKNOWN);
@@ -705,7 +761,7 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
           database.addOrReplaceTrustedDeviceHashedToken(tokenEntity);
         });
 
-    reset();
+    resetEnrollmentFields();
 
     TrustedDevice trustedDevice = new TrustedDevice(deviceId, userId, handle);
     notifyRemoteCallbackList(
@@ -724,8 +780,8 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
       logw(TAG, "Received unlock message with null payload. Ignoring.");
       return;
     }
-    byte[] message = payload.toByteArray();
 
+    byte[] message = payload.toByteArray();
     PhoneCredentials credentials;
     try {
       credentials = PhoneCredentials.parseFrom(message, ExtensionRegistryLite.getEmptyRegistry());
@@ -746,26 +802,17 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
       return;
     }
 
-    if (entity.userId != ActivityManager.getCurrentUser()) {
-      logw(TAG, "Received credentials from background user " + entity.userId + ". Ignoring.");
-      return;
-    }
-
     TrustedDeviceEventLog.onCredentialsReceived();
 
-    if (trustAgentDelegate == null) {
-      logd(TAG, "No trust agent delegate set yet. Credentials will be delivered once " + "set.");
-      pendingCredentials = new PendingCredentials(device.getDeviceId(), credentials);
-      return;
-    }
+    pendingCredentials =
+        new PendingCredentials(ActivityManager.getCurrentUser(), device.getDeviceId(), credentials);
 
     logd(
         TAG,
         "Received unlock credentials from trusted device "
             + device.getDeviceId()
             + ". Attempting unlock.");
-
-    unlockUser(device.getDeviceId(), credentials);
+    unlockUser();
   }
 
   private void processStatusSyncMessage(
@@ -835,7 +882,7 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
     notifyEnrollmentError(error);
   }
 
-  private void notifyEnrollmentError(@TrustedDeviceConstants.TrustedDeviceError int error) {
+  void notifyEnrollmentError(@TrustedDeviceConstants.TrustedDeviceError int error) {
     notifyRemoteEnrollmentCallbacks(
         callback -> {
           try {
@@ -1085,13 +1132,29 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
         }
       };
 
-  private static class PendingCredentials {
+  /** Unlocking credentials information from the phone side. */
+  @VisibleForTesting
+  protected static class PendingCredentials {
+    final int userId;
     final String deviceId;
     final PhoneCredentials phoneCredentials;
 
-    PendingCredentials(@NonNull String deviceId, @NonNull PhoneCredentials credentials) {
+    PendingCredentials(
+        int userId, @NonNull String deviceId, @NonNull PhoneCredentials credentials) {
+      this.userId = userId;
       this.deviceId = deviceId;
       phoneCredentials = credentials;
+    }
+  }
+
+  /** Token information for a pending token received from the phone side. */
+  protected static class PendingToken {
+    final int userId;
+    final byte[] escrowToken;
+
+    PendingToken(int userId, @NonNull byte[] escrowToken) {
+      this.userId = userId;
+      this.escrowToken = escrowToken;
     }
   }
 

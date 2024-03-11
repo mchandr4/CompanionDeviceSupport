@@ -27,6 +27,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.google.android.connecteddevice.api.Connector;
 import com.google.android.connecteddevice.api.FakeConnector;
 import com.google.android.connecteddevice.model.ConnectedDevice;
+import com.google.android.connecteddevice.trust.TrustedDeviceManager.PendingCredentials;
+import com.google.android.connecteddevice.trust.TrustedDeviceManager.PendingToken;
 import com.google.android.connecteddevice.trust.api.IOnTrustedDeviceEnrollmentNotificationCallback;
 import com.google.android.connecteddevice.trust.api.IOnTrustedDevicesRetrievedListener;
 import com.google.android.connecteddevice.trust.api.ITrustedDeviceAgentDelegate;
@@ -219,7 +221,7 @@ public final class TrustedDeviceManagerTest {
 
     // Callback is invoked twice because there are 2 enrollment attempts.
     verify(enrollmentCallback, times(2)).onEscrowTokenReceived();
-    assertThat(manager.pendingToken).isEqualTo(FAKE_TOKEN_2);
+    assertThat(manager.pendingToken.escrowToken).isEqualTo(FAKE_TOKEN_2);
     assertThat(manager.pendingDevice).isEqualTo(SECONDARY_SECURE_CONNECTED_DEVICE);
     verifyReset();
   }
@@ -247,6 +249,28 @@ public final class TrustedDeviceManagerTest {
     manager.processEnrollment(/* isDeviceSecure= */ true);
 
     verify(enrollmentCallback).onTrustedDeviceEnrollmentError(TRUSTED_DEVICE_ERROR_UNKNOWN);
+  }
+
+  @Test
+  public void testEnrollment_backgroundUserToken_postEnrollmentError() throws RemoteException {
+    triggerDeviceConnected(SECURE_CONNECTED_DEVICE);
+
+    manager.pendingToken = new PendingToken(1, "12345678".getBytes(UTF_8));
+    manager.setTrustedDeviceAgentDelegate(trustAgentDelegate);
+
+    verify(enrollmentCallback).onTrustedDeviceEnrollmentError(TRUSTED_DEVICE_ERROR_UNKNOWN);
+  }
+
+  @Test
+  public void testEnrollment_nullTokenBeforeTrustedDeviceAgentDelegate_doNotPostEnrollmentError()
+      throws RemoteException {
+    triggerDeviceConnected(SECURE_CONNECTED_DEVICE);
+
+    manager.pendingToken = null;
+    manager.setTrustedDeviceAgentDelegate(trustAgentDelegate);
+
+    verify(enrollmentCallback, never())
+        .onTrustedDeviceEnrollmentError(TRUSTED_DEVICE_ERROR_UNKNOWN);
   }
 
   @Test
@@ -740,6 +764,26 @@ public final class TrustedDeviceManagerTest {
     featureCallback.onMessageReceived(SECURE_CONNECTED_DEVICE, unlockMessage.toByteArray());
 
     verify(trustAgentDelegate).unlockUserWithToken(FAKE_TOKEN_1, FAKE_HANDLE, DEFAULT_USER_ID);
+    assertThat(manager.pendingCredentials).isNull();
+  }
+
+  @Test
+  public void testUnlock_backgroundUserCredentials_doNotAttemptUnlock() throws RemoteException {
+    triggerDeviceConnected(SECURE_CONNECTED_DEVICE);
+    executeAndVerifyValidEnrollFlowOnSecureCar();
+    PhoneCredentials phoneCredentials =
+        PhoneCredentials.newBuilder()
+            .setEscrowToken(ByteString.copyFrom(FAKE_TOKEN_1))
+            .setHandle(ByteString.copyFrom(ByteUtils.longToBytes(FAKE_HANDLE)))
+            .build();
+
+    manager.pendingCredentials =
+        new PendingCredentials(
+            /* userId= */ 1, SECURE_CONNECTED_DEVICE.getDeviceId(), phoneCredentials);
+    manager.setTrustedDeviceAgentDelegate(trustAgentDelegate);
+
+    verify(trustAgentDelegate, never()).unlockUserWithToken(any(), anyLong(), anyInt());
+    assertThat(manager.pendingCredentials).isNull();
   }
 
   @Test
@@ -761,6 +805,7 @@ public final class TrustedDeviceManagerTest {
     featureCallback.onMessageReceived(SECURE_CONNECTED_DEVICE, unlockMessage.toByteArray());
 
     verify(trustAgentDelegate, never()).unlockUserWithToken(any(), anyLong(), anyInt());
+    assertThat(manager.pendingCredentials).isNull();
   }
 
   @Test
@@ -863,7 +908,8 @@ public final class TrustedDeviceManagerTest {
     triggerDeviceConnected(SECURE_CONNECTED_DEVICE);
     executeAndVerifyTokenAddedInEnrollFlowOnSecureCar();
 
-    assertThat(manager.getPendingToken()).isEqualTo(FAKE_TOKEN_1);
+    assertThat(manager.getPendingToken().escrowToken).isEqualTo(FAKE_TOKEN_1);
+    assertThat(manager.getPendingToken().userId).isEqualTo(DEFAULT_USER_ID);
   }
 
   @Test

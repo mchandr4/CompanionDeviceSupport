@@ -44,7 +44,7 @@ class PeriodicPingFeatureTest {
       UUID.randomUUID().toString(),
       /* deviceName= */ null,
       /* belongsToDriver= */ true,
-      /* hasSecureChannel= */ true
+      /* hasSecureChannel= */ true,
     )
 
   @Before
@@ -83,8 +83,8 @@ class PeriodicPingFeatureTest {
     val periods = 3
     fakeConnector.callback?.onSecureChannelEstablished(device)
 
-    Shadows.shadowOf(Looper.getMainLooper())
-      .idleFor(periods * PeriodicPingFeature.PING_DELAY, TimeUnit.MILLISECONDS)
+    val expectedDelay = periods * PeriodicPingFeature.PING_DELAY.toMillis()
+    Shadows.shadowOf(Looper.getMainLooper()).idleFor(expectedDelay, TimeUnit.MILLISECONDS)
 
     // First ping is sent immediately and following pings are sent periodically.
     verifySendingPing(1 + periods)
@@ -98,7 +98,7 @@ class PeriodicPingFeatureTest {
 
     fakeConnector.callback?.onDeviceDisconnected(device)
     Shadows.shadowOf(Looper.getMainLooper())
-      .idleFor(PeriodicPingFeature.PING_DELAY, TimeUnit.MILLISECONDS)
+      .idleFor(PeriodicPingFeature.PING_DELAY.toMillis(), TimeUnit.MILLISECONDS)
 
     // After the device is disconnected, scheduled ping tasks should be canceled.
     verifySendingPing(1)

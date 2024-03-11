@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">コンパニオン アプリを開きます</string>
   <string name="enable_bluetooth_instruction_text">Bluetooth 接続を許可します</string>
   <string name="connect_to_targe_car_instruction_text">&lt;b&gt;%1$s&lt;/b&gt;%2$sに接続します</string>
-  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s に接続するには、スマートフォンで QR コードをスキャンするか、MyCompanion を開いてください</string>
+  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; に接続するには、スマートフォンで QR コードをスキャンするか、MyCompanion を開いてください</string>
   <string name="connect_to_car_instruction_text">車に接続します</string>
   <string name="associated_device_pairing_code_title">スマートフォンでのコードの確認</string>
   <string name="associated_device_pairing_message">このコードがスマートフォンに表示されているコードと一致することをご確認ください</string>
@@ -99,7 +99,7 @@
   </plurals>
   <string name="name_not_available">名前がありません</string>
   <string name="ble_device_name_prefix">車\u00A0</string>
-  <string name="suw_setup_profile_title">スマートフォンでプロファイルを設定</string>
-  <string name="suw_setup_profile_content">設定を開始するには、QR コードをスキャンしてください。MyCompanion アプリを持っていない場合は、Google Play または App Store でダウンロードできます。</string>
-  <string name="suw_qr_instruction_text">QR コードをスキャンして接続:&lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="suw_setup_profile_title">スマートフォンまたは車でセットアップを完了してください</string>
+  <string name="suw_setup_profile_content">スマートフォンでのセットアップをすでに開始している場合は、コンパニオン アプリを開いて QR コードをスキャンしてください。\n\nプロファイルのセットアップを車で完了することもできます。</string>
+  <string name="suw_qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; に接続するにはスキャンしてください</string>
 </resources>

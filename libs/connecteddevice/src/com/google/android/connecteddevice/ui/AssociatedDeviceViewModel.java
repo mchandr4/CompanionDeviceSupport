@@ -269,6 +269,7 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
     associationResponse.postValue(null);
     advertisedCarName.postValue(null);
     pairingCode.postValue(null);
+    updateDeviceDetails();
   }
 
   /** Gets the name that is being advertised by the car. */

@@ -19,6 +19,7 @@ package com.google.android.companiondevicesupport;
 import static com.android.car.setupwizardlib.util.ResultCodes.RESULT_SKIP;
 import static com.google.android.connecteddevice.util.SafeLog.logd;
 import static com.google.android.connecteddevice.util.SafeLog.loge;
+import static com.google.android.connecteddevice.util.SafeLog.logi;
 import static com.google.android.connecteddevice.util.SafeLog.logw;
 
 import android.Manifest.permission;
@@ -195,6 +196,10 @@ public abstract class AssociationBaseActivity extends FragmentActivity {
     if (maybeAskForPermissions()) {
       logd(TAG, "Waiting for permissions to be granted before association can be started.");
       pendingAssociationAfterPerms = true;
+      return;
+    }
+    if (!model.getAssociatedDevicesDetails().getValue().isEmpty()) {
+      logi(TAG, "Attempt to start association while already associated. Ignored.");
       return;
     }
     model.startAssociation();
@@ -433,15 +438,6 @@ public abstract class AssociationBaseActivity extends FragmentActivity {
   }
 
   private void handleEmptyDeviceList() {
-    Fragment fragment =
-        getSupportFragmentManager().findFragmentByTag(COMPANION_LANDING_FRAGMENT_TAG);
-
-    if (fragment != null) {
-      logd(
-          TAG,
-          "Device list is empty, but landing fragment already showing. Nothing more to be done.");
-      return;
-    }
     logd(TAG, "No associated device, showing landing screen.");
     setIsProgressBarVisible(false);
     showCompanionLandingFragment();
@@ -449,18 +445,14 @@ public abstract class AssociationBaseActivity extends FragmentActivity {
 
   private void showCompanionLandingFragment() {
     maybeClearDetailsFragmentFromBackstack();
+
+    dismissButtons();
+
     logd(TAG, "Showing LandingFragment with QR code.");
     CompanionQrCodeLandingFragment fragment =
-        (CompanionQrCodeLandingFragment)
-            getSupportFragmentManager().findFragmentByTag(COMPANION_LANDING_FRAGMENT_TAG);
-    if (fragment != null && fragment.isVisible()) {
-      logd(TAG, "Attempted to show QR code, but fragment is visible already. Ignoring");
-      return;
-    }
-    fragment =
         CompanionQrCodeLandingFragment.newInstance(isStartedForSuw, isStartedForSetupProfile);
-    dismissButtons();
     launchFragment(fragment, COMPANION_LANDING_FRAGMENT_TAG);
+
     showSkipButton();
   }
 
@@ -568,7 +560,6 @@ public abstract class AssociationBaseActivity extends FragmentActivity {
       getSupportFragmentManager().beginTransaction().remove(fragment).commit();
     }
     model.stopAssociation();
-    startAssociation();
   }
 
   private void setDeviceAndResultOkToReturn(AssociatedDevice device) {

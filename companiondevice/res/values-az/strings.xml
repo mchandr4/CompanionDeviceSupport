@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">Kompanyon tətbiqini açın</string>
   <string name="enable_bluetooth_instruction_text">Bluetooth bağlantısına icazə verin</string>
   <string name="connect_to_targe_car_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s avtomobilinə qoşulun</string>
-  <string name="qr_instruction_text">Telefondan istifadə edərək QR kodunu skan edin və ya &lt;b&gt;%1$s&lt;/b&gt; %2$s avtomobilinə qoşulmaq üçün MyCompanion\'u açın</string>
+  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; avtomobilinə qoşulmaq üçün telefon ilə QR kodunu skanlayın və ya MyCompanion-u açın</string>
   <string name="connect_to_car_instruction_text">Avtomobilə qoşulun</string>
   <string name="associated_device_pairing_code_title">Telefonda kodu təsdiq edin</string>
   <string name="associated_device_pairing_message">Bunun telefondakı koda uyğun gəldiyini təsdiq edin</string>
@@ -63,7 +63,7 @@
   <string name="not_now">İndi yox</string>
   <string name="connect">Qoşulun</string>
   <string name="disconnect">Ayırın</string>
-  <string name="disconnecting">Disconnecting</string>
+  <string name="disconnecting">Əlaqə kəsilir</string>
   <string name="skip">Keçin</string>
   <string name="change_profile">Profili dəyişdirin</string>
   <string name="connected">Qoşuldu</string>
@@ -99,7 +99,7 @@
   </plurals>
   <string name="name_not_available">Ad əlçatan deyil</string>
   <string name="ble_device_name_prefix">Avtomobil\u00A0</string>
-  <string name="suw_setup_profile_title">Telefonla profil ayarlayın</string>
-  <string name="suw_setup_profile_content">Başlamaq üçün QR kodu skan edin. MyCompanion tətbiqi yoxdursa, onu Google Play və App Store\'dan endirə bilərsiniz.</string>
-  <string name="suw_qr_instruction_text">&lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s avtomobilinə qoşulmaq üçün QR kodunu skan edin</string>
+  <string name="suw_setup_profile_title">Telefon və ya avtomobildə ayarlamanı yekunlaşdırın</string>
+  <string name="suw_setup_profile_content">Artıq telefonda ayarlamağa başlamısınızsa, Kompanyon tətbiqi açın və QR kodunu skanlayın.\n\nYaxud profilin ayarlanmasını avtomobildə yekunlaşdıra bilərsiniz.</string>
+  <string name="suw_qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; avtomobilinə qoşulmaq üçün skanlayın</string>
 </resources>

@@ -85,7 +85,7 @@ constructor(
   private val oobRunner: OobRunner,
   private val associationServiceUuid: UUID,
   private val enablePassenger: Boolean,
-  private val storageExecutor: Executor = Executors.newSingleThreadExecutor()
+  private val storageExecutor: Executor = Executors.newSingleThreadExecutor(),
 ) : DeviceController {
   private val connectedRemoteDevices = ConcurrentHashMap<UUID, ConnectedRemoteDevice>()
 
@@ -131,7 +131,7 @@ constructor(
             logd(
               TAG,
               "Unable to find a device with id ${device.deviceId} in associated devices. Skipped " +
-                "mapping."
+                "mapping.",
             )
             continue
           }
@@ -142,7 +142,7 @@ constructor(
               associatedDevice.deviceId,
               associatedDevice.deviceName,
               belongsToDriver,
-              hasSecureChannel
+              hasSecureChannel,
             )
           )
         }
@@ -210,7 +210,7 @@ constructor(
   override fun startAssociation(
     nameForAssociation: String,
     callback: IAssociationCallback,
-    identifier: UUID?
+    identifier: UUID?,
   ) {
     val associationUuid = identifier ?: associationServiceUuid
     logd(TAG, "Start association with name $nameForAssociation")
@@ -223,7 +223,7 @@ constructor(
       StartAssociationResponse(
         oobRunner.sendOobData(),
         ByteUtils.hexStringToByteArray(nameForAssociation),
-        nameForAssociation
+        nameForAssociation,
       )
     for (protocol in protocolDelegate.protocols) {
       val discoveryCallback =
@@ -231,7 +231,7 @@ constructor(
       protocol.startAssociationDiscovery(
         nameForAssociation,
         ParcelUuid(associationUuid),
-        discoveryCallback
+        discoveryCallback,
       )
     }
   }
@@ -247,7 +247,7 @@ constructor(
       loge(
         TAG,
         "Null SecureChannel found for the current connected device when out-of-band confirmation " +
-          "received."
+          "received.",
       )
       return
     }
@@ -274,7 +274,7 @@ constructor(
       logw(
         TAG,
         "Attempted to send message to device $deviceId when secure channel is not " +
-          "established. Ignored."
+          "established. Ignored.",
       )
       return false
     }
@@ -317,10 +317,11 @@ constructor(
     if (pendingDevice == null) {
       logw(
         TAG,
-        "Unable to find a matching connected device matching the pending id. Nothing to disconnect."
+        "Unable to find a matching connected device matching the pending id. Nothing to disconnect.",
       )
       return
     }
+    pendingDevice.secureChannel?.cancel()
     for (protocolDevice in pendingDevice.protocolDevices) {
       protocolDevice.protocol.disconnectDevice(protocolDevice.protocolId)
     }
@@ -363,11 +364,7 @@ constructor(
           logd(TAG, "Devices populated successfully.")
           break
         } catch (sqliteException: SQLiteCantOpenDatabaseException) {
-          loge(
-            TAG,
-            "Caught transient exception while retrieving devices. Trying again.",
-            sqliteException
-          )
+          loge(TAG, "Caught transient exception while retrieving devices. Retrying.")
           try {
             Thread.sleep(ASSOCIATED_DEVICE_RETRY_MS)
           } catch (interrupted: InterruptedException) {
@@ -402,19 +399,19 @@ constructor(
   private fun generateConnectionDiscoveryCallback(
     deviceId: UUID,
     protocol: IConnectionProtocol,
-    challenge: ConnectChallenge
+    challenge: ConnectChallenge,
   ) =
     object : IDiscoveryCallback.Stub() {
       override fun onDeviceConnected(protocolId: String) {
         metricLogger.pushConnectedEvent()
         logd(
           TAG,
-          "New connection protocol connected for $deviceId. id: $protocolId, protocol: $protocol"
+          "New connection protocol connected for $deviceId. id: $protocolId, protocol: $protocol",
         )
         EventLog.onDeviceConnected()
         protocol.registerDeviceDisconnectedListener(
           protocolId,
-          generateDeviceDisconnectedListener(deviceId, protocol)
+          generateDeviceDisconnectedListener(deviceId, protocol),
         )
         val protocolDevice = ProtocolDevice(protocol, protocolId)
         val device =
@@ -423,7 +420,7 @@ constructor(
               logd(
                 TAG,
                 "Certain connect protocol already exist, add id $protocolId to current " +
-                  "connected remote device."
+                  "connected remote device.",
               )
               device.secureChannel?.addStream(ProtocolStream(protocolDevice))
               device.channelResolver?.addProtocolDevice(protocolDevice)
@@ -436,8 +433,7 @@ constructor(
               channelResolver = generateChannelResolver(protocolDevice, device = this)
               channelResolver?.resolveReconnect(deviceId, challenge.challenge)
             }
-          }
-            ?: return
+          } ?: return
         invokeCallbacksWithDevice(device) { connectedDevice, callback ->
           callback.onDeviceConnected(connectedDevice)
         }
@@ -460,7 +456,7 @@ constructor(
   private fun generateAssociationDiscoveryCallback(
     protocol: IConnectionProtocol,
     associationCallback: IAssociationCallback,
-    response: StartAssociationResponse
+    response: StartAssociationResponse,
   ) =
     object : IDiscoveryCallback.Stub() {
       override fun onDeviceConnected(protocolId: String) {
@@ -471,14 +467,14 @@ constructor(
           loge(
             TAG,
             "Device connected for association when there was no association in progress. " +
-              "Disconnecting."
+              "Disconnecting.",
           )
           protocol.disconnectDevice(protocolId)
           return
         }
         protocol.registerDeviceDisconnectedListener(
           protocolId,
-          generateDeviceDisconnectedListener(pendingId, protocol)
+          generateDeviceDisconnectedListener(pendingId, protocol),
         )
         // The channel only needs to be resolved once for all protocols connected to one remote
         // device.
@@ -493,7 +489,7 @@ constructor(
         if (existingDevice != null) {
           logd(
             TAG,
-            "Certain connect protocol already exist, add id to current connected remote device."
+            "Certain connect protocol already exist, add id to current connected remote device.",
           )
           connectedRemoteDevices.compute(pendingId) { _, device ->
             device?.apply {
@@ -515,7 +511,7 @@ constructor(
             loge(
               TAG,
               "Association callback binder has died. Unable to issue discovery started " +
-                "successfully callback."
+                "successfully callback.",
             )
           }
       }
@@ -525,7 +521,7 @@ constructor(
           ?: run {
             loge(
               TAG,
-              "Association callback binder has died. Unable to issue discovery failed callback."
+              "Association callback binder has died. Unable to issue discovery failed callback.",
             )
           }
       }
@@ -544,7 +540,7 @@ constructor(
   private fun generateChannelResolver(
     protocolDevice: ProtocolDevice,
     device: ConnectedRemoteDevice,
-    associationCallback: IAssociationCallback? = null
+    associationCallback: IAssociationCallback? = null,
   ) =
     ChannelResolver(
       protocolDevice,
@@ -564,13 +560,10 @@ constructor(
           loge(TAG, "Failed to resolve channel with device $device.")
           handleAssociationError(Errors.DEVICE_ERROR_INVALID_CHANNEL_STATE, device)
         }
-      }
+      },
     )
 
-  private fun generateDeviceDisconnectedListener(
-    deviceId: UUID,
-    protocol: IConnectionProtocol,
-  ) =
+  private fun generateDeviceDisconnectedListener(deviceId: UUID, protocol: IConnectionProtocol) =
     object : IDeviceDisconnectedListener.Stub() {
       override fun onDeviceDisconnected(protocolId: String) {
         logd(TAG, "Remote connect protocol disconnected, id: $protocolId, protocol: $protocol")
@@ -594,7 +587,7 @@ constructor(
             logd(
               TAG,
               "There are still ${device.protocolDevices.size} connected protocols for $deviceId. " +
-                "A disconnect callback will not be issued."
+                "A disconnect callback will not be issued.",
             )
           }
           device
@@ -606,7 +599,7 @@ constructor(
     val disconnectedDeviceId = device.deviceId
     logd(
       TAG,
-      "Device $disconnectedDeviceId has no more protocols connected. Issuing disconnect callback."
+      "Device $disconnectedDeviceId has no more protocols connected. Issuing disconnect callback.",
     )
     connectedRemoteDevices.remove(disconnectedDeviceId)
 
@@ -618,7 +611,7 @@ constructor(
       if (associatedDevice == null) {
         loge(
           TAG,
-          "Unable to find recently disconnected device $disconnectedDeviceId. Cannot proceed."
+          "Unable to find recently disconnected device $disconnectedDeviceId. Cannot proceed.",
         )
         return@execute
       }
@@ -637,7 +630,7 @@ constructor(
       ?: run {
         loge(
           TAG,
-          "Association callback binder has died. Unable to issue association error callback."
+          "Association callback binder has died. Unable to issue association error callback.",
         )
       }
     stopAssociation()
@@ -655,14 +648,14 @@ constructor(
               /* recipient= */ null,
               true,
               OperationType.ENCRYPTION_HANDSHAKE,
-              ByteUtils.uuidToBytes(uniqueId)
+              ByteUtils.uuidToBytes(uniqueId),
             )
           device.secureChannel?.sendClientMessage(deviceMessage)
         }
         logd(
           TAG,
           "Notifying callbacks that a secure channel has been established with " +
-            "${device.deviceId}."
+            "${device.deviceId}.",
         )
         invokeCallbacksWithDevice(device) { connectedDevice, callback ->
           callback.onSecureChannelEstablished(connectedDevice)
@@ -672,7 +665,7 @@ constructor(
       }
 
       override fun onEstablishSecureChannelFailure(error: ChannelError) {
-        // TODO(b/267814661): action items for this error.
+        loge(TAG, "onEstablishSecureChannelFailure. $error")
         handleAssociationError(error.ordinal, device)
       }
 
@@ -689,7 +682,7 @@ constructor(
   @VisibleForTesting
   internal fun handleSecureChannelMessage(
     deviceMessage: DeviceMessage,
-    device: ConnectedRemoteDevice
+    device: ConnectedRemoteDevice,
   ) {
     if (device.deviceId == associationPendingDeviceId.get()) {
       handleAssociationMessage(deviceMessage)
@@ -729,7 +722,7 @@ constructor(
     try {
       storage.saveChallengeSecret(
         deviceId.toString(),
-        deviceMessage.message.copyOfRange(DEVICE_ID_BYTES, deviceMessage.message.size)
+        deviceMessage.message.copyOfRange(DEVICE_ID_BYTES, deviceMessage.message.size),
       )
     } catch (e: InvalidParameterException) {
       loge(TAG, "Error saving challenge secret.", e)
@@ -750,7 +743,7 @@ constructor(
 
   private fun convertTempAssociationDeviceToRealDevice(
     device: ConnectedRemoteDevice,
-    deviceId: UUID
+    deviceId: UUID,
   ): ConnectedRemoteDevice {
     val newDevice =
       device.copyWithNewDeviceId(deviceId).apply {
@@ -759,7 +752,7 @@ constructor(
     for (protocolDevice in newDevice.protocolDevices) {
       protocolDevice.protocol.registerDeviceDisconnectedListener(
         protocolDevice.protocolId,
-        generateDeviceDisconnectedListener(deviceId, protocolDevice.protocol)
+        generateDeviceDisconnectedListener(deviceId, protocolDevice.protocol),
       )
     }
     return newDevice
@@ -771,7 +764,7 @@ constructor(
         deviceId,
         /* deviceAddress= */ "",
         /* deviceName= */ null,
-        /* isConnectionEnabled= */ true
+        /* isConnectionEnabled= */ true,
       )
     lock.withLock {
       if (enablePassenger) {
@@ -792,7 +785,7 @@ constructor(
    */
   private fun invokeCallbacksWithDevice(
     device: ConnectedRemoteDevice,
-    onCallback: (ConnectedDevice, Callback) -> Unit
+    onCallback: (ConnectedDevice, Callback) -> Unit,
   ) {
     val connectedDevice = lock.withLock { device.toConnectedDevice(passengerDevices) }
     callbacks.invoke { onCallback(connectedDevice, it) }
@@ -810,7 +803,7 @@ constructor(
           associatedDevice.deviceId,
           associatedDevice.deviceName,
           belongsToDriver,
-          hasSecureChannel
+          hasSecureChannel,
         )
       callbacks.invoke { it.onDeviceConnected(connectedDevice) }
       callbacks.invoke { it.onSecureChannelEstablished(connectedDevice) }
@@ -820,7 +813,7 @@ constructor(
   /** Container class to hold information about a connected device. */
   internal data class ConnectedRemoteDevice(
     val deviceId: UUID,
-    val protocolDevices: CopyOnWriteArraySet<ProtocolDevice> = CopyOnWriteArraySet()
+    val protocolDevices: CopyOnWriteArraySet<ProtocolDevice> = CopyOnWriteArraySet(),
   ) {
     var secureChannel: MultiProtocolSecureChannel? = null
     var callback: IAssociationCallback? = null

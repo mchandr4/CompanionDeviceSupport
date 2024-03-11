@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">Дэмжигч аппыг нээх</string>
   <string name="enable_bluetooth_instruction_text">Bluetooth холболтыг зөвшөөрөх</string>
   <string name="connect_to_targe_car_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s-д холбогдох</string>
-  <string name="qr_instruction_text">QR кодыг скан хийхийн тулд утсаа ашиглана уу эсвэл &lt;b&gt;%1$s&lt;/b&gt; %2$s-д холбогдохын тулд MyCompanion-г нээнэ үү</string>
+  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt;-д холбогдохын тулд утсаа ашиглан QR кодыг скан хийх эсвэл MyCompanion-г нээнэ үү</string>
   <string name="connect_to_car_instruction_text"> машинд холбох</string>
   <string name="associated_device_pairing_code_title">Утсан дээрх кодыг баталгаажуулна уу</string>
   <string name="associated_device_pairing_message">Энэ нь таны утсан дээр харуулсан кодтой таарч байгаа эсэхийг баталгаажуулна уу</string>
@@ -63,7 +63,7 @@
   <string name="not_now">Одоо биш</string>
   <string name="connect">Холбогдох</string>
   <string name="disconnect">Салгах</string>
-  <string name="disconnecting">Disconnecting</string>
+  <string name="disconnecting">Салгаж байна</string>
   <string name="skip">Алгасах</string>
   <string name="change_profile">Профайлыг өөрчлөх</string>
   <string name="connected">Холбогдсон</string>
@@ -99,7 +99,7 @@
   </plurals>
   <string name="name_not_available">Нэр боломжгүй байна</string>
   <string name="ble_device_name_prefix">Тээврийн хэрэгсэл\u00A0</string>
-  <string name="suw_setup_profile_title">Профайлыг утсаар тохируулна уу</string>
-  <string name="suw_setup_profile_content">Эхлүүлэхийн тулд QR кодыг скан хийнэ үү. Хэрэв танд MyCompanion апп байхгүй бол Google Play болон апп дэлгүүрээс үүнийг татах боломжтой.</string>
-  <string name="suw_qr_instruction_text">&lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s-д холбогдохын тулд QR кодыг скан хийнэ үү</string>
+  <string name="suw_setup_profile_title">Утас эсвэл машин дээрээ тохируулгыг дуусгана уу</string>
+  <string name="suw_setup_profile_content">Хэрэв та тохируулгыг утсан дээрээ аль хэдийн эхлүүлсэн бол Дэмжигч аппаа нээж QR кодыг скан хийнэ үү.\n\nЭсвэл та машиндаа профайлынхаа тохируулгыг дуусгах боломжтой.</string>
+  <string name="suw_qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt;-д холбогдохын тулд скан хийнэ үү</string>
 </resources>

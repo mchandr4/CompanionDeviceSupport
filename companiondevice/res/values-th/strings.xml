@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">เปิดแอปที่ใช้ร่วมกัน</string>
   <string name="enable_bluetooth_instruction_text">อนุญาตการเชื่อมต่อบลูทูธ</string>
   <string name="connect_to_targe_car_instruction_text">เชื่อมต่อกับ &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
-  <string name="qr_instruction_text">ใช้โทรศัพท์สแกนคิวอาร์โค้ดหรือเปิด MyCompanion เพื่อเชื่อมต่อกับ &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">ใช้โทรศัพท์สแกนคิวอาร์โค้ดหรือเปิด MyCompanion เพื่อเชื่อมต่อกับ &lt;b&gt;%1$s&lt;/b&gt;</string>
   <string name="connect_to_car_instruction_text">เชื่อมต่อรถยนต์</string>
   <string name="associated_device_pairing_code_title">ยืนยันรหัสในโทรศัพท์</string>
   <string name="associated_device_pairing_message">ยืนยันว่ารหัสนี้ตรงกับรหัสที่แสดงในโทรศัพท์</string>
@@ -63,7 +63,7 @@
   <string name="not_now">ไว้ทีหลัง</string>
   <string name="connect">เชื่อมต่อ</string>
   <string name="disconnect">ยกเลิกการเชื่อมต่อ</string>
-  <string name="disconnecting">Disconnecting</string>
+  <string name="disconnecting">กำลังตัดการเชื่อมต่อ</string>
   <string name="skip">ข้าม</string>
   <string name="change_profile">เปลี่ยนโปรไฟล์</string>
   <string name="connected">เชื่อมต่อแล้ว</string>
@@ -99,7 +99,7 @@
   </plurals>
   <string name="name_not_available">ไม่มีชื่อ</string>
   <string name="ble_device_name_prefix">รถยนต์\u00A0</string>
-  <string name="suw_setup_profile_title">ตั้งค่าโปรไฟล์ด้วยโทรศัพท์</string>
-  <string name="suw_setup_profile_content">สแกนคิวอาร์โค้ดเพื่อเริ่มใช้งาน หากคุณไม่มีแอป MyCompanion คุณจะดาวน์โหลดแอปได้จาก Google Play และ App Store</string>
-  <string name="suw_qr_instruction_text">สแกนคิวอาร์โค้ดเพื่อเชื่อมต่อไปยัง&lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="suw_setup_profile_title">ตั้งค่าในโทรศัพท์หรือรถยนต์ให้เสร็จ</string>
+  <string name="suw_setup_profile_content">หากเริ่มตั้งค่าในโทรศัพท์แล้ว ให้เปิดแอปที่ใช้ร่วมกันแล้วสแกนคิวอาร์โค้ด\n\nหรือตั้งค่าโปรไฟล์ในรถยนต์ให้เสร็จ</string>
+  <string name="suw_qr_instruction_text">สแกนเพื่อเชื่อมต่อกับ &lt;b&gt;%1$s&lt;/b&gt;</string>
 </resources>

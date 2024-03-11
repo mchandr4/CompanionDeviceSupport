@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">Ireki aplikazio osagarria</string>
   <string name="enable_bluetooth_instruction_text">Eman Bluetooth bidez konektatzeko baimena</string>
   <string name="connect_to_targe_car_instruction_text">Konektatu &lt;b&gt;%1$s&lt;/b&gt; autora (%2$s)</string>
-  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; ibilgailura (%2$s) konektatzeko, eskaneatu QR kodea telefonoaren bidez edo ireki MyCompanion</string>
+  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; ibilgailura konektatzeko, eskaneatu QR kodea telefonoaren bidez edo ireki MyCompanion</string>
   <string name="connect_to_car_instruction_text">Konektatu autora</string>
   <string name="associated_device_pairing_code_title">Berretsi telefonoko kodea</string>
   <string name="associated_device_pairing_message">Berretsi telefonoko kodea horrekin bat datorrela</string>
@@ -63,7 +63,7 @@
   <string name="not_now">Orain ez</string>
   <string name="connect">Konektatu</string>
   <string name="disconnect">Deskonektatu</string>
-  <string name="disconnecting">Disconnecting</string>
+  <string name="disconnecting">Deskonektatzen</string>
   <string name="skip">Saltatu</string>
   <string name="change_profile">Aldatu profila</string>
   <string name="connected">Konektatuta</string>
@@ -99,7 +99,7 @@
   </plurals>
   <string name="name_not_available">Izena ez dago erabilgarri</string>
   <string name="ble_device_name_prefix">Ibilgailua</string>
-  <string name="suw_setup_profile_title">Konfiguratu profila telefonoarekin</string>
-  <string name="suw_setup_profile_content">Hasteko, eskaneatu QR kodea. MyCompanion aplikazioa ez badaukazu, Google Play eta App Store zerbitzuetatik deskarga dezakezu.</string>
-  <string name="suw_qr_instruction_text">Eskaneatu QR kodea&lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; izeneko %2$s ibilgailura konektatzeko</string>
+  <string name="suw_setup_profile_title">Amaitu konfiguratzen telefonoan edo autoan</string>
+  <string name="suw_setup_profile_content">Telefonoan hasi bazara konfiguratzen, ireki Companion aplikazioa eta eskaneatu QR kodea.\n\nBestela, autoan ere amai dezakezu profila konfiguratzen.</string>
+  <string name="suw_qr_instruction_text">Eskaneatu &lt;b&gt;%1$s&lt;/b&gt; ibilgailura konektatzeko</string>
 </resources>

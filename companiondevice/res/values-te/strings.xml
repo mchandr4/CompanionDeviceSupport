@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">సహచర యాప్‌ను తెరవండి</string>
   <string name="enable_bluetooth_instruction_text">బ్లూటూత్ కనెక్షన్‌ను అనుమతించండి</string>
   <string name="connect_to_targe_car_instruction_text">&lt;b&gt;%1$s&lt;/b&gt;%2$s‌కు కనెక్ట్ చేయండి</string>
-  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s‌కు కనెక్ట్ చేయడానికి, QR కోడ్‌ను స్కాన్ చేయడానికి మీ ఫోన్‌ను ఉపయోగించండి లేదా MyCompanionను తెరవండి</string>
+  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt;‌కు కనెక్ట్ చేయడానికి, QR కోడ్‌ను స్కాన్ చేయడానికి మీ ఫోన్‌ను ఉపయోగించండి లేదా MyCompanion యాప్‌ను తెరవండి</string>
   <string name="connect_to_car_instruction_text">కార్‌కు కనెక్ట్ చేయండి</string>
   <string name="associated_device_pairing_code_title">ఫోన్‌లో కోడ్‌ను నిర్ధారించండి</string>
   <string name="associated_device_pairing_message">ఇది మీ ఫోన్‌లో చూపించిన కోడ్‌తో మ్యాచ్ అవుతున్నట్లు నిర్ధారించండి</string>
@@ -61,7 +61,7 @@
   <string name="retry">మళ్లీ ట్రై చేయి</string>
   <string name="turn_on">ఆన్ చేయి</string>
   <string name="not_now">ఇప్పుడు కాదు</string>
-  <string name="connect">కనెక్ట్ చేేయి</string>
+  <string name="connect">కనెక్ట్ చేయండి</string>
   <string name="disconnect">డిస్‌కనెక్ట్ చేయి</string>
   <string name="disconnecting">డిస్‌కనెక్టింగ్</string>
   <string name="skip">స్కిప్ చేయి</string>
@@ -99,7 +99,7 @@
   </plurals>
   <string name="name_not_available">పేరు అందుబాటులో లేదు</string>
   <string name="ble_device_name_prefix">వెహికల్\u00A0</string>
-  <string name="suw_setup_profile_title">ఫోన్‌తో ప్రొఫైల్‌ను సెటప్ చేయండి</string>
-  <string name="suw_setup_profile_content">ప్రారంభించడానికి QR కోడ్‌ను స్కాన్ చేయండి. మీకు MyCompanion యాప్ లేకపోతే, మీరు దాన్ని Google Play అలాగే App Storeలో డౌన్‌లోడ్ చేసుకోవచ్చు.</string>
-  <string name="suw_qr_instruction_text">&lt;br /&gt;&lt;b&gt; %1$s&lt;/b&gt; :%2$s కనెక్ట్ చేయడానికి QR కోడ్‌ను స్కాన్ చేయండి</string>
+  <string name="suw_setup_profile_title">మీ ఫోన్ లేదా కారులో సెటప్‌ను పూర్తి చేయండి</string>
+  <string name="suw_setup_profile_content">మీరు ఇప్పటికే మీ ఫోన్‌లో సెటప్ చేయడం ప్రారంభించినట్లయితే, మీ సహాయక యాప్‌ను తెరిచి, QR కోడ్‌ను స్కాన్ చేయండి.\n\nలేదా, మీరు మీ కారులో మీ ప్రొఫైల్‌ను సెటప్ చేయడం పూర్తి చేయవచ్చు.</string>
+  <string name="suw_qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt;‌కు కనెక్ట్ చేయడానికి స్కాన్ చేయండి</string>
 </resources>

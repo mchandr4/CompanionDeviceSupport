@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">Отворите пратећу апликацију</string>
   <string name="enable_bluetooth_instruction_text">Омогућите Bluetooth везу</string>
   <string name="connect_to_targe_car_instruction_text">Повежите се са аутомобилом &lt;b&gt;%1$s&lt;/b&gt;%2$s</string>
-  <string name="qr_instruction_text">Помоћу телефона скенирајте QR кôд или отворите MyCompanion да бисте се повезали са аутомобилом &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">Помоћу телефона скенирајте QR кôд или отворите MyCompanion да бисте се повезали са аутомобилом &lt;b&gt;%1$s&lt;/b&gt;</string>
   <string name="connect_to_car_instruction_text">Повежите се са аутомобилом</string>
   <string name="associated_device_pairing_code_title">Потврдите кôд на телефону</string>
   <string name="associated_device_pairing_message">Потврдите да се ово подудара са кодом који се приказује на телефону</string>
@@ -91,7 +91,7 @@
   <string name="trusted_device_notification_content">Додирните овде да бисте одобрили ову функцију</string>
   <string name="trusted_device_enrollment_error_dialog_title">Дошло је до грешке</string>
   <string name="trusted_device_enrollment_error_dialog_message">Нажалост, укључивање ове функције засад није успело. Пробајте поново.</string>
-  <string name="create_phone_lock_dialog_title">Подесите закључавање екрана на телефону</string>
+  <string name="create_phone_lock_dialog_title">Подесите откључавање екрана на телефону</string>
   <string name="create_phone_lock_dialog_message">На телефону није подешено закључавање екрана. Да бисте откључали профил аутомобила помоћу телефона, прво подесите закључавање екрана (познато и као шифра) у подешавањима телефона.</string>
   <plurals name="notification_new_message">
     <item quantity="one">%d нова порука</item>
@@ -100,7 +100,7 @@
   </plurals>
   <string name="name_not_available">Име није доступно</string>
   <string name="ble_device_name_prefix">Возило\u00A0</string>
-  <string name="suw_setup_profile_title">Подесите профил помоћу телефона</string>
-  <string name="suw_setup_profile_content">Скенирајте QR кôд да бисте започели. Ако немате апликацију MyCompanion, можете да је преузмете на Google Play-у и у App Store-у.</string>
-  <string name="suw_qr_instruction_text">Скенирајте QR кôд да бисте се повезали са аутомобилом&lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="suw_setup_profile_title">Довршите подешавање на телефону или у аутомобилу</string>
+  <string name="suw_setup_profile_content">Ако сте већ започели подешавање на телефону, отворите пратећу апликацију и скенирајте QR кôд.\n\nИли можете да довршите подешавање профила у аутомобилу.</string>
+  <string name="suw_qr_instruction_text">Скенирајте да бисте се повезали са аутомобилом &lt;b&gt;%1$s&lt;/b&gt;</string>
 </resources>

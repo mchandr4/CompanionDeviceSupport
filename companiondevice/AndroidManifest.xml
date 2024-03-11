@@ -66,23 +66,7 @@
             android:singleUser="true"
             android:exported="false">
             <intent-filter>
-                <action android:name="com.google.android.connecteddevice.BIND_ASSOCIATION" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="com.google.android.connecteddevice.api.BIND_REMOTE_FEATURE" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-            <intent-filter>
                 <action android:name="com.google.android.connecteddevice.api.BIND_FEATURE_COORDINATOR" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="com.google.android.connecteddevice.BIND_SPP" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="com.google.android.connecteddevice.BIND_TRANSPORT" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <meta-data android:name="com.google.android.connecteddevice.early_services"
@@ -98,10 +82,6 @@
         <service
             android:name="com.google.android.connecteddevice.service.ConnectedDeviceFgUserService"
             android:exported="true">
-            <intent-filter>
-                <action android:name="com.google.android.connecteddevice.api.BIND_REMOTE_FEATURE_FG" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
             <intent-filter>
                 <action android:name="com.google.android.connecteddevice.api.BIND_FEATURE_COORDINATOR_FG" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -193,14 +173,6 @@
             android:name="com.google.android.connecteddevice.trust.TrustedDeviceManagerService"
             android:singleUser="true"
             android:exported="false">
-            <intent-filter>
-                <action android:name="com.google.android.companiondevicesupport.trust.BIND_ENROLLMENT_MANAGER" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="com.google.android.companiondevicesupport.trust.BIND_TRUST_MANAGER" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
         </service>
         <service
             android:name="com.google.android.connecteddevice.trust.TrustedDeviceAgentService"

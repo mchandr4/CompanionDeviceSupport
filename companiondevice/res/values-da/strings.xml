@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">Åbn den medfølgende app</string>
   <string name="enable_bluetooth_instruction_text">Tillad Bluetooth-forbindelse</string>
   <string name="connect_to_targe_car_instruction_text">Opret forbindelse til &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
-  <string name="qr_instruction_text">Scan QR-koden med din telefon, eller åbn MyCompanion for at oprette forbindelse til &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">Scan QR-koden med din telefon, eller åbn MyCompanion for at oprette forbindelse til &lt;b&gt;%1$s&lt;/b&gt;</string>
   <string name="connect_to_car_instruction_text">Opret forbindelse til bilen</string>
   <string name="associated_device_pairing_code_title">Bekræft koden på telefonen</string>
   <string name="associated_device_pairing_message">Bekræft, at dette stemmer overens med den kode, der vises på din telefon</string>
@@ -63,7 +63,7 @@
   <string name="not_now">Ikke nu</string>
   <string name="connect">Opret forbindelse</string>
   <string name="disconnect">Afbryd</string>
-  <string name="disconnecting">Disconnecting</string>
+  <string name="disconnecting">Afbryder</string>
   <string name="skip">Spring over</string>
   <string name="change_profile">Skift profil</string>
   <string name="connected">Forbundet</string>
@@ -99,7 +99,7 @@
   </plurals>
   <string name="name_not_available">Navnet er ikke tilgængeligt</string>
   <string name="ble_device_name_prefix">Køretøj\u00A0</string>
-  <string name="suw_setup_profile_title">Konfigurer profilen med din telefon</string>
-  <string name="suw_setup_profile_content">Scan QR-koden for at komme i gang. Hvis du ikke har MyCompanion-appen, kan du downloade den i Google Play eller App Store.</string>
-  <string name="suw_qr_instruction_text">Scan QR-koden for at oprette forbindelse til&lt;br/&gt;&lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="suw_setup_profile_title">Afslut konfigurationen på telefonen eller i bilen</string>
+  <string name="suw_setup_profile_content">Hvis du allerede har startet konfigurationen på telefonen, skal du åbne den medfølgende app og scanne QR-koden.\n\nDu kan også fuldføre konfigurationen af din profil i bilen.</string>
+  <string name="suw_qr_instruction_text">Scan for at oprette forbindelse til &lt;b&gt;%1$s&lt;/b&gt;</string>
 </resources>

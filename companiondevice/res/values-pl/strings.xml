@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">Otwórz aplikację towarzyszącą</string>
   <string name="enable_bluetooth_instruction_text">Zezwól na połączenie Bluetooth</string>
   <string name="connect_to_targe_car_instruction_text">Połącz z: &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
-  <string name="qr_instruction_text">Aby połączyć się z samochodem &lt;b&gt;%1$s&lt;/b&gt; %2$s, otwórz aplikację MyCompanion lub zeskanuj kod QR za pomocą telefonu</string>
+  <string name="qr_instruction_text">Aby połączyć się z samochodem &lt;b&gt;%1$s&lt;/b&gt; , otwórz aplikację MyCompanion lub zeskanuj kod QR za pomocą telefonu</string>
   <string name="connect_to_car_instruction_text">Połącz z samochodem</string>
   <string name="associated_device_pairing_code_title">Potwierdź kod na telefonie</string>
   <string name="associated_device_pairing_message">Potwierdź zgodność z kodem wyświetlanym na telefonie</string>
@@ -63,7 +63,7 @@
   <string name="not_now">Nie teraz</string>
   <string name="connect">Połącz</string>
   <string name="disconnect">Odłącz</string>
-  <string name="disconnecting">Disconnecting</string>
+  <string name="disconnecting">Rozłączenie</string>
   <string name="skip">Pomiń</string>
   <string name="change_profile">Zmień profil</string>
   <string name="connected">Połączono</string>
@@ -101,7 +101,7 @@
   </plurals>
   <string name="name_not_available">Brak danych o nadawcy</string>
   <string name="ble_device_name_prefix">Pojazd\u00A0</string>
-  <string name="suw_setup_profile_title">Konfigurowanie profilu przez telefon</string>
-  <string name="suw_setup_profile_content">Aby rozpocząć, zeskanuj kod QR. Jeśli nie masz aplikacji MyCompanion, możesz ją pobrać z Google Play lub App Store.</string>
-  <string name="suw_qr_instruction_text">Zeskanuj kod QR, aby połączyć się z:&lt;br /&gt;&lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="suw_setup_profile_title">Dokończ konfigurację na telefonie lub w samochodzie</string>
+  <string name="suw_setup_profile_content">Jeśli konfiguracja została rozpoczęta na telefonie, otwórz aplikację towarzyszącą i zeskanuj kod QR.\n\nMożesz też dokończyć konfigurację profilu w samochodzie.</string>
+  <string name="suw_qr_instruction_text">Zeskanuj, aby połączyć się z samochodem &lt;b&gt;%1$s&lt;/b&gt;</string>
 </resources>

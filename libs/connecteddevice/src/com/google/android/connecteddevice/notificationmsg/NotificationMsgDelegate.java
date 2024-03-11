@@ -103,10 +103,11 @@ public class NotificationMsgDelegate extends BaseNotificationDelegate {
       String defaultDisplayName,
       String groupTitleSeparator,
       float letterToTileRatio,
-      int contentTextResourceId) {
+      int contentTextResourceId,
+      ProjectionStateListener projectionStateListener) {
     super(
         context, /* useLetterTile= */ true, bitmapSize, cornerRadiusPercent, avatarNumberOfLetters);
-    projectionStateListener = new ProjectionStateListener(context);
+    this.projectionStateListener = projectionStateListener;
     this.defaultIconResourceId = defaultIconResourceId;
     this.defaultColor = defaultColor;
     this.colors = colors;
@@ -385,10 +386,5 @@ public class NotificationMsgDelegate extends BaseNotificationDelegate {
   @VisibleForTesting
   void setNotificationManager(NotificationManager manager) {
     notificationManager = manager;
-  }
-
-  @VisibleForTesting
-  void setProjectionStateListener(ProjectionStateListener listener) {
-    projectionStateListener = listener;
   }
 }

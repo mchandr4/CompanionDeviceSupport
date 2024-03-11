@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">Buka aplikasi pendamping</string>
   <string name="enable_bluetooth_instruction_text">Izinkan koneksi Bluetooth</string>
   <string name="connect_to_targe_car_instruction_text">Hubungkan ke &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
-  <string name="qr_instruction_text">Gunakan ponsel Anda untuk memindai kode QR atau buka MyCompanion untuk menghubungkan perangkat ke &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">Gunakan ponsel Anda untuk memindai kode QR atau buka MyCompanion untuk menghubungkan perangkat ke &lt;b&gt;%1$s&lt;/b&gt;</string>
   <string name="connect_to_car_instruction_text">Hubungkan ke mobil</string>
   <string name="associated_device_pairing_code_title">Konfirmasi kode di ponsel</string>
   <string name="associated_device_pairing_message">Konfirmasi bahwa kode ini sesuai dengan kode yang ditampilkan di ponsel</string>
@@ -99,7 +99,7 @@
   </plurals>
   <string name="name_not_available">Nama tidak tersedia</string>
   <string name="ble_device_name_prefix">Kendaraan\u00A0</string>
-  <string name="suw_setup_profile_title">Menyiapkan profil dengan ponsel</string>
-  <string name="suw_setup_profile_content">Pindai kode QR untuk memulai. Jika tidak memiliki aplikasi MyCompanion, Anda dapat mendownloadnya di Google Play dan App Store.</string>
-  <string name="suw_qr_instruction_text">Pindai kode QR untuk menghubungkan ke&lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="suw_setup_profile_title">Selesaikan penyiapan di ponsel atau mobil Anda</string>
+  <string name="suw_setup_profile_content">Jika Anda sudah memulai penyiapan di ponsel, buka Aplikasi Pendamping Anda, lalu pindai kode QR.\n\nAtau, Anda dapat menyelesaikan penyiapan profil di mobil Anda.</string>
+  <string name="suw_qr_instruction_text">Pindai untuk menghubungkan perangkat ke &lt;b&gt;%1$s&lt;/b&gt;</string>
 </resources>

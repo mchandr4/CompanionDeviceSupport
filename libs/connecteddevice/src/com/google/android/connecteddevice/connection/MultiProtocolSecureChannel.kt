@@ -54,7 +54,7 @@ open class MultiProtocolSecureChannel(
   private var deviceId: String? = null,
   protected val inflater: Inflater = Inflater(),
   private val deflater: Deflater = Deflater(Deflater.BEST_COMPRESSION),
-  private val isCompressionEnabled: Boolean = true
+  private val isCompressionEnabled: Boolean = true,
 ) {
 
   enum class ChannelError {
@@ -100,6 +100,13 @@ open class MultiProtocolSecureChannel(
    * band association.
    */
   private var oobCode: ByteArray? = null
+
+  /**
+   * Indicates whether this channel has been canceled.
+   *
+   * This field should only be toggled from `false` to `true` once, and never re-enabled.
+   */
+  private var isCanceled: Boolean = false
 
   @HandshakeState private var state: Int = HandshakeState.UNKNOWN
 
@@ -166,7 +173,7 @@ open class MultiProtocolSecureChannel(
         loge(
           TAG,
           "processHandshakeInProgress: Encountered unexpected handshake state: $state. " +
-            "Notify callback of failure."
+            "Notify callback of failure.",
         )
         notifySecureChannelFailure(ChannelError.CHANNEL_ERROR_INVALID_STATE)
       }
@@ -241,7 +248,7 @@ open class MultiProtocolSecureChannel(
       loge(
         TAG,
         "No verification code callback has been set. Unable to display verification code " +
-          "to user."
+          "to user.",
       )
       notifySecureChannelFailure(ChannelError.CHANNEL_ERROR_INVALID_STATE)
       return
@@ -341,7 +348,7 @@ open class MultiProtocolSecureChannel(
       loge(
         TAG,
         "Handshake not finished after calling verify PIN. Instead got state: " +
-          "${message.handshakeState}."
+          "${message.handshakeState}.",
       )
       notifySecureChannelFailure(ChannelError.CHANNEL_ERROR_INVALID_STATE)
       return
@@ -355,6 +362,16 @@ open class MultiProtocolSecureChannel(
     encryptionKey.set(localKey)
     logd(TAG, "Pairing code successfully verified.")
     notifyCallback { it.onSecureChannelEstablished() }
+  }
+
+  /**
+   * Cancels this channel.
+   *
+   * A secure channel can be canceled during association, when the user, instead of confirming the
+   * pairing code, chooses to "retry/cancel" the association.
+   */
+  open fun cancel() {
+    isCanceled = true
   }
 
   /** Add a protocol stream to this channel. */
@@ -372,9 +389,9 @@ open class MultiProtocolSecureChannel(
         override fun onProtocolDisconnected() {
           logd(TAG, "The stream's protocol has disconnected. Removing from secure channel.")
           streams.remove(stream)
-          // Notify secure channel error during association if device get disconnected before secure
-          // channel is established.
-          if (streams.isEmpty() && deviceId == null) {
+          // deviceId is set after association completes.
+          val disconnectedDuringAssociation = streams.isEmpty() && deviceId == null
+          if (disconnectedDuringAssociation && !isCanceled) {
             loge(TAG, "There are no more streams to complete association.")
             notifySecureChannelFailure(ChannelError.CHANNEL_ERROR_DEVICE_DISCONNECTED)
           }
@@ -390,7 +407,7 @@ open class MultiProtocolSecureChannel(
         /* recipient= */ null,
         false,
         OperationType.ENCRYPTION_HANDSHAKE,
-        message
+        message,
       )
     sendMessage(deviceMessage)
   }
@@ -559,7 +576,7 @@ open class MultiProtocolSecureChannel(
     logd(
       TAG,
       "Message compressed from ${originalMessage.size} to $compressedSize bytes saving " +
-        "$compressionSavings%"
+        "$compressionSavings%",
     )
   }
 
@@ -584,7 +601,7 @@ open class MultiProtocolSecureChannel(
     }
     logd(
       TAG,
-      "Message successfully decompressed from ${message.size} to $originalMessageSize bytes."
+      "Message successfully decompressed from ${message.size} to $originalMessageSize bytes.",
     )
     return true
   }

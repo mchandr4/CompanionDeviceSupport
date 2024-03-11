@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">Откройте сопутствующее приложение.</string>
   <string name="enable_bluetooth_instruction_text">Разрешите подключение по Bluetooth.</string>
   <string name="connect_to_targe_car_instruction_text">Установите подключение с &lt;b&gt;%1$s&lt;/b&gt; (%2$s).</string>
-  <string name="qr_instruction_text">Чтобы подключиться к автомобилю &lt;b&gt;%1$s&lt;/b&gt; %2$s, отсканируйте QR-код или откройте приложение MyCompanion.</string>
+  <string name="qr_instruction_text">Чтобы подключиться к автомобилю &lt;b&gt;%1$s&lt;/b&gt;, отсканируйте QR-код или откройте приложение MyCompanion на телефоне.</string>
   <string name="connect_to_car_instruction_text">Установите подключение с автомобилем.</string>
   <string name="associated_device_pairing_code_title">Подтверждение кода на телефоне</string>
   <string name="associated_device_pairing_message">Убедитесь, что коды на экранах автомобиля и телефона совпадают.</string>
@@ -63,7 +63,7 @@
   <string name="not_now">Не сейчас</string>
   <string name="connect">Подключить</string>
   <string name="disconnect">Отключить</string>
-  <string name="disconnecting">Disconnecting</string>
+  <string name="disconnecting">Отключение</string>
   <string name="skip">Пропустить</string>
   <string name="change_profile">Сменить профиль</string>
   <string name="connected">Подключено</string>
@@ -101,7 +101,7 @@
   </plurals>
   <string name="name_not_available">Имя недоступно</string>
   <string name="ble_device_name_prefix">Автомобиль\u00A0</string>
-  <string name="suw_setup_profile_title">Настройка профиля с помощью телефона</string>
-  <string name="suw_setup_profile_content">Отсканируйте QR-код. Приложение MyCompanion можно скачать из Google Play или App Store.</string>
-  <string name="suw_qr_instruction_text">Отсканируйте QR-код, чтобы подключиться к автомобилю &lt;br/&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="suw_setup_profile_title">Завершите настройку на телефоне или в системе автомобиля</string>
+  <string name="suw_setup_profile_content">Если вы уже начали настройку на телефоне, откройте сопутствующее приложение и отсканируйте QR-код.\n\nТакже вы можете завершить настройку профиля в системе автомобиля.</string>
+  <string name="suw_qr_instruction_text">Отсканируйте, чтобы подключиться к автомобилю &lt;b&gt;%1$s&lt;/b&gt;.</string>
 </resources>

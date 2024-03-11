@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">साथी ऐप्लिकेशन खोलें</string>
   <string name="enable_bluetooth_instruction_text">ब्लूटूथ कनेक्शन की अनुमति दें</string>
   <string name="connect_to_targe_car_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s से कनेक्ट करें</string>
-  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s से कनेक्ट करने के लिए, अपने फ़ोन पर MyCompanion खोलें या इस क्यूआर कोड को स्कैन करें</string>
+  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; से कनेक्ट करने के लिए, अपने फ़ोन से क्यूआर कोड स्कैन करें या MyCompanion खोलें</string>
   <string name="connect_to_car_instruction_text">कार से कनेक्ट करें</string>
   <string name="associated_device_pairing_code_title">फ़ोन पर कोड की पुष्टि करें</string>
   <string name="associated_device_pairing_message">पुष्टि करें कि यह कोड, आपके फ़ोन पर दिखाए गए कोड से मेल खाता है</string>
@@ -99,7 +99,7 @@
   </plurals>
   <string name="name_not_available">नाम उपलब्ध नहीं है</string>
   <string name="ble_device_name_prefix">गाड़ी\u00A0</string>
-  <string name="suw_setup_profile_title">फ़ोन की मदद से प्रोफ़ाइल सेट अप करें</string>
-  <string name="suw_setup_profile_content">शुरू करने के लिए, क्यूआर कोड स्कैन करें. अगर आपके पास MyCompanion ऐप्लिकेशन नहीं है, तो Google Play और App Store से इसे डाउनलोड किया जा सकता है.</string>
-  <string name="suw_qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s&lt;br /&gt; से कनेक्ट करने के लिए, क्यूआर कोड स्कैन करें</string>
+  <string name="suw_setup_profile_title">अपनी कार या फ़ोन पर सेटअप पूरा करें</string>
+  <string name="suw_setup_profile_content">अगर फ़ोन पर सेटअप शुरू कर दिया है, तो MyCompanion ऐप्लिकेशन खोलें और क्यूआर कोड स्कैन करें.\n\nइसके अलावा, आपके पास कार में अपनी प्रोफ़ाइल सेट अप करने का विकल्प है.</string>
+  <string name="suw_qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; से कनेक्ट करने के लिए स्कैन करें</string>
 </resources>

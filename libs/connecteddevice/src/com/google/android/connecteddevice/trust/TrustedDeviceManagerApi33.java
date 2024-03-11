@@ -71,7 +71,7 @@ public class TrustedDeviceManagerApi33 extends TrustedDeviceManager {
 
   @Override
   public void processEnrollment(boolean isDeviceSecure) {
-    byte[] token = getPendingToken();
+    PendingToken token = getPendingToken();
     if (token == null) {
       loge(TAG, "No pending token can be added.");
       return;
@@ -100,8 +100,12 @@ public class TrustedDeviceManagerApi33 extends TrustedDeviceManager {
   }
 
   @Override
-  public void setTrustedDeviceAgentDelegate(ITrustedDeviceAgentDelegate trustAgentDelegate) {
-    setTrustedDeviceAgentDelegateInternal(trustAgentDelegate);
+  void setTrustedDeviceAgentDelegateInternal(ITrustedDeviceAgentDelegate trustedAgentDelegate) {
+    logd(TAG, "setTrustedDeviceAgentDelegateInternal");
+    this.trustAgentDelegate = trustedAgentDelegate;
+    int userId = ActivityManager.getCurrentUser();
+    cleanUpInvalidTrustedDevices(userId);
+    maybeResumeUnlocking();
   }
 
   @Override
@@ -131,17 +135,21 @@ public class TrustedDeviceManagerApi33 extends TrustedDeviceManager {
     }
   }
 
-  private void addWeakEscrowToken(@NonNull byte[] token, boolean isDeviceSecure) {
-    int userId = ActivityManager.getCurrentUser();
-    logd(TAG, "Adding weak escrow token for user " + userId + ".");
+  private void addWeakEscrowToken(@NonNull PendingToken token, boolean isDeviceSecure) {
+    if (token.userId != ActivityManager.getCurrentUser()) {
+      loge(TAG, "Received token from backgrounded user. Abort enrollment.");
+      notifyEnrollmentError(TrustedDeviceConstants.TRUSTED_DEVICE_ERROR_UNKNOWN);
+      return;
+    }
+    logd(TAG, "Adding weak escrow token.");
     long addedHandle =
         keyguardManager.addWeakEscrowToken(
-            token,
-            UserHandle.of(userId),
+            token.escrowToken,
+            UserHandle.of(token.userId),
             Runnable::run,
             (handle, user) ->
                 onWeakEscrowTokenActivated(user.getIdentifier(), handle, isDeviceSecure));
-    pendingHandle = new PendingHandle(userId, addedHandle);
+    pendingHandle = new PendingHandle(token.userId, addedHandle);
     if (!isDeviceSecure) {
       return;
     }

@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">Άνοιγμα συνοδευτικής εφαρμογής</string>
   <string name="enable_bluetooth_instruction_text">Να επιτρέπεται η σύνδεση Bluetooth</string>
   <string name="connect_to_targe_car_instruction_text">Σύνδεση με &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
-  <string name="qr_instruction_text">Χρησιμοποιήστε το τηλέφωνό σας για να σαρώσετε τον κωδικό QR ή ανοίξτε το MyCompanion για να συνδεθείτε στο &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">Χρησιμοποιήστε το τηλέφωνό σας για να σαρώσετε τον κωδικό QR ή ανοίξτε το MyCompanion για να συνδεθείτε στο &lt;b&gt;%1$s&lt;/b&gt;</string>
   <string name="connect_to_car_instruction_text">Σύνδεση στο αυτοκίνητο</string>
   <string name="associated_device_pairing_code_title">Επιβεβαίωση κωδικού στο τηλέφωνο</string>
   <string name="associated_device_pairing_message">Βεβαιωθείτε ότι συμφωνεί με τον κωδικό που εμφανίζεται στο τηλέφωνό σας.</string>
@@ -63,7 +63,7 @@
   <string name="not_now">Όχι τώρα</string>
   <string name="connect">Σύνδεση</string>
   <string name="disconnect">Αποσύνδεση</string>
-  <string name="disconnecting">Disconnecting</string>
+  <string name="disconnecting">Αποσύνδεση</string>
   <string name="skip">Παράβλεψη</string>
   <string name="change_profile">Αλλαγή προφίλ</string>
   <string name="connected">Συνδέθηκε</string>
@@ -99,7 +99,7 @@
   </plurals>
   <string name="name_not_available">Το όνομα δεν είναι διαθέσιμο.</string>
   <string name="ble_device_name_prefix">Όχημα\u00A0</string>
-  <string name="suw_setup_profile_title">Ρύθμιση προφίλ μέσω τηλεφώνου</string>
-  <string name="suw_setup_profile_content">Σαρώστε τον κωδικό QR για να ξεκινήσετε. Εάν δεν διαθέτετε την εφαρμογή MyCompanion, μπορείτε να την κατεβάσετε στο Google Play και το App Store.</string>
-  <string name="suw_qr_instruction_text">Σαρώστε τον κωδικό QR για να συνδεθείτε στο&lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="suw_setup_profile_title">Ολοκληρώστε τη ρύθμιση στο τηλέφωνο ή το αυτοκίνητό σας</string>
+  <string name="suw_setup_profile_content">Εάν έχετε ξεκινήσει ήδη τη ρύθμιση στο τηλέφωνο, ανοίξτε τη συνοδευτική εφαρμογή και σαρώστε τον κωδικό QR.\n\nΕναλλακτικά, μπορείτε να ολοκληρώσετε τη ρύθμιση του προφίλ σας στο αυτοκίνητο.</string>
+  <string name="suw_qr_instruction_text">Σαρώστε για σύνδεση στο &lt;b&gt;%1$s&lt;/b&gt;</string>
 </resources>

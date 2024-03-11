@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">አጃቢ መተግበሪያውን ይክፈቱ</string>
   <string name="enable_bluetooth_instruction_text">የብሉቱዝ ግንኙነትን ይፍቀዱ</string>
   <string name="connect_to_targe_car_instruction_text">ከ&lt;b&gt;%1$s&lt;/b&gt;%2$s ጋር ይገናኙ</string>
-  <string name="qr_instruction_text">QR ኮዱን ለመቃኘት ስልክዎን ይጠቀሙ ወይም ከ&lt;b&gt;%1$s&lt;/b&gt; %2$s ጋር ለመገናኘት MyCompanionን ይክፈቱ</string>
+  <string name="qr_instruction_text">QR ኮዱን ለመቃኘት ስልክዎን ይጠቀሙ ወይም ከ&lt;b&gt;%1$s&lt;/b&gt; ጋር ለመገናኘት MyCompanionን ይክፈቱ</string>
   <string name="connect_to_car_instruction_text">ከመኪናው ጋር ይገናኙ</string>
   <string name="associated_device_pairing_code_title">በስልክ ላይ ኮድ ያረጋግጡ</string>
   <string name="associated_device_pairing_message">ይህ በስልክዎ ላይ ከሚታየው ኮድ ጋር እንደሚዛመድ ያረጋግጡ</string>
@@ -38,7 +38,7 @@
   <string name="device_removed_failure_toast_text">%1$sን መርሳት አልተሳካም</string>
   <string name="continue_setup_toast_text">በእርስዎ ስልክ ላይ ማዋቀር ይቀጥሉ</string>
   <string name="error_screen_title">የሆነ ስህተት ተከስቷል</string>
-  <string name="error_screen_message">መጥፎ ዕድል ሆኖ ይህ ማያ ገጽ በአግባቡ ማሳየት አይችልም። እባክዎ እንደገና ይሞክሩ።</string>
+  <string name="error_screen_message">መጥፎ ዕድል ሆኖ ይህ ማያ ገፅ በአግባቡ ማሳየት አይችልም። እባክዎ እንደገና ይሞክሩ።</string>
   <string name="turn_on_bluetooth_title">ብሉቱዝ ያብሩ</string>
   <string name="turn_on_bluetooth_message">ስልክዎን እንደ አጃቢ መሣሪያ ለማቀናበር መኪናዎ ብሉቱዝ ያስፈልገዋል።</string>
   <string name="turn_on_bluetooth_dialog_title">ብሉቱዝ ይብራ?</string>
@@ -63,7 +63,7 @@
   <string name="not_now">አሁን አይደለም</string>
   <string name="connect">አገናኝ</string>
   <string name="disconnect">ግንኙነት አቋርጥ</string>
-  <string name="disconnecting">Disconnecting</string>
+  <string name="disconnecting">ግንኙነትን በማቋረጥ ላይ</string>
   <string name="skip">ዝለል</string>
   <string name="change_profile">መገለጫን ቀይር</string>
   <string name="connected">ተገናኝቷል</string>
@@ -91,15 +91,15 @@
   <string name="trusted_device_notification_content">ለዚህ ባህሪ ፈቀዳ ለመስጠት እዚህ መታ ያድርጉ</string>
   <string name="trusted_device_enrollment_error_dialog_title">የሆነ ስህተት ተከስቷል</string>
   <string name="trusted_device_enrollment_error_dialog_message">መጥፎ ዕድል ሆኖ ይህ ባህሪ በዚህ ጊዜ ሊበራ አልቻለም። እባክዎ እንደገና ይሞክሩ።</string>
-  <string name="create_phone_lock_dialog_title">በስልክዎ ላይ የማያ ገጽ ቁልፍ ይፍጠሩ</string>
-  <string name="create_phone_lock_dialog_message">የእርስዎ ስልክ የማያ ቁልፍ አልተቀናበረለትም። የመኪናዎን መገለጫ በስልክዎ ለመክፈት መጀመሪያ በስልክዎ ቅንብሮች ውስጥ የማያ ገጽ ቁልፍ (እንዲሁም የይለፍ ኮድ በመባል የሚታወቅ) ይፍጠሩ።</string>
+  <string name="create_phone_lock_dialog_title">በስልክዎ ላይ የማያ ገፅ ቁልፍ ይፍጠሩ</string>
+  <string name="create_phone_lock_dialog_message">የእርስዎ ስልክ የማያ ቁልፍ አልተቀናበረለትም። የመኪናዎን መገለጫ በስልክዎ ለመክፈት መጀመሪያ በስልክዎ ቅንብሮች ውስጥ የማያ ገፅ ቁልፍ (እንዲሁም የይለፍ ኮድ በመባል የሚታወቅ) ይፍጠሩ።</string>
   <plurals name="notification_new_message">
     <item quantity="one">%d አዲስ መልዕክቶች</item>
     <item quantity="other">%d አዲስ መልዕክቶች</item>
   </plurals>
   <string name="name_not_available">ስም አይገኝም</string>
   <string name="ble_device_name_prefix">ተሽከርካሪ\u00A0</string>
-  <string name="suw_setup_profile_title">መገለጫን በስልክ ያዋቅሩ</string>
-  <string name="suw_setup_profile_content">ለመጀመር የQR ኮድን ይቃኙ። የMyCompanion መተግበሪያ ከሌለዎት Google Play እና App Store ላይ ማውረድ ይችላሉ።</string>
-  <string name="suw_qr_instruction_text">ከ&lt;b&gt;%1$s&lt;/b&gt; %2$s ጋር&lt;br /&gt;ለመገናኘት የQR ኮድን ይቃኙ</string>
+  <string name="suw_setup_profile_title">በስልክዎ ወይም በመኪናዎ ላይ ውቅረትን ያጠናቅቁ</string>
+  <string name="suw_setup_profile_content">አስቀድመው በስልክዎ ላይ ማዋቀር ከጀመሩ የCompanion መተግበሪያዎን ይክፈቱ እና የQR ኮዱን ይቃኙ።\n\nወይም በመኪናዎ ውስጥ መገለጫዎን ማዋቀር ማጠናቀቅ ይችላሉ።</string>
+  <string name="suw_qr_instruction_text">ከ&lt;b&gt;%1$s&lt;/b&gt; ጋር ለመገናኘት ይቃኙ</string>
 </resources>

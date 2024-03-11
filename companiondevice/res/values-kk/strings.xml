@@ -18,14 +18,14 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <string name="settings_entry_title">Companion Device</string>
   <string name="default_device_name">Байланысқан құрылғы</string>
-  <string name="add_device_title">Қосымша қолданбаға қосылу</string>
+  <string name="add_device_title">Серік қолданбаға қосылу</string>
   <string name="add_associated_device_title">MyCompanion қолданбасына қосылу</string>
   <string name="add_associated_device_subtitle">Телефоныңызды көлік жүргізуге көмекші құрылғы ретінде пайдалана аласыз.</string>
-  <string name="associated_device_install_app">Телефонда <b>қосымша қолданба</b> орнатылғанына көз жеткізіңіз.</string>
-  <string name="open_companion_app_instruction_text">Қосымша қолданбаны ашыңыз.</string>
+  <string name="associated_device_install_app">Телефонда <b>серік қолданба</b> орнатылғанына көз жеткізіңіз.</string>
+  <string name="open_companion_app_instruction_text">Серік қолданбаны ашыңыз.</string>
   <string name="enable_bluetooth_instruction_text">Bluetooth байланысына рұқсат беріңіз.</string>
   <string name="connect_to_targe_car_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s көлігіне қосылыңыз.</string>
-  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s көлігіне қосылу үшін телефон арқылы QR кодын сканерлеңіз немесе MyCompanion қолданбасын ашыңыз.</string>
+  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; көлігіне қосылу үшін телефон арқылы QR кодын сканерлеңіз немесе MyCompanion қолданбасын ашыңыз.</string>
   <string name="connect_to_car_instruction_text">Көлікке қосылыңыз.</string>
   <string name="associated_device_pairing_code_title">Кодты телефоннан растау</string>
   <string name="associated_device_pairing_message">Мұның телефонда көрсетілетін кодқа сәйкес келетінін растаңыз.</string>
@@ -33,7 +33,7 @@
   <string name="associated_device_select_device">Қолданбаны ашып, &lt;b&gt;%1$s&lt;/b&gt; көлігімен байланыстырыңыз.</string>
   <string name="associated_device_open_app">Қолданбаны ашып, ондағы нұсқауларды орындаңыз.</string>
   <string name="remove_associated_device_title">&lt;b&gt;%1$s&lt;/b&gt; жойылсын ба?</string>
-  <string name="remove_associated_device_message">Бұл көлік енді бұл құрылғымен жұптастырылмайды. Сондай-ақ бұл көлікті қосымша қолданбадан өшіру қажет болады.</string>
+  <string name="remove_associated_device_message">Осы көлік енді бұл құрылғымен жұптастырылмайды. Сондай-ақ бұл көлікті серік қолданбадан өшіру қажет болады.</string>
   <string name="device_removed_success_toast_text">%1$s телефоны жойылды.</string>
   <string name="device_removed_failure_toast_text">%1$s телефоны жойылмады.</string>
   <string name="continue_setup_toast_text">Pеттеуді телефонда жалғастырыңыз.</string>
@@ -63,7 +63,7 @@
   <string name="not_now">Қазір емес</string>
   <string name="connect">Қосылу</string>
   <string name="disconnect">Ажырау</string>
-  <string name="disconnecting">Disconnecting</string>
+  <string name="disconnecting">Ажырату</string>
   <string name="skip">Өткізіп жіберу</string>
   <string name="change_profile">Профильді өзгерту</string>
   <string name="connected">Қосулы</string>
@@ -75,10 +75,10 @@
   <string name="app_running_msg_notification_title">Телефонда мәтіндік хабар қызметі қосулы.</string>
   <string name="app_running_msg_notification_content">Мәтіндік хабарлар көмекші құрылғы арқылы алынуда</string>
   <string name="trusted_device_feature_title">Профиль құлпын телефонмен ашу</string>
-  <string name="trusted_device_feature_instruction">Құлпын ашу опцияларын орнату үшін көмекші қолданбаны тексеріңіз.</string>
+  <string name="trusted_device_feature_instruction">Құлып ашу опцияларын орнату үшін серік қолданбаны тексеріңіз.</string>
   <string name="trusted_device_item_title">&lt;b&gt;%1$s&lt;/b&gt; телефонына профиль құлпын ашуға рұқсат ету</string>
-  <string name="device_not_connected_dialog_title">Қосымша қолданбаңыз белсенді түрде жалғанып тұруы керек</string>
-  <string name="device_not_connected_dialog_message">Бұл функцияны қосу үшін телефоныңызда қосымша қолданба ашық тұрғанына көз жеткізіңіз. Көлік пен телефон бір-біріне жақын болып, екеуінде де Bluetooth қосулы болуы керек.</string>
+  <string name="device_not_connected_dialog_title">Серік қолданбаңыз жалғанып тұруы керек</string>
+  <string name="device_not_connected_dialog_message">Бұл функцияны қосу үшін телефоныңызда серік қолданба ашық тұрғанына көз жеткізіңіз. Көлік пен телефон бір-біріне жақын болып, екеуінде де Bluetooth қосулы болуы керек.</string>
   <string name="trusted_device_enrollment_success_message">&lt;b&gt;%1$s&lt;/b&gt; телефоны енді профиліңіздің құлпын аша алады.</string>
   <string name="create_profile_lock_dialog_title">Негізгі профиль құлпын жасау</string>
   <string name="create_profile_lock_dialog_message">Профиль құлпын телефонмен ашу үшін негізгі профиль құлпы да орнатылған болу керек.</string>
@@ -99,7 +99,7 @@
   </plurals>
   <string name="name_not_available">Атауы жоқ</string>
   <string name="ble_device_name_prefix">Көлік\u00A0</string>
-  <string name="suw_setup_profile_title">Профильді телефонмен реттеңіз</string>
-  <string name="suw_setup_profile_content">Реттеуді бастау үшін QR кодын сканерлеңіз. MyCompanion қолданбасы болмаса, оны Google Play және App Store дүкендерінен жүктеп ала аласыз.</string>
-  <string name="suw_qr_instruction_text">%1$s&lt;/b&gt; %2$s көлігіне қосылу үшін&lt;br /&gt; &lt;b&gt;QR кодын сканерлеңіз.</string>
+  <string name="suw_setup_profile_title">Орнату процесін телефоныңызда немесе көлігіңізде аяқтаңыз</string>
+  <string name="suw_setup_profile_content">Егер орнату процесін телефоныңызда бастап қойған болсаңыз, серік қолданбаны ашып, QR кодын сканерлеңіз.\n\nНе болмаса профиль параметрлерін орнатуды көлікте аяқтауға болады.</string>
+  <string name="suw_qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; көлігіне қосылу үшін сканерлеңіз.</string>
 </resources>

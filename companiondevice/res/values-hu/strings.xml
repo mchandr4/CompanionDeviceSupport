@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">Társalkalmazás megnyitása</string>
   <string name="enable_bluetooth_instruction_text">Bluetooth-kapcsolat engedélyezése</string>
   <string name="connect_to_targe_car_instruction_text">Csatlakozzon a következőhöz: &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
-  <string name="qr_instruction_text">Olvassa be a QR-kódot a telefon segítségével, vagy nyissa meg a MyCompanion alkalmazást a következőhöz való kapcsolódáshoz: &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="qr_instruction_text">Olvassa be a QR-kódot a telefon segítségével, vagy nyissa meg a MyCompanion alkalmazást a következőhöz való csatlakozáshoz: &lt;b&gt;%1$s&lt;/b&gt;</string>
   <string name="connect_to_car_instruction_text">Csatlakozás az autóhoz</string>
   <string name="associated_device_pairing_code_title">Kód ellenőrzése a telefonon</string>
   <string name="associated_device_pairing_message">Ellenőrizze, hogy ez egyezik-e a telefonon látható kóddal</string>
@@ -63,7 +63,7 @@
   <string name="not_now">Ne most</string>
   <string name="connect">Csatlakozás</string>
   <string name="disconnect">Leválasztás</string>
-  <string name="disconnecting">Disconnecting</string>
+  <string name="disconnecting">Megszakítás</string>
   <string name="skip">Kihagyás</string>
   <string name="change_profile">Profil módosítása</string>
   <string name="connected">Csatlakozva</string>
@@ -99,7 +99,7 @@
   </plurals>
   <string name="name_not_available">A név nem használható</string>
   <string name="ble_device_name_prefix">Jármű\u00A0</string>
-  <string name="suw_setup_profile_title">Profil beállítása telefonnal</string>
-  <string name="suw_setup_profile_content">A kezdéshez olvassa be a QR-kódot. Ha nem található meg az eszközén a MyCompanion alkalmazás, letöltheti a Google Playről és az App Store-ból.</string>
-  <string name="suw_qr_instruction_text">Olvassa be a QR-kódot a következőhöz való csatlakozáshoz:&lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
+  <string name="suw_setup_profile_title">Fejezze be a beállítást a telefonján vagy az autó rendszerében</string>
+  <string name="suw_setup_profile_content">Ha már nekifogott a beállításnak a telefonján, nyissa meg a társalkalmazást, és olvassa be a QR-kódot.\n\nMásik megoldásként befejezheti profilja beállítását az autó rendszerében is.</string>
+  <string name="suw_qr_instruction_text">Olvassa be a következőhöz való csatlakozáshoz: &lt;b&gt;%1$s&lt;/b&gt;</string>
 </resources>

@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">මිත්‍ර යෙදුම විවෘත කරන්න</string>
   <string name="enable_bluetooth_instruction_text">බ්ලූටූත් සම්බන්ධතාවට ඉඩ දෙන්න</string>
   <string name="connect_to_targe_car_instruction_text">&lt;b&gt;%1$s&lt;/b&gt;%2$s වෙත සම්බන්ධ කරන්න</string>
-  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s වෙත සම්බන්ධ වීමට QR කේතය ස්කෑන් කිරීමට ඔබගේ දුරකථනය භාවිත කරන්න හෝ MyCompanion විවෘත කරන්න</string>
+  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; වෙත සම්බන්ධ වීමට QR කේතය ස්කෑන් කිරීමට ඔබේ දුරකථනය භාවිතා කරන්න හෝ MyCompanion විවෘත කරන්න</string>
   <string name="connect_to_car_instruction_text">මෝටර් රථයට සම්බන්ධ කරන්න</string>
   <string name="associated_device_pairing_code_title">දුරකථනයේ කේතය තහවුරු කරන්න</string>
   <string name="associated_device_pairing_message">මෙය ඔබේ දුරකථනයේ පෙන්වනු ලබන කේතයට ගැළපෙන බව තහවුරු කරන්න</string>
@@ -63,7 +63,7 @@
   <string name="not_now">දැන් නොවේ</string>
   <string name="connect">සම්බන්ධ කරන්න</string>
   <string name="disconnect">විසන්ධි කරන්න</string>
-  <string name="disconnecting">Disconnecting</string>
+  <string name="disconnecting">විසන්ධි වෙමින්</string>
   <string name="skip">මඟ හරින්න</string>
   <string name="change_profile">පැතිකඩ වෙනස් කරන්න</string>
   <string name="connected">සම්බන්ධයි</string>
@@ -99,7 +99,7 @@
   </plurals>
   <string name="name_not_available">නම ලබා ගත නොහැකිය</string>
   <string name="ble_device_name_prefix">වාහනය\u00A0</string>
-  <string name="suw_setup_profile_title">දුරකථනය සමඟ පැතිකඩ පිහිටුවන්න</string>
-  <string name="suw_setup_profile_content">ආරම්භ කිරීමට QR කේතය ස්කෑන් කරන්න. ඔබට MyCompanion යෙදුමක් නොමැති නම්, ඔබට එය Google Play සහ App Store වෙතින් බාගත හැකිය.</string>
-  <string name="suw_qr_instruction_text">&lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s වෙත සම්බන්ධ වීමට QR කේතය ස්කෑන් කරන්න</string>
+  <string name="suw_setup_profile_title">ඔබේ දුරකථනයෙහි හෝ මෝටර් රථයෙහි පිහිටුවීම අවසන් කරන්න</string>
+  <string name="suw_setup_profile_content">ඔබ දැනටමත් ඔබේ දුරකථනයෙහි පිහිටුවීම ආරම්භ කර ඇත්නම්, ඔබේ මිත්‍ර යෙදුම විවෘත කර QR කේතය ස්කෑන් කරන්න.\n\nනැතහොත්, ඔබට ඔබේ මෝටර් රථයේ ඔබේ පැතිකඩ පිහිටුවීම අවසන් කළ හැක.</string>
+  <string name="suw_qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; වෙත සම්බන්ධ වීමට ස්කෑන් කරන්න</string>
 </resources>

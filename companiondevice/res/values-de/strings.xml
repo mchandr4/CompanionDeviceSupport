@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">Companion-App öffnen</string>
   <string name="enable_bluetooth_instruction_text">Bluetooth-Verbindung zulassen</string>
   <string name="connect_to_targe_car_instruction_text">Mit &lt;b&gt;%1$s&lt;/b&gt; %2$s verbinden</string>
-  <string name="qr_instruction_text">Scanne den QR-Code mit deinem Smartphone oder öffne MyCompanion, um eine Verbindung zu &lt;b&gt;%1$s&lt;/b&gt; %2$s herzustellen</string>
+  <string name="qr_instruction_text">Scanne den QR-Code mit deinem Smartphone oder öffne MyCompanion, um eine Verbindung zu &lt;b&gt;%1$s&lt;/b&gt; herzustellen</string>
   <string name="connect_to_car_instruction_text">Mit dem Fahrzeug verbinden</string>
   <string name="associated_device_pairing_code_title">Code auf Smartphone bestätigen</string>
   <string name="associated_device_pairing_message">Bestätige, dass dieser Code dem Code auf deinem Smartphone entspricht</string>
@@ -63,7 +63,7 @@
   <string name="not_now">Später</string>
   <string name="connect">Verbinden</string>
   <string name="disconnect">Trennen</string>
-  <string name="disconnecting">Disconnecting</string>
+  <string name="disconnecting">Verbindung trennen</string>
   <string name="skip">Überspringen</string>
   <string name="change_profile">Profil ändern</string>
   <string name="connected">Verbunden</string>
@@ -99,7 +99,7 @@
   </plurals>
   <string name="name_not_available">Name nicht verfügbar</string>
   <string name="ble_device_name_prefix">Fahrzeug\u00A0</string>
-  <string name="suw_setup_profile_title">Profil mit Smartphone einrichten</string>
-  <string name="suw_setup_profile_content">Scanne den QR-Code, um loszulegen. Wenn du die MyCompanion App nicht hast, lade sie bei Google Play oder im App Store herunter.</string>
-  <string name="suw_qr_instruction_text">QR-Code scannen, um Verbindung mit&lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s herzustellen</string>
+  <string name="suw_setup_profile_title">Einrichtung auf dem Smartphone oder im Auto abschließen</string>
+  <string name="suw_setup_profile_content">Wenn du die Einrichtung auf deinem Smartphone bereits gestartet hast, öffne die Companion-App und scanne den QR-Code.\n\nDu kannst die Einrichtung deines Profils auch in deinem Auto abschließen.</string>
+  <string name="suw_qr_instruction_text">Scanne den QR-Code, um eine Verbindung zu &lt;b&gt;%1$s&lt;/b&gt; herzustellen</string>
 </resources>

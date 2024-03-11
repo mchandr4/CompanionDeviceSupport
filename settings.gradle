@@ -1,7 +1,10 @@
+plugins {
+  id 'org.gradle.toolchains.foojay-resolver-convention' version '0.5.0'
+}
+
 include ':libs:companionprotos'
 include ':libs:connecteddevice'
 include ':libs:encryptionrunner'
 include ':companiondevice'
-include ':ukey2'
-project(':ukey2').projectDir = new File('../../../../external/ukey2')
+include ':libs:ukey2'
 rootProject.name = "CompanionDeviceSupport"

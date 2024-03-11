@@ -12,6 +12,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.android.connecteddevice.trust.api.ITrustedDeviceAgentDelegate
 import com.google.android.connecteddevice.trust.api.ITrustedDeviceManager
 import com.google.android.connecteddevice.util.ByteUtils
+import java.util.concurrent.TimeUnit.SECONDS
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -22,6 +23,7 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows
 import org.robolectric.annotation.Config
 import org.robolectric.shadow.api.Shadow
 import org.robolectric.shadows.ShadowKeyguardManager
@@ -59,7 +61,18 @@ class TrustedDeviceAgentServiceTest {
       delegate = firstValue
     }
     shadowPowerManager.turnScreenOn(true)
+    shadowKeyguardManager.setIsDeviceLocked(true)
+  }
+
+  @Test
+  fun unlockUserWithToken_screenNotLocked_doNotInvokeCallback() {
     shadowKeyguardManager.setIsDeviceLocked(false)
+    service.isUserUnlocked = true
+
+    sendToken()
+    unlockScreen()
+
+    verify(mockTrustedDeviceManager, never()).onUserUnlocked()
   }
 
   @Test
@@ -68,6 +81,7 @@ class TrustedDeviceAgentServiceTest {
 
     sendToken()
     unlockUser()
+    unlockScreen()
 
     verify(mockTrustedDeviceManager).onUserUnlocked()
   }
@@ -77,6 +91,7 @@ class TrustedDeviceAgentServiceTest {
     service.isUserUnlocked = true
 
     sendToken()
+    unlockScreen()
 
     verify(mockTrustedDeviceManager).onUserUnlocked()
   }
@@ -127,6 +142,7 @@ class TrustedDeviceAgentServiceTest {
 
     shadowPowerManager.turnScreenOn(true)
     service.screenOnReceiver?.onReceive(context, screenOnIntent)
+    unlockScreen()
 
     verify(mockTrustedDeviceManager).onUserUnlocked()
   }
@@ -173,6 +189,12 @@ class TrustedDeviceAgentServiceTest {
     } catch (e: IllegalStateException) {
       // This is expected because we aren't actually connected to a real TrustAgent.
     }
+  }
+
+  private fun unlockScreen() {
+    shadowKeyguardManager.setIsDeviceLocked(false)
+    Shadows.shadowOf(service.retryThread.getLooper())
+      .idleFor(service.checkIhuLockScreenDelay.toSeconds(), SECONDS)
   }
 
   companion object {

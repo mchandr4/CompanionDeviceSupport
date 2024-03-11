@@ -64,7 +64,7 @@ internal fun createEmptyResult(config: ConnectionHowitzerFeature.HowitzerConfig)
 
 internal fun createResult(
   config: ConnectionHowitzerFeature.HowitzerConfig,
-  valid: Boolean = true
+  valid: Boolean = true,
 ): HowitzerMessage {
   val startTime = Instant.now()
   val receivedLastPayloadTime = startTime.plusSeconds(1)

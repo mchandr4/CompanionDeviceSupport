@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">တွဲဖက် အက်ပ် ဖွင့်ပါ</string>
   <string name="enable_bluetooth_instruction_text">ဘလူးတုသ် ချိတ်ဆက်မှုကို ခွင့်ပြုပါ</string>
   <string name="connect_to_targe_car_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s နှင့် ချိတ်ဆက်ပါ</string>
-  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s သို့ချိတ်ဆက်ရန် သင့်ဖုန်းသုံး၍ QR ကုဒ်ကို စကင်ဖတ်ပါ (သို့) MyCompanion ကိုဖွင့်ပါ</string>
+  <string name="qr_instruction_text">ဖုန်းသုံး၍ QR ကုဒ်ကို စကင်ဖတ်ပါ (သို့) &lt;b&gt;%1$s&lt;/b&gt; နှင့် ချိတ်ဆက်ရန် MyCompanion ဖွင့်ပါ</string>
   <string name="connect_to_car_instruction_text">ကားနှင့် ချိတ်ဆက်ပါ</string>
   <string name="associated_device_pairing_code_title">ဖုန်းတွင် ကုဒ်ကိုအတည်ပြုပါ</string>
   <string name="associated_device_pairing_message">ဤကုဒ်သည် သင့်ဖုန်းတွင်ပြသည့်ကုဒ်နှင့် တူညီကြောင်း အတည်ပြုပါ</string>
@@ -63,7 +63,7 @@
   <string name="not_now">ယခုမလုပ်ပါ</string>
   <string name="connect">ချိတ်ဆက်ရန်</string>
   <string name="disconnect">ချိတ်ဆက်မှု ဖြုတ်ရန်</string>
-  <string name="disconnecting">Disconnecting</string>
+  <string name="disconnecting">ချိတ်ဆက်မှုဖြုတ်နေသည်</string>
   <string name="skip">ကျော်ရန်</string>
   <string name="change_profile">ပရိုဖိုင်ပြောင်းရန်</string>
   <string name="connected">ချိတ်ဆက်ထားသည်</string>
@@ -99,7 +99,7 @@
   </plurals>
   <string name="name_not_available">အမည် မရနိုင်ပါ</string>
   <string name="ble_device_name_prefix">ယာဉ်\u00A0</string>
-  <string name="suw_setup_profile_title">ပရိုဖိုင်ကို ဖုန်းဖြင့် စနစ်သွင်းခြင်း</string>
-  <string name="suw_setup_profile_content">စတင်ရန် QR ကုဒ်ကိုစကင်ဖတ်ပါ။ MyCompanion အက်ပ်မရှိပါက Google Play နှင့် App Store တွင်ဒေါင်းလုဒ်လုပ်နိုင်သည်။</string>
-  <string name="suw_qr_instruction_text">&lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s သို့ချိတ်ဆက်ရန် QR ကုဒ်ကို စကင်ဖတ်ပါ</string>
+  <string name="suw_setup_profile_title">ဖုန်း (သို့) ကားတွင် စနစ်ထည့်သွင်းမှု အပြီးသတ်ခြင်း</string>
+  <string name="suw_setup_profile_content">ဖုန်းတွင် စနစ်ထည့်သွင်းမှုကို စတင်ထားပြီးပါက ‘တွဲဖက်အက်ပ်’ ဖွင့်ပြီး QR ကုဒ်ကို စကင်ဖတ်ပါ။\n\nသို့မဟုတ် ကားတွင် ပရိုဖိုင်စနစ်ထည့်သွင်းခြင်းကို အပြီးသတ်နိုင်သည်။</string>
+  <string name="suw_qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; နှင့် ချိတ်ဆက်ရန် စကင်ဖတ်ပါ</string>
 </resources>

@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">ಕಂಪ್ಯಾನಿಯನ್ ಆ್ಯಪ್ ಅನ್ನು ತೆರೆಯಿರಿ</string>
   <string name="enable_bluetooth_instruction_text">ಬ್ಲೂಟೂತ್ ಕನೆಕ್ಷನ್ ಅನ್ನು ಅನುಮತಿಸಿ</string>
   <string name="connect_to_targe_car_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s ಗೆ ಕನೆಕ್ಟ್ ಮಾಡಿ</string>
-  <string name="qr_instruction_text">QR ಕೋಡ್ ಅನ್ನು ಸ್ಕ್ಯಾನ್ ಮಾಡಲು ನಿಮ್ಮ ಫೋನ್ ಅನ್ನು ಬಳಸಿ ಅಥವಾ &lt;b&gt;%1$s&lt;/b&gt;%2$s ಗೆ ಕನೆಕ್ಟ್ ಮಾಡಲು MyCompanion ಅನ್ನು ತೆರೆಯಿರಿ</string>
+  <string name="qr_instruction_text">QR ಕೋಡ್ ಅನ್ನು ಸ್ಕ್ಯಾನ್ ಮಾಡಲು ನಿಮ್ಮ ಫೋನ್ ಅನ್ನು ಬಳಸಿ ಅಥವಾ &lt;b&gt;%1$s&lt;/b&gt; ಗೆ ಕನೆಕ್ಟ್ ಮಾಡಲು MyCompanion ಅನ್ನು ತೆರೆಯಿರಿ</string>
   <string name="connect_to_car_instruction_text">ಕಾರ್‌ಗೆ ಕನೆಕ್ಟ್ ಮಾಡಿ</string>
   <string name="associated_device_pairing_code_title">ಫೋನ್‌ನಲ್ಲಿ ಕೋಡ್ ಅನ್ನು ದೃಢೀಕರಿಸಿ</string>
   <string name="associated_device_pairing_message">ನಿಮ್ಮ ಫೋನ್‌ನಲ್ಲಿ ತೋರಿಸಲಾಗುವ ಕೋಡ್‌ಗೆ ಇದು ಹೊಂದಾಣಿಕೆಯಾಗುತ್ತಿದೆ ಎಂದು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ</string>
@@ -63,7 +63,7 @@
   <string name="not_now">ಈಗ ಬೇಡ</string>
   <string name="connect">ಕನೆಕ್ಟ್ ಮಾಡಿ</string>
   <string name="disconnect">ಡಿಸ್‌ಕನೆಕ್ಟ್ ಮಾಡಿ</string>
-  <string name="disconnecting">Disconnecting</string>
+  <string name="disconnecting">ಡಿಸ್‌ಕನೆಕ್ಟಿಂಗ್</string>
   <string name="skip">ಸ್ಕಿಪ್ ಮಾಡಿ</string>
   <string name="change_profile">ಪ್ರೊಫೈಲ್ ಅನ್ನು ಬದಲಾಯಿಸಿ</string>
   <string name="connected">ಕನೆಕ್ಟ್ ಆಗಿದೆ</string>
@@ -99,7 +99,7 @@
   </plurals>
   <string name="name_not_available">ಹೆಸರು ಲಭ್ಯವಿಲ್ಲ</string>
   <string name="ble_device_name_prefix">ವಾಹನ\u00A0</string>
-  <string name="suw_setup_profile_title">ಫೋನ್‌ನ ಮೂಲಕ ಪ್ರೊಫೈಲ್ ಅನ್ನು ಸೆಟಪ್ ಮಾಡಿ</string>
-  <string name="suw_setup_profile_content">ಪ್ರಾರಂಭಿಸಲು QR ಕೋಡ್ ಅನ್ನು ಸ್ಕ್ಯಾನ್ ಮಾಡಿ. ನೀವು MyCompanion ಆ್ಯಪ್ ಅನ್ನು ಹೊಂದಿರದಿದ್ದರೆ, ನೀವು ಅದನ್ನು Google Play ಮತ್ತು ಆ್ಯಪ್ ಸ್ಟೋರ್‌ನಲ್ಲಿ ಡೌನ್‌ಲೋಡ್ ಮಾಡಬಹುದು.</string>
-  <string name="suw_qr_instruction_text">&lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s ಗೆ ಕನೆಕ್ಟ್ ಆಗಲು QR ಕೋಡ್ ಅನ್ನು ಸ್ಕ್ಯಾನ್ ಮಾಡಿ</string>
+  <string name="suw_setup_profile_title">ನಿಮ್ಮ ಫೋನ್ ಅಥವಾ ಕಾರ್‌ನಲ್ಲಿ ಸೆಟಪ್ ಅನ್ನು ಪೂರ್ಣಗೊಳಿಸಿ</string>
+  <string name="suw_setup_profile_content">ನೀವು ಈಗಾಗಲೇ ನಿಮ್ಮ ಫೋನ್‌ನಲ್ಲಿ ಸೆಟಪ್ ಮಾಡಲು ಪ್ರಾರಂಭಿಸಿದ್ದರೆ, ನಿಮ್ಮ ಕಂಪ್ಯಾನಿಯನ್ ಆ್ಯಪ್ ತೆರೆಯಿರಿ ಮತ್ತು QR ಕೋಡ್ ಅನ್ನು ಸ್ಕ್ಯಾನ್ ಮಾಡಿ.\n\nಅಥವಾ, ನಿಮ್ಮ ಕಾರ್‌ನಲ್ಲಿ ನಿಮ್ಮ ಪ್ರೊಫೈಲ್ ಸೆಟ್ ಮಾಡುವುದನ್ನು ಪೂರ್ಣಗೊಳಿಸಬಹುದು.</string>
+  <string name="suw_qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; ಗೆ ಕನೆಕ್ಟ್ ಮಾಡಲು ಸ್ಕ್ಯಾನ್ ಮಾಡಿ</string>
 </resources>

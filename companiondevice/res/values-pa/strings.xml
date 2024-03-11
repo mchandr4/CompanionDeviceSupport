@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">ਸੰਬੰਧੀ ਐਪ ਖੋਲ੍ਹੋ</string>
   <string name="enable_bluetooth_instruction_text">ਬਲੂਟੁੱਥ ਕਨੈਕਸ਼ਨ ਨੂੰ ਇਜਾਜ਼ਤ ਦਿਓ</string>
   <string name="connect_to_targe_car_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s ਨਾਲ ਕਨੈਕਟ ਕਰੋ</string>
-  <string name="qr_instruction_text">QR ਕੋਡ ਨੂੰ ਸਕੈਨ ਕਰਨ ਲਈ ਆਪਣੇ ਫ਼ੋਨ ਨੂੰ ਵਰਤੋ ਜਾਂ &lt;b&gt;%1$s&lt;/b&gt; %2$s ਨਾਲ ਕਨੈਕਟ ਕਰਨ ਲਈ MyCompanion ਖੋਲ੍ਹੋ</string>
+  <string name="qr_instruction_text">QR ਕੋਡ ਨੂੰ ਸਕੈਨ ਕਰਨ ਲਈ ਆਪਣੇ ਫ਼ੋਨ ਨੂੰ ਵਰਤੋ ਜਾਂ &lt;b&gt;%1$s&lt;/b&gt; ਨਾਲ ਕਨੈਕਟ ਕਰਨ ਲਈ MyCompanion ਖੋਲ੍ਹੋ</string>
   <string name="connect_to_car_instruction_text">ਕਾਰ ਨਾਲ ਕਨੈਕਟ ਕਰੋ</string>
   <string name="associated_device_pairing_code_title">ਫ਼ੋਨ \'ਤੇ ਕੋਡ ਦੀ ਤਸਦੀਕ ਕਰੋ</string>
   <string name="associated_device_pairing_message">ਤਸਦੀਕ ਕਰੋ ਕਿ ਇਹ ਤੁਹਾਡੇ ਫ਼ੋਨ \'ਤੇ ਦਿਖਾਏ ਜਾ ਰਹੇ ਕੋਡ ਨਾਲ ਮੇਲ ਖਾਂਦਾ ਹੈ</string>
@@ -63,7 +63,7 @@
   <string name="not_now">ਹੁਣੇ ਨਹੀਂ</string>
   <string name="connect">ਕਨੈਕਟ ਕਰੋ</string>
   <string name="disconnect">ਡਿਸਕਨੈਕਟ ਕਰੋ</string>
-  <string name="disconnecting">Disconnecting</string>
+  <string name="disconnecting">ਡਿਸਕਨੈਕਟ ਹੋ ਰਿਹਾ ਹੈ</string>
   <string name="skip">ਛੱਡੋ</string>
   <string name="change_profile">ਪ੍ਰੋਫਾਈਲ ਬਦਲੋ</string>
   <string name="connected">ਕਨੈਕਟ ਹੈ</string>
@@ -99,7 +99,7 @@
   </plurals>
   <string name="name_not_available">ਨਾਮ ਉਪਲਬਧ ਨਹੀਂ ਹੈ</string>
   <string name="ble_device_name_prefix">ਵਾਹਨ\u00A0</string>
-  <string name="suw_setup_profile_title">ਫ਼ੋਨ ਨਾਲ ਪ੍ਰੋਫਾਈਲ ਦਾ ਸੈੱਟਅੱਪ ਕਰੋ</string>
-  <string name="suw_setup_profile_content">ਸ਼ੁਰੂਆਤ ਕਰਨ ਲਈ QR ਕੋਡ ਨੂੰ ਸਕੈਨ ਕਰੋ। ਜੇ ਤੁਹਾਡੇ ਕੋਲ MyCompanion ਐਪ ਨਹੀਂ ਹੈ, ਤਾਂ ਤੁਸੀਂ ਇਸਨੂੰ Google Play ਅਤੇ App Store ਤੋਂ ਡਾਊਨਲੋਡ ਕਰ ਸਕਦੇ ਹੋ।</string>
-  <string name="suw_qr_instruction_text">&lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; %2$s ਨਾਲ ਕਨੈਕਟ ਕਰਨ ਲਈ QR ਕੋਡ ਨੂੰ ਸਕੈਨ ਕਰੋ</string>
+  <string name="suw_setup_profile_title">ਆਪਣੇ ਫ਼ੋਨ ਜਾਂ ਕਾਰ \'ਤੇ ਸੈੱਟਅੱਪ ਪੂਰਾ ਕਰੋ</string>
+  <string name="suw_setup_profile_content">ਜੇ ਤੁਸੀਂ ਪਹਿਲਾਂ ਹੀ ਆਪਣੇ ਫ਼ੋਨ \'ਤੇ ਸੈੱਟਅੱਪ ਕਰਨਾ ਸ਼ੁਰੂ ਕਰ ਦਿੱਤਾ ਹੈ, ਤਾਂ ਆਪਣੀ ਸੰਬੰਧੀ ਐਪ ਖੋਲ੍ਹੋ ਅਤੇ QR ਕੋਡ ਨੂੰ ਸਕੈਨ ਕਰੋ।\n\nਜਾਂ, ਤੁਸੀਂ ਆਪਣੀ ਕਾਰ ਵਿੱਚ ਆਪਣੇ ਪ੍ਰੋਫਾਈਲ ਦਾ ਸੈੱਟਅੱਪ ਪੂਰਾ ਕਰ ਸਕਦੇ ਹੋ।</string>
+  <string name="suw_qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; ਨਾਲ ਕਨੈਕਟ ਕਰਨ ਲਈ ਸਕੈਨ ਕਰੋ</string>
 </resources>

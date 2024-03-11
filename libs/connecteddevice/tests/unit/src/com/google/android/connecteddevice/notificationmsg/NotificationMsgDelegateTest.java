@@ -159,10 +159,10 @@ public class NotificationMsgDelegateTest {
         /* defaultDisplayName= */ "defaultName",
         /* groupTitleSeparator= */ ",",
         /* letterToTileRatio= */ 1f,
-        /* contentTextResourceId= */ R.plurals.notification_new_message
+        /* contentTextResourceId= */ R.plurals.notification_new_message,
+        mMockProjectionStateListener
     );
     mNotificationMsgDelegate.setNotificationManager(mMockNotificationManager);
-    mNotificationMsgDelegate.setProjectionStateListener(mMockProjectionStateListener);
   }
 
   @Test

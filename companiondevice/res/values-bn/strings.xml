@@ -25,7 +25,7 @@
   <string name="open_companion_app_instruction_text">কম্প্যানিয়ন অ্যাপ খুলুন</string>
   <string name="enable_bluetooth_instruction_text">ব্লুটুথ কানেকশনের অনুমতি দিন</string>
   <string name="connect_to_targe_car_instruction_text">&lt;b&gt;%1$s&lt;/b&gt;-এ কানেক্ট করুন%2$s</string>
-  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; %2$s-এর সাথে কানেক্ট করতে MyCompanion খুলুন বা QR কোড স্ক্যান করতে আপনার ফোন ব্যবহার করুন</string>
+  <string name="qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt;-এর সাথে কানেক্ট করতে MyCompanion খুলুন বা QR কোড স্ক্যান করতে আপনার ফোন ব্যবহার করুন</string>
   <string name="connect_to_car_instruction_text">গাড়ির সাথে কানেক্ট করুন</string>
   <string name="associated_device_pairing_code_title">ফোনে কোড কনফার্ম করুন</string>
   <string name="associated_device_pairing_message">আপনার ফোনে দেখানো কোডের সাথে এটি ম্যাচ করছে কিনা তা কনফার্ম করুন</string>
@@ -63,7 +63,7 @@
   <string name="not_now">এখন নয়</string>
   <string name="connect">কানেক্ট করুন</string>
   <string name="disconnect">ডিসকানেক্ট করুন</string>
-  <string name="disconnecting">Disconnecting</string>
+  <string name="disconnecting">ডিসকানেক্ট করা হচ্ছে</string>
   <string name="skip">এড়িয়ে যান</string>
   <string name="change_profile">প্রোফাইল পরিবর্তন করুন</string>
   <string name="connected">কানেক্ট করা আছে</string>
@@ -99,7 +99,7 @@
   </plurals>
   <string name="name_not_available">নাম পাওয়া যাচ্ছে না</string>
   <string name="ble_device_name_prefix">গাড়ি\u00A0</string>
-  <string name="suw_setup_profile_title">ফোন থেকে প্রোফাইল সেট-আপ করুন</string>
-  <string name="suw_setup_profile_content">শুরু করতে QR কোড স্ক্যান করুন। আপনার ডিভাইসে MyCompanion অ্যাপ ইনস্টল করা না থাকলে, আপনি এটি Google Play এবং App Store থেকে ডাউনলোড করতে পারবেন।</string>
-  <string name="suw_qr_instruction_text">&lt;br /&gt;&lt;b&gt;%1$s&lt;/b&gt; %2$s-এর সাথে কানেক্ট করতে QR কোড স্ক্যান করুন</string>
+  <string name="suw_setup_profile_title">ফোন বা গাড়ি থেকে সেট-আপ শেষ করুন</string>
+  <string name="suw_setup_profile_content">আপনি যদি ইতিমধ্যেই ফোন থেকে সেট-আপ করা শুরু করে থাকেন, তাহলে Companion অ্যাপ খুলে QR কোড স্ক্যান করুন।\n\nঅথবা আপনার গাড়িতেও আপনি প্রোফাইল সেট-আপ করার প্রক্রিয়া শেষ করতে পারেন।</string>
+  <string name="suw_qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt;-এর সাথে কানেক্ট করতে স্ক্যান করুন</string>
 </resources>
