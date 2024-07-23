@@ -603,7 +603,7 @@ class CompanionConnectorTest {
         UUID.randomUUID().toString(),
         /* deviceAddress= */ "",
         /* deviceName= */ null,
-        /* isConnectionEnabled= */ true
+        /* isConnectionEnabled= */ true,
       )
     defaultConnector.connect()
 
@@ -622,7 +622,7 @@ class CompanionConnectorTest {
         UUID.randomUUID().toString(),
         /* deviceAddress= */ "",
         /* deviceName= */ null,
-        /* isConnectionEnabled= */ true
+        /* isConnectionEnabled= */ true,
       )
     defaultConnector.connect()
 
@@ -641,7 +641,7 @@ class CompanionConnectorTest {
         UUID.randomUUID().toString(),
         /* deviceAddress= */ "",
         /* deviceName= */ null,
-        /* isConnectionEnabled= */ true
+        /* isConnectionEnabled= */ true,
       )
     defaultConnector.connect()
 
@@ -777,7 +777,7 @@ class CompanionConnectorTest {
           defaultConnector.featureId?.uuid,
           /* isMessageEncrypted= */ true,
           DeviceMessage.OperationType.CLIENT_MESSAGE,
-          message
+          message,
         )
       firstValue.onMessageReceived(device, deviceMessage)
     }
@@ -871,7 +871,7 @@ class CompanionConnectorTest {
         defaultConnector.featureId?.uuid,
         /* isMessageEncrypted= */ true,
         DeviceMessage.OperationType.QUERY_RESPONSE,
-        queryResponse.toByteArray()
+        queryResponse.toByteArray(),
       )
     callbackCaptor.firstValue.onMessageReceived(device, deviceMessage)
 
@@ -912,7 +912,7 @@ class CompanionConnectorTest {
         defaultConnector.featureId?.uuid,
         /* isMessageEncrypted= */ true,
         DeviceMessage.OperationType.QUERY_RESPONSE,
-        queryResponse.toByteArray()
+        queryResponse.toByteArray(),
       )
     callbackCaptor.firstValue.onMessageReceived(device, deviceMessage)
 
@@ -953,7 +953,7 @@ class CompanionConnectorTest {
         defaultConnector.featureId?.uuid,
         /* isMessageEncrypted= */ true,
         DeviceMessage.OperationType.QUERY_RESPONSE,
-        queryResponse.toByteArray()
+        queryResponse.toByteArray(),
       )
     callbackCaptor.firstValue.onMessageReceived(device, deviceMessage)
 
@@ -1043,7 +1043,7 @@ class CompanionConnectorTest {
         featureId,
         /* isMessageEncrypted= */ true,
         DeviceMessage.OperationType.QUERY,
-        query.toByteArray()
+        query.toByteArray(),
       )
     callbackCaptor.firstValue.onMessageReceived(device, deviceMessage)
 
@@ -1091,7 +1091,7 @@ class CompanionConnectorTest {
         featureId,
         /* isMessageEncrypted= */ true,
         DeviceMessage.OperationType.QUERY,
-        query.toByteArray()
+        query.toByteArray(),
       )
 
     callbackCaptor.firstValue.onMessageReceived(device, deviceMessage)
@@ -1104,7 +1104,7 @@ class CompanionConnectorTest {
     val queryResponse =
       QueryResponse.parseFrom(
         messageCaptor.firstValue.message,
-        ExtensionRegistryLite.getEmptyRegistry()
+        ExtensionRegistryLite.getEmptyRegistry(),
       )
 
     assertThat(queryResponse.queryId).isEqualTo(queryId)
@@ -1140,7 +1140,7 @@ class CompanionConnectorTest {
         featureId.uuid,
         /* isMessageEncrypted= */ true,
         DeviceMessage.OperationType.QUERY,
-        query.toByteArray()
+        query.toByteArray(),
       )
     callbackCaptor.firstValue.onMessageReceived(device, deviceMessage)
     val response = ByteUtils.randomBytes(10)
@@ -1153,7 +1153,7 @@ class CompanionConnectorTest {
     val queryResponse =
       QueryResponse.parseFrom(
         messageCaptor.firstValue.message,
-        ExtensionRegistryLite.getEmptyRegistry()
+        ExtensionRegistryLite.getEmptyRegistry(),
       )
 
     assertThat(queryResponse.queryId).isEqualTo(queryId)
@@ -1227,7 +1227,7 @@ class CompanionConnectorTest {
         defaultConnector.featureId?.uuid,
         /* isMessageEncrypted= */ true,
         DeviceMessage.OperationType.QUERY_RESPONSE,
-        queryResponse.toByteArray()
+        queryResponse.toByteArray(),
       )
     callbackCaptor.firstValue.onMessageReceived(device, deviceMessage)
 
@@ -1267,7 +1267,7 @@ class CompanionConnectorTest {
         defaultConnector.featureId?.uuid,
         /* isMessageEncrypted= */ true,
         DeviceMessage.OperationType.QUERY_RESPONSE,
-        queryResponse.toByteArray()
+        queryResponse.toByteArray(),
       )
     deviceCallback.onMessageReceived(device, deviceMessage)
 
@@ -1306,7 +1306,7 @@ class CompanionConnectorTest {
         defaultConnector.featureId?.uuid,
         /* isMessageEncrypted= */ true,
         DeviceMessage.OperationType.QUERY_RESPONSE,
-        queryResponse.toByteArray()
+        queryResponse.toByteArray(),
       )
     callbackCaptor.firstValue.onMessageReceived(device, deviceMessage)
 
@@ -1325,6 +1325,30 @@ class CompanionConnectorTest {
     defaultConnector.retrieveCompanionApplicationName(device, callback)
 
     verify(callback).onError()
+  }
+
+  @Test
+  fun isFeatureSupportedCached_supported() {
+    val device = createConnectedDevice()
+    whenever(mockFeatureCoordinator.isFeatureSupportedCached(any(), any())).thenReturn(1)
+
+    assertThat(defaultConnector.isFeatureSupportedCached(device)).isTrue()
+  }
+
+  @Test
+  fun isFeatureSupportedCached_notSupported() {
+    val device = createConnectedDevice()
+    whenever(mockFeatureCoordinator.isFeatureSupportedCached(any(), any())).thenReturn(-1)
+
+    assertThat(defaultConnector.isFeatureSupportedCached(device)).isFalse()
+  }
+
+  @Test
+  fun isFeatureSupportedCached_unknown() {
+    val device = createConnectedDevice()
+    whenever(mockFeatureCoordinator.isFeatureSupportedCached(any(), any())).thenReturn(0)
+
+    assertThat(defaultConnector.isFeatureSupportedCached(device)).isNull()
   }
 
   @Test
@@ -1548,7 +1572,7 @@ class CompanionConnectorTest {
       .firstOrNull()!!
       .onServiceConnected(
         ComponentName(PACKAGE_NAME, FG_NAME),
-        mockFeatureCoordinatorStatusNotifier.asBinder()
+        mockFeatureCoordinatorStatusNotifier.asBinder(),
       )
 
     verify(mockFeatureCoordinatorListener, never()).onFeatureCoordinatorInitialized(any())
@@ -1704,7 +1728,7 @@ class CompanionConnectorTest {
         defaultConnector.featureId?.uuid,
         /* isMessageEncrypted= */ true,
         DeviceMessage.OperationType.QUERY_RESPONSE,
-        queryResponse.toByteArray()
+        queryResponse.toByteArray(),
       )
     val callbackCaptor =
       argumentCaptor<IDeviceCallback> {
@@ -1751,7 +1775,7 @@ class CompanionConnectorTest {
         defaultConnector.featureId?.uuid,
         /* isMessageEncrypted= */ true,
         DeviceMessage.OperationType.QUERY_RESPONSE,
-        queryResponse.toByteArray()
+        queryResponse.toByteArray(),
       )
     val callbackCaptor =
       argumentCaptor<IDeviceCallback> {
@@ -1807,7 +1831,7 @@ class CompanionConnectorTest {
         defaultConnector.featureId?.uuid,
         /* isMessageEncrypted= */ true,
         DeviceMessage.OperationType.QUERY_RESPONSE,
-        queryResponse.toByteArray()
+        queryResponse.toByteArray(),
       )
     val callbackCaptor =
       argumentCaptor<IDeviceCallback> {
@@ -1863,7 +1887,7 @@ class CompanionConnectorTest {
         defaultConnector.featureId?.uuid,
         /* isMessageEncrypted= */ true,
         DeviceMessage.OperationType.QUERY_RESPONSE,
-        queryResponse.toByteArray()
+        queryResponse.toByteArray(),
       )
     val callbackCaptor =
       argumentCaptor<IDeviceCallback> {
@@ -1943,7 +1967,7 @@ class CompanionConnectorTest {
 
     private fun createConnectedDevice(
       belongsToDriver: Boolean = true,
-      hasSecureChannel: Boolean = false
+      hasSecureChannel: Boolean = false,
     ) =
       ConnectedDevice(
         UUID.randomUUID().toString(),

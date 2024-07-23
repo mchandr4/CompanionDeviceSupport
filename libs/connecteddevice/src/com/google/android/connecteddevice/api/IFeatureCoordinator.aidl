@@ -34,7 +34,7 @@ import com.google.android.connecteddevice.model.DeviceMessage;
  * The added function needs to be assigned the transaction value noted below,
  * and the value needs to be appropriately incremented.
  *
- * Next transaction value: 27
+ * Next transaction value: 28
  */
 interface IFeatureCoordinator {
 
@@ -213,4 +213,14 @@ interface IFeatureCoordinator {
 
     /** Remove the claim on the identified associated device. */
     void removeAssociatedDeviceClaim(in String deviceId) = 26;
+
+    /**
+     * Returns the support status of a feature on the phone side.
+     *
+     * Returns:
+     * - a postive value if the feature is supported on the phone side;
+     * - a negative value if the feature is NOT supported on the phone side;
+     * - 0 if the status is unknown.
+     */
+    int isFeatureSupportedCached(in String deviceId, in String featureId) = 27;
 }

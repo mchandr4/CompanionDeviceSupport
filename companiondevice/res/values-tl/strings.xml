@@ -77,8 +77,8 @@
   <string name="trusted_device_feature_title">I-unlock ang profile gamit ang telepono</string>
   <string name="trusted_device_feature_instruction">Tingnan ang iyong Kasamang App para magtakda ng mga ospyon sa pag-unlock</string>
   <string name="trusted_device_item_title">Hayaan ang &lt;b&gt;%1$s&lt;/b&gt; na i-unlock ang profile ko</string>
-  <string name="device_not_connected_dialog_title">Dapat aktibong nakakonekta ang iyong Kasamang App.</string>
-  <string name="device_not_connected_dialog_message">Para i-on ang feature na ito, tiyaking naka-on ang Companion App sa iyong telepono. Dapat naka-on ang Bluetooth para sa kotse at telepono mo, at magkalapit ang mga ito.</string>
+  <string name="device_not_connected_dialog_title">Hindi makita ang iyong telepono</string>
+  <string name="device_not_connected_dialog_message">Tiyaking naka-on ang Bluetooth ng iyong telepono at kotse, at nasa malapit ang telepono mo</string>
   <string name="trusted_device_enrollment_success_message">Maa-unlock na ngayon ng &lt;b&gt;%1$s&lt;/b&gt; ang iyong profile</string>
   <string name="create_profile_lock_dialog_title">Gumawa ng pangunahing lock ng profile</string>
   <string name="create_profile_lock_dialog_message">Para magamit ang telepono mo para i-unlock ang iyong profile, kailangan mo ng pangunahing lock ng profile bilang backup</string>

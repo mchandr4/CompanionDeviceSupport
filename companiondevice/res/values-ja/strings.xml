@@ -77,8 +77,8 @@
   <string name="trusted_device_feature_title">スマートフォンでプロファイルのロック解除</string>
   <string name="trusted_device_feature_instruction">コンパニオン アプリを確認してロック解除オプションを設定します</string>
   <string name="trusted_device_item_title">&lt;b&gt;%1$s&lt;/b&gt; によるプロファイルのロック解除</string>
-  <string name="device_not_connected_dialog_title">コンパニオン アプリを接続してください</string>
-  <string name="device_not_connected_dialog_message">この機能を ON にするには、スマートフォンでコンパニオン アプリを開いてください。車とスマートフォンが近くにあり、両方の Bluetooth が ON になっていることをご確認ください。</string>
+  <string name="device_not_connected_dialog_title">スマートフォンが見つかりません</string>
+  <string name="device_not_connected_dialog_message">スマートフォンと車の Bluetooth が ON になっていて、スマートフォンが近くにあることをご確認ください</string>
   <string name="trusted_device_enrollment_success_message">&lt;b&gt;%1$s&lt;/b&gt; でプロファイルのロックを解除できるようになりました</string>
   <string name="create_profile_lock_dialog_title">メイン プロファイル ロックの作成</string>
   <string name="create_profile_lock_dialog_message">スマートフォンを使用してプロファイルのロックを解除するには、バックアップとしてメイン プロファイル ロックが必要です</string>

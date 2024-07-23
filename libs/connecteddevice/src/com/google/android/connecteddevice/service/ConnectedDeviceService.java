@@ -31,7 +31,8 @@ import androidx.annotation.Nullable;
 import com.google.android.connecteddevice.R;
 import com.google.android.connecteddevice.api.CompanionConnector;
 import com.google.android.connecteddevice.api.Connector;
-import com.google.android.connecteddevice.api.FeatureConnector;
+import com.google.android.connecteddevice.api.SafeConnector;
+import com.google.android.connecteddevice.beacon.BeaconFeature;
 import com.google.android.connecteddevice.core.DeviceController;
 import com.google.android.connecteddevice.core.FeatureCoordinator;
 import com.google.android.connecteddevice.core.MultiProtocolDeviceController;
@@ -103,6 +104,8 @@ public final class ConnectedDeviceService extends TrunkService {
 
   private PeriodicPingFeature periodicPingFeature;
 
+  private BeaconFeature beaconFeature;
+
   @Override
   @SuppressLint("UnprotectedReceiver") // ACTION_USER_REMOVED is a protected broadcast.
   public void onCreate() {
@@ -173,6 +176,11 @@ public final class ConnectedDeviceService extends TrunkService {
         new PeriodicPingFeature(
             CompanionConnector.createLocalConnector(
                 this, Connector.USER_TYPE_ALL, featureCoordinator));
+    beaconFeature =
+        BeaconFeature.create(
+            this,
+            CompanionConnector.createLocalConnector(
+                this, Connector.USER_TYPE_ALL, featureCoordinator));
   }
 
   private void onUserRemoved(UserHandle userHandle) {
@@ -205,9 +213,11 @@ public final class ConnectedDeviceService extends TrunkService {
     switch (action) {
       case CompanionProtocolRegistry.ACTION_BIND_PROTOCOL:
         return protocolDelegate;
-      case CompanionConnector.ACTION_BIND_FEATURE_COORDINATOR:
+      case Connector.ACTION_BIND_FEATURE_COORDINATOR:
         return featureCoordinator;
-      case FeatureConnector.ACTION_QUERY_API_VERSION:
+      case SafeConnector.ACTION_BIND_SAFE_FEATURE_COORDINATOR:
+        return featureCoordinator.getSafeFeatureCoordinator();
+      case SafeConnector.ACTION_QUERY_API_VERSION:
         logd(TAG, "Return binder version to remote process");
         return binderVersion.asBinder();
       default:
@@ -255,6 +265,7 @@ public final class ConnectedDeviceService extends TrunkService {
     systemFeature.stop();
     loggingFeature.stop();
     periodicPingFeature.stop();
+    beaconFeature.stop();
   }
 
   private void initializeFeatures() {
@@ -272,6 +283,7 @@ public final class ConnectedDeviceService extends TrunkService {
               systemFeature.start();
               loggingFeature.start();
               periodicPingFeature.start();
+              beaconFeature.start();
             })
         .start();
   }

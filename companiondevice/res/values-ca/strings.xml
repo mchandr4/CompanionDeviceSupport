@@ -16,7 +16,7 @@
   -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-  <string name="settings_entry_title">Companion Device</string>
+  <string name="settings_entry_title">Dispositiu complementari</string>
   <string name="default_device_name">Dispositiu associat</string>
   <string name="add_device_title">Connecta a l\'aplicació complementària</string>
   <string name="add_associated_device_title">Connecta a MyCompanion</string>
@@ -77,8 +77,8 @@
   <string name="trusted_device_feature_title">Desbloqueja el perfil amb el telèfon</string>
   <string name="trusted_device_feature_instruction">Ves a l\'aplicació complementària per definir les opcions de desbloqueig</string>
   <string name="trusted_device_item_title">Permet que &lt;b&gt;%1$s&lt;/b&gt; desbloquegi el meu perfil</string>
-  <string name="device_not_connected_dialog_title">L\'aplicació complementària ha d\'estar connectada i activa</string>
-  <string name="device_not_connected_dialog_message">Per activar aquesta funció, comprova que l\'aplicació complementària estigui oberta al telèfon. El cotxe i el telèfon han de tenir el Bluetooth activat i han d\'estar a prop.</string>
+  <string name="device_not_connected_dialog_title">No es pot trobar el telèfon</string>
+  <string name="device_not_connected_dialog_message">Assegura\'t que el Bluetooth del telèfon i del cotxe estigui activat i que el telèfon sigui a prop</string>
   <string name="trusted_device_enrollment_success_message">Ara &lt;b&gt;%1$s&lt;/b&gt; pot desbloquejar el teu perfil</string>
   <string name="create_profile_lock_dialog_title">Crea un bloqueig de perfil principal</string>
   <string name="create_profile_lock_dialog_message">Per utilitzar el telèfon per desbloquejar el teu perfil, necessites un bloqueig de perfil principal de seguretat</string>

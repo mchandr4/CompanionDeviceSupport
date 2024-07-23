@@ -77,8 +77,8 @@
   <string name="trusted_device_feature_title">Déverrouiller le profil avec le téléphone</string>
   <string name="trusted_device_feature_instruction">Vous pouvez définir les options de déverrouillage dans l\'application compagnon</string>
   <string name="trusted_device_item_title">Autoriser &lt;b&gt;%1$s&lt;/b&gt; à déverrouiller mon profil</string>
-  <string name="device_not_connected_dialog_title">La connexion de votre application compagnon doit être active</string>
-  <string name="device_not_connected_dialog_message">Pour activer fonctionnalité, vérifiez que l\'appli compagnon est ouverte sur téléphone. Téléphone et véhicule doivent être près et Bluetooth doit être activé sur les deux.</string>
+  <string name="device_not_connected_dialog_title">Impossible de trouver votre téléphone</string>
+  <string name="device_not_connected_dialog_message">Assurez-vous que la connexion Bluetooth de votre téléphone et de votre véhicule est activée et que votre téléphone est à proximité</string>
   <string name="trusted_device_enrollment_success_message">&lt;b&gt;%1$s&lt;/b&gt; peut maintenant déverrouiller votre profil</string>
   <string name="create_profile_lock_dialog_title">Configurer un mode de verrouillage pour le profil</string>
   <string name="create_profile_lock_dialog_message">Pour utiliser votre téléphone afin de déverrouiller votre profil, vous devez utiliser un mode de verrouillage de profil comme mesure de sécurité</string>

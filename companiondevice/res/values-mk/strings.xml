@@ -77,8 +77,8 @@
   <string name="trusted_device_feature_title">Отклучете го профилот со телефон</string>
   <string name="trusted_device_feature_instruction">Проверете ја придружната апликација за да поставите опции за отклучување</string>
   <string name="trusted_device_item_title">Дозволи &lt;b&gt;%1$s&lt;/b&gt; да го отклучува мојот профил</string>
-  <string name="device_not_connected_dialog_title">Придружната апликација мора да е активно поврзана</string>
-  <string name="device_not_connected_dialog_message">За да ја вклучите карактеристикава, вклучете ја придружната апликација на телефонот. Bluetooth треба да е вклучен во автомобилот и на телефонот и да бидат во близина.</string>
+  <string name="device_not_connected_dialog_title">Не може да се најде телефонот</string>
+  <string name="device_not_connected_dialog_message">Погрижете се да биде вклучен Bluetooth на телефонот и автомобилот и телефонот да биде во близина</string>
   <string name="trusted_device_enrollment_success_message">&lt;b&gt;%1$s&lt;/b&gt; отсега може да го отклучува вашиот профил</string>
   <string name="create_profile_lock_dialog_title">Создајте примарно заклучување на профилот</string>
   <string name="create_profile_lock_dialog_message">За да го користите телефонот за отклучување на профилот, ви треба примарно заклучување на профилот како резервна опција</string>

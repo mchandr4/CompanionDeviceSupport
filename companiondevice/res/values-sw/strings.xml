@@ -77,8 +77,8 @@
   <string name="trusted_device_feature_title">Fungua wasifu ukitumia simu</string>
   <string name="trusted_device_feature_instruction">Angalia Programu Saidizi ili uweke mipangilio ya chaguo za kufungua</string>
   <string name="trusted_device_item_title">Ruhusu &lt;b&gt;%1$s&lt;/b&gt; ifungue wasifu wangu</string>
-  <string name="device_not_connected_dialog_title">Ni sharti Programu yako Saidizi iwe imeunganishwa</string>
-  <string name="device_not_connected_dialog_message">Ili uwashe kipengele hiki, hakikisha kuwa Programu Saidizi imefunguliwa kwenye simu yako. Ni sharti Bluetooth iwe imewashwa kwenye gari na simu yako na zikaribiane.</string>
+  <string name="device_not_connected_dialog_title">Imeshindwa kupata simu yako</string>
+  <string name="device_not_connected_dialog_message">Hakikisha umewasha Bluetooth kwenye simu na gari lako na simu yako iko karibu</string>
   <string name="trusted_device_enrollment_success_message">Sasa &lt;b&gt;%1$s&lt;/b&gt; inaweza kufungua wasifu wako</string>
   <string name="create_profile_lock_dialog_title">Weka mbinu ya msingi ya kufunga wasifu</string>
   <string name="create_profile_lock_dialog_message">Ili utumie simu yako kufungua wasifu, unahitaji mbinu ya msingi ya kufunga wasifu kama njia mbadala</string>

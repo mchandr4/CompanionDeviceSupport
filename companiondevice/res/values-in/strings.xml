@@ -16,7 +16,7 @@
   -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-  <string name="settings_entry_title">Companion Device</string>
+  <string name="settings_entry_title">Perangkat Pendamping</string>
   <string name="default_device_name">Perangkat Terkait</string>
   <string name="add_device_title">Hubungkan ke aplikasi pendamping</string>
   <string name="add_associated_device_title">Hubungkan ke MyCompanion</string>
@@ -77,8 +77,8 @@
   <string name="trusted_device_feature_title">Buka kunci profil dengan ponsel</string>
   <string name="trusted_device_feature_instruction">Buka Aplikasi Pendamping untuk menyetel opsi buka kunci</string>
   <string name="trusted_device_item_title">Izinkan &lt;b&gt;%1$s&lt;/b&gt; membuka kunci profil saya</string>
-  <string name="device_not_connected_dialog_title">Aplikasi Pendamping Anda harus aktif dan terhubung</string>
-  <string name="device_not_connected_dialog_message">Untuk mengaktifkan fitur ini, pastikan Anda membuka Aplikasi Pendamping di ponsel. Bluetooth mobil dan ponsel Anda harus aktif dan saling berdekatan.</string>
+  <string name="device_not_connected_dialog_title">Tidak dapat menemukan ponsel Anda</string>
+  <string name="device_not_connected_dialog_message">Pastikan Bluetooth ponsel dan mobil Anda aktif, dan ponsel berada di sekitar Anda</string>
   <string name="trusted_device_enrollment_success_message">&lt;b&gt;%1$s&lt;/b&gt; kini dapat membuka kunci profil Anda</string>
   <string name="create_profile_lock_dialog_title">Buat kunci profil utama</string>
   <string name="create_profile_lock_dialog_message">Agar dapat menggunakan ponsel untuk membuka kunci profil, Anda perlu kunci profil utama sebagai cadangan</string>

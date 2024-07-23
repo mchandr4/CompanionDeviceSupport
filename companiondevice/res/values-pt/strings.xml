@@ -77,8 +77,8 @@
   <string name="trusted_device_feature_title">Desbloquear perfil usando o smartphone</string>
   <string name="trusted_device_feature_instruction">Verifique seu aplicativo Companion para definir opções de desbloqueio</string>
   <string name="trusted_device_item_title">Permitir que o smartphone &lt;b&gt;%1$s&lt;/b&gt; desbloqueie meu perfil</string>
-  <string name="device_not_connected_dialog_title">O aplicativo Companion precisa estar conectado</string>
-  <string name="device_not_connected_dialog_message">Para ativar este recurso, é necessário abrir o aplicativo Companion no smartphone. O carro e o dispositivo precisam estar próximos e com o Bluetooth ativado.</string>
+  <string name="device_not_connected_dialog_title">Não foi possível encontrar seu smartphone</string>
+  <string name="device_not_connected_dialog_message">Verifique se o Bluetooth dele e do carro estão ativados e se seu aparelho está por perto</string>
   <string name="trusted_device_enrollment_success_message">Agora o smartphone &lt;b&gt;%1$s&lt;/b&gt; pode desbloquear seu perfil</string>
   <string name="create_profile_lock_dialog_title">Criar um bloqueio de perfil principal</string>
   <string name="create_profile_lock_dialog_message">Ao usar o smartphone para desbloquear seu perfil, você precisará de um bloqueio de perfil principal como backup</string>

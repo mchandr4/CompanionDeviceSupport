@@ -77,8 +77,8 @@
   <string name="trusted_device_feature_title">Vula iphrofayela ngefoni</string>
   <string name="trusted_device_feature_instruction">Hlola Uhlelo lwakho lokusebenza elingumngane ukusetha izinketho zokuvula</string>
   <string name="trusted_device_item_title">Vumela i-&lt;b&gt;%1$s&lt;/b&gt; ivule iphrofayela lami</string>
-  <string name="device_not_connected_dialog_title">I-App yakho engumngane kufanelwe ixhunywe</string>
-  <string name="device_not_connected_dialog_message">Ukuze uvule lesi sici, qinisekisa ukuthi i-App engumngane ivuliwe efonini yakho. Imoto nefoni yakho kufanele kuvulwe i-Bluetooth futhi kusondelane.</string>
+  <string name="device_not_connected_dialog_title">Ayikwazi ukuthola ifoni yakho</string>
+  <string name="device_not_connected_dialog_message">Qiniseka ukuthi i-Bluetooth yefoni nemoto yakho ivuliwe, nokuthi ifoni yakho iseduze</string>
   <string name="trusted_device_enrollment_success_message">I-&lt;b&gt;%1$s&lt;/b&gt; manje isiyakwazi ukuvula iphrofayela lakho</string>
   <string name="create_profile_lock_dialog_title">Dala ukhiye wephrofayela oyinhloko</string>
   <string name="create_profile_lock_dialog_message">Ukusebenzisa ifoni yakho ukuvula iphrofayela yakho, udinga ukukhiya iphrofayela okuyinhloko njengekhophi yasenqolobaneni</string>

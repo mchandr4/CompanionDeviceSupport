@@ -77,8 +77,8 @@
   <string name="trusted_device_feature_title">Профилдин кулпусун телефон менен ачуу</string>
   <string name="trusted_device_feature_instruction">Кулпуну ачуу параметрлерин жөндөө үчүн Өнөктөш колдонмого өтүңүз</string>
   <string name="trusted_device_item_title">&lt;b&gt;%1$s&lt;/b&gt; менин профилимдин кулпусун ачсын</string>
-  <string name="device_not_connected_dialog_title">Өнөктөш колдонмо туташтырылышы керек</string>
-  <string name="device_not_connected_dialog_message">Бул функцияны күйгүзүү үчүн телефонуңуздагы Өнөктөш колдонмо ачык экенин текшериңиз. Унаа менен телефондун Bluetooth\'у күйүп, бири-бирине жакын турушу керек.</string>
+  <string name="device_not_connected_dialog_title">Телефонуңуз табылбай жатат</string>
+  <string name="device_not_connected_dialog_message">Телефонуңуз менен унаадагы Bluetooth күйгүзүлгөнүн текшерип, телефонду жакын жерге коюңуз</string>
   <string name="trusted_device_enrollment_success_message">Эми &lt;b&gt;%1$s&lt;/b&gt; профилиңиздин кулпусун ача алат</string>
   <string name="create_profile_lock_dialog_title">Негизги профилдин кулпусун түзүү</string>
   <string name="create_profile_lock_dialog_message">Профилди телефондун жардамы менен ачуу үчүн негизги профилдин кулпусун түзүшүңүз керек</string>

@@ -77,8 +77,8 @@
   <string name="trusted_device_feature_title">باز کردن قفل نمایه با تلفن</string>
   <string name="trusted_device_feature_instruction">برای تنظیم گزینه‌های باز کردن قفل، «برنامه همراه» را بررسی کنید</string>
   <string name="trusted_device_item_title">به &lt;b&gt;%1$s&lt;/b&gt; اجازه دهید قفل نمایه‌تان را باز کند</string>
-  <string name="device_not_connected_dialog_title">«برنامه همراه» باید به‌صورت فعال متصل باشد</string>
-  <string name="device_not_connected_dialog_message">برای روشن کردن این ویژگی، مطمئن شوید «برنامه همراه» در تلفن باز باشد. خودرو و تلفن باید نزدیک یکدیگر باشند و بلوتوث آن‌ها روشن باشد.</string>
+  <string name="device_not_connected_dialog_title">تلفن پیدا نشد</string>
+  <string name="device_not_connected_dialog_message">مطمئن شوید بلوتوث تلفن و خودرو روشن است و تلفنتان در همین نزدیکی است</string>
   <string name="trusted_device_enrollment_success_message">&lt;b&gt;%1$s&lt;/b&gt; اکنون می‌تواند قفل نمایه‌تان را باز کند</string>
   <string name="create_profile_lock_dialog_title">ایجاد قفل نمایه اصلی</string>
   <string name="create_profile_lock_dialog_message">برای باز کردن قفل نمایه بااستفاده از تلفن، به قفل نمایه اصلی به‌عنوان پشتیبان نیاز دارید</string>

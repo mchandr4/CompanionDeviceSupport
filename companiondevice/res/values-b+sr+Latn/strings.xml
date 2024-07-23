@@ -77,8 +77,8 @@
   <string name="trusted_device_feature_title">Otključajte profil pomoću telefona</string>
   <string name="trusted_device_feature_instruction">Proverite prateću aplikaciju da biste podesili opcije za otključavanje</string>
   <string name="trusted_device_item_title">Dozvolite da &lt;b&gt;%1$s&lt;/b&gt; otključa moj profil</string>
-  <string name="device_not_connected_dialog_title">Prateća aplikacija mora da bude aktivno povezana</string>
-  <string name="device_not_connected_dialog_message">Da biste uključili funkciju, uverite se da je prateća aplikacija otvorena na telefonu. Automobil i telefon treba da imaju uključen Bluetooth i da budu blizu jedan drugog.</string>
+  <string name="device_not_connected_dialog_title">Nismo uspeli da pronađemo telefon</string>
+  <string name="device_not_connected_dialog_message">Uverite se da je Bluetooth na telefonu i u automobilu uključen, kao i da je telefon u blizini</string>
   <string name="trusted_device_enrollment_success_message">&lt;b&gt;%1$s&lt;/b&gt; sada može da vam otključa profil</string>
   <string name="create_profile_lock_dialog_title">Podesite primarno zaključavanje profila</string>
   <string name="create_profile_lock_dialog_message">Da biste otključali profil pomoću telefona, morate da podesite primarno zaključavanje profila kao rezervu</string>
@@ -92,7 +92,7 @@
   <string name="trusted_device_enrollment_error_dialog_title">Došlo je do greške</string>
   <string name="trusted_device_enrollment_error_dialog_message">Nažalost, uključivanje ove funkcije zasad nije uspelo. Probajte ponovo.</string>
   <string name="create_phone_lock_dialog_title">Podesite otključavanje ekrana na telefonu</string>
-  <string name="create_phone_lock_dialog_message">Na telefonu nije podešeno zaključavanje ekrana. Da biste otključali profil automobila pomoću telefona, prvo podesite zaključavanje ekrana (poznato i kao šifra) u podešavanjima telefona.</string>
+  <string name="create_phone_lock_dialog_message">Na telefonu nije podešeno otključavanje ekrana. Da biste otključali profil automobila pomoću telefona, prvo podesite otključavanje ekrana (poznato i kao šifra) u podešavanjima telefona.</string>
   <plurals name="notification_new_message">
     <item quantity="one">%d nova poruka</item>
     <item quantity="few">%d nove poruke</item>

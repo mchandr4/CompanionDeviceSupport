@@ -77,8 +77,8 @@
   <string name="trusted_device_feature_title">Desbloquear perfil con el teléfono</string>
   <string name="trusted_device_feature_instruction">Configura las opciones de desbloqueo en la aplicación complementaria</string>
   <string name="trusted_device_item_title">Permitir que &lt;b&gt;%1$s&lt;/b&gt; desbloquee mi perfil</string>
-  <string name="device_not_connected_dialog_title">Tu aplicación complementaria debe estar conectada</string>
-  <string name="device_not_connected_dialog_message">Para activar esta función, la aplicación complementaria tiene que estar abierta en tu teléfono. El coche y el teléfono deben tener activado el Bluetooth y estar cerca.</string>
+  <string name="device_not_connected_dialog_title">No se puede encontrar tu teléfono</string>
+  <string name="device_not_connected_dialog_message">Asegúrate de que el Bluetooth de tu teléfono y del coche están activados, y de que tu teléfono está cerca.</string>
   <string name="trusted_device_enrollment_success_message">&lt;b&gt;%1$s&lt;/b&gt; ahora puede desbloquear tu perfil</string>
   <string name="create_profile_lock_dialog_title">Crea un bloqueo de perfil principal</string>
   <string name="create_profile_lock_dialog_message">Para desbloquear tu perfil con tu teléfono, tienes que definir un bloqueo de perfil principal como alternativa</string>

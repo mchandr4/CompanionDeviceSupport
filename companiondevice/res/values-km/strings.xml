@@ -16,7 +16,7 @@
   -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-  <string name="settings_entry_title">Companion Device</string>
+  <string name="settings_entry_title">ឧបករណ៍អម</string>
   <string name="default_device_name">ឧបករណ៍​ដែលបានភ្ជាប់</string>
   <string name="add_device_title">ភ្ជាប់ទៅ​កម្មវិធី​ដៃគូ</string>
   <string name="add_associated_device_title">ភ្ជាប់ទៅ MyCompanion</string>
@@ -77,8 +77,8 @@
   <string name="trusted_device_feature_title">ដោះសោ​កម្រងព័ត៌មាន​ដោយប្រើទូរសព្ទ</string>
   <string name="trusted_device_feature_instruction">ពិនិត្យមើល​កម្មវិធីដៃគូ​របស់អ្នក ដើម្បី​កំណត់ជម្រើស​ដោះសោ</string>
   <string name="trusted_device_item_title">អនុញ្ញាតឱ្យ &lt;b&gt;%1$s&lt;/b&gt; ដោះសោកម្រងព័ត៌មានរបស់ខ្ញុំ</string>
-  <string name="device_not_connected_dialog_title">កម្មវិធីដៃគូ​របស់អ្នក​ត្រូវតែបានភ្ជាប់​យ៉ាងសកម្ម</string>
-  <string name="device_not_connected_dialog_message">ដើម្បីបើក​មុខងារនេះ ត្រូវប្រាកដថា​បានបើក​កម្មវិធីដៃគូ​នៅលើទូរសព្ទ​របស់អ្នក។ ទូរសព្ទ និង​រថយន្ត​របស់អ្នក​គួរតែបើក​ប៊្លូធូស និង​នៅជិតគ្នា។</string>
+  <string name="device_not_connected_dialog_title">រកទូរសព្ទរបស់អ្នក​មិនឃើញទេ</string>
+  <string name="device_not_connected_dialog_message">ត្រូវប្រាកដថាប៊្លូធូសទូរសព្ទ និងរថយន្តរបស់អ្នកត្រូវបានបើក ហើយថាទូរសព្ទរបស់អ្នកនៅជិត</string>
   <string name="trusted_device_enrollment_success_message">ឥឡូវនេះ &lt;b&gt;%1$s&lt;/b&gt; អាចដោះសោកម្រងព័ត៌មានរបស់អ្នកបានហើយ</string>
   <string name="create_profile_lock_dialog_title">បង្កើត​ការចាក់សោ​កម្រងព័ត៌មានចម្បង</string>
   <string name="create_profile_lock_dialog_message">ដើម្បីប្រើទូរសព្ទ​របស់អ្នក​សម្រាប់ដោះសោ​កម្រងព័ត៌មាន​ អ្នកត្រូវការ​ការចាក់សោ​កម្រងព័ត៌មានចម្បង​សម្រាប់ជាការបម្រុង​ទុក</string>

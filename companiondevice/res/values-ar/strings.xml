@@ -16,7 +16,7 @@
   -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-  <string name="settings_entry_title">Companion Device</string>
+  <string name="settings_entry_title">جهاز مصاحب</string>
   <string name="default_device_name">جهاز مرتبط</string>
   <string name="add_device_title">الاتصال بالتطبيق المصاحب</string>
   <string name="add_associated_device_title">الاتصال بتطبيق MyCompanion</string>
@@ -77,8 +77,8 @@
   <string name="trusted_device_feature_title">فتح قفل الملف الشخصي باستخدام الهاتف</string>
   <string name="trusted_device_feature_instruction">افتح التطبيق المصاحب لضبط خيارات فتح القفل.</string>
   <string name="trusted_device_item_title">السماح لجهاز &lt;b&gt;%1$s&lt;/b&gt; بفتح قفل ملفي الشخصي</string>
-  <string name="device_not_connected_dialog_title">يجب أن تكون ميزة ربط \"التطبيق المصاحب\" مفعَّلة</string>
-  <string name="device_not_connected_dialog_message">لتفعيل هذه الميزة، احرص على فتح \"التطبيق المصاحب\" على هاتفك. يجب تفعيل البلوتوث في سيارتك وهاتفك وأن يكون الهاتف قريبًا من السيارة.</string>
+  <string name="device_not_connected_dialog_title">يتعذَّر العثور على هاتفك</string>
+  <string name="device_not_connected_dialog_message">تأكَّد من أنّ البلوتوث مفعَّل في هاتفك وسيارتك، ومن أنّ هاتفك قريب منك</string>
   <string name="trusted_device_enrollment_success_message">بإمكان &lt;b&gt;%1$s&lt;/b&gt; الآن فتح قفل ملفك الشخصي.</string>
   <string name="create_profile_lock_dialog_title">إنشاء قفل أساسي للملف الشخصي</string>
   <string name="create_profile_lock_dialog_message">لاستخدام هاتفك في فتح قفل ملفك الشخصي، يجب أن يكون لديك قفل أساسي للملف الشخصي كنسخة احتياطية.</string>

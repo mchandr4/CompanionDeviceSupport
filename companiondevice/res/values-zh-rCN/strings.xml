@@ -16,7 +16,7 @@
   -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-  <string name="settings_entry_title">Companion Device</string>
+  <string name="settings_entry_title">配套设备</string>
   <string name="default_device_name">关联的设备</string>
   <string name="add_device_title">关联到配套应用</string>
   <string name="add_associated_device_title">关联到 MyCompanion</string>
@@ -77,8 +77,8 @@
   <string name="trusted_device_feature_title">使用手机解锁个人资料</string>
   <string name="trusted_device_feature_instruction">查看您的配套应用以设置解锁选项</string>
   <string name="trusted_device_item_title">允许&lt;b&gt;%1$s&lt;/b&gt;解锁我的个人资料</string>
-  <string name="device_not_connected_dialog_title">您的配套应用必须保持连接状态</string>
-  <string name="device_not_connected_dialog_message">如需开启此功能，请确保已您的手机上打开配套应用。您的汽车和手机应已开启蓝牙并且彼此靠近。</string>
+  <string name="device_not_connected_dialog_title">找不到您的手机</string>
+  <string name="device_not_connected_dialog_message">请确保您的手机和汽车均已开启蓝牙，并且手机就在附近</string>
   <string name="trusted_device_enrollment_success_message">&lt;b&gt;%1$s&lt;/b&gt;现在可以解锁您的个人资料了</string>
   <string name="create_profile_lock_dialog_title">创建主要个人资料锁定方式</string>
   <string name="create_profile_lock_dialog_message">如需使用手机解锁您的个人资料，您需要创建备用的主要个人资料锁定方式</string>

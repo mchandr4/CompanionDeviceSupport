@@ -15,6 +15,20 @@ open class FakeConnector : Connector {
   /** Current user id for testing associated devices for other users. */
   var currentUserId = 10
 
+  /**
+   * Fakes the status of a device that has cached the status.
+   *
+   * Used by [isFeatureSupportedCached].
+   */
+  var isFeatureSupportedCachedByDevice = mutableSetOf<String>()
+
+  /**
+   * Fakes the status of a device that requires sending a query and receiving the response.
+   *
+   * Used by [isFeatureSupported].
+   */
+  var isFeatureSupportedByDevice = mutableSetOf<String>()
+
   /** List of associated devices to be returned in [retrieveAssociatedDevices] or user variants. */
   private val associatedDevices = mutableListOf<AssociatedDevice>()
 
@@ -52,28 +66,29 @@ open class FakeConnector : Connector {
     deviceId: String,
     request: ByteArray,
     parameters: ByteArray?,
-    callback: Connector.QueryCallback
+    callback: Connector.QueryCallback,
   ) {}
 
   override fun sendQuerySecurely(
     device: ConnectedDevice,
     request: ByteArray,
     parameters: ByteArray?,
-    callback: Connector.QueryCallback
+    callback: Connector.QueryCallback,
   ) {}
 
   override fun respondToQuerySecurely(
     device: ConnectedDevice,
     queryId: Int,
     success: Boolean,
-    response: ByteArray?
+    response: ByteArray?,
   ) {}
 
-  override suspend fun isFeatureSupported(device: ConnectedDevice): Boolean = featureId != null
+  override suspend fun isFeatureSupported(device: ConnectedDevice): Boolean =
+    isFeatureSupportedByDevice.contains(device.deviceId)
 
   override suspend fun queryFeatureSupportStatuses(
     device: ConnectedDevice,
-    queriedFeatures: List<UUID>
+    queriedFeatures: List<UUID>,
   ): List<Pair<UUID, Boolean>> = emptyList()
 
   override fun isFeatureSupportedFuture(device: ConnectedDevice): ListenableFuture<Boolean> {
@@ -86,7 +101,7 @@ open class FakeConnector : Connector {
 
   override fun retrieveCompanionApplicationName(
     device: ConnectedDevice,
-    callback: Connector.AppNameCallback
+    callback: Connector.AppNameCallback,
   ) {}
 
   override fun startAssociation(callback: IAssociationCallback) {}
@@ -128,6 +143,9 @@ open class FakeConnector : Connector {
     associatedDevices.remove(device)
     associatedDevices.add(device.cloneWith(AssociatedDevice.UNCLAIMED_USER_ID))
   }
+
+  override fun isFeatureSupportedCached(device: ConnectedDevice): Boolean? =
+    isFeatureSupportedCachedByDevice.contains(device.deviceId)
 
   fun addAssociatedDevice(device: AssociatedDevice) {
     associatedDevices.add(device)

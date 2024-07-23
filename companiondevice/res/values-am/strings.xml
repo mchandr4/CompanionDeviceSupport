@@ -77,8 +77,8 @@
   <string name="trusted_device_feature_title">መገለጫውን በስልክ ይክፈቱት</string>
   <string name="trusted_device_feature_instruction">የመክፈቻ አማራጮችን ለማቀናበር አጃቢ መተግበሪያዎን ይፈትሹ</string>
   <string name="trusted_device_item_title">&lt;b&gt;%1$s&lt;/b&gt; መገለጫዬን እንዲከፍት ይፍቀዱ</string>
-  <string name="device_not_connected_dialog_title">የእርስዎ አጃቢ መተግበሪያ በንቃት መገናኘት አለበት</string>
-  <string name="device_not_connected_dialog_message">ይህን ባህሪ ለማብራት በስልክዎ ላይ አጃቢ መተግበሪያ መከፈቱን ያረጋግጡ። የእርስዎ መኪና እና ስልክ ብሉቱዝን ማብራት እና እርስ ከራሳቸው ጋር አጠገብ መሆን አለባቸው።</string>
+  <string name="device_not_connected_dialog_title">የእርስዎን ስልክ ማግኘት አልተቻለም</string>
+  <string name="device_not_connected_dialog_message">የስልክዎ እና የመኪናዎ ብሉቱዝ መብራታቸውን እና ስልክዎ በአቅራቢያ መሆኑን ያረጋግጡ</string>
   <string name="trusted_device_enrollment_success_message">&lt;b&gt;%1$s&lt;/b&gt; አሁን መገለጫዎን ማስከፈት ይችላል</string>
   <string name="create_profile_lock_dialog_title">ዋና የመገለጫ ቁልፍ ይፍጠሩ</string>
   <string name="create_profile_lock_dialog_message">ስልክዎን ተጠቅመው መገለጫዎን ለመክፈት ዋና የመገለጫ ቁልፍ እንደ መጠባበቂያ ያስፈልገዎታል</string>

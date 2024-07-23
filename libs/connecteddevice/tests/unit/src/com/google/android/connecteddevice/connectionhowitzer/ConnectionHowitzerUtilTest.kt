@@ -19,7 +19,7 @@ package com.google.android.connecteddevice.connectionhowitzer
 import com.google.android.connecteddevice.connectionhowitzer.ConnectionHowitzerFeature.Companion.toInstant
 import com.google.testing.junit.testparameterinjector.TestParameters
 import com.google.testing.junit.testparameterinjector.TestParameters.TestParametersValues
-import com.google.testing.junit.testparameterinjector.TestParameters.TestParametersValuesProvider
+import com.google.testing.junit.testparameterinjector.TestParametersValuesProvider
 import com.google.thirdparty.robolectric.testparameterinjector.RobolectricTestParameterInjector
 import java.time.Instant
 import java.util.UUID
@@ -118,8 +118,8 @@ class ConnectionHowitzerUtilTest {
     private val TEST_ID = UUID.randomUUID()
   }
 
-  class CalculateBandwidthTestParametersValuesProvider : TestParametersValuesProvider {
-    override fun provideValues(): List<TestParametersValues> {
+  class CalculateBandwidthTestParametersValuesProvider : TestParametersValuesProvider() {
+    override fun provideValues(context: Context): List<TestParametersValues> {
       val startTime = Instant.now()
 
       val config1 =

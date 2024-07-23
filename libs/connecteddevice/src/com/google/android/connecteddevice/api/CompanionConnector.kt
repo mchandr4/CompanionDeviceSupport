@@ -269,8 +269,7 @@ constructor(
         USER_TYPE_PASSENGER -> aliveFeatureCoordinator?.connectedDevicesForPassengers
         USER_TYPE_ALL -> aliveFeatureCoordinator?.allConnectedDevices
         else -> null
-      }
-        ?: emptyList()
+      } ?: emptyList()
     }
 
   override val isConnected: Boolean
@@ -418,7 +417,7 @@ constructor(
         featureId?.uuid,
         /* isMessageEncrypted= */ true,
         DeviceMessage.OperationType.CLIENT_MESSAGE,
-        message
+        message,
       )
     try {
       sendMessageInternal(device, deviceMessage)
@@ -448,6 +447,26 @@ constructor(
     sendQuerySecurely(device, request, parameters, callback)
   }
 
+  override fun isFeatureSupportedCached(device: ConnectedDevice): Boolean? {
+    val featureId = featureId?.uuid?.toString() ?: return null
+    val status =
+      try {
+        aliveFeatureCoordinator?.isFeatureSupportedCached(device.deviceId, featureId) ?: return null
+      } catch (e: Exception) {
+        // If the companion AIDL doesn't have an updated version, calling a non-existent method
+        // could throw exception. This check is always executed so we catch a generic Exception to
+        // be safe.
+        // Return 0 to indicate unknown status.
+        0
+      }
+    return when {
+      status > 0 -> true
+      status < 0 -> false
+      // Status unknown - returns 0; using `else` so `when` is exhausive.
+      else -> null
+    }
+  }
+
   override suspend fun isFeatureSupported(device: ConnectedDevice): Boolean {
     val queriedFeatureId = featureId?.uuid ?: return false
     val status =
@@ -459,7 +478,7 @@ constructor(
 
   override suspend fun queryFeatureSupportStatuses(
     device: ConnectedDevice,
-    queriedFeatures: List<UUID>
+    queriedFeatures: List<UUID>,
   ): List<Pair<UUID, Boolean>> {
     val payloads =
       queriedFeatures.map {
@@ -512,7 +531,7 @@ constructor(
             loge("Failed to send the query for the feature support status.")
             continuation.resume(emptyList())
           }
-        }
+        },
       )
     }
   }
@@ -569,7 +588,7 @@ constructor(
         recipient.uuid,
         /* isMessageEncrypted= */ true,
         DeviceMessage.OperationType.QUERY,
-        builder.build().toByteArray()
+        builder.build().toByteArray(),
       )
     try {
       sendMessageInternal(device, deviceMessage)
@@ -607,7 +626,7 @@ constructor(
         recipientId.uuid,
         /* isMessageEncrypted= */ true,
         DeviceMessage.OperationType.QUERY_RESPONSE,
-        queryResponse.toByteArray()
+        queryResponse.toByteArray(),
       )
     try {
       sendMessageInternal(device, deviceMessage)
@@ -663,7 +682,7 @@ constructor(
           loge("Failed to send the query for the application name.")
           callback.onError()
         }
-      }
+      },
     )
   }
 
@@ -704,7 +723,7 @@ constructor(
   }
 
   override fun retrieveAssociatedDevicesForPassengers(
-    listener: IOnAssociatedDevicesRetrievedListener,
+    listener: IOnAssociatedDevicesRetrievedListener
   ) {
     aliveFeatureCoordinator?.retrieveAssociatedDevicesForPassengers(listener)
       ?: listener.onAssociatedDevicesRetrieved(emptyList())
@@ -886,7 +905,7 @@ constructor(
       device,
       query.id,
       query.request.toByteArray(),
-      query.parameters.toByteArray()
+      query.parameters.toByteArray(),
     )
   }
 
@@ -952,6 +971,7 @@ constructor(
     /** A generator of unique IDs for queries. */
     private class QueryIdGenerator {
       private val messageId = AtomicInteger(0)
+
       fun next(): Int {
         val current = messageId.getAndIncrement()
         messageId.compareAndSet(Int.MAX_VALUE, 0)

@@ -77,8 +77,8 @@
   <string name="trusted_device_feature_title">Разблокировка профиля с помощью телефона</string>
   <string name="trusted_device_feature_instruction">Настроить параметры разблокировки можно в сопутствующем приложении.</string>
   <string name="trusted_device_item_title">Разрешите разблокировку профиля с помощью телефона &lt;b&gt;%1$s&lt;/b&gt;</string>
-  <string name="device_not_connected_dialog_title">Требуется подключить сопутствующее приложение</string>
-  <string name="device_not_connected_dialog_message">Чтобы включить эту функцию, откройте сопутствующее приложение на телефоне. Также убедитесь, что на телефоне и в автомобиле включен модуль Bluetooth и они находятся рядом друг с другом.</string>
+  <string name="device_not_connected_dialog_title">Не удается найти телефон</string>
+  <string name="device_not_connected_dialog_message">Включите Bluetooth на телефоне и в автомобиле и убедитесь, что телефон находится рядом.</string>
   <string name="trusted_device_enrollment_success_message">Теперь блокировку профиля можно снимать с помощью телефона &lt;b&gt;%1$s&lt;/b&gt;.</string>
   <string name="create_profile_lock_dialog_title">Настройка основного способа блокировки профиля</string>
   <string name="create_profile_lock_dialog_message">Чтобы снимать блокировку с помощью телефона, нужно настроить основной способ блокировки профиля.</string>

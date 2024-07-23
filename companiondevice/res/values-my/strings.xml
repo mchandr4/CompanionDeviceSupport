@@ -77,8 +77,8 @@
   <string name="trusted_device_feature_title">ဖုန်းဖြင့် ပရိုဖိုင်ကိုလော့ခ်ဖွင့်ခြင်း</string>
   <string name="trusted_device_feature_instruction">လောခ့်ဖွင့်သည့်နည်းလမ်းများ သတ်မှတ်ရန် သင့် \'တွဲဖက်အက်ပ်\' ကို စစ်ဆေးပါ</string>
   <string name="trusted_device_item_title">ကျွန်ုပ်၏ပရိုဖိုင်ကို လော့ခ်ဖွင့်ရန် &lt;b&gt;%1$s&lt;/b&gt; ကို ခွင့်ပြုခြင်း</string>
-  <string name="device_not_connected_dialog_title">သင်၏ ‘တွဲဖက်အက်ပ်’ ကို လက်ရှိချိတ်ဆက်ထားရမည်</string>
-  <string name="device_not_connected_dialog_message">ဤဝန်ဆောင်မှုကိုဖွင့်ရန် သင့်ဖုန်းတွင် ‘တွဲဖက်အက်ပ်’ ကိုဖွင့်ထားကြောင်း သေချာပါစေ။ သင့်ကားနှင့်ဖုန်းတွင် ဘလူးတုသ်ဖွင့်ထားပြီး တစ်ခုနှင့်တစ်ခု အနီးတွင်ရှိနေရပါမည်။</string>
+  <string name="device_not_connected_dialog_title">သင့်ဖုန်းကို ရှာမတွေ့ပါ</string>
+  <string name="device_not_connected_dialog_message">သင့်ဖုန်းနှင့်ကား၏ ဘလူးတုသ်ကို ဖွင့်ထားပြီး ဖုန်းသည် အနီးတွင်ရှိကြောင်း သေချာပါစေ</string>
   <string name="trusted_device_enrollment_success_message">ယခုအခါ &lt;b&gt;%1$s&lt;/b&gt; သည် သင့်ပရိုဖိုင်ကို လောခ့်ဖွင့်နိုင်ပါပြီ</string>
   <string name="create_profile_lock_dialog_title">ပင်မပရိုဖိုင်လော့ခ် သတ်မှတ်ခြင်း</string>
   <string name="create_profile_lock_dialog_message">သင်၏ဖုန်းဖြင့် သင့်ပရိုဖိုင်ကို လော့ခ်ဖွင့်ရန်အတွက် ပင်မပရိုဖိုင်လော့ခ်ကို အရန်အဖြစ်ထားရန် လိုအပ်နိုင်ပါသည်</string>

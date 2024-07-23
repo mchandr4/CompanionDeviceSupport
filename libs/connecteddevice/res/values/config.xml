@@ -17,11 +17,13 @@
 
 <resources>
     <!-- Current version of the SDK -->
-    <string name="hu_companion_sdk_version" translatable="false">2.0.4</string>
-    <integer name="hu_companion_binder_version" translatable="false">1</integer>
+    <string name="hu_companion_sdk_version" translatable="false">2.0.5</string>
+    <integer name="hu_companion_binder_version" translatable="false">2</integer>
     <!-- Mobile SDK of later version should be compatible with the HU SDK. -->
     <string name="compatible_min_mobile_version_android" translatable="false">1.0.0</string>
     <string name="compatible_min_mobile_version_ios" translatable="false">1.0.0</string>
     <!-- Delay for checking IHU locking status for systems older than Tiramisu. -->
     <integer name="lock_screen_check_delay_in_second" translatable="false">2</integer>
+    <!-- Beacon UUID. This value must match the beacon UUID used by the iOS device. -->
+    <string name="beacon_uuid" translatable="false">9E5A96F4-7B9D-4AEE-BAEA-F295DE3C3581</string>
 </resources>

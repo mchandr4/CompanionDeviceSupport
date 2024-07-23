@@ -77,8 +77,8 @@
   <string name="trusted_device_feature_title">Mở khóa hồ sơ bằng điện thoại</string>
   <string name="trusted_device_feature_instruction">Kiểm tra Ứng dụng đồng hành để đặt các tùy chọn mở khóa</string>
   <string name="trusted_device_item_title">Cho phép &lt;b&gt;%1$s&lt;/b&gt; mở khóa hồ sơ của tôi</string>
-  <string name="device_not_connected_dialog_title">Ứng dụng đồng hành của bạn phải được kết nối</string>
-  <string name="device_not_connected_dialog_message">Để bật tính năng này, hãy nhớ mở Ứng dụng đồng hành trên điện thoại của bạn. Ô tô và điện thoại của bạn phải bật Bluetooth và ở gần nhau.</string>
+  <string name="device_not_connected_dialog_title">Không tìm thấy điện thoại của bạn</string>
+  <string name="device_not_connected_dialog_message">Hãy đảm bảo rằng Bluetooth của điện thoại và ô tô đang bật và điện thoại của bạn đang ở gần đó</string>
   <string name="trusted_device_enrollment_success_message">&lt;b&gt;%1$s&lt;/b&gt; hiện có thể mở khóa hồ sơ của bạn</string>
   <string name="create_profile_lock_dialog_title">Tạo khóa cho hồ sơ chính</string>
   <string name="create_profile_lock_dialog_message">Để mở khóa hồ sơ bằng điện thoại, bạn cần có một khóa hồ sơ chính làm khóa dự phòng</string>

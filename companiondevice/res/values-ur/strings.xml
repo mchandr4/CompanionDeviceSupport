@@ -16,7 +16,7 @@
   -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-  <string name="settings_entry_title">Companion Device</string>
+  <string name="settings_entry_title">ساتھی آلہ</string>
   <string name="default_device_name">وابستہ آلہ</string>
   <string name="add_device_title">ساتھی ایپ سے منسلک کریں</string>
   <string name="add_associated_device_title">MyCompanion سے منسلک کریں</string>
@@ -77,8 +77,8 @@
   <string name="trusted_device_feature_title">فون سے پروفائل غیر مقفل کریں</string>
   <string name="trusted_device_feature_instruction">غیر مقفل کرنے کے اختیارات سیٹ کرنے کے ليے اپنا ساتھی ایپ چیک کریں</string>
   <string name="trusted_device_item_title">&lt;b&gt;%1$s&lt;/b&gt; کو میری پروفائل غیر مقفل کرنے دیں</string>
-  <string name="device_not_connected_dialog_title">آپ کا ساتھی ایپ فعال طور پر منسلک ہونا چاہیے</string>
-  <string name="device_not_connected_dialog_message">اس خصوصیت کو آن کرنے کے ليے، یقینی بنائیں کہ آپ کے فون پر ساتھی ایپ کھلی ہے۔ آپ کی کار اور فون میں بلوٹوتھ آن اور ایک دوسرے کے قریب  ہونا چاہیے۔</string>
+  <string name="device_not_connected_dialog_title">آپ کا فون تلاش نہیں کیا جا سکا</string>
+  <string name="device_not_connected_dialog_message">یقینی بنائیں کہ آپ کے فون اور کار کا بلوٹوتھ آن ہے اور آپ کا فون قریب ہے</string>
   <string name="trusted_device_enrollment_success_message">&lt;b&gt;%1$s&lt;/b&gt; اب آپ کی پروفائل کو غیر مقفل کر سکتا ہے</string>
   <string name="create_profile_lock_dialog_title">ایک بنیادی پروفائل لاک تخلیق کریں</string>
   <string name="create_profile_lock_dialog_message">اپنی پروفائل کو غیر مقفل کرنے کے ليے اپنے فون کا استعمال کرنے کی خاطر، آپ کو بیک اپ کے طور پر ایک بنیادی پروفائل لاک کی ضرورت ہے</string>

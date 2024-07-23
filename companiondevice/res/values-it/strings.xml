@@ -77,8 +77,8 @@
   <string name="trusted_device_feature_title">Sblocca il profilo con il telefono</string>
   <string name="trusted_device_feature_instruction">Verifica la tua app complementare per impostare le opzioni di sblocco</string>
   <string name="trusted_device_item_title">Consenti a &lt;b&gt;%1$s&lt;/b&gt; di sbloccare il mio profilo</string>
-  <string name="device_not_connected_dialog_title">L\'app complementare deve essere connessa</string>
-  <string name="device_not_connected_dialog_message">Per attivare questa funzionalità, assicurati che l\'app complementare sia aperta sul tuo telefono. L\'auto e il telefono devono essere vicini e avere il Bluetooth attivo.</string>
+  <string name="device_not_connected_dialog_title">Impossibile trovare lo smartphone</string>
+  <string name="device_not_connected_dialog_message">Assicurati che il Bluetooth dello smartphone e il Bluetooth dell\'auto siano accesi e che lo smartphone si trovi nelle vicinanze</string>
   <string name="trusted_device_enrollment_success_message">Ora &lt;b&gt;%1$s&lt;/b&gt; può sbloccare il tuo profilo</string>
   <string name="create_profile_lock_dialog_title">Crea un blocco del profilo principale</string>
   <string name="create_profile_lock_dialog_message">Per poter usare il telefono per sbloccare il tuo profilo, devi avere un blocco del profilo principale come backup</string>

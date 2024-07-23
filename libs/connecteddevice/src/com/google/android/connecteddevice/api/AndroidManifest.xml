@@ -25,6 +25,9 @@
       <action android:name="com.google.android.connecteddevice.api.BIND_FEATURE_COORDINATOR" />
     </intent>
     <intent>
+      <action android:name="com.google.android.connecteddevice.api.BIND_SAFE_FEATURE_COORDINATOR" />
+    </intent>
+    <intent>
       <action android:name="com.google.android.connecteddevice.api.QUERY_API_VERSION" />
     </intent>
   </queries>

@@ -60,13 +60,22 @@
         android:label="@string/app_name"
         android:icon="@mipmap/ic_directions_car_filled"
         android:directBootAware="true"
-        android:supportsRtl="true">
+        android:supportsRtl="true"
+        android:taskAffinity="">
         <service
             android:name="com.google.android.connecteddevice.service.ConnectedDeviceService"
             android:singleUser="true"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.android.connecteddevice.api.BIND_FEATURE_COORDINATOR" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.google.android.connecteddevice.api.BIND_SAFE_FEATURE_COORDINATOR" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.google.android.connecteddevice.api.QUERY_API_VERSION" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <meta-data android:name="com.google.android.connecteddevice.early_services"

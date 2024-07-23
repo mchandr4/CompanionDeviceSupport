@@ -58,7 +58,7 @@ interface SafeConnector {
     deviceId: String,
     request: ByteArray,
     parameters: ByteArray?,
-    queryCallback: QueryCallback
+    queryCallback: QueryCallback,
   )
 
   /** Sends a response to a query with an indication of whether it was successful. */
@@ -122,7 +122,7 @@ interface SafeConnector {
       deviceId: String,
       queryId: Int,
       request: ByteArray,
-      parameters: ByteArray?
+      parameters: ByteArray?,
     ) {}
 
     /** Invoked when an error has occurred with the connection. */
@@ -164,11 +164,11 @@ interface SafeConnector {
 
   companion object {
     /**
-     * When a client calls [Context.bindService] to get the [IFeatureCoordinator], this action is
-     * required in the param [Intent].
+     * When a client calls [Context.bindService] to get the [ISafeFeatureCoordinator], this action
+     * is required in the param [Intent].
      */
-    const val ACTION_BIND_FEATURE_COORDINATOR =
-      "com.google.android.connecteddevice.api.BIND_FEATURE_COORDINATOR"
+    const val ACTION_BIND_SAFE_FEATURE_COORDINATOR =
+      "com.google.android.connecteddevice.api.BIND_SAFE_FEATURE_COORDINATOR"
 
     /**
      * When a client queries for the platform's API version, this action is required in the param

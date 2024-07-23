@@ -77,8 +77,8 @@
   <string name="trusted_device_feature_title">Odklepanje profila s telefonom</string>
   <string name="trusted_device_feature_instruction">V spremljevalni aplikaciji nastavite možnosti odklepanja.</string>
   <string name="trusted_device_item_title">Naj &lt;b&gt;%1$s&lt;/b&gt; odklepa moj profil</string>
-  <string name="device_not_connected_dialog_title">Spremljevalna aplikacija mora biti aktivno povezana</string>
-  <string name="device_not_connected_dialog_message">Če želite vklopiti to funkcijo, mora biti spremljevalna aplikacija odprta v telefonu. Bluetooth mora biti vklopljen v avtomobilu in telefonu ter morata biti blizu.</string>
+  <string name="device_not_connected_dialog_title">Telefona ni mogoče najti</string>
+  <string name="device_not_connected_dialog_message">Bluetooth mora biti vklopljen v telefonu in avtomobilu ter telefon mora biti v bližini</string>
   <string name="trusted_device_enrollment_success_message">&lt;b&gt;%1$s&lt;/b&gt; lahko odklepa vaš profil.</string>
   <string name="create_profile_lock_dialog_title">Ustvarjanje glavnega zaklepanja profila</string>
   <string name="create_profile_lock_dialog_message">Če želite uporabljati telefon za odklepanje profila, morate imeti kot rezervno možnost nastavljeno glavno zaklepanje profila.</string>

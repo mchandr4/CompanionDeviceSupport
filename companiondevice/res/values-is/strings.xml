@@ -77,8 +77,8 @@
   <string name="trusted_device_feature_title">Taka prófílinn úr lás með símanum</string>
   <string name="trusted_device_feature_instruction">Stilltu hvernig er hægt að taka úr lás í fylgiforritinu</string>
   <string name="trusted_device_item_title">Leyfa &lt;b&gt;%1$s&lt;/b&gt; að taka prófílinn minn úr lás</string>
-  <string name="device_not_connected_dialog_title">Fylgiforritið verður að vera tengt</string>
-  <string name="device_not_connected_dialog_message">Til að kveikja á þessum eiginleika þarf fylgiforritið að vera opið í símanum. Kveikja þarf á Bluetooth í símanum og í bílnum og hafa símann nálægt bílnum.</string>
+  <string name="device_not_connected_dialog_title">Síminn þinn finnst ekki</string>
+  <string name="device_not_connected_dialog_message">Passaðu að kveikt sé á Bluetooth í símanum og bílnum og að síminn sé nærri</string>
   <string name="trusted_device_enrollment_success_message">&lt;b&gt;%1$s&lt;/b&gt; getur nú tekið prófílinn þinn úr lás</string>
   <string name="create_profile_lock_dialog_title">Búa til aðalprófíllás</string>
   <string name="create_profile_lock_dialog_message">Til að geta notað símann til að taka prófílinn þinn úr lás þarftu að hafa aðalprófíllás til vara</string>

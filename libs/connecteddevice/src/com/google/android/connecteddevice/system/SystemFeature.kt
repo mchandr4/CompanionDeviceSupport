@@ -72,6 +72,8 @@ internal constructor(
       //   cache, namely querying the feature status here so when the feature checks, the response
       //   is cached.
       UUID.fromString("524a5d28-b208-449c-bb54-cd89498d3b1b"),
+      // RemoteSetupPreferenceFeature
+      UUID.fromString("3f112c6f-37b3-4a73-8505-1268394b409d"),
     ),
   )
 

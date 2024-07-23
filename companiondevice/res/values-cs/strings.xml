@@ -77,8 +77,8 @@
   <string name="trusted_device_feature_title">Odemknutí profilu telefonem</string>
   <string name="trusted_device_feature_instruction">V doprovodné aplikaci nastavte možnosti odemknutí</string>
   <string name="trusted_device_item_title">Povolit telefonu &lt;b&gt;%1$s&lt;/b&gt; odemykat můj profil</string>
-  <string name="device_not_connected_dialog_title">Doprovodná aplikace musí být aktivně připojena</string>
-  <string name="device_not_connected_dialog_message">Pokud chcete tuto funkci zapnout, v telefonu musí být otevřena doprovodná aplikace. V autě i telefonu je třeba mít zapnuté Bluetooth a telefon musí být blízko u auta.</string>
+  <string name="device_not_connected_dialog_title">Telefon nebyl nalezen</string>
+  <string name="device_not_connected_dialog_message">Funkce Bluetooth na telefonu i v autě musí být zapnutá a telefon musí být poblíž</string>
   <string name="trusted_device_enrollment_success_message">Telefon &lt;b&gt;%1$s&lt;/b&gt; teď může odemykat můj profil</string>
   <string name="create_profile_lock_dialog_title">Vytvoření zámku primárního profilu</string>
   <string name="create_profile_lock_dialog_message">Chcete-li pomocí telefonu odemykat profil, musíte mít jako záložní možnost nastaven zámek primárního profilu</string>

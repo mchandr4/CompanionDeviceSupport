@@ -59,6 +59,13 @@ interface SystemQueryCache {
    */
   fun getCachedResponse(device: ConnectedDevice, message: DeviceMessage): DeviceMessage?
 
+  /**
+   * Checks if the feature is supported on the phone side.
+   *
+   * Returns `null` if the response is not cached.
+   */
+  fun isFeatureSupported(device: ConnectedDevice, featureId: UUID): Boolean?
+
   /** Clears cached response from device. */
   fun clearCache(device: ConnectedDevice)
 
@@ -80,6 +87,12 @@ internal class SystemQueryCacheImpl : SystemQueryCache {
     val deviceCache =
       deviceCaches.getOrPut(UUID.fromString(device.deviceId)) { DeviceSystemQueryCache() }
     return deviceCache.getCached(message)
+  }
+
+  override fun isFeatureSupported(device: ConnectedDevice, featureId: UUID): Boolean? {
+    val deviceCache =
+      deviceCaches.getOrPut(UUID.fromString(device.deviceId)) { DeviceSystemQueryCache() }
+    return deviceCache.isFeatureSupported(featureId)
   }
 
   override fun clearCache(device: ConnectedDevice) {
@@ -134,7 +147,7 @@ internal class DeviceSystemQueryCache {
       loge(
         TAG,
         "Received SystemQuery response with unrecognized query type. " +
-          "Intended receiver is $querySender with $queryId."
+          "Intended receiver is $querySender with $queryId.",
       )
       return
     }
@@ -215,6 +228,12 @@ internal class DeviceSystemQueryCache {
     return null
   }
 
+  fun isFeatureSupported(featureId: UUID): Boolean? {
+    // The current implementation only keeps the supported features. But the interface returns
+    // an optional boolean that could indicate true/false/unknown.
+    return if (featureId in supportedFeatures) true else null
+  }
+
   private fun handleAppNameSystemQuery(sender: UUID, queryId: Int): DeviceMessage? {
     val cached = appName
     if (cached == null) {
@@ -240,7 +259,7 @@ internal class DeviceSystemQueryCache {
   private fun createCachedResponseForString(
     cached: String,
     sender: UUID,
-    queryId: Int
+    queryId: Int,
   ): DeviceMessage {
     // Generate a device message that contains a QueryResponse that contains the cached value.
     val queryResponse =
@@ -266,7 +285,7 @@ internal class DeviceSystemQueryCache {
   private fun handleIsFeatureSupportedSystemQuery(
     sender: UUID,
     queryId: Int,
-    systemQuery: SystemQuery
+    systemQuery: SystemQuery,
   ): DeviceMessage? {
     val queriedFeatureIds =
       systemQuery.getPayloadsList().map {

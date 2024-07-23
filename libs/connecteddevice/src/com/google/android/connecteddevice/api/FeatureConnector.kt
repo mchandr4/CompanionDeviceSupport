@@ -30,8 +30,9 @@ import com.google.android.companionprotos.Query
 import com.google.android.companionprotos.QueryResponse
 import com.google.android.companionprotos.SystemQuery
 import com.google.android.companionprotos.SystemQueryType
+import com.google.android.connecteddevice.api.Connector.Companion.ACTION_BIND_FEATURE_COORDINATOR
 import com.google.android.connecteddevice.api.SafeConnector.AppNameCallback
-import com.google.android.connecteddevice.api.SafeConnector.Companion.ACTION_BIND_FEATURE_COORDINATOR
+import com.google.android.connecteddevice.api.SafeConnector.Companion.ACTION_BIND_SAFE_FEATURE_COORDINATOR
 import com.google.android.connecteddevice.api.SafeConnector.Companion.ACTION_QUERY_API_VERSION
 import com.google.android.connecteddevice.api.SafeConnector.QueryCallback
 import com.google.android.connecteddevice.api.external.ISafeBinderVersion
@@ -53,13 +54,12 @@ import java.util.concurrent.locks.ReentrantLock
  *
  * @param context [Context] of the hosting process.
  * @param featureId Identifier of the feature that is running this connector.
- * @param callback Callback associated with this connector.
  * @param minSupportedVersion External feature's minimum supported Companion API version.
  */
 class FeatureConnector(
   private val context: Context,
   override val featureId: ParcelUuid,
-  private val minSupportedVersion: Int = 0
+  private val minSupportedVersion: Int = 0,
 ) : SafeConnector {
 
   @VisibleForTesting internal var bindAttempts = 0
@@ -91,18 +91,22 @@ class FeatureConnector(
   internal val versionCheckConnection =
     object : ServiceConnection {
       override fun onServiceConnected(name: ComponentName, service: IBinder) {
-        if (service !is ISafeBinderVersion) {
-          logd("Unexpected binder received from platform. Aborting.")
-          callback.onFailedToConnect()
-          return
-        } else if (minSupportedVersion > service.getVersion()) {
-          loge("Incompatible client and platform versions detected. Aborting.")
+        logd("Service connected.")
+        val receivedPlatformVersion = ISafeBinderVersion.Stub.asInterface(service).getVersion()
+        logd(
+          "minSupportedVersion: $minSupportedVersion; Platform version: $receivedPlatformVersion"
+        )
+        if (minSupportedVersion > receivedPlatformVersion) {
+          loge(
+            "The client requires a minimum platform version of $minSupportedVersion, current " +
+              "platform version is $receivedPlatformVersion. Aborting."
+          )
           callback.onApiNotSupported()
           return
         } else {
-          platformVersion = service.getVersion()
+          platformVersion = receivedPlatformVersion
           bindAttempts = 0
-          bindToService(ACTION_BIND_FEATURE_COORDINATOR, featureCoordinatorConnection)
+          bindToService(ACTION_BIND_SAFE_FEATURE_COORDINATOR, featureCoordinatorConnection)
         }
       }
 
@@ -144,7 +148,7 @@ class FeatureConnector(
                 featureId,
                 callback,
                 loggerId,
-                platformVersion
+                platformVersion,
               )
             platformVersion == 0 ->
               LegacyApiProxy(
@@ -152,7 +156,7 @@ class FeatureConnector(
                 featureId,
                 callback,
                 loggerId,
-                platformVersion
+                platformVersion,
               )
             else -> {
               loge("Incompatible companion platform version. Aborting.")
@@ -210,7 +214,7 @@ class FeatureConnector(
         logw("Unable to bind to service with action ${intent.action}. Trying again.")
         bindToService(action, serviceConnection)
       },
-      BIND_RETRY_DURATION.toMillis()
+      BIND_RETRY_DURATION.toMillis(),
     )
   }
 
@@ -286,7 +290,7 @@ class FeatureConnector(
     deviceId: String,
     request: ByteArray,
     parameters: ByteArray?,
-    queryCallback: QueryCallback
+    queryCallback: QueryCallback,
   ) {
     val coordinatorProxy = coordinatorProxy
     if (coordinatorProxy == null) {
@@ -320,7 +324,7 @@ class FeatureConnector(
     deviceId: String,
     queryId: Int,
     success: Boolean,
-    response: ByteArray?
+    response: ByteArray?,
   ) {
     val coordinatorProxy = coordinatorProxy
     if (coordinatorProxy == null) {
@@ -346,7 +350,7 @@ class FeatureConnector(
 
   override fun retrieveCompanionApplicationName(
     deviceId: String,
-    appNameCallback: AppNameCallback
+    appNameCallback: AppNameCallback,
   ) {
     val systemQuery = SystemQuery.newBuilder().setType(SystemQueryType.APP_NAME).build()
     sendQuery(
@@ -374,7 +378,7 @@ class FeatureConnector(
           loge("Failed to send the query for the application name.")
           appNameCallback.onError()
         }
-      }
+      },
     )
   }
 

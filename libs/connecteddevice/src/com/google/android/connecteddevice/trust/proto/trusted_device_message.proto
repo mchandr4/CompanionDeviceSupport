@@ -1,24 +1,22 @@
-/*
- * Copyright (C) 2020 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2021 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 syntax = "proto3";
 
-package com.google.android.connecteddevice.trust.proto;
+package aae.trustagent;
 
-option java_package = "com.google.android.connecteddevice.trust.proto";
+option java_package = "com.google.companionprotos.trusteddevice";
 option java_outer_classname = "TrustedDeviceMessageProto";
 
 // A message specific to the trusted device feature.
@@ -30,6 +28,9 @@ message TrustedDeviceMessage {
   // The different message types that indicate the content of the payload.
   enum MessageType {
     // The contents of the payload are unknown.
+    //
+    // Note, this enum name is prefixed. See
+    // go/proto-best-practices-checkers#enum-default-value-name-conflict
     MESSAGE_TYPE_UNKNOWN = 0;
 
     // This message is a request for the other device to start the enrollment
@@ -59,7 +60,7 @@ message TrustedDeviceMessage {
     // state of trusted device between two devices.
     STATE_SYNC = 7;
 
-    // A request from IHU to device to send the unlocking credentials.
+    // A request from IHU to device to dismiss its lock screen.
     UNLOCK_REQUEST = 8;
   }
 
@@ -75,6 +76,9 @@ message TrustedDeviceMessage {
 message TrustedDeviceError {
   enum ErrorType {
     // The contents of the payload are unknown.
+    //
+    // Note, this enum name is prefixed. See
+    // go/proto-best-practices-checkers#enum-default-value-name-conflict
     MESSAGE_TYPE_UNKNOWN = 0;
 
     // This device does not meet the requirement of device security to start

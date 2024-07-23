@@ -15,7 +15,8 @@ import com.google.android.companionprotos.Query
 import com.google.android.companionprotos.QueryResponse
 import com.google.android.companionprotos.SystemQuery
 import com.google.android.companionprotos.SystemQueryType
-import com.google.android.connecteddevice.api.SafeConnector.Companion.ACTION_BIND_FEATURE_COORDINATOR
+import com.google.android.connecteddevice.api.Connector.Companion.ACTION_BIND_FEATURE_COORDINATOR
+import com.google.android.connecteddevice.api.SafeConnector.Companion.ACTION_BIND_SAFE_FEATURE_COORDINATOR
 import com.google.android.connecteddevice.api.SafeConnector.Companion.ACTION_QUERY_API_VERSION
 import com.google.android.connecteddevice.api.SafeConnector.QueryCallback
 import com.google.android.connecteddevice.api.external.ISafeBinderVersion
@@ -73,7 +74,7 @@ class FeatureConnectorTest {
   fun setUp() {
     versionZeroConnector = FeatureConnector(context, testFeatureId, minSupportedVersion = 0)
     versionOneConnector = FeatureConnector(context, testFeatureId, minSupportedVersion = 1)
-    versionTwoConnector = FeatureConnector(context, testFeatureId, minSupportedVersion  = 2)
+    versionTwoConnector = FeatureConnector(context, testFeatureId, minSupportedVersion = 2)
   }
 
   @Test
@@ -84,7 +85,7 @@ class FeatureConnectorTest {
     connector.connect(mockCallback)
 
     assertThat(context.bindingActions)
-      .containsExactly(ACTION_QUERY_API_VERSION, ACTION_BIND_FEATURE_COORDINATOR)
+      .containsExactly(ACTION_QUERY_API_VERSION, ACTION_BIND_SAFE_FEATURE_COORDINATOR)
     assertThat(connector.coordinatorProxy).isNull()
   }
 
@@ -109,7 +110,7 @@ class FeatureConnectorTest {
 
     assertThat(connector.coordinatorProxy is SafeApiProxy).isTrue()
     assertThat(context.bindingActions)
-      .containsExactly(ACTION_QUERY_API_VERSION, ACTION_BIND_FEATURE_COORDINATOR)
+      .containsExactly(ACTION_QUERY_API_VERSION, ACTION_BIND_SAFE_FEATURE_COORDINATOR)
   }
 
   @Test
@@ -121,7 +122,7 @@ class FeatureConnectorTest {
 
     assertThat(connector.coordinatorProxy is SafeApiProxy).isTrue()
     assertThat(context.bindingActions)
-      .containsExactly(ACTION_QUERY_API_VERSION, ACTION_BIND_FEATURE_COORDINATOR)
+      .containsExactly(ACTION_QUERY_API_VERSION, ACTION_BIND_SAFE_FEATURE_COORDINATOR)
   }
 
   @Test
@@ -147,7 +148,7 @@ class FeatureConnectorTest {
     assertThat(connector.coordinatorProxy).isNull()
     assertThat(connector.platformVersion).isNull()
     assertThat(incorrectServiceContext.bindingActions).containsExactly(ACTION_QUERY_API_VERSION)
-    verify(mockCallback).onFailedToConnect()
+    verify(mockCallback).onApiNotSupported()
   }
 
   @Test
@@ -172,7 +173,7 @@ class FeatureConnectorTest {
 
     assertThat(connector.coordinatorProxy is SafeApiProxy).isTrue()
     assertThat(context.bindingActions)
-      .containsExactly(ACTION_QUERY_API_VERSION, ACTION_BIND_FEATURE_COORDINATOR)
+      .containsExactly(ACTION_QUERY_API_VERSION, ACTION_BIND_SAFE_FEATURE_COORDINATOR)
   }
 
   @Test
@@ -184,7 +185,7 @@ class FeatureConnectorTest {
 
     assertThat(connector.coordinatorProxy is SafeApiProxy).isTrue()
     assertThat(context.bindingActions)
-      .containsExactly(ACTION_QUERY_API_VERSION, ACTION_BIND_FEATURE_COORDINATOR)
+      .containsExactly(ACTION_QUERY_API_VERSION, ACTION_BIND_SAFE_FEATURE_COORDINATOR)
   }
 
   @Test
@@ -219,7 +220,7 @@ class FeatureConnectorTest {
 
     assertThat(connector.bindAttempts == 0).isTrue()
     assertThat(context.bindingActions)
-      .containsExactly(ACTION_QUERY_API_VERSION, ACTION_BIND_FEATURE_COORDINATOR)
+      .containsExactly(ACTION_QUERY_API_VERSION, ACTION_BIND_SAFE_FEATURE_COORDINATOR)
   }
 
   @Test
@@ -278,7 +279,7 @@ class FeatureConnectorTest {
         connector.featureCoordinatorConnection,
         connector.featureCoordinatorConnection,
         connector.featureCoordinatorConnection,
-        connector.featureCoordinatorConnection
+        connector.featureCoordinatorConnection,
       )
     verify(mockCallback).onFailedToConnect()
   }
@@ -734,6 +735,10 @@ class FeatureConnectorTest {
         resolveInfo.serviceInfo.name = VERSION_NAME
         listOf(resolveInfo)
       }
+      ACTION_BIND_SAFE_FEATURE_COORDINATOR -> {
+        resolveInfo.serviceInfo.name = FC_NAME
+        listOf(resolveInfo)
+      }
       ACTION_BIND_FEATURE_COORDINATOR -> {
         resolveInfo.serviceInfo.name = FC_NAME
         listOf(resolveInfo)
@@ -757,10 +762,10 @@ class FeatureConnectorTest {
       service.action?.let { bindingActions.add(it) }
       serviceConnection.add(conn)
 
-      if (service.action == ACTION_QUERY_API_VERSION) {
-        bindVersionService(conn)
-      } else if (service.action == ACTION_BIND_FEATURE_COORDINATOR) {
-        bindFeatureCoordinatorService(conn)
+      when (service.action) {
+        ACTION_QUERY_API_VERSION -> bindVersionService(conn)
+        ACTION_BIND_SAFE_FEATURE_COORDINATOR,
+        ACTION_BIND_FEATURE_COORDINATOR -> bindFeatureCoordinatorService(conn)
       }
 
       return super.bindService(service, conn, flags)
@@ -886,7 +891,7 @@ class FeatureConnectorTest {
 
   private open class TestCompanionApiProxy(
     val defaultReturnValue: Boolean = true,
-    val deviceIdList: List<String> = emptyList()
+    val deviceIdList: List<String> = emptyList(),
   ) : CompanionApiProxy {
 
     override val queryCallbacks = ConcurrentHashMap<Int, QueryCallback>()

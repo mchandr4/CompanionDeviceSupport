@@ -59,6 +59,13 @@ interface Connector {
   /** Securely sends message to a device. */
   fun sendMessageSecurely(device: ConnectedDevice, message: ByteArray)
 
+  /**
+   * Returns if the feature is supported on the phone side.
+   *
+   * Returns `null` if the status is not cached.
+   */
+  fun isFeatureSupportedCached(device: ConnectedDevice): Boolean?
+
   /** Returns whether this feature is supported by the [device]. */
   suspend fun isFeatureSupported(device: ConnectedDevice): Boolean
 
@@ -79,7 +86,7 @@ interface Connector {
    */
   suspend fun queryFeatureSupportStatuses(
     device: ConnectedDevice,
-    queriedFeatures: List<UUID>
+    queriedFeatures: List<UUID>,
   ): List<Pair<UUID, Boolean>>
 
   /** Securely send a query to a device and registers a [QueryCallback] for a response. */
@@ -87,7 +94,7 @@ interface Connector {
     deviceId: String,
     request: ByteArray,
     parameters: ByteArray?,
-    callback: QueryCallback
+    callback: QueryCallback,
   )
 
   /** Securely sends a query to a device and registers a [QueryCallback] for a response. */
@@ -95,7 +102,7 @@ interface Connector {
     device: ConnectedDevice,
     request: ByteArray,
     parameters: ByteArray?,
-    callback: QueryCallback
+    callback: QueryCallback,
   )
 
   /** Sends a secure response to a query with an indication of whether it was successful. */
@@ -103,7 +110,7 @@ interface Connector {
     device: ConnectedDevice,
     queryId: Int,
     success: Boolean,
-    response: ByteArray?
+    response: ByteArray?,
   )
 
   /**
@@ -209,7 +216,7 @@ interface Connector {
       device: ConnectedDevice,
       queryId: Int,
       request: ByteArray,
-      parameters: ByteArray?
+      parameters: ByteArray?,
     ) {}
 
     /** Called when an error has occurred with the connection. */

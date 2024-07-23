@@ -77,8 +77,8 @@
   <string name="trusted_device_feature_title">Lås profilen op med telefonen</string>
   <string name="trusted_device_feature_instruction">Brug din medfølgende app til at angive indstillinger for oplåsning</string>
   <string name="trusted_device_item_title">Tillad, at &lt;b&gt;%1$s&lt;/b&gt; låser min profil op</string>
-  <string name="device_not_connected_dialog_title">Der skal være en aktiv forbindelse til din medfølgende app</string>
-  <string name="device_not_connected_dialog_message">Hvis du vil aktivere denne funktion, skal den medfølgende app være åben på din telefon. Din bil og telefon skal have aktiveret Bluetooth og være i nærheden af hinanden.</string>
+  <string name="device_not_connected_dialog_title">Din telefon blev ikke fundet</string>
+  <string name="device_not_connected_dialog_message">Sørg for, at Bluetooth er aktiveret på din telefon og i din bil, og at din telefon er i nærheden</string>
   <string name="trusted_device_enrollment_success_message">&lt;b&gt;%1$s&lt;/b&gt; kan nu låse din profil op</string>
   <string name="create_profile_lock_dialog_title">Opret en primær profillås</string>
   <string name="create_profile_lock_dialog_message">Hvis du vil bruge din telefon til at låse din profil op, skal du konfigurere en primær profillås som alternativ metode</string>

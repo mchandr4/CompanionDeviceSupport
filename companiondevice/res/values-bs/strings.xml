@@ -71,14 +71,14 @@
   <string name="disconnected">Veza je prekinuta</string>
   <string name="detected">Otkriveno</string>
   <string name="unknown">Nepoznato</string>
-  <string name="app_running_msg_channel_name">Usluga slanja SMS-ova na telefonu je pokrenuta</string>
+  <string name="app_running_msg_channel_name">Usluga slanja poruka na telefonu je pokrenuta</string>
   <string name="app_running_msg_notification_title">Usluga slanja SMS-ova na telefonu je aktivna</string>
   <string name="app_running_msg_notification_content">Primanje SMS-ova putem pratećeg uređaja</string>
   <string name="trusted_device_feature_title">Otključajte profil telefonom</string>
   <string name="trusted_device_feature_instruction">Provjerite prateću aplikaciju da postavite opcije otključavanja</string>
   <string name="trusted_device_item_title">Dozvolite da telefon &lt;b&gt;%1$s&lt;/b&gt; otključa moj profil</string>
-  <string name="device_not_connected_dialog_title">Prateća aplikacija mora biti aktivno povezana</string>
-  <string name="device_not_connected_dialog_message">Da uključite ovu funkciju, provjerite je li prateća aplikacija otvorena na telefonu. U automobilu i na telefonu treba uključiti Bluetooth i moraju biti blizu jedno drugom.</string>
+  <string name="device_not_connected_dialog_title">Nije moguće pronaći telefon</string>
+  <string name="device_not_connected_dialog_message">Provjerite je li Bluetooth uključen na telefonu i u automobilu i je li telefon u blizini</string>
   <string name="trusted_device_enrollment_success_message">Telefon &lt;b&gt;%1$s&lt;/b&gt; sada može otključati vaš profil</string>
   <string name="create_profile_lock_dialog_title">Postavite zaključavanje primarnog profila</string>
   <string name="create_profile_lock_dialog_message">Da koristite telefon za otključavanje profila, potrebno vam je zaključavanje primarnog profila kao sigurnosna kopija</string>

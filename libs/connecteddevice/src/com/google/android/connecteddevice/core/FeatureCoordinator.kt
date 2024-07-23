@@ -125,14 +125,14 @@ constructor(
       override fun registerDeviceCallback(
         deviceId: String,
         recipientId: ParcelUuid,
-        callback: ISafeDeviceCallback
+        callback: ISafeDeviceCallback,
       ) {
         val connectedDevice =
           ConnectedDevice(
             deviceId,
             /* deviceName= */ null,
             /* belongsToDriver= */ false,
-            /* hasSecureChannel= */ false
+            /* hasSecureChannel= */ false,
           )
 
         val registrationSuccessful =
@@ -144,7 +144,7 @@ constructor(
           loge(
             TAG,
             "Multiple callbacks registered for recipient $recipientId! " +
-              "Your recipient id is no longer secure and has been blocked from future use."
+              "Your recipient id is no longer secure and has been blocked from future use.",
           )
           callbackExecutor.execute {
             callback.onDeviceError(deviceId, DEVICE_ERROR_INSECURE_RECIPIENT_ID_DETECTED)
@@ -155,7 +155,7 @@ constructor(
       override fun unregisterDeviceCallback(
         deviceId: String,
         recipientId: ParcelUuid,
-        callback: ISafeDeviceCallback
+        callback: ISafeDeviceCallback,
       ) {
         lock.withLock { unregisterDeviceCallbackLocked(deviceId, recipientId, callback) }
       }
@@ -179,7 +179,7 @@ constructor(
             ByteUtils.bytesToUUID(parsedMessage.recipient.toByteArray()),
             parsedMessage.isPayloadEncrypted,
             DeviceMessage.OperationType.fromValue(parsedMessage.operation.number),
-            parsedMessage.payload.toByteArray()
+            parsedMessage.payload.toByteArray(),
           )
         val cachedResponse = systemQueryCache.getCachedResponse(connectedDevice, deviceMessage)
         if (cachedResponse != null) {
@@ -200,14 +200,14 @@ constructor(
 
       override fun registerOnLogRequestedListener(
         loggerId: Int,
-        listener: ISafeOnLogRequestedListener
+        listener: ISafeOnLogRequestedListener,
       ) {
         this@FeatureCoordinator.registerOnLogRequestedListener(loggerId, listener)
       }
 
       override fun unregisterOnLogRequestedListener(
         loggerId: Int,
-        listener: ISafeOnLogRequestedListener
+        listener: ISafeOnLogRequestedListener,
       ) {
         this@FeatureCoordinator.unregisterOnLogRequestedListener(loggerId, listener)
       }
@@ -278,7 +278,7 @@ constructor(
   override fun registerDeviceCallback(
     connectedDevice: ConnectedDevice,
     recipientId: ParcelUuid,
-    callback: IDeviceCallback
+    callback: IDeviceCallback,
   ) {
     val registrationSuccessful =
       lock.withLock { registerDeviceCallbackLocked(connectedDevice, recipientId, callback) }
@@ -289,7 +289,7 @@ constructor(
       loge(
         TAG,
         "Multiple callbacks registered for recipient $recipientId! " +
-          "Your recipient id is no longer secure and has been blocked from future use."
+          "Your recipient id is no longer secure and has been blocked from future use.",
       )
       callbackExecutor.execute {
         callback.onDeviceError(connectedDevice, DEVICE_ERROR_INSECURE_RECIPIENT_ID_DETECTED)
@@ -301,7 +301,7 @@ constructor(
   private fun registerDeviceCallbackLocked(
     connectedDevice: ConnectedDevice,
     recipientId: ParcelUuid,
-    callback: IInterface
+    callback: IInterface,
   ): Boolean {
     if (recipientId in blockedRecipients) {
       logw(TAG, "Recipient $recipientId is already blocked. Request to register callback ignored.")
@@ -324,7 +324,7 @@ constructor(
         else -> {
           logd(
             TAG,
-            "Attempted to use unsupported callback type. Request to register callback ignored."
+            "Attempted to use unsupported callback type. Request to register callback ignored.",
           )
           return false
         }
@@ -346,14 +346,14 @@ constructor(
           callbackExecutor.execute {
             previousCallback.onDeviceError(
               connectedDevice,
-              DEVICE_ERROR_INSECURE_RECIPIENT_ID_DETECTED
+              DEVICE_ERROR_INSECURE_RECIPIENT_ID_DETECTED,
             )
           }
         is ISafeDeviceCallback ->
           callbackExecutor.execute {
             previousCallback.onDeviceError(
               connectedDevice.deviceId,
-              DEVICE_ERROR_INSECURE_RECIPIENT_ID_DETECTED
+              DEVICE_ERROR_INSECURE_RECIPIENT_ID_DETECTED,
             )
           }
       }
@@ -362,7 +362,7 @@ constructor(
 
     logd(
       TAG,
-      "New callback registered on device ${connectedDevice.deviceId} for recipient $recipientId."
+      "New callback registered on device ${connectedDevice.deviceId} for recipient $recipientId.",
     )
     @Suppress("UNCHECKED_CAST") // Cast will always succeed because of the type check above.
     (recipientCallbacks as? MutableMap<ParcelUuid, IInterface>)?.put(recipientId, callback)
@@ -372,7 +372,7 @@ constructor(
   private fun notifyOfMissedMessages(
     connectedDevice: ConnectedDevice,
     recipientId: ParcelUuid,
-    callback: IInterface
+    callback: IInterface,
   ) {
     val missedMessages = recipientMissedMessages[recipientId]?.remove(connectedDevice.deviceId)
     if (missedMessages?.isNotEmpty() != true) {
@@ -410,7 +410,7 @@ constructor(
       else ->
         logd(
           TAG,
-          "Attempted to use unsupported callback type. Request to notify of missed messsages ignored."
+          "Attempted to use unsupported callback type. Request to notify of missed messages ignored.",
         )
     }
   }
@@ -418,7 +418,7 @@ constructor(
   override fun unregisterDeviceCallback(
     connectedDevice: ConnectedDevice,
     recipientId: ParcelUuid,
-    callback: IDeviceCallback
+    callback: IDeviceCallback,
   ) {
     lock.withLock {
       unregisterDeviceCallbackLocked(connectedDevice.deviceId, recipientId, callback)
@@ -435,7 +435,7 @@ constructor(
   private fun unregisterDeviceCallbackLocked(
     deviceId: String,
     recipientId: ParcelUuid,
-    callback: IInterface
+    callback: IInterface,
   ) {
     val deviceCallback =
       when (callback) {
@@ -444,7 +444,7 @@ constructor(
         else -> {
           logd(
             TAG,
-            "Attempted to use unsupported callback type. Request to unregister callback ignored."
+            "Attempted to use unsupported callback type. Request to unregister callback ignored.",
           )
           return
         }
@@ -454,7 +454,7 @@ constructor(
       logw(
         TAG,
         "Request to unregister callback on device ${deviceId} for recipient $recipientId, but " +
-          "this callback is not registered. Request to unregister callback ignored."
+          "this callback is not registered. Request to unregister callback ignored.",
       )
       return
     }
@@ -465,7 +465,7 @@ constructor(
       else -> {
         logd(
           TAG,
-          "Attempted to use unsupported callback type. Request to unregister callback ignored."
+          "Attempted to use unsupported callback type. Request to unregister callback ignored.",
         )
         return
       }
@@ -501,14 +501,14 @@ constructor(
 
   override fun registerOnLogRequestedListener(
     loggerId: Int,
-    listener: ISafeOnLogRequestedListener
+    listener: ISafeOnLogRequestedListener,
   ) {
     loggingManager.registerLogRequestedListener(loggerId, listener, callbackExecutor)
   }
 
   override fun unregisterOnLogRequestedListener(
     loggerId: Int,
-    listener: ISafeOnLogRequestedListener
+    listener: ISafeOnLogRequestedListener,
   ) {
     loggingManager.unregisterLogRequestedListener(loggerId, listener)
   }
@@ -523,7 +523,7 @@ constructor(
 
   override fun startAssociationWithIdentifier(
     callback: IAssociationCallback,
-    identifier: ParcelUuid
+    identifier: ParcelUuid,
   ) {
     startAssociationInternal(callback, identifier)
   }
@@ -584,15 +584,26 @@ constructor(
     controller.initiateConnectionToDevice(UUID.fromString(deviceId))
   }
 
+  override fun isFeatureSupportedCached(deviceId: String, featureId: String): Int {
+    val connectedDevice =
+      controller.connectedDevices.firstOrNull { it.deviceId == deviceId } ?: return 0
+    return when (systemQueryCache.isFeatureSupported(connectedDevice, UUID.fromString(featureId))) {
+      true -> 1
+      false -> -1
+      // else handles the null case
+      else -> 0
+    }
+  }
+
   private fun startAssociationInternal(
     callback: IAssociationCallback,
-    identifier: ParcelUuid? = null
+    identifier: ParcelUuid? = null,
   ) {
     logd(TAG, "Received request to start association with identifier $identifier.")
     controller.startAssociation(
       ByteUtils.byteArrayToHexString(ByteUtils.randomBytes(DEVICE_NAME_LENGTH)),
       callback,
-      identifier?.uuid
+      identifier?.uuid,
     )
   }
 
@@ -646,14 +657,14 @@ constructor(
       logd(
         TAG,
         "A secure channel has been established with ${connectedDevice.deviceId}, but no " +
-          "callbacks registered to be notified."
+          "callbacks registered to be notified.",
       )
       return
     }
     logd(
       TAG,
       "Notifying callbacks that a secure channel has been established with " +
-        "${connectedDevice.deviceId}."
+        "${connectedDevice.deviceId}.",
     )
     if (callbacks != null) {
       for (callback in callbacks) {
@@ -683,7 +694,7 @@ constructor(
     if (message.recipient == null) {
       loge(
         TAG,
-        "Received callback for a new message containing no recipient. No callbacks were invoked!"
+        "Received callback for a new message containing no recipient. No callbacks were invoked!",
       )
       return
     }
