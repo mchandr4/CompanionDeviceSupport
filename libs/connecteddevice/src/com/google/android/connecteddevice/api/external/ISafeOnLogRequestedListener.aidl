@@ -30,7 +30,7 @@ package com.google.android.connecteddevice.api.external;
  *
  * Next transaction value: 1
  */
-// TODO(b/262293752) Link to the internal documentation on rules for modifying
+// TODO Link to the internal documentation on rules for modifying
 // this class.
 oneway interface ISafeOnLogRequestedListener {
     /** Triggered when the log records is requested. */

@@ -93,7 +93,7 @@ public abstract class AssociationBaseActivity extends FragmentActivity {
         return;
       }
     }
-    // TODO(b/228328725): Remove strict mode change when the violation is resolved.
+    // TODO: Remove strict mode change when the violation is resolved.
     maybeEnableStrictMode();
 
     // Set theme before calling super.onCreate(bundle) to avoid recreating activity.

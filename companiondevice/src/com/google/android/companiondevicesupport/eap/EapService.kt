@@ -76,7 +76,7 @@ internal open class EapService : Service() {
 
     private const val META_EAP_SERVICE_NAME =
       "com.google.android.connecteddevice.car_eap_service_name"
-    // TODO(b/166538373): Find a suitable packet size for SPP rather than the arbitrary number.
+    // TODO: Find a suitable packet size for SPP rather than the arbitrary number.
     private const val DEFAULT_SPP_PACKET_SIZE_BYTES = 700
 
     /** `int` Maximum number of bytes each SPP packet can contain. */

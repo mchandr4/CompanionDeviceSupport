@@ -453,7 +453,7 @@ open class MultiProtocolSecureChannel(
       // Include the call to send the message in the lock, because the call chops the message into
       // packets and queues them to be sent out. Proper locking ensures the order of encryption is
       // the same as delivery.
-      // TODO(b/189247832): Send message through one of the connected streams for now.
+      // TODO: Send message through one of the connected streams for now.
       stream.sendMessage(deviceMessage)
     }
     return true

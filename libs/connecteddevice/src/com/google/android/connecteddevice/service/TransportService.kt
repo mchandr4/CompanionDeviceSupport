@@ -184,7 +184,7 @@ open class TransportService : Service() {
 
     private const val DEFAULT_MTU_SIZE = 185 // Max allowed for iOS.
 
-    // TODO(b/166538373): Find a suitable packet size for SPP rather than the arbitrary number.
+    // TODO: Find a suitable packet size for SPP rather than the arbitrary number.
     private const val DEFAULT_SPP_PACKET_SIZE_BYTES = 700
 
     private const val PROXY_ENABLED_BY_DEFAULT = false

@@ -128,7 +128,7 @@ class CalendarImporter {
 
   private int createCalendar(@NonNull Calendar calendar) {
     ContentValues values = new ContentValues();
-    // TODO(jdp): maybe use the name of the logged in user instead.
+    // TODO: maybe use the name of the logged in user instead.
     values.put(CalendarContract.Calendars.ACCOUNT_NAME, DEFAULT_ACCOUNT_NAME);
     values.put(CalendarContract.Calendars.OWNER_ACCOUNT, calendar.getAccountName());
     values.put(CalendarContract.Calendars.ACCOUNT_TYPE, CalendarContract.ACCOUNT_TYPE_LOCAL);

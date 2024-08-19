@@ -57,7 +57,7 @@ class EventMetricLogger(private val context: Context) {
     )
   }
 
-  // TODO(b/298248724): Reports more errors.
+  // TODO: Reports more errors.
   fun pushCompanionErrorEvent(error: Int, duringAssociation: Boolean = false) {
     val errorId =
       when (error) {

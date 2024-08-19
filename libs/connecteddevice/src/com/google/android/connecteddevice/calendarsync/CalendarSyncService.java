@@ -51,7 +51,7 @@ public final class CalendarSyncService extends Service {
     calendarSyncFeature = new CalendarSyncFeature2(getApplicationContext());
     calendarSyncFeature.start();
 
-    // TODO(b/177819109) This setting is global and should be enabled in Application.onCreate().
+    // TODO This setting is global and should be enabled in Application.onCreate().
     // Enable StrictMode globally when debug logging is enabled.
     if (Log.isLoggable(TAG, Log.DEBUG)) {
       // Settings for the current (main) thread.

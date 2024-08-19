@@ -62,7 +62,7 @@ public class Utils {
   /** The starting substring index for a string formatted with the MAP_CLIENT_URI_REGEX above. */
   private static final int MAP_CLIENT_URI_PHONE_NUMBER_SUBSTRING_INDEX = 4;
 
-  // TODO (150711637): Reference BluetoothMapClient Extras once BluetoothMapClient is SystemApi.
+  // TODO : Reference BluetoothMapClient Extras once BluetoothMapClient is SystemApi.
   protected static final String BMC_EXTRA_MESSAGE_HANDLE =
       "android.bluetooth.mapmce.profile.extra.MESSAGE_HANDLE";
   protected static final String BMC_EXTRA_SENDER_CONTACT_URI =
@@ -206,7 +206,7 @@ public class Utils {
       Drawable defaultAvatar,
       float letterToTileRatio,
       int avatarNumberOfLetters) {
-    // TODO(b/135446418): use TelecomUtils once car-telephony-common supports bp.
+    // TODO: use TelecomUtils once car-telephony-common supports bp.
     LetterTileDrawable letterTileDrawable =
         createLetterTileDrawable(
             initials,
@@ -227,7 +227,7 @@ public class Utils {
   /** Creates an Icon based on the given roundedBitmapDrawable. */
   private static Bitmap createFromRoundedBitmapDrawable(
       RoundedBitmapDrawable roundedBitmapDrawable, int avatarSize, float cornerRadiusPercent) {
-    // TODO(b/135446418): use TelecomUtils once car-telephony-common supports bp.
+    // TODO: use TelecomUtils once car-telephony-common supports bp.
     float radius = avatarSize * cornerRadiusPercent;
     roundedBitmapDrawable.setCornerRadius(radius);
 
@@ -284,7 +284,7 @@ public class Utils {
    * @param nameAlt should be alternative display name of a contact.
    */
   public static String getInitials(String name, String nameAlt) {
-    // TODO(b/135446418): use TelecomUtils once car-telephony-common supports bp.
+    // TODO: use TelecomUtils once car-telephony-common supports bp.
     StringBuilder initials = new StringBuilder();
     if (!TextUtils.isEmpty(name) && Character.isLetter(name.charAt(0))) {
       initials.append(Character.toUpperCase(name.charAt(0)));
@@ -321,7 +321,7 @@ public class Utils {
     if (!ccUris.contains(uri)) {
       ccUris.add(uri);
     }
-    // TODO (b/169183358): remove sorting.
+    // TODO : remove sorting.
     Collections.sort(ccUris);
 
     return ccUris;

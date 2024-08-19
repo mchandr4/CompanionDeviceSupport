@@ -142,7 +142,7 @@ public class NotificationMsgFeature extends RemoteFeature {
 
   @Override
   protected void onMessageFailedToSend(String deviceId, byte[] message, boolean isTransient) {
-    // TODO (b/144924164): Notify Delegate action request failed.
+    // TODO : Notify Delegate action request failed.
   }
 
   private boolean isSecureDeviceForActiveUser(String deviceId) {

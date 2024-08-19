@@ -822,7 +822,7 @@ constructor(
 
     /** Returns the [ConnectedDevice] equivalent or `null` if the conversion failed. */
     fun toConnectedDevice(passengerDevices: List<AssociatedDevice>): ConnectedDevice {
-      // TODO(b/269484772): During device removal, the device record might have already been cleared
+      // TODO: During device removal, the device record might have already been cleared
       // so we have to do a reversed check against passenger device. This value may still be true if
       // device is already disassociated.
       val belongsToDriver =

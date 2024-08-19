@@ -36,7 +36,7 @@ import com.google.android.connecteddevice.api.external.ISafeOnLogRequestedListen
  *
  * Next transaction value: 10
  */
-// TODO(b/262293752) Link to the internal documentation on rules when modify
+// TODO Link to the internal documentation on rules when modify
 // this class.
 interface ISafeFeatureCoordinator {
     /**

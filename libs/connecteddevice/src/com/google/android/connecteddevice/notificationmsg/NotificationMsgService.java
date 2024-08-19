@@ -45,7 +45,7 @@ import com.google.android.connecteddevice.service.MetaDataService;
 public class NotificationMsgService extends MetaDataService {
   private static final String TAG = "NotificationMsgService";
 
-  // TODO(b/172590500) Add proper documentation to these values.
+  // TODO Add proper documentation to these values.
   private static final String META_BITMAP_SIZE =
       "com.google.android.connecteddevice.notificationmsg.notification_contact_photo_size";
   private static final String META_CORNER_RADIUS =

@@ -166,7 +166,7 @@ constructor(
           loge(TAG, "Device $deviceId not found. Unable to send message.")
           return false
         }
-        // TODO(b/265862484): Deprecate DeviceMessage in favor of byte arrays.
+        // TODO: Deprecate DeviceMessage in favor of byte arrays.
         val parsedMessage =
           try {
             DeviceMessageProto.Message.parseFrom(message)
@@ -308,7 +308,7 @@ constructor(
       return false
     }
 
-    // TODO(b/266652724): Replace this with AidlCallback; isBinderAlive might not always be
+    // TODO: Replace this with AidlCallback; isBinderAlive might not always be
     // accurate.
     if (!callback.asBinder().isBinderAlive) {
       logd(TAG, "Attempted to register dead callback. Request to register callback ignored.")

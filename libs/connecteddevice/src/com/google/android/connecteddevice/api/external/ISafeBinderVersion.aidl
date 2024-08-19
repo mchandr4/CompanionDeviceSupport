@@ -23,7 +23,7 @@ package com.google.android.connecteddevice.api.external;
  * mentioned in the Android official doc.
  * See <a href="https://developer.android.com/guide/components/aidl">Android AIDL</a>
  */
-// TODO(b/262293752) Link to the internal documentation on rules when modify
+// TODO Link to the internal documentation on rules when modify
 // this class.
 interface ISafeBinderVersion {
    /** Returns the Companion binder version*/

@@ -131,7 +131,7 @@ public class NotificationMsgDelegate extends BaseNotificationDelegate {
         initializeNewMessage(device.getDeviceId(), message.getMessage(), notificationKey);
         return;
       case STATUS_UPDATE:
-        // TODO (b/144924164): implement Action Request tracking logic.
+        // TODO : implement Action Request tracking logic.
         return;
       case PHONE_METADATA:
         connectedDeviceBluetoothAddress = message.getPhoneMetadata().getBluetoothDeviceAddress();
@@ -141,7 +141,7 @@ public class NotificationMsgDelegate extends BaseNotificationDelegate {
             device.getDeviceId(), message.getClearAppDataRequest().getMessagingAppPackageName());
         return;
       case FEATURE_ENABLED_STATE_CHANGE:
-        // TODO(b/150326327): implement enabled state change behavior.
+        // TODO: implement enabled state change behavior.
         return;
       case MESSAGEDATA_NOT_SET:
         logw(TAG, "PhoneToCarMessage: message data not set!");
@@ -150,7 +150,7 @@ public class NotificationMsgDelegate extends BaseNotificationDelegate {
 
   protected CarToPhoneMessage dismiss(ConversationKey convoKey) {
     super.dismissInternal(convoKey);
-    // TODO(b/144924164): add a request id to the action.
+    // TODO: add a request id to the action.
     Action action =
         Action.newBuilder()
             .setActionName(Action.ActionName.DISMISS)
@@ -164,7 +164,7 @@ public class NotificationMsgDelegate extends BaseNotificationDelegate {
 
   protected CarToPhoneMessage markAsRead(ConversationKey convoKey) {
     excludeFromNotification(convoKey);
-    // TODO(b/144924164): add a request id to the action.
+    // TODO: add a request id to the action.
     Action action =
         Action.newBuilder()
             .setActionName(Action.ActionName.MARK_AS_READ)
@@ -177,7 +177,7 @@ public class NotificationMsgDelegate extends BaseNotificationDelegate {
   }
 
   protected CarToPhoneMessage reply(ConversationKey convoKey, String message) {
-    // TODO(b/144924164): add a request id to the action.
+    // TODO: add a request id to the action.
     MapEntry entry = MapEntry.newBuilder().setKey(REPLY_KEY).setValue(message).build();
     Action action =
         Action.newBuilder()

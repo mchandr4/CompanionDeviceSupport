@@ -420,7 +420,7 @@ class FeatureConnector(
 
     @VisibleForTesting internal const val MAX_BIND_ATTEMPTS = 3
 
-    // TODO(alwa) Move this (and QueryIdGenerator in CompanionConnector) to its own internal class.
+    // TODO Move this (and QueryIdGenerator in CompanionConnector) to its own internal class.
     /** A generator of unique IDs for queries. */
     private class QueryIdGenerator {
       private val messageId = AtomicInteger(0)
