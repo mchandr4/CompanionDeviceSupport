@@ -74,10 +74,6 @@
                 <action android:name="com.google.android.connecteddevice.api.BIND_SAFE_FEATURE_COORDINATOR" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-            <intent-filter>
-                <action android:name="com.google.android.connecteddevice.api.QUERY_API_VERSION" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
             <meta-data android:name="com.google.android.connecteddevice.early_services"
                 android:resource="@array/early_single_user_services"/>
             <meta-data android:name="com.google.android.connecteddevice.association_service_uuid"
@@ -86,13 +82,16 @@
                 android:resource="@array/transport_protocols" />
             <meta-data android:name="com.google.android.connecteddevice.car_eap_oob_protocol_name"
                 android:resource="@string/car_eap_oob_protocol_name" />
-
         </service>
         <service
             android:name="com.google.android.connecteddevice.service.ConnectedDeviceFgUserService"
             android:exported="true">
             <intent-filter>
                 <action android:name="com.google.android.connecteddevice.api.BIND_FEATURE_COORDINATOR_FG" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.google.android.connecteddevice.api.QUERY_API_VERSION" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <meta-data android:name="com.google.android.connecteddevice.early_services"
@@ -213,7 +212,7 @@
         </service>
         <activity
             android:name=".trust.TrustedDeviceActivity"
-            android:exported="false"
+            android:exported="true"
             android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="com.google.android.connecteddevice.trust.TRUSTED_DEVICE_ACTIVITY" />

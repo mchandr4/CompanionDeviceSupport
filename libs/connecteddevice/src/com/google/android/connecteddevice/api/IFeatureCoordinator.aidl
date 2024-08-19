@@ -218,7 +218,7 @@ interface IFeatureCoordinator {
      * Returns the support status of a feature on the phone side.
      *
      * Returns:
-     * - a postive value if the feature is supported on the phone side;
+     * - a positive value if the feature is supported on the phone side;
      * - a negative value if the feature is NOT supported on the phone side;
      * - 0 if the status is unknown.
      */
