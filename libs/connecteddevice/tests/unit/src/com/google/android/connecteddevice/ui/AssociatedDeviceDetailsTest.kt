@@ -58,9 +58,9 @@ final class AssociatedDeviceDetailsTest {
     val connectionState = CONNECTED
     val details = AssociatedDeviceDetails(associatedDevice, connectionState)
 
-    assertThat(details.deviceId).isEqualTo(associatedDevice.deviceId)
-    assertThat(details.deviceName).isEqualTo(associatedDevice.deviceName)
-    assertThat(details.deviceAddress).isEqualTo(associatedDevice.deviceAddress)
+    assertThat(details.id).isEqualTo(associatedDevice.id)
+    assertThat(details.name).isEqualTo(associatedDevice.name)
+    assertThat(details.address).isEqualTo(associatedDevice.address)
     assertThat(details.isConnectionEnabled).isEqualTo(associatedDevice.isConnectionEnabled)
     assertThat(details.userId).isEqualTo(associatedDevice.userId)
     assertThat(details.connectionState).isEqualTo(connectionState)
@@ -80,7 +80,7 @@ final class AssociatedDeviceDetailsTest {
         TEST_ASSOCIATED_DEVICE_ID,
         TEST_ASSOCIATED_DEVICE_ADDRESS,
         TEST_ASSOCIATED_DEVICE_NAME,
-        /* isConnectionEnabled= */ true
+        /* isConnectionEnabled= */ true,
       )
 
     /**
@@ -92,7 +92,7 @@ final class AssociatedDeviceDetailsTest {
         TEST_ASSOCIATED_DEVICE_ID_2,
         TEST_ASSOCIATED_DEVICE_ADDRESS_2,
         TEST_ASSOCIATED_DEVICE_NAME_2,
-        /* isConnectionEnabled= */ true
+        /* isConnectionEnabled= */ true,
       )
   }
 }

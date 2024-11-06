@@ -63,7 +63,7 @@ public final class AssociatedDeviceViewModelTest {
   private static final String TEST_ASSOCIATED_DEVICE_ID = "test_device_id";
   private static final String TEST_ASSOCIATED_DEVICE_NAME_1 = "test_device_name_1";
   private static final String TEST_ASSOCIATED_DEVICE_NAME_2 = "test_device_name_2";
-  private static final String TEST_ASSOCIATED_DEVICE_ADDRESS = "test_device_address";
+  private static final String TEST_ASSOCIATED_ADDRESS = "test_address";
   private static final String TEST_CAR_NAME = "test_car_name";
   private static final String TEST_VERIFICATION_CODE = "test_code";
   private static final String TEST_BLE_DEVICE_NAME_PREFIX = "TestPrefix";
@@ -250,14 +250,6 @@ public final class AssociatedDeviceViewModelTest {
   }
 
   @Test
-  public void retryAssociation_retryWithPreviousIdentifier() {
-    ParcelUuid testIdentifier = new ParcelUuid(UUID.randomUUID());
-    viewModel.startAssociation(testIdentifier);
-    viewModel.retryAssociation();
-    verify(fakeConnector, times(2)).startAssociation(eq(testIdentifier), any());
-  }
-
-  @Test
   public void stopAssociation() {
     viewModel.startAssociation();
     viewModel.stopAssociation();
@@ -283,7 +275,7 @@ public final class AssociatedDeviceViewModelTest {
     // upon construction.
     AssociatedDevice driverDevice = createAssociatedDevice(/* isConnectionEnabled= */ true);
     fakeConnector.addAssociatedDevice(driverDevice);
-    fakeConnector.claimAssociatedDevice(driverDevice.getDeviceId());
+    fakeConnector.claimAssociatedDevice(driverDevice.getId());
 
     AssociatedDevice nonClaimedDevice = createAssociatedDevice(/* isConnectionEnabled= */ true);
     fakeConnector.addAssociatedDevice(nonClaimedDevice);
@@ -311,7 +303,7 @@ public final class AssociatedDeviceViewModelTest {
     // upon construction.
     AssociatedDevice driverDevice = createAssociatedDevice(/* isConnectionEnabled= */ true);
     fakeConnector.addAssociatedDevice(driverDevice);
-    fakeConnector.claimAssociatedDevice(driverDevice.getDeviceId());
+    fakeConnector.claimAssociatedDevice(driverDevice.getId());
 
     AssociatedDevice nonClaimedDevice = createAssociatedDevice(/* isConnectionEnabled= */ true);
     fakeConnector.addAssociatedDevice(nonClaimedDevice);
@@ -342,7 +334,7 @@ public final class AssociatedDeviceViewModelTest {
     AssociatedDevice updatedDevice =
         new AssociatedDevice(
             TEST_ASSOCIATED_DEVICE_ID,
-            TEST_ASSOCIATED_DEVICE_ADDRESS,
+            TEST_ASSOCIATED_ADDRESS,
             TEST_ASSOCIATED_DEVICE_NAME_2,
             /* isConnectionEnabled= */ true);
 
@@ -437,7 +429,7 @@ public final class AssociatedDeviceViewModelTest {
 
     viewModel.claimDevice(device);
 
-    verify(fakeConnector).claimAssociatedDevice(device.getDeviceId());
+    verify(fakeConnector).claimAssociatedDevice(device.getId());
   }
 
   @Test
@@ -457,7 +449,7 @@ public final class AssociatedDeviceViewModelTest {
 
     viewModel.removeClaimOnDevice(device);
 
-    verify(fakeConnector).removeAssociatedDeviceClaim(device.getDeviceId());
+    verify(fakeConnector).removeAssociatedDeviceClaim(device.getId());
   }
 
   @Test
@@ -489,7 +481,7 @@ public final class AssociatedDeviceViewModelTest {
   private static AssociatedDevice createAssociatedDevice(boolean isConnectionEnabled) {
     return new AssociatedDevice(
         TEST_ASSOCIATED_DEVICE_ID,
-        TEST_ASSOCIATED_DEVICE_ADDRESS,
+        TEST_ASSOCIATED_ADDRESS,
         TEST_ASSOCIATED_DEVICE_NAME_1,
         isConnectionEnabled);
   }

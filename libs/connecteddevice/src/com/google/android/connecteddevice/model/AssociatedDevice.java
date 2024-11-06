@@ -20,6 +20,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import com.google.android.companionprotos.DeviceOS;
 import java.util.Objects;
 
 /** Contains basic info of an associated device. */
@@ -27,75 +28,155 @@ public class AssociatedDevice implements Parcelable {
   /** Default placeholder userId value for an unclaimed device. */
   public static final int UNCLAIMED_USER_ID = -1;
 
-  private final String deviceId;
+  private final String id;
 
-  private final String deviceAddress;
+  private final String address;
 
-  private final String deviceName;
+  private final String name;
 
   private final boolean isConnectionEnabled;
 
   private final int userId;
 
+  private final DeviceOS os;
+
+  private final String osVersion;
+
+  private final String companionSdkVersion;
+
   /**
    * Create a new AssociatedDevice.
    *
-   * @param deviceId Id of the associated device.
-   * @param deviceAddress Address of the associated device.
-   * @param deviceName Name of the associated device. {@code null} if not known.
+   * @param id Id of the associated device.
+   * @param address Address of the associated device.
+   * @param name Name of the associated device. {@code null} if not known.
    * @param isConnectionEnabled If connection is enabled for this device.
    */
   public AssociatedDevice(
-      @NonNull String deviceId,
-      @NonNull String deviceAddress,
-      @Nullable String deviceName,
-      boolean isConnectionEnabled
-  ) {
-    this(deviceId, deviceAddress, deviceName, isConnectionEnabled, UNCLAIMED_USER_ID);
+      @NonNull String id,
+      @NonNull String address,
+      @Nullable String name,
+      boolean isConnectionEnabled) {
+    this(id, address, name, isConnectionEnabled, UNCLAIMED_USER_ID);
   }
 
   /**
    * Create a new AssociatedDevice.
    *
-   * @param deviceId Id of the associated device.
-   * @param deviceAddress Address of the associated device.
-   * @param deviceName Name of the associated device. {@code null} if not known.
+   * @param id Id of the associated device.
+   * @param address Address of the associated device.
+   * @param name Name of the associated device. {@code null} if not known.
    * @param isConnectionEnabled If connection is enabled for this device.
    * @param userId Id of the claiming user, or {@value #UNCLAIMED_USER_ID} if unclaimed.
    */
   public AssociatedDevice(
-      @NonNull String deviceId,
-      @NonNull String deviceAddress,
-      @Nullable String deviceName,
+      @NonNull String id,
+      @NonNull String address,
+      @Nullable String name,
       boolean isConnectionEnabled,
       int userId) {
-    this.deviceId = deviceId;
-    this.deviceAddress = deviceAddress;
-    this.deviceName = deviceName;
+    this(
+        id,
+        address,
+        name,
+        isConnectionEnabled,
+        userId,
+        DeviceOS.DEVICE_OS_UNKNOWN,
+        /* osVersion= */ null,
+        /* companionSdkVersion= */ null);
+  }
+
+  /**
+   * Create a new AssociatedDevice using a numeric representation of the operating system.
+   *
+   * @param id Id of the associated device.
+   * @param address Address of the associated device.
+   * @param name Name of the associated device. {@code null} if not known.
+   * @param isConnectionEnabled If connection is enabled for this device.
+   * @param userId Id of the claiming user, or {@value #UNCLAIMED_USER_ID} if unclaimed.
+   * @param os The numeric representation of the operating system of the associated device.
+   * @param osVersion The version of the operating system of the associated device.
+   * @param companionSdkVersion The Companion SDK version running on the associated device.
+   */
+  public AssociatedDevice(
+      @NonNull String id,
+      @NonNull String address,
+      @Nullable String name,
+      boolean isConnectionEnabled,
+      int userId,
+      int os,
+      @Nullable String osVersion,
+      @Nullable String companionSdkVersion) {
+    this(
+        id,
+        address,
+        name,
+        isConnectionEnabled,
+        userId,
+        DeviceOS.forNumber(os),
+        osVersion,
+        companionSdkVersion);
+  }
+
+  /**
+   * Create a new AssociatedDevice.
+   *
+   * @param id Id of the associated device.
+   * @param address Address of the associated device.
+   * @param name Name of the associated device. {@code null} if not known.
+   * @param isConnectionEnabled If connection is enabled for this device.
+   * @param userId Id of the claiming user, or {@value #UNCLAIMED_USER_ID} if unclaimed.
+   * @param os The operating system of the device.
+   * @param osVersion The version of the operating system of the device.
+   * @param companionSdkVersion The Companion SDK version running on the device.
+   */
+  public AssociatedDevice(
+      @NonNull String id,
+      @NonNull String address,
+      @Nullable String name,
+      boolean isConnectionEnabled,
+      int userId,
+      @NonNull DeviceOS os,
+      @Nullable String osVersion,
+      @Nullable String companionSdkVersion) {
+    this.id = id;
+    this.address = address;
+    this.name = name;
     this.isConnectionEnabled = isConnectionEnabled;
     this.userId = userId;
+    this.os = os;
+    this.osVersion = osVersion;
+    this.companionSdkVersion = companionSdkVersion;
   }
 
   private AssociatedDevice(Parcel in) {
-    this(in.readString(), in.readString(), in.readString(), in.readBoolean(), in.readInt());
+    this(
+        in.readString(),
+        in.readString(),
+        in.readString(),
+        in.readBoolean(),
+        in.readInt(),
+        in.readInt(),
+        in.readString(),
+        in.readString());
   }
 
   /** Returns the id for this device. */
   @NonNull
-  public String getDeviceId() {
-    return deviceId;
+  public String getId() {
+    return id;
   }
 
   /** Returns the address for this device. */
   @NonNull
-  public String getDeviceAddress() {
-    return deviceAddress;
+  public String getAddress() {
+    return address;
   }
 
   /** Returns the name for this device or {@code null} if not known. */
   @Nullable
-  public String getDeviceName() {
-    return deviceName;
+  public String getName() {
+    return name;
   }
 
   /** Return if connection is enabled for this device. */
@@ -108,6 +189,24 @@ public class AssociatedDevice implements Parcelable {
     return userId;
   }
 
+  /** Returns the operating system of the device. */
+  @NonNull
+  public DeviceOS getOs() {
+    return os;
+  }
+
+  /** Returns the version of the operating system of the device. */
+  @Nullable
+  public String getOsVersion() {
+    return osVersion;
+  }
+
+  /** Returns the Companion SDK version running on the device. */
+  @Nullable
+  public String getCompanionSdkVersion() {
+    return companionSdkVersion;
+  }
+
   @Override
   public boolean equals(Object obj) {
     if (obj == this) {
@@ -117,12 +216,12 @@ public class AssociatedDevice implements Parcelable {
       return false;
     }
     AssociatedDevice associatedDevice = (AssociatedDevice) obj;
-    return Objects.equals(deviceId, associatedDevice.deviceId);
+    return Objects.equals(id, associatedDevice.id);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(deviceId);
+    return Objects.hashCode(id);
   }
 
   @Override
@@ -132,11 +231,14 @@ public class AssociatedDevice implements Parcelable {
 
   @Override
   public void writeToParcel(Parcel dest, int flags) {
-    dest.writeString(deviceId);
-    dest.writeString(deviceAddress);
-    dest.writeString(deviceName);
+    dest.writeString(id);
+    dest.writeString(address);
+    dest.writeString(name);
     dest.writeBoolean(isConnectionEnabled);
     dest.writeInt(userId);
+    dest.writeInt(os.getNumber());
+    dest.writeString(osVersion);
+    dest.writeString(companionSdkVersion);
   }
 
   // Explicitly specifying the type within <> to support building with Java 8.

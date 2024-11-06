@@ -182,21 +182,13 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
     resetAssociationState();
   }
 
-  /** Retries association. */
-  public void retryAssociation() {
-    stopAssociation();
-    startAssociationInternal();
-  }
-
   /** Removes the association of the given device. */
   public void removeDevice(@NonNull AssociatedDevice device) {
     if (!connector.isConnected()) {
-      loge(
-          TAG,
-          "Failed to remove device " + device.getDeviceId() + " , connector is not connected.");
+      loge(TAG, "Failed to remove device " + device.getId() + " , connector is not connected.");
       return;
     }
-    connector.removeAssociatedDevice(device.getDeviceId());
+    connector.removeAssociatedDevice(device.getId());
   }
 
   /** Toggles connection of the given associated device. */
@@ -205,25 +197,24 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
       loge(
           TAG,
           "Failed to change connection on device "
-              + device.getDeviceId()
+              + device.getId()
               + " , connector is not connected.");
       return;
     }
     if (device.isConnectionEnabled()) {
-      connector.disableAssociatedDeviceConnection(device.getDeviceId());
+      connector.disableAssociatedDeviceConnection(device.getId());
     } else {
-      connector.enableAssociatedDeviceConnection(device.getDeviceId());
+      connector.enableAssociatedDeviceConnection(device.getId());
     }
   }
 
   /** Mark the given device as belonging to the active driver. */
   public void claimDevice(@NonNull AssociatedDevice device) {
     if (!connector.isConnected()) {
-      loge(
-          TAG, "Failed to claim device " + device.getDeviceId() + " , connector is not connected.");
+      loge(TAG, "Failed to claim device " + device.getId() + " , connector is not connected.");
       return;
     }
-    connector.claimAssociatedDevice(device.getDeviceId());
+    connector.claimAssociatedDevice(device.getId());
   }
 
   /** Mark the given device as unclaimed by any user. */
@@ -231,12 +222,10 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
     if (!connector.isConnected()) {
       loge(
           TAG,
-          "Failed to remove claim on device "
-              + device.getDeviceId()
-              + " , connector is not connected.");
+          "Failed to remove claim on device " + device.getId() + " , connector is not connected.");
       return;
     }
-    connector.removeAssociatedDeviceClaim(device.getDeviceId());
+    connector.removeAssociatedDeviceClaim(device.getId());
   }
 
   /**
@@ -377,8 +366,8 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
   }
 
   private ConnectionState getConnectionState(@NonNull AssociatedDevice device) {
-    logd(TAG, "Getting connection state for device " + device.getDeviceId() + ".");
-    ConnectedDevice connectedDevice = connector.getConnectedDeviceById(device.getDeviceId());
+    logd(TAG, "Getting connection state for device " + device.getId() + ".");
+    ConnectedDevice connectedDevice = connector.getConnectedDeviceById(device.getId());
     if (connectedDevice == null) {
       logd(TAG, "Device is not detected.");
       return ConnectionState.NOT_DETECTED;
@@ -420,8 +409,12 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
 
     try {
       if (associatedDevices.remove(device)) {
-        logd(TAG, device.getDeviceId() + " removed as an associated device. "
-            + "Current number of associated devices: " + associatedDevices.size());
+        logd(
+            TAG,
+            device.getId()
+                + " removed as an associated device. "
+                + "Current number of associated devices: "
+                + associatedDevices.size());
 
         removedDevice.postValue(device);
         updateDeviceDetailsLocked();
@@ -467,20 +460,20 @@ public class AssociatedDeviceViewModel extends AndroidViewModel {
 
         @Override
         public void onAssociatedDeviceAdded(@NonNull AssociatedDevice device) {
-          logd(TAG, "Associated device has been added: " + device.getDeviceId());
+          logd(TAG, "Associated device has been added: " + device.getId());
           resetAssociationState();
           addOrUpdateAssociatedDevice(device);
         }
 
         @Override
         public void onAssociatedDeviceRemoved(@NonNull AssociatedDevice device) {
-          logd(TAG, "Associated device " + device.getDeviceId() + " was removed");
+          logd(TAG, "Associated device " + device.getId() + " was removed");
           removeAssociatedDevice(device);
         }
 
         @Override
         public void onAssociatedDeviceUpdated(AssociatedDevice device) {
-          logd(TAG, "Associated device has been updated: " + device.getDeviceId());
+          logd(TAG, "Associated device has been updated: " + device.getId());
           addOrUpdateAssociatedDevice(device);
         }
 

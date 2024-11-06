@@ -148,7 +148,7 @@ public class AssociatedDeviceDetailFragment extends Fragment {
     if (context == null) {
       return;
     }
-    deviceName.setText(deviceDetails.getDeviceName());
+    deviceName.setText(deviceDetails.getName());
 
     if (deviceDetails.isConnectionEnabled()) {
       setEnabledConnectionStatus(deviceDetails);
@@ -228,7 +228,7 @@ public class AssociatedDeviceDetailFragment extends Fragment {
   }
 
   private void showRemoveDeviceDialog() {
-    String deviceName = deviceDetails.getDeviceName();
+    String deviceName = deviceDetails.getName();
     RemoveDeviceDialogFragment dialogFragment =
         RemoveDeviceDialogFragment.newInstance(
           deviceName, (d, w) -> model.removeDevice(deviceDetails.getAssociatedDevice()));

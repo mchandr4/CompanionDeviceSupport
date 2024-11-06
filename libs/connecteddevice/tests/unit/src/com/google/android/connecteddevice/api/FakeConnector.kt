@@ -133,13 +133,13 @@ open class FakeConnector : Connector {
   }
 
   override fun claimAssociatedDevice(deviceId: String) {
-    val device = associatedDevices.firstOrNull { it.deviceId == deviceId } ?: return
+    val device = associatedDevices.firstOrNull { it.id == deviceId } ?: return
     associatedDevices.remove(device)
     associatedDevices.add(device.cloneWith(currentUserId))
   }
 
   override fun removeAssociatedDeviceClaim(deviceId: String) {
-    val device = associatedDevices.firstOrNull { it.deviceId == deviceId } ?: return
+    val device = associatedDevices.firstOrNull { it.id == deviceId } ?: return
     associatedDevices.remove(device)
     associatedDevices.add(device.cloneWith(AssociatedDevice.UNCLAIMED_USER_ID))
   }
@@ -159,5 +159,5 @@ open class FakeConnector : Connector {
   }
 
   private fun AssociatedDevice.cloneWith(userId: Int): AssociatedDevice =
-    AssociatedDevice(deviceId, deviceAddress, deviceName, isConnectionEnabled, userId)
+    AssociatedDevice(id, address, name, isConnectionEnabled, userId)
 }

@@ -21,6 +21,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import com.google.android.companionprotos.DeviceOS;
 import com.google.android.connecteddevice.model.AssociatedDevice;
 import java.util.Objects;
 
@@ -54,38 +55,61 @@ public class AssociatedDeviceDetails implements Parcelable {
         ConnectionState.values()[in.readInt()]);
   }
 
-  /** Get the device id. */
+  /** Returns the id for this device. */
   @NonNull
-  public String getDeviceId() {
-    return device.getDeviceId();
+  public String getId() {
+    return device.getId();
   }
 
-  /** Get the name of the associated device. */
+  /** Returns the address for this device. */
+  @NonNull
+  public String getAddress() {
+    return device.getAddress();
+  }
+
+  /** Returns the name for this device or {@code null} if not known. */
   @Nullable
-  public String getDeviceName() {
-    return device.getDeviceName();
+  public String getName() {
+    return device.getName();
   }
 
-  /** Get the device address. */
-  @NonNull
-  public String getDeviceAddress() {
-    return device.getDeviceAddress();
-  }
-
-  /** {@code true} if the connection is enabled for the device. */
+  /** Return if connection is enabled for this device. */
   public boolean isConnectionEnabled() {
     return device.isConnectionEnabled();
+  }
+
+  /**
+   * Returns the id of the claiming user, or {@value AssociatedDevice#UNCLAIMED_USER_ID} if
+   * unclaimed.
+   */
+  public int getUserId() {
+    return device.getUserId();
+  }
+
+  /**
+   * Returns the operating system of the device or {@value DeviceOS#DEVICE_OS_UNKNOWN} if not known.
+   */
+  @NonNull
+  public DeviceOS getOs() {
+    return device.getOs();
+  }
+
+  /** Returns the version of the operating system of the device or {@code null} if not known. */
+  @Nullable
+  public String getOsVersion() {
+    return device.getOsVersion();
+  }
+
+  /** Returns the Companion SDK version running on the device or {@code null} if not known. */
+  @Nullable
+  public String getCompanionSdkVersion() {
+    return device.getCompanionSdkVersion();
   }
 
   /** Returns the current state of the device's connection. */
   @NonNull
   public ConnectionState getConnectionState() {
     return state;
-  }
-
-  /** Returns the claiming user id, or {@value AssociatedDevice#UNCLAIMED_USER_ID} if unclaimed. */
-  public int getUserId() {
-    return device.getUserId();
   }
 
   /** Returns whether this device belongs to the current driver. */

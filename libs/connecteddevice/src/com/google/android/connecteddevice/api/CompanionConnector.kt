@@ -172,17 +172,17 @@ constructor(
   private val deviceAssociationCallback =
     object : IDeviceAssociationCallback.Stub() {
       override fun onAssociatedDeviceAdded(device: AssociatedDevice) {
-        logd("New device ${device.deviceId} associated. Notifying callback.")
+        logd("New device ${device.id} associated. Notifying callback.")
         callback?.onAssociatedDeviceAdded(device)
       }
 
       override fun onAssociatedDeviceRemoved(device: AssociatedDevice) {
-        logd("Associated device ${device.deviceId} removed. Notifying callback.")
+        logd("Associated device ${device.id} removed. Notifying callback.")
         callback?.onAssociatedDeviceRemoved(device)
       }
 
       override fun onAssociatedDeviceUpdated(device: AssociatedDevice) {
-        logd("Associated device ${device.deviceId} updated. Notifying callback.")
+        logd("Associated device ${device.id} updated. Notifying callback.")
         callback?.onAssociatedDeviceUpdated(device)
       }
     }

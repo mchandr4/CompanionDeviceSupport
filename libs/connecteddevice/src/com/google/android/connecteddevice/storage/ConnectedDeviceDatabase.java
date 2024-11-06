@@ -26,10 +26,9 @@ import androidx.room.RoomDatabase;
       AssociatedDeviceKeyEntity.class,
       AssociatedDeviceChallengeSecretEntity.class
     },
-    version = 2,
-    exportSchema = false)
+    version = 3,
+    exportSchema = true)
 public abstract class ConnectedDeviceDatabase extends RoomDatabase {
-
   /** Return the DAO for the associated device table. */
   public abstract AssociatedDeviceDao associatedDeviceDao();
 }

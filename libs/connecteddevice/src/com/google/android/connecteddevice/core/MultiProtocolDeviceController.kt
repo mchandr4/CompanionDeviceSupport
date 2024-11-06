@@ -126,7 +126,7 @@ constructor(
         val devices = mutableListOf<ConnectedDevice>()
         for (device in connectedRemoteDevices.values) {
           val associatedDevice =
-            associatedDevices.firstOrNull { it.deviceId == device.deviceId.toString() }
+            associatedDevices.firstOrNull { it.id == device.deviceId.toString() }
           if (associatedDevice == null) {
             logd(
               TAG,
@@ -135,12 +135,12 @@ constructor(
             )
             continue
           }
-          val belongsToDriver = driverDevices.any { it.deviceId == associatedDevice.deviceId }
+          val belongsToDriver = driverDevices.any { it.id == associatedDevice.id }
           val hasSecureChannel = device.secureChannel != null
           devices.add(
             ConnectedDevice(
-              associatedDevice.deviceId,
-              associatedDevice.deviceName,
+              associatedDevice.id,
+              associatedDevice.name,
               belongsToDriver,
               hasSecureChannel,
             )
@@ -164,7 +164,7 @@ constructor(
       val driverDevices = storage.driverAssociatedDevices
       for (device in driverDevices) {
         if (device.isConnectionEnabled) {
-          initiateConnectionToDevice(UUID.fromString(device.deviceId))
+          initiateConnectionToDevice(UUID.fromString(device.id))
         }
       }
       if (!enablePassenger) {
@@ -174,7 +174,7 @@ constructor(
       logd(TAG, "Initiating connections with passenger devices.")
       val passengerDevices = storage.passengerAssociatedDevices
       for (device in passengerDevices) {
-        initiateConnectionToDevice(UUID.fromString(device.deviceId))
+        initiateConnectionToDevice(UUID.fromString(device.id))
       }
     }
   }
@@ -762,8 +762,8 @@ constructor(
     val associatedDevice =
       AssociatedDevice(
         deviceId,
-        /* deviceAddress= */ "",
-        /* deviceName= */ null,
+        /* address= */ "",
+        /* name= */ null,
         /* isConnectionEnabled= */ true,
       )
     lock.withLock {
@@ -792,16 +792,15 @@ constructor(
   }
 
   private fun invokeCallbacksWithAssociatedDevice(associatedDevice: AssociatedDevice) {
-    logd(TAG, "Invovke callbacks with associated device")
+    logd(TAG, "Invoke callbacks with associated device")
     val hasSecureChannel =
-      connectedRemoteDevices.get(UUID.fromString(associatedDevice.deviceId))?.secureChannel != null
+      connectedRemoteDevices.get(UUID.fromString(associatedDevice.id))?.secureChannel != null
     lock.withLock {
-      val belongsToDriver =
-        passengerDevices.none { device -> device.deviceId == associatedDevice.deviceId }
+      val belongsToDriver = passengerDevices.none { device -> device.id == associatedDevice.id }
       val connectedDevice =
         ConnectedDevice(
-          associatedDevice.deviceId,
-          associatedDevice.deviceName,
+          associatedDevice.id,
+          associatedDevice.getName(),
           belongsToDriver,
           hasSecureChannel,
         )
@@ -825,8 +824,7 @@ constructor(
       // TODO: During device removal, the device record might have already been cleared
       // so we have to do a reversed check against passenger device. This value may still be true if
       // device is already disassociated.
-      val belongsToDriver =
-        passengerDevices.none { device -> device.deviceId == deviceId.toString() }
+      val belongsToDriver = passengerDevices.none { device -> device.id == deviceId.toString() }
       val hasSecureChannel = secureChannel != null
       return ConnectedDevice(deviceId.toString(), name, belongsToDriver, hasSecureChannel)
     }

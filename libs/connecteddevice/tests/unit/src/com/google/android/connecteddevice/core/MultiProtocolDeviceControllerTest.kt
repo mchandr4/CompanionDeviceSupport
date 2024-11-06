@@ -207,16 +207,16 @@ class MultiProtocolDeviceControllerTest {
     val driverDevice =
       AssociatedDevice(
         driverId.toString(),
-        /* deviceAddress= */ "",
-        /* deviceName= */ null,
+        /* address= */ "",
+        /* name= */ null,
         /* isConnectionEnabled= */ true,
       )
     val passengerId = ParcelUuid(UUID.randomUUID())
     val passengerDevice =
       AssociatedDevice(
         passengerId.toString(),
-        /* deviceAddress= */ "",
-        /* deviceName= */ null,
+        /* address= */ "",
+        /* name= */ null,
         /* isConnectionEnabled= */ true,
       )
     whenever(spyStorage.driverAssociatedDevices).thenReturn(listOf(driverDevice))
@@ -245,16 +245,16 @@ class MultiProtocolDeviceControllerTest {
     val driverDevice =
       AssociatedDevice(
         driverId.uuid.toString(),
-        /* deviceAddress= */ "",
-        /* deviceName= */ null,
+        /* address= */ "",
+        /* name= */ null,
         /* isConnectionEnabled= */ true,
       )
     val passengerId = ParcelUuid(UUID.randomUUID())
     val passengerDevice =
       AssociatedDevice(
         passengerId.toString(),
-        /* deviceAddress= */ "",
-        /* deviceName= */ null,
+        /* address= */ "",
+        /* name= */ null,
         /* isConnectionEnabled= */ true,
       )
     whenever(spyStorage.driverAssociatedDevices).thenReturn(listOf(driverDevice))
@@ -279,23 +279,24 @@ class MultiProtocolDeviceControllerTest {
 
   @Test
   fun startAssociation_startedWithoutIdentifier() {
-    val deviceName = "TestDeviceName"
-
-    deviceController.startAssociation(deviceName, mockAssociationCallback)
+    deviceController.startAssociation(TEST_DEVICE_NAME, mockAssociationCallback)
 
     verify(testConnectionProtocol)
-      .startAssociationDiscovery(eq(deviceName), eq(testAssociationServiceUuid), any())
+      .startAssociationDiscovery(eq(TEST_DEVICE_NAME), eq(testAssociationServiceUuid), any())
   }
 
   @Test
   fun startAssociation_startedSuccessfully() {
-    val deviceName = "TestDeviceName"
     val testIdentifier = ParcelUuid(UUID.randomUUID())
 
-    deviceController.startAssociation(deviceName, mockAssociationCallback, testIdentifier.uuid)
+    deviceController.startAssociation(
+      TEST_DEVICE_NAME,
+      mockAssociationCallback,
+      testIdentifier.uuid,
+    )
     argumentCaptor<IDiscoveryCallback>().apply {
       verify(testConnectionProtocol)
-        .startAssociationDiscovery(eq(deviceName), eq(testIdentifier), capture())
+        .startAssociationDiscovery(eq(TEST_DEVICE_NAME), eq(testIdentifier), capture())
       firstValue.onDiscoveryStartedSuccessfully()
     }
 
@@ -308,8 +309,8 @@ class MultiProtocolDeviceControllerTest {
     val expectedResponse =
       StartAssociationResponse(
         TEST_OOB_DATA,
-        ByteUtils.hexStringToByteArray(deviceName),
-        deviceName,
+        ByteUtils.hexStringToByteArray(TEST_DEVICE_NAME),
+        TEST_DEVICE_NAME,
       )
     assertThat(response.hashCode()).isEqualTo(expectedResponse.hashCode())
     assertThat(expectedResponse).isEqualTo(response)
@@ -317,34 +318,40 @@ class MultiProtocolDeviceControllerTest {
 
   @Test
   fun startAssociation_callbackBinderIsDead_DoNotThrow() {
-    val deviceName = "TestDeviceName"
     val testIdentifier = ParcelUuid(UUID.randomUUID())
 
-    deviceController.startAssociation(deviceName, mockDeadAssociationCallback, testIdentifier.uuid)
+    deviceController.startAssociation(
+      TEST_DEVICE_NAME,
+      mockDeadAssociationCallback,
+      testIdentifier.uuid,
+    )
     argumentCaptor<IDiscoveryCallback>().apply {
       verify(testConnectionProtocol)
-        .startAssociationDiscovery(eq(deviceName), eq(testIdentifier), capture())
+        .startAssociationDiscovery(eq(TEST_DEVICE_NAME), eq(testIdentifier), capture())
       firstValue.onDiscoveryStartedSuccessfully()
     }
     verify(mockAssociationCallback, never())
       .onAssociationStartSuccess(
         StartAssociationResponse(
           TEST_OOB_DATA,
-          ByteUtils.hexStringToByteArray(deviceName),
-          deviceName,
+          ByteUtils.hexStringToByteArray(TEST_DEVICE_NAME),
+          TEST_DEVICE_NAME,
         )
       )
   }
 
   @Test
   fun startAssociation_onDiscoveryFailedToStartInvokesOnAssociationStartFailure() {
-    val deviceName = "TestDeviceName"
     val testIdentifier = ParcelUuid(UUID.randomUUID())
 
-    deviceController.startAssociation(deviceName, mockAssociationCallback, testIdentifier.uuid)
+    deviceController.startAssociation(
+      TEST_DEVICE_NAME,
+      mockAssociationCallback,
+      testIdentifier.uuid,
+    )
     argumentCaptor<IDiscoveryCallback>().apply {
       verify(testConnectionProtocol)
-        .startAssociationDiscovery(eq(deviceName), eq(testIdentifier), capture())
+        .startAssociationDiscovery(eq(TEST_DEVICE_NAME), eq(testIdentifier), capture())
       firstValue.onDiscoveryFailedToStart()
     }
 
@@ -353,13 +360,16 @@ class MultiProtocolDeviceControllerTest {
 
   @Test
   fun startAssociation_onDiscoveryFailedToStart_callbackBinderDeadDoNotThrow() {
-    val deviceName = "TestDeviceName"
     val testIdentifier = ParcelUuid(UUID.randomUUID())
 
-    deviceController.startAssociation(deviceName, mockDeadAssociationCallback, testIdentifier.uuid)
+    deviceController.startAssociation(
+      TEST_DEVICE_NAME,
+      mockDeadAssociationCallback,
+      testIdentifier.uuid,
+    )
     argumentCaptor<IDiscoveryCallback>().apply {
       verify(testConnectionProtocol)
-        .startAssociationDiscovery(eq(deviceName), eq(testIdentifier), capture())
+        .startAssociationDiscovery(eq(TEST_DEVICE_NAME), eq(testIdentifier), capture())
       firstValue.onDiscoveryFailedToStart()
     }
 
@@ -390,8 +400,8 @@ class MultiProtocolDeviceControllerTest {
         listOf(
           AssociatedDevice(
             deviceId.toString(),
-            "deviceAddress",
-            "deviceName",
+            "address",
+            TEST_DEVICE_NAME,
             /* isConnectionEnabled= */ true,
           )
         )
@@ -443,8 +453,8 @@ class MultiProtocolDeviceControllerTest {
         listOf(
           AssociatedDevice(
             deviceId.toString(),
-            "deviceAddress",
-            "deviceName",
+            "address",
+            TEST_DEVICE_NAME,
             /* isConnectionEnabled= */ true,
           )
         )
@@ -467,7 +477,11 @@ class MultiProtocolDeviceControllerTest {
   fun onDeviceDisconnected_duringAssociation_invokesAssociationErrorCallback() {
     val testProtocolId = UUID.randomUUID()
     val testIdentifier = ParcelUuid(UUID.randomUUID())
-    deviceController.startAssociation("deviceName", mockAssociationCallback, testIdentifier.uuid)
+    deviceController.startAssociation(
+      TEST_DEVICE_NAME,
+      mockAssociationCallback,
+      testIdentifier.uuid,
+    )
     argumentCaptor<IDiscoveryCallback>().apply {
       verify(testConnectionProtocol).startAssociationDiscovery(any(), eq(testIdentifier), capture())
       firstValue.onDeviceConnected(testProtocolId.toString())
@@ -496,7 +510,11 @@ class MultiProtocolDeviceControllerTest {
         ByteUtils.uuidToBytes(deviceId) + secret,
       )
 
-    deviceController.startAssociation("deviceName", mockAssociationCallback, testIdentifier.uuid)
+    deviceController.startAssociation(
+      TEST_DEVICE_NAME,
+      mockAssociationCallback,
+      testIdentifier.uuid,
+    )
     argumentCaptor<IDiscoveryCallback>().apply {
       verify(testConnectionProtocol).startAssociationDiscovery(any(), eq(testIdentifier), capture())
       firstValue.onDeviceConnected(testProtocolId.toString())
@@ -525,8 +543,8 @@ class MultiProtocolDeviceControllerTest {
     val associatedDevice =
       AssociatedDevice(
         deviceId.toString(),
-        "deviceAddress",
-        "deviceName",
+        "address",
+        TEST_DEVICE_NAME,
         /* isConnectionEnabled= */ true,
       )
     spyStorage.addAssociatedDeviceForDriver(associatedDevice)
@@ -551,8 +569,8 @@ class MultiProtocolDeviceControllerTest {
     val associatedDevice =
       AssociatedDevice(
         deviceId.toString(),
-        "deviceAddress",
-        "deviceName",
+        "address",
+        TEST_DEVICE_NAME,
         /* isConnectionEnabled= */ true,
       )
     spyStorage.addAssociatedDeviceForDriver(associatedDevice)
@@ -650,13 +668,16 @@ class MultiProtocolDeviceControllerTest {
 
   @Test
   fun notifyVerificationCodeAccepted_notifiesChannel() {
-    val deviceName = "TestDeviceName"
     val testIdentifier = ParcelUuid(UUID.randomUUID())
 
-    deviceController.startAssociation(deviceName, mockAssociationCallback, testIdentifier.uuid)
+    deviceController.startAssociation(
+      TEST_DEVICE_NAME,
+      mockAssociationCallback,
+      testIdentifier.uuid,
+    )
     argumentCaptor<IDiscoveryCallback>().apply {
       verify(testConnectionProtocol)
-        .startAssociationDiscovery(eq(deviceName), eq(testIdentifier), capture())
+        .startAssociationDiscovery(eq(TEST_DEVICE_NAME), eq(testIdentifier), capture())
       firstValue.onDeviceConnected(UUID.randomUUID().toString())
     }
     val device =
@@ -676,13 +697,16 @@ class MultiProtocolDeviceControllerTest {
 
   @Test
   fun notifyVerificationCodeAccepted_deviceWithoutChannelDoesNotThrow() {
-    val deviceName = "TestDeviceName"
     val testIdentifier = ParcelUuid(UUID.randomUUID())
 
-    deviceController.startAssociation(deviceName, mockAssociationCallback, testIdentifier.uuid)
+    deviceController.startAssociation(
+      TEST_DEVICE_NAME,
+      mockAssociationCallback,
+      testIdentifier.uuid,
+    )
     argumentCaptor<IDiscoveryCallback>().apply {
       verify(testConnectionProtocol)
-        .startAssociationDiscovery(eq(deviceName), eq(testIdentifier), capture())
+        .startAssociationDiscovery(eq(TEST_DEVICE_NAME), eq(testIdentifier), capture())
       firstValue.onDeviceConnected(UUID.randomUUID().toString())
     }
 
@@ -691,7 +715,6 @@ class MultiProtocolDeviceControllerTest {
 
   @Test
   fun handleSecureChannelMessage_firstAssociationMessageSavesIdAndSecretAndIssuesDeviceConnected() {
-    val deviceName = "TestDeviceName"
     val deviceId = UUID.randomUUID()
     val testIdentifier = ParcelUuid(UUID.randomUUID())
     val secret = ByteUtils.randomBytes(CHALLENGE_SECRET_BYTES)
@@ -703,10 +726,14 @@ class MultiProtocolDeviceControllerTest {
         ByteUtils.uuidToBytes(deviceId) + secret,
       )
 
-    deviceController.startAssociation(deviceName, mockAssociationCallback, testIdentifier.uuid)
+    deviceController.startAssociation(
+      TEST_DEVICE_NAME,
+      mockAssociationCallback,
+      testIdentifier.uuid,
+    )
     argumentCaptor<IDiscoveryCallback>().apply {
       verify(testConnectionProtocol)
-        .startAssociationDiscovery(eq(deviceName), eq(testIdentifier), capture())
+        .startAssociationDiscovery(eq(TEST_DEVICE_NAME), eq(testIdentifier), capture())
       firstValue.onDeviceConnected(UUID.randomUUID().toString())
     }
 
@@ -725,12 +752,11 @@ class MultiProtocolDeviceControllerTest {
   @Test
   fun onAssociatedDeviceAdded_issuesDeviceConnectedCallback() {
     val deviceId = UUID.randomUUID()
-    val deviceName = "TestDeviceName"
     val associatedDevice =
       AssociatedDevice(
         deviceId.toString(),
-        "deviceAddress",
-        deviceName,
+        "address",
+        TEST_DEVICE_NAME,
         /* isConnectionEnabled= */ true,
       )
     argumentCaptor<ConnectedDeviceStorage.AssociatedDeviceCallback>().apply {
@@ -739,7 +765,7 @@ class MultiProtocolDeviceControllerTest {
     }
     argumentCaptor<ConnectedDevice>().apply {
       verify(mockCallback).onDeviceConnected(capture())
-      assertThat(firstValue.deviceId).isEqualTo(associatedDevice.deviceId)
+      assertThat(firstValue.deviceId).isEqualTo(associatedDevice.id)
       assertThat(firstValue.hasSecureChannel()).isFalse()
     }
     verify(mockCallback).onSecureChannelEstablished(any())
@@ -748,7 +774,6 @@ class MultiProtocolDeviceControllerTest {
 
   @Test
   fun handleSecureChannelMessage_associationStorageErrorInvokesOnAssociationErrorCallback() {
-    val deviceName = "TestDeviceName"
     val deviceId = UUID.randomUUID()
     val testIdentifier = ParcelUuid(UUID.randomUUID())
     val secret = ByteUtils.randomBytes(CHALLENGE_SECRET_BYTES - 1)
@@ -760,10 +785,14 @@ class MultiProtocolDeviceControllerTest {
         ByteUtils.uuidToBytes(deviceId) + secret,
       )
 
-    deviceController.startAssociation(deviceName, mockAssociationCallback, testIdentifier.uuid)
+    deviceController.startAssociation(
+      TEST_DEVICE_NAME,
+      mockAssociationCallback,
+      testIdentifier.uuid,
+    )
     argumentCaptor<IDiscoveryCallback>().apply {
       verify(testConnectionProtocol)
-        .startAssociationDiscovery(eq(deviceName), eq(testIdentifier), capture())
+        .startAssociationDiscovery(eq(TEST_DEVICE_NAME), eq(testIdentifier), capture())
       firstValue.onDeviceConnected(UUID.randomUUID().toString())
     }
 
@@ -787,8 +816,8 @@ class MultiProtocolDeviceControllerTest {
         listOf(
           AssociatedDevice(
             deviceId.toString(),
-            "deviceAddress",
-            "deviceName",
+            "address",
+            TEST_DEVICE_NAME,
             /* isConnectionEnabled= */ true,
           )
         )
@@ -817,7 +846,6 @@ class MultiProtocolDeviceControllerTest {
 
   @Test
   fun handleSecureChannelMessage_firstMessagePersistsDeviceAsDriverWhenPassengerDisabled() {
-    val deviceName = "TestDeviceName"
     val deviceId = UUID.randomUUID()
     val testIdentifier = ParcelUuid(UUID.randomUUID())
     val secret = ByteUtils.randomBytes(CHALLENGE_SECRET_BYTES)
@@ -839,10 +867,14 @@ class MultiProtocolDeviceControllerTest {
         storageExecutor = directExecutor(),
       )
 
-    deviceController.startAssociation(deviceName, mockAssociationCallback, testIdentifier.uuid)
+    deviceController.startAssociation(
+      TEST_DEVICE_NAME,
+      mockAssociationCallback,
+      testIdentifier.uuid,
+    )
     argumentCaptor<IDiscoveryCallback>().apply {
       verify(testConnectionProtocol)
-        .startAssociationDiscovery(eq(deviceName), eq(testIdentifier), capture())
+        .startAssociationDiscovery(eq(TEST_DEVICE_NAME), eq(testIdentifier), capture())
       firstValue.onDeviceConnected(UUID.randomUUID().toString())
     }
 
@@ -855,13 +887,12 @@ class MultiProtocolDeviceControllerTest {
 
     argumentCaptor<AssociatedDevice>().apply {
       verify(spyStorage).addAssociatedDeviceForDriver(capture())
-      assertThat(firstValue.deviceId).isEqualTo(deviceId.toString())
+      assertThat(firstValue.id).isEqualTo(deviceId.toString())
     }
   }
 
   @Test
   fun handleSecureChannelMessage_firstMessagePersistsDeviceAsUnclaimedWhenPassengerEnabled() {
-    val deviceName = "TestDeviceName"
     val deviceId = ParcelUuid(UUID.randomUUID())
     val testIdentifier = ParcelUuid(UUID.randomUUID())
     val secret = ByteUtils.randomBytes(CHALLENGE_SECRET_BYTES)
@@ -883,10 +914,14 @@ class MultiProtocolDeviceControllerTest {
         storageExecutor = directExecutor(),
       )
 
-    deviceController.startAssociation(deviceName, mockAssociationCallback, testIdentifier.uuid)
+    deviceController.startAssociation(
+      TEST_DEVICE_NAME,
+      mockAssociationCallback,
+      testIdentifier.uuid,
+    )
     argumentCaptor<IDiscoveryCallback>().apply {
       verify(testConnectionProtocol)
-        .startAssociationDiscovery(eq(deviceName), eq(testIdentifier), capture())
+        .startAssociationDiscovery(eq(TEST_DEVICE_NAME), eq(testIdentifier), capture())
       firstValue.onDeviceConnected(UUID.randomUUID().toString())
     }
 
@@ -900,7 +935,7 @@ class MultiProtocolDeviceControllerTest {
     argumentCaptor<AssociatedDevice>().apply {
       verify(spyStorage)
         .addAssociatedDeviceForUser(eq(AssociatedDevice.UNCLAIMED_USER_ID), capture())
-      assertThat(firstValue.deviceId).isEqualTo(deviceId.toString())
+      assertThat(firstValue.id).isEqualTo(deviceId.toString())
     }
   }
 
@@ -910,24 +945,24 @@ class MultiProtocolDeviceControllerTest {
     val activeUserDevice =
       AssociatedDevice(
         activeUserDeviceId.toString(),
-        "userDeviceAddress",
-        "userDeviceName",
+        "userAddress",
+        "userName",
         /* isConnectionEnabled= */ true,
       )
     val otherUserDeviceId = ParcelUuid(UUID.randomUUID())
     val otherUserDevice =
       AssociatedDevice(
         otherUserDeviceId.toString(),
-        "otherUserDeviceAddress",
-        "otherUserDeviceName",
+        "otherUserAddress",
+        "otherUserName",
         /* isConnectionEnabled= */ true,
       )
     val disconnectedDeviceId = UUID.randomUUID()
     val disconnectedDevice =
       AssociatedDevice(
         disconnectedDeviceId.toString(),
-        "otherUserDeviceAddress",
-        "otherUserDeviceName",
+        "otherUserAddress",
+        "otherUserName",
         /* isConnectionEnabled= */ true,
       )
     whenever(spyStorage.driverAssociatedDevices).thenReturn(listOf(activeUserDevice))
@@ -966,12 +1001,12 @@ class MultiProtocolDeviceControllerTest {
     val activeUserConnectedDevice =
       connectedDevices.firstOrNull { it.deviceId == activeUserDeviceId.toString() }
     assertThat(activeUserConnectedDevice).isNotNull()
-    assertThat(activeUserConnectedDevice?.deviceName).isEqualTo(activeUserDevice.deviceName)
+    assertThat(activeUserConnectedDevice?.deviceName).isEqualTo(activeUserDevice.name)
     assertThat(activeUserConnectedDevice?.isAssociatedWithDriver).isTrue()
     val otherUserConnectedDevice =
       connectedDevices.firstOrNull { it.deviceId == otherUserDeviceId.toString() }
     assertThat(otherUserConnectedDevice).isNotNull()
-    assertThat(otherUserConnectedDevice?.deviceName).isEqualTo(otherUserDevice.deviceName)
+    assertThat(otherUserConnectedDevice?.deviceName).isEqualTo(otherUserDevice.name)
     assertThat(otherUserConnectedDevice?.isAssociatedWithDriver).isFalse()
   }
 
@@ -980,15 +1015,15 @@ class MultiProtocolDeviceControllerTest {
     val activeUserDevice =
       AssociatedDevice(
         UUID.randomUUID().toString(),
-        "userDeviceAddress",
-        "userDeviceName",
+        "userAddress",
+        "userName",
         /* isConnectionEnabled= */ true,
       )
     val otherUserDevice =
       AssociatedDevice(
         UUID.randomUUID().toString(),
-        "otherUserDeviceAddress",
-        "otherUserDeviceName",
+        "otherUserAddress",
+        "otherUserName",
         /* isConnectionEnabled= */ true,
       )
     whenever(spyStorage.driverAssociatedDevices).thenReturn(listOf(activeUserDevice))
@@ -1066,14 +1101,17 @@ class MultiProtocolDeviceControllerTest {
 
   @Test
   fun stopAssociation_disconnectPendingDeviceAndClearOobRunner() {
-    val deviceName = "TestDeviceName"
     val testIdentifier = ParcelUuid(UUID.randomUUID())
     val testProtocolId = UUID.randomUUID().toString()
 
-    deviceController.startAssociation(deviceName, mockAssociationCallback, testIdentifier.uuid)
+    deviceController.startAssociation(
+      TEST_DEVICE_NAME,
+      mockAssociationCallback,
+      testIdentifier.uuid,
+    )
     argumentCaptor<IDiscoveryCallback>().apply {
       verify(testConnectionProtocol)
-        .startAssociationDiscovery(eq(deviceName), eq(testIdentifier), capture())
+        .startAssociationDiscovery(eq(TEST_DEVICE_NAME), eq(testIdentifier), capture())
       firstValue.onDeviceConnected(testProtocolId)
     }
     deviceController.stopAssociation()
@@ -1104,15 +1142,15 @@ class MultiProtocolDeviceControllerTest {
     val enabledDevice =
       AssociatedDevice(
         enabledDeviceId.toString(),
-        /* deviceAddress= */ "",
-        /* deviceName= */ null,
+        /* address= */ "",
+        /* name= */ null,
         /* isConnectionEnabled= */ true,
       )
     val disabledDevice =
       AssociatedDevice(
         disabledDeviceId.toString(),
-        /* deviceAddress= */ "",
-        /* deviceName= */ null,
+        /* address= */ "",
+        /* name= */ null,
         /* isConnectionEnabled= */ false,
       )
     whenever(spyStorage.driverAssociatedDevices).thenReturn(listOf(disabledDevice, enabledDevice))
@@ -1177,13 +1215,16 @@ class MultiProtocolDeviceControllerTest {
   }
 
   private fun startAssociation() {
-    val deviceName = "TestDeviceName"
     val testIdentifier = ParcelUuid(UUID.randomUUID())
 
-    deviceController.startAssociation(deviceName, mockAssociationCallback, testIdentifier.uuid)
+    deviceController.startAssociation(
+      TEST_DEVICE_NAME,
+      mockAssociationCallback,
+      testIdentifier.uuid,
+    )
     argumentCaptor<IDiscoveryCallback>().apply {
       verify(testConnectionProtocol)
-        .startAssociationDiscovery(eq(deviceName), eq(testIdentifier), capture())
+        .startAssociationDiscovery(eq(TEST_DEVICE_NAME), eq(testIdentifier), capture())
       firstValue.onDeviceConnected(UUID.randomUUID().toString())
     }
   }
@@ -1230,5 +1271,9 @@ class MultiProtocolDeviceControllerTest {
       whenever(mockBinder.isBinderAlive).thenReturn(true)
       return mockBinder
     }
+  }
+
+  companion object {
+    private const val TEST_DEVICE_NAME = "TestDevice"
   }
 }

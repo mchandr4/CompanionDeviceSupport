@@ -18,8 +18,10 @@ package com.google.android.connecteddevice.system
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.content.Context
+import com.google.android.companionprotos.DeviceVersionsResponse
 import com.google.android.companionprotos.SystemQuery
 import com.google.android.companionprotos.SystemQueryType.DEVICE_NAME
+import com.google.android.companionprotos.SystemQueryType.DEVICE_OS
 import com.google.android.companionprotos.SystemQueryType.USER_ROLE
 import com.google.android.companionprotos.SystemUserRole
 import com.google.android.companionprotos.SystemUserRoleResponse
@@ -88,7 +90,7 @@ internal constructor(
           device: ConnectedDevice,
           queryId: Int,
           request: ByteArray,
-          parameters: ByteArray?
+          parameters: ByteArray?,
         ) = onQueryReceivedInternal(device, queryId, request)
       }
   }
@@ -108,6 +110,7 @@ internal constructor(
   private fun onSecureChannelEstablishedInternal(device: ConnectedDevice) {
     logd(TAG, "Secure channel has been established. ")
     queryDeviceName(device)
+    queryDeviceOs(device)
     queryFeatureSupportStatusToPreheatCache(device)
   }
 
@@ -128,7 +131,48 @@ internal constructor(
           logd(TAG, "Updating device ${device.deviceId}'s name to $deviceName.")
           storage.updateAssociatedDeviceName(device.deviceId, deviceName)
         }
-      }
+      },
+    )
+  }
+
+  private fun queryDeviceOs(device: ConnectedDevice) {
+    logd(TAG, "Issuing device OS query.")
+    val deviceOSQuery = SystemQuery.newBuilder().setType(DEVICE_OS).build()
+    connector.sendQuerySecurely(
+      device,
+      deviceOSQuery.toByteArray(),
+      parameters = null,
+      object : QueryCallback {
+        override fun onSuccess(response: ByteArray) {
+          if (response.isEmpty()) {
+            loge(TAG, "Received an empty device OS query response. Ignoring.")
+            return
+          }
+          val versionsResponse =
+            try {
+              DeviceVersionsResponse.parseFrom(response)
+            } catch (e: InvalidProtocolBufferException) {
+              loge(TAG, "Could not parse query response as proto.", e)
+              return
+            }
+          val deviceOs = versionsResponse.os
+          val deviceOsName = deviceOs.name
+          val deviceOsVersion = versionsResponse.osVersion
+          val deviceSdkVersion = versionsResponse.companionSdkVersion
+
+          logd(TAG, "Updating device ${device.deviceId}'s OS to $deviceOsName.")
+          storage.updateAssociatedDeviceOs(device.deviceId, deviceOs)
+
+          logd(TAG, "Updating device ${device.deviceId}'s OS version to $deviceOsVersion.")
+          storage.updateAssociatedDeviceOsVersion(device.deviceId, deviceOsVersion)
+
+          logd(
+            TAG,
+            "Updating device ${device.deviceId}'s Companion SDK version to $deviceSdkVersion.",
+          )
+          storage.updateAssociatedDeviceCompanionSdkVersion(device.deviceId, deviceSdkVersion)
+        }
+      },
     )
   }
 
@@ -140,11 +184,7 @@ internal constructor(
     }
   }
 
-  private fun onQueryReceivedInternal(
-    device: ConnectedDevice,
-    queryId: Int,
-    request: ByteArray,
-  ) {
+  private fun onQueryReceivedInternal(device: ConnectedDevice, queryId: Int, request: ByteArray) {
     val query =
       try {
         SystemQuery.parseFrom(request, ExtensionRegistryLite.getEmptyRegistry())
@@ -171,7 +211,7 @@ internal constructor(
       device,
       queryId,
       deviceName != null,
-      deviceName?.toByteArray(StandardCharsets.UTF_8)
+      deviceName?.toByteArray(StandardCharsets.UTF_8),
     )
   }
 

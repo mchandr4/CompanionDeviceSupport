@@ -27,6 +27,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import androidx.room.Room;
+import androidx.room.migration.Migration;
+import androidx.sqlite.db.SupportSQLiteDatabase;
+import com.google.android.companionprotos.DeviceOS;
 import com.google.android.connecteddevice.model.AssociatedDevice;
 import com.google.android.connecteddevice.util.ThreadSafeCallbacks;
 import java.security.InvalidKeyException;
@@ -47,6 +50,19 @@ public class ConnectedDeviceStorage {
   private static final String SHARED_PREFS_NAME = "com.google.android.connecteddevice";
   private static final String UNIQUE_ID_KEY = "CTABM_unique_id";
   private static final String DATABASE_NAME = "connected-device-database";
+  // Database migration from version 2 to 3.
+  // This migration adds the os, osVersion, and companionSdkVersion columns to the
+  // associated_devices table.
+  private static final Migration MIGRATION_2_3 =
+      new Migration(2, 3) {
+        @Override
+        public void migrate(SupportSQLiteDatabase database) {
+          database.execSQL(
+              "ALTER TABLE associated_devices ADD os TEXT NOT NULL DEFAULT 'DEVICE_OS_UNKNOWN';");
+          database.execSQL("ALTER TABLE associated_devices ADD osVersion TEXT;");
+          database.execSQL("ALTER TABLE associated_devices ADD companionSdkVersion TEXT;");
+        }
+      };
 
   private static final String CHALLENGE_HASHING_ALGORITHM = "HmacSHA256";
 
@@ -72,6 +88,7 @@ public class ConnectedDeviceStorage {
         context,
         new KeyStoreCryptoHelper(),
         Room.databaseBuilder(context, ConnectedDeviceDatabase.class, DATABASE_NAME)
+            .addMigrations(MIGRATION_2_3)
             .fallbackToDestructiveMigration()
             .build()
             .associatedDeviceDao(),
@@ -319,7 +336,7 @@ public class ConnectedDeviceStorage {
     ArrayList<String> userDeviceIds = new ArrayList<>();
 
     for (AssociatedDevice device : userDevices) {
-      userDeviceIds.add(device.getDeviceId());
+      userDeviceIds.add(device.getId());
     }
 
     return userDeviceIds;
@@ -381,7 +398,7 @@ public class ConnectedDeviceStorage {
   public void addAssociatedDeviceForUser(int userId, @NonNull AssociatedDevice device) {
     AssociatedDeviceEntity entity =
         new AssociatedDeviceEntity(userId, device, /* isConnectionEnabled= */ true);
-    associatedDeviceDatabase.addOrReplaceAssociatedDevice(entity);
+    addOrReplaceAssociatedDevice(entity);
     callbacks.invoke(callback -> callback.onAssociatedDeviceAdded(device));
   }
 
@@ -429,7 +446,66 @@ public class ConnectedDeviceStorage {
 
   private void updateName(AssociatedDeviceEntity entity, String name) {
     entity.name = name;
-    associatedDeviceDatabase.addOrReplaceAssociatedDevice(entity);
+    addOrReplaceAssociatedDevice(entity);
+    callbacks.invoke(callback -> callback.onAssociatedDeviceUpdated(entity.toAssociatedDevice()));
+  }
+
+  public void updateAssociatedDeviceOs(@NonNull String deviceId, @NonNull DeviceOS deviceOs) {
+    if (deviceOs == null) {
+      logw(TAG, "Cannot update the OS to null. Ignoring.");
+      return;
+    }
+    AssociatedDeviceEntity entity = associatedDeviceDatabase.getAssociatedDevice(deviceId);
+    if (entity == null) {
+      logw(
+          TAG,
+          "Attempted to update the device OS on an unrecognized device "
+              + deviceId
+              + ". Ignoring.");
+      return;
+    }
+    entity.os = deviceOs;
+    addOrReplaceAssociatedDevice(entity);
+    callbacks.invoke(callback -> callback.onAssociatedDeviceUpdated(entity.toAssociatedDevice()));
+  }
+
+  public void updateAssociatedDeviceOsVersion(
+      @NonNull String deviceId, @NonNull String deviceOsVersion) {
+    if (deviceOsVersion == null) {
+      logw(TAG, "Cannot update the OS version to null. Ignoring.");
+      return;
+    }
+    AssociatedDeviceEntity entity = associatedDeviceDatabase.getAssociatedDevice(deviceId);
+    if (entity == null) {
+      logw(
+          TAG,
+          "Attempted to update the device OS version on an unrecognized device "
+              + deviceId
+              + ". Ignoring.");
+      return;
+    }
+    entity.osVersion = deviceOsVersion;
+    addOrReplaceAssociatedDevice(entity);
+    callbacks.invoke(callback -> callback.onAssociatedDeviceUpdated(entity.toAssociatedDevice()));
+  }
+
+  public void updateAssociatedDeviceCompanionSdkVersion(
+      @NonNull String deviceId, @NonNull String sdkVersion) {
+    if (sdkVersion == null) {
+      logw(TAG, "Cannot update the companion SDK version to null. Ignoring.");
+      return;
+    }
+    AssociatedDeviceEntity entity = associatedDeviceDatabase.getAssociatedDevice(deviceId);
+    if (entity == null) {
+      logw(
+          TAG,
+          "Attempted to update the device SDK version on an unrecognized device "
+              + deviceId
+              + ". Ignoring.");
+      return;
+    }
+    entity.companionSdkVersion = sdkVersion;
+    addOrReplaceAssociatedDevice(entity);
     callbacks.invoke(callback -> callback.onAssociatedDeviceUpdated(entity.toAssociatedDevice()));
   }
 
@@ -468,7 +544,7 @@ public class ConnectedDeviceStorage {
       return;
     }
     entity.isConnectionEnabled = isConnectionEnabled;
-    associatedDeviceDatabase.addOrReplaceAssociatedDevice(entity);
+    addOrReplaceAssociatedDevice(entity);
     callbacks.invoke(callback -> callback.onAssociatedDeviceUpdated(entity.toAssociatedDevice()));
   }
 
@@ -498,7 +574,7 @@ public class ConnectedDeviceStorage {
     }
 
     entity.userId = ActivityManager.getCurrentUser();
-    associatedDeviceDatabase.addOrReplaceAssociatedDevice(entity);
+    addOrReplaceAssociatedDevice(entity);
     callbacks.invoke(callback -> callback.onAssociatedDeviceUpdated(entity.toAssociatedDevice()));
   }
 
@@ -516,8 +592,16 @@ public class ConnectedDeviceStorage {
     }
 
     entity.userId = AssociatedDevice.UNCLAIMED_USER_ID;
-    associatedDeviceDatabase.addOrReplaceAssociatedDevice(entity);
+    addOrReplaceAssociatedDevice(entity);
     callbacks.invoke(callback -> callback.onAssociatedDeviceUpdated(entity.toAssociatedDevice()));
+  }
+
+  private void addOrReplaceAssociatedDevice(AssociatedDeviceEntity entity) {
+    // Needed for database migration.
+    if (entity.os == null) {
+      entity.os = DeviceOS.DEVICE_OS_UNKNOWN;
+    }
+    associatedDeviceDatabase.addOrReplaceAssociatedDevice(entity);
   }
 
   /** Callback for association device related events. */

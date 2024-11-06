@@ -1099,7 +1099,7 @@ public class TrustedDeviceManager extends ITrustedDeviceManager.Stub {
           }
           TrustedDevice deviceToRemove = null;
           for (TrustedDevice trustedDevice : devices) {
-            if (trustedDevice.getDeviceId().equals(device.getDeviceId())) {
+            if (trustedDevice.getDeviceId().equals(device.getId())) {
               deviceToRemove = trustedDevice;
               break;
             }

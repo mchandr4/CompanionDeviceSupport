@@ -62,6 +62,12 @@ public final class ConnectedDeviceService extends TrunkService {
   private static final String META_ASSOCIATION_SERVICE_UUID =
       "com.google.android.connecteddevice.association_service_uuid";
 
+  private static final String META_ENABLE_BEACON =
+      "com.google.android.connecteddevice.enable_beacon";
+
+  private static final String META_ENABLE_PERIODIC_PING =
+      "com.google.android.connecteddevice.enable_periodic_ping";
+
   private static final String META_EAP_OOB_PROTOCOL_NAME =
       "com.google.android.connecteddevice.car_eap_oob_protocol_name";
 
@@ -73,8 +79,6 @@ public final class ConnectedDeviceService extends TrunkService {
 
   private static final String META_ENABLE_PASSENGER =
       "com.google.android.connecteddevice.enable_passenger";
-
-  private static final boolean ENABLE_PASSENGER_BY_DEFAULT = false;
 
   private final AtomicBoolean isEveryFeatureInitialized = new AtomicBoolean(false);
 
@@ -102,9 +106,9 @@ public final class ConnectedDeviceService extends TrunkService {
 
   private LoggingFeature loggingFeature;
 
-  private PeriodicPingFeature periodicPingFeature;
+  @Nullable private PeriodicPingFeature periodicPingFeature;
 
-  private BeaconFeature beaconFeature;
+  @Nullable private BeaconFeature beaconFeature;
 
   @Override
   @SuppressLint("UnprotectedReceiver") // ACTION_USER_REMOVED is a protected broadcast.
@@ -147,7 +151,7 @@ public final class ConnectedDeviceService extends TrunkService {
     }
     logd(TAG, "Initializing FeatureCoordinator version of the platform.");
     UUID associationUuid = UUID.fromString(requireMetaString(META_ASSOCIATION_SERVICE_UUID));
-    boolean enablePassenger = getMetaBoolean(META_ENABLE_PASSENGER, ENABLE_PASSENGER_BY_DEFAULT);
+    boolean enablePassenger = getMetaBoolean(META_ENABLE_PASSENGER, false);
     String oobProtocolName =
         getMetaString(META_EAP_OOB_PROTOCOL_NAME, DEFAULT_EAP_OOB_PROTOCOL_NAME);
     OobRunner oobRunner = new OobRunner(protocolDelegate, oobProtocolName);
@@ -172,15 +176,21 @@ public final class ConnectedDeviceService extends TrunkService {
             storage,
             CompanionConnector.createLocalConnector(
                 this, Connector.USER_TYPE_ALL, featureCoordinator));
-    periodicPingFeature =
-        new PeriodicPingFeature(
-            CompanionConnector.createLocalConnector(
-                this, Connector.USER_TYPE_ALL, featureCoordinator));
-    beaconFeature =
-        BeaconFeature.create(
-            this,
-            CompanionConnector.createLocalConnector(
-                this, Connector.USER_TYPE_ALL, featureCoordinator));
+    if (getMetaBoolean(META_ENABLE_PERIODIC_PING, false)) {
+      logd(TAG, "Instantiating PeriodicPingFeature.");
+      periodicPingFeature =
+          new PeriodicPingFeature(
+              CompanionConnector.createLocalConnector(
+                  this, Connector.USER_TYPE_ALL, featureCoordinator));
+    }
+    if (getMetaBoolean(META_ENABLE_BEACON, false)) {
+      logd(TAG, "Instantiating BeaconFeature.");
+      beaconFeature =
+          BeaconFeature.create(
+              this,
+              CompanionConnector.createLocalConnector(
+                  this, Connector.USER_TYPE_ALL, featureCoordinator));
+    }
   }
 
   private void onUserRemoved(UserHandle userHandle) {
@@ -264,8 +274,12 @@ public final class ConnectedDeviceService extends TrunkService {
     loggingManager.reset();
     systemFeature.stop();
     loggingFeature.stop();
-    periodicPingFeature.stop();
-    beaconFeature.stop();
+    if (periodicPingFeature != null) {
+      periodicPingFeature.stop();
+    }
+    if (beaconFeature != null) {
+      beaconFeature.stop();
+    }
   }
 
   private void initializeFeatures() {
@@ -282,8 +296,12 @@ public final class ConnectedDeviceService extends TrunkService {
               featureCoordinator.start();
               systemFeature.start();
               loggingFeature.start();
-              periodicPingFeature.start();
-              beaconFeature.start();
+              if (periodicPingFeature != null) {
+                periodicPingFeature.start();
+              }
+              if (beaconFeature != null) {
+                beaconFeature.start();
+              }
             })
         .start();
   }

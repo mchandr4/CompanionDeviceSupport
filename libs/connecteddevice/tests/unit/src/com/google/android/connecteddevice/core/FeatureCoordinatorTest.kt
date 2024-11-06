@@ -55,7 +55,7 @@ class FeatureCoordinatorTest {
       mockStorage,
       mockSystemQueryCache,
       mockLoggingManager,
-      directExecutor()
+      directExecutor(),
     )
 
   private val safeCoordinator = coordinator.safeFeatureCoordinator
@@ -703,11 +703,7 @@ class FeatureCoordinatorTest {
         /* message= */ ByteArray(0),
         /* originalMessageSize= */ 0,
       )
-    coordinator.onMessageReceivedInternal(
-      connectedDevice,
-      message,
-      shouldCacheMessage = true,
-    )
+    coordinator.onMessageReceivedInternal(connectedDevice, message, shouldCacheMessage = true)
 
     verify(mockSystemQueryCache).maybeCacheResponse(connectedDevice, message)
   }
@@ -729,11 +725,7 @@ class FeatureCoordinatorTest {
         /* message= */ ByteArray(0),
         /* originalMessageSize= */ 0,
       )
-    coordinator.onMessageReceivedInternal(
-      connectedDevice,
-      message,
-      shouldCacheMessage = false,
-    )
+    coordinator.onMessageReceivedInternal(connectedDevice, message, shouldCacheMessage = false)
 
     verify(mockSystemQueryCache, never()).maybeCacheResponse(any(), any())
   }
@@ -979,7 +971,7 @@ class FeatureCoordinatorTest {
     verify(mockStorage)
       .updateAssociatedDeviceConnectionEnabled(
         deviceId.toString(),
-        /* isConnectionEnabled= */ false
+        /* isConnectionEnabled= */ false,
       )
     verify(mockController).disconnectDevice(deviceId)
   }
@@ -990,16 +982,16 @@ class FeatureCoordinatorTest {
       listOf(
         AssociatedDevice(
           UUID.randomUUID().toString(),
-          /* deviceAddress= */ "",
-          /* deviceName= */ null,
+          /* address= */ "",
+          /* name= */ null,
           /* isConnectionEnabled= */ true,
         ),
         AssociatedDevice(
           UUID.randomUUID().toString(),
-          /* deviceAddress= */ "",
-          /* deviceName= */ null,
+          /* address= */ "",
+          /* name= */ null,
           /* isConnectionEnabled= */ false,
-        )
+        ),
       )
     val listener: IOnAssociatedDevicesRetrievedListener = mockToBeAlive()
     whenever(mockStorage.allAssociatedDevices).thenReturn(associatedDevices)
@@ -1015,16 +1007,16 @@ class FeatureCoordinatorTest {
       listOf(
         AssociatedDevice(
           UUID.randomUUID().toString(),
-          /* deviceAddress= */ "",
-          /* deviceName= */ null,
+          /* address= */ "",
+          /* name= */ null,
           /* isConnectionEnabled= */ true,
         ),
         AssociatedDevice(
           UUID.randomUUID().toString(),
-          /* deviceAddress= */ "",
-          /* deviceName= */ null,
+          /* address= */ "",
+          /* name= */ null,
           /* isConnectionEnabled= */ false,
-        )
+        ),
       )
     val listener: IOnAssociatedDevicesRetrievedListener = mockToBeAlive()
     whenever(mockStorage.driverAssociatedDevices).thenReturn(driverDevices)
@@ -1040,16 +1032,16 @@ class FeatureCoordinatorTest {
       listOf(
         AssociatedDevice(
           UUID.randomUUID().toString(),
-          /* deviceAddress= */ "",
-          /* deviceName= */ null,
+          /* address= */ "",
+          /* name= */ null,
           /* isConnectionEnabled= */ true,
         ),
         AssociatedDevice(
           UUID.randomUUID().toString(),
-          /* deviceAddress= */ "",
-          /* deviceName= */ null,
+          /* address= */ "",
+          /* name= */ null,
           /* isConnectionEnabled= */ false,
-        )
+        ),
       )
     val listener: IOnAssociatedDevicesRetrievedListener = mockToBeAlive()
     whenever(mockStorage.passengerAssociatedDevices).thenReturn(passengerDevices)
@@ -1200,6 +1192,33 @@ class FeatureCoordinatorTest {
   }
 
   @Test
+  fun safeFC_registerDeviceCallback_newAssociation_notifiesOfSecureChannelEstablished() {
+    val deviceCallback: ISafeDeviceCallback = mockToBeAlive()
+    val recipientId = ParcelUuid(UUID.randomUUID())
+    val connectedDevice =
+      ConnectedDevice(
+        UUID.randomUUID().toString(),
+        "testDeviceName",
+        /* belongsToDriver= */ true,
+        /* hasSecureChannel= */ true,
+      )
+    val controllerCallback =
+      argumentCaptor<DeviceController.Callback>().run {
+        verify(mockController).registerCallback(capture(), any())
+        firstValue
+      }
+
+    whenever(mockController.connectedDevices).thenReturn(listOf(connectedDevice))
+    // Controller callback is made before FeatureController registers the callback.
+    controllerCallback.onDeviceConnected(connectedDevice)
+    controllerCallback.onSecureChannelEstablished(connectedDevice)
+    safeCoordinator.registerDeviceCallback(connectedDevice.deviceId, recipientId, deviceCallback)
+
+    // Expect to receive the backfilled callback.
+    verify(deviceCallback).onSecureChannelEstablished(connectedDevice.deviceId)
+  }
+
+  @Test
   fun safeFC_registerDeviceCallback_sendsMissedMessages() {
     val deviceCallback: ISafeDeviceCallback = mockToBeAlive()
     val recipientId = ParcelUuid(UUID.randomUUID())
@@ -1225,7 +1244,7 @@ class FeatureCoordinatorTest {
         ByteUtils.bytesToUUID(message.recipient.toByteArray()),
         message.isPayloadEncrypted,
         DeviceMessage.OperationType.fromValue(message.operation.number),
-        message.payload.toByteArray()
+        message.payload.toByteArray(),
       )
 
     coordinator.onMessageReceivedInternal(connectedDevice, missedMessage)
@@ -1251,7 +1270,7 @@ class FeatureCoordinatorTest {
     safeCoordinator.registerDeviceCallback(
       connectedDevice.deviceId,
       recipientId,
-      duplicateDeviceCallback
+      duplicateDeviceCallback,
     )
 
     verify(deviceCallback)
@@ -1277,7 +1296,7 @@ class FeatureCoordinatorTest {
     safeCoordinator.registerDeviceCallback(
       connectedDevice.deviceId,
       recipientId,
-      duplicateDeviceCallback
+      duplicateDeviceCallback,
     )
 
     verify(deviceCallback)
@@ -1302,12 +1321,12 @@ class FeatureCoordinatorTest {
     safeCoordinator.registerDeviceCallback(
       connectedDevice.deviceId,
       recipientId,
-      deadDeviceCallback
+      deadDeviceCallback,
     )
     safeCoordinator.registerDeviceCallback(
       connectedDevice.deviceId,
       recipientId,
-      duplicateDeviceCallback
+      duplicateDeviceCallback,
     )
 
     verify(duplicateDeviceCallback, never())
@@ -1331,13 +1350,13 @@ class FeatureCoordinatorTest {
     safeCoordinator.registerDeviceCallback(
       connectedDevice.deviceId,
       recipientId,
-      duplicateDeviceCallback
+      duplicateDeviceCallback,
     )
 
     safeCoordinator.registerDeviceCallback(
       connectedDevice.deviceId,
       recipientId,
-      secondDuplicateDeviceCallback
+      secondDuplicateDeviceCallback,
     )
 
     verify(secondDuplicateDeviceCallback)
@@ -1444,7 +1463,7 @@ class FeatureCoordinatorTest {
     safeCoordinator.registerDeviceCallback(
       connectedDevice.deviceId,
       recipientId,
-      duplicateDeviceCallback
+      duplicateDeviceCallback,
     )
 
     coordinator.onMessageReceivedInternal(connectedDevice, message)
@@ -1613,23 +1632,23 @@ class FeatureCoordinatorTest {
       listOf(
         AssociatedDevice(
           UUID.randomUUID().toString(),
-          /* deviceAddress= */ "",
-          /* deviceName= */ null,
+          /* address= */ "",
+          /* name= */ null,
           /* isConnectionEnabled= */ true,
         ),
         AssociatedDevice(
           UUID.randomUUID().toString(),
-          /* deviceAddress= */ "",
-          /* deviceName= */ null,
+          /* address= */ "",
+          /* name= */ null,
           /* isConnectionEnabled= */ false,
-        )
+        ),
       )
     val listener: ISafeOnAssociatedDevicesRetrievedListener = mockToBeAlive()
     whenever(mockStorage.driverAssociatedDevices).thenReturn(driverDevices)
 
     safeCoordinator.retrieveAssociatedDevices(listener)
 
-    verify(listener).onAssociatedDevicesRetrieved(driverDevices.map { it.deviceId })
+    verify(listener).onAssociatedDevicesRetrieved(driverDevices.map { it.id })
   }
 
   companion object {

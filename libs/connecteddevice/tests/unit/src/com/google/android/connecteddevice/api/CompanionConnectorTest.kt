@@ -601,8 +601,8 @@ class CompanionConnectorTest {
     val device =
       AssociatedDevice(
         UUID.randomUUID().toString(),
-        /* deviceAddress= */ "",
-        /* deviceName= */ null,
+        /* address= */ "",
+        /* name= */ null,
         /* isConnectionEnabled= */ true,
       )
     defaultConnector.connect()
@@ -620,8 +620,8 @@ class CompanionConnectorTest {
     val device =
       AssociatedDevice(
         UUID.randomUUID().toString(),
-        /* deviceAddress= */ "",
-        /* deviceName= */ null,
+        /* address= */ "",
+        /* name= */ null,
         /* isConnectionEnabled= */ true,
       )
     defaultConnector.connect()
@@ -639,8 +639,8 @@ class CompanionConnectorTest {
     val device =
       AssociatedDevice(
         UUID.randomUUID().toString(),
-        /* deviceAddress= */ "",
-        /* deviceName= */ null,
+        /* address= */ "",
+        /* name= */ null,
         /* isConnectionEnabled= */ true,
       )
     defaultConnector.connect()

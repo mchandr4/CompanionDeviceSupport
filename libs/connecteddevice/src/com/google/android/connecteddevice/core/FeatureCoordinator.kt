@@ -135,12 +135,9 @@ constructor(
             /* hasSecureChannel= */ false,
           )
 
-        val registrationSuccessful =
+        val success =
           lock.withLock { registerDeviceCallbackLocked(connectedDevice, recipientId, callback) }
-
-        if (registrationSuccessful) {
-          notifyOfMissedMessages(connectedDevice, recipientId, callback)
-        } else {
+        if (!success) {
           loge(
             TAG,
             "Multiple callbacks registered for recipient $recipientId! " +
@@ -149,8 +146,26 @@ constructor(
           callbackExecutor.execute {
             callback.onDeviceError(deviceId, DEVICE_ERROR_INSECURE_RECIPIENT_ID_DETECTED)
           }
+          return
         }
+
+        // Retrospectively notify FeatureConnectors of onSecureChannelEstablished on Association.
+        //
+        // This logic is necessary because onSecureChannelEstablished is notified through
+        // DeviceCallback, which is registered to each associated device. FeatureConnector cannot
+        // register the callback for a newly associated device unheard of before.
+        if (hasSecureChannel(deviceId)) {
+          logd(TAG, "Notifying onSecureChannelEstablished() for associated device $deviceId.")
+          callbackExecutor.execute { callback.onSecureChannelEstablished(deviceId) }
+        }
+
+        notifyOfMissedMessages(connectedDevice, recipientId, callback)
       }
+
+      // Checks if deviceId currently has established a secure channel.
+      private fun hasSecureChannel(deviceId: String): Boolean =
+        controller.connectedDevices.firstOrNull { it.deviceId == deviceId }?.hasSecureChannel()
+          ?: false
 
       override fun unregisterDeviceCallback(
         deviceId: String,
@@ -219,9 +234,7 @@ constructor(
       // Retrieves Associated Devices for Driver
       override fun retrieveAssociatedDevices(listener: ISafeOnAssociatedDevicesRetrievedListener) {
         callbackExecutor.execute {
-          listener.onAssociatedDevicesRetrieved(
-            storage.getDriverAssociatedDevices().map { it.deviceId }
-          )
+          listener.onAssociatedDevicesRetrieved(storage.getDriverAssociatedDevices().map { it.id })
         }
       }
     }

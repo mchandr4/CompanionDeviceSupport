@@ -41,12 +41,12 @@ import java.util.concurrent.ConcurrentHashMap
  * Wrapper for SafeFeatureCoordinator APIs used to make sure that the Companion app's version is
  * compatible with the APIs it is attempting to call before actually making the call.
  */
-class SafeApiProxy (
+class SafeApiProxy(
   private val featureCoordinator: ISafeFeatureCoordinator,
   private val recipientId: ParcelUuid,
   private val connectorCallback: SafeConnector.Callback,
   private val loggerId: Int,
-  private val platformVersion: Int
+  private val platformVersion: Int,
 ) : CompanionApiProxy {
 
   // queryId -> callback
@@ -118,7 +118,7 @@ class SafeApiProxy (
             deviceId,
             query.id,
             query.request.toByteArray(),
-            query.parameters.toByteArray()
+            query.parameters.toByteArray(),
           )
         } catch (e: InvalidProtocolBufferException) {
           loge(TAG, "Unable to parse query.", e)
@@ -169,7 +169,7 @@ class SafeApiProxy (
 
       featureCoordinator.registerOnLogRequestedListener(loggerId, listener)
     } else {
-      logd(TAG, "Feature coordinator created by outdated Companion platform.")
+      loge(TAG, "Feature coordinator created by outdated Companion platform. No-op")
     }
   }
 
@@ -238,7 +238,7 @@ class SafeApiProxy (
     } else {
       logd(
         TAG,
-        "Attempting to clean up feature coordinator through an outdated Companion platform."
+        "Attempting to clean up feature coordinator through an outdated Companion platform.",
       )
     }
   }

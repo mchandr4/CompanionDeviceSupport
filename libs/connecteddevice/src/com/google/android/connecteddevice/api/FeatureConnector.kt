@@ -91,7 +91,7 @@ class FeatureConnector(
   internal val versionCheckConnection =
     object : ServiceConnection {
       override fun onServiceConnected(name: ComponentName, service: IBinder) {
-        logd("Service connected.")
+        logd("onServiceConnected: $name.")
         val receivedPlatformVersion = ISafeBinderVersion.Stub.asInterface(service).getVersion()
         logd(
           "minSupportedVersion: $minSupportedVersion; Platform version: $receivedPlatformVersion"
@@ -103,11 +103,11 @@ class FeatureConnector(
           )
           callback.onApiNotSupported()
           return
-        } else {
-          platformVersion = receivedPlatformVersion
-          bindAttempts = 0
-          bindToService(ACTION_BIND_SAFE_FEATURE_COORDINATOR, featureCoordinatorConnection)
         }
+
+        platformVersion = receivedPlatformVersion
+        bindAttempts = 0
+        bindToService(ACTION_BIND_SAFE_FEATURE_COORDINATOR, featureCoordinatorConnection)
       }
 
       override fun onServiceDisconnected(name: ComponentName) {

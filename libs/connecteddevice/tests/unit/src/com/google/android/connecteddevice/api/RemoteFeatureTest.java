@@ -90,8 +90,8 @@ public class RemoteFeatureTest {
     AssociatedDevice device =
         new AssociatedDevice(
             UUID.randomUUID().toString(),
-            /* deviceAddress= */ "",
-            /* deviceName= */ null,
+            /* address= */ "",
+            /* name= */ null,
             /* isConnectionEnabled= */ true);
 
     fakeConnector.getCallback().onAssociatedDeviceAdded(device);
@@ -104,8 +104,8 @@ public class RemoteFeatureTest {
     AssociatedDevice device =
         new AssociatedDevice(
             UUID.randomUUID().toString(),
-            /* deviceAddress= */ "",
-            /* deviceName= */ null,
+            /* address= */ "",
+            /* name= */ null,
             /* isConnectionEnabled= */ true);
 
     fakeConnector.getCallback().onAssociatedDeviceRemoved(device);
@@ -118,8 +118,8 @@ public class RemoteFeatureTest {
     AssociatedDevice device =
         new AssociatedDevice(
             UUID.randomUUID().toString(),
-            /* deviceAddress= */ "",
-            /* deviceName= */ null,
+            /* address= */ "",
+            /* name= */ null,
             /* isConnectionEnabled= */ true);
 
     fakeConnector.getCallback().onAssociatedDeviceUpdated(device);

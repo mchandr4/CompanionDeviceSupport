@@ -306,7 +306,7 @@ public abstract class AssociationBaseActivity extends FragmentActivity {
             this,
             device -> {
               if (device != null) {
-                runOnUiThread(() -> showDeviceRemovedToast(device.getDeviceName()));
+                runOnUiThread(() -> showDeviceRemovedToast(device.getName()));
               }
             });
     model

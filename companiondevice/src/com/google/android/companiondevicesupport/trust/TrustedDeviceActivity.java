@@ -397,12 +397,12 @@ public class TrustedDeviceActivity extends FragmentActivity {
       loge(TAG, "No associated device retrieved when a trusted device has been added.");
       return;
     }
-    if (!addedDevice.getDeviceId().equals(device.getDeviceId())) {
+    if (!addedDevice.getId().equals(device.getDeviceId())) {
       loge(TAG, "Id of the enrolled trusted device doesn't match id of the current device");
       return;
     }
     String message =
-        getString(R.string.trusted_device_enrollment_success_message, addedDevice.getDeviceName());
+        getString(R.string.trusted_device_enrollment_success_message, addedDevice.getName());
     Spanned styledMessage = Html.fromHtml(message, Html.FROM_HTML_MODE_LEGACY);
     runOnUiThread(() -> Toast.makeText(this, styledMessage, Toast.LENGTH_SHORT).show());
   }

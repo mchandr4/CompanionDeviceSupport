@@ -53,6 +53,11 @@
         <item>ble_peripheral</item>
     </string-array>
 
-    <bool name="enable_proxy">false</bool>
+    <bool name="enable_beacon">false</bool>
+
     <bool name="enable_passenger">false</bool>
+
+    <bool name="enable_periodic_ping">true</bool>
+
+    <bool name="enable_proxy">false</bool>
 </resources>

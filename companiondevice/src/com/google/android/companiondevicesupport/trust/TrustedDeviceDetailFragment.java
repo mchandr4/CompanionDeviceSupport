@@ -90,7 +90,7 @@ public class TrustedDeviceDetailFragment extends Fragment {
   }
 
   private void setTrustedDeviceTitle() {
-    String deviceName = associatedDevice.getDeviceName();
+    String deviceName = associatedDevice.getName();
     if (deviceName == null) {
       deviceName = getString(R.string.unknown);
     }
@@ -111,7 +111,7 @@ public class TrustedDeviceDetailFragment extends Fragment {
     }
     // Currently, we only support single trusted device.
     TrustedDevice device = devices.get(0);
-    if (!device.getDeviceId().equals(associatedDevice.getDeviceId())) {
+    if (!device.getDeviceId().equals(associatedDevice.getId())) {
       loge(TAG, "Trusted device id doesn't match associated device id.");
       return;
     }
@@ -128,7 +128,7 @@ public class TrustedDeviceDetailFragment extends Fragment {
               if (device == null) {
                 return;
               }
-              if (device.getDeviceId().equals(associatedDevice.getDeviceId())) {
+              if (device.getId().equals(associatedDevice.getId())) {
                 associatedDevice = device;
                 setTrustedDeviceTitle();
               }

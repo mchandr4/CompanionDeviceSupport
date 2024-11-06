@@ -20,6 +20,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
+import com.google.android.companionprotos.DeviceOS;
 import com.google.android.connecteddevice.model.AssociatedDevice;
 
 /** Table entity representing an associated device. */
@@ -38,9 +39,17 @@ public class AssociatedDeviceEntity {
   @Nullable
   public String address;
 
-  /** Bluetooth device name. */
-  @Nullable
-  public String name;
+  /** Associated device name. */
+  @Nullable public String name;
+
+  /** Operating system of this device. */
+  @NonNull public DeviceOS os;
+
+  /** Version of the operating system of this device. */
+  @Nullable public String osVersion;
+
+  /** The Companion SDK’s version running on this device. */
+  @Nullable public String companionSdkVersion;
 
   /** {@code true} if the connection is enabled for this device. */
   public boolean isConnectionEnabled;
@@ -50,14 +59,18 @@ public class AssociatedDeviceEntity {
   public AssociatedDeviceEntity(
       int userId, AssociatedDevice associatedDevice, boolean isConnectionEnabled) {
     this.userId = userId;
-    id = associatedDevice.getDeviceId();
-    address = associatedDevice.getDeviceAddress();
-    name = associatedDevice.getDeviceName();
+    id = associatedDevice.getId();
+    address = associatedDevice.getAddress();
+    name = associatedDevice.getName();
     this.isConnectionEnabled = isConnectionEnabled;
+    this.os = associatedDevice.getOs();
+    this.osVersion = associatedDevice.getOsVersion();
+    this.companionSdkVersion = associatedDevice.getCompanionSdkVersion();
   }
 
   /** Return a new {@link AssociatedDevice} of this entity. */
   public AssociatedDevice toAssociatedDevice() {
-    return new AssociatedDevice(id, address, name, isConnectionEnabled, userId);
+    return new AssociatedDevice(
+        id, address, name, isConnectionEnabled, userId, os, osVersion, companionSdkVersion);
   }
 }

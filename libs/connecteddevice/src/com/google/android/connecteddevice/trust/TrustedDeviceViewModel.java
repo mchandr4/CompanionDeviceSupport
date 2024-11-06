@@ -314,12 +314,12 @@ public class TrustedDeviceViewModel extends AndroidViewModel {
   }
 
   private void attemptInitiatingEnrollment(AssociatedDevice device) {
-    if (!isCompanionDeviceConnected(device.getDeviceId())) {
+    if (!isCompanionDeviceConnected(device.getId())) {
       enrollmentError.postValue(TRUSTED_DEVICE_ERROR_NO_CONNECTION);
       return;
     }
     try {
-      trustedDeviceManager.initiateEnrollment(device.getDeviceId());
+      trustedDeviceManager.initiateEnrollment(device.getId());
     } catch (RemoteException e) {
       loge(TAG, "Failed to initiate enrollment. ", e);
     }

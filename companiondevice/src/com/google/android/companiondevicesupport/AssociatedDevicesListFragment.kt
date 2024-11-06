@@ -63,12 +63,12 @@ class AssociatedDevicesListFragment : Fragment() {
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ): View =
     inflater.inflate(
       R.layout.associated_devices_list_fragment,
       container,
-      /* attachToRoot= */ false
+      /* attachToRoot= */ false,
     )
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -89,8 +89,8 @@ class AssociatedDevicesListFragment : Fragment() {
           activity.getApplication(),
           transportProtocols.contains(TransportProtocols.PROTOCOL_SPP),
           resources.getString(R.string.ble_device_name_prefix),
-          resources.getBoolean(R.bool.enable_passenger)
-        )
+          resources.getBoolean(R.bool.enable_passenger),
+        ),
       )
       .get(AssociatedDeviceViewModel::class.java)
   }
@@ -116,7 +116,7 @@ class AssociatedDevicesListFragment : Fragment() {
     val context = requireContext()
 
     return CarUiContentListItem(Action.CHEVRON).apply {
-      setTitle(deviceName)
+      setTitle(name)
       setBody(
         context.getString(
           if (belongsToDriver()) R.string.driver_device else R.string.passenger_device

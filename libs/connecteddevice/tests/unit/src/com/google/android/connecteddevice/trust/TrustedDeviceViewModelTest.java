@@ -48,8 +48,8 @@ import org.robolectric.ParameterizedRobolectricTestRunner.Parameters;
 @RunWith(ParameterizedRobolectricTestRunner.class)
 public final class TrustedDeviceViewModelTest {
   private static final String TEST_ASSOCIATED_DEVICE_ID = "test_device_id";
-  private static final String TEST_ASSOCIATED_DEVICE_NAME = "test_device_name";
-  private static final String TEST_ASSOCIATED_DEVICE_ADDRESS = "test_device_address";
+  private static final String TEST_ASSOCIATED_NAME = "test_name";
+  private static final String TEST_ASSOCIATED_ADDRESS = "test_address";
   private static final int TEST_USER_ID = 10;
   private static final long TEST_HANDLE = 0L;
 
@@ -354,15 +354,15 @@ public final class TrustedDeviceViewModelTest {
   private static AssociatedDevice createAssociatedDevice() {
     return new AssociatedDevice(
         TEST_ASSOCIATED_DEVICE_ID,
-        TEST_ASSOCIATED_DEVICE_ADDRESS,
-        TEST_ASSOCIATED_DEVICE_NAME,
+        TEST_ASSOCIATED_ADDRESS,
+        TEST_ASSOCIATED_NAME,
         /* isConnectionEnabled= */ true);
   }
 
   private static ConnectedDevice createConnectedDevice() {
     return new ConnectedDevice(
         TEST_ASSOCIATED_DEVICE_ID,
-        TEST_ASSOCIATED_DEVICE_NAME,
+        TEST_ASSOCIATED_NAME,
         /* belongsToDriver= */ true,
         /* hasSecureChannel= */ true);
   }
