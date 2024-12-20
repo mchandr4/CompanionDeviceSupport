@@ -18,6 +18,7 @@ package com.google.android.connecteddevice.core
 import android.content.Context
 import android.database.sqlite.SQLiteCantOpenDatabaseException
 import android.os.ParcelUuid
+import android.os.RemoteException
 import androidx.annotation.GuardedBy
 import androidx.annotation.VisibleForTesting
 import com.google.android.connecteddevice.api.IAssociationCallback
@@ -203,7 +204,11 @@ constructor(
     }
     for (protocol in protocolDelegate.protocols) {
       val discoveryCallback = generateConnectionDiscoveryCallback(deviceId, protocol, challenge)
-      protocol.startConnectionDiscovery(ParcelUuid(deviceId), challenge, discoveryCallback)
+      try {
+        protocol.startConnectionDiscovery(ParcelUuid(deviceId), challenge, discoveryCallback)
+      } catch (e: RemoteException) {
+        loge(TAG, "User process killed while running startConnectionDiscovery.", e)
+      }
     }
   }
 
