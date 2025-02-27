@@ -385,8 +385,8 @@ constructor(
       ACTION_BIND_FEATURE_COORDINATOR -> aliveFeatureCoordinator?.asBinder()
       ACTION_BIND_FEATURE_COORDINATOR_FG -> foregroundUserBinder.asBinder()
       else -> {
-        loge("Binder for unexpected action, returning null binder.")
-        null
+        loge("Binder for unexpected $action. Returning foregroundUserBinder.")
+        foregroundUserBinder.asBinder()
       }
     }
   }

@@ -36,6 +36,7 @@ import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.properties.Delegates
+import kotlinx.coroutines.runBlocking
 
 /**
  * Manages the version, capability exchange and device verification that must be completed in order
@@ -65,7 +66,7 @@ class ChannelResolver(
   private val storage: ConnectedDeviceStorage,
   private val callback: Callback,
   private val streamFactory: ProtocolStreamFactory = ProtocolStreamFactoryImpl(),
-  private var encryptionRunner: EncryptionRunner = newRunner(EncryptionRunnerType.UKEY2)
+  private var encryptionRunner: EncryptionRunner = newRunner(EncryptionRunnerType.UKEY2),
 ) {
   private val currentDevice: AtomicReference<ProtocolDevice?> =
     AtomicReference<ProtocolDevice?>(null)
@@ -112,7 +113,7 @@ class ChannelResolver(
           logd(
             TAG,
             "Channel already resolving with connection ${currentDevice.get()?.protocolId}. " +
-              "Ignoring data received from connection $protocolId."
+              "Ignoring data received from connection $protocolId.",
           )
         }
       }
@@ -148,7 +149,7 @@ class ChannelResolver(
     logd(
       TAG,
       "Resolved to messaging version $resolvedMessageVersion and security version " +
-        "$resolvedSecurityVersion."
+        "$resolvedSecurityVersion.",
     )
     val carVersion =
       VersionExchange.newBuilder()
@@ -209,8 +210,9 @@ class ChannelResolver(
             return
           }
           logd(TAG, "Responding to challenge.")
-          val deviceChallengeResponse =
+          val deviceChallengeResponse = runBlocking {
             storage.hashWithChallengeSecret(id.toString(), deviceChallenge)
+          }
           if (deviceChallengeResponse == null) {
             onError("Failed to generate challenge response.")
             return
@@ -220,7 +222,7 @@ class ChannelResolver(
               /* recipient= */ null,
               /* isMessageEncrypted= */ false,
               ENCRYPTION_HANDSHAKE,
-              deviceChallengeResponse
+              deviceChallengeResponse,
             )
           stream.sendMessage(challengeResponseMessage)
           resolveChannel(stream)

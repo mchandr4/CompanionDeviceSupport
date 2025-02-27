@@ -17,11 +17,11 @@
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <string name="settings_entry_title">Companion Device</string>
-  <string name="default_device_name">Associated device</string>
+  <string name="default_device_name">Associated Device</string>
   <string name="add_device_title">Connect to companion app</string>
   <string name="add_associated_device_title">Connect to MyCompanion</string>
   <string name="add_associated_device_subtitle">You can use your phone as a companion device to help manage your driving experience</string>
-  <string name="associated_device_install_app">Make sure you have <b>Companion app</b> installed on your phone</string>
+  <string name="associated_device_install_app">Make sure you have <b>Companion App</b> installed on your phone</string>
   <string name="open_companion_app_instruction_text">Open the companion app</string>
   <string name="enable_bluetooth_instruction_text">Allow Bluetooth connection</string>
   <string name="connect_to_targe_car_instruction_text">Connect to &lt;b&gt;%1$s&lt;/b&gt; %2$s</string>
@@ -31,7 +31,7 @@
   <string name="associated_device_pairing_message">Confirm that this matches the code shown on your phone</string>
   <string name="associated_device_success">Device has been associated successfully</string>
   <string name="associated_device_select_device">Open the app and connect to &lt;b&gt;%1$s&lt;/b&gt;</string>
-  <string name="associated_device_open_app">Open app and follow instructions in app</string>
+  <string name="associated_device_open_app">Open the app and follow instructions in the app</string>
   <string name="remove_associated_device_title">Forget &lt;b&gt;%1$s&lt;/b&gt;?</string>
   <string name="remove_associated_device_message">This car will no longer be paired with this device. You will additionally need to remove this car from the Companion app.</string>
   <string name="device_removed_success_toast_text">%1$s forgotten</string>
@@ -75,7 +75,7 @@
   <string name="app_running_msg_notification_title">Phone text messaging service is active</string>
   <string name="app_running_msg_notification_content">Receiving text messages via companion device</string>
   <string name="trusted_device_feature_title">Unlock profile with phone</string>
-  <string name="trusted_device_feature_instruction">Check your Companion app to set unlocking options</string>
+  <string name="trusted_device_feature_instruction">Check your Companion App to set unlocking options</string>
   <string name="trusted_device_item_title">Let &lt;b&gt;%1$s&lt;/b&gt; unlock my profile</string>
   <string name="device_not_connected_dialog_title">Can\'t find your phone</string>
   <string name="device_not_connected_dialog_message">Make sure your phone\'s and car\'s Bluetooth are on, and that your phone is nearby</string>
@@ -88,11 +88,11 @@
   <string name="enable_device_connection_text">Reconnect this device</string>
   <string name="trusted_device_notification_channel_name">Unlock with phone</string>
   <string name="trusted_device_notification_title">Let your phone unlock your profile</string>
-  <string name="trusted_device_notification_content">Tap here to authorise this feature</string>
+  <string name="trusted_device_notification_content">Tap here to authorize this feature</string>
   <string name="trusted_device_enrollment_error_dialog_title">Something went wrong</string>
   <string name="trusted_device_enrollment_error_dialog_message">Unfortunately, this feature could not be turned on at this time. Please try again.</string>
   <string name="create_phone_lock_dialog_title">Create a screen lock on your phone</string>
-  <string name="create_phone_lock_dialog_message">Your phone doesn\'t have a screen lock set. To unlock your car profile with your phone, first create a screen lock (also known as a passcode) in your phone\'s settings.</string>
+  <string name="create_phone_lock_dialog_message">Your phone doesn\'t have a screen lock set. To unlock your car profile with your phone, first create a screen lock (also known as passcode) in your phone\'s settings.</string>
   <plurals name="notification_new_message">
     <item quantity="one">New message</item>
     <item quantity="other">%d new messages</item>

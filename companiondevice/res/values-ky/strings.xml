@@ -99,7 +99,7 @@
   </plurals>
   <string name="name_not_available">Аты-жөнү жеткиликсиз</string>
   <string name="ble_device_name_prefix">Унаа\u00A0</string>
-  <string name="suw_setup_profile_title">Телефонуңузда же унаада тууралап бүтүрүңүз</string>
+  <string name="suw_setup_profile_title">Телефонуңузда же унаада аягына чейин орнотуңуз</string>
   <string name="suw_setup_profile_content">Эгер телефонуңузда тууралап баштаган болсоңуз, Көмөкчү колдонмону ачып, QR кодду скандаңыз.\n\nЖе профилиңизди унаада тууралап бүтүрсөңүз болот.</string>
   <string name="suw_qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; менен туташтыруу үчүн скандаңыз</string>
 </resources>

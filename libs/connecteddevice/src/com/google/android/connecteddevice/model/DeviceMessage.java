@@ -34,7 +34,10 @@ public class DeviceMessage implements Parcelable {
     ACK(3),
     CLIENT_MESSAGE(4),
     QUERY(5),
-    QUERY_RESPONSE(6);
+    QUERY_RESPONSE(6),
+    // DISCONNECT should be created at the protocol level. It is not necessary at DeviceMessage
+    // level. This enum only exists to match the proto field.
+    DISCONNECT(7);
 
     private final int value;
 

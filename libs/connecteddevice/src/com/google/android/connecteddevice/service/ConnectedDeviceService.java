@@ -47,7 +47,6 @@ import com.google.android.connecteddevice.transport.ProtocolDelegate;
 import com.google.android.connecteddevice.util.EventLog;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -90,7 +89,6 @@ public final class ConnectedDeviceService extends TrunkService {
       new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-          logd(TAG, "Received USER_REMOVED broadcast.");
           UserHandle userHandle = intent.getParcelableExtra(Intent.EXTRA_USER);
           onUserRemoved(userHandle);
         }
@@ -157,8 +155,16 @@ public final class ConnectedDeviceService extends TrunkService {
     OobRunner oobRunner = new OobRunner(protocolDelegate, oobProtocolName);
     DeviceController deviceController =
         new MultiProtocolDeviceController(
-            this, protocolDelegate, storage, oobRunner, associationUuid, enablePassenger);
-    featureCoordinator = new FeatureCoordinator(deviceController, storage, loggingManager);
+            /* context= */ this,
+            /* lifecycleOwner= */ this,
+            protocolDelegate,
+            storage,
+            oobRunner,
+            associationUuid,
+            enablePassenger);
+    featureCoordinator =
+        new FeatureCoordinator(
+            /* lifecycleOwner= */ this, deviceController, storage, loggingManager);
     logd(TAG, "Wrapping FeatureCoordinator in legacy binders for backwards compatibility.");
   }
 
@@ -172,7 +178,8 @@ public final class ConnectedDeviceService extends TrunkService {
                 this, Connector.USER_TYPE_DRIVER, featureCoordinator));
     systemFeature =
         new SystemFeature(
-            this,
+            /* context= */ this,
+            /* lifecycleOwner= */ this,
             storage,
             CompanionConnector.createLocalConnector(
                 this, Connector.USER_TYPE_ALL, featureCoordinator));
@@ -196,30 +203,32 @@ public final class ConnectedDeviceService extends TrunkService {
   private void onUserRemoved(UserHandle userHandle) {
     databaseExecutor.execute(
         () -> {
+          int userId = userHandle.getIdentifier();
+          logd(TAG, "Received USER_REMOVED broadcast for " + userId);
+
           FeatureCoordinator featurecoordinator = this.featureCoordinator;
           if (featurecoordinator == null) {
             logd(TAG, "User removed before feature coordinator is initiated. Ignored");
             return;
           }
 
-          int userId = userHandle.getIdentifier();
-          List<String> deviceIds = storage.getAssociatedDeviceIdsForUser(userId);
-          for (String deviceId : deviceIds) {
-            logd(TAG, "Delete data from database; userId=" + userId + ", deviceId=" + deviceId);
-            featurecoordinator.removeAssociatedDevice(deviceId);
-          }
+          featureCoordinator.removeAssociatedDevicesForUser(userId);
         });
   }
 
   @Nullable
   @Override
   public IBinder onBind(Intent intent) {
+    IBinder unused = super.onBind(intent);
+
     if (intent == null || intent.getAction() == null) {
-      logd(TAG, "Unidentified service bound request. Return null binder.");
-      return null;
+      // This is likely the binding intent from VendorServiceController, which controls the
+      // lifecycle of this service. The controller ignores the returned IBinder, so anything works.
+      logd(TAG, "onBind: received intent with null action. Returning featureCoordinator.");
+      return featureCoordinator;
     }
-    logd(TAG, "Service bound. Action: " + intent.getAction());
     String action = intent.getAction();
+    logd(TAG, "Service bound. Action: " + action);
     switch (action) {
       case CompanionProtocolRegistry.ACTION_BIND_PROTOCOL:
         return protocolDelegate;
@@ -231,8 +240,8 @@ public final class ConnectedDeviceService extends TrunkService {
         logd(TAG, "Return binder version to remote process");
         return binderVersion.asBinder();
       default:
-        loge(TAG, "Unexpected action found while binding: " + action);
-        return null;
+        loge(TAG, "onBinder: unexpected action: " + action + ". Returning featureCoordinator");
+        return featureCoordinator;
     }
   }
 

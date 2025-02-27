@@ -116,6 +116,7 @@ public class NotificationMsgService extends MetaDataService {
 
   @Override
   public IBinder onBind(Intent intent) {
+    IBinder unused = super.onBind(intent);
     return binder;
   }
 
@@ -136,6 +137,7 @@ public class NotificationMsgService extends MetaDataService {
 
   @Override
   public int onStartCommand(Intent intent, int flags, int startId) {
+    super.onStartCommand(intent, flags, startId);
     if (intent == null || intent.getAction() == null) {
       return START_STICKY;
     }

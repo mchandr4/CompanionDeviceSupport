@@ -88,7 +88,7 @@
   <string name="enable_device_connection_text">اتصال مجدد این دستگاه</string>
   <string name="trusted_device_notification_channel_name">باز کردن قفل با تلفن</string>
   <string name="trusted_device_notification_title">اجازه به تلفن برای باز کردن قفل نمایه</string>
-  <string name="trusted_device_notification_content">برای اجازه به این ویژگی، اینجا ضربه بزنید</string>
+  <string name="trusted_device_notification_content">برای اجازه به این ویژگی، اینجا تک‌ضرب بزنید</string>
   <string name="trusted_device_enrollment_error_dialog_title">مشکلی پیش آمد</string>
   <string name="trusted_device_enrollment_error_dialog_message">متأسفانه، در این لحظه امکان روشن کردن این ویژگی وجود ندارد. لطفاً دوباره امتحان کنید.</string>
   <string name="create_phone_lock_dialog_title">ایجاد قفل صفحه در تلفن</string>

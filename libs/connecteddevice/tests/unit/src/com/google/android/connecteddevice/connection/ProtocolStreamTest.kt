@@ -32,7 +32,6 @@ import com.google.android.connecteddevice.util.ByteUtils
 import com.google.common.truth.Truth
 import com.google.common.truth.Truth.assertThat
 import com.google.protobuf.ByteString
-import com.google.protobuf.ExtensionRegistryLite
 import java.util.UUID
 import java.util.concurrent.ThreadLocalRandom
 import org.junit.Test
@@ -65,7 +64,7 @@ class ProtocolStreamTest {
         recipient,
         /* isMessageEncrypted= */ false,
         DeviceMessage.OperationType.CLIENT_MESSAGE,
-        message
+        message,
       )
     )
     verify(protocol).sendData(eq(PROTOCOL_ID), any(), any())
@@ -80,7 +79,7 @@ class ProtocolStreamTest {
         recipient,
         /* isMessageEncrypted= */ false,
         DeviceMessage.OperationType.CLIENT_MESSAGE,
-        message
+        message,
       )
     )
     verify(protocol, times(2)).sendData(eq(PROTOCOL_ID), any(), any())
@@ -95,17 +94,27 @@ class ProtocolStreamTest {
         recipient,
         /* isMessageEncrypted= */ false,
         DeviceMessage.OperationType.CLIENT_MESSAGE,
-        message
+        message,
       )
     )
     argumentCaptor<ByteArray>().apply {
       verify(protocol).sendData(eq(PROTOCOL_ID), capture(), any())
-      val packet = Packet.parseFrom(firstValue, ExtensionRegistryLite.getEmptyRegistry())
-      val sentMessage =
-        Message.parseFrom(packet.payload.toByteArray(), ExtensionRegistryLite.getEmptyRegistry())
-          .payload
-          .toByteArray()
+      val packet = Packet.parseFrom(firstValue)
+      val sentMessage = Message.parseFrom(packet.payload.toByteArray()).payload.toByteArray()
       assertThat(message).isEqualTo(sentMessage)
+    }
+  }
+
+  @Test
+  fun requestDisconnect_sendsDisconnectMessage() {
+    val expected = Message.newBuilder().setOperation(OperationType.DISCONNECT).build()
+    stream.requestDisconnect()
+
+    argumentCaptor<ByteArray>().apply {
+      verify(protocol).sendData(eq(PROTOCOL_ID), capture(), any())
+      val packet = Packet.parseFrom(firstValue)
+      val sentMessage = Message.parseFrom(packet.payload.toByteArray())
+      assertThat(sentMessage).isEqualTo(expected)
     }
   }
 
@@ -119,7 +128,7 @@ class ProtocolStreamTest {
         recipient,
         /* isMessageEncrypted= */ false,
         DeviceMessage.OperationType.CLIENT_MESSAGE,
-        message
+        message,
       )
     )
     verify(protocol, never()).sendData(eq(PROTOCOL_ID), any(), any())
@@ -144,7 +153,7 @@ class ProtocolStreamTest {
         recipient,
         /* isMessageEncrypted= */ false,
         DeviceMessage.OperationType.CLIENT_MESSAGE,
-        message
+        message,
       )
     )
     verify(failingProtocol).disconnectDevice(PROTOCOL_ID)
@@ -240,7 +249,7 @@ class ProtocolStreamTest {
       PacketFactory.makePackets(
         message.toByteArray(),
         ThreadLocalRandom.current().nextInt(),
-        MAX_WRITE_SIZE
+        MAX_WRITE_SIZE,
       )
     } catch (e: Exception) {
       Truth.assertWithMessage("Uncaught exception while making packets.").fail()
@@ -258,13 +267,13 @@ class ProtocolStreamTest {
     override fun startAssociationDiscovery(
       name: String,
       identifier: ParcelUuid,
-      callback: IDiscoveryCallback
+      callback: IDiscoveryCallback,
     ) {}
 
     override fun startConnectionDiscovery(
       id: ParcelUuid,
       challenge: ConnectChallenge,
-      callback: IDiscoveryCallback
+      callback: IDiscoveryCallback,
     ) {}
 
     override fun stopAssociationDiscovery() {}
@@ -292,13 +301,13 @@ class ProtocolStreamTest {
     override fun startAssociationDiscovery(
       name: String,
       identifier: ParcelUuid,
-      callback: IDiscoveryCallback
+      callback: IDiscoveryCallback,
     ) {}
 
     override fun startConnectionDiscovery(
       id: ParcelUuid,
       challenge: ConnectChallenge,
-      callback: IDiscoveryCallback
+      callback: IDiscoveryCallback,
     ) {}
 
     override fun stopAssociationDiscovery() {}

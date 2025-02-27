@@ -62,13 +62,13 @@
   <string name="turn_on">Aktifkan</string>
   <string name="not_now">Lain kali</string>
   <string name="connect">Hubungkan</string>
-  <string name="disconnect">Putuskan koneksi</string>
+  <string name="disconnect">Berhenti hubungkan</string>
   <string name="disconnecting">Memutuskan hubungan</string>
   <string name="skip">Lewati</string>
   <string name="change_profile">Ubah profil</string>
   <string name="connected">Terhubung</string>
   <string name="notDetected">Tidak terdeteksi</string>
-  <string name="disconnected">Terputus</string>
+  <string name="disconnected">Tidak terhubung</string>
   <string name="detected">Terdeteksi</string>
   <string name="unknown">Tidak dikenal</string>
   <string name="app_running_msg_channel_name">Layanan SMS ponsel sedang berjalan</string>

@@ -115,8 +115,9 @@ public abstract class TrunkService extends MetaDataService {
     Intent intent = new Intent();
     intent.setComponent(componentName);
     String flatComponentName = componentName.flattenToString();
+    logd(TAG, "Attempted to start " + flatComponentName);
     boolean success = bindService(intent, createServiceConnection(), Context.BIND_AUTO_CREATE);
-    logd(TAG, "Attempted to start " + flatComponentName + " with success: " + success + ".");
+    logd(TAG, "Starting service with success: " + success);
     if (success) {
       bindAttempts.remove(flatComponentName);
       return;

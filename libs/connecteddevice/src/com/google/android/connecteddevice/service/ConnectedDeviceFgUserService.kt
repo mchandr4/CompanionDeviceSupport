@@ -65,7 +65,7 @@ class ConnectedDeviceFgUserService : TrunkService() {
           loge(
             TAG,
             "Unable to establish connection with the companion platform. Retrying in " +
-              "${RETRY_WAIT.toMillis()} ms."
+              "${RETRY_WAIT.toMillis()} ms.",
           )
           Handler(Looper.myLooper() ?: Looper.getMainLooper())
             .postDelayed({ connector.connect() }, RETRY_WAIT.toMillis())
@@ -90,8 +90,17 @@ class ConnectedDeviceFgUserService : TrunkService() {
   }
 
   override fun onBind(intent: Intent): IBinder? {
-    logd(TAG, "Service bound. Action: ${intent.action}")
-    val action = intent.action ?: return null
+    val unused = super.onBind(intent)
+
+    val action = intent.action
+    logd(TAG, "Service bound with action: $action")
+
+    if (action == null) {
+      // This is likely the binding intent from VendorServiceController, which controls the
+      // lifecycle of this service. The controller ignores the returned IBinder, so anything works.
+      logd(TAG, "onBind: received intent with null action. Returning binderVersion.")
+      return binderVersion.asBinder()
+    }
     if (action == SafeConnector.ACTION_QUERY_API_VERSION) {
       logd(TAG, "Return binder version to remote process")
       return binderVersion.asBinder()

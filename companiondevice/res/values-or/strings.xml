@@ -54,7 +54,7 @@
   <string name="ok">ଠିକ୍ ଅଛି</string>
   <string name="connection">ସଂଯୋଗ</string>
   <string name="forget_title">ଏହି ଡିଭାଇସକୁ ବିଚ୍ଛିନ୍ନ କରନ୍ତୁ</string>
-  <string name="forget">ବିଚ୍ଛିନ୍ନ କରନ୍ତୁ</string>
+  <string name="forget">ବାହାର କରନ୍ତୁ</string>
   <string name="disable">ଅକ୍ଷମ କରନ୍ତୁ</string>
   <string name="enable">ସକ୍ଷମ କରନ୍ତୁ</string>
   <string name="continue_button">ଜାରି ରଖନ୍ତୁ</string>
@@ -62,7 +62,7 @@
   <string name="turn_on">ଚାଲୁ କରନ୍ତୁ</string>
   <string name="not_now">ବର୍ତ୍ତମାନ ନୁହେଁ</string>
   <string name="connect">ସଂଯୋଗ କରନ୍ତୁ</string>
-  <string name="disconnect">ବିଚ୍ଛିନ୍ନ କରନ୍ତୁ</string>
+  <string name="disconnect">ଡିସକନେକ୍ଟ କରନ୍ତୁ</string>
   <string name="disconnecting">ଡିସକନେକ୍ଟ କରାଯାଉଛି</string>
   <string name="skip">ବାଦ୍ ଦିଅନ୍ତୁ</string>
   <string name="change_profile">ପ୍ରୋଫାଇଲ ବଦଳାନ୍ତୁ</string>

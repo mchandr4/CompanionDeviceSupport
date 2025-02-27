@@ -73,7 +73,7 @@
   <string name="unknown">અજાણ</string>
   <string name="app_running_msg_channel_name">ફોન ટેક્સ્ટ સંદેશની સેવા ચાલુ છે</string>
   <string name="app_running_msg_notification_title">ફોન ટેક્સ્ટ સંદેશની સેવા સક્રિય છે</string>
-  <string name="app_running_msg_notification_content">સાથી ડિવાઇસ દ્વારા ટેક્સ્ટ સંદેશ પ્રાપ્ત કરી રહ્યાં છીએ</string>
+  <string name="app_running_msg_notification_content">કમ્પેનિયન ડિવાઇસ દ્વારા ટેક્સ્ટ મેસેજ પ્રાપ્ત કરી રહ્યાં છીએ</string>
   <string name="trusted_device_feature_title">ફોન વડે પ્રોફાઇલ અનલૉક કરો</string>
   <string name="trusted_device_feature_instruction">અનલૉક કરવાના વિકલ્પો સેટ કરવા માટે તમારી સાથી ઍપ ચેક કરો</string>
   <string name="trusted_device_item_title">&lt;b&gt;%1$s&lt;/b&gt;ને મારી પ્રોફાઇલ અનલૉક કરવા દો</string>
@@ -94,8 +94,8 @@
   <string name="create_phone_lock_dialog_title">તમારા ફોન પર સ્ક્રીન લૉક બનાવો</string>
   <string name="create_phone_lock_dialog_message">તમારા ફોનમાં સ્ક્રીન લૉક સેટ કરેલું નથી. તમારા કારની પ્રોફાઇલને તમારા ફોન વડે અનલૉક કરવા માટે, તમારા ફોનના સેટિંગમાં પહેલા સ્ક્રીન લૉક (જે પાસકોડ તરીકે પણ ઓળખાય છે તે) બનાવો.</string>
   <plurals name="notification_new_message">
-    <item quantity="one">%d નવો સંદેશ</item>
-    <item quantity="other">%d નવા સંદેશા</item>
+    <item quantity="one">%d નવો મેસેજ</item>
+    <item quantity="other">%d નવા મેસેજ</item>
   </plurals>
   <string name="name_not_available">નામ ઉપલબ્ધ નથી</string>
   <string name="ble_device_name_prefix">વાહન\u00A0</string>

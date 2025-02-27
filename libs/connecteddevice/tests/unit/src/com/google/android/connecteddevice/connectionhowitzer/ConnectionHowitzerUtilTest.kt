@@ -20,13 +20,13 @@ import com.google.android.connecteddevice.connectionhowitzer.ConnectionHowitzerF
 import com.google.testing.junit.testparameterinjector.TestParameters
 import com.google.testing.junit.testparameterinjector.TestParameters.TestParametersValues
 import com.google.testing.junit.testparameterinjector.TestParametersValuesProvider
-import com.google.thirdparty.robolectric.testparameterinjector.RobolectricTestParameterInjector
 import java.time.Instant
 import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestParameterInjector
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestParameterInjector::class)

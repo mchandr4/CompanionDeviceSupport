@@ -99,7 +99,7 @@
   </plurals>
   <string name="name_not_available">नाम उपलब्ध छैन</string>
   <string name="ble_device_name_prefix">सवारी साधन\u00A0</string>
-  <string name="suw_setup_profile_title">आफ्नो फोन वा कारमा प्रोफाइल सेटअप गर्ने प्रक्रिया पूरा गर्नुहोस्</string>
+  <string name="suw_setup_profile_title">आफ्नो फोन वा कारमा प्रोफाइल सेटअप प्रक्रिया पूरा गर्नुहोस्</string>
   <string name="suw_setup_profile_content">तपाईंले आफ्नो फोनमा प्रोफाइल सेटअप गर्ने प्रक्रिया थालिसक्नुभएको छ भने सहयोगी एप खोलेर QR कोड स्क्यान गर्नुहोस्।\n\nतपाईं आफ्नो कारमा पनि प्रोफाइल सेटअप गर्ने प्रक्रिया पूरा गर्न सक्नुहुन्छ।</string>
   <string name="suw_qr_instruction_text">&lt;b&gt;%1$s&lt;/b&gt; मा कनेक्ट गर्न QR कोड स्क्यान गर्नुहोस्</string>
 </resources>

@@ -69,7 +69,7 @@ open class ProtocolStream(private val device: ProtocolDevice) {
         override fun onDataReceived(protocolId: String, data: ByteArray) {
           onDataReceived(data)
         }
-      }
+      },
     )
     device.protocol.registerDeviceDisconnectedListener(
       device.protocolId,
@@ -78,7 +78,7 @@ open class ProtocolStream(private val device: ProtocolDevice) {
           isConnected.set(false)
           protocolDisconnectListener?.onProtocolDisconnected()
         }
-      }
+      },
     )
     device.protocol.registerDeviceMaxDataSizeChangedListener(
       device.protocolId,
@@ -86,33 +86,17 @@ open class ProtocolStream(private val device: ProtocolDevice) {
         override fun onDeviceMaxDataSizeChanged(protocolId: String, maxBytes: Int) {
           maxWriteSize = maxBytes
         }
-      }
+      },
     )
     maxWriteSize = device.protocol.getMaxWriteSize(device.protocolId)
   }
 
-  private fun send(data: ByteArray) {
-    if (!isConnected.get()) {
-      logw(TAG, "Unable to send data to disconnected device.")
-      return
-    }
-    logd(TAG, "Send data with callback.")
-    device.protocol.sendData(
-      device.protocolId,
-      data,
-      object : IDataSendCallback.Stub() {
-        override fun onDataSentSuccessfully() {
-          logd(TAG, "Data sent successfully. Sending next message in queue.")
-          isSendingInProgress.set(false)
-          writeNextMessageInQueue()
-        }
-
-        override fun onDataFailedToSend() {
-          loge(TAG, "Data failed to send. Disconnecting.")
-          device.protocol.disconnectDevice(device.protocolId)
-        }
-      }
-    )
+  /** Sends a message to request the mobile side to initiate a disconnection. */
+  open fun requestDisconnect() {
+    val message =
+      DeviceMessageProto.Message.newBuilder().setOperation(OperationType.DISCONNECT).build()
+    logd(TAG, "Requesting disconnection. ${message.toString()}")
+    sendDeviceMessageProto(message)
   }
 
   /**
@@ -121,23 +105,14 @@ open class ProtocolStream(private val device: ProtocolDevice) {
    * Note: This method will handle the chunking of messages based on the max write size.
    */
   open fun sendMessage(deviceMessage: DeviceMessage) {
+    sendDeviceMessageProto(deviceMessage.toDeviceMessageProto())
+  }
+
+  private fun sendDeviceMessageProto(message: DeviceMessageProto.Message) {
     if (!isConnected.get()) {
       logw(TAG, "Unable to send message to disconnected device.")
       return
     }
-    val builder =
-      DeviceMessageProto.Message.newBuilder()
-        .setOperation(
-          OperationType.forNumber(deviceMessage.operationType.value)
-            ?: OperationType.OPERATION_TYPE_UNKNOWN
-        )
-        .setIsPayloadEncrypted(deviceMessage.isMessageEncrypted)
-        .setPayload(ByteString.copyFrom(deviceMessage.message))
-        .setOriginalSize(deviceMessage.originalMessageSize)
-    deviceMessage.recipient?.let {
-      builder.recipient = ByteString.copyFrom(ByteUtils.uuidToBytes(it))
-    }
-    val message = builder.build()
     val rawBytes = message.toByteArray()
     val packets =
       try {
@@ -163,9 +138,33 @@ open class ProtocolStream(private val device: ProtocolDevice) {
     val packet = packetQueue.remove()
     logd(
       TAG,
-      "Writing packet ${packet.packetNumber} of ${packet.totalPackets} for ${packet.messageId}."
+      "Writing packet ${packet.packetNumber} of ${packet.totalPackets} for ${packet.messageId}.",
     )
     send(packet.toByteArray())
+  }
+
+  private fun send(data: ByteArray) {
+    if (!isConnected.get()) {
+      logw(TAG, "Unable to send data to disconnected device.")
+      return
+    }
+    logd(TAG, "Send data with callback.")
+    device.protocol.sendData(
+      device.protocolId,
+      data,
+      object : IDataSendCallback.Stub() {
+        override fun onDataSentSuccessfully() {
+          logd(TAG, "Data sent successfully. Sending next message in queue.")
+          isSendingInProgress.set(false)
+          writeNextMessageInQueue()
+        }
+
+        override fun onDataFailedToSend() {
+          loge(TAG, "Data failed to send. Disconnecting.")
+          device.protocol.disconnectDevice(device.protocolId)
+        }
+      },
+    )
   }
 
   /** Process incoming data from stream. */
@@ -200,7 +199,7 @@ open class ProtocolStream(private val device: ProtocolDevice) {
     logd(
       TAG,
       "Parsed packet ${packet.packetNumber} of ${packet.totalPackets} for message $messageId. " +
-        "Writing ${payload.size}."
+        "Writing ${payload.size}.",
     )
     if (packet.packetNumber == 1) {
       onMessageStarted(messageId)
@@ -221,7 +220,7 @@ open class ProtocolStream(private val device: ProtocolDevice) {
     if (packetNumber == expectedPacket - 1) {
       logw(
         TAG,
-        "Received duplicate packet ${packet.packetNumber} for message $messageId. Ignoring."
+        "Received duplicate packet ${packet.packetNumber} for message $messageId. Ignoring.",
       )
       return false
     }
@@ -253,7 +252,7 @@ open class ProtocolStream(private val device: ProtocolDevice) {
         message.isPayloadEncrypted,
         DeviceMessage.OperationType.fromValue(message.operation.number),
         message.payload.toByteArray(),
-        message.originalSize
+        message.originalSize,
       )
     messageReceivedListener?.onMessageReceived(deviceMessage)
   }
@@ -261,6 +260,7 @@ open class ProtocolStream(private val device: ProtocolDevice) {
   /** A generator of unique IDs for messages. */
   private class MessageIdGenerator {
     private val messageId = AtomicInteger(0)
+
     fun next(): Int {
       val current = messageId.getAndIncrement()
       messageId.compareAndSet(Int.MAX_VALUE, 0)
@@ -286,5 +286,23 @@ open class ProtocolStream(private val device: ProtocolDevice) {
 
   companion object {
     private const val TAG = "ProtocolStream"
+
+    fun DeviceMessage.toDeviceMessageProto(): DeviceMessageProto.Message {
+      val builder =
+        DeviceMessageProto.Message.newBuilder()
+          .setOperation(
+            OperationType.forNumber(this.operationType.value)
+              ?: OperationType.OPERATION_TYPE_UNKNOWN
+          )
+          .setIsPayloadEncrypted(this.isMessageEncrypted)
+          .setPayload(ByteString.copyFrom(this.message))
+          .setOriginalSize(this.originalMessageSize)
+      val recipient = this.recipient
+      if (recipient != null) {
+        builder.recipient = ByteString.copyFrom(ByteUtils.uuidToBytes(recipient))
+      }
+
+      return builder.build()
+    }
   }
 }

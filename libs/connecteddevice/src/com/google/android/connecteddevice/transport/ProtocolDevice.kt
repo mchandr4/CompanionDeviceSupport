@@ -16,4 +16,7 @@
 package com.google.android.connecteddevice.transport
 
 /** Representation of a single device within a [ConnectionProtocol]. */
-data class ProtocolDevice(val protocol: IConnectionProtocol, val protocolId: String)
+data class ProtocolDevice(val protocol: IConnectionProtocol, val protocolId: String) {
+  // IConnectionProtocol is an AIDL generated interface. It'll always be logged as object address.
+  override fun toString(): String = "ProtocolDevice($protocolId)"
+}

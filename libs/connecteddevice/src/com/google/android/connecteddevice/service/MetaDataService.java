@@ -19,7 +19,6 @@ package com.google.android.connecteddevice.service;
 import static com.google.android.connecteddevice.util.SafeLog.logd;
 import static com.google.android.connecteddevice.util.SafeLog.loge;
 
-import android.app.Service;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -28,9 +27,10 @@ import android.os.Bundle;
 import android.os.IBinder;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.lifecycle.LifecycleService;
 
 /** Service with convenience methods for using meta-data configuration. */
-public abstract class MetaDataService extends Service {
+public abstract class MetaDataService extends LifecycleService {
 
   private static final String TAG = "MetaDataService";
 
@@ -188,6 +188,7 @@ public abstract class MetaDataService extends Service {
   @Nullable
   @Override
   public IBinder onBind(Intent intent) {
+    IBinder unused = super.onBind(intent);
     return null;
   }
 }

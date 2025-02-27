@@ -18,7 +18,6 @@ package com.google.android.connecteddevice.connection
 import android.content.Context
 import android.os.ParcelUuid
 import android.util.Base64
-import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.companionprotos.VerificationCode
@@ -29,7 +28,6 @@ import com.google.android.connecteddevice.connection.MultiProtocolSecureChannel.
 import com.google.android.connecteddevice.model.DeviceMessage
 import com.google.android.connecteddevice.model.DeviceMessage.OperationType
 import com.google.android.connecteddevice.oob.OobRunner
-import com.google.android.connecteddevice.storage.ConnectedDeviceDatabase
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage
 import com.google.android.connecteddevice.storage.CryptoHelper
 import com.google.android.connecteddevice.transport.ConnectChallenge
@@ -42,29 +40,30 @@ import com.google.android.encryptionrunner.EncryptionRunnerFactory
 import com.google.android.encryptionrunner.FakeEncryptionRunner
 import com.google.android.encryptionrunner.HandshakeException
 import com.google.common.truth.Truth.assertThat
-import com.google.common.util.concurrent.MoreExecutors.directExecutor
 import com.google.protobuf.ByteString
 import java.security.SignatureException
 import java.util.UUID
 import java.util.zip.DataFormatException
 import java.util.zip.Inflater
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.spy
+import org.mockito.kotlin.stub
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 private const val PROTOCOL_ID_1 = "testProtocol1"
 private const val PROTOCOL_ID_2 = "testProtocol2"
-private val SERVER_DEVICE_ID = UUID.fromString("a29f0c74-2014-4b14-ac02-be6ed15b545a")
 
 @RunWith(AndroidJUnit4::class)
 class MultiProtocolSecureChannelTest {
@@ -74,24 +73,16 @@ class MultiProtocolSecureChannelTest {
   private val mockInflater: Inflater = mock()
   private val mockCallback: MultiProtocolSecureChannel.Callback = mock()
   private val mockOobRunner: OobRunner = mock()
+  private val mockShowVerificationCodeListener: ShowVerificationCodeListener = mock()
 
   private lateinit var secureChannel: MultiProtocolSecureChannel
   private lateinit var spied: MultiProtocolSecureChannel
-  private lateinit var spyStorage: ConnectedDeviceStorage
-  private val mockShowVerificationCodeListener: ShowVerificationCodeListener = mock()
+  private lateinit var mockStorage: ConnectedDeviceStorage
 
   @Before
   @Throws(SignatureException::class)
   fun setUp() {
-    val database =
-      Room.inMemoryDatabaseBuilder(context, ConnectedDeviceDatabase::class.java)
-        .allowMainThreadQueries()
-        .setQueryExecutor(directExecutor())
-        .build()
-        .associatedDeviceDao()
-    spyStorage =
-      spy(ConnectedDeviceStorage(context, Base64CryptoHelper(), database, directExecutor()))
-    whenever(spyStorage.uniqueId).thenReturn(SERVER_DEVICE_ID)
+    mockStorage = mock()
   }
 
   @Test
@@ -349,6 +340,18 @@ class MultiProtocolSecureChannelTest {
   }
 
   @Test
+  fun requestDisconnect_notifiesAllStreams() {
+    setupSecureChannel(isReconnect = true)
+    secureChannel.addStream(stream1)
+    secureChannel.addStream(stream2)
+
+    secureChannel.requestDisconnect()
+
+    verify(stream1).requestDisconnect()
+    verify(stream2).requestDisconnect()
+  }
+
+  @Test
   fun sendClientMessage_FailedToSendMessageWithNullKey() {
     setupSecureChannel(isReconnect = true)
     val deviceMessage =
@@ -410,35 +413,36 @@ class MultiProtocolSecureChannelTest {
   }
 
   @Test
-  fun association_secureChannelEstablishedSuccessfully() {
-    val clientId = UUID.randomUUID()
-    setupSecureChannel(isReconnect = false)
-    secureChannel.showVerificationCodeListener = mockShowVerificationCodeListener
-    argumentCaptor<DeviceMessage>().apply {
-      initHandshakeMessage()
-      verify(stream1).sendMessage(capture())
-      val response = firstValue.message
-      assertThat(response).isEqualTo(FakeEncryptionRunner.INIT_RESPONSE)
+  fun association_secureChannelEstablishedSuccessfully() =
+    runBlocking<Unit> {
+      val clientId = UUID.randomUUID()
+      setupSecureChannel(isReconnect = false)
+      secureChannel.showVerificationCodeListener = mockShowVerificationCodeListener
+      argumentCaptor<DeviceMessage>().apply {
+        initHandshakeMessage()
+        verify(stream1).sendMessage(capture())
+        val response = firstValue.message
+        assertThat(response).isEqualTo(FakeEncryptionRunner.INIT_RESPONSE)
+      }
+      respondToContinueMessage()
+      val testVerificationCodeMessage =
+        VerificationCode.newBuilder().setState(VerificationCodeState.VISUAL_VERIFICATION).build()
+      val deviceMessage =
+        DeviceMessage.createOutgoingMessage(
+          /* recipient= */ null,
+          /* isMessageEncrypted= */ false,
+          OperationType.ENCRYPTION_HANDSHAKE,
+          testVerificationCodeMessage.toByteArray(),
+        )
+      secureChannel.onDeviceMessageReceived(deviceMessage)
+
+      verify(mockShowVerificationCodeListener).showVerificationCode(any())
+
+      secureChannel.notifyVerificationCodeAccepted()
+      secureChannel.setDeviceIdDuringAssociation(clientId)
+      verify(mockStorage).saveEncryptionKey(eq(clientId.toString()), any())
+      verify(mockCallback).onSecureChannelEstablished()
     }
-    respondToContinueMessage()
-    val testVerificationCodeMessage =
-      VerificationCode.newBuilder().setState(VerificationCodeState.VISUAL_VERIFICATION).build()
-    val deviceMessage =
-      DeviceMessage.createOutgoingMessage(
-        /* recipient= */ null,
-        /* isMessageEncrypted= */ false,
-        OperationType.ENCRYPTION_HANDSHAKE,
-        testVerificationCodeMessage.toByteArray(),
-      )
-    secureChannel.onDeviceMessageReceived(deviceMessage)
-
-    verify(mockShowVerificationCodeListener).showVerificationCode(any())
-
-    secureChannel.notifyVerificationCodeAccepted()
-    secureChannel.setDeviceIdDuringAssociation(clientId)
-    verify(spyStorage).saveEncryptionKey(eq(clientId.toString()), any())
-    verify(mockCallback).onSecureChannelEstablished()
-  }
 
   @Test
   fun association_wrongInitHandshakeMessage_issueInvalidHandshakeError() {
@@ -463,17 +467,20 @@ class MultiProtocolSecureChannelTest {
   }
 
   @Test
-  fun reconnect_secureChannelEstablishedSuccessfully() {
-    val clientId = UUID.randomUUID()
-    whenever(spyStorage.getEncryptionKey(clientId.toString())).thenReturn(byteArrayOf())
-    setupSecureChannel(isReconnect = true, clientId.toString())
-    initHandshakeMessage()
-    respondToContinueMessage()
-    respondToResumeMessage()
+  fun reconnect_secureChannelEstablishedSuccessfully() =
+    runBlocking<Unit> {
+      val clientId = UUID.randomUUID()
+      mockStorage.stub {
+        onBlocking { getEncryptionKey(clientId.toString()) } doReturn byteArrayOf()
+      }
+      setupSecureChannel(isReconnect = true, clientId.toString())
+      initHandshakeMessage()
+      respondToContinueMessage()
+      respondToResumeMessage()
 
-    verify(spyStorage).saveEncryptionKey(eq(clientId.toString()), any())
-    verify(mockCallback).onSecureChannelEstablished()
-  }
+      verify(mockStorage).saveEncryptionKey(eq(clientId.toString()), any())
+      verify(mockCallback).onSecureChannelEstablished()
+    }
 
   @Test
   fun reconnect_deviceIdNotSet_issueInvalidStateError() {
@@ -501,7 +508,7 @@ class MultiProtocolSecureChannelTest {
   fun processHandshakeResumingSession_incorrectHandshakeState_issueInvalidStateError() {
     val clientId = UUID.randomUUID().toString()
     setupSecureChannel(isReconnect = true, clientId)
-    whenever(spyStorage.getEncryptionKey(clientId)).thenReturn(byteArrayOf())
+    mockStorage.stub { onBlocking { getEncryptionKey(clientId) } doReturn byteArrayOf() }
     initHandshakeMessage()
     respondToContinueMessage()
     respondToResumeMessage(FakeEncryptionRunner.RECONNECTION_MESSAGE_STATE_ERROR)
@@ -513,7 +520,7 @@ class MultiProtocolSecureChannelTest {
   fun processHandshakeResumingSession_emptyNewKey_issueInvalidKeyError() {
     val clientId = UUID.randomUUID().toString()
     setupSecureChannel(isReconnect = true, clientId)
-    whenever(spyStorage.getEncryptionKey(clientId)).thenReturn(byteArrayOf())
+    mockStorage.stub { onBlocking { getEncryptionKey(clientId) } doReturn byteArrayOf() }
     initHandshakeMessage()
     respondToContinueMessage()
     respondToResumeMessage(FakeEncryptionRunner.RECONNECTION_MESSAGE_KEY_ERROR)
@@ -526,7 +533,7 @@ class MultiProtocolSecureChannelTest {
   fun processHandshakeResumingSession_emptyNextMessage_issueInvalidMessageError() {
     val clientId = UUID.randomUUID().toString()
     setupSecureChannel(isReconnect = true, clientId)
-    whenever(spyStorage.getEncryptionKey(clientId)).thenReturn(byteArrayOf())
+    mockStorage.stub { onBlocking { getEncryptionKey(clientId) } doReturn byteArrayOf() }
     initHandshakeMessage()
     respondToContinueMessage()
     respondToResumeMessage(FakeEncryptionRunner.RECONNECTION_MESSAGE_EMPTY_RESPONSE)
@@ -694,7 +701,7 @@ class MultiProtocolSecureChannelTest {
     secureChannel =
       MultiProtocolSecureChannel(
           stream1,
-          spyStorage,
+          mockStorage,
           encryptionRunner,
           mockOobRunner,
           deviceId = deviceId,

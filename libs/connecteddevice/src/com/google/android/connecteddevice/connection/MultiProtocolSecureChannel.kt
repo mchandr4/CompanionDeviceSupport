@@ -40,6 +40,7 @@ import java.util.zip.Deflater
 import java.util.zip.Inflater
 import kotlin.concurrent.withLock
 import kotlin.math.roundToLong
+import kotlinx.coroutines.runBlocking
 
 /**
  * Establishes a secure channel with [EncryptionRunner] over [ProtocolStream]s as server side, sends
@@ -77,14 +78,14 @@ open class MultiProtocolSecureChannel(
     CHANNEL_ERROR_INVALID_ENCRYPTION_KEY,
 
     /** Disconnected before secure channel is established. */
-    CHANNEL_ERROR_DEVICE_DISCONNECTED
+    CHANNEL_ERROR_DEVICE_DISCONNECTED,
   }
 
   enum class MessageError {
     /** Indicates an error when decrypting the message. */
     MESSAGE_ERROR_DECRYPTION_FAILURE,
     /** Indicates an error when decompressing the message. */
-    MESSAGE_ERROR_DECOMPRESSION_FAILURE
+    MESSAGE_ERROR_DECOMPRESSION_FAILURE,
   }
 
   private val encryptionKeyLock = ReentrantLock()
@@ -273,7 +274,7 @@ open class MultiProtocolSecureChannel(
       return
     }
     logd(TAG, "Start reconnection authentication.")
-    val previousKey = storage.getEncryptionKey(deviceId.toString())
+    val previousKey = runBlocking { storage.getEncryptionKey(deviceId.toString()) }
     if (previousKey == null) {
       loge(TAG, "Unable to resume session, previous key is null.")
       notifySecureChannelFailure(ChannelError.CHANNEL_ERROR_INVALID_ENCRYPTION_KEY)
@@ -292,7 +293,7 @@ open class MultiProtocolSecureChannel(
       notifySecureChannelFailure(ChannelError.CHANNEL_ERROR_INVALID_ENCRYPTION_KEY)
       return
     }
-    storage.saveEncryptionKey(deviceId.toString(), newKey.asBytes())
+    runBlocking { storage.saveEncryptionKey(deviceId.toString(), newKey.asBytes()) }
     logd(TAG, "Saved new key for reconnection.")
     encryptionKey.set(newKey)
     sendServerAuthToClient(handshakeMessage.nextMessage)
@@ -308,7 +309,7 @@ open class MultiProtocolSecureChannel(
     sendHandshakeMessage(message)
   }
 
-  /** Notify that the device id is received from remote device during association. */
+  /** Notifies that the device id is received from remote device during association. */
   open fun setDeviceIdDuringAssociation(deviceId: UUID) {
     this.deviceId = deviceId.toString()
     if (encryptionKey.get() == null) {
@@ -316,7 +317,7 @@ open class MultiProtocolSecureChannel(
       notifySecureChannelFailure(ChannelError.CHANNEL_ERROR_INVALID_ENCRYPTION_KEY)
       return
     }
-    storage.saveEncryptionKey(deviceId.toString(), encryptionKey.get().asBytes())
+    runBlocking { storage.saveEncryptionKey(deviceId.toString(), encryptionKey.get().asBytes()) }
   }
 
   /**
@@ -374,7 +375,7 @@ open class MultiProtocolSecureChannel(
     isCanceled = true
   }
 
-  /** Add a protocol stream to this channel. */
+  /** Adds a protocol stream to this channel. */
   fun addStream(stream: ProtocolStream) {
     streams.add(stream)
     stream.messageReceivedListener =
@@ -399,7 +400,14 @@ open class MultiProtocolSecureChannel(
       }
   }
 
-  /** Send un-encrypted message to remote device during handshake. */
+  /** Requests all streams to initiate a disconnection. */
+  open fun requestDisconnect() {
+    for (stream in streams) {
+      stream.requestDisconnect()
+    }
+  }
+
+  /** Sends un-encrypted message to remote device during handshake. */
   protected fun sendHandshakeMessage(message: ByteArray) {
     logd(TAG, "Sending handshake message.")
     val deviceMessage =
@@ -413,7 +421,7 @@ open class MultiProtocolSecureChannel(
   }
 
   /**
-   * Send a client [DeviceMessage] to remote device. Returns 'true' if the send is successful,
+   * Sends a client [DeviceMessage] to remote device. Returns 'true' if the send is successful,
    * `false` if this method is called with an encrypted message only after the secure channel has
    * been established
    */
@@ -471,16 +479,16 @@ open class MultiProtocolSecureChannel(
     callback?.let { notification.accept(it) }
   }
 
-  /** Notify callbacks that an error has occurred. */
+  /** Notifies callbacks that an error has occurred. */
   protected fun notifySecureChannelFailure(error: ChannelError) {
     loge(TAG, "Secure channel error: $error")
     notifyCallback { it.onEstablishSecureChannelFailure(error) }
   }
 
   /**
-   * Process the inner message and replace with decrypted value if necessary. If an error occurs the
-   * inner message will be replaced with `null` and call [Callback.onMessageReceivedError] on the
-   * registered callback.
+   * Processes the inner message and replace with decrypted value if necessary. If an error occurs
+   * the inner message will be replaced with `null` and call [Callback.onMessageReceivedError] on
+   * the registered callback.
    *
    * @param deviceMessage The message to process.
    * @return `true` if message was successfully processed. `false` if an error occurred.

@@ -62,10 +62,11 @@
         android:directBootAware="true"
         android:supportsRtl="true"
         android:taskAffinity="">
+        <!-- ConnectedDeviceService is exported for FeatureConnector. -->
         <service
             android:name="com.google.android.connecteddevice.service.ConnectedDeviceService"
             android:singleUser="true"
-            android:exported="false">
+            android:exported="true">
             <intent-filter>
                 <action android:name="com.google.android.connecteddevice.api.BIND_FEATURE_COORDINATOR" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -87,6 +88,8 @@
             <meta-data android:name="com.google.android.connecteddevice.enable_periodic_ping"
                 android:resource="@bool/enable_periodic_ping" />
         </service>
+        <!-- ConnectedDeviceFgUserService is exported for CompanionConnector
+             and FeatureConnector. -->
         <service
             android:name="com.google.android.connecteddevice.service.ConnectedDeviceFgUserService"
             android:foregroundServiceType="connectedDevice"
@@ -143,12 +146,13 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <meta-data android:name="com.android.settings.icon"
-                       android:resource="@drawable/ic_smartphone_24dp" android:value="true"/>
+                       android:resource="@drawable/ic_phonelink_ring_40dp" android:value="true"/>
             <meta-data android:name="com.android.settings.title"
                        android:resource="@string/settings_entry_title" />
             <meta-data android:name="com.android.settings.category"
                        android:value="com.android.settings.category.personal" />
         </activity>
+        <!-- SetupWizardAssociationActivity is exported for SUW. -->
         <activity android:name=".SetupWizardAssociationActivity"
             android:exported="true"
             android:launchMode="singleInstance">
@@ -187,6 +191,7 @@
             android:singleUser="true"
             android:exported="false">
         </service>
+        <!-- TrustedDeviceAgentService is an extension of the platform service TrustAgent. -->
         <service
             android:name="com.google.android.connecteddevice.trust.TrustedDeviceAgentService"
             android:permission="android.permission.BIND_TRUST_AGENT"
@@ -215,6 +220,8 @@
             <meta-data android:name="com.google.android.connecteddevice.trust.enrollment_notification_content"
                 android:resource="@string/trusted_device_notification_content"/>
         </service>
+        <!-- TrustedDeviceActivity is exported because it's injected as
+             Settings > Security > "Unlock profile with phone". -->
         <activity
             android:name=".trust.TrustedDeviceActivity"
             android:exported="true"

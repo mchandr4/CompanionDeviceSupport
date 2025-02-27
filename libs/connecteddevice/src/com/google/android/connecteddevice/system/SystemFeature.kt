@@ -18,6 +18,8 @@ package com.google.android.connecteddevice.system
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.content.Context
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import com.google.android.companionprotos.DeviceVersionsResponse
 import com.google.android.companionprotos.SystemQuery
 import com.google.android.companionprotos.SystemQueryType.DEVICE_NAME
@@ -32,11 +34,9 @@ import com.google.android.connecteddevice.model.ConnectedDevice
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage
 import com.google.android.connecteddevice.util.SafeLog.logd
 import com.google.android.connecteddevice.util.SafeLog.loge
-import com.google.protobuf.ExtensionRegistryLite
 import com.google.protobuf.InvalidProtocolBufferException
 import java.nio.charset.StandardCharsets
 import java.util.UUID
-import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 
 /**
@@ -51,6 +51,7 @@ open class SystemFeature
 // @VisibleForTesting
 internal constructor(
   context: Context,
+  private val lifecycleOwner: LifecycleOwner,
   private val storage: ConnectedDeviceStorage,
   private val connector: Connector,
   private val queryFeatureSupportOnConnection: List<UUID>,
@@ -61,10 +62,12 @@ internal constructor(
 
   constructor(
     context: Context,
+    lifecycleOwner: LifecycleOwner,
     storage: ConnectedDeviceStorage,
     connector: Connector,
   ) : this(
     context,
+    lifecycleOwner,
     storage,
     connector,
     listOf(
@@ -128,8 +131,10 @@ internal constructor(
             return
           }
           val deviceName = String(response, StandardCharsets.UTF_8)
-          logd(TAG, "Updating device ${device.deviceId}'s name to $deviceName.")
-          storage.updateAssociatedDeviceName(device.deviceId, deviceName)
+          lifecycleOwner.lifecycleScope.launch {
+            logd(TAG, "Updating device ${device.deviceId}'s name to $deviceName.")
+            storage.updateAssociatedDeviceName(device.deviceId, deviceName)
+          }
         }
       },
     )
@@ -160,17 +165,19 @@ internal constructor(
           val deviceOsVersion = versionsResponse.osVersion
           val deviceSdkVersion = versionsResponse.companionSdkVersion
 
-          logd(TAG, "Updating device ${device.deviceId}'s OS to $deviceOsName.")
-          storage.updateAssociatedDeviceOs(device.deviceId, deviceOs)
+          lifecycleOwner.lifecycleScope.launch {
+            logd(TAG, "Updating device ${device.deviceId}'s OS to $deviceOsName.")
+            storage.updateAssociatedDeviceOs(device.deviceId, deviceOs)
 
-          logd(TAG, "Updating device ${device.deviceId}'s OS version to $deviceOsVersion.")
-          storage.updateAssociatedDeviceOsVersion(device.deviceId, deviceOsVersion)
+            logd(TAG, "Updating device ${device.deviceId}'s OS version to $deviceOsVersion.")
+            storage.updateAssociatedDeviceOsVersion(device.deviceId, deviceOsVersion)
 
-          logd(
-            TAG,
-            "Updating device ${device.deviceId}'s Companion SDK version to $deviceSdkVersion.",
-          )
-          storage.updateAssociatedDeviceCompanionSdkVersion(device.deviceId, deviceSdkVersion)
+            logd(
+              TAG,
+              "Updating device ${device.deviceId}'s Companion SDK version to $deviceSdkVersion.",
+            )
+            storage.updateAssociatedDeviceCompanionSdkVersion(device.deviceId, deviceSdkVersion)
+          }
         }
       },
     )
@@ -179,7 +186,7 @@ internal constructor(
   private fun queryFeatureSupportStatusToPreheatCache(device: ConnectedDevice) {
     logd(TAG, "Issuing query for feature support status.")
     // Ignore the result because we are only calling to preheat the status cache.
-    MainScope().launch {
+    lifecycleOwner.lifecycleScope.launch {
       val unused = connector.queryFeatureSupportStatuses(device, queryFeatureSupportOnConnection)
     }
   }
@@ -187,7 +194,7 @@ internal constructor(
   private fun onQueryReceivedInternal(device: ConnectedDevice, queryId: Int, request: ByteArray) {
     val query =
       try {
-        SystemQuery.parseFrom(request, ExtensionRegistryLite.getEmptyRegistry())
+        SystemQuery.parseFrom(request)
       } catch (e: InvalidProtocolBufferException) {
         loge(TAG, "Unable to parse system query.", e)
         respondWithError(device, queryId)

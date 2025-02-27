@@ -24,5 +24,6 @@
     app:showBackButton="true"
     app:showPrimaryToolbarButton="false"
     app:supportsSplitNavLayout="true"
+    app:supportsRotaryControl="true"
     tools:ignore="Overdraw">
 </com.android.car.setupwizardlib.CarSetupWizardCompatLayout>

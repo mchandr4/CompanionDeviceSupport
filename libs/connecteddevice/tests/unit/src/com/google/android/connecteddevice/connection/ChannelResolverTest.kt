@@ -18,7 +18,6 @@ package com.google.android.connecteddevice.connection
 import android.content.Context
 import android.os.ParcelUuid
 import android.util.Base64
-import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.companionprotos.CapabilitiesExchangeProto.CapabilitiesExchange.OobChannelType
@@ -26,7 +25,6 @@ import com.google.android.companionprotos.VersionExchangeProto
 import com.google.android.connecteddevice.model.DeviceMessage
 import com.google.android.connecteddevice.model.DeviceMessage.OperationType
 import com.google.android.connecteddevice.oob.OobRunner
-import com.google.android.connecteddevice.storage.ConnectedDeviceDatabase
 import com.google.android.connecteddevice.storage.ConnectedDeviceStorage
 import com.google.android.connecteddevice.storage.CryptoHelper
 import com.google.android.connecteddevice.transport.ConnectChallenge
@@ -37,7 +35,6 @@ import com.google.android.connecteddevice.transport.IDiscoveryCallback
 import com.google.android.connecteddevice.transport.ProtocolDevice
 import com.google.android.encryptionrunner.FakeEncryptionRunner
 import com.google.common.truth.Truth.assertThat
-import com.google.common.util.concurrent.MoreExecutors.directExecutor
 import java.util.UUID
 import org.junit.After
 import org.junit.Before
@@ -46,9 +43,11 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
+import org.mockito.kotlin.stub
 import org.mockito.kotlin.validateMockitoUsage
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -73,35 +72,28 @@ class ChannelResolverTest {
   private var mockEncryptionRunner = mock<FakeEncryptionRunner>()
   private val testDevice1 = ProtocolDevice(testProtocol1, TEST_PROTOCOL_ID_1)
   private val testDevice2 = ProtocolDevice(testProtocol2, TEST_PROTOCOL_ID_2)
-  private lateinit var spyStorage: ConnectedDeviceStorage
+  private lateinit var mockStorage: ConnectedDeviceStorage
   private lateinit var channelResolver: ChannelResolver
-  private lateinit var connectedDeviceDatabase: ConnectedDeviceDatabase
 
   @Before
   fun setUp() {
-    connectedDeviceDatabase =
-      Room.inMemoryDatabaseBuilder(context, ConnectedDeviceDatabase::class.java)
-        .allowMainThreadQueries()
-        .setQueryExecutor(directExecutor())
-        .build()
-    val database = connectedDeviceDatabase.associatedDeviceDao()
-    spyStorage =
-      spy(ConnectedDeviceStorage(context, Base64CryptoHelper(), database, directExecutor()))
+    mockStorage = mock()
     whenever(mockStreamFactory.createProtocolStream(any())).thenReturn(mockStream)
-    whenever(spyStorage.hashWithChallengeSecret(any(), any())).thenReturn(TEST_CHALLENGE_RESPONSE)
+    mockStorage.stub {
+      onBlocking { hashWithChallengeSecret(any(), any()) } doReturn TEST_CHALLENGE_RESPONSE
+    }
     channelResolver =
       ChannelResolver(
         testDevice1,
-        spyStorage,
+        mockStorage,
         mockCallback,
         mockStreamFactory,
-        mockEncryptionRunner
+        mockEncryptionRunner,
       )
   }
 
   @After
   fun cleanUp() {
-    connectedDeviceDatabase.close()
     // Validate after each test to get accurate indication of Mockito misuse.
     validateMockitoUsage()
   }
@@ -170,7 +162,7 @@ class ChannelResolverTest {
         /* recipient= */ null,
         /* isMessageEncrypted= */ false,
         OperationType.ENCRYPTION_HANDSHAKE,
-        "Invalid test Challenge".toByteArray()
+        "Invalid test Challenge".toByteArray(),
       )
     mockStream.messageReceivedListener?.onMessageReceived(invalidChallengeMessage)
     verify(mockCallback).onChannelResolutionError()
@@ -189,7 +181,7 @@ class ChannelResolverTest {
         /* recipient= */ null,
         /* isMessageEncrypted= */ false,
         OperationType.ENCRYPTION_HANDSHAKE,
-        TEST_CHALLENGE
+        TEST_CHALLENGE,
       )
     mockStream.messageReceivedListener?.onMessageReceived(validChallengeMessage)
     argumentCaptor<DeviceMessage> {
@@ -213,7 +205,7 @@ class ChannelResolverTest {
         /* recipient= */ null,
         /* isMessageEncrypted= */ false,
         OperationType.ENCRYPTION_HANDSHAKE,
-        TEST_CHALLENGE
+        TEST_CHALLENGE,
       )
     mockStream.messageReceivedListener?.onMessageReceived(validChallengeMessage)
     verify(mockCallback).onChannelResolved(any())
@@ -256,13 +248,13 @@ class ChannelResolverTest {
     override fun startAssociationDiscovery(
       name: String,
       identifier: ParcelUuid,
-      callback: IDiscoveryCallback
+      callback: IDiscoveryCallback,
     ) {}
 
     override fun startConnectionDiscovery(
       id: ParcelUuid,
       challenge: ConnectChallenge,
-      callback: IDiscoveryCallback
+      callback: IDiscoveryCallback,
     ) {}
 
     override fun stopAssociationDiscovery() {}

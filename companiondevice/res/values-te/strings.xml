@@ -48,7 +48,7 @@
   <string name="companion_not_available_dialog_switch_user_message">గెస్ట్ ప్రొఫైల్స్ CompanionDeviceను యాక్సెస్ చేయలేవు. మీ ప్రొఫైల్‌ను మార్చడానికి, సెట్టింగ్‌లు &gt; యూజర్‌లు ఆప్షన్‌కు వెళ్లండి.</string>
   <string name="accept">అంగీకరించండి</string>
   <string name="reject">తిరస్కరించు</string>
-  <string name="confirm">నిర్ధారించు</string>
+  <string name="confirm">నిర్ధారించండి</string>
   <string name="cancel">రద్దు చేయండి</string>
   <string name="remove">తీసివేయండి</string>
   <string name="ok">సరే</string>

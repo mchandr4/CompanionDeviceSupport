@@ -1413,7 +1413,8 @@ class CompanionConnectorTest {
       .isEqualTo(defaultConnector.featureCoordinator?.asBinder())
     assertThat(defaultConnector.binderForAction(ACTION_BIND_FEATURE_COORDINATOR_FG))
       .isEqualTo(defaultConnector.foregroundUserBinder.asBinder())
-    assertThat(defaultConnector.binderForAction("")).isNull()
+    assertThat(defaultConnector.binderForAction(""))
+      .isEqualTo(defaultConnector.foregroundUserBinder.asBinder())
   }
 
   @Test

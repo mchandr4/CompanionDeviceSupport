@@ -1,6 +1,7 @@
 package com.google.android.connecteddevice.core
 
 import android.os.ParcelUuid
+import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.companionprotos.OperationProto.OperationType
 import com.google.android.companionprotos.message
@@ -31,6 +32,7 @@ import com.google.common.truth.Truth.assertThat
 import com.google.common.util.concurrent.MoreExecutors.directExecutor
 import com.google.protobuf.ByteString
 import java.util.UUID
+import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
@@ -51,6 +53,7 @@ class FeatureCoordinatorTest {
 
   private val coordinator =
     FeatureCoordinator(
+      TestLifecycleOwner(),
       mockController,
       mockStorage,
       mockSystemQueryCache,
@@ -942,114 +945,132 @@ class FeatureCoordinatorTest {
   }
 
   @Test
-  fun removeAssociatedDevice_disconnectsAndRemovesAssociatedDeviceFromStorage() {
-    val deviceId = UUID.randomUUID()
+  fun removeAssociatedDevicesForUser_allDevicesRemoved() =
+    runBlocking<Unit> {
+      val device1 = UUID.randomUUID()
+      val device2 = UUID.randomUUID()
+      // User 10 is arbitrary.
+      whenever(mockStorage.getAssociatedDeviceIdsForUser(10))
+        .thenReturn(listOf(device1.toString(), device2.toString()))
 
-    coordinator.removeAssociatedDevice(deviceId.toString())
+      coordinator.removeAssociatedDevicesForUser(10)
 
-    verify(mockController).disconnectDevice(deviceId)
-    verify(mockStorage).removeAssociatedDevice(deviceId.toString())
-  }
-
-  @Test
-  fun enableAssociatedDeviceConnection_updatesStorageAndInitiatesConnection() {
-    val deviceId = UUID.randomUUID()
-
-    coordinator.enableAssociatedDeviceConnection(deviceId.toString())
-
-    verify(mockStorage)
-      .updateAssociatedDeviceConnectionEnabled(deviceId.toString(), /* isConnectionEnabled= */ true)
-    verify(mockController).initiateConnectionToDevice(deviceId)
-  }
+      verify(mockStorage).removeAssociatedDevice(device1.toString())
+      verify(mockStorage).removeAssociatedDevice(device2.toString())
+    }
 
   @Test
-  fun disableAssociatedDeviceConnection_updatesStorageAndDisconnectsDevice() {
-    val deviceId = UUID.randomUUID()
+  fun removeAssociatedDevice_disconnectsAndRemovesAssociatedDeviceFromStorage() =
+    runBlocking<Unit> {
+      val deviceId = UUID.randomUUID()
 
-    coordinator.disableAssociatedDeviceConnection(deviceId.toString())
+      coordinator.removeAssociatedDevice(deviceId.toString())
 
-    verify(mockStorage)
-      .updateAssociatedDeviceConnectionEnabled(
-        deviceId.toString(),
-        /* isConnectionEnabled= */ false,
-      )
-    verify(mockController).disconnectDevice(deviceId)
-  }
+      verify(mockController).disconnectDevice(deviceId)
+      verify(mockStorage).removeAssociatedDevice(deviceId.toString())
+    }
 
   @Test
-  fun retrieveAssociatedDevices_returnsAllAssociatedDevicesInStorage() {
-    val associatedDevices =
-      listOf(
-        AssociatedDevice(
-          UUID.randomUUID().toString(),
-          /* address= */ "",
-          /* name= */ null,
-          /* isConnectionEnabled= */ true,
-        ),
-        AssociatedDevice(
-          UUID.randomUUID().toString(),
-          /* address= */ "",
-          /* name= */ null,
-          /* isConnectionEnabled= */ false,
-        ),
-      )
-    val listener: IOnAssociatedDevicesRetrievedListener = mockToBeAlive()
-    whenever(mockStorage.allAssociatedDevices).thenReturn(associatedDevices)
+  fun enableAssociatedDeviceConnection_updatesStorageAndInitiatesConnection() =
+    runBlocking<Unit> {
+      val deviceId = UUID.randomUUID()
 
-    coordinator.retrieveAssociatedDevices(listener)
+      coordinator.enableAssociatedDeviceConnection(deviceId.toString())
 
-    verify(listener).onAssociatedDevicesRetrieved(associatedDevices)
-  }
+      verify(mockStorage)
+        .updateAssociatedDeviceConnectionEnabled(deviceId.toString(), isConnectionEnabled = true)
+      verify(mockController).initiateConnectionToDevice(deviceId)
+    }
 
   @Test
-  fun retrieveAssociatedDevicesForDriver_returnsOnlyDriverDevicesInStorage() {
-    val driverDevices =
-      listOf(
-        AssociatedDevice(
-          UUID.randomUUID().toString(),
-          /* address= */ "",
-          /* name= */ null,
-          /* isConnectionEnabled= */ true,
-        ),
-        AssociatedDevice(
-          UUID.randomUUID().toString(),
-          /* address= */ "",
-          /* name= */ null,
-          /* isConnectionEnabled= */ false,
-        ),
-      )
-    val listener: IOnAssociatedDevicesRetrievedListener = mockToBeAlive()
-    whenever(mockStorage.driverAssociatedDevices).thenReturn(driverDevices)
+  fun disableAssociatedDeviceConnection_updatesStorageAndDisconnectsDevice() =
+    runBlocking<Unit> {
+      val deviceId = UUID.randomUUID()
 
-    coordinator.retrieveAssociatedDevicesForDriver(listener)
+      coordinator.disableAssociatedDeviceConnection(deviceId.toString())
 
-    verify(listener).onAssociatedDevicesRetrieved(driverDevices)
-  }
+      verify(mockStorage)
+        .updateAssociatedDeviceConnectionEnabled(deviceId.toString(), isConnectionEnabled = false)
+      verify(mockController).disconnectDevice(deviceId)
+    }
 
   @Test
-  fun retrieveAssociatedDevicesForPassengers_returnsOnlyPassengerDevicesInStorage() {
-    val passengerDevices =
-      listOf(
-        AssociatedDevice(
-          UUID.randomUUID().toString(),
-          /* address= */ "",
-          /* name= */ null,
-          /* isConnectionEnabled= */ true,
-        ),
-        AssociatedDevice(
-          UUID.randomUUID().toString(),
-          /* address= */ "",
-          /* name= */ null,
-          /* isConnectionEnabled= */ false,
-        ),
-      )
-    val listener: IOnAssociatedDevicesRetrievedListener = mockToBeAlive()
-    whenever(mockStorage.passengerAssociatedDevices).thenReturn(passengerDevices)
+  fun retrieveAssociatedDevices_returnsAllAssociatedDevicesInStorage() =
+    runBlocking<Unit> {
+      val associatedDevices =
+        listOf(
+          AssociatedDevice(
+            UUID.randomUUID().toString(),
+            /* address= */ "",
+            /* name= */ null,
+            /* isConnectionEnabled= */ true,
+          ),
+          AssociatedDevice(
+            UUID.randomUUID().toString(),
+            /* address= */ "",
+            /* name= */ null,
+            /* isConnectionEnabled= */ false,
+          ),
+        )
+      val listener: IOnAssociatedDevicesRetrievedListener = mockToBeAlive()
+      whenever(mockStorage.getAllAssociatedDevices()).thenReturn(associatedDevices)
 
-    coordinator.retrieveAssociatedDevicesForPassengers(listener)
+      coordinator.retrieveAssociatedDevices(listener)
 
-    verify(listener).onAssociatedDevicesRetrieved(passengerDevices)
-  }
+      verify(listener).onAssociatedDevicesRetrieved(associatedDevices)
+    }
+
+  @Test
+  fun retrieveAssociatedDevicesForDriver_returnsOnlyDriverDevicesInStorage() =
+    runBlocking<Unit> {
+      val driverDevices =
+        listOf(
+          AssociatedDevice(
+            UUID.randomUUID().toString(),
+            /* address= */ "",
+            /* name= */ null,
+            /* isConnectionEnabled= */ true,
+          ),
+          AssociatedDevice(
+            UUID.randomUUID().toString(),
+            /* address= */ "",
+            /* name= */ null,
+            /* isConnectionEnabled= */ false,
+          ),
+        )
+      val listener: IOnAssociatedDevicesRetrievedListener = mockToBeAlive()
+      whenever(mockStorage.getDriverAssociatedDevices()).thenReturn(driverDevices)
+
+      coordinator.retrieveAssociatedDevicesForDriver(listener)
+
+      verify(listener).onAssociatedDevicesRetrieved(driverDevices)
+    }
+
+  @Test
+  fun retrieveAssociatedDevicesForPassengers_returnsOnlyPassengerDevicesInStorage() =
+    runBlocking<Unit> {
+      val passengerDevices =
+        listOf(
+          AssociatedDevice(
+            UUID.randomUUID().toString(),
+            /* address= */ "",
+            /* name= */ null,
+            /* isConnectionEnabled= */ true,
+          ),
+          AssociatedDevice(
+            UUID.randomUUID().toString(),
+            /* address= */ "",
+            /* name= */ null,
+            /* isConnectionEnabled= */ false,
+          ),
+        )
+      val listener: IOnAssociatedDevicesRetrievedListener = mockToBeAlive()
+      whenever(mockStorage.getPassengerAssociatedDevices()).thenReturn(passengerDevices)
+
+      coordinator.retrieveAssociatedDevicesForPassengers(listener)
+
+      verify(listener).onAssociatedDevicesRetrieved(passengerDevices)
+    }
 
   @Test
   fun registerOnLogRequestedListener() {
@@ -1103,26 +1124,28 @@ class FeatureCoordinatorTest {
   }
 
   @Test
-  fun claimAssociatedDevice_disconnectsAndClaimsDeviceAndInitiatesReconnection() {
-    val deviceId = UUID.randomUUID()
+  fun claimAssociatedDevice_disconnectsAndClaimsDeviceAndInitiatesReconnection() =
+    runBlocking<Unit> {
+      val deviceId = UUID.randomUUID()
 
-    coordinator.claimAssociatedDevice(deviceId.toString())
+      coordinator.claimAssociatedDevice(deviceId.toString())
 
-    verify(mockController).disconnectDevice(deviceId)
-    verify(mockStorage).claimAssociatedDevice(deviceId.toString())
-    verify(mockController).initiateConnectionToDevice(deviceId)
-  }
+      verify(mockController).disconnectDevice(deviceId)
+      verify(mockStorage).claimAssociatedDevice(deviceId.toString())
+      verify(mockController).initiateConnectionToDevice(deviceId)
+    }
 
   @Test
-  fun removeAssociatedDeviceClaim_disconnectsAndRemovesClaimAndInitiatesReconnection() {
-    val deviceId = UUID.randomUUID()
+  fun removeAssociatedDeviceClaim_disconnectsAndRemovesClaimAndInitiatesReconnection() =
+    runBlocking<Unit> {
+      val deviceId = UUID.randomUUID()
 
-    coordinator.removeAssociatedDeviceClaim(deviceId.toString())
+      coordinator.removeAssociatedDeviceClaim(deviceId.toString())
 
-    verify(mockController).disconnectDevice(deviceId)
-    verify(mockStorage).removeAssociatedDeviceClaim(deviceId.toString())
-    verify(mockController).initiateConnectionToDevice(deviceId)
-  }
+      verify(mockController).disconnectDevice(deviceId)
+      verify(mockStorage).removeAssociatedDeviceClaim(deviceId.toString())
+      verify(mockController).initiateConnectionToDevice(deviceId)
+    }
 
   // The following tests are for the SafeFeatureCoordinator contained in FeatureCoordinator.
 
@@ -1627,29 +1650,30 @@ class FeatureCoordinatorTest {
   }
 
   @Test
-  fun safeFC_retrieveAssociatedDevices_returnsOnlyDriverDevicesInStorage() {
-    val driverDevices =
-      listOf(
-        AssociatedDevice(
-          UUID.randomUUID().toString(),
-          /* address= */ "",
-          /* name= */ null,
-          /* isConnectionEnabled= */ true,
-        ),
-        AssociatedDevice(
-          UUID.randomUUID().toString(),
-          /* address= */ "",
-          /* name= */ null,
-          /* isConnectionEnabled= */ false,
-        ),
-      )
-    val listener: ISafeOnAssociatedDevicesRetrievedListener = mockToBeAlive()
-    whenever(mockStorage.driverAssociatedDevices).thenReturn(driverDevices)
+  fun safeFC_retrieveAssociatedDevices_returnsOnlyDriverDevicesInStorage() =
+    runBlocking<Unit> {
+      val driverDevices =
+        listOf(
+          AssociatedDevice(
+            UUID.randomUUID().toString(),
+            /* address= */ "",
+            /* name= */ null,
+            /* isConnectionEnabled= */ true,
+          ),
+          AssociatedDevice(
+            UUID.randomUUID().toString(),
+            /* address= */ "",
+            /* name= */ null,
+            /* isConnectionEnabled= */ false,
+          ),
+        )
+      val listener: ISafeOnAssociatedDevicesRetrievedListener = mockToBeAlive()
+      whenever(mockStorage.getDriverAssociatedDevices()).thenReturn(driverDevices)
 
-    safeCoordinator.retrieveAssociatedDevices(listener)
+      safeCoordinator.retrieveAssociatedDevices(listener)
 
-    verify(listener).onAssociatedDevicesRetrieved(driverDevices.map { it.id })
-  }
+      verify(listener).onAssociatedDevicesRetrieved(driverDevices.map { it.id })
+    }
 
   companion object {
     private const val TAG = "FeatureCoordinatorTest"

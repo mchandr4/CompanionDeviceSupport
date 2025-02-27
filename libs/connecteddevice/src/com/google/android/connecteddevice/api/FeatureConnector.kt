@@ -196,7 +196,15 @@ class FeatureConnector(
       return
     }
 
-    val success = context.bindService(intent, serviceConnection, /* flag= */ 0)
+    val success =
+      try {
+        context.bindService(intent, serviceConnection, /* flag= */ 0)
+      } catch (e: SecurityException) {
+        // Some released companion IHU SDK did not export the service that supports this action.
+        // This try-catch prevents a crash in the caller like SUW.
+        loge("Could not bind to service with $intent.", e)
+        false
+      }
     if (success) {
       logd("Successfully started binding with ${intent.action}.")
       return

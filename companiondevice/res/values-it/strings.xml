@@ -36,7 +36,7 @@
   <string name="remove_associated_device_message">L\'auto non sarà più accoppiata a questo dispositivo. Dovrai inoltre rimuovere questa auto dall\'app complementare.</string>
   <string name="device_removed_success_toast_text">Dispositivo %1$s eliminato</string>
   <string name="device_removed_failure_toast_text">Impossibile eliminare %1$s</string>
-  <string name="continue_setup_toast_text">Continua la configurazione sul telefono</string>
+  <string name="continue_setup_toast_text">Continua la configurazione sullo smartphone</string>
   <string name="error_screen_title">Si è verificato un problema</string>
   <string name="error_screen_message">Impossibile visualizzare correttamente questa schermata. Riprova.</string>
   <string name="turn_on_bluetooth_title">Attiva Bluetooth</string>

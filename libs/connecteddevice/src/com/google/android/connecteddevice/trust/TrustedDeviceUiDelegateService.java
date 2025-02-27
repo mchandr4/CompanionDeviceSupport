@@ -136,6 +136,7 @@ public class TrustedDeviceUiDelegateService extends MetaDataService {
   @Nullable
   @Override
   public IBinder onBind(Intent intent) {
+    IBinder unused = super.onBind(intent);
     return null;
   }
 

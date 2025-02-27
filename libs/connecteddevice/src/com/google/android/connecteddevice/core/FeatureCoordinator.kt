@@ -19,6 +19,8 @@ import android.os.IInterface
 import android.os.ParcelUuid
 import androidx.annotation.GuardedBy
 import androidx.annotation.VisibleForTesting
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import com.google.android.companionprotos.DeviceMessageProto
 import com.google.android.companionprotos.OperationProto.OperationType
 import com.google.android.connecteddevice.api.IAssociationCallback
@@ -52,11 +54,13 @@ import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
+import kotlinx.coroutines.launch
 
 /** Coordinator between features and connected devices. */
 class FeatureCoordinator
 @JvmOverloads
 constructor(
+  private val lifecycleOwner: LifecycleOwner,
   private val controller: DeviceController,
   private val storage: ConnectedDeviceStorage,
   private val systemQueryCache: SystemQueryCache = SystemQueryCache.create(),
@@ -65,11 +69,8 @@ constructor(
 ) : IFeatureCoordinator.Stub() {
 
   private val deviceAssociationCallbacks = AidlThreadSafeCallbacks<IDeviceAssociationCallback>()
-
   private val driverConnectionCallbacks = AidlThreadSafeCallbacks<IConnectionCallback>()
-
   private val passengerConnectionCallbacks = AidlThreadSafeCallbacks<IConnectionCallback>()
-
   private val allConnectionCallbacks = AidlThreadSafeCallbacks<IConnectionCallback>()
 
   @VisibleForTesting
@@ -81,12 +82,10 @@ constructor(
   @GuardedBy("lock")
   private val deviceCallbacks: MutableMap<String, MutableMap<ParcelUuid, IDeviceCallback>> =
     ConcurrentHashMap()
-
   // deviceId -> (recipientId -> callback)s
   @GuardedBy("lock")
   private val safeDeviceCallbacks: MutableMap<String, MutableMap<ParcelUuid, ISafeDeviceCallback>> =
     ConcurrentHashMap()
-
   // Recipient ids that received multiple callback registrations indicate that the recipient id
   // has been compromised. Another party now has access the messages intended for that recipient.
   // As a safeguard, that recipient id will be added to this list and blocked from further
@@ -233,8 +232,9 @@ constructor(
 
       // Retrieves Associated Devices for Driver
       override fun retrieveAssociatedDevices(listener: ISafeOnAssociatedDevicesRetrievedListener) {
-        callbackExecutor.execute {
-          listener.onAssociatedDevicesRetrieved(storage.getDriverAssociatedDevices().map { it.id })
+        lifecycleOwner.lifecycleScope.launch {
+          val associatedDevices = storage.getDriverAssociatedDevices().map { it.id }
+          callbackExecutor.execute { listener.onAssociatedDevicesRetrieved(associatedDevices) }
         }
       }
     }
@@ -260,6 +260,17 @@ constructor(
     }
     controller.reset()
     recipientMissedMessages.clear()
+  }
+
+  /** Removes all associated devices for a user. */
+  fun removeAssociatedDevicesForUser(userId: Int) {
+    lifecycleOwner.lifecycleScope.launch {
+      val deviceIds = storage.getAssociatedDeviceIdsForUser(userId)
+      for (deviceId in deviceIds) {
+        logd(TAG, "Removing associated device $deviceId for user $userId.")
+        removeAssociatedDevice(deviceId)
+      }
+    }
   }
 
   override fun getConnectedDevicesForDriver(): List<ConnectedDevice> =
@@ -547,20 +558,25 @@ constructor(
   }
 
   override fun retrieveAssociatedDevices(listener: IOnAssociatedDevicesRetrievedListener) {
-    callbackExecutor.execute { listener.onAssociatedDevicesRetrieved(storage.allAssociatedDevices) }
+    lifecycleOwner.lifecycleScope.launch {
+      val associatedDevices = storage.getAllAssociatedDevices()
+      callbackExecutor.execute { listener.onAssociatedDevicesRetrieved(associatedDevices) }
+    }
   }
 
   override fun retrieveAssociatedDevicesForDriver(listener: IOnAssociatedDevicesRetrievedListener) {
-    callbackExecutor.execute {
-      listener.onAssociatedDevicesRetrieved(storage.driverAssociatedDevices)
+    lifecycleOwner.lifecycleScope.launch {
+      val associatedDevices = storage.getDriverAssociatedDevices()
+      callbackExecutor.execute { listener.onAssociatedDevicesRetrieved(associatedDevices) }
     }
   }
 
   override fun retrieveAssociatedDevicesForPassengers(
     listener: IOnAssociatedDevicesRetrievedListener
   ) {
-    callbackExecutor.execute {
-      listener.onAssociatedDevicesRetrieved(storage.passengerAssociatedDevices)
+    lifecycleOwner.lifecycleScope.launch {
+      val associatedDevices = storage.getPassengerAssociatedDevices()
+      callbackExecutor.execute { listener.onAssociatedDevicesRetrieved(associatedDevices) }
     }
   }
 
@@ -570,31 +586,39 @@ constructor(
 
   override fun removeAssociatedDevice(deviceId: String) {
     controller.disconnectDevice(UUID.fromString(deviceId))
-    storage.removeAssociatedDevice(deviceId)
+    lifecycleOwner.lifecycleScope.launch { storage.removeAssociatedDevice(deviceId) }
   }
 
   override fun enableAssociatedDeviceConnection(deviceId: String) {
-    storage.updateAssociatedDeviceConnectionEnabled(deviceId, /* isConnectionEnabled= */ true)
-    controller.initiateConnectionToDevice(UUID.fromString(deviceId))
+    lifecycleOwner.lifecycleScope.launch {
+      storage.updateAssociatedDeviceConnectionEnabled(deviceId, isConnectionEnabled = true)
+      controller.initiateConnectionToDevice(UUID.fromString(deviceId))
+    }
   }
 
   override fun disableAssociatedDeviceConnection(deviceId: String) {
-    storage.updateAssociatedDeviceConnectionEnabled(deviceId, /* isConnectionEnabled= */ false)
-    controller.disconnectDevice(UUID.fromString(deviceId))
+    lifecycleOwner.lifecycleScope.launch {
+      storage.updateAssociatedDeviceConnectionEnabled(deviceId, isConnectionEnabled = false)
+      controller.disconnectDevice(UUID.fromString(deviceId))
+    }
   }
 
   override fun claimAssociatedDevice(deviceId: String) {
-    logd(TAG, "Claiming device $deviceId. Updating storage and disconnecting.")
-    controller.disconnectDevice(UUID.fromString(deviceId))
-    storage.claimAssociatedDevice(deviceId)
-    controller.initiateConnectionToDevice(UUID.fromString(deviceId))
+    lifecycleOwner.lifecycleScope.launch {
+      logd(TAG, "Claiming device $deviceId. Updating storage and disconnecting.")
+      controller.disconnectDevice(UUID.fromString(deviceId))
+      storage.claimAssociatedDevice(deviceId)
+      controller.initiateConnectionToDevice(UUID.fromString(deviceId))
+    }
   }
 
   override fun removeAssociatedDeviceClaim(deviceId: String) {
-    logd(TAG, "Removing claim on device $deviceId. Updating storage and disconnecting.")
-    controller.disconnectDevice(UUID.fromString(deviceId))
-    storage.removeAssociatedDeviceClaim(deviceId)
-    controller.initiateConnectionToDevice(UUID.fromString(deviceId))
+    lifecycleOwner.lifecycleScope.launch {
+      logd(TAG, "Removing claim on device $deviceId. Updating storage and disconnecting.")
+      controller.disconnectDevice(UUID.fromString(deviceId))
+      storage.removeAssociatedDeviceClaim(deviceId)
+      controller.initiateConnectionToDevice(UUID.fromString(deviceId))
+    }
   }
 
   override fun isFeatureSupportedCached(deviceId: String, featureId: String): Int {

@@ -3,6 +3,7 @@ package com.google.android.connecteddevice.system
 import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.os.Looper
+import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.companionprotos.DeviceOS
@@ -64,7 +65,14 @@ class SystemFeatureTest {
   fun setUp() {
     val context = ApplicationProvider.getApplicationContext<Context>()
     context.getSystemService(BluetoothManager::class.java).adapter.name = TEST_DEVICE_NAME
-    systemFeature = SystemFeature(context, mockStorage, fakeConnector, onConnectionQueriedFeatures)
+    systemFeature =
+      SystemFeature(
+        context,
+        TestLifecycleOwner(),
+        mockStorage,
+        fakeConnector,
+        onConnectionQueriedFeatures,
+      )
     assertThat(fakeConnector.callback).isNotNull()
   }
 
@@ -114,95 +122,103 @@ class SystemFeatureTest {
   }
 
   @Test
-  fun deviceNameQueryResponse_successUpdatesDeviceName() {
-    fakeConnector.callback?.onSecureChannelEstablished(device)
+  fun deviceNameQueryResponse_successUpdatesDeviceName() =
+    runBlocking<Unit> {
+      fakeConnector.callback?.onSecureChannelEstablished(device)
 
-    val callback =
-      argumentCaptor<Connector.QueryCallback>().run {
+      val callback =
+        argumentCaptor<Connector.QueryCallback>().run {
+          // onSecureChannelEstablished calls sendQuerySecurely twice, once for device name and once
+          // for device OS.
+          verify(fakeConnector, times(2))
+            .sendQuerySecurely(eq(device), any(), anyOrNull(), capture())
+          firstValue
+        }
+      callback.onSuccess(TEST_DEVICE_NAME.toByteArray(StandardCharsets.UTF_8))
+      verify(mockStorage).updateAssociatedDeviceName(device.deviceId, TEST_DEVICE_NAME)
+    }
+
+  @Test
+  fun deviceNameQueryResponse_successDoesNotUpdateDeviceNameIfEmpty() =
+    runBlocking<Unit> {
+      fakeConnector.callback?.onSecureChannelEstablished(device)
+
+      argumentCaptor<Connector.QueryCallback>() {
         // onSecureChannelEstablished calls sendQuerySecurely twice, once for device name and once
         // for device OS.
         verify(fakeConnector, times(2)).sendQuerySecurely(eq(device), any(), anyOrNull(), capture())
-        firstValue
+        firstValue.onSuccess(ByteArray(0))
+        verify(mockStorage, never()).updateAssociatedDeviceName(any(), any())
       }
-    callback.onSuccess(TEST_DEVICE_NAME.toByteArray(StandardCharsets.UTF_8))
-    verify(mockStorage).updateAssociatedDeviceName(device.deviceId, TEST_DEVICE_NAME)
-  }
-
-  @Test
-  fun deviceNameQueryResponse_successDoesNotUpdateDeviceNameIfEmpty() {
-    fakeConnector.callback?.onSecureChannelEstablished(device)
-
-    argumentCaptor<Connector.QueryCallback>() {
-      // onSecureChannelEstablished calls sendQuerySecurely twice, once for device name and once for
-      // device OS.
-      verify(fakeConnector, times(2)).sendQuerySecurely(eq(device), any(), anyOrNull(), capture())
-      firstValue.onSuccess(ByteArray(0))
-      verify(mockStorage, never()).updateAssociatedDeviceName(any(), any())
     }
-  }
 
   @Test
-  fun deviceNameQueryResponse_onErrorDoesNotUpdateDeviceNameOrDeviceOs() {
-    fakeConnector.callback?.onSecureChannelEstablished(device)
+  fun deviceNameQueryResponse_onErrorDoesNotUpdateDeviceNameOrDeviceOs() =
+    runBlocking<Unit> {
+      fakeConnector.callback?.onSecureChannelEstablished(device)
 
-    argumentCaptor<Connector.QueryCallback>() {
-      verify(fakeConnector, atLeastOnce())
-        .sendQuerySecurely(eq(device), any(), anyOrNull(), capture())
-      firstValue.onError(ByteArray(0))
-      secondValue.onError(ByteArray(0))
-      verify(mockStorage, never()).updateAssociatedDeviceName(any(), any())
-      verify(mockStorage, never()).updateAssociatedDeviceOs(any(), any())
-      verify(mockStorage, never()).updateAssociatedDeviceOsVersion(any(), any())
-      verify(mockStorage, never()).updateAssociatedDeviceCompanionSdkVersion(any(), any())
+      argumentCaptor<Connector.QueryCallback>() {
+        verify(fakeConnector, atLeastOnce())
+          .sendQuerySecurely(eq(device), any(), anyOrNull(), capture())
+        firstValue.onError(ByteArray(0))
+        secondValue.onError(ByteArray(0))
+        verify(mockStorage, never()).updateAssociatedDeviceName(any(), any())
+        verify(mockStorage, never()).updateAssociatedDeviceOs(any(), any())
+        verify(mockStorage, never()).updateAssociatedDeviceOsVersion(any(), any())
+        verify(mockStorage, never()).updateAssociatedDeviceCompanionSdkVersion(any(), any())
+      }
     }
-  }
 
   @Test
-  fun deviceNameQueryResponse_onQueryFailedToSendDoesNotUpdateDeviceName() {
-    fakeConnector.callback?.onSecureChannelEstablished(device)
+  fun deviceNameQueryResponse_onQueryFailedToSendDoesNotUpdateDeviceName() =
+    runBlocking<Unit> {
+      fakeConnector.callback?.onSecureChannelEstablished(device)
 
-    argumentCaptor<Connector.QueryCallback>() {
-      // onSecureChannelEstablished calls sendQuerySecurely twice, once for device name and once for
-      // device OS.
-      verify(fakeConnector, times(2)).sendQuerySecurely(eq(device), any(), anyOrNull(), capture())
-      firstValue.onQueryFailedToSend(isTransient = false)
-      firstValue.onQueryFailedToSend(isTransient = true)
-      secondValue.onQueryFailedToSend(isTransient = false)
-      secondValue.onQueryFailedToSend(isTransient = true)
-      verify(mockStorage, never()).updateAssociatedDeviceName(any(), any())
-      verify(mockStorage, never()).updateAssociatedDeviceOs(any(), any())
-      verify(mockStorage, never()).updateAssociatedDeviceOsVersion(any(), any())
-      verify(mockStorage, never()).updateAssociatedDeviceCompanionSdkVersion(any(), any())
-    }
-  }
-
-  @Test
-  fun deviceOSQueryResponse_successUpdatesDeviceOs() {
-    val testDeviceOs = DeviceOS.ANDROID
-    val testDeviceOsVersion = "TEST_DEVICE_OS_VERSION"
-    val testDeviceCompanionSdkVersion = "TEST_DEVICE_COMPANION_SDK_VERSION"
-
-    fakeConnector.callback?.onSecureChannelEstablished(device)
-
-    val callback =
-      argumentCaptor<Connector.QueryCallback>().run {
+      argumentCaptor<Connector.QueryCallback>() {
         // onSecureChannelEstablished calls sendQuerySecurely twice, once for device name and once
-        // for device OS.
+        // for
+        // device OS.
         verify(fakeConnector, times(2)).sendQuerySecurely(eq(device), any(), anyOrNull(), capture())
-        secondValue
+        firstValue.onQueryFailedToSend(isTransient = false)
+        firstValue.onQueryFailedToSend(isTransient = true)
+        secondValue.onQueryFailedToSend(isTransient = false)
+        secondValue.onQueryFailedToSend(isTransient = true)
+        verify(mockStorage, never()).updateAssociatedDeviceName(any(), any())
+        verify(mockStorage, never()).updateAssociatedDeviceOs(any(), any())
+        verify(mockStorage, never()).updateAssociatedDeviceOsVersion(any(), any())
+        verify(mockStorage, never()).updateAssociatedDeviceCompanionSdkVersion(any(), any())
       }
-    val response: DeviceVersionsResponse =
-      DeviceVersionsResponse.newBuilder()
-        .setOs(testDeviceOs)
-        .setOsVersion(testDeviceOsVersion)
-        .setCompanionSdkVersion(testDeviceCompanionSdkVersion)
-        .build()
-    callback.onSuccess(response.toByteArray())
-    verify(mockStorage).updateAssociatedDeviceOs(device.deviceId, testDeviceOs)
-    verify(mockStorage).updateAssociatedDeviceOsVersion(device.deviceId, testDeviceOsVersion)
-    verify(mockStorage)
-      .updateAssociatedDeviceCompanionSdkVersion(device.deviceId, testDeviceCompanionSdkVersion)
-  }
+    }
+
+  @Test
+  fun deviceOSQueryResponse_successUpdatesDeviceOs() =
+    runBlocking<Unit> {
+      val testDeviceOs = DeviceOS.ANDROID
+      val testDeviceOsVersion = "TEST_DEVICE_OS_VERSION"
+      val testDeviceCompanionSdkVersion = "TEST_DEVICE_COMPANION_SDK_VERSION"
+
+      fakeConnector.callback?.onSecureChannelEstablished(device)
+
+      val callback =
+        argumentCaptor<Connector.QueryCallback>().run {
+          // onSecureChannelEstablished calls sendQuerySecurely twice, once for device name and once
+          // for device OS.
+          verify(fakeConnector, times(2))
+            .sendQuerySecurely(eq(device), any(), anyOrNull(), capture())
+          secondValue
+        }
+      val response: DeviceVersionsResponse =
+        DeviceVersionsResponse.newBuilder()
+          .setOs(testDeviceOs)
+          .setOsVersion(testDeviceOsVersion)
+          .setCompanionSdkVersion(testDeviceCompanionSdkVersion)
+          .build()
+      callback.onSuccess(response.toByteArray())
+      verify(mockStorage).updateAssociatedDeviceOs(device.deviceId, testDeviceOs)
+      verify(mockStorage).updateAssociatedDeviceOsVersion(device.deviceId, testDeviceOsVersion)
+      verify(mockStorage)
+        .updateAssociatedDeviceCompanionSdkVersion(device.deviceId, testDeviceCompanionSdkVersion)
+    }
 
   @Test
   fun onQueryReceived_deviceNameQueryRespondsWithName() {
@@ -231,7 +247,7 @@ class SystemFeatureTest {
   fun onQueryReceived_nullNameFromNameProviderRespondsWithError() {
     val context = ApplicationProvider.getApplicationContext<Context>()
     context.getSystemService(BluetoothManager::class.java).adapter.name = null
-    systemFeature = spy(SystemFeature(context, mockStorage, fakeConnector))
+    systemFeature = spy(SystemFeature(context, TestLifecycleOwner(), mockStorage, fakeConnector))
     val query = SystemQuery.newBuilder().setType(DEVICE_NAME).build()
     val queryId = 0
 
