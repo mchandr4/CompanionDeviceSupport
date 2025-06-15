@@ -1,0 +1,23 @@
+-- Merging decision tree log ---
+manifest
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/encryptionrunner/AndroidManifest.xml:17:1-22:12
+INJECTED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/encryptionrunner/AndroidManifest.xml:17:1-22:12
+	package
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/encryptionrunner/AndroidManifest.xml:18:3-48
+		INJECTED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/encryptionrunner/AndroidManifest.xml
+	android:versionName
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/encryptionrunner/AndroidManifest.xml:20:3-28
+	xmlns:android
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/encryptionrunner/AndroidManifest.xml:17:11-69
+	android:versionCode
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/encryptionrunner/AndroidManifest.xml:19:3-26
+application
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/encryptionrunner/AndroidManifest.xml:21:3-18
+uses-sdk
+INJECTED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/encryptionrunner/AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/encryptionrunner/AndroidManifest.xml
+INJECTED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/encryptionrunner/AndroidManifest.xml
+	android:targetSdkVersion
+		INJECTED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/encryptionrunner/AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/encryptionrunner/AndroidManifest.xml

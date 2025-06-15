@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:ns1="urn:oasis:names:tc:xliff:document:1.2">
+    <plurals name="notification_new_message">
+    <item quantity="one">%d پیام جدید</item>
+    <item quantity="other">%d پیام جدید</item>
+  </plurals>
+    <string msgid="5976598919945601918" name="abc_action_bar_home_description">"پیمایش به صفحه اصلی"</string>
+    <string msgid="8388173803310557296" name="abc_action_bar_up_description">"رفتن به بالا"</string>
+    <string msgid="3937310113216875497" name="abc_action_menu_overflow_description">"گزینه‌های بیشتر"</string>
+    <string msgid="4692188335987374352" name="abc_action_mode_done">"تمام"</string>
+    <string msgid="1189761859438369441" name="abc_activity_chooser_view_see_all">"دیدن همه"</string>
+    <string msgid="2165779757652331008" name="abc_activitychooserview_choose_application">"انتخاب برنامه"</string>
+    <string msgid="4215997306490295099" name="abc_capital_off">"خاموش"</string>
+    <string msgid="884982626291842264" name="abc_capital_on">"روشن"</string>
+    <string msgid="8833365367933412986" name="abc_menu_alt_shortcut_label">"‎Alt+‎"</string>
+    <string msgid="2223301931652355242" name="abc_menu_ctrl_shortcut_label">"‎Ctrl+‎"</string>
+    <string msgid="838001238306846836" name="abc_menu_delete_shortcut_label">"حذف"</string>
+    <string msgid="7986526966204849475" name="abc_menu_enter_shortcut_label">"enter"</string>
+    <string msgid="375214403600139847" name="abc_menu_function_shortcut_label">"‎Function+‎"</string>
+    <string msgid="4192209724446364286" name="abc_menu_meta_shortcut_label">"‎Meta+‎"</string>
+    <string msgid="4741552369836443843" name="abc_menu_shift_shortcut_label">"‎Shift+‎"</string>
+    <string msgid="5473865519181928982" name="abc_menu_space_shortcut_label">"فاصله"</string>
+    <string msgid="6180552449598693998" name="abc_menu_sym_shortcut_label">"‎Sym+‎"</string>
+    <string msgid="5520303668377388990" name="abc_prepend_shortcut_label">"منو+"</string>
+    <string msgid="7208076849092622260" name="abc_search_hint">"جستجو…‏"</string>
+    <string msgid="3741173234950517107" name="abc_searchview_description_clear">"پاک کردن پُرسمان"</string>
+    <string msgid="693312494995508443" name="abc_searchview_description_query">"درخواست جستجو"</string>
+    <string msgid="3417662926640357176" name="abc_searchview_description_search">"جستجو"</string>
+    <string msgid="1486535517437947103" name="abc_searchview_description_submit">"ارسال پُرسمان"</string>
+    <string msgid="2293578557972875415" name="abc_searchview_description_voice">"جستجوی گفتاری"</string>
+    <string msgid="8875138169939072951" name="abc_shareactionprovider_share_with">"هم‌رسانی با"</string>
+    <string msgid="9055268688411532828" name="abc_shareactionprovider_share_with_application">"هم‌رسانی با <ns1:g id="APPLICATION_NAME">%s</ns1:g>"</string>
+    <string msgid="1656852541809559762" name="abc_toolbar_collapse_description">"کوچک کردن"</string>
+    <string name="accept">پذیرفتن</string>
+    <string name="add_associated_device_subtitle">برای کمک به مدیریت تجربه رانندگی، می‌توانید از تلفن خود به‌عنوان دستگاه همراه استفاده کنید</string>
+    <string name="add_associated_device_title">اتصال به MyCompanion</string>
+    <string name="add_device_title">اتصال به برنامه همراه</string>
+    <string name="app_running_msg_channel_name">سرویس پیامک تلفن درحال اجرا است</string>
+    <string name="app_running_msg_notification_content">درحال دریافت پیامک‌ها ازطریق دستگاه همراه</string>
+    <string name="app_running_msg_notification_title">سرویس پیامک تلفن فعال است</string>
+    <string name="associated_device_install_app">مطمئن شوید <b>برنامه همراه</b> را در تلفنتان نصب کرده‌اید</string>
+    <string name="associated_device_open_app">برنامه را باز کنید و دستورالعمل‌های درون آن را دنبال کنید</string>
+    <string name="associated_device_pairing_code_title">تأیید کد در تلفن</string>
+    <string name="associated_device_pairing_message">تأیید کنید این کد با کدی است که در تلفنتان نشان داده شده است مطابقت دارد</string>
+    <string name="associated_device_select_device">برنامه را باز کنید و به &lt;b>%1$s&lt;/b> متصل شوید</string>
+    <string name="associated_device_success">دستگاه باموفقیت مرتبط شد</string>
+    <string name="ble_device_name_prefix">خودرو\u00A0</string>
+    <string name="cancel">لغو کردن</string>
+    <string msgid="399078418913970003" name="car_ui_alert_dialog_default_button">"بستن"</string>
+    <string msgid="511096411523593697" name="car_ui_preference_switch_off">"خاموش"</string>
+    <string msgid="2091385466752081649" name="car_ui_preference_switch_on">"روشن"</string>
+    <string msgid="7490306547860308268" name="car_ui_restricted_while_driving">"این ویژگی هنگام رانندگی در دسترس نیست"</string>
+    <string msgid="746830252244551947" name="car_ui_scrollbar_page_down_button">"پیمایش به پایین"</string>
+    <string msgid="965431866383176249" name="car_ui_scrollbar_page_up_button">"پیمایش به بالا"</string>
+    <string msgid="5978003166159186378" name="car_ui_scrolling_limited_message">"پیمایش درحین رانندگی محدود شده است"</string>
+    <string msgid="8339474149462104372" name="car_ui_toolbar_default_search_hint">"جستجو…"</string>
+    <string msgid="9132512843297732890" name="car_ui_toolbar_menu_item_overflow_title">"لبریزشده"</string>
+    <string msgid="2988075382498202155" name="car_ui_toolbar_menu_item_search_title">"جستجو"</string>
+    <string msgid="5206858558664840197" name="car_ui_toolbar_menu_item_settings_title">"تنظیمات"</string>
+    <string msgid="6116610935599234725" name="car_ui_toolbar_nav_icon_content_description">"برگشت"</string>
+    <string name="change_profile">تغییر نمایه</string>
+    <string name="companion_not_available_dialog_message">نمایه مهمان نمی‌تواند به CompanionDevice دسترسی داشته باشد</string>
+    <string name="companion_not_available_dialog_switch_user_message">نمایه مهمان نمی‌تواند به CompanionDevice دسترسی داشته باشد. برای تغییر نمایه‌تان، به «تنظیمات > کاربران» بروید.</string>
+    <string name="companion_not_available_dialog_title">این تنظیم دردسترس نیست</string>
+    <string name="confirm">تأیید کردن</string>
+    <string name="connect">اتصال</string>
+    <string name="connect_to_car_instruction_text">به خودرو متصل شوید</string>
+    <string name="connect_to_targe_car_instruction_text">به &lt;b>%1$s&lt;/b> %2$s متصل شوید</string>
+    <string name="connected">متصل</string>
+    <string name="connection">اتصال</string>
+    <string name="continue_button">ادامه دادن</string>
+    <string name="continue_setup_toast_text">ادامه راه‌اندازی در تلفن</string>
+    <string msgid="3209159573327985035" name="copy">"کپی"</string>
+    <string name="create_phone_lock_dialog_message">قفل صفحه تلفن شما تنظیم نشده است. برای باز کردن قفل نمایه خودرو با تلفن، ابتدا در تنظیمات تلفن خود قفل صفحه (گذرنویسه هم گفته می‌شود) ایجاد کنید.</string>
+    <string name="create_phone_lock_dialog_title">ایجاد قفل صفحه در تلفن</string>
+    <string name="create_profile_lock_dialog_message">برای باز کردن قفل نمایه بااستفاده از تلفن، به قفل نمایه اصلی به‌عنوان پشتیبان نیاز دارید</string>
+    <string name="create_profile_lock_dialog_title">ایجاد قفل نمایه اصلی</string>
+    <string name="default_device_name">دستگاه مرتبط</string>
+    <string name="detected">شناسایی شد</string>
+    <string name="device_not_connected_dialog_message">مطمئن شوید بلوتوث تلفن و خودرو روشن است و تلفنتان در همین نزدیکی است</string>
+    <string name="device_not_connected_dialog_title">تلفن پیدا نشد</string>
+    <string name="device_removed_failure_toast_text">%1$s فراموش نشد</string>
+    <string name="device_removed_success_toast_text">%1$s فراموش شد</string>
+    <string name="disable">غیرفعال کردن</string>
+    <string name="disable_device_connection_text">قطع اتصال این دستگاه</string>
+    <string name="disconnect">قطع اتصال</string>
+    <string name="disconnected">متصل نیست</string>
+    <string name="disconnecting">درحال قطع ارتباط</string>
+    <string name="enable">فعال کردن</string>
+    <string name="enable_bluetooth_instruction_text">اتصال بلوتوث را مجاز کنید</string>
+    <string name="enable_device_connection_text">اتصال مجدد این دستگاه</string>
+    <string name="error_screen_message">متأسفانه، این صفحه‌نمایش به‌درستی نشان داده نمی‌شود. لطفاً دوباره امتحان کنید.</string>
+    <string name="error_screen_title">مشکلی پیش آمد</string>
+    <string msgid="1234962710353108940" name="expand_button_title">"پیشرفته"</string>
+    <string name="forget">فراموش شود</string>
+    <string name="forget_title">فراموش کردن این دستگاه</string>
+    <string name="name_not_available">نام دردسترس نیست</string>
+    <string name="notDetected">چیزی شناسایی نشد</string>
+    <string name="not_now">حالا نه</string>
+    <string msgid="478774118347071097" name="not_set">"تنظیم نشده است"</string>
+    <string name="ok">تأیید</string>
+    <string name="open_companion_app_instruction_text">برنامه همراه را باز کنید</string>
+    <string msgid="7961817945132860002" name="preference_copied">"«<ns1:g id="SUMMARY">%1$s</ns1:g>» در بریده‌دان کپی شد."</string>
+    <string name="qr_instruction_text">برای اتصال به &lt;b>%1$s&lt;/b>، رمزینه پاسخ‌سریع را با تلفنتان اسکن کنید یا برنامه MyCompanion را باز کنید</string>
+    <string name="reject">رد کردن</string>
+    <string name="remove">برداشتن</string>
+    <string name="remove_associated_device_message">این خودرو دیگر با این دستگاه مرتبط نخواهد بود. به‌علاوه، باید این خودرو را از برنامه همراه بردارید.</string>
+    <string name="remove_associated_device_title">&lt;b>%1$s&lt;/b> فراموش شود؟</string>
+    <string name="retry">امتحان مجدد</string>
+    <string msgid="635940284003824276" name="scroll_bar_page_down_button">"پیمایش به پایین"</string>
+    <string msgid="465102831431294180" name="scroll_bar_page_up_button">"پیمایش به بالا"</string>
+    <string msgid="6264217191555673260" name="search_menu_title">"جستجو"</string>
+    <string name="settings_entry_title">دستگاه همراه</string>
+    <string name="skip">رد شدن</string>
+    <string msgid="444412252084688703" name="speed_bump_lockout_message">"روی جاده تمرکز داشته باشید"</string>
+    <string msgid="6277540029070332960" name="status_bar_notification_info_overflow">"999+"</string>
+    <string msgid="5190123168583152844" name="summary_collapsed_preference_list">"<ns1:g id="CURRENT_ITEMS">%1$s</ns1:g>، <ns1:g id="ADDED_ITEMS">%2$s</ns1:g>"</string>
+    <string name="suw_qr_instruction_text">برای اتصال به &lt;b>%1$s&lt;/b>، اسکن کنید</string>
+    <string name="suw_setup_profile_content">اگر راه‌اندازی را قبلاً در تلفنتان شروع کرده‌اید، «برنامه همراه» را باز کنید و رمزینه پاسخ‌سریع را اسکن کنید.\n\nیا می‌توانید راه‌اندازی را در خودرو تکمیل کنید.</string>
+    <string name="suw_setup_profile_title">راه‌اندازی را در تلفن یا خودرو تکمیل کنید</string>
+    <string name="trusted_device_enrollment_error_dialog_message">متأسفانه، در این لحظه امکان روشن کردن این ویژگی وجود ندارد. لطفاً دوباره امتحان کنید.</string>
+    <string name="trusted_device_enrollment_error_dialog_title">مشکلی پیش آمد</string>
+    <string name="trusted_device_enrollment_success_message">&lt;b>%1$s&lt;/b> اکنون می‌تواند قفل نمایه‌تان را باز کند</string>
+    <string name="trusted_device_feature_instruction">برای تنظیم گزینه‌های باز کردن قفل، «برنامه همراه» را بررسی کنید</string>
+    <string name="trusted_device_feature_title">باز کردن قفل نمایه با تلفن</string>
+    <string name="trusted_device_item_title">به &lt;b>%1$s&lt;/b> اجازه دهید قفل نمایه‌تان را باز کند</string>
+    <string name="trusted_device_notification_channel_name">باز کردن قفل با تلفن</string>
+    <string name="trusted_device_notification_content">برای اجازه به این ویژگی، اینجا تک‌ضرب بزنید</string>
+    <string name="trusted_device_notification_title">اجازه به تلفن برای باز کردن قفل نمایه</string>
+    <string name="turn_on">روشن کردن</string>
+    <string name="turn_on_bluetooth_dialog_message">برای وصل شدن به دستگاه همراه، خودرویتان به بلوتوث نیاز دارد.</string>
+    <string name="turn_on_bluetooth_dialog_title">بلوتوث روشن شود؟</string>
+    <string name="turn_on_bluetooth_message">برای تنظیم تلفن به‌عنوان دستگاه همراه، خودرویتان به بلوتوث نیاز دارد.</string>
+    <string name="turn_on_bluetooth_title">روشن کردن بلوتوث</string>
+    <string name="unknown">نامشخص</string>
+    <string name="unlock_profile_to_finish_message">قفل نمایه جدیدی ایجاد کرده‌اید. در مرحله بعد، برای تأیید اینکه تلفنتان می‌تواند به‌طور خودکار قفل نمایه را باز کند، آن را دوباره وارد کنید</string>
+    <string name="unlock_profile_to_finish_title">برای اتمام این مرحله، قفل نمایه‌تان را باز کنید</string>
+    <string msgid="5138405918326871307" name="v7_preference_off">"خاموش"</string>
+    <string msgid="27351710992731591" name="v7_preference_on">"روشن"</string>
+</resources>

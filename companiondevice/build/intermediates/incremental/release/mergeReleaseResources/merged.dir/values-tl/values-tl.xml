@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:ns1="urn:oasis:names:tc:xliff:document:1.2">
+    <plurals name="notification_new_message">
+    <item quantity="one">%d bagong mensahe</item>
+    <item quantity="other">%d na bagong mensahe</item>
+  </plurals>
+    <string msgid="5976598919945601918" name="abc_action_bar_home_description">"Mag-navigate sa home"</string>
+    <string msgid="8388173803310557296" name="abc_action_bar_up_description">"Mag-navigate pataas"</string>
+    <string msgid="3937310113216875497" name="abc_action_menu_overflow_description">"Higit pang opsyon"</string>
+    <string msgid="4692188335987374352" name="abc_action_mode_done">"Tapos na"</string>
+    <string msgid="1189761859438369441" name="abc_activity_chooser_view_see_all">"Tingnan lahat"</string>
+    <string msgid="2165779757652331008" name="abc_activitychooserview_choose_application">"Pumili ng app"</string>
+    <string msgid="4215997306490295099" name="abc_capital_off">"I-OFF"</string>
+    <string msgid="884982626291842264" name="abc_capital_on">"I-ON"</string>
+    <string msgid="8833365367933412986" name="abc_menu_alt_shortcut_label">"Alt+"</string>
+    <string msgid="2223301931652355242" name="abc_menu_ctrl_shortcut_label">"Ctrl+"</string>
+    <string msgid="838001238306846836" name="abc_menu_delete_shortcut_label">"delete"</string>
+    <string msgid="7986526966204849475" name="abc_menu_enter_shortcut_label">"enter"</string>
+    <string msgid="375214403600139847" name="abc_menu_function_shortcut_label">"Function+"</string>
+    <string msgid="4192209724446364286" name="abc_menu_meta_shortcut_label">"Meta+"</string>
+    <string msgid="4741552369836443843" name="abc_menu_shift_shortcut_label">"Shift+"</string>
+    <string msgid="5473865519181928982" name="abc_menu_space_shortcut_label">"space"</string>
+    <string msgid="6180552449598693998" name="abc_menu_sym_shortcut_label">"Sym+"</string>
+    <string msgid="5520303668377388990" name="abc_prepend_shortcut_label">"Menu+"</string>
+    <string msgid="7208076849092622260" name="abc_search_hint">"Maghanap…"</string>
+    <string msgid="3741173234950517107" name="abc_searchview_description_clear">"I-clear ang query"</string>
+    <string msgid="693312494995508443" name="abc_searchview_description_query">"Query sa paghahanap"</string>
+    <string msgid="3417662926640357176" name="abc_searchview_description_search">"Maghanap"</string>
+    <string msgid="1486535517437947103" name="abc_searchview_description_submit">"Isumite ang query"</string>
+    <string msgid="2293578557972875415" name="abc_searchview_description_voice">"Paghahanap gamit ang boses"</string>
+    <string msgid="8875138169939072951" name="abc_shareactionprovider_share_with">"Ibahagi sa/kay"</string>
+    <string msgid="9055268688411532828" name="abc_shareactionprovider_share_with_application">"Ibahagi gamit ang <ns1:g id="APPLICATION_NAME">%s</ns1:g>"</string>
+    <string msgid="1656852541809559762" name="abc_toolbar_collapse_description">"I-collapse"</string>
+    <string name="accept">Tanggapin</string>
+    <string name="add_associated_device_subtitle">Puwede mong gamitin ang iyong telepono bilang kasamang device para tumulong sa pagmamaneho mo</string>
+    <string name="add_associated_device_title">Kumonekta sa MyCompanion</string>
+    <string name="add_device_title">Kumonekta sa kasamang app</string>
+    <string name="app_running_msg_channel_name">Gumagana ang serbisyo ng text message ng telepono</string>
+    <string name="app_running_msg_notification_content">Nakakatanggap ng mga text message sa pamamagitan ng kasamang device</string>
+    <string name="app_running_msg_notification_title">Aktibo ang serbisyo ng text messaging ng telepono</string>
+    <string name="associated_device_install_app">Tiyaking may naka-install kang <b>Kasamang App</b> sa telepono mo</string>
+    <string name="associated_device_open_app">Buksan ang app at sundin ang mga tagubilin sa app</string>
+    <string name="associated_device_pairing_code_title">Kumpirmahin ang code sa telepono</string>
+    <string name="associated_device_pairing_message">Kumpirmahing tumutugma ito sa code na ipinapakita sa telepono mo</string>
+    <string name="associated_device_select_device">Buksan ang app at kumonekta sa &lt;b>%1$s&lt;/b></string>
+    <string name="associated_device_success">Matagumpay na naiugnay ang device</string>
+    <string name="ble_device_name_prefix">Sasakyan\u00A0</string>
+    <string name="cancel">Kanselahin</string>
+    <string msgid="399078418913970003" name="car_ui_alert_dialog_default_button">"Isara"</string>
+    <string msgid="511096411523593697" name="car_ui_preference_switch_off">"I-off"</string>
+    <string msgid="2091385466752081649" name="car_ui_preference_switch_on">"I-on"</string>
+    <string msgid="7490306547860308268" name="car_ui_restricted_while_driving">"Hindi available ang feature habang nagmamaneho"</string>
+    <string msgid="746830252244551947" name="car_ui_scrollbar_page_down_button">"Mag-scroll pababa"</string>
+    <string msgid="965431866383176249" name="car_ui_scrollbar_page_up_button">"Mag-scroll pataas"</string>
+    <string msgid="5978003166159186378" name="car_ui_scrolling_limited_message">"Limitado ang pag-scroll habang nagmamaneho"</string>
+    <string msgid="8339474149462104372" name="car_ui_toolbar_default_search_hint">"Maghanap…"</string>
+    <string msgid="9132512843297732890" name="car_ui_toolbar_menu_item_overflow_title">"Overflow"</string>
+    <string msgid="2988075382498202155" name="car_ui_toolbar_menu_item_search_title">"Paghahanap"</string>
+    <string msgid="5206858558664840197" name="car_ui_toolbar_menu_item_settings_title">"Mga Setting"</string>
+    <string msgid="6116610935599234725" name="car_ui_toolbar_nav_icon_content_description">"Bumalik"</string>
+    <string name="change_profile">Palitan ang profile</string>
+    <string name="companion_not_available_dialog_message">Hindi maa-access ng mga profile ng bisita ang CompanionDevice</string>
+    <string name="companion_not_available_dialog_switch_user_message">Hindi maa-access ng mga profile ng bisita ang CompanionDevice. Para palitan ang iyong profile, pumunta sa Mga Setting > Mga User.</string>
+    <string name="companion_not_available_dialog_title">Hindi available ang setting na ito</string>
+    <string name="confirm">Kumpirmahin</string>
+    <string name="connect">Kumonekta</string>
+    <string name="connect_to_car_instruction_text">Kumonekta sa kotse</string>
+    <string name="connect_to_targe_car_instruction_text">Kumonekta sa &lt;b>%1$s&lt;/b> %2$s</string>
+    <string name="connected">Nakakonekta</string>
+    <string name="connection">Koneksyon</string>
+    <string name="continue_button">Magpatuloy</string>
+    <string name="continue_setup_toast_text">Ipagpatuloy ang pag-set up sa iyong telepono</string>
+    <string msgid="3209159573327985035" name="copy">"Kopyahin"</string>
+    <string name="create_phone_lock_dialog_message">Walang nakatakdang lock ng screen ang iyong telepono. Para ma-unlock ang profile ng iyong sasakyan gamit ang telepono mo, gumawa muna ng lock ng screen (na tinatawag ding passcode) sa mga setting ng iyong telepono.</string>
+    <string name="create_phone_lock_dialog_title">Gumawa ng lock ng screen sa iyong telepono</string>
+    <string name="create_profile_lock_dialog_message">Para magamit ang telepono mo para i-unlock ang iyong profile, kailangan mo ng pangunahing lock ng profile bilang backup</string>
+    <string name="create_profile_lock_dialog_title">Gumawa ng pangunahing lock ng profile</string>
+    <string name="default_device_name">Nauugnay na Device</string>
+    <string name="detected">Na-detect</string>
+    <string name="device_not_connected_dialog_message">Tiyaking naka-on ang Bluetooth ng iyong telepono at kotse, at nasa malapit ang telepono mo</string>
+    <string name="device_not_connected_dialog_title">Hindi makita ang iyong telepono</string>
+    <string name="device_removed_failure_toast_text">Hindi nakalimutan ang %1$s</string>
+    <string name="device_removed_success_toast_text">Nakalimutan ang %1$s</string>
+    <string name="disable">I-disable</string>
+    <string name="disable_device_connection_text">Idiskonekta ang device na ito</string>
+    <string name="disconnect">Idiskonekta</string>
+    <string name="disconnected">Nadiskonekta</string>
+    <string name="disconnecting">Nagdidiskonekta</string>
+    <string name="enable">I-enable</string>
+    <string name="enable_bluetooth_instruction_text">Payagan ang koneksyon sa Bluetooth</string>
+    <string name="enable_device_connection_text">Ikonekta ulit ang device na ito</string>
+    <string name="error_screen_message">Sa kasamaang-palad, hindi makapag-display nang maayos ang screen na ito. Pakisubukan ulit.</string>
+    <string name="error_screen_title">Nagkaproblema</string>
+    <string msgid="1234962710353108940" name="expand_button_title">"Advanced"</string>
+    <string name="forget">Kalimutan</string>
+    <string name="forget_title">Kalimutan ang device na ito</string>
+    <string name="name_not_available">Hindi available ang pangalan</string>
+    <string name="notDetected">Hindi na-detect</string>
+    <string name="not_now">Huwag muna</string>
+    <string msgid="478774118347071097" name="not_set">"Hindi nakatakda"</string>
+    <string name="ok">OK</string>
+    <string name="open_companion_app_instruction_text">Buksan ang kasamang app</string>
+    <string msgid="7961817945132860002" name="preference_copied">"Nakopya sa clipboard ang \"<ns1:g id="SUMMARY">%1$s</ns1:g>.\""</string>
+    <string name="qr_instruction_text">Gamitin ang iyong telepono para i-scan ang QR code o buksan ang MyCompanion para kumonekta sa &lt;b>%1$s&lt;/b></string>
+    <string name="reject">Tanggihan</string>
+    <string name="remove">Alisin</string>
+    <string name="remove_associated_device_message">Hindi na ipapares ang sasakyang ito sa device na ito. Bukod pa rito, kakailanganin mong alisin ang sasakyang ito sa Kasamang app.</string>
+    <string name="remove_associated_device_title">Kalimutan ang &lt;b>%1$s&lt;/b>?</string>
+    <string name="retry">Subukan ulit</string>
+    <string msgid="635940284003824276" name="scroll_bar_page_down_button">"Mag-scroll pababa"</string>
+    <string msgid="465102831431294180" name="scroll_bar_page_up_button">"Mag-scroll pataas"</string>
+    <string msgid="6264217191555673260" name="search_menu_title">"Maghanap"</string>
+    <string name="settings_entry_title">Companion Device</string>
+    <string name="skip">Laktawan</string>
+    <string msgid="444412252084688703" name="speed_bump_lockout_message">"Tumuon sa kalsada"</string>
+    <string msgid="6277540029070332960" name="status_bar_notification_info_overflow">"999+"</string>
+    <string msgid="5190123168583152844" name="summary_collapsed_preference_list">"<ns1:g id="CURRENT_ITEMS">%1$s</ns1:g>, <ns1:g id="ADDED_ITEMS">%2$s</ns1:g>"</string>
+    <string name="suw_qr_instruction_text">I-scan para kumonekta sa &lt;b>%1$s&lt;/b></string>
+    <string name="suw_setup_profile_content">Kung nagsimula ka na ng pag-set up sa iyong telepono, buksan ang Companion App mo at i-scan ang QR code.\n\nO kaya, tapusin ang pag-set up ng iyong profile sa kotse mo.</string>
+    <string name="suw_setup_profile_title">Tapusin ang pag-set up sa iyong telepono o kotse</string>
+    <string name="trusted_device_enrollment_error_dialog_message">Sa kasamaang-palad, hindi ma-on ang feature na ito sa oras na ito. Pakisubukan ulit.</string>
+    <string name="trusted_device_enrollment_error_dialog_title">Nagkaproblema</string>
+    <string name="trusted_device_enrollment_success_message">Maa-unlock na ngayon ng &lt;b>%1$s&lt;/b> ang iyong profile</string>
+    <string name="trusted_device_feature_instruction">Tingnan ang iyong Kasamang App para magtakda ng mga ospyon sa pag-unlock</string>
+    <string name="trusted_device_feature_title">I-unlock ang profile gamit ang telepono</string>
+    <string name="trusted_device_item_title">Hayaan ang &lt;b>%1$s&lt;/b> na i-unlock ang profile ko</string>
+    <string name="trusted_device_notification_channel_name">I-unlock gamit ang telepono</string>
+    <string name="trusted_device_notification_content">Mag-tap dito para pahintulutan ang feature na ito</string>
+    <string name="trusted_device_notification_title">Hayaan ang iyong telepono na i-unlock ang profile mo</string>
+    <string name="turn_on">I-on</string>
+    <string name="turn_on_bluetooth_dialog_message">Para kumonekta sa iyong kasamang device, kailangan ng sasakyan mo ng Bluetooth.</string>
+    <string name="turn_on_bluetooth_dialog_title">I-on ang Bluetooth?</string>
+    <string name="turn_on_bluetooth_message">Para ma-set up ang telepono mo bilang kasamang device, kailangan ng iyong sasakyan ng Bluetooth.</string>
+    <string name="turn_on_bluetooth_title">I-on ang Bluetooth</string>
+    <string name="unknown">Hindi Alam</string>
+    <string name="unlock_profile_to_finish_message">Gumawa ka ng bagong lock ng profile. Pagkatapos, ilagay ito ulit para kumpirmahing puwedeng awtomatikong i-unlock ng iyong telepono ang profile mo</string>
+    <string name="unlock_profile_to_finish_title">I-unlock ang iyong profile para tapusin</string>
+    <string msgid="5138405918326871307" name="v7_preference_off">"NAKA-OFF"</string>
+    <string msgid="27351710992731591" name="v7_preference_on">"NAKA-ON"</string>
+</resources>

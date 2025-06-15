@@ -1,0 +1,41 @@
+-- Merging decision tree log ---
+manifest
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/connecteddevice/AndroidManifest.xml:18:1-29:12
+INJECTED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/connecteddevice/AndroidManifest.xml:18:1-29:12
+	package
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/connecteddevice/AndroidManifest.xml:19:5-49
+		INJECTED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/connecteddevice/AndroidManifest.xml
+	xmlns:android
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/connecteddevice/AndroidManifest.xml:18:11-69
+uses-permission#android.permission.ACCESS_FINE_LOCATION
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/connecteddevice/AndroidManifest.xml:21:3-77
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/connecteddevice/AndroidManifest.xml:21:20-74
+uses-permission#android.permission.BLUETOOTH
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/connecteddevice/AndroidManifest.xml:22:3-65
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/connecteddevice/AndroidManifest.xml:22:20-63
+uses-permission#android.permission.BLUETOOTH_ADMIN
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/connecteddevice/AndroidManifest.xml:23:3-71
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/connecteddevice/AndroidManifest.xml:23:20-69
+uses-permission#android.permission.INTERACT_ACROSS_USERS_FULL
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/connecteddevice/AndroidManifest.xml:26:3-82
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/connecteddevice/AndroidManifest.xml:26:20-80
+uses-permission#android.permission.INTERACT_ACROSS_USERS
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/connecteddevice/AndroidManifest.xml:27:3-77
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/connecteddevice/AndroidManifest.xml:27:20-75
+uses-permission#android.permission.MANAGE_USERS
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/connecteddevice/AndroidManifest.xml:28:3-69
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/connecteddevice/AndroidManifest.xml:28:20-66
+uses-sdk
+INJECTED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/connecteddevice/AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/connecteddevice/AndroidManifest.xml
+INJECTED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/connecteddevice/AndroidManifest.xml
+	android:targetSdkVersion
+		INJECTED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/connecteddevice/AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/connecteddevice/AndroidManifest.xml

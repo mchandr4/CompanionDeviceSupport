@@ -1,0 +1,43 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<!--
+3  ~ Copyright (C) 2020 The Android Open Source Project
+4  ~
+5  ~ Licensed under the Apache License, Version 2.0 (the "License");
+6  ~ you may not use this file except in compliance with the License.
+7  ~ You may obtain a copy of the License at
+8  ~
+9  ~      http://www.apache.org/licenses/LICENSE-2.0
+10  ~
+11  ~ Unless required by applicable law or agreed to in writing, software
+12  ~ distributed under the License is distributed on an "AS IS" BASIS,
+13  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+14  ~ See the License for the specific language governing permissions and
+15  ~ limitations under the License.
+16-->
+17<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+18    package="com.google.android.connecteddevice" >
+19
+20    <uses-sdk android:minSdkVersion="29" />
+21    <!-- Needed for BLE scanning/advertising -->
+22    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+22-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/connecteddevice/AndroidManifest.xml:21:3-77
+22-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/connecteddevice/AndroidManifest.xml:21:20-74
+23    <uses-permission android:name="android.permission.BLUETOOTH" />
+23-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/connecteddevice/AndroidManifest.xml:22:3-65
+23-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/connecteddevice/AndroidManifest.xml:22:20-63
+24    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+24-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/connecteddevice/AndroidManifest.xml:23:3-71
+24-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/connecteddevice/AndroidManifest.xml:23:20-69
+25
+26    <!-- Needed for detecting foreground user -->
+27    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
+27-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/connecteddevice/AndroidManifest.xml:26:3-82
+27-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/connecteddevice/AndroidManifest.xml:26:20-80
+28    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" />
+28-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/connecteddevice/AndroidManifest.xml:27:3-77
+28-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/connecteddevice/AndroidManifest.xml:27:20-75
+29    <uses-permission android:name="android.permission.MANAGE_USERS" />
+29-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/connecteddevice/AndroidManifest.xml:28:3-69
+29-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/connecteddevice/AndroidManifest.xml:28:20-66
+30
+31</manifest>

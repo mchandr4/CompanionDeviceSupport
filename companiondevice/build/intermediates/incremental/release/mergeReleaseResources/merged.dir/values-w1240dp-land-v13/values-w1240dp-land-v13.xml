@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <bool name="is_layout_narrow">false</bool>
+    <dimen name="suw_column_inner_padding_horizontal">48dp</dimen>
+    <dimen name="suw_page_margin_horizontal">64dp</dimen>
+</resources>

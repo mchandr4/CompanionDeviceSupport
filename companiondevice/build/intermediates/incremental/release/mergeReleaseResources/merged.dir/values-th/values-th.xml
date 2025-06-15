@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:ns1="urn:oasis:names:tc:xliff:document:1.2">
+    <plurals name="notification_new_message">
+    <item quantity="one">ข้อความใหม่</item>
+    <item quantity="other">%d ข้อความใหม่</item>
+  </plurals>
+    <string msgid="5976598919945601918" name="abc_action_bar_home_description">"นำทางไปหน้าแรก"</string>
+    <string msgid="8388173803310557296" name="abc_action_bar_up_description">"กลับ"</string>
+    <string msgid="3937310113216875497" name="abc_action_menu_overflow_description">"ตัวเลือกอื่น"</string>
+    <string msgid="4692188335987374352" name="abc_action_mode_done">"เสร็จ"</string>
+    <string msgid="1189761859438369441" name="abc_activity_chooser_view_see_all">"ดูทั้งหมด"</string>
+    <string msgid="2165779757652331008" name="abc_activitychooserview_choose_application">"เลือกแอป"</string>
+    <string msgid="4215997306490295099" name="abc_capital_off">"ปิด"</string>
+    <string msgid="884982626291842264" name="abc_capital_on">"เปิด"</string>
+    <string msgid="8833365367933412986" name="abc_menu_alt_shortcut_label">"Alt+"</string>
+    <string msgid="2223301931652355242" name="abc_menu_ctrl_shortcut_label">"Ctrl+"</string>
+    <string msgid="838001238306846836" name="abc_menu_delete_shortcut_label">"ลบ"</string>
+    <string msgid="7986526966204849475" name="abc_menu_enter_shortcut_label">"Enter"</string>
+    <string msgid="375214403600139847" name="abc_menu_function_shortcut_label">"Function+"</string>
+    <string msgid="4192209724446364286" name="abc_menu_meta_shortcut_label">"Meta+"</string>
+    <string msgid="4741552369836443843" name="abc_menu_shift_shortcut_label">"Shift+"</string>
+    <string msgid="5473865519181928982" name="abc_menu_space_shortcut_label">"Space"</string>
+    <string msgid="6180552449598693998" name="abc_menu_sym_shortcut_label">"Sym+"</string>
+    <string msgid="5520303668377388990" name="abc_prepend_shortcut_label">"เมนู+"</string>
+    <string msgid="7208076849092622260" name="abc_search_hint">"ค้นหา…"</string>
+    <string msgid="3741173234950517107" name="abc_searchview_description_clear">"ล้างคำค้นหา"</string>
+    <string msgid="693312494995508443" name="abc_searchview_description_query">"คำค้นหา"</string>
+    <string msgid="3417662926640357176" name="abc_searchview_description_search">"ค้นหา"</string>
+    <string msgid="1486535517437947103" name="abc_searchview_description_submit">"ส่งคำค้นหา"</string>
+    <string msgid="2293578557972875415" name="abc_searchview_description_voice">"ค้นหาด้วยเสียง"</string>
+    <string msgid="8875138169939072951" name="abc_shareactionprovider_share_with">"แชร์กับ"</string>
+    <string msgid="9055268688411532828" name="abc_shareactionprovider_share_with_application">"แชร์ทาง <ns1:g id="APPLICATION_NAME">%s</ns1:g>"</string>
+    <string msgid="1656852541809559762" name="abc_toolbar_collapse_description">"ยุบ"</string>
+    <string name="accept">ยอมรับ</string>
+    <string name="add_associated_device_subtitle">คุณใช้โทรศัพท์เป็นอุปกรณ์ที่ใช้ร่วมกันเพื่อช่วยจัดการประสบการณ์การขับขี่ได้</string>
+    <string name="add_associated_device_title">เชื่อมต่อ MyCompanion</string>
+    <string name="add_device_title">เชื่อมต่อแอปที่ใช้ร่วมกัน</string>
+    <string name="app_running_msg_channel_name">บริการ SMS ทางโทรศัพท์ทำงานอยู่</string>
+    <string name="app_running_msg_notification_content">รับ SMS ผ่านอุปกรณ์ที่ใช้ร่วมกัน</string>
+    <string name="app_running_msg_notification_title">เปิดใช้งานบริการ SMS ทางโทรศัพท์อยู่</string>
+    <string name="associated_device_install_app">ตรวจสอบว่าคุณมี<b>แอปที่ใช้ร่วมกัน</b>ติดตั้งอยู่ในโทรศัพท์</string>
+    <string name="associated_device_open_app">เปิดแอปและทำตามวิธีการในแอป</string>
+    <string name="associated_device_pairing_code_title">ยืนยันรหัสในโทรศัพท์</string>
+    <string name="associated_device_pairing_message">ยืนยันว่ารหัสนี้ตรงกับรหัสที่แสดงในโทรศัพท์</string>
+    <string name="associated_device_select_device">เปิดแอปและเชื่อมต่อกับ &lt;b>%1$s&lt;b></string>
+    <string name="associated_device_success">เชื่อมโยงอุปกรณ์สำเร็จแล้ว</string>
+    <string name="ble_device_name_prefix">รถยนต์\u00A0</string>
+    <string name="cancel">ยกเลิก</string>
+    <string msgid="399078418913970003" name="car_ui_alert_dialog_default_button">"ปิด"</string>
+    <string msgid="511096411523593697" name="car_ui_preference_switch_off">"ปิด"</string>
+    <string msgid="2091385466752081649" name="car_ui_preference_switch_on">"เปิด"</string>
+    <string msgid="7490306547860308268" name="car_ui_restricted_while_driving">"ฟีเจอร์ไม่พร้อมใช้งานขณะขับรถ"</string>
+    <string msgid="746830252244551947" name="car_ui_scrollbar_page_down_button">"เลื่อนลง"</string>
+    <string msgid="965431866383176249" name="car_ui_scrollbar_page_up_button">"เลื่อนขึ้น"</string>
+    <string msgid="5978003166159186378" name="car_ui_scrolling_limited_message">"การเลื่อนถูกจำกัดไม่ให้ใช้งานขณะขับรถ"</string>
+    <string msgid="8339474149462104372" name="car_ui_toolbar_default_search_hint">"ค้นหา…"</string>
+    <string msgid="9132512843297732890" name="car_ui_toolbar_menu_item_overflow_title">"รายการเพิ่มเติม"</string>
+    <string msgid="2988075382498202155" name="car_ui_toolbar_menu_item_search_title">"ค้นหา"</string>
+    <string msgid="5206858558664840197" name="car_ui_toolbar_menu_item_settings_title">"การตั้งค่า"</string>
+    <string msgid="6116610935599234725" name="car_ui_toolbar_nav_icon_content_description">"กลับ"</string>
+    <string name="change_profile">เปลี่ยนโปรไฟล์</string>
+    <string name="companion_not_available_dialog_message">โปรไฟล์ผู้มาเยือนเข้าถึง CompanionDevice ไม่ได้</string>
+    <string name="companion_not_available_dialog_switch_user_message">โปรไฟล์ผู้มาเยือนเข้าถึง CompanionDevice ไม่ได้ หากต้องการเปลี่ยนโปรไฟล์ ให้ไปที่การตั้งค่า > ผู้ใช้</string>
+    <string name="companion_not_available_dialog_title">การตั้งค่านี้ไม่พร้อมใช้งาน</string>
+    <string name="confirm">ยืนยัน</string>
+    <string name="connect">เชื่อมต่อ</string>
+    <string name="connect_to_car_instruction_text">เชื่อมต่อรถยนต์</string>
+    <string name="connect_to_targe_car_instruction_text">เชื่อมต่อกับ &lt;b>%1$s&lt;/b> %2$s</string>
+    <string name="connected">เชื่อมต่อแล้ว</string>
+    <string name="connection">การเชื่อมต่อ</string>
+    <string name="continue_button">ต่อไป</string>
+    <string name="continue_setup_toast_text">ตั้งค่าต่อในโทรศัพท์ของคุณ</string>
+    <string msgid="3209159573327985035" name="copy">"คัดลอก"</string>
+    <string name="create_phone_lock_dialog_message">โทรศัพท์ยังไม่ได้ตั้งค่าการล็อกหน้าจอ หากต้องการปลดล็อกโปรไฟล์รถยนต์ด้วยโทรศัพท์ ก่อนอื่นให้สร้างการล็อกหน้าจอ (หรือรหัสผ่าน) ในการตั้งค่าโทรศัพท์</string>
+    <string name="create_phone_lock_dialog_title">สร้างการล็อกหน้าจอในโทรศัพท์</string>
+    <string name="create_profile_lock_dialog_message">หากต้องการใช้โทรศัพท์เพื่อปลดล็อกโปรไฟล์ คุณต้องมีการล็อกโปรไฟล์หลักเป็นรายการสำรอง</string>
+    <string name="create_profile_lock_dialog_title">สร้างการล็อกโปรไฟล์หลัก</string>
+    <string name="default_device_name">อุปกรณ์ที่เชื่อมโยง</string>
+    <string name="detected">ตรวจพบ</string>
+    <string name="device_not_connected_dialog_message">ตรวจสอบว่าบลูทูธของโทรศัพท์และของรถเปิดอยู่ รวมถึงมีโทรศัพท์อยู่ใกล้ๆ</string>
+    <string name="device_not_connected_dialog_title">ไม่พบโทรศัพท์</string>
+    <string name="device_removed_failure_toast_text">เลิกจำ %1$s ไม่สำเร็จ</string>
+    <string name="device_removed_success_toast_text">เลิกจำ %1$s แล้ว</string>
+    <string name="disable">ปิดใช้</string>
+    <string name="disable_device_connection_text">เลิกเชื่อมต่ออุปกรณ์นี้</string>
+    <string name="disconnect">ยกเลิกการเชื่อมต่อ</string>
+    <string name="disconnected">เลิกเชื่อมต่อแล้ว</string>
+    <string name="disconnecting">กำลังตัดการเชื่อมต่อ</string>
+    <string name="enable">เปิดใช้</string>
+    <string name="enable_bluetooth_instruction_text">อนุญาตการเชื่อมต่อบลูทูธ</string>
+    <string name="enable_device_connection_text">เชื่อมต่ออุปกรณ์นี้ใหม่</string>
+    <string name="error_screen_message">ขออภัย ระบบไม่อาจแสดงหน้าจอนี้ได้อย่างถูกต้อง โปรดลองอีกครั้ง</string>
+    <string name="error_screen_title">เกิดข้อผิดพลาด</string>
+    <string msgid="1234962710353108940" name="expand_button_title">"ขั้นสูง"</string>
+    <string name="forget">เลิกจำ</string>
+    <string name="forget_title">เลิกจำอุปกรณ์นี้</string>
+    <string name="name_not_available">ไม่มีชื่อ</string>
+    <string name="notDetected">ไม่พบ</string>
+    <string name="not_now">ไว้ทีหลัง</string>
+    <string msgid="478774118347071097" name="not_set">"ไม่ได้ตั้งค่า"</string>
+    <string name="ok">ตกลง</string>
+    <string name="open_companion_app_instruction_text">เปิดแอปที่ใช้ร่วมกัน</string>
+    <string msgid="7961817945132860002" name="preference_copied">"คัดลอก \"<ns1:g id="SUMMARY">%1$s</ns1:g>\" ไปยังคลิปบอร์ดแล้ว"</string>
+    <string name="qr_instruction_text">ใช้โทรศัพท์สแกนคิวอาร์โค้ดหรือเปิด MyCompanion เพื่อเชื่อมต่อกับ &lt;b>%1$s&lt;/b></string>
+    <string name="reject">ปฏิเสธ</string>
+    <string name="remove">นำออก</string>
+    <string name="remove_associated_device_message">รถคันนี้เลิกจับคู่กับอุปกรณ์เครื่องนี้แล้ว นอกจากนี้ คุณจะต้องนำรถออกจากแอปที่ใช้ร่วมกันด้วย</string>
+    <string name="remove_associated_device_title">เลิกจำ &lt;b>%1$s&lt;/b> ไหม</string>
+    <string name="retry">ลองอีกครั้ง</string>
+    <string msgid="635940284003824276" name="scroll_bar_page_down_button">"เลื่อนลง"</string>
+    <string msgid="465102831431294180" name="scroll_bar_page_up_button">"เลื่อนขึ้น"</string>
+    <string msgid="6264217191555673260" name="search_menu_title">"ค้นหา"</string>
+    <string name="settings_entry_title">อุปกรณ์ที่ใช้ร่วมกัน</string>
+    <string name="skip">ข้าม</string>
+    <string msgid="444412252084688703" name="speed_bump_lockout_message">"จดจ่อกับถนน"</string>
+    <string msgid="6277540029070332960" name="status_bar_notification_info_overflow">"999+"</string>
+    <string msgid="5190123168583152844" name="summary_collapsed_preference_list">"<ns1:g id="CURRENT_ITEMS">%1$s</ns1:g> <ns1:g id="ADDED_ITEMS">%2$s</ns1:g>"</string>
+    <string name="suw_qr_instruction_text">สแกนเพื่อเชื่อมต่อกับ &lt;b>%1$s&lt;/b></string>
+    <string name="suw_setup_profile_content">หากเริ่มตั้งค่าในโทรศัพท์แล้ว ให้เปิดแอปที่ใช้ร่วมกันแล้วสแกนคิวอาร์โค้ด\n\nหรือตั้งค่าโปรไฟล์ในรถยนต์ให้เสร็จ</string>
+    <string name="suw_setup_profile_title">ตั้งค่าในโทรศัพท์หรือรถยนต์ให้เสร็จ</string>
+    <string name="trusted_device_enrollment_error_dialog_message">ขออภัย ระบบเปิดฟีเจอร์นี้ไม่ได้ในขณะนี้ โปรดลองอีกครั้ง</string>
+    <string name="trusted_device_enrollment_error_dialog_title">เกิดข้อผิดพลาด</string>
+    <string name="trusted_device_enrollment_success_message">ตอนนี้ &lt;b>%1$s&lt;/b> ปลดล็อกโปรไฟล์ของคุณได้แล้ว</string>
+    <string name="trusted_device_feature_instruction">ไปที่แอปที่ใช้ร่วมกันเพื่อกำหนดตัวเลือกการปลดล็อก</string>
+    <string name="trusted_device_feature_title">ปลดล็อกโปรไฟล์ด้วยโทรศัพท์</string>
+    <string name="trusted_device_item_title">อนุญาตให้ &lt;b>%1$s&lt;/b> ปลดล็อกโปรไฟล์ของฉัน</string>
+    <string name="trusted_device_notification_channel_name">ปลดล็อกด้วยโทรศัพท์</string>
+    <string name="trusted_device_notification_content">แตะที่นี่เพื่อให้สิทธิ์ฟีเจอร์นี้</string>
+    <string name="trusted_device_notification_title">อนุญาตให้โทรศัพท์ปลดล็อกโปรไฟล์ของคุณ</string>
+    <string name="turn_on">เปิด</string>
+    <string name="turn_on_bluetooth_dialog_message">รถยนต์ต้องเปิดบลูทูธจึงจะเชื่อมต่อกับอุปกรณ์ที่ใช้ร่วมกันได้</string>
+    <string name="turn_on_bluetooth_dialog_title">เปิดบลูทูธไหม</string>
+    <string name="turn_on_bluetooth_message">รถยนต์ต้องเปิดบลูทูธจึงจะตั้งค่าให้โทรศัพท์เป็นอุปกรณ์ที่ใช้ร่วมกันได้</string>
+    <string name="turn_on_bluetooth_title">เปิดบลูทูธ</string>
+    <string name="unknown">ไม่ทราบ</string>
+    <string name="unlock_profile_to_finish_message">คุณสร้างการล็อกโปรไฟล์ใหม่แล้ว ต่อไปให้ป้อนอีกครั้งเพื่อยืนยันว่าโทรศัพท์ปลดล็อกโปรไฟล์ได้โดยอัตโนมัติ</string>
+    <string name="unlock_profile_to_finish_title">ปลดล็อกโปรไฟล์เพื่อเสร็จสิ้นขั้นตอน</string>
+    <string msgid="5138405918326871307" name="v7_preference_off">"ปิด"</string>
+    <string msgid="27351710992731591" name="v7_preference_on">"เปิด"</string>
+</resources>

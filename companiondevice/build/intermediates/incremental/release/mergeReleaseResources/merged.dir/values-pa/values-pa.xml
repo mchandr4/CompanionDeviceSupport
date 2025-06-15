@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:ns1="urn:oasis:names:tc:xliff:document:1.2">
+    <plurals name="notification_new_message">
+    <item quantity="one">%d ਨਵਾਂ ਸੁਨੇਹਾ</item>
+    <item quantity="other">%d ਨਵੇਂ ਸੁਨੇਹੇ</item>
+  </plurals>
+    <string msgid="5976598919945601918" name="abc_action_bar_home_description">"ਹੋਮ \'ਤੇ ਜਾਓ"</string>
+    <string msgid="8388173803310557296" name="abc_action_bar_up_description">"ਉੱਪਰ ਜਾਓ"</string>
+    <string msgid="3937310113216875497" name="abc_action_menu_overflow_description">"ਹੋਰ ਵਿਕਲਪ"</string>
+    <string msgid="4692188335987374352" name="abc_action_mode_done">"ਹੋ ਗਿਆ"</string>
+    <string msgid="1189761859438369441" name="abc_activity_chooser_view_see_all">"ਸਭ ਦੇਖੋ"</string>
+    <string msgid="2165779757652331008" name="abc_activitychooserview_choose_application">"ਇੱਕ ਐਪ ਚੁਣੋ"</string>
+    <string msgid="4215997306490295099" name="abc_capital_off">"ਬੰਦ"</string>
+    <string msgid="884982626291842264" name="abc_capital_on">"ਚਾਲੂ"</string>
+    <string msgid="8833365367933412986" name="abc_menu_alt_shortcut_label">"Alt+"</string>
+    <string msgid="2223301931652355242" name="abc_menu_ctrl_shortcut_label">"Ctrl+"</string>
+    <string msgid="838001238306846836" name="abc_menu_delete_shortcut_label">"ਮਿਟਾਓ"</string>
+    <string msgid="7986526966204849475" name="abc_menu_enter_shortcut_label">"enter"</string>
+    <string msgid="375214403600139847" name="abc_menu_function_shortcut_label">"Function+"</string>
+    <string msgid="4192209724446364286" name="abc_menu_meta_shortcut_label">"Meta+"</string>
+    <string msgid="4741552369836443843" name="abc_menu_shift_shortcut_label">"Shift+"</string>
+    <string msgid="5473865519181928982" name="abc_menu_space_shortcut_label">"space"</string>
+    <string msgid="6180552449598693998" name="abc_menu_sym_shortcut_label">"Sym+"</string>
+    <string msgid="5520303668377388990" name="abc_prepend_shortcut_label">"Menu+"</string>
+    <string msgid="7208076849092622260" name="abc_search_hint">"ਖੋਜ…"</string>
+    <string msgid="3741173234950517107" name="abc_searchview_description_clear">"ਪੁੱਛਗਿੱਛ ਕਲੀਅਰ ਕਰੋ"</string>
+    <string msgid="693312494995508443" name="abc_searchview_description_query">"ਖੋਜ ਪੁੱਛਗਿੱਛ"</string>
+    <string msgid="3417662926640357176" name="abc_searchview_description_search">"ਖੋਜ"</string>
+    <string msgid="1486535517437947103" name="abc_searchview_description_submit">"ਪੁੱਛਗਿੱਛ ਸਪੁਰਦ ਕਰੋ"</string>
+    <string msgid="2293578557972875415" name="abc_searchview_description_voice">"ਅਵਾਜ਼ੀ ਖੋਜ"</string>
+    <string msgid="8875138169939072951" name="abc_shareactionprovider_share_with">"ਇਸ ਨਾਲ ਸਾਂਝਾ ਕਰੋ"</string>
+    <string msgid="9055268688411532828" name="abc_shareactionprovider_share_with_application">"<ns1:g id="APPLICATION_NAME">%s</ns1:g> ਨਾਲ ਸਾਂਝਾ ਕਰੋ"</string>
+    <string msgid="1656852541809559762" name="abc_toolbar_collapse_description">"ਸਮੇਟੋ"</string>
+    <string name="accept">ਸਵੀਕਾਰ ਕਰੋ</string>
+    <string name="add_associated_device_subtitle">ਤੁਸੀਂ ਆਪਣੇ ਡਰਾਈਵਿੰਗ ਅਨੁਭਵ ਦੇ ਪ੍ਰਬੰਧਨ ਵਿੱਚ ਮਦਦ ਲਈ ਆਪਣੇ ਫ਼ੋਨ ਨੂੰ ਸੰਬੰਧੀ ਡੀਵਾਈਸ ਵਜੋਂ ਵਰਤ ਸਕਦੇ ਹੋ</string>
+    <string name="add_associated_device_title">MyCompanion ਨਾਲ ਕਨੈਕਟ ਕਰੋ</string>
+    <string name="add_device_title">ਸੰਬੰਧੀ ਐਪ ਨਾਲ ਕਨੈਕਟ ਕਰੋ</string>
+    <string name="app_running_msg_channel_name">ਫ਼ੋਨ ਦੀ ਲਿਖਤ ਸੁਨੇਹਿਆਂ ਵਾਲੀ ਸੇਵਾ ਚੱਲ ਰਹੀ ਹੈ</string>
+    <string name="app_running_msg_notification_content">ਸੰਬੰਧੀ ਡੀਵਾਈਸ ਰਾਹੀਂ ਲਿਖਤ ਸੁਨੇਹੇ ਪ੍ਰਾਪਤ ਕੀਤੇ ਜਾ ਰਹੇ ਹਨ</string>
+    <string name="app_running_msg_notification_title">ਫ਼ੋਨ ਦੀ ਲਿਖਤ ਸੁਨੇਹਿਆਂ ਵਾਲੀ ਸੇਵਾ ਕਿਰਿਆਸ਼ੀਲ ਹੈ</string>
+    <string name="associated_device_install_app">ਪੱਕਾ ਕਰੋ ਕਿ ਤੁਹਾਡੇ ਫ਼ੋਨ \'ਤੇ <b>ਸੰਬੰਧੀ ਐਪ</b> ਸਥਾਪਤ ਹੈ</string>
+    <string name="associated_device_open_app">ਐਪ ਖੋਲ੍ਹ ਕੇ ਹਿਦਾਇਤਾਂ ਦਾ ਅਨੁਸਰਣ ਕਰੋ</string>
+    <string name="associated_device_pairing_code_title">ਫ਼ੋਨ \'ਤੇ ਕੋਡ ਦੀ ਤਸਦੀਕ ਕਰੋ</string>
+    <string name="associated_device_pairing_message">ਤਸਦੀਕ ਕਰੋ ਕਿ ਇਹ ਤੁਹਾਡੇ ਫ਼ੋਨ \'ਤੇ ਦਿਖਾਏ ਜਾ ਰਹੇ ਕੋਡ ਨਾਲ ਮੇਲ ਖਾਂਦਾ ਹੈ</string>
+    <string name="associated_device_select_device">ਐਪ ਖੋਲ੍ਹੋ ਅਤੇ &lt;b>%1$s&lt;/b> ਨਾਲ ਕਨੈਕਟ ਕਰੋ</string>
+    <string name="associated_device_success">ਡੀਵਾਈਸ ਨੂੰ ਸਫਲਤਾਪੂਰਵਕ ਜੋੜਿਆ ਗਿਆ ਹੈ</string>
+    <string name="ble_device_name_prefix">ਵਾਹਨ\u00A0</string>
+    <string name="cancel">ਰੱਦ ਕਰੋ</string>
+    <string msgid="399078418913970003" name="car_ui_alert_dialog_default_button">"ਬੰਦ ਕਰੋ"</string>
+    <string msgid="511096411523593697" name="car_ui_preference_switch_off">"ਬੰਦ"</string>
+    <string msgid="2091385466752081649" name="car_ui_preference_switch_on">"ਚਾਲੂ"</string>
+    <string msgid="7490306547860308268" name="car_ui_restricted_while_driving">"ਚੱਲਦੀ ਗੱਡੀ ਵਿੱਚ ਇਹ ਵਿਸ਼ੇਸ਼ਤਾ ਉਪਲਬਧ ਨਹੀਂ ਹੈ"</string>
+    <string msgid="746830252244551947" name="car_ui_scrollbar_page_down_button">"ਹੇਠਾਂ ਵੱਲ ਸਕ੍ਰੋਲ ਕਰੋ"</string>
+    <string msgid="965431866383176249" name="car_ui_scrollbar_page_up_button">"ਉੱਪਰ ਵੱਲ ਸਕ੍ਰੋਲ ਕਰੋ"</string>
+    <string msgid="5978003166159186378" name="car_ui_scrolling_limited_message">"ਚਲਦੀ ਗੱਡੀ ਵਿੱਚ ਸਕ੍ਰੋਲ ਕਰਨ ਨੂੰ ਸੀਮਤ ਕੀਤਾ ਗਿਆ"</string>
+    <string msgid="8339474149462104372" name="car_ui_toolbar_default_search_hint">"ਖੋਜ…"</string>
+    <string msgid="9132512843297732890" name="car_ui_toolbar_menu_item_overflow_title">"ਓਵਰਫ਼ਲੋ"</string>
+    <string msgid="2988075382498202155" name="car_ui_toolbar_menu_item_search_title">"ਖੋਜ"</string>
+    <string msgid="5206858558664840197" name="car_ui_toolbar_menu_item_settings_title">"ਸੈਟਿੰਗਾਂ"</string>
+    <string msgid="6116610935599234725" name="car_ui_toolbar_nav_icon_content_description">"ਪਿੱਛੇ"</string>
+    <string name="change_profile">ਪ੍ਰੋਫਾਈਲ ਬਦਲੋ</string>
+    <string name="companion_not_available_dialog_message">ਮਹਿਮਾਨ ਪ੍ਰੋਫਾਈਲ CompanionDevice ਤੱਕ ਪਹੁੰਚ ਨਹੀਂ ਕਰ ਸਕਦੇ</string>
+    <string name="companion_not_available_dialog_switch_user_message">ਮਹਿਮਾਨ ਪ੍ਰੋਫਾਈਲ CompanionDevice ਤੱਕ ਪਹੁੰਚ ਨਹੀਂ ਕਰ ਸਕਦੇ। ਆਪਣੇ ਪ੍ਰੋਫਾਈਲ ਨੂੰ ਬਦਲਣ ਲਈ, ਸੈਟਿੰਗਾਂ > ਵਰਤੋਂਕਾਰ \'ਤੇ ਜਾਓ।</string>
+    <string name="companion_not_available_dialog_title">ਇਹ ਸੈਟਿੰਗ ਉਪਲਬਧ ਨਹੀਂ ਹੈ</string>
+    <string name="confirm">ਤਸਦੀਕ ਕਰੋ</string>
+    <string name="connect">ਕਨੈਕਟ ਕਰੋ</string>
+    <string name="connect_to_car_instruction_text">ਕਾਰ ਨਾਲ ਕਨੈਕਟ ਕਰੋ</string>
+    <string name="connect_to_targe_car_instruction_text">&lt;b>%1$s&lt;/b> %2$s ਨਾਲ ਕਨੈਕਟ ਕਰੋ</string>
+    <string name="connected">ਕਨੈਕਟ ਹੈ</string>
+    <string name="connection">ਕਨੈਕਸ਼ਨ</string>
+    <string name="continue_button">ਜਾਰੀ ਰੱਖੋ</string>
+    <string name="continue_setup_toast_text">ਆਪਣੇ ਫ਼ੋਨ \'ਤੇ ਸੈੱਟਅੱਪ ਜਾਰੀ ਰੱਖੋ</string>
+    <string msgid="3209159573327985035" name="copy">"ਕਾਪੀ ਕਰੋ"</string>
+    <string name="create_phone_lock_dialog_message">ਤੁਹਾਡੇ ਫ਼ੋਨ \'ਤੇ ਸਕ੍ਰੀਨ ਲਾਕ ਸੈੱਟ ਨਹੀਂ ਹੈ। ਆਪਣੇ ਫ਼ੋਨ ਨਾਲ ਆਪਣੇ ਕਾਰ ਪ੍ਰੋਫਾਈਲ ਨੂੰ ਅਣਲਾਕ ਕਰਨ ਲਈ, ਪਹਿਲਾਂ ਆਪਣੇ ਫ਼ੋਨ ਦੀਆਂ ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਸਕ੍ਰੀਨ ਲਾਕ (ਜਿਸਨੂੰ ਪਾਸਕੋਡ ਵੀ ਕਿਹਾ ਜਾਂਦਾ ਹੈ) ਬਣਾਓ।</string>
+    <string name="create_phone_lock_dialog_title">ਆਪਣੇ ਫ਼ੋਨ \'ਤੇ ਸਕ੍ਰੀਨ ਲਾਕ ਬਣਾਓ</string>
+    <string name="create_profile_lock_dialog_message">ਆਪਣੇ ਪ੍ਰੋਫਾਈਲ ਨੂੰ ਅਣਲਾਕ ਕਰਨ ਵਾਸਤੇ ਆਪਣੇ ਫ਼ੋਨ ਨੂੰ ਵਰਤਣ ਲਈ, ਤੁਹਾਨੂੰ ਬੈਕਅੱਪ ਦੇ ਤੌਰ \'ਤੇ ਇੱਕ ਮੁੱਖ ਪ੍ਰੋਫਾਈਲ ਲਾਕ ਦੀ ਲੋੜ ਹੈ</string>
+    <string name="create_profile_lock_dialog_title">ਮੁੱਖ ਪ੍ਰੋਫਾਈਲ ਲਾਕ ਬਣਾਓ</string>
+    <string name="default_device_name">ਸੰਬੰਧਿਤ ਡੀਵਾਈਸ</string>
+    <string name="detected">ਪਤਾ ਲਗਾਇਆ ਗਿਆ</string>
+    <string name="device_not_connected_dialog_message">ਪੱਕਾ ਕਰੋ ਕਿ ਤੁਹਾਡੇ ਫ਼ੋਨ ਅਤੇ ਕਾਰ ਦਾ ਬਲੂਟੁੱਥ ਚਾਲੂ ਹੈ ਅਤੇ ਤੁਹਾਡਾ ਫ਼ੋਨ ਨੇੜੇ ਹੈ</string>
+    <string name="device_not_connected_dialog_title">ਤੁਹਾਡਾ ਫ਼ੋਨ ਲੱਭਿਆ ਨਹੀਂ ਜਾ ਸਕਦਾ</string>
+    <string name="device_removed_failure_toast_text">%1$s ਨੂੰ ਭੁੱਲਣਾ ਅਸਫਲ ਰਿਹਾ</string>
+    <string name="device_removed_success_toast_text">%1$s ਨੂੰ ਭੁਲਾਇਆ ਗਿਆ</string>
+    <string name="disable">ਬੰਦ ਕਰੋ</string>
+    <string name="disable_device_connection_text">ਇਸ ਡੀਵਾਈਸ ਨੂੰ ਡਿਸਕਨੈਕਟ ਕਰੋ</string>
+    <string name="disconnect">ਡਿਸਕਨੈਕਟ ਕਰੋ</string>
+    <string name="disconnected">ਡਿਸਕਨੈਕਟ ਹੋਇਆ</string>
+    <string name="disconnecting">ਡਿਸਕਨੈਕਟ ਹੋ ਰਿਹਾ ਹੈ</string>
+    <string name="enable">ਚਾਲੂ ਕਰੋ</string>
+    <string name="enable_bluetooth_instruction_text">ਬਲੂਟੁੱਥ ਕਨੈਕਸ਼ਨ ਨੂੰ ਇਜਾਜ਼ਤ ਦਿਓ</string>
+    <string name="enable_device_connection_text">ਇਸ ਡੀਵਾਈਸ ਨੂੰ ਮੁੜ-ਕਨੈਕਟ ਕਰੋ</string>
+    <string name="error_screen_message">ਅਫ਼ਸੋਸ, ਇਹ ਸਕ੍ਰੀਨ ਸਹੀ ਤਰ੍ਹਾਂ ਨਹੀਂ ਦਿਖਾਈ ਜਾ ਸਕੀ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।</string>
+    <string name="error_screen_title">ਕੋਈ ਗੜਬੜ ਹੋ ਗਈ</string>
+    <string msgid="1234962710353108940" name="expand_button_title">"ਉੱਨਤ"</string>
+    <string name="forget">ਭੁੱਲ ਜਾਓ</string>
+    <string name="forget_title">ਇਸ ਡੀਵਾਈਸ ਨੂੰ ਭੁੱਲ ਜਾਓ</string>
+    <string name="name_not_available">ਨਾਮ ਉਪਲਬਧ ਨਹੀਂ ਹੈ</string>
+    <string name="notDetected">ਪਤਾ ਨਹੀਂ ਲੱਗਾ</string>
+    <string name="not_now">ਹੁਣੇ ਨਹੀਂ</string>
+    <string msgid="478774118347071097" name="not_set">"ਸੈੱਟ ਨਹੀਂ"</string>
+    <string name="ok">ਠੀਕ ਹੈ</string>
+    <string name="open_companion_app_instruction_text">ਸੰਬੰਧੀ ਐਪ ਖੋਲ੍ਹੋ</string>
+    <string msgid="7961817945132860002" name="preference_copied">"\"<ns1:g id="SUMMARY">%1$s</ns1:g>\" ਨੂੰ ਕਲਿੱਪਬੋਰਡ \'ਤੇ ਕਾਪੀ ਕੀਤਾ ਗਿਆ।"</string>
+    <string name="qr_instruction_text">QR ਕੋਡ ਨੂੰ ਸਕੈਨ ਕਰਨ ਲਈ ਆਪਣੇ ਫ਼ੋਨ ਨੂੰ ਵਰਤੋ ਜਾਂ &lt;b>%1$s&lt;/b> ਨਾਲ ਕਨੈਕਟ ਕਰਨ ਲਈ MyCompanion ਖੋਲ੍ਹੋ</string>
+    <string name="reject">ਅਸਵੀਕਾਰ ਕਰੋ</string>
+    <string name="remove">ਹਟਾਓ</string>
+    <string name="remove_associated_device_message">ਇਹ ਕਾਰ ਹੁਣ ਇਸ ਡੀਵਾਈਸ ਨਾਲ ਜੋੜਾਬੱਧ ਨਹੀਂ ਰਹੇਗੀ। ਇਸ ਦੇ ਇਲਾਵਾ ਤੁਹਾਨੂੰ ਇਸ ਕਾਰ ਨੂੰ ਸੰਬੰਧੀ ਐਪ ਤੋਂ ਹਟਾਉਣ ਦੀ ਲੋੜ ਪਵੇਗੀ।</string>
+    <string name="remove_associated_device_title">ਕੀ &lt;b>%1$s&lt;/b> ਨੂੰ ਭੁੱਲਣਾ ਹੈ?</string>
+    <string name="retry">ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ</string>
+    <string msgid="635940284003824276" name="scroll_bar_page_down_button">"ਹੇਠਾਂ ਵੱਲ ਸਕ੍ਰੋਲ ਕਰੋ"</string>
+    <string msgid="465102831431294180" name="scroll_bar_page_up_button">"ਉੱਪਰ ਵੱਲ ਸਕ੍ਰੋਲ ਕਰੋ"</string>
+    <string msgid="6264217191555673260" name="search_menu_title">"ਖੋਜ"</string>
+    <string name="settings_entry_title">ਸੰਬੰਧਿਤ ਡੀਵਾਈਸ</string>
+    <string name="skip">ਛੱਡੋ</string>
+    <string msgid="444412252084688703" name="speed_bump_lockout_message">"ਸੜਕ \'ਤੇ ਧਿਆਨ ਦਿਓ"</string>
+    <string msgid="6277540029070332960" name="status_bar_notification_info_overflow">"999+"</string>
+    <string msgid="5190123168583152844" name="summary_collapsed_preference_list">"<ns1:g id="CURRENT_ITEMS">%1$s</ns1:g>, <ns1:g id="ADDED_ITEMS">%2$s</ns1:g>"</string>
+    <string name="suw_qr_instruction_text">&lt;b>%1$s&lt;/b> ਨਾਲ ਕਨੈਕਟ ਕਰਨ ਲਈ ਸਕੈਨ ਕਰੋ</string>
+    <string name="suw_setup_profile_content">ਜੇ ਤੁਸੀਂ ਪਹਿਲਾਂ ਹੀ ਆਪਣੇ ਫ਼ੋਨ \'ਤੇ ਸੈੱਟਅੱਪ ਕਰਨਾ ਸ਼ੁਰੂ ਕਰ ਦਿੱਤਾ ਹੈ, ਤਾਂ ਆਪਣੀ ਸੰਬੰਧੀ ਐਪ ਖੋਲ੍ਹੋ ਅਤੇ QR ਕੋਡ ਨੂੰ ਸਕੈਨ ਕਰੋ।\n\nਜਾਂ, ਤੁਸੀਂ ਆਪਣੀ ਕਾਰ ਵਿੱਚ ਆਪਣੇ ਪ੍ਰੋਫਾਈਲ ਦਾ ਸੈੱਟਅੱਪ ਪੂਰਾ ਕਰ ਸਕਦੇ ਹੋ।</string>
+    <string name="suw_setup_profile_title">ਆਪਣੇ ਫ਼ੋਨ ਜਾਂ ਕਾਰ \'ਤੇ ਸੈੱਟਅੱਪ ਪੂਰਾ ਕਰੋ</string>
+    <string name="trusted_device_enrollment_error_dialog_message">ਅਫ਼ਸੋਸ, ਇਸ ਸਮੇਂ ਇਹ ਵਿਸ਼ੇਸ਼ਤਾ ਚਾਲੂ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।</string>
+    <string name="trusted_device_enrollment_error_dialog_title">ਕੋਈ ਗੜਬੜ ਹੋ ਗਈ</string>
+    <string name="trusted_device_enrollment_success_message">&lt;b>%1$s&lt;/b> ਹੁਣ ਤੁਹਾਡੇ ਪ੍ਰੋਫਾਈਲ ਨੂੰ ਅਣਲਾਕ ਕਰ ਸਕਦਾ ਹੈ</string>
+    <string name="trusted_device_feature_instruction">ਅਣਲਾਕ ਕਰਨ ਦੇ ਵਿਕਲਪ ਸੈੱਟ ਕਰਨ ਲਈ ਆਪਣੀ ਸੰਬੰਧੀ ਐਪ ਦੀ ਜਾਂਚ ਕਰੋ</string>
+    <string name="trusted_device_feature_title">ਪ੍ਰੋਫਾਈਲ ਨੂੰ ਫ਼ੋਨ ਨਾਲ ਅਣਲਾਕ ਕਰੋ</string>
+    <string name="trusted_device_item_title">&lt;b>%1$s&lt;/b> ਨੂੰ ਮੇਰਾ ਪ੍ਰੋਫਾਈਲ ਅਣਲਾਕ ਕਰਨ ਦਿਓ</string>
+    <string name="trusted_device_notification_channel_name">ਫ਼ੋਨ ਨਾਲ ਅਣਲਾਕ ਕਰੋ</string>
+    <string name="trusted_device_notification_content">ਇਸ ਵਿਸ਼ੇਸ਼ਤਾ ਨੂੰ ਅਧਿਕਾਰਿਤ ਕਰਨ ਲਈ ਇੱਥੇ ਟੈਪ ਕਰੋ</string>
+    <string name="trusted_device_notification_title">ਆਪਣੇ ਫ਼ੋਨ ਨੂੰ ਤੁਹਾਡਾ ਪ੍ਰੋਫਾਈਲ ਅਣਲਾਕ ਕਰਨ ਦਿਓ</string>
+    <string name="turn_on">ਚਾਲੂ ਕਰੋ</string>
+    <string name="turn_on_bluetooth_dialog_message">ਆਪਣੇ ਸੰਬੰਧੀ ਡੀਵਾਈਸ ਦੇ ਨਾਲ ਕਨੈਕਟ ਕਰਨ ਲਈ, ਤੁਹਾਡੀ ਕਾਰ ਨੂੰ ਬਲੂਟੁੱਥ ਦੀ ਲੋੜ ਹੈ।</string>
+    <string name="turn_on_bluetooth_dialog_title">ਕੀ ਬਲੂਟੁੱਥ ਚਾਲੂ ਕਰਨਾ ਹੈ?</string>
+    <string name="turn_on_bluetooth_message">ਆਪਣੇ ਫ਼ੋਨ ਨੂੰ ਸੰਬੰਧੀ ਡੀਵਾਈਸ ਵਜੋਂ ਸੈੱਟ ਕਰਨ ਲਈ, ਤੁਹਾਡੀ ਕਾਰ ਨੂੰ ਬਲੂਟੁੱਥ ਦੀ ਲੋੜ ਹੈ।</string>
+    <string name="turn_on_bluetooth_title">ਬਲੂਟੁੱਥ ਚਾਲੂ ਕਰੋ</string>
+    <string name="unknown">ਅਗਿਆਤ</string>
+    <string name="unlock_profile_to_finish_message">ਤੁਸੀਂ ਇੱਕ ਨਵਾਂ ਪ੍ਰੋਫਾਈਲ ਲਾਕ ਬਣਾਇਆ ਹੈ। ਅੱਗੇ, ਇਹ ਤਸਦੀਕ ਕਰਨ ਲਈ ਕਿ ਤੁਹਾਡਾ ਫ਼ੋਨ ਸਵੈਚਲਿਤ ਤੌਰ \'ਤੇ ਤੁਹਾਡੇ ਪ੍ਰੋਫਾਈਲ ਨੂੰ ਅਣਲਾਕ ਕਰ ਸਕਦਾ ਹੈ, ਇਸਨੂੰ ਦੁਬਾਰਾ ਦਾਖਲ ਕਰੋ</string>
+    <string name="unlock_profile_to_finish_title">ਸਮਾਪਤ ਕਰਨ ਲਈ ਆਪਣੇ ਪ੍ਰੋਫਾਈਲ ਨੂੰ ਅਣਲਾਕ ਕਰੋ</string>
+    <string msgid="5138405918326871307" name="v7_preference_off">"ਬੰਦ"</string>
+    <string msgid="27351710992731591" name="v7_preference_on">"ਚਾਲੂ"</string>
+</resources>

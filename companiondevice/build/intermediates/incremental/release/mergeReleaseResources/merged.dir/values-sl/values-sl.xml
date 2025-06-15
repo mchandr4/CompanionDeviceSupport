@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:ns1="urn:oasis:names:tc:xliff:document:1.2">
+    <plurals name="notification_new_message">
+    <item quantity="one">%d novo sporočilo</item>
+    <item quantity="two">%d novi sporočili</item>
+    <item quantity="few">%d nova sporočila</item>
+    <item quantity="other">%d novih sporočil</item>
+  </plurals>
+    <string msgid="5976598919945601918" name="abc_action_bar_home_description">"Krmarjenje na začetek"</string>
+    <string msgid="8388173803310557296" name="abc_action_bar_up_description">"Pomik navzgor"</string>
+    <string msgid="3937310113216875497" name="abc_action_menu_overflow_description">"Več možnosti"</string>
+    <string msgid="4692188335987374352" name="abc_action_mode_done">"Končano"</string>
+    <string msgid="1189761859438369441" name="abc_activity_chooser_view_see_all">"Pokaži vse"</string>
+    <string msgid="2165779757652331008" name="abc_activitychooserview_choose_application">"Izbira aplikacije"</string>
+    <string msgid="4215997306490295099" name="abc_capital_off">"IZKLOP"</string>
+    <string msgid="884982626291842264" name="abc_capital_on">"VKLOP"</string>
+    <string msgid="8833365367933412986" name="abc_menu_alt_shortcut_label">"Alt +"</string>
+    <string msgid="2223301931652355242" name="abc_menu_ctrl_shortcut_label">"Ctrl +"</string>
+    <string msgid="838001238306846836" name="abc_menu_delete_shortcut_label">"delete"</string>
+    <string msgid="7986526966204849475" name="abc_menu_enter_shortcut_label">"enter"</string>
+    <string msgid="375214403600139847" name="abc_menu_function_shortcut_label">"Fn +"</string>
+    <string msgid="4192209724446364286" name="abc_menu_meta_shortcut_label">"Meta +"</string>
+    <string msgid="4741552369836443843" name="abc_menu_shift_shortcut_label">"Shift +"</string>
+    <string msgid="5473865519181928982" name="abc_menu_space_shortcut_label">"preslednica"</string>
+    <string msgid="6180552449598693998" name="abc_menu_sym_shortcut_label">"Sym +"</string>
+    <string msgid="5520303668377388990" name="abc_prepend_shortcut_label">"Meni +"</string>
+    <string msgid="7208076849092622260" name="abc_search_hint">"Iskanje …"</string>
+    <string msgid="3741173234950517107" name="abc_searchview_description_clear">"Izbris poizvedbe"</string>
+    <string msgid="693312494995508443" name="abc_searchview_description_query">"Iskalna poizvedba"</string>
+    <string msgid="3417662926640357176" name="abc_searchview_description_search">"Iskanje"</string>
+    <string msgid="1486535517437947103" name="abc_searchview_description_submit">"Pošiljanje poizvedbe"</string>
+    <string msgid="2293578557972875415" name="abc_searchview_description_voice">"Glasovno iskanje"</string>
+    <string msgid="8875138169939072951" name="abc_shareactionprovider_share_with">"Skupna raba z:"</string>
+    <string msgid="9055268688411532828" name="abc_shareactionprovider_share_with_application">"Skupna raba z drugimi prek aplikacije <ns1:g id="APPLICATION_NAME">%s</ns1:g>"</string>
+    <string msgid="1656852541809559762" name="abc_toolbar_collapse_description">"Strnitev"</string>
+    <string name="accept">Sprejmi</string>
+    <string name="add_associated_device_subtitle">Telefon lahko uporabljate kot spremljevalno napravo za pomoč pri upravljanju vozne izkušnje.</string>
+    <string name="add_associated_device_title">Poveži z aplikacijo MyCompanion</string>
+    <string name="add_device_title">Poveži s spremljevalno aplikacijo</string>
+    <string name="app_running_msg_channel_name">Storitev za SMS-je prek telefona se izvaja</string>
+    <string name="app_running_msg_notification_content">Prejemanje SMS-jev prek spremljevalne naprave.</string>
+    <string name="app_running_msg_notification_title">Storitev za SMS-je prek telefona je aktivna.</string>
+    <string name="associated_device_install_app">V telefonu morate imeti nameščeno <b>spremljevalno aplikacijo</b>.</string>
+    <string name="associated_device_open_app">Odprite aplikacijo in upoštevajte navodila v njej.</string>
+    <string name="associated_device_pairing_code_title">Potrditev kode v telefonu</string>
+    <string name="associated_device_pairing_message">Potrdite, da se ujema s kodo, prikazano v telefonu.</string>
+    <string name="associated_device_select_device">Odprite aplikacijo in se povežite z avtomobilom &lt;b>%1$s&lt;b>.</string>
+    <string name="associated_device_success">Naprava je uspešno povezana.</string>
+    <string name="ble_device_name_prefix">Vozilo\u00A0</string>
+    <string name="cancel">Prekliči</string>
+    <string msgid="399078418913970003" name="car_ui_alert_dialog_default_button">"Zapri"</string>
+    <string msgid="511096411523593697" name="car_ui_preference_switch_off">"Izklopljeno"</string>
+    <string msgid="2091385466752081649" name="car_ui_preference_switch_on">"Vklopljeno"</string>
+    <string msgid="7490306547860308268" name="car_ui_restricted_while_driving">"Funkcija med vožnjo ni na voljo"</string>
+    <string msgid="746830252244551947" name="car_ui_scrollbar_page_down_button">"Pomik navzdol"</string>
+    <string msgid="965431866383176249" name="car_ui_scrollbar_page_up_button">"Pomik navzgor"</string>
+    <string msgid="5978003166159186378" name="car_ui_scrolling_limited_message">"Pomikanje je med vožnjo omejeno"</string>
+    <string msgid="8339474149462104372" name="car_ui_toolbar_default_search_hint">"Iskanje …"</string>
+    <string msgid="9132512843297732890" name="car_ui_toolbar_menu_item_overflow_title">"Element menija z dodatnimi elementi"</string>
+    <string msgid="2988075382498202155" name="car_ui_toolbar_menu_item_search_title">"Išči"</string>
+    <string msgid="5206858558664840197" name="car_ui_toolbar_menu_item_settings_title">"Nastavitve"</string>
+    <string msgid="6116610935599234725" name="car_ui_toolbar_nav_icon_content_description">"Nazaj"</string>
+    <string name="change_profile">Spremeni profil</string>
+    <string name="companion_not_available_dialog_message">Profili gosta ne morejo dostopati do spremljevalne naprave.</string>
+    <string name="companion_not_available_dialog_switch_user_message">Profili gosta ne morejo dostopati do spremljevalne naprave. Če želite spremeniti profil, odprite »Nastavitve > Uporabniki«.</string>
+    <string name="companion_not_available_dialog_title">Ta nastavitev ni na voljo</string>
+    <string name="confirm">Potrdi</string>
+    <string name="connect">Poveži</string>
+    <string name="connect_to_car_instruction_text">Povežite se z avtomobilom</string>
+    <string name="connect_to_targe_car_instruction_text">Povežite se z vozilom &lt;b>%1$s&lt;/b> %2$s</string>
+    <string name="connected">Povezano</string>
+    <string name="connection">Povezava</string>
+    <string name="continue_button">Naprej</string>
+    <string name="continue_setup_toast_text">Nastavitev nadaljujte v telefonu.</string>
+    <string msgid="3209159573327985035" name="copy">"Kopiraj"</string>
+    <string name="create_phone_lock_dialog_message">V telefonu še ni nastavljeno zaklepanje zaslona. Če želite odkleniti profil avtomobila s telefonom, v nastavitvah telefona najprej ustvarite zaklepanje zaslona (znano kot geslo).</string>
+    <string name="create_phone_lock_dialog_title">Ustvarjanje zaklepanja zaslona v telefonu</string>
+    <string name="create_profile_lock_dialog_message">Če želite uporabljati telefon za odklepanje profila, morate imeti kot rezervno možnost nastavljeno glavno zaklepanje profila.</string>
+    <string name="create_profile_lock_dialog_title">Ustvarjanje glavnega zaklepanja profila</string>
+    <string name="default_device_name">Povezana naprava</string>
+    <string name="detected">Zaznano</string>
+    <string name="device_not_connected_dialog_message">Bluetooth mora biti vklopljen v telefonu in avtomobilu ter telefon mora biti v bližini</string>
+    <string name="device_not_connected_dialog_title">Telefona ni mogoče najti</string>
+    <string name="device_removed_failure_toast_text">Telefona %1$s ni bilo mogoče odstraniti.</string>
+    <string name="device_removed_success_toast_text">Telefon %1$s je bil odstranjen.</string>
+    <string name="disable">Onemogoči</string>
+    <string name="disable_device_connection_text">Prekini povezavo s to napravo</string>
+    <string name="disconnect">Prekini povezavo</string>
+    <string name="disconnected">Prekinjeno</string>
+    <string name="disconnecting">Prekinjanje povezave</string>
+    <string name="enable">Omogoči</string>
+    <string name="enable_bluetooth_instruction_text">Dovolite povezavo Bluetooth</string>
+    <string name="enable_device_connection_text">Znova poveži to napravo</string>
+    <string name="error_screen_message">Tega zaslona ža ni bilo mogoče pravilno prikazati. Poskusite znova.</string>
+    <string name="error_screen_title">Prišlo je do težave</string>
+    <string msgid="1234962710353108940" name="expand_button_title">"Dodatno"</string>
+    <string name="forget">Pozabi</string>
+    <string name="forget_title">Odstrani to napravo</string>
+    <string name="name_not_available">Ime ni na voljo</string>
+    <string name="notDetected">Ni zaznano</string>
+    <string name="not_now">Ne zdaj</string>
+    <string msgid="478774118347071097" name="not_set">"Ni nastavljeno"</string>
+    <string name="ok">V redu</string>
+    <string name="open_companion_app_instruction_text">Odprite spremljevalno aplikacijo</string>
+    <string msgid="7961817945132860002" name="preference_copied">"»<ns1:g id="SUMMARY">%1$s</ns1:g>« je bilo kopirano v odložišče."</string>
+    <string name="qr_instruction_text">S telefonom optično preberite kodo QR ali odprite MyCompanion, če se želite povezati z avtomobilom &lt;b>%1$s&lt;/b></string>
+    <string name="reject">Zavrni</string>
+    <string name="remove">Odstrani</string>
+    <string name="remove_associated_device_message">Ta avtomobil ne bo več seznanjen s to napravo. Ta avtomobil boste morali tudi odstraniti iz spremljevalne aplikacije.</string>
+    <string name="remove_associated_device_title">Želite pozabiti avtomobil &lt;b>%1$s&lt;/b>?</string>
+    <string name="retry">Poskusi znova</string>
+    <string msgid="635940284003824276" name="scroll_bar_page_down_button">"Pomik navzdol"</string>
+    <string msgid="465102831431294180" name="scroll_bar_page_up_button">"Pomik navzgor"</string>
+    <string msgid="6264217191555673260" name="search_menu_title">"Iskanje"</string>
+    <string name="settings_entry_title">Spremljevalna naprava</string>
+    <string name="skip">Preskoči</string>
+    <string msgid="444412252084688703" name="speed_bump_lockout_message">"Glejte na cesto"</string>
+    <string msgid="6277540029070332960" name="status_bar_notification_info_overflow">"999+"</string>
+    <string msgid="5190123168583152844" name="summary_collapsed_preference_list">"<ns1:g id="CURRENT_ITEMS">%1$s</ns1:g>, <ns1:g id="ADDED_ITEMS">%2$s</ns1:g>"</string>
+    <string name="suw_qr_instruction_text">Optično preberite, če se želite povezati z avtomobilom &lt;b>%1$s&lt;/b></string>
+    <string name="suw_setup_profile_content">Če ste nastavitev že začeli v telefonu, odprite aplikacijo MyCompanion in optično preberite kodo QR.\n\nNastavitev profila lahko dokončate tudi v avtomobilu.</string>
+    <string name="suw_setup_profile_title">Dokončajte nastavitev v telefonu ali avtomobilu</string>
+    <string name="trusted_device_enrollment_error_dialog_message">Te funkcije trenutno žal ni bilo mogoče vklopiti. Poskusite znova.</string>
+    <string name="trusted_device_enrollment_error_dialog_title">Prišlo je do težave</string>
+    <string name="trusted_device_enrollment_success_message">&lt;b>%1$s&lt;/b> lahko odklepa vaš profil.</string>
+    <string name="trusted_device_feature_instruction">V spremljevalni aplikaciji nastavite možnosti odklepanja.</string>
+    <string name="trusted_device_feature_title">Odklepanje profila s telefonom</string>
+    <string name="trusted_device_item_title">Naj &lt;b>%1$s&lt;/b> odklepa moj profil</string>
+    <string name="trusted_device_notification_channel_name">Odklepanje s telefonom</string>
+    <string name="trusted_device_notification_content">Dotaknite se tukaj, če želite pooblastiti to funkcijo.</string>
+    <string name="trusted_device_notification_title">Omogočanje, da telefon odklene vaš profil</string>
+    <string name="turn_on">Vklopi</string>
+    <string name="turn_on_bluetooth_dialog_message">Če želite povezati spremljevalno napravo, avtomobil potrebuje Bluetooth.</string>
+    <string name="turn_on_bluetooth_dialog_title">Želite vklopiti Bluetooth?</string>
+    <string name="turn_on_bluetooth_message">Če želite nastaviti telefon kot spremljevalno napravo, avtomobil potrebuje Bluetooth.</string>
+    <string name="turn_on_bluetooth_title">Vklopite Bluetooth</string>
+    <string name="unknown">Neznano</string>
+    <string name="unlock_profile_to_finish_message">Ustvarili ste novo zaklepanje profila. Znova ga vnesite zaradi potrditve, da lahko telefon samodejno odklene vaš profil.</string>
+    <string name="unlock_profile_to_finish_title">Za konec odklenite profil</string>
+    <string msgid="5138405918326871307" name="v7_preference_off">"IZKLOPLJENO"</string>
+    <string msgid="27351710992731591" name="v7_preference_on">"VKLOPLJENO"</string>
+</resources>

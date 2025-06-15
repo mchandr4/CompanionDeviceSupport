@@ -1,0 +1,7 @@
+com.google.android.connecteddevice
+integer hu_companion_binder_version
+integer lock_screen_check_delay_in_second
+string beacon_uuid
+string compatible_min_mobile_version_android
+string compatible_min_mobile_version_ios
+string hu_companion_sdk_version

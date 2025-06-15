@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:ns1="urn:oasis:names:tc:xliff:document:1.2">
+    <plurals name="notification_new_message">
+    <item quantity="one">Nytt meddelande</item>
+    <item quantity="other">%d nya meddelanden</item>
+  </plurals>
+    <string msgid="5976598919945601918" name="abc_action_bar_home_description">"Navigera hem"</string>
+    <string msgid="8388173803310557296" name="abc_action_bar_up_description">"Navigera uppåt"</string>
+    <string msgid="3937310113216875497" name="abc_action_menu_overflow_description">"Fler alternativ"</string>
+    <string msgid="4692188335987374352" name="abc_action_mode_done">"Klar"</string>
+    <string msgid="1189761859438369441" name="abc_activity_chooser_view_see_all">"Visa alla"</string>
+    <string msgid="2165779757652331008" name="abc_activitychooserview_choose_application">"Välj en app"</string>
+    <string msgid="4215997306490295099" name="abc_capital_off">"AV"</string>
+    <string msgid="884982626291842264" name="abc_capital_on">"PÅ"</string>
+    <string msgid="8833365367933412986" name="abc_menu_alt_shortcut_label">"Alt + "</string>
+    <string msgid="2223301931652355242" name="abc_menu_ctrl_shortcut_label">"Ctrl + "</string>
+    <string msgid="838001238306846836" name="abc_menu_delete_shortcut_label">"delete"</string>
+    <string msgid="7986526966204849475" name="abc_menu_enter_shortcut_label">"retur"</string>
+    <string msgid="375214403600139847" name="abc_menu_function_shortcut_label">"Funktion + "</string>
+    <string msgid="4192209724446364286" name="abc_menu_meta_shortcut_label">"Meta + "</string>
+    <string msgid="4741552369836443843" name="abc_menu_shift_shortcut_label">"Skift + "</string>
+    <string msgid="5473865519181928982" name="abc_menu_space_shortcut_label">"blanksteg"</string>
+    <string msgid="6180552449598693998" name="abc_menu_sym_shortcut_label">"Symbol + "</string>
+    <string msgid="5520303668377388990" name="abc_prepend_shortcut_label">"Meny + "</string>
+    <string msgid="7208076849092622260" name="abc_search_hint">"Sök …"</string>
+    <string msgid="3741173234950517107" name="abc_searchview_description_clear">"Ta bort frågan"</string>
+    <string msgid="693312494995508443" name="abc_searchview_description_query">"Sökfråga"</string>
+    <string msgid="3417662926640357176" name="abc_searchview_description_search">"Sök"</string>
+    <string msgid="1486535517437947103" name="abc_searchview_description_submit">"Skicka fråga"</string>
+    <string msgid="2293578557972875415" name="abc_searchview_description_voice">"Röstsökning"</string>
+    <string msgid="8875138169939072951" name="abc_shareactionprovider_share_with">"Dela med"</string>
+    <string msgid="9055268688411532828" name="abc_shareactionprovider_share_with_application">"Dela med <ns1:g id="APPLICATION_NAME">%s</ns1:g>"</string>
+    <string msgid="1656852541809559762" name="abc_toolbar_collapse_description">"Komprimera"</string>
+    <string name="accept">Godkänn</string>
+    <string name="add_associated_device_subtitle">Du kan koppla in telefonen som hjälpenhet och använda den när du kör</string>
+    <string name="add_associated_device_title">Anslut till MyCompanion</string>
+    <string name="add_device_title">Anslut till kompletterande app</string>
+    <string name="app_running_msg_channel_name">Telefonens sms-tjänst körs</string>
+    <string name="app_running_msg_notification_content">Tar emot sms via hjälpenheten</string>
+    <string name="app_running_msg_notification_title">Telefonens sms-tjänst är aktiv</string>
+    <string name="associated_device_install_app">Kolla att den <b>tillhörande appen</b> är installerad på telefonen</string>
+    <string name="associated_device_open_app">Öppna appen och följ anvisningarna</string>
+    <string name="associated_device_pairing_code_title">Kolla koden på telefonen</string>
+    <string name="associated_device_pairing_message">Kontrollera att detta är samma kod som visas på telefonen</string>
+    <string name="associated_device_select_device">Öppna appen och anslut till &lt;b>%1$s&lt;b></string>
+    <string name="associated_device_success">Enheten har kopplats</string>
+    <string name="ble_device_name_prefix">Fordon\u00A0</string>
+    <string name="cancel">Avbryt</string>
+    <string msgid="399078418913970003" name="car_ui_alert_dialog_default_button">"Stäng"</string>
+    <string msgid="511096411523593697" name="car_ui_preference_switch_off">"Av"</string>
+    <string msgid="2091385466752081649" name="car_ui_preference_switch_on">"På"</string>
+    <string msgid="7490306547860308268" name="car_ui_restricted_while_driving">"Funktionen är inte tillgänglig när du kör"</string>
+    <string msgid="746830252244551947" name="car_ui_scrollbar_page_down_button">"Scrolla nedåt"</string>
+    <string msgid="965431866383176249" name="car_ui_scrollbar_page_up_button">"Scrolla uppåt"</string>
+    <string msgid="5978003166159186378" name="car_ui_scrolling_limited_message">"Scrollning begränsas när du kör"</string>
+    <string msgid="8339474149462104372" name="car_ui_toolbar_default_search_hint">"Sök …"</string>
+    <string msgid="9132512843297732890" name="car_ui_toolbar_menu_item_overflow_title">"Fler menyalternativ"</string>
+    <string msgid="2988075382498202155" name="car_ui_toolbar_menu_item_search_title">"Sök"</string>
+    <string msgid="5206858558664840197" name="car_ui_toolbar_menu_item_settings_title">"Inställningar"</string>
+    <string msgid="6116610935599234725" name="car_ui_toolbar_nav_icon_content_description">"Tillbaka"</string>
+    <string name="change_profile">Byt profil</string>
+    <string name="companion_not_available_dialog_message">Gästprofiler har inte åtkomst till CompanionDevice</string>
+    <string name="companion_not_available_dialog_switch_user_message">Gästprofiler har inte åtkomst till CompanionDevice. Byt profil genom att öppna Inställningar > Användare.</string>
+    <string name="companion_not_available_dialog_title">Inställningen är inte tillgänglig</string>
+    <string name="confirm">Bekräfta</string>
+    <string name="connect">Anslut</string>
+    <string name="connect_to_car_instruction_text">Anslut till bilen</string>
+    <string name="connect_to_targe_car_instruction_text">Anslut till &lt;b>%1$s&lt;/b> %2$s</string>
+    <string name="connected">Ansluten</string>
+    <string name="connection">Anslutning</string>
+    <string name="continue_button">Fortsätt</string>
+    <string name="continue_setup_toast_text">Fortsätt med konfigureringen på telefonen</string>
+    <string msgid="3209159573327985035" name="copy">"Kopiera"</string>
+    <string name="create_phone_lock_dialog_message">Inget skärmlås har ställts in på telefonen. Innan du kan låsa upp bilens profil med telefonen måste du ställa in ett skärmlås (kallas även lösenord) i telefonens inställningar.</string>
+    <string name="create_phone_lock_dialog_title">Ställ in ett skärmlås på telefonen</string>
+    <string name="create_profile_lock_dialog_message">Innan du kan låsa upp profilen med telefonen måste du ha ett primärt profillås som reservalternativ</string>
+    <string name="create_profile_lock_dialog_title">Skapa ett primärt profillås</string>
+    <string name="default_device_name">Kopplad enhet</string>
+    <string name="detected">Upptäckt</string>
+    <string name="device_not_connected_dialog_message">Se till att telefonens och bilens Bluetooth är på och att telefonen är i närheten</string>
+    <string name="device_not_connected_dialog_title">Det gick inte att hitta telefonen</string>
+    <string name="device_removed_failure_toast_text">Det gick inte att glömma bort %1$s</string>
+    <string name="device_removed_success_toast_text">%1$s har glömts bort</string>
+    <string name="disable">Inaktivera</string>
+    <string name="disable_device_connection_text">Koppla från den här enheten</string>
+    <string name="disconnect">Koppla från</string>
+    <string name="disconnected">Frånkopplad</string>
+    <string name="disconnecting">Kopplar från</string>
+    <string name="enable">Aktivera</string>
+    <string name="enable_bluetooth_instruction_text">Tillåt Bluetooth-anslutning</string>
+    <string name="enable_device_connection_text">Anslut den här enheten igen</string>
+    <string name="error_screen_message">Skärmen kan inte visas korrekt. Försök igen.</string>
+    <string name="error_screen_title">Något gick fel</string>
+    <string msgid="1234962710353108940" name="expand_button_title">"Avancerat"</string>
+    <string name="forget">Glöm</string>
+    <string name="forget_title">Glöm den här enheten</string>
+    <string name="name_not_available">Namnet är inte tillgängligt</string>
+    <string name="notDetected">Ingen hittades</string>
+    <string name="not_now">Inte nu</string>
+    <string msgid="478774118347071097" name="not_set">"Inte angett"</string>
+    <string name="ok">OK</string>
+    <string name="open_companion_app_instruction_text">Öppna kompletterande app</string>
+    <string msgid="7961817945132860002" name="preference_copied">"<ns1:g id="SUMMARY">%1$s</ns1:g> har kopierats till Urklipp."</string>
+    <string name="qr_instruction_text">Skanna QR-koden med telefonen eller öppna MyCompanion för att ansluta till &lt;b>%1$s&lt;/b></string>
+    <string name="reject">Godkänn inte</string>
+    <string name="remove">Ta bort</string>
+    <string name="remove_associated_device_message">Bilen kopplas bort från denna enhet. Du behöver dessutom ta bort bilen från den tillhörande appen.</string>
+    <string name="remove_associated_device_title">Vill du glömma &lt;b>%1$s&lt;/b>?</string>
+    <string name="retry">Försök igen</string>
+    <string msgid="635940284003824276" name="scroll_bar_page_down_button">"Rulla nedåt"</string>
+    <string msgid="465102831431294180" name="scroll_bar_page_up_button">"Rulla uppåt"</string>
+    <string msgid="6264217191555673260" name="search_menu_title">"Sök"</string>
+    <string name="settings_entry_title">Tillhörande enhet</string>
+    <string name="skip">Hoppa över</string>
+    <string msgid="444412252084688703" name="speed_bump_lockout_message">"Fokusera på körningen"</string>
+    <string msgid="6277540029070332960" name="status_bar_notification_info_overflow">"999+"</string>
+    <string msgid="5190123168583152844" name="summary_collapsed_preference_list">"<ns1:g id="CURRENT_ITEMS">%1$s</ns1:g>, <ns1:g id="ADDED_ITEMS">%2$s</ns1:g>"</string>
+    <string name="suw_qr_instruction_text">Skanna för att ansluta till &lt;b>%1$s&lt;/b></string>
+    <string name="suw_setup_profile_content">Om du redan har påbörjat konfigureringen på telefonen öppnar du Companion-appen och skannar QR-koden.\n\nDu kan även slutföra konfigureringen av profilen i bilen.</string>
+    <string name="suw_setup_profile_title">Slutför konfigureringen på telefonen eller i bilen</string>
+    <string name="trusted_device_enrollment_error_dialog_message">Det gick inte att aktivera den här funktionen just nu. Försök igen.</string>
+    <string name="trusted_device_enrollment_error_dialog_title">Något gick fel</string>
+    <string name="trusted_device_enrollment_success_message">&lt;b>%1$s&lt;/b> kan nu låsa upp din profil</string>
+    <string name="trusted_device_feature_instruction">Upplåsningsalternativ finns i den tillhörande appen</string>
+    <string name="trusted_device_feature_title">Lås upp profilen med telefonen</string>
+    <string name="trusted_device_item_title">Låt &lt;b>%1$s&lt;/b> låsa upp min profil</string>
+    <string name="trusted_device_notification_channel_name">Låsa upp med telefonen</string>
+    <string name="trusted_device_notification_content">Tryck här om du vill auktorisera funktionen</string>
+    <string name="trusted_device_notification_title">Låt telefonen låsa upp din profil</string>
+    <string name="turn_on">Aktivera</string>
+    <string name="turn_on_bluetooth_dialog_message">Bilen måste ha Bluetooth om det ska gå att ansluta till hjälpenheten.</string>
+    <string name="turn_on_bluetooth_dialog_title">Vill du aktivera Bluetooth?</string>
+    <string name="turn_on_bluetooth_message">Bilen måste ha Bluetooth om det ska gå att konfigurera telefonen som hjälpenhet.</string>
+    <string name="turn_on_bluetooth_title">Aktivera Bluetooth</string>
+    <string name="unknown">Okänd</string>
+    <string name="unlock_profile_to_finish_message">Ett nytt profillås har skapats. Ange det igen och kontrollera att telefonen kan låsa upp profilen automatiskt.</string>
+    <string name="unlock_profile_to_finish_title">Slutför genom att låsa upp profilen</string>
+    <string msgid="5138405918326871307" name="v7_preference_off">"AV"</string>
+    <string msgid="27351710992731591" name="v7_preference_on">"PÅ"</string>
+</resources>

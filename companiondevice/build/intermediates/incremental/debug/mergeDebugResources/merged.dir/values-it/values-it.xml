@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:ns1="urn:oasis:names:tc:xliff:document:1.2">
+    <plurals name="notification_new_message">
+    <item quantity="one">Nuovo messaggio</item>
+    <item quantity="other">%d nuovi messaggi</item>
+  </plurals>
+    <string msgid="5976598919945601918" name="abc_action_bar_home_description">"Portami a casa"</string>
+    <string msgid="8388173803310557296" name="abc_action_bar_up_description">"Torna indietro"</string>
+    <string msgid="3937310113216875497" name="abc_action_menu_overflow_description">"Altre opzioni"</string>
+    <string msgid="4692188335987374352" name="abc_action_mode_done">"Fine"</string>
+    <string msgid="1189761859438369441" name="abc_activity_chooser_view_see_all">"Mostra tutto"</string>
+    <string msgid="2165779757652331008" name="abc_activitychooserview_choose_application">"Scelta di un\'app"</string>
+    <string msgid="4215997306490295099" name="abc_capital_off">"OFF"</string>
+    <string msgid="884982626291842264" name="abc_capital_on">"ON"</string>
+    <string msgid="8833365367933412986" name="abc_menu_alt_shortcut_label">"ALT +"</string>
+    <string msgid="2223301931652355242" name="abc_menu_ctrl_shortcut_label">"CTRL +"</string>
+    <string msgid="838001238306846836" name="abc_menu_delete_shortcut_label">"CANC"</string>
+    <string msgid="7986526966204849475" name="abc_menu_enter_shortcut_label">"INVIO"</string>
+    <string msgid="375214403600139847" name="abc_menu_function_shortcut_label">"FUNZIONE +"</string>
+    <string msgid="4192209724446364286" name="abc_menu_meta_shortcut_label">"META +"</string>
+    <string msgid="4741552369836443843" name="abc_menu_shift_shortcut_label">"MAIUSC +"</string>
+    <string msgid="5473865519181928982" name="abc_menu_space_shortcut_label">"SPAZIO"</string>
+    <string msgid="6180552449598693998" name="abc_menu_sym_shortcut_label">"SYM +"</string>
+    <string msgid="5520303668377388990" name="abc_prepend_shortcut_label">"MENU +"</string>
+    <string msgid="7208076849092622260" name="abc_search_hint">"Cerca…"</string>
+    <string msgid="3741173234950517107" name="abc_searchview_description_clear">"Cancella query"</string>
+    <string msgid="693312494995508443" name="abc_searchview_description_query">"Query di ricerca"</string>
+    <string msgid="3417662926640357176" name="abc_searchview_description_search">"Cerca"</string>
+    <string msgid="1486535517437947103" name="abc_searchview_description_submit">"Invia query"</string>
+    <string msgid="2293578557972875415" name="abc_searchview_description_voice">"Ricerca vocale"</string>
+    <string msgid="8875138169939072951" name="abc_shareactionprovider_share_with">"Condividi con"</string>
+    <string msgid="9055268688411532828" name="abc_shareactionprovider_share_with_application">"Condividi tramite <ns1:g id="APPLICATION_NAME">%s</ns1:g>"</string>
+    <string msgid="1656852541809559762" name="abc_toolbar_collapse_description">"Comprimi"</string>
+    <string name="accept">Accetta</string>
+    <string name="add_associated_device_subtitle">Puoi usare il telefono come dispositivo complementare per gestire la tua esperienza di guida</string>
+    <string name="add_associated_device_title">Connettiti a MyCompanion</string>
+    <string name="add_device_title">Connettiti all\'app complementare</string>
+    <string name="app_running_msg_channel_name">Servizio di SMS del telefono in esecuzione</string>
+    <string name="app_running_msg_notification_content">Ricezione di SMS tramite dispositivo complementare</string>
+    <string name="app_running_msg_notification_title">Servizio di SMS del telefono attivo</string>
+    <string name="associated_device_install_app">Verifica che l\'<b>app complementare</b> sia installata sul telefono</string>
+    <string name="associated_device_open_app">Apri l\'app e segui le istruzioni</string>
+    <string name="associated_device_pairing_code_title">Conferma il codice sul telefono</string>
+    <string name="associated_device_pairing_message">Conferma che questo codice corrisponde a quello visualizzato sul telefono</string>
+    <string name="associated_device_select_device">Apri l\'app e collegala a &lt;b>%1$s&lt;/b></string>
+    <string name="associated_device_success">Il dispositivo è stato associato correttamente</string>
+    <string name="ble_device_name_prefix">Veicolo\u00A0</string>
+    <string name="cancel">Annulla</string>
+    <string msgid="399078418913970003" name="car_ui_alert_dialog_default_button">"Chiudi"</string>
+    <string msgid="511096411523593697" name="car_ui_preference_switch_off">"Off"</string>
+    <string msgid="2091385466752081649" name="car_ui_preference_switch_on">"On"</string>
+    <string msgid="7490306547860308268" name="car_ui_restricted_while_driving">"Funzionalità non disponibile durante la guida"</string>
+    <string msgid="746830252244551947" name="car_ui_scrollbar_page_down_button">"Scorri verso il basso"</string>
+    <string msgid="965431866383176249" name="car_ui_scrollbar_page_up_button">"Scorri verso l\'alto"</string>
+    <string msgid="5978003166159186378" name="car_ui_scrolling_limited_message">"Scorrimento limitato durante la guida"</string>
+    <string msgid="8339474149462104372" name="car_ui_toolbar_default_search_hint">"Cerca…"</string>
+    <string msgid="9132512843297732890" name="car_ui_toolbar_menu_item_overflow_title">"Extra"</string>
+    <string msgid="2988075382498202155" name="car_ui_toolbar_menu_item_search_title">"Cerca"</string>
+    <string msgid="5206858558664840197" name="car_ui_toolbar_menu_item_settings_title">"Impostazioni"</string>
+    <string msgid="6116610935599234725" name="car_ui_toolbar_nav_icon_content_description">"Indietro"</string>
+    <string name="change_profile">Modifica profilo</string>
+    <string name="companion_not_available_dialog_message">I profili ospite non possono accedere a CompanionDevice</string>
+    <string name="companion_not_available_dialog_switch_user_message">I profili ospite non possono accedere a CompanionDevice. Per modificare il tuo profilo vai su Impostazioni > Utenti.</string>
+    <string name="companion_not_available_dialog_title">Questa impostazione non è disponibile</string>
+    <string name="confirm">Conferma</string>
+    <string name="connect">Connetti</string>
+    <string name="connect_to_car_instruction_text">Connettiti all\'auto</string>
+    <string name="connect_to_targe_car_instruction_text">Connettiti a &lt;b>%1$s&lt;/b> %2$s</string>
+    <string name="connected">Connesso</string>
+    <string name="connection">Connessione</string>
+    <string name="continue_button">Continua</string>
+    <string name="continue_setup_toast_text">Continua la configurazione sullo smartphone</string>
+    <string msgid="3209159573327985035" name="copy">"Copia"</string>
+    <string name="create_phone_lock_dialog_message">Sul telefono non è configurato un blocco schermo. Per sbloccare il profilo della tua auto con il telefono, devi prima creare un blocco schermo (chiamato anche passcode) nelle impostazioni del telefono.</string>
+    <string name="create_phone_lock_dialog_title">Crea un blocco schermo sul telefono</string>
+    <string name="create_profile_lock_dialog_message">Per poter usare il telefono per sbloccare il tuo profilo, devi avere un blocco del profilo principale come backup</string>
+    <string name="create_profile_lock_dialog_title">Crea un blocco del profilo principale</string>
+    <string name="default_device_name">Dispos. associato</string>
+    <string name="detected">Rilevato</string>
+    <string name="device_not_connected_dialog_message">Assicurati che il Bluetooth dello smartphone e il Bluetooth dell\'auto siano accesi e che lo smartphone si trovi nelle vicinanze</string>
+    <string name="device_not_connected_dialog_title">Impossibile trovare lo smartphone</string>
+    <string name="device_removed_failure_toast_text">Impossibile eliminare %1$s</string>
+    <string name="device_removed_success_toast_text">Dispositivo %1$s eliminato</string>
+    <string name="disable">Disattiva</string>
+    <string name="disable_device_connection_text">Disconnetti questo dispositivo</string>
+    <string name="disconnect">Disconnetti</string>
+    <string name="disconnected">Disconnesso</string>
+    <string name="disconnecting">Disconnessione…</string>
+    <string name="enable">Attiva</string>
+    <string name="enable_bluetooth_instruction_text">Consenti la connessione Bluetooth</string>
+    <string name="enable_device_connection_text">Riconnetti questo dispositivo</string>
+    <string name="error_screen_message">Impossibile visualizzare correttamente questa schermata. Riprova.</string>
+    <string name="error_screen_title">Si è verificato un problema</string>
+    <string msgid="1234962710353108940" name="expand_button_title">"Avanzate"</string>
+    <string name="forget">Elimina</string>
+    <string name="forget_title">Elimina questo dispositivo</string>
+    <string name="name_not_available">Nome non disponibile</string>
+    <string name="notDetected">Non rilevato</string>
+    <string name="not_now">Non ora</string>
+    <string msgid="478774118347071097" name="not_set">"Non impostato"</string>
+    <string name="ok">OK</string>
+    <string name="open_companion_app_instruction_text">Apri l\'app complementare</string>
+    <string msgid="7961817945132860002" name="preference_copied">"\"<ns1:g id="SUMMARY">%1$s</ns1:g>\"copiato negli appunti."</string>
+    <string name="qr_instruction_text">Scansiona il codice QR con il tuo telefono oppure apri MyCompanion per connetterti a &lt;b>%1$s&lt;/b></string>
+    <string name="reject">Rifiuta</string>
+    <string name="remove">Rimuovi</string>
+    <string name="remove_associated_device_message">L\'auto non sarà più accoppiata a questo dispositivo. Dovrai inoltre rimuovere questa auto dall\'app complementare.</string>
+    <string name="remove_associated_device_title">Vuoi eliminare &lt;b>%1$s&lt;/b>?</string>
+    <string name="retry">Riprova</string>
+    <string msgid="635940284003824276" name="scroll_bar_page_down_button">"Scorri verso il basso"</string>
+    <string msgid="465102831431294180" name="scroll_bar_page_up_button">"Scorri verso l\'alto"</string>
+    <string msgid="6264217191555673260" name="search_menu_title">"Cerca"</string>
+    <string name="settings_entry_title">Dispositivo complementare</string>
+    <string name="skip">Salta</string>
+    <string msgid="444412252084688703" name="speed_bump_lockout_message">"Concentrati sulla strada"</string>
+    <string msgid="6277540029070332960" name="status_bar_notification_info_overflow">"999+"</string>
+    <string msgid="5190123168583152844" name="summary_collapsed_preference_list">"<ns1:g id="CURRENT_ITEMS">%1$s</ns1:g>, <ns1:g id="ADDED_ITEMS">%2$s</ns1:g>"</string>
+    <string name="suw_qr_instruction_text">Scansiona per connetterti a &lt;b>%1$s&lt;/b></string>
+    <string name="suw_setup_profile_content">Se hai già iniziato la configurazione sul telefono, apri l\'app complementare e scansiona il codice QR.\n\nIn alternativa, puoi completare la configurazione del profilo in auto.</string>
+    <string name="suw_setup_profile_title">Completa la configurazione sul telefono o in auto</string>
+    <string name="trusted_device_enrollment_error_dialog_message">Purtroppo non è al momento possibile attivare questa funzionalità. Riprova.</string>
+    <string name="trusted_device_enrollment_error_dialog_title">Si è verificato un problema</string>
+    <string name="trusted_device_enrollment_success_message">Ora &lt;b>%1$s&lt;/b> può sbloccare il tuo profilo</string>
+    <string name="trusted_device_feature_instruction">Verifica la tua app complementare per impostare le opzioni di sblocco</string>
+    <string name="trusted_device_feature_title">Sblocca il profilo con il telefono</string>
+    <string name="trusted_device_item_title">Consenti a &lt;b>%1$s&lt;/b> di sbloccare il mio profilo</string>
+    <string name="trusted_device_notification_channel_name">Sblocca con il telefono</string>
+    <string name="trusted_device_notification_content">Tocca qui per autorizzare questa funzionalità</string>
+    <string name="trusted_device_notification_title">Consenti al telefono di sbloccare il tuo profilo</string>
+    <string name="turn_on">Attiva</string>
+    <string name="turn_on_bluetooth_dialog_message">La tua auto deve disporre del Bluetooth per potersi connettere al dispositivo complementare.</string>
+    <string name="turn_on_bluetooth_dialog_title">Vuoi attivare il Bluetooth?</string>
+    <string name="turn_on_bluetooth_message">La tua auto deve disporre del Bluetooth per poter configurare il telefono come dispositivo complementare.</string>
+    <string name="turn_on_bluetooth_title">Attiva Bluetooth</string>
+    <string name="unknown">Sconosciuto</string>
+    <string name="unlock_profile_to_finish_message">Hai creato un nuovo blocco profilo. Ora, inseriscilo di nuovo per confermare che il telefono può sbloccare automaticamente il profilo</string>
+    <string name="unlock_profile_to_finish_title">Sblocca il profilo per terminare</string>
+    <string msgid="5138405918326871307" name="v7_preference_off">"OFF"</string>
+    <string msgid="27351710992731591" name="v7_preference_on">"ON"</string>
+</resources>

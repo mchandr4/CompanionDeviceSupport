@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:ns1="urn:oasis:names:tc:xliff:document:1.2">
+    <plurals name="notification_new_message">
+    <item quantity="one">Uus sõnum</item>
+    <item quantity="other">%d uut sõnumit</item>
+  </plurals>
+    <string msgid="5976598919945601918" name="abc_action_bar_home_description">"Liigu avalehele"</string>
+    <string msgid="8388173803310557296" name="abc_action_bar_up_description">"Liigu üles"</string>
+    <string msgid="3937310113216875497" name="abc_action_menu_overflow_description">"Rohkem valikuid"</string>
+    <string msgid="4692188335987374352" name="abc_action_mode_done">"Valmis"</string>
+    <string msgid="1189761859438369441" name="abc_activity_chooser_view_see_all">"Kuva kõik"</string>
+    <string msgid="2165779757652331008" name="abc_activitychooserview_choose_application">"Valige rakendus"</string>
+    <string msgid="4215997306490295099" name="abc_capital_off">"VÄLJAS"</string>
+    <string msgid="884982626291842264" name="abc_capital_on">"SEES"</string>
+    <string msgid="8833365367933412986" name="abc_menu_alt_shortcut_label">"Alt +"</string>
+    <string msgid="2223301931652355242" name="abc_menu_ctrl_shortcut_label">"Ctrl +"</string>
+    <string msgid="838001238306846836" name="abc_menu_delete_shortcut_label">"kustuta"</string>
+    <string msgid="7986526966204849475" name="abc_menu_enter_shortcut_label">"sisestusklahv"</string>
+    <string msgid="375214403600139847" name="abc_menu_function_shortcut_label">"Funktsiooniklahv +"</string>
+    <string msgid="4192209724446364286" name="abc_menu_meta_shortcut_label">"Meta +"</string>
+    <string msgid="4741552369836443843" name="abc_menu_shift_shortcut_label">"Tõstuklahv +"</string>
+    <string msgid="5473865519181928982" name="abc_menu_space_shortcut_label">"tühik"</string>
+    <string msgid="6180552449598693998" name="abc_menu_sym_shortcut_label">"Sym +"</string>
+    <string msgid="5520303668377388990" name="abc_prepend_shortcut_label">"Menüü +"</string>
+    <string msgid="7208076849092622260" name="abc_search_hint">"Otsige …"</string>
+    <string msgid="3741173234950517107" name="abc_searchview_description_clear">"Päringu tühistamine"</string>
+    <string msgid="693312494995508443" name="abc_searchview_description_query">"Otsingupäring"</string>
+    <string msgid="3417662926640357176" name="abc_searchview_description_search">"Otsing"</string>
+    <string msgid="1486535517437947103" name="abc_searchview_description_submit">"Päringu esitamine"</string>
+    <string msgid="2293578557972875415" name="abc_searchview_description_voice">"Häälotsing"</string>
+    <string msgid="8875138169939072951" name="abc_shareactionprovider_share_with">"Jaga:"</string>
+    <string msgid="9055268688411532828" name="abc_shareactionprovider_share_with_application">"Jagamine rakendusega <ns1:g id="APPLICATION_NAME">%s</ns1:g>"</string>
+    <string msgid="1656852541809559762" name="abc_toolbar_collapse_description">"Ahendamine"</string>
+    <string name="accept">Nõustu</string>
+    <string name="add_associated_device_subtitle">Sõidukogemuse haldamiseks saate oma telefoni kasutada kaasseadmena</string>
+    <string name="add_associated_device_title">Ühenda rakendusega MyCompanion</string>
+    <string name="add_device_title">Ühenda kaasrakendusega</string>
+    <string name="app_running_msg_channel_name">Telefoni tekstsõnumiteenus töötab</string>
+    <string name="app_running_msg_notification_content">Tekstsõnumeid võetakse vastu kaasseadme kaudu</string>
+    <string name="app_running_msg_notification_title">Telefoni tekstsõnumiteenus on aktiivne</string>
+    <string name="associated_device_install_app">Veenduge, et <b>kaasrakendus</b> oleks teie telefoni installitud</string>
+    <string name="associated_device_open_app">Avage rakendus ja järgige seal juhiseid</string>
+    <string name="associated_device_pairing_code_title">Kinnitage kood telefonis</string>
+    <string name="associated_device_pairing_message">Veenduge, et see ühtiks teie telefonis kuvatud koodiga</string>
+    <string name="associated_device_select_device">Avage rakendus ja ühendage autoga &lt;b>%1$s&lt;/b></string>
+    <string name="associated_device_success">Seadme seostamine õnnestus</string>
+    <string name="ble_device_name_prefix">Sõiduk\u00A0</string>
+    <string name="cancel">Tühista</string>
+    <string msgid="399078418913970003" name="car_ui_alert_dialog_default_button">"Sule"</string>
+    <string msgid="511096411523593697" name="car_ui_preference_switch_off">"Väljas"</string>
+    <string msgid="2091385466752081649" name="car_ui_preference_switch_on">"Sees"</string>
+    <string msgid="7490306547860308268" name="car_ui_restricted_while_driving">"Funktsioon pole sõidu ajal saadaval"</string>
+    <string msgid="746830252244551947" name="car_ui_scrollbar_page_down_button">"Keri alla"</string>
+    <string msgid="965431866383176249" name="car_ui_scrollbar_page_up_button">"Keri üles"</string>
+    <string msgid="5978003166159186378" name="car_ui_scrolling_limited_message">"Kerimine on sõitmise ajal piiratud"</string>
+    <string msgid="8339474149462104372" name="car_ui_toolbar_default_search_hint">"Otsing …"</string>
+    <string msgid="9132512843297732890" name="car_ui_toolbar_menu_item_overflow_title">"Ületäide"</string>
+    <string msgid="2988075382498202155" name="car_ui_toolbar_menu_item_search_title">"Otsi"</string>
+    <string msgid="5206858558664840197" name="car_ui_toolbar_menu_item_settings_title">"Seaded"</string>
+    <string msgid="6116610935599234725" name="car_ui_toolbar_nav_icon_content_description">"Tagasi"</string>
+    <string name="change_profile">Vaheta profiili</string>
+    <string name="companion_not_available_dialog_message">Külalisprofiilid ei pääse seadmele CompanionDevice juurde</string>
+    <string name="companion_not_available_dialog_switch_user_message">Külalisprofiilid ei pääse seadmele CompanionDevice juurde. Profiili vahetamiseks tehke valikud Seaded > Kasutajad.</string>
+    <string name="companion_not_available_dialog_title">See seade ei ole saadaval</string>
+    <string name="confirm">Kinnita</string>
+    <string name="connect">Ühenda</string>
+    <string name="connect_to_car_instruction_text">Ühendage autoga</string>
+    <string name="connect_to_targe_car_instruction_text">Ühendage autoga &lt;b>%1$s&lt;/b> %2$s</string>
+    <string name="connected">Ühendatud</string>
+    <string name="connection">Ühendus</string>
+    <string name="continue_button">Jätka</string>
+    <string name="continue_setup_toast_text">Jätkake seadistamist oma telefonis</string>
+    <string msgid="3209159573327985035" name="copy">"Kopeerimine"</string>
+    <string name="create_phone_lock_dialog_message">Teie telefonis ei ole ekraanilukku seadistatud. Telefoniga auto profiili avamiseks looge oma telefoni seadetes esmalt ekraanilukk (seda nimetatakse ka pääsukoodiks).</string>
+    <string name="create_phone_lock_dialog_title">Telefonis ekraaniluku loomine</string>
+    <string name="create_profile_lock_dialog_message">Selleks et oma profiili avamiseks telefoni kasutada, peab varuvalikuna olema seadistatud peamine profiililukk</string>
+    <string name="create_profile_lock_dialog_title">Peamise profiililuku loomine</string>
+    <string name="default_device_name">Seotud seade</string>
+    <string name="detected">Tuvastatud</string>
+    <string name="device_not_connected_dialog_message">Veenduge, et teie telefoni ja auto Bluetooth oleks sisse lülitatud ning teie telefon asuks läheduses</string>
+    <string name="device_not_connected_dialog_title">Teie telefoni ei õnnestu leida</string>
+    <string name="device_removed_failure_toast_text">Telefoni %1$s unustamine ebaõnnestus</string>
+    <string name="device_removed_success_toast_text">%1$s unustati</string>
+    <string name="disable">Keela</string>
+    <string name="disable_device_connection_text">Katkesta selle seadme ühendus</string>
+    <string name="disconnect">Katkesta ühendus</string>
+    <string name="disconnected">Pole ühendatud</string>
+    <string name="disconnecting">Katkestamine</string>
+    <string name="enable">Luba</string>
+    <string name="enable_bluetooth_instruction_text">Lubage Bluetooth-ühendus</string>
+    <string name="enable_device_connection_text">Ühenda see seade uuesti</string>
+    <string name="error_screen_message">Kahjuks ei õnnestunud seda ekraanikuva õigesti kuvada. Proovige uuesti.</string>
+    <string name="error_screen_title">Midagi läks valesti</string>
+    <string msgid="1234962710353108940" name="expand_button_title">"Täpsemad"</string>
+    <string name="forget">Unusta</string>
+    <string name="forget_title">Unusta see seade</string>
+    <string name="name_not_available">Nimi pole saadaval</string>
+    <string name="notDetected">Ei tuvastatud</string>
+    <string name="not_now">Mitte praegu</string>
+    <string msgid="478774118347071097" name="not_set">"Määramata"</string>
+    <string name="ok">OK</string>
+    <string name="open_companion_app_instruction_text">Avage kaasrakendus</string>
+    <string msgid="7961817945132860002" name="preference_copied">"„<ns1:g id="SUMMARY">%1$s</ns1:g>” on lõikelauale kopeeritud."</string>
+    <string name="qr_instruction_text">Skannige telefoniga QR-kood või avage MyCompanion, et luua ühendus sõidukiga &lt;b>%1$s&lt;/b></string>
+    <string name="reject">Keeldu</string>
+    <string name="remove">Eemalda</string>
+    <string name="remove_associated_device_message">See auto ei ole enam selle seadmega seotud. Lisaks sellele peate selle auto kaasrakendusest eemaldama.</string>
+    <string name="remove_associated_device_title">Kas soovite auto &lt;b>%1$s&lt;/b> unustada?</string>
+    <string name="retry">Proovi uuesti</string>
+    <string msgid="635940284003824276" name="scroll_bar_page_down_button">"Keri alla"</string>
+    <string msgid="465102831431294180" name="scroll_bar_page_up_button">"Keri üles"</string>
+    <string msgid="6264217191555673260" name="search_menu_title">"Otsing"</string>
+    <string name="settings_entry_title">Kaasseade</string>
+    <string name="skip">Jäta vahele</string>
+    <string msgid="444412252084688703" name="speed_bump_lockout_message">"Keskenduge teele"</string>
+    <string msgid="6277540029070332960" name="status_bar_notification_info_overflow">"999+"</string>
+    <string msgid="5190123168583152844" name="summary_collapsed_preference_list">"<ns1:g id="CURRENT_ITEMS">%1$s</ns1:g>, <ns1:g id="ADDED_ITEMS">%2$s</ns1:g>"</string>
+    <string name="suw_qr_instruction_text">Skannige, et luua ühendus sõidukiga &lt;b>%1$s&lt;/b></string>
+    <string name="suw_setup_profile_content">Kui olete seadistamist juba telefonis alustanud, avage kaasrakendus ja skannige QR-kood.\n\nSamuti võite profiili seadistamise lõpule viia oma sõidukis.</string>
+    <string name="suw_setup_profile_title">Telefoni või sõiduki seadistuse lõpuleviimine</string>
+    <string name="trusted_device_enrollment_error_dialog_message">Kahjuks ei saanud seda funktsiooni praegu sisse lülitada. Proovige uuesti.</string>
+    <string name="trusted_device_enrollment_error_dialog_title">Midagi läks valesti</string>
+    <string name="trusted_device_enrollment_success_message">&lt;b>%1$s&lt;/b> saab nüüd teie profiili avada</string>
+    <string name="trusted_device_feature_instruction">Kontrollige avamise valikute määramiseks kaasrakendust</string>
+    <string name="trusted_device_feature_title">Profiili avamine telefoniga</string>
+    <string name="trusted_device_item_title">Luba telefonil &lt;b>%1$s&lt;/b> minu profiil avada</string>
+    <string name="trusted_device_notification_channel_name">Avamine telefoniga</string>
+    <string name="trusted_device_notification_content">Puudutage sellele funktsioonile volituse andmiseks siin</string>
+    <string name="trusted_device_notification_title">Lubage telefonil oma profiil avada</string>
+    <string name="turn_on">Lülita sisse</string>
+    <string name="turn_on_bluetooth_dialog_message">Kaasseadme ühendamiseks vajab auto Bluetoothi.</string>
+    <string name="turn_on_bluetooth_dialog_title">Kas lülitada Bluetooth sisse?</string>
+    <string name="turn_on_bluetooth_message">Telefoni seadistamiseks kaasseadmena vajab auto Bluetoothi.</string>
+    <string name="turn_on_bluetooth_title">Lülitage Bluetooth sisse</string>
+    <string name="unknown">Teadmata</string>
+    <string name="unlock_profile_to_finish_message">Lõite uue profiililuku. Järgmiseks sisestage see uuesti ja veenduge, et teie telefon saaks profiili automaatselt avada</string>
+    <string name="unlock_profile_to_finish_title">Lõpetamiseks avage oma profiil</string>
+    <string msgid="5138405918326871307" name="v7_preference_off">"VÄLJAS"</string>
+    <string msgid="27351710992731591" name="v7_preference_on">"SEES"</string>
+</resources>

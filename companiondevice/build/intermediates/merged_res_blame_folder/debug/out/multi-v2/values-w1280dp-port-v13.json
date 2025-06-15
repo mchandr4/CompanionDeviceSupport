@@ -1,0 +1,26 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.google.android.companiondevicesupport.companiondevice-mergeDebugResources-36:/values-w1280dp-port-v13/values-w1280dp-port-v13.xml",
+            "map": [
+                {
+                    "source": "/home/mchandr4/.gradle/caches/8.10/transforms/b49d1adaa96556a838d4b8fe7ff5d1f0/transformed/car-setup-wizard-lib-1.5.0/res/values-w1280dp-port-v13/values.xml",
+                    "from": {
+                        "startLines": "4",
+                        "startColumns": "0",
+                        "startOffsets": "186",
+                        "endColumns": "54",
+                        "endOffsets": "240"
+                    },
+                    "to": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "58",
+                        "endOffsets": "109"
+                    }
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:ns1="urn:oasis:names:tc:xliff:document:1.2">
+    <plurals name="notification_new_message">
+    <item quantity="zero">%d jaunu ziņojumu</item>
+    <item quantity="one">%d jauns ziņojums</item>
+    <item quantity="other">%d jauni ziņojumi</item>
+  </plurals>
+    <string msgid="5976598919945601918" name="abc_action_bar_home_description">"Pārvietoties uz sākuma ekrānu"</string>
+    <string msgid="8388173803310557296" name="abc_action_bar_up_description">"Pārvietoties uz augšu"</string>
+    <string msgid="3937310113216875497" name="abc_action_menu_overflow_description">"Citas opcijas"</string>
+    <string msgid="4692188335987374352" name="abc_action_mode_done">"Gatavs"</string>
+    <string msgid="1189761859438369441" name="abc_activity_chooser_view_see_all">"Skatīt visu"</string>
+    <string msgid="2165779757652331008" name="abc_activitychooserview_choose_application">"Izvēlieties lietotni"</string>
+    <string msgid="4215997306490295099" name="abc_capital_off">"IZSLĒGT"</string>
+    <string msgid="884982626291842264" name="abc_capital_on">"IESLĒGT"</string>
+    <string msgid="8833365367933412986" name="abc_menu_alt_shortcut_label">"Alternēšanas taustiņš +"</string>
+    <string msgid="2223301931652355242" name="abc_menu_ctrl_shortcut_label">"Vadīšanas taustiņš +"</string>
+    <string msgid="838001238306846836" name="abc_menu_delete_shortcut_label">"dzēšanas taustiņš"</string>
+    <string msgid="7986526966204849475" name="abc_menu_enter_shortcut_label">"ievadīšanas taustiņš"</string>
+    <string msgid="375214403600139847" name="abc_menu_function_shortcut_label">"Funkcijas taustiņš +"</string>
+    <string msgid="4192209724446364286" name="abc_menu_meta_shortcut_label">"Meta taustiņš +"</string>
+    <string msgid="4741552369836443843" name="abc_menu_shift_shortcut_label">"Pārslēgšanas taustiņš +"</string>
+    <string msgid="5473865519181928982" name="abc_menu_space_shortcut_label">"atstarpes taustiņš"</string>
+    <string msgid="6180552449598693998" name="abc_menu_sym_shortcut_label">"Simbolu taustiņš +"</string>
+    <string msgid="5520303668377388990" name="abc_prepend_shortcut_label">"Poga Izvēlne +"</string>
+    <string msgid="7208076849092622260" name="abc_search_hint">"Meklējiet…"</string>
+    <string msgid="3741173234950517107" name="abc_searchview_description_clear">"Notīrīt vaicājumu"</string>
+    <string msgid="693312494995508443" name="abc_searchview_description_query">"Meklēšanas vaicājums"</string>
+    <string msgid="3417662926640357176" name="abc_searchview_description_search">"Meklēt"</string>
+    <string msgid="1486535517437947103" name="abc_searchview_description_submit">"Iesniegt vaicājumu"</string>
+    <string msgid="2293578557972875415" name="abc_searchview_description_voice">"Meklēt ar balsi"</string>
+    <string msgid="8875138169939072951" name="abc_shareactionprovider_share_with">"Kopīgot ar:"</string>
+    <string msgid="9055268688411532828" name="abc_shareactionprovider_share_with_application">"Kopīgot ar lietojumprogrammu <ns1:g id="APPLICATION_NAME">%s</ns1:g>"</string>
+    <string msgid="1656852541809559762" name="abc_toolbar_collapse_description">"Sakļaut"</string>
+    <string name="accept">Piekrist</string>
+    <string name="add_associated_device_subtitle">Varat izmantot savu tālruni kā palīgierīci braukšanas iespēju pārvaldībai.</string>
+    <string name="add_associated_device_title">Savienojuma izveide ar lietotni MyCompanion</string>
+    <string name="add_device_title">Izveidot savienojumu ar palīglietotni</string>
+    <string name="app_running_msg_channel_name">Darbojas tālruņa īsziņu pakalpojums</string>
+    <string name="app_running_msg_notification_content">Īsziņas tiek saņemtas, izmantojot palīgierīci.</string>
+    <string name="app_running_msg_notification_title">Tālruņa īsziņu pakalpojums ir aktīvs.</string>
+    <string name="associated_device_install_app">Jūsu tālrunī ir jābūt instalētai <b>palīglietotnei</b>.</string>
+    <string name="associated_device_open_app">Atveriet lietotni un izpildiet tajā sniegtos norādījumus.</string>
+    <string name="associated_device_pairing_code_title">Koda apstiprināšana tālrunī</string>
+    <string name="associated_device_pairing_message">Apstipriniet, ka šis kods atbilst jūsu tālrunī redzamajam kodam.</string>
+    <string name="associated_device_select_device">Atveriet lietotni un savienojiet to ar &lt;b>%1$s&lt;/b>.</string>
+    <string name="associated_device_success">Ierīce tika sekmīgi saistīta.</string>
+    <string name="ble_device_name_prefix">Transportlīdzeklis\u00A0</string>
+    <string name="cancel">Atcelt</string>
+    <string msgid="399078418913970003" name="car_ui_alert_dialog_default_button">"Aizvērt"</string>
+    <string msgid="511096411523593697" name="car_ui_preference_switch_off">"Izslēgta"</string>
+    <string msgid="2091385466752081649" name="car_ui_preference_switch_on">"Ieslēgta"</string>
+    <string msgid="7490306547860308268" name="car_ui_restricted_while_driving">"Funkcija nav pieejama braukšanas laikā."</string>
+    <string msgid="746830252244551947" name="car_ui_scrollbar_page_down_button">"Ritināt uz leju"</string>
+    <string msgid="965431866383176249" name="car_ui_scrollbar_page_up_button">"Ritināt uz augšu"</string>
+    <string msgid="5978003166159186378" name="car_ui_scrolling_limited_message">"Ritināšana ir ierobežota braukšanas laikā."</string>
+    <string msgid="8339474149462104372" name="car_ui_toolbar_default_search_hint">"Meklēt…"</string>
+    <string msgid="9132512843297732890" name="car_ui_toolbar_menu_item_overflow_title">"Pārpilde"</string>
+    <string msgid="2988075382498202155" name="car_ui_toolbar_menu_item_search_title">"Meklēšana"</string>
+    <string msgid="5206858558664840197" name="car_ui_toolbar_menu_item_settings_title">"Iestatījumi"</string>
+    <string msgid="6116610935599234725" name="car_ui_toolbar_nav_icon_content_description">"Atpakaļ"</string>
+    <string name="change_profile">Mainīt profilu</string>
+    <string name="companion_not_available_dialog_message">Viesu profili nevar piekļūt palīgierīcei.</string>
+    <string name="companion_not_available_dialog_switch_user_message">Viesu profili nevar piekļūt palīgierīcei. Lai mainītu profilu, pārejiet uz sadaļu Iestatījumi > Lietotāji.</string>
+    <string name="companion_not_available_dialog_title">Šis iestatījums nav pieejams</string>
+    <string name="confirm">Apstiprināt</string>
+    <string name="connect">Izveidot savienojumu</string>
+    <string name="connect_to_car_instruction_text">Izveidojiet savienojumu ar automašīnu</string>
+    <string name="connect_to_targe_car_instruction_text">Izveidojiet savienojumu ar automašīnu &lt;b>%1$s&lt;/b> (%2$s)</string>
+    <string name="connected">Pievienots</string>
+    <string name="connection">Savienojums</string>
+    <string name="continue_button">Turpināt</string>
+    <string name="continue_setup_toast_text">Turpiniet iestatīšanu tālrunī.</string>
+    <string msgid="3209159573327985035" name="copy">"Kopēt"</string>
+    <string name="create_phone_lock_dialog_message">Tālrunim nav iestatīta ekrāna bloķēšana. Lai varētu atbloķēt automašīnas profilu, izmantojot tālruni, vispirms tālruņa iestatījumos izveidojiet ekrāna bloķēšanu (piekļuves kodu).</string>
+    <string name="create_phone_lock_dialog_title">Ekrāna bloķēšanas iestatīšana tālrunī</string>
+    <string name="create_profile_lock_dialog_message">Lai varētu atbloķēt profilu, izmantojot tālruni, galvenajam profila bloķēšanas veidam ir jābūt iestatītam kā rezerves iespējai.</string>
+    <string name="create_profile_lock_dialog_title">Profila bloķēšanas galvenā veida iestatīšana</string>
+    <string name="default_device_name">Saistītā ierīce</string>
+    <string name="detected">Noteiktā ierīce</string>
+    <string name="device_not_connected_dialog_message">Tālruņa un automašīnas Bluetooth savienojumam ir jābūt ieslēgtam, kā arī tālrunim ir jāatrodas tuvumā.</string>
+    <string name="device_not_connected_dialog_title">Nevar atrast jūsu tālruni</string>
+    <string name="device_removed_failure_toast_text">Neizdevās noņemt tālruni %1$s.</string>
+    <string name="device_removed_success_toast_text">Tālrunis %1$s tika noņemts.</string>
+    <string name="disable">Atspējot</string>
+    <string name="disable_device_connection_text">Atvienot šo ierīci</string>
+    <string name="disconnect">Atvienot</string>
+    <string name="disconnected">Atvienots</string>
+    <string name="disconnecting">Notiek atvienošana…</string>
+    <string name="enable">Iespējot</string>
+    <string name="enable_bluetooth_instruction_text">Atļaujiet Bluetooth savienojuma izveidi.</string>
+    <string name="enable_device_connection_text">Atkārtoti pievienot šo ierīci</string>
+    <string name="error_screen_message">Diemžēl nevarēja pareizi parādīt šo ekrānu. Lūdzu, mēģiniet vēlreiz.</string>
+    <string name="error_screen_title">Radās problēma</string>
+    <string msgid="1234962710353108940" name="expand_button_title">"Papildu iestatījumi"</string>
+    <string name="forget">Aizmirst</string>
+    <string name="forget_title">Aizmirst šo ierīci</string>
+    <string name="name_not_available">Vārds nav pieejams.</string>
+    <string name="notDetected">Netika atrasts</string>
+    <string name="not_now">Vēlāk</string>
+    <string msgid="478774118347071097" name="not_set">"Nav iestatīts"</string>
+    <string name="ok">Labi</string>
+    <string name="open_companion_app_instruction_text">Atveriet palīglietotni.</string>
+    <string msgid="7961817945132860002" name="preference_copied">"Preference “<ns1:g id="SUMMARY">%1$s</ns1:g>” ir kopēta starpliktuvē."</string>
+    <string name="qr_instruction_text">Skenējiet kvadrātkodu, izmantojot savu tālruni, vai atveriet lietotni MyCompanion, lai izveidotu savienojumu ar &lt;b>%1$s&lt;/b>.</string>
+    <string name="reject">Noraidīt</string>
+    <string name="remove">Noņemt</string>
+    <string name="remove_associated_device_message">Šī automašīna vairs nebūs savienota pārī ar šo ierīci. Jums būs arī jānoņem šī automašīna no palīglietotnes.</string>
+    <string name="remove_associated_device_title">Vai aizmirst &lt;b>%1$s&lt;/b>?</string>
+    <string name="retry">Mēģināt vēlreiz</string>
+    <string msgid="635940284003824276" name="scroll_bar_page_down_button">"Ritināt uz leju"</string>
+    <string msgid="465102831431294180" name="scroll_bar_page_up_button">"Ritināt uz augšu"</string>
+    <string msgid="6264217191555673260" name="search_menu_title">"Meklēt"</string>
+    <string name="settings_entry_title">Palīgierīce</string>
+    <string name="skip">Izlaist</string>
+    <string msgid="444412252084688703" name="speed_bump_lockout_message">"Pievērsieties ceļam"</string>
+    <string msgid="6277540029070332960" name="status_bar_notification_info_overflow">"999+"</string>
+    <string msgid="5190123168583152844" name="summary_collapsed_preference_list">"<ns1:g id="CURRENT_ITEMS">%1$s</ns1:g>, <ns1:g id="ADDED_ITEMS">%2$s</ns1:g>"</string>
+    <string name="suw_qr_instruction_text">Skenējiet kvadrātkodu, lai izveidotu savienojumu ar &lt;b>%1$s&lt;/b>.</string>
+    <string name="suw_setup_profile_content">Ja esat jau sācis iestatīšanu savā tālrunī, atveriet palīglietotni un skenējiet kvadrātkodu.\n\nVarat arī pabeigt sava profila iestatīšanu automašīnā.</string>
+    <string name="suw_setup_profile_title">Iestatīšanas pabeigšana tālrunī vai automašīnā</string>
+    <string name="trusted_device_enrollment_error_dialog_message">Diemžēl šobrīd nevarēja ieslēgt šo funkciju. Lūdzu, mēģiniet vēlreiz.</string>
+    <string name="trusted_device_enrollment_error_dialog_title">Radās problēma</string>
+    <string name="trusted_device_enrollment_success_message">Jūsu profilu tagad var atbloķēt, izmantojot tālruni &lt;b>%1$s&lt;/b>.</string>
+    <string name="trusted_device_feature_instruction">Skatiet palīglietotni, lai iestatītu atbloķēšanas iespējas.</string>
+    <string name="trusted_device_feature_title">Profila atbloķēšana, izmantojot tālruni</string>
+    <string name="trusted_device_item_title">Atļauja atbloķēt profilu, izmantojot tālruni &lt;b>%1$s&lt;/b></string>
+    <string name="trusted_device_notification_channel_name">Atbloķēšana, izmantojot tālruni</string>
+    <string name="trusted_device_notification_content">Pieskarieties šeit, lai atļautu šo funkciju.</string>
+    <string name="trusted_device_notification_title">Atļauja atbloķēt profilu, izmantojot tālruni</string>
+    <string name="turn_on">Ieslēgt</string>
+    <string name="turn_on_bluetooth_dialog_message">Lai pievienotu palīgierīci, automašīnai ir nepieciešams Bluetooth savienojums.</string>
+    <string name="turn_on_bluetooth_dialog_title">Vai ieslēgt Bluetooth?</string>
+    <string name="turn_on_bluetooth_message">Lai iestatītu tālruni kā palīgierīci, automašīnai ir nepieciešams Bluetooth savienojums.</string>
+    <string name="turn_on_bluetooth_title">Bluetooth ieslēgšana</string>
+    <string name="unknown">Nezināms</string>
+    <string name="unlock_profile_to_finish_message">Jūs izveidojāt jaunu profila bloķēšanas veidu. Ievadiet to vēlreiz, lai apstiprinātu, ka jūsu tālrunis var automātiski atbloķēt jūsu profilu.</string>
+    <string name="unlock_profile_to_finish_title">Profila atbloķēšana, lai pabeigtu procesu</string>
+    <string msgid="5138405918326871307" name="v7_preference_off">"IZSLĒGTS"</string>
+    <string msgid="27351710992731591" name="v7_preference_on">"IESLĒGTS"</string>
+</resources>

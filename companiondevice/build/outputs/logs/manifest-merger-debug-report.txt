@@ -1,0 +1,747 @@
+-- Merging decision tree log ---
+manifest
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:18:1-244:12
+INJECTED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:18:1-244:12
+INJECTED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:18:1-244:12
+INJECTED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:18:1-244:12
+MERGED from [:libs:connecteddevice] /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/connecteddevice/build/intermediates/merged_manifest/debug/AndroidManifest.xml:17:1-31:12
+MERGED from [com.android.car.setupwizardlib:car-setup-wizard-lib:1.5.0] /home/mchandr4/.gradle/caches/8.10/transforms/b49d1adaa96556a838d4b8fe7ff5d1f0/transformed/car-setup-wizard-lib-1.5.0/AndroidManifest.xml:17:1-24:12
+MERGED from [com.android.car.ui:car-ui-lib:2.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/441a4ee370575c42882713dcdfa9385c/transformed/car-ui-lib-2.0.0/AndroidManifest.xml:17:1-48:12
+MERGED from [androidx.lifecycle:lifecycle-extensions:2.2.0] /home/mchandr4/.gradle/caches/8.10/transforms/6040fbe07a3517db7eb82c47665cb7cd/transformed/lifecycle-extensions-2.2.0/AndroidManifest.xml:17:1-27:12
+MERGED from [androidx.car:car:1.0.0-alpha7] /home/mchandr4/.gradle/caches/8.10/transforms/ddb03b64d596a9ac806fe39383d4ac29/transformed/car-1.0.0-alpha7/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.preference:preference:1.1.1] /home/mchandr4/.gradle/caches/8.10/transforms/fc85b8993d7993eba2c6b5e2aba12001/transformed/preference-1.1.1/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.constraintlayout:constraintlayout:2.1.0] /home/mchandr4/.gradle/caches/8.10/transforms/75048dc92e72c3a8de64f279bf715eae/transformed/constraintlayout-2.1.0/AndroidManifest.xml:2:1-11:12
+MERGED from [com.google.android.material:material:1.2.0] /home/mchandr4/.gradle/caches/8.10/transforms/d51aa63ed2348e30fd1ea7e88a35727e/transformed/material-1.2.0/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.appcompat:appcompat:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/3e8f767fc69779f7c0981df459cf35fe/transformed/appcompat-1.3.1/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.viewpager2:viewpager2:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/ee77d6c73c13780f2ff1c455065da428/transformed/viewpager2-1.0.0/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.fragment:fragment:1.3.6] /home/mchandr4/.gradle/caches/8.10/transforms/7d05539a6b6a5847190779f6d97725e1/transformed/fragment-1.3.6/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.activity:activity:1.2.4] /home/mchandr4/.gradle/caches/8.10/transforms/f58fc2d67082678ac420500e577918ef/transformed/activity-1.2.4/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.gridlayout:gridlayout:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/1b773a2a0e661d34b2533c34512db56a/transformed/gridlayout-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.legacy:legacy-support-core-ui:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/e962e5223ed6dc3d59ee74c60a0af597/transformed/legacy-support-core-ui-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.legacy:legacy-support-core-utils:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/b3f6599d1d41521031fe678ad3327fc1/transformed/legacy-support-core-utils-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.loader:loader:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/d78cd4846c6adf503c5633694692a49b/transformed/loader-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.recyclerview:recyclerview:1.2.1] /home/mchandr4/.gradle/caches/8.10/transforms/abc17e87b2d653f7341e7fa4870cfe65/transformed/recyclerview-1.2.1/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.viewpager:viewpager:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/5ec2c4bbe67bbd650039af1598ce8076/transformed/viewpager-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.drawerlayout:drawerlayout:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/e7802e60053285ba0c88c80dbf057124/transformed/drawerlayout-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.coordinatorlayout:coordinatorlayout:1.1.0] /home/mchandr4/.gradle/caches/8.10/transforms/2606642573a0598651e2af0aa6089bd3/transformed/coordinatorlayout-1.1.0/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.slidingpanelayout:slidingpanelayout:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/1883049087881cb276ecfd468695de2c/transformed/slidingpanelayout-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.customview:customview:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/4d8ca3f17b542eb4931f7a1b14144b57/transformed/customview-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.appcompat:appcompat-resources:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/55e449fbc126878447a3c49aae172c4b/transformed/appcompat-resources-1.3.1/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.transition:transition:1.2.0] /home/mchandr4/.gradle/caches/8.10/transforms/07203d232bc9cd6db0b9af4f56595532/transformed/transition-1.2.0/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.vectordrawable:vectordrawable-animated:1.1.0] /home/mchandr4/.gradle/caches/8.10/transforms/9c46c5a9780ffce6f869d19287a50ca6/transformed/vectordrawable-animated-1.1.0/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.vectordrawable:vectordrawable:1.1.0] /home/mchandr4/.gradle/caches/8.10/transforms/296d1f8c783c3cc9b463ed307c0d0db4/transformed/vectordrawable-1.1.0/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.swiperefreshlayout:swiperefreshlayout:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/387dccc01c5ff1a10d9bcb5420020aa4/transformed/swiperefreshlayout-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.asynclayoutinflater:asynclayoutinflater:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/9eab1f7a506bf37a58b9a7aec99f1b12/transformed/asynclayoutinflater-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.core:core:1.5.0] /home/mchandr4/.gradle/caches/8.10/transforms/f548d7353429d6934d13fdec9a9cffa7/transformed/core-1.5.0/AndroidManifest.xml:17:1-26:12
+MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.8.7] /home/mchandr4/.gradle/caches/8.10/transforms/45201b9637562641308cded53994a718/transformed/lifecycle-viewmodel-2.8.7/AndroidManifest.xml:2:1-5:12
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-android:2.8.7] /home/mchandr4/.gradle/caches/8.10/transforms/9d96c28e2dc9b601061a549a9903b778/transformed/lifecycle-viewmodel-release/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-livedata-core-ktx:2.8.7] /home/mchandr4/.gradle/caches/8.10/transforms/9e8d89612f9bb220e104975f2ff6863d/transformed/lifecycle-livedata-core-ktx-2.8.7/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.savedstate:savedstate:1.2.1] /home/mchandr4/.gradle/caches/8.10/transforms/fba313ed154e376d0084f49b2d52596f/transformed/savedstate-1.2.1/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-runtime:2.8.7] /home/mchandr4/.gradle/caches/8.10/transforms/5c2392e56cf5832d6d3018db5750f6d5/transformed/lifecycle-runtime-2.8.7/AndroidManifest.xml:2:1-5:12
+MERGED from [androidx.lifecycle:lifecycle-runtime-android:2.8.7] /home/mchandr4/.gradle/caches/8.10/transforms/33c7eb2fd277d6ff66afbd220ab7a350/transformed/lifecycle-runtime-release/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7] /home/mchandr4/.gradle/caches/8.10/transforms/0bf78721478d77e376d023e2b770660e/transformed/lifecycle-viewmodel-ktx-2.8.7/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.lifecycle:lifecycle-service:2.8.7] /home/mchandr4/.gradle/caches/8.10/transforms/439a54c56f080ac14b4fa171f1c083d3/transformed/lifecycle-service-2.8.7/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.lifecycle:lifecycle-process:2.8.7] /home/mchandr4/.gradle/caches/8.10/transforms/b7a3d0d3fad28f8cb257e38ebe308859/transformed/lifecycle-process-2.8.7/AndroidManifest.xml:17:1-35:12
+MERGED from [androidx.lifecycle:lifecycle-livedata:2.8.7] /home/mchandr4/.gradle/caches/8.10/transforms/3608c109b5524aa0e5ad59772055ffc1/transformed/lifecycle-livedata-2.8.7/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.8.7] /home/mchandr4/.gradle/caches/8.10/transforms/ebf85e30141a664d38431910df33681e/transformed/lifecycle-livedata-core-2.8.7/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-runtime-ktx-android:2.8.7] /home/mchandr4/.gradle/caches/8.10/transforms/012619c760f209f31dbe1995957e5580/transformed/lifecycle-runtime-ktx-release/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-savedstate:2.8.7] /home/mchandr4/.gradle/caches/8.10/transforms/990540508fc4951f6c4d0c8c87f4e391/transformed/lifecycle-viewmodel-savedstate-2.8.7/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.core:core-ktx:1.3.2] /home/mchandr4/.gradle/caches/8.10/transforms/5fa4ba13848d0faf39446742880cd3ef/transformed/core-ktx-1.3.2/AndroidManifest.xml:2:1-9:12
+MERGED from [androidx.room:room-runtime-android:2.7.0-rc03] /home/mchandr4/.gradle/caches/8.10/transforms/ac18a04daebb7a14e42fcbaf05599a36/transformed/room-runtime-release/AndroidManifest.xml:17:1-31:12
+MERGED from [androidx.annotation:annotation-experimental:1.4.1] /home/mchandr4/.gradle/caches/8.10/transforms/cd6f47aa8987178a79354dbfde191bda/transformed/annotation-experimental-1.4.1/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /home/mchandr4/.gradle/caches/8.10/transforms/d988a5a78bbbd400359829914155bf15/transformed/versionedparcelable-1.1.1/AndroidManifest.xml:17:1-27:12
+MERGED from [androidx.sqlite:sqlite-framework-android:2.5.0-rc03] /home/mchandr4/.gradle/caches/8.10/transforms/9458c8f9544952024b071e430e1ea2ce/transformed/sqlite-framework-release/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.sqlite:sqlite-android:2.5.0-rc03] /home/mchandr4/.gradle/caches/8.10/transforms/bd99ff62c6cdde032a587e085e97e502/transformed/sqlite-release/AndroidManifest.xml:17:1-22:12
+MERGED from [:libs:encryptionrunner] /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/encryptionrunner/build/intermediates/merged_manifest/debug/AndroidManifest.xml:17:1-26:12
+MERGED from [androidx.cursoradapter:cursoradapter:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/d9de397bb9bde190c8255f184c88b988/transformed/cursoradapter-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.cardview:cardview:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/7d12637bea79d0fb8fb7f1d3cd9a6c92/transformed/cardview-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/2ad56b42444620a0108aaf72d35e7d98/transformed/profileinstaller-1.3.1/AndroidManifest.xml:17:1-55:12
+MERGED from [androidx.startup:startup-runtime:1.1.1] /home/mchandr4/.gradle/caches/8.10/transforms/f076551ada57f8ecfbb4a23937e12dec/transformed/startup-runtime-1.1.1/AndroidManifest.xml:17:1-33:12
+MERGED from [androidx.tracing:tracing:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/0093a7c832da25438ba2447954f23ddd/transformed/tracing-1.0.0/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.arch.core:core-runtime:2.2.0] /home/mchandr4/.gradle/caches/8.10/transforms/c09a301ae43a6c8445f0cce0ad222fe1/transformed/core-runtime-2.2.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.interpolator:interpolator:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/c7a05316a2aa09a7f98b7457a36b315a/transformed/interpolator-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.documentfile:documentfile:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/b1608a17556860ddb81d3e942bcbb18c/transformed/documentfile-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.localbroadcastmanager:localbroadcastmanager:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/1272e4c0e53ba795f3cd641574ad71de/transformed/localbroadcastmanager-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.print:print:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/5421314b2495bbac34f58240974361d9/transformed/print-1.0.0/AndroidManifest.xml:17:1-22:12
+	package
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:20:11-62
+		INJECTED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml
+	android:versionName
+		INJECTED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml
+	xmlns:tools
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:19:11-57
+	android:versionCode
+		INJECTED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml
+	xmlns:android
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:18:11-69
+	tools:ignore
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:21:11-29
+uses-permission#android.permission.ACCESS_FINE_LOCATION
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:24:5-25:38
+MERGED from [:libs:connecteddevice] /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/connecteddevice/build/intermediates/merged_manifest/debug/AndroidManifest.xml:22:5-79
+MERGED from [:libs:connecteddevice] /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/connecteddevice/build/intermediates/merged_manifest/debug/AndroidManifest.xml:22:5-79
+	android:maxSdkVersion
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:25:9-35
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:24:22-76
+uses-permission#android.permission.BLUETOOTH
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:26:5-27:38
+MERGED from [:libs:connecteddevice] /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/connecteddevice/build/intermediates/merged_manifest/debug/AndroidManifest.xml:23:5-68
+MERGED from [:libs:connecteddevice] /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/connecteddevice/build/intermediates/merged_manifest/debug/AndroidManifest.xml:23:5-68
+	android:maxSdkVersion
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:27:9-35
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:26:22-65
+uses-permission#android.permission.BLUETOOTH_ADMIN
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:28:5-74
+MERGED from [:libs:connecteddevice] /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/connecteddevice/build/intermediates/merged_manifest/debug/AndroidManifest.xml:24:5-74
+MERGED from [:libs:connecteddevice] /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/connecteddevice/build/intermediates/merged_manifest/debug/AndroidManifest.xml:24:5-74
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:28:22-71
+uses-permission#android.permission.BLUETOOTH_ADVERTISE
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:29:5-78
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:29:22-75
+uses-permission#android.permission.BLUETOOTH_CONNECT
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:30:5-76
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:30:22-73
+uses-permission#android.permission.BLUETOOTH_SCAN
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:31:5-32:58
+	android:usesPermissionFlags
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:32:9-55
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:31:22-70
+uses-permission#android.permission.INTERACT_ACROSS_USERS
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:35:5-79
+MERGED from [:libs:connecteddevice] /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/connecteddevice/build/intermediates/merged_manifest/debug/AndroidManifest.xml:28:5-80
+MERGED from [:libs:connecteddevice] /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/connecteddevice/build/intermediates/merged_manifest/debug/AndroidManifest.xml:28:5-80
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:35:22-77
+uses-permission#android.permission.MANAGE_USERS
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:36:5-71
+MERGED from [:libs:connecteddevice] /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/connecteddevice/build/intermediates/merged_manifest/debug/AndroidManifest.xml:29:5-71
+MERGED from [:libs:connecteddevice] /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/connecteddevice/build/intermediates/merged_manifest/debug/AndroidManifest.xml:29:5-71
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:36:22-68
+uses-permission#android.permission.FOREGROUND_SERVICE
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:37:5-77
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:37:22-74
+uses-permission#android.permission.READ_CALENDAR
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:40:5-71
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:40:22-69
+uses-permission#android.permission.WRITE_CALENDAR
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:41:5-72
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:41:22-70
+uses-permission#android.permission.PROVIDE_TRUST_AGENT
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:44:5-77
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:44:22-75
+uses-permission#android.permission.MANAGE_WEAK_ESCROW_TOKEN
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:45:5-82
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:45:22-80
+uses-permission#android.permission.POST_NOTIFICATIONS
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:46:5-76
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:46:22-74
+uses-permission#android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:49:5-90
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:49:22-88
+uses-permission#android.car.permission.ACCESS_CAR_PROJECTION_STATUS
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:50:5-90
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:50:22-88
+uses-permission#android.permission.INTERNET
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:53:5-67
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:53:22-64
+uses-permission#android.permission.ACCESS_NETWORK_STATE
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:54:5-79
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:54:22-76
+uses-feature#android.hardware.type.automotive
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:57:5-93
+	android:required
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:57:67-90
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:57:19-66
+application
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:59:5-243:19
+INJECTED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:59:5-243:19
+MERGED from [com.android.car.ui:car-ui-lib:2.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/441a4ee370575c42882713dcdfa9385c/transformed/car-ui-lib-2.0.0/AndroidManifest.xml:33:5-46:19
+MERGED from [com.android.car.ui:car-ui-lib:2.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/441a4ee370575c42882713dcdfa9385c/transformed/car-ui-lib-2.0.0/AndroidManifest.xml:33:5-46:19
+MERGED from [androidx.lifecycle:lifecycle-extensions:2.2.0] /home/mchandr4/.gradle/caches/8.10/transforms/6040fbe07a3517db7eb82c47665cb7cd/transformed/lifecycle-extensions-2.2.0/AndroidManifest.xml:24:5-25:19
+MERGED from [androidx.lifecycle:lifecycle-extensions:2.2.0] /home/mchandr4/.gradle/caches/8.10/transforms/6040fbe07a3517db7eb82c47665cb7cd/transformed/lifecycle-extensions-2.2.0/AndroidManifest.xml:24:5-25:19
+MERGED from [androidx.constraintlayout:constraintlayout:2.1.0] /home/mchandr4/.gradle/caches/8.10/transforms/75048dc92e72c3a8de64f279bf715eae/transformed/constraintlayout-2.1.0/AndroidManifest.xml:9:5-20
+MERGED from [androidx.constraintlayout:constraintlayout:2.1.0] /home/mchandr4/.gradle/caches/8.10/transforms/75048dc92e72c3a8de64f279bf715eae/transformed/constraintlayout-2.1.0/AndroidManifest.xml:9:5-20
+MERGED from [com.google.android.material:material:1.2.0] /home/mchandr4/.gradle/caches/8.10/transforms/d51aa63ed2348e30fd1ea7e88a35727e/transformed/material-1.2.0/AndroidManifest.xml:22:5-20
+MERGED from [com.google.android.material:material:1.2.0] /home/mchandr4/.gradle/caches/8.10/transforms/d51aa63ed2348e30fd1ea7e88a35727e/transformed/material-1.2.0/AndroidManifest.xml:22:5-20
+MERGED from [androidx.core:core:1.5.0] /home/mchandr4/.gradle/caches/8.10/transforms/f548d7353429d6934d13fdec9a9cffa7/transformed/core-1.5.0/AndroidManifest.xml:24:5-89
+MERGED from [androidx.core:core:1.5.0] /home/mchandr4/.gradle/caches/8.10/transforms/f548d7353429d6934d13fdec9a9cffa7/transformed/core-1.5.0/AndroidManifest.xml:24:5-89
+MERGED from [androidx.lifecycle:lifecycle-process:2.8.7] /home/mchandr4/.gradle/caches/8.10/transforms/b7a3d0d3fad28f8cb257e38ebe308859/transformed/lifecycle-process-2.8.7/AndroidManifest.xml:23:5-33:19
+MERGED from [androidx.lifecycle:lifecycle-process:2.8.7] /home/mchandr4/.gradle/caches/8.10/transforms/b7a3d0d3fad28f8cb257e38ebe308859/transformed/lifecycle-process-2.8.7/AndroidManifest.xml:23:5-33:19
+MERGED from [androidx.room:room-runtime-android:2.7.0-rc03] /home/mchandr4/.gradle/caches/8.10/transforms/ac18a04daebb7a14e42fcbaf05599a36/transformed/room-runtime-release/AndroidManifest.xml:23:5-29:19
+MERGED from [androidx.room:room-runtime-android:2.7.0-rc03] /home/mchandr4/.gradle/caches/8.10/transforms/ac18a04daebb7a14e42fcbaf05599a36/transformed/room-runtime-release/AndroidManifest.xml:23:5-29:19
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /home/mchandr4/.gradle/caches/8.10/transforms/d988a5a78bbbd400359829914155bf15/transformed/versionedparcelable-1.1.1/AndroidManifest.xml:24:5-25:19
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /home/mchandr4/.gradle/caches/8.10/transforms/d988a5a78bbbd400359829914155bf15/transformed/versionedparcelable-1.1.1/AndroidManifest.xml:24:5-25:19
+MERGED from [:libs:encryptionrunner] /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/encryptionrunner/build/intermediates/merged_manifest/debug/AndroidManifest.xml:24:5-20
+MERGED from [:libs:encryptionrunner] /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/encryptionrunner/build/intermediates/merged_manifest/debug/AndroidManifest.xml:24:5-20
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/2ad56b42444620a0108aaf72d35e7d98/transformed/profileinstaller-1.3.1/AndroidManifest.xml:23:5-53:19
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/2ad56b42444620a0108aaf72d35e7d98/transformed/profileinstaller-1.3.1/AndroidManifest.xml:23:5-53:19
+MERGED from [androidx.startup:startup-runtime:1.1.1] /home/mchandr4/.gradle/caches/8.10/transforms/f076551ada57f8ecfbb4a23937e12dec/transformed/startup-runtime-1.1.1/AndroidManifest.xml:25:5-31:19
+MERGED from [androidx.startup:startup-runtime:1.1.1] /home/mchandr4/.gradle/caches/8.10/transforms/f076551ada57f8ecfbb4a23937e12dec/transformed/startup-runtime-1.1.1/AndroidManifest.xml:25:5-31:19
+	android:extractNativeLibs
+		INJECTED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml
+	android:appComponentFactory
+		ADDED from [androidx.core:core:1.5.0] /home/mchandr4/.gradle/caches/8.10/transforms/f548d7353429d6934d13fdec9a9cffa7/transformed/core-1.5.0/AndroidManifest.xml:24:18-86
+	android:supportsRtl
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:63:9-35
+	android:label
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:60:9-41
+	android:icon
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:61:9-56
+	android:directBootAware
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:62:9-39
+	android:taskAffinity
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:64:9-32
+service#com.google.android.connecteddevice.service.ConnectedDeviceService
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:66:9-90:19
+	android:singleUser
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:68:13-38
+	android:exported
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:69:13-36
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:67:13-93
+intent-filter#action:name:com.google.android.connecteddevice.api.BIND_FEATURE_COORDINATOR+category:name:android.intent.category.DEFAULT
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:70:13-73:29
+action#com.google.android.connecteddevice.api.BIND_FEATURE_COORDINATOR
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:71:17-106
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:71:25-103
+category#android.intent.category.DEFAULT
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:72:17-76
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:72:27-73
+intent-filter#action:name:com.google.android.connecteddevice.api.BIND_SAFE_FEATURE_COORDINATOR+category:name:android.intent.category.DEFAULT
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:74:13-77:29
+action#com.google.android.connecteddevice.api.BIND_SAFE_FEATURE_COORDINATOR
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:75:17-111
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:75:25-108
+meta-data#com.google.android.connecteddevice.early_services
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:78:13-79:71
+	android:resource
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:79:17-69
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:78:24-88
+meta-data#com.google.android.connecteddevice.association_service_uuid
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:80:13-81:75
+	android:resource
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:81:17-72
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:80:24-98
+meta-data#com.google.android.connecteddevice.transport_protocols
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:82:13-83:65
+	android:resource
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:83:17-62
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:82:24-93
+meta-data#com.google.android.connecteddevice.car_eap_oob_protocol_name
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:84:13-85:72
+	android:resource
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:85:17-69
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:84:24-99
+meta-data#com.google.android.connecteddevice.enable_beacon
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:86:13-87:58
+	android:resource
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:87:17-55
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:86:24-87
+meta-data#com.google.android.connecteddevice.enable_periodic_ping
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:88:13-89:65
+	android:resource
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:89:17-62
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:88:24-94
+service#com.google.android.connecteddevice.service.ConnectedDeviceFgUserService
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:93:9-109:19
+	android:exported
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:96:13-36
+	android:foregroundServiceType
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:95:13-60
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:94:13-99
+intent-filter#action:name:com.google.android.connecteddevice.api.BIND_FEATURE_COORDINATOR_FG+category:name:android.intent.category.DEFAULT
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:97:13-100:29
+action#com.google.android.connecteddevice.api.BIND_FEATURE_COORDINATOR_FG
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:98:17-109
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:98:25-106
+intent-filter#action:name:com.google.android.connecteddevice.api.QUERY_API_VERSION+category:name:android.intent.category.DEFAULT
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:101:13-104:29
+action#com.google.android.connecteddevice.api.QUERY_API_VERSION
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:102:17-99
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:102:25-96
+meta-data#com.google.android.connecteddevice.unlock_services
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:107:13-108:68
+	android:resource
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:108:17-66
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:107:24-89
+service#com.google.android.connecteddevice.service.TransportService
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:110:9-121:19
+	android:exported
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:112:13-37
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:111:13-87
+meta-data#com.google.android.connecteddevice.enable_proxy
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:115:13-116:57
+	android:resource
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:116:17-54
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:115:24-86
+meta-data#com.google.android.connecteddevice.supported_oob_channels
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:119:13-120:67
+	android:resource
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:120:17-65
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:119:24-96
+service#com.google.android.companiondevicesupport.eap.EapService
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:122:9-135:19
+	android:exported
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:124:13-37
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:123:13-84
+meta-data#com.google.android.connecteddevice.car_eap_client_name
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:131:13-132:66
+	android:resource
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:132:17-63
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:131:24-93
+meta-data#com.google.android.connecteddevice.car_eap_service_name
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:133:13-134:67
+	android:resource
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:134:17-64
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:133:24-94
+activity#com.google.android.companiondevicesupport.AssociationActivity
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:137:9-154:20
+	android:launchMode
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:139:19-54
+	android:exported
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:138:19-42
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:137:19-54
+intent-filter#action:name:com.google.android.connecteddevice.api.ASSOCIATION_ACTIVITY+category:name:android.intent.category.DEFAULT
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:140:13-143:29
+action#com.google.android.connecteddevice.api.ASSOCIATION_ACTIVITY
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:141:17-102
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:141:25-99
+intent-filter#action:name:com.android.settings.action.EXTRA_SETTINGS+category:name:android.intent.category.DEFAULT
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:144:13-147:29
+action#com.android.settings.action.EXTRA_SETTINGS
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:145:17-85
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:145:25-82
+meta-data#com.android.settings.icon
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:148:13-149:98
+	android:resource
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:149:24-75
+	android:value
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:149:76-96
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:148:24-64
+meta-data#com.android.settings.title
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:150:13-151:74
+	android:resource
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:151:24-71
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:150:24-65
+meta-data#com.android.settings.category
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:152:13-153:81
+	android:value
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:153:24-78
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:152:24-68
+activity#com.google.android.companiondevicesupport.SetupWizardAssociationActivity
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:156:9-163:20
+	android:launchMode
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:158:13-48
+	android:exported
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:157:13-36
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:156:19-65
+intent-filter#action:name:com.google.android.connecteddevice.api.SETUP_WIZARD_ASSOCIATION_ACTIVITY+category:name:android.intent.category.DEFAULT
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:159:13-162:29
+action#com.google.android.connecteddevice.api.SETUP_WIZARD_ASSOCIATION_ACTIVITY
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:160:17-115
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:160:25-112
+service#com.google.android.connecteddevice.calendarsync.CalendarSyncService
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:168:9-170:40
+	android:exported
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:170:13-37
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:169:13-95
+service#com.google.android.connecteddevice.notificationmsg.NotificationMsgService
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:173:9-186:19
+	android:exported
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:175:13-37
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:174:13-101
+meta-data#com.google.android.connecteddevice.notificationmsg.notification_contact_photo_size
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:176:13-177:76
+	android:resource
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:177:17-74
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:176:24-121
+meta-data#com.google.android.connecteddevice.notificationmsg.default_message_icon
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:178:13-179:58
+	android:resource
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:179:17-56
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:178:24-110
+meta-data#com.google.android.connecteddevice.notificationmsg.default_avatar
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:180:13-181:57
+	android:resource
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:181:17-55
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:180:24-104
+meta-data#com.google.android.connecteddevice.notificationmsg.default_display_name
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:182:13-183:64
+	android:resource
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:183:17-62
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:182:24-110
+meta-data#com.google.android.connecteddevice.notificationmsg.content_text
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:184:13-185:71
+	android:resource
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:185:17-69
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:184:24-102
+service#com.google.android.connecteddevice.trust.TrustedDeviceManagerService
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:189:9-193:19
+	android:singleUser
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:191:13-38
+	android:exported
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:192:13-37
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:190:13-96
+service#com.google.android.connecteddevice.trust.TrustedDeviceAgentService
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:195:9-207:19
+	android:singleUser
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:198:13-38
+	android:exported
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:199:13-36
+	android:permission
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:197:13-69
+	android:directBootAware
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:200:13-43
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:196:13-94
+intent-filter#action:name:android.service.trust.TrustAgentService+category:name:android.intent.category.DEFAULT
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:201:13-204:29
+action#android.service.trust.TrustAgentService
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:202:17-82
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:202:25-79
+meta-data#android.service.trust.trustagent
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:205:13-206:65
+	android:resource
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:206:24-63
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:205:24-71
+service#com.google.android.connecteddevice.trust.TrustedDeviceUiDelegateService
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:208:9-222:19
+	android:exported
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:209:18-42
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:208:18-104
+meta-data#com.google.android.connecteddevice.trust.notification_channel_name
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:210:13-211:86
+	android:resource
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:211:17-84
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:210:24-105
+meta-data#com.google.android.connecteddevice.trust.enrollment_notification_icon
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:216:13-217:72
+	android:resource
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:217:17-70
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:216:24-108
+meta-data#com.google.android.connecteddevice.trust.enrollment_notification_title
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:218:13-219:79
+	android:resource
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:219:17-77
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:218:24-109
+meta-data#com.google.android.connecteddevice.trust.enrollment_notification_content
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:220:13-221:81
+	android:resource
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:221:17-79
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:220:24-111
+activity#com.google.android.companiondevicesupport.trust.TrustedDeviceActivity
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:225:9-242:20
+	android:launchMode
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:228:13-44
+	android:exported
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:227:13-36
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:226:13-56
+intent-filter#action:name:com.android.settings.action.EXTRA_SETTINGS+action:name:com.google.android.connecteddevice.trust.TRUSTED_DEVICE_ACTIVITY+category:name:android.intent.category.DEFAULT
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:229:13-233:29
+action#com.google.android.connecteddevice.trust.TRUSTED_DEVICE_ACTIVITY
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:230:17-107
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:230:25-104
+meta-data#com.android.settings.icon_tintable
+ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:240:13-241:47
+	android:value
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:241:24-44
+	android:name
+		ADDED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:240:24-73
+uses-sdk
+INJECTED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml
+INJECTED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml
+MERGED from [:libs:connecteddevice] /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/connecteddevice/build/intermediates/merged_manifest/debug/AndroidManifest.xml:20:5-44
+MERGED from [:libs:connecteddevice] /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/connecteddevice/build/intermediates/merged_manifest/debug/AndroidManifest.xml:20:5-44
+MERGED from [com.android.car.setupwizardlib:car-setup-wizard-lib:1.5.0] /home/mchandr4/.gradle/caches/8.10/transforms/b49d1adaa96556a838d4b8fe7ff5d1f0/transformed/car-setup-wizard-lib-1.5.0/AndroidManifest.xml:20:5-22:41
+MERGED from [com.android.car.setupwizardlib:car-setup-wizard-lib:1.5.0] /home/mchandr4/.gradle/caches/8.10/transforms/b49d1adaa96556a838d4b8fe7ff5d1f0/transformed/car-setup-wizard-lib-1.5.0/AndroidManifest.xml:20:5-22:41
+MERGED from [com.android.car.ui:car-ui-lib:2.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/441a4ee370575c42882713dcdfa9385c/transformed/car-ui-lib-2.0.0/AndroidManifest.xml:24:5-44
+MERGED from [com.android.car.ui:car-ui-lib:2.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/441a4ee370575c42882713dcdfa9385c/transformed/car-ui-lib-2.0.0/AndroidManifest.xml:24:5-44
+MERGED from [androidx.lifecycle:lifecycle-extensions:2.2.0] /home/mchandr4/.gradle/caches/8.10/transforms/6040fbe07a3517db7eb82c47665cb7cd/transformed/lifecycle-extensions-2.2.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.lifecycle:lifecycle-extensions:2.2.0] /home/mchandr4/.gradle/caches/8.10/transforms/6040fbe07a3517db7eb82c47665cb7cd/transformed/lifecycle-extensions-2.2.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.car:car:1.0.0-alpha7] /home/mchandr4/.gradle/caches/8.10/transforms/ddb03b64d596a9ac806fe39383d4ac29/transformed/car-1.0.0-alpha7/AndroidManifest.xml:20:5-44
+MERGED from [androidx.car:car:1.0.0-alpha7] /home/mchandr4/.gradle/caches/8.10/transforms/ddb03b64d596a9ac806fe39383d4ac29/transformed/car-1.0.0-alpha7/AndroidManifest.xml:20:5-44
+MERGED from [androidx.preference:preference:1.1.1] /home/mchandr4/.gradle/caches/8.10/transforms/fc85b8993d7993eba2c6b5e2aba12001/transformed/preference-1.1.1/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.preference:preference:1.1.1] /home/mchandr4/.gradle/caches/8.10/transforms/fc85b8993d7993eba2c6b5e2aba12001/transformed/preference-1.1.1/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.constraintlayout:constraintlayout:2.1.0] /home/mchandr4/.gradle/caches/8.10/transforms/75048dc92e72c3a8de64f279bf715eae/transformed/constraintlayout-2.1.0/AndroidManifest.xml:5:5-7:41
+MERGED from [androidx.constraintlayout:constraintlayout:2.1.0] /home/mchandr4/.gradle/caches/8.10/transforms/75048dc92e72c3a8de64f279bf715eae/transformed/constraintlayout-2.1.0/AndroidManifest.xml:5:5-7:41
+MERGED from [com.google.android.material:material:1.2.0] /home/mchandr4/.gradle/caches/8.10/transforms/d51aa63ed2348e30fd1ea7e88a35727e/transformed/material-1.2.0/AndroidManifest.xml:20:5-44
+MERGED from [com.google.android.material:material:1.2.0] /home/mchandr4/.gradle/caches/8.10/transforms/d51aa63ed2348e30fd1ea7e88a35727e/transformed/material-1.2.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.appcompat:appcompat:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/3e8f767fc69779f7c0981df459cf35fe/transformed/appcompat-1.3.1/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.appcompat:appcompat:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/3e8f767fc69779f7c0981df459cf35fe/transformed/appcompat-1.3.1/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.viewpager2:viewpager2:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/ee77d6c73c13780f2ff1c455065da428/transformed/viewpager2-1.0.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.viewpager2:viewpager2:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/ee77d6c73c13780f2ff1c455065da428/transformed/viewpager2-1.0.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.fragment:fragment:1.3.6] /home/mchandr4/.gradle/caches/8.10/transforms/7d05539a6b6a5847190779f6d97725e1/transformed/fragment-1.3.6/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.fragment:fragment:1.3.6] /home/mchandr4/.gradle/caches/8.10/transforms/7d05539a6b6a5847190779f6d97725e1/transformed/fragment-1.3.6/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.activity:activity:1.2.4] /home/mchandr4/.gradle/caches/8.10/transforms/f58fc2d67082678ac420500e577918ef/transformed/activity-1.2.4/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.activity:activity:1.2.4] /home/mchandr4/.gradle/caches/8.10/transforms/f58fc2d67082678ac420500e577918ef/transformed/activity-1.2.4/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.gridlayout:gridlayout:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/1b773a2a0e661d34b2533c34512db56a/transformed/gridlayout-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.gridlayout:gridlayout:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/1b773a2a0e661d34b2533c34512db56a/transformed/gridlayout-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.legacy:legacy-support-core-ui:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/e962e5223ed6dc3d59ee74c60a0af597/transformed/legacy-support-core-ui-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.legacy:legacy-support-core-ui:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/e962e5223ed6dc3d59ee74c60a0af597/transformed/legacy-support-core-ui-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.legacy:legacy-support-core-utils:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/b3f6599d1d41521031fe678ad3327fc1/transformed/legacy-support-core-utils-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.legacy:legacy-support-core-utils:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/b3f6599d1d41521031fe678ad3327fc1/transformed/legacy-support-core-utils-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.loader:loader:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/d78cd4846c6adf503c5633694692a49b/transformed/loader-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.loader:loader:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/d78cd4846c6adf503c5633694692a49b/transformed/loader-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.recyclerview:recyclerview:1.2.1] /home/mchandr4/.gradle/caches/8.10/transforms/abc17e87b2d653f7341e7fa4870cfe65/transformed/recyclerview-1.2.1/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.recyclerview:recyclerview:1.2.1] /home/mchandr4/.gradle/caches/8.10/transforms/abc17e87b2d653f7341e7fa4870cfe65/transformed/recyclerview-1.2.1/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.viewpager:viewpager:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/5ec2c4bbe67bbd650039af1598ce8076/transformed/viewpager-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.viewpager:viewpager:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/5ec2c4bbe67bbd650039af1598ce8076/transformed/viewpager-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.drawerlayout:drawerlayout:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/e7802e60053285ba0c88c80dbf057124/transformed/drawerlayout-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.drawerlayout:drawerlayout:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/e7802e60053285ba0c88c80dbf057124/transformed/drawerlayout-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.coordinatorlayout:coordinatorlayout:1.1.0] /home/mchandr4/.gradle/caches/8.10/transforms/2606642573a0598651e2af0aa6089bd3/transformed/coordinatorlayout-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.coordinatorlayout:coordinatorlayout:1.1.0] /home/mchandr4/.gradle/caches/8.10/transforms/2606642573a0598651e2af0aa6089bd3/transformed/coordinatorlayout-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.slidingpanelayout:slidingpanelayout:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/1883049087881cb276ecfd468695de2c/transformed/slidingpanelayout-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.slidingpanelayout:slidingpanelayout:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/1883049087881cb276ecfd468695de2c/transformed/slidingpanelayout-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.customview:customview:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/4d8ca3f17b542eb4931f7a1b14144b57/transformed/customview-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.customview:customview:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/4d8ca3f17b542eb4931f7a1b14144b57/transformed/customview-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.appcompat:appcompat-resources:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/55e449fbc126878447a3c49aae172c4b/transformed/appcompat-resources-1.3.1/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.appcompat:appcompat-resources:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/55e449fbc126878447a3c49aae172c4b/transformed/appcompat-resources-1.3.1/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.transition:transition:1.2.0] /home/mchandr4/.gradle/caches/8.10/transforms/07203d232bc9cd6db0b9af4f56595532/transformed/transition-1.2.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.transition:transition:1.2.0] /home/mchandr4/.gradle/caches/8.10/transforms/07203d232bc9cd6db0b9af4f56595532/transformed/transition-1.2.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.vectordrawable:vectordrawable-animated:1.1.0] /home/mchandr4/.gradle/caches/8.10/transforms/9c46c5a9780ffce6f869d19287a50ca6/transformed/vectordrawable-animated-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.vectordrawable:vectordrawable-animated:1.1.0] /home/mchandr4/.gradle/caches/8.10/transforms/9c46c5a9780ffce6f869d19287a50ca6/transformed/vectordrawable-animated-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.vectordrawable:vectordrawable:1.1.0] /home/mchandr4/.gradle/caches/8.10/transforms/296d1f8c783c3cc9b463ed307c0d0db4/transformed/vectordrawable-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.vectordrawable:vectordrawable:1.1.0] /home/mchandr4/.gradle/caches/8.10/transforms/296d1f8c783c3cc9b463ed307c0d0db4/transformed/vectordrawable-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.swiperefreshlayout:swiperefreshlayout:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/387dccc01c5ff1a10d9bcb5420020aa4/transformed/swiperefreshlayout-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.swiperefreshlayout:swiperefreshlayout:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/387dccc01c5ff1a10d9bcb5420020aa4/transformed/swiperefreshlayout-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.asynclayoutinflater:asynclayoutinflater:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/9eab1f7a506bf37a58b9a7aec99f1b12/transformed/asynclayoutinflater-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.asynclayoutinflater:asynclayoutinflater:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/9eab1f7a506bf37a58b9a7aec99f1b12/transformed/asynclayoutinflater-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.core:core:1.5.0] /home/mchandr4/.gradle/caches/8.10/transforms/f548d7353429d6934d13fdec9a9cffa7/transformed/core-1.5.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.core:core:1.5.0] /home/mchandr4/.gradle/caches/8.10/transforms/f548d7353429d6934d13fdec9a9cffa7/transformed/core-1.5.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.8.7] /home/mchandr4/.gradle/caches/8.10/transforms/45201b9637562641308cded53994a718/transformed/lifecycle-viewmodel-2.8.7/AndroidManifest.xml:4:5-43
+MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.8.7] /home/mchandr4/.gradle/caches/8.10/transforms/45201b9637562641308cded53994a718/transformed/lifecycle-viewmodel-2.8.7/AndroidManifest.xml:4:5-43
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-android:2.8.7] /home/mchandr4/.gradle/caches/8.10/transforms/9d96c28e2dc9b601061a549a9903b778/transformed/lifecycle-viewmodel-release/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-android:2.8.7] /home/mchandr4/.gradle/caches/8.10/transforms/9d96c28e2dc9b601061a549a9903b778/transformed/lifecycle-viewmodel-release/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata-core-ktx:2.8.7] /home/mchandr4/.gradle/caches/8.10/transforms/9e8d89612f9bb220e104975f2ff6863d/transformed/lifecycle-livedata-core-ktx-2.8.7/AndroidManifest.xml:5:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata-core-ktx:2.8.7] /home/mchandr4/.gradle/caches/8.10/transforms/9e8d89612f9bb220e104975f2ff6863d/transformed/lifecycle-livedata-core-ktx-2.8.7/AndroidManifest.xml:5:5-44
+MERGED from [androidx.savedstate:savedstate:1.2.1] /home/mchandr4/.gradle/caches/8.10/transforms/fba313ed154e376d0084f49b2d52596f/transformed/savedstate-1.2.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.savedstate:savedstate:1.2.1] /home/mchandr4/.gradle/caches/8.10/transforms/fba313ed154e376d0084f49b2d52596f/transformed/savedstate-1.2.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-runtime:2.8.7] /home/mchandr4/.gradle/caches/8.10/transforms/5c2392e56cf5832d6d3018db5750f6d5/transformed/lifecycle-runtime-2.8.7/AndroidManifest.xml:4:5-43
+MERGED from [androidx.lifecycle:lifecycle-runtime:2.8.7] /home/mchandr4/.gradle/caches/8.10/transforms/5c2392e56cf5832d6d3018db5750f6d5/transformed/lifecycle-runtime-2.8.7/AndroidManifest.xml:4:5-43
+MERGED from [androidx.lifecycle:lifecycle-runtime-android:2.8.7] /home/mchandr4/.gradle/caches/8.10/transforms/33c7eb2fd277d6ff66afbd220ab7a350/transformed/lifecycle-runtime-release/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-runtime-android:2.8.7] /home/mchandr4/.gradle/caches/8.10/transforms/33c7eb2fd277d6ff66afbd220ab7a350/transformed/lifecycle-runtime-release/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7] /home/mchandr4/.gradle/caches/8.10/transforms/0bf78721478d77e376d023e2b770660e/transformed/lifecycle-viewmodel-ktx-2.8.7/AndroidManifest.xml:5:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7] /home/mchandr4/.gradle/caches/8.10/transforms/0bf78721478d77e376d023e2b770660e/transformed/lifecycle-viewmodel-ktx-2.8.7/AndroidManifest.xml:5:5-44
+MERGED from [androidx.lifecycle:lifecycle-service:2.8.7] /home/mchandr4/.gradle/caches/8.10/transforms/439a54c56f080ac14b4fa171f1c083d3/transformed/lifecycle-service-2.8.7/AndroidManifest.xml:5:5-44
+MERGED from [androidx.lifecycle:lifecycle-service:2.8.7] /home/mchandr4/.gradle/caches/8.10/transforms/439a54c56f080ac14b4fa171f1c083d3/transformed/lifecycle-service-2.8.7/AndroidManifest.xml:5:5-44
+MERGED from [androidx.lifecycle:lifecycle-process:2.8.7] /home/mchandr4/.gradle/caches/8.10/transforms/b7a3d0d3fad28f8cb257e38ebe308859/transformed/lifecycle-process-2.8.7/AndroidManifest.xml:21:5-44
+MERGED from [androidx.lifecycle:lifecycle-process:2.8.7] /home/mchandr4/.gradle/caches/8.10/transforms/b7a3d0d3fad28f8cb257e38ebe308859/transformed/lifecycle-process-2.8.7/AndroidManifest.xml:21:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata:2.8.7] /home/mchandr4/.gradle/caches/8.10/transforms/3608c109b5524aa0e5ad59772055ffc1/transformed/lifecycle-livedata-2.8.7/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata:2.8.7] /home/mchandr4/.gradle/caches/8.10/transforms/3608c109b5524aa0e5ad59772055ffc1/transformed/lifecycle-livedata-2.8.7/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.8.7] /home/mchandr4/.gradle/caches/8.10/transforms/ebf85e30141a664d38431910df33681e/transformed/lifecycle-livedata-core-2.8.7/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.8.7] /home/mchandr4/.gradle/caches/8.10/transforms/ebf85e30141a664d38431910df33681e/transformed/lifecycle-livedata-core-2.8.7/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-runtime-ktx-android:2.8.7] /home/mchandr4/.gradle/caches/8.10/transforms/012619c760f209f31dbe1995957e5580/transformed/lifecycle-runtime-ktx-release/AndroidManifest.xml:5:5-44
+MERGED from [androidx.lifecycle:lifecycle-runtime-ktx-android:2.8.7] /home/mchandr4/.gradle/caches/8.10/transforms/012619c760f209f31dbe1995957e5580/transformed/lifecycle-runtime-ktx-release/AndroidManifest.xml:5:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-savedstate:2.8.7] /home/mchandr4/.gradle/caches/8.10/transforms/990540508fc4951f6c4d0c8c87f4e391/transformed/lifecycle-viewmodel-savedstate-2.8.7/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-savedstate:2.8.7] /home/mchandr4/.gradle/caches/8.10/transforms/990540508fc4951f6c4d0c8c87f4e391/transformed/lifecycle-viewmodel-savedstate-2.8.7/AndroidManifest.xml:20:5-44
+MERGED from [androidx.core:core-ktx:1.3.2] /home/mchandr4/.gradle/caches/8.10/transforms/5fa4ba13848d0faf39446742880cd3ef/transformed/core-ktx-1.3.2/AndroidManifest.xml:5:5-7:41
+MERGED from [androidx.core:core-ktx:1.3.2] /home/mchandr4/.gradle/caches/8.10/transforms/5fa4ba13848d0faf39446742880cd3ef/transformed/core-ktx-1.3.2/AndroidManifest.xml:5:5-7:41
+MERGED from [androidx.room:room-runtime-android:2.7.0-rc03] /home/mchandr4/.gradle/caches/8.10/transforms/ac18a04daebb7a14e42fcbaf05599a36/transformed/room-runtime-release/AndroidManifest.xml:21:5-44
+MERGED from [androidx.room:room-runtime-android:2.7.0-rc03] /home/mchandr4/.gradle/caches/8.10/transforms/ac18a04daebb7a14e42fcbaf05599a36/transformed/room-runtime-release/AndroidManifest.xml:21:5-44
+MERGED from [androidx.annotation:annotation-experimental:1.4.1] /home/mchandr4/.gradle/caches/8.10/transforms/cd6f47aa8987178a79354dbfde191bda/transformed/annotation-experimental-1.4.1/AndroidManifest.xml:5:5-44
+MERGED from [androidx.annotation:annotation-experimental:1.4.1] /home/mchandr4/.gradle/caches/8.10/transforms/cd6f47aa8987178a79354dbfde191bda/transformed/annotation-experimental-1.4.1/AndroidManifest.xml:5:5-44
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /home/mchandr4/.gradle/caches/8.10/transforms/d988a5a78bbbd400359829914155bf15/transformed/versionedparcelable-1.1.1/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /home/mchandr4/.gradle/caches/8.10/transforms/d988a5a78bbbd400359829914155bf15/transformed/versionedparcelable-1.1.1/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.sqlite:sqlite-framework-android:2.5.0-rc03] /home/mchandr4/.gradle/caches/8.10/transforms/9458c8f9544952024b071e430e1ea2ce/transformed/sqlite-framework-release/AndroidManifest.xml:20:5-44
+MERGED from [androidx.sqlite:sqlite-framework-android:2.5.0-rc03] /home/mchandr4/.gradle/caches/8.10/transforms/9458c8f9544952024b071e430e1ea2ce/transformed/sqlite-framework-release/AndroidManifest.xml:20:5-44
+MERGED from [androidx.sqlite:sqlite-android:2.5.0-rc03] /home/mchandr4/.gradle/caches/8.10/transforms/bd99ff62c6cdde032a587e085e97e502/transformed/sqlite-release/AndroidManifest.xml:20:5-44
+MERGED from [androidx.sqlite:sqlite-android:2.5.0-rc03] /home/mchandr4/.gradle/caches/8.10/transforms/bd99ff62c6cdde032a587e085e97e502/transformed/sqlite-release/AndroidManifest.xml:20:5-44
+MERGED from [:libs:encryptionrunner] /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/encryptionrunner/build/intermediates/merged_manifest/debug/AndroidManifest.xml:22:5-44
+MERGED from [:libs:encryptionrunner] /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/encryptionrunner/build/intermediates/merged_manifest/debug/AndroidManifest.xml:22:5-44
+MERGED from [androidx.cursoradapter:cursoradapter:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/d9de397bb9bde190c8255f184c88b988/transformed/cursoradapter-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.cursoradapter:cursoradapter:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/d9de397bb9bde190c8255f184c88b988/transformed/cursoradapter-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.cardview:cardview:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/7d12637bea79d0fb8fb7f1d3cd9a6c92/transformed/cardview-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.cardview:cardview:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/7d12637bea79d0fb8fb7f1d3cd9a6c92/transformed/cardview-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/2ad56b42444620a0108aaf72d35e7d98/transformed/profileinstaller-1.3.1/AndroidManifest.xml:21:5-44
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/2ad56b42444620a0108aaf72d35e7d98/transformed/profileinstaller-1.3.1/AndroidManifest.xml:21:5-44
+MERGED from [androidx.startup:startup-runtime:1.1.1] /home/mchandr4/.gradle/caches/8.10/transforms/f076551ada57f8ecfbb4a23937e12dec/transformed/startup-runtime-1.1.1/AndroidManifest.xml:21:5-23:41
+MERGED from [androidx.startup:startup-runtime:1.1.1] /home/mchandr4/.gradle/caches/8.10/transforms/f076551ada57f8ecfbb4a23937e12dec/transformed/startup-runtime-1.1.1/AndroidManifest.xml:21:5-23:41
+MERGED from [androidx.tracing:tracing:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/0093a7c832da25438ba2447954f23ddd/transformed/tracing-1.0.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.tracing:tracing:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/0093a7c832da25438ba2447954f23ddd/transformed/tracing-1.0.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.arch.core:core-runtime:2.2.0] /home/mchandr4/.gradle/caches/8.10/transforms/c09a301ae43a6c8445f0cce0ad222fe1/transformed/core-runtime-2.2.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.arch.core:core-runtime:2.2.0] /home/mchandr4/.gradle/caches/8.10/transforms/c09a301ae43a6c8445f0cce0ad222fe1/transformed/core-runtime-2.2.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.interpolator:interpolator:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/c7a05316a2aa09a7f98b7457a36b315a/transformed/interpolator-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.interpolator:interpolator:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/c7a05316a2aa09a7f98b7457a36b315a/transformed/interpolator-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.documentfile:documentfile:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/b1608a17556860ddb81d3e942bcbb18c/transformed/documentfile-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.documentfile:documentfile:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/b1608a17556860ddb81d3e942bcbb18c/transformed/documentfile-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.localbroadcastmanager:localbroadcastmanager:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/1272e4c0e53ba795f3cd641574ad71de/transformed/localbroadcastmanager-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.localbroadcastmanager:localbroadcastmanager:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/1272e4c0e53ba795f3cd641574ad71de/transformed/localbroadcastmanager-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.print:print:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/5421314b2495bbac34f58240974361d9/transformed/print-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.print:print:1.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/5421314b2495bbac34f58240974361d9/transformed/print-1.0.0/AndroidManifest.xml:20:5-44
+	android:targetSdkVersion
+		INJECTED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml
+uses-permission#android.permission.INTERACT_ACROSS_USERS_FULL
+ADDED from [:libs:connecteddevice] /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/connecteddevice/build/intermediates/merged_manifest/debug/AndroidManifest.xml:27:5-85
+	android:name
+		ADDED from [:libs:connecteddevice] /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/connecteddevice/build/intermediates/merged_manifest/debug/AndroidManifest.xml:27:22-82
+queries
+ADDED from [com.android.car.ui:car-ui-lib:2.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/441a4ee370575c42882713dcdfa9385c/transformed/car-ui-lib-2.0.0/AndroidManifest.xml:26:5-31:15
+provider#com.android.car.ui.plugin.PluginNameProvider
+ADDED from [com.android.car.ui:car-ui-lib:2.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/441a4ee370575c42882713dcdfa9385c/transformed/car-ui-lib-2.0.0/AndroidManifest.xml:27:9-30:67
+	android:authorities
+		ADDED from [com.android.car.ui:car-ui-lib:2.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/441a4ee370575c42882713dcdfa9385c/transformed/car-ui-lib-2.0.0/AndroidManifest.xml:29:13-60
+	tools:ignore
+		ADDED from [com.android.car.ui:car-ui-lib:2.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/441a4ee370575c42882713dcdfa9385c/transformed/car-ui-lib-2.0.0/AndroidManifest.xml:30:13-64
+	android:name
+		ADDED from [com.android.car.ui:car-ui-lib:2.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/441a4ee370575c42882713dcdfa9385c/transformed/car-ui-lib-2.0.0/AndroidManifest.xml:28:13-72
+provider#com.android.car.ui.core.CarUiInstaller
+ADDED from [com.android.car.ui:car-ui-lib:2.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/441a4ee370575c42882713dcdfa9385c/transformed/car-ui-lib-2.0.0/AndroidManifest.xml:34:9-39:71
+	android:process
+		ADDED from [com.android.car.ui:car-ui-lib:2.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/441a4ee370575c42882713dcdfa9385c/transformed/car-ui-lib-2.0.0/AndroidManifest.xml:39:13-68
+	android:authorities
+		ADDED from [com.android.car.ui:car-ui-lib:2.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/441a4ee370575c42882713dcdfa9385c/transformed/car-ui-lib-2.0.0/AndroidManifest.xml:36:13-66
+	android:exported
+		ADDED from [com.android.car.ui:car-ui-lib:2.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/441a4ee370575c42882713dcdfa9385c/transformed/car-ui-lib-2.0.0/AndroidManifest.xml:38:13-37
+	android:directBootAware
+		ADDED from [com.android.car.ui:car-ui-lib:2.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/441a4ee370575c42882713dcdfa9385c/transformed/car-ui-lib-2.0.0/AndroidManifest.xml:37:13-43
+	android:name
+		ADDED from [com.android.car.ui:car-ui-lib:2.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/441a4ee370575c42882713dcdfa9385c/transformed/car-ui-lib-2.0.0/AndroidManifest.xml:35:13-66
+provider#com.android.car.ui.core.SearchResultsProvider
+ADDED from [com.android.car.ui:car-ui-lib:2.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/441a4ee370575c42882713dcdfa9385c/transformed/car-ui-lib-2.0.0/AndroidManifest.xml:40:9-45:79
+	android:readPermission
+		ADDED from [com.android.car.ui:car-ui-lib:2.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/441a4ee370575c42882713dcdfa9385c/transformed/car-ui-lib-2.0.0/AndroidManifest.xml:45:13-76
+	android:process
+		ADDED from [com.android.car.ui:car-ui-lib:2.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/441a4ee370575c42882713dcdfa9385c/transformed/car-ui-lib-2.0.0/AndroidManifest.xml:44:13-68
+	android:authorities
+		ADDED from [com.android.car.ui:car-ui-lib:2.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/441a4ee370575c42882713dcdfa9385c/transformed/car-ui-lib-2.0.0/AndroidManifest.xml:42:13-73
+	android:exported
+		ADDED from [com.android.car.ui:car-ui-lib:2.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/441a4ee370575c42882713dcdfa9385c/transformed/car-ui-lib-2.0.0/AndroidManifest.xml:43:13-36
+	android:name
+		ADDED from [com.android.car.ui:car-ui-lib:2.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/441a4ee370575c42882713dcdfa9385c/transformed/car-ui-lib-2.0.0/AndroidManifest.xml:41:13-73
+provider#androidx.startup.InitializationProvider
+ADDED from [androidx.lifecycle:lifecycle-process:2.8.7] /home/mchandr4/.gradle/caches/8.10/transforms/b7a3d0d3fad28f8cb257e38ebe308859/transformed/lifecycle-process-2.8.7/AndroidManifest.xml:24:9-32:20
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/2ad56b42444620a0108aaf72d35e7d98/transformed/profileinstaller-1.3.1/AndroidManifest.xml:24:9-32:20
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/2ad56b42444620a0108aaf72d35e7d98/transformed/profileinstaller-1.3.1/AndroidManifest.xml:24:9-32:20
+MERGED from [androidx.startup:startup-runtime:1.1.1] /home/mchandr4/.gradle/caches/8.10/transforms/f076551ada57f8ecfbb4a23937e12dec/transformed/startup-runtime-1.1.1/AndroidManifest.xml:26:9-30:34
+MERGED from [androidx.startup:startup-runtime:1.1.1] /home/mchandr4/.gradle/caches/8.10/transforms/f076551ada57f8ecfbb4a23937e12dec/transformed/startup-runtime-1.1.1/AndroidManifest.xml:26:9-30:34
+	tools:node
+		ADDED from [androidx.lifecycle:lifecycle-process:2.8.7] /home/mchandr4/.gradle/caches/8.10/transforms/b7a3d0d3fad28f8cb257e38ebe308859/transformed/lifecycle-process-2.8.7/AndroidManifest.xml:28:13-31
+	android:authorities
+		ADDED from [androidx.lifecycle:lifecycle-process:2.8.7] /home/mchandr4/.gradle/caches/8.10/transforms/b7a3d0d3fad28f8cb257e38ebe308859/transformed/lifecycle-process-2.8.7/AndroidManifest.xml:26:13-68
+	android:exported
+		ADDED from [androidx.lifecycle:lifecycle-process:2.8.7] /home/mchandr4/.gradle/caches/8.10/transforms/b7a3d0d3fad28f8cb257e38ebe308859/transformed/lifecycle-process-2.8.7/AndroidManifest.xml:27:13-37
+	android:name
+		ADDED from [androidx.lifecycle:lifecycle-process:2.8.7] /home/mchandr4/.gradle/caches/8.10/transforms/b7a3d0d3fad28f8cb257e38ebe308859/transformed/lifecycle-process-2.8.7/AndroidManifest.xml:25:13-67
+meta-data#androidx.lifecycle.ProcessLifecycleInitializer
+ADDED from [androidx.lifecycle:lifecycle-process:2.8.7] /home/mchandr4/.gradle/caches/8.10/transforms/b7a3d0d3fad28f8cb257e38ebe308859/transformed/lifecycle-process-2.8.7/AndroidManifest.xml:29:13-31:52
+	android:value
+		ADDED from [androidx.lifecycle:lifecycle-process:2.8.7] /home/mchandr4/.gradle/caches/8.10/transforms/b7a3d0d3fad28f8cb257e38ebe308859/transformed/lifecycle-process-2.8.7/AndroidManifest.xml:31:17-49
+	android:name
+		ADDED from [androidx.lifecycle:lifecycle-process:2.8.7] /home/mchandr4/.gradle/caches/8.10/transforms/b7a3d0d3fad28f8cb257e38ebe308859/transformed/lifecycle-process-2.8.7/AndroidManifest.xml:30:17-78
+service#androidx.room.MultiInstanceInvalidationService
+ADDED from [androidx.room:room-runtime-android:2.7.0-rc03] /home/mchandr4/.gradle/caches/8.10/transforms/ac18a04daebb7a14e42fcbaf05599a36/transformed/room-runtime-release/AndroidManifest.xml:24:9-28:63
+	android:exported
+		ADDED from [androidx.room:room-runtime-android:2.7.0-rc03] /home/mchandr4/.gradle/caches/8.10/transforms/ac18a04daebb7a14e42fcbaf05599a36/transformed/room-runtime-release/AndroidManifest.xml:27:13-37
+	tools:ignore
+		ADDED from [androidx.room:room-runtime-android:2.7.0-rc03] /home/mchandr4/.gradle/caches/8.10/transforms/ac18a04daebb7a14e42fcbaf05599a36/transformed/room-runtime-release/AndroidManifest.xml:28:13-60
+	android:directBootAware
+		ADDED from [androidx.room:room-runtime-android:2.7.0-rc03] /home/mchandr4/.gradle/caches/8.10/transforms/ac18a04daebb7a14e42fcbaf05599a36/transformed/room-runtime-release/AndroidManifest.xml:26:13-43
+	android:name
+		ADDED from [androidx.room:room-runtime-android:2.7.0-rc03] /home/mchandr4/.gradle/caches/8.10/transforms/ac18a04daebb7a14e42fcbaf05599a36/transformed/room-runtime-release/AndroidManifest.xml:25:13-74
+meta-data#androidx.profileinstaller.ProfileInstallerInitializer
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/2ad56b42444620a0108aaf72d35e7d98/transformed/profileinstaller-1.3.1/AndroidManifest.xml:29:13-31:52
+	android:value
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/2ad56b42444620a0108aaf72d35e7d98/transformed/profileinstaller-1.3.1/AndroidManifest.xml:31:17-49
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/2ad56b42444620a0108aaf72d35e7d98/transformed/profileinstaller-1.3.1/AndroidManifest.xml:30:17-85
+receiver#androidx.profileinstaller.ProfileInstallReceiver
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/2ad56b42444620a0108aaf72d35e7d98/transformed/profileinstaller-1.3.1/AndroidManifest.xml:34:9-52:20
+	android:enabled
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/2ad56b42444620a0108aaf72d35e7d98/transformed/profileinstaller-1.3.1/AndroidManifest.xml:37:13-35
+	android:exported
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/2ad56b42444620a0108aaf72d35e7d98/transformed/profileinstaller-1.3.1/AndroidManifest.xml:38:13-36
+	android:permission
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/2ad56b42444620a0108aaf72d35e7d98/transformed/profileinstaller-1.3.1/AndroidManifest.xml:39:13-57
+	android:directBootAware
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/2ad56b42444620a0108aaf72d35e7d98/transformed/profileinstaller-1.3.1/AndroidManifest.xml:36:13-44
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/2ad56b42444620a0108aaf72d35e7d98/transformed/profileinstaller-1.3.1/AndroidManifest.xml:35:13-76
+intent-filter#action:name:androidx.profileinstaller.action.INSTALL_PROFILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/2ad56b42444620a0108aaf72d35e7d98/transformed/profileinstaller-1.3.1/AndroidManifest.xml:40:13-42:29
+action#androidx.profileinstaller.action.INSTALL_PROFILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/2ad56b42444620a0108aaf72d35e7d98/transformed/profileinstaller-1.3.1/AndroidManifest.xml:41:17-91
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/2ad56b42444620a0108aaf72d35e7d98/transformed/profileinstaller-1.3.1/AndroidManifest.xml:41:25-88
+intent-filter#action:name:androidx.profileinstaller.action.SKIP_FILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/2ad56b42444620a0108aaf72d35e7d98/transformed/profileinstaller-1.3.1/AndroidManifest.xml:43:13-45:29
+action#androidx.profileinstaller.action.SKIP_FILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/2ad56b42444620a0108aaf72d35e7d98/transformed/profileinstaller-1.3.1/AndroidManifest.xml:44:17-85
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/2ad56b42444620a0108aaf72d35e7d98/transformed/profileinstaller-1.3.1/AndroidManifest.xml:44:25-82
+intent-filter#action:name:androidx.profileinstaller.action.SAVE_PROFILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/2ad56b42444620a0108aaf72d35e7d98/transformed/profileinstaller-1.3.1/AndroidManifest.xml:46:13-48:29
+action#androidx.profileinstaller.action.SAVE_PROFILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/2ad56b42444620a0108aaf72d35e7d98/transformed/profileinstaller-1.3.1/AndroidManifest.xml:47:17-88
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/2ad56b42444620a0108aaf72d35e7d98/transformed/profileinstaller-1.3.1/AndroidManifest.xml:47:25-85
+intent-filter#action:name:androidx.profileinstaller.action.BENCHMARK_OPERATION
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/2ad56b42444620a0108aaf72d35e7d98/transformed/profileinstaller-1.3.1/AndroidManifest.xml:49:13-51:29
+action#androidx.profileinstaller.action.BENCHMARK_OPERATION
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/2ad56b42444620a0108aaf72d35e7d98/transformed/profileinstaller-1.3.1/AndroidManifest.xml:50:17-95
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/2ad56b42444620a0108aaf72d35e7d98/transformed/profileinstaller-1.3.1/AndroidManifest.xml:50:25-92

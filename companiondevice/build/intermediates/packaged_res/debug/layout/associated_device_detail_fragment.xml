@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2021 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+  <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:orientation="vertical"
+      android:gravity="center_horizontal"
+      android:paddingVertical="?attr/pageMarginVertical"
+      android:layout_marginHorizontal="?attr/pageMarginHorizontal">
+    <ImageView
+        android:id="@+id/device_icon"
+        android:layout_width="?attr/companionPrimaryIconSize"
+        android:layout_height="?attr/companionPrimaryIconSize"
+        android:src="@drawable/ic_smartphone_24dp"
+        style="@style/SettingsTopIconStyle"
+        tools:ignore="ContentDescription" />
+    <TextView
+        android:id="@+id/device_name"
+        android:text="@string/unknown"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_marginVertical="?attr/contentMarginVertical"
+        style="@style/CompanionTitleTextStyle" />
+    <LinearLayout
+        android:id="@+id/connection_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+      <ImageView
+          android:id="@+id/connection_status_indicator"
+          android:layout_height="@dimen/connection_indicator_size"
+          android:layout_width="@dimen/connection_indicator_size"
+          android:layout_marginEnd="@dimen/connection_indicator_margin_end"
+          android:src="@drawable/ic_connection_indicator"
+          tools:ignore="ContentDescription"/>
+      <TextView
+          android:id="@+id/connection_status_text"
+          android:layout_height="wrap_content"
+          android:layout_width="wrap_content"
+          android:textAppearance="@style/CompanionSubtitleTextStyle"/>
+    </LinearLayout>
+    <View
+        android:layout_marginTop="?attr/companionDividerMargin"
+        style="@style/HorizontalDividerStyle" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical">
+      <LinearLayout
+          android:id="@+id/connection_button"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:orientation="horizontal"
+          android:gravity="center"
+          android:layout_weight="1"
+          android:background="@drawable/car_ui_list_item_background"
+          android:clickable="true"
+          android:minHeight="?attr/companionListItemMinHeight">
+        <ImageView
+            android:id="@+id/connection_button_icon"
+            android:layout_width="?attr/companionSecondaryIconSize"
+            android:layout_height="?attr/companionSecondaryIconSize"
+            android:scaleType="fitXY"
+            android:src="@drawable/ic_phonelink_erase_24dp"
+            android:tint="?attr/companionColorAccent"
+            tools:ignore="ContentDescription" />
+        <TextView
+            android:id="@+id/connection_button_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/settings_list_item_text_no_icon_margin_start"
+            android:layout_marginEnd="@dimen/settings_list_item_text_margin_end"
+            android:layout_marginBottom="@dimen/settings_list_item_content_margin_bottom"
+            android:layout_marginTop="@dimen/settings_list_item_content_margin_top"
+            android:text="@string/disconnect"
+            android:textAppearance="@style/SettingsItemButtonTextStyle" />
+      </LinearLayout>
+      <LinearLayout
+          android:id="@+id/claim_button"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:orientation="horizontal"
+          android:gravity="center"
+          android:layout_weight="1"
+          android:background="@drawable/car_ui_list_item_background"
+          android:clickable="true"
+          android:minHeight="?attr/companionListItemMinHeight">
+        <ImageView
+            android:id="@+id/claim_button_icon"
+            android:layout_width="?attr/companionSecondaryIconSize"
+            android:layout_height="?attr/companionSecondaryIconSize"
+            android:scaleType="fitXY"
+            android:src="@drawable/ic_baseline_star_border_24"
+            android:tint="?attr/companionColorAccent"
+            tools:ignore="ContentDescription" />
+        <TextView
+            android:id="@+id/claim_button_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/settings_list_item_text_no_icon_margin_start"
+            android:layout_marginEnd="@dimen/settings_list_item_text_margin_end"
+            android:layout_marginBottom="@dimen/settings_list_item_content_margin_bottom"
+            android:layout_marginTop="@dimen/settings_list_item_content_margin_top"
+            android:text="@string/unclaimed_device"
+            android:textAppearance="@style/SettingsItemButtonTextStyle" />
+      </LinearLayout>
+      <LinearLayout
+          android:id="@+id/forget_button"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:orientation="horizontal"
+          android:gravity="center"
+          android:layout_weight="1"
+          android:background="@drawable/car_ui_list_item_background"
+          android:clickable="true"
+          android:minHeight="?attr/companionListItemMinHeight">
+        <ImageView
+            android:id="@+id/forget_button_icon"
+            android:layout_width="?attr/companionSecondaryIconSize"
+            android:layout_height="?attr/companionSecondaryIconSize"
+            android:scaleType="fitXY"
+            android:src="@drawable/ic_delete"
+            android:tint="?attr/companionColorAccent"
+            tools:ignore="ContentDescription" />
+        <TextView
+            android:id="@+id/forget_button_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/settings_list_item_text_no_icon_margin_start"
+            android:layout_marginEnd="@dimen/settings_list_item_text_margin_end"
+            android:layout_marginBottom="@dimen/settings_list_item_content_margin_bottom"
+            android:layout_marginTop="@dimen/settings_list_item_content_margin_top"
+            android:text="@string/forget"
+            android:textAppearance="@style/SettingsItemButtonTextStyle" />
+      </LinearLayout>
+    </LinearLayout>
+    <View
+        android:layout_marginBottom="?attr/companionDividerMargin"
+        style="@style/HorizontalDividerStyle" />
+    <TextView
+        android:id="@+id/trusted_device_feature_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:background="@drawable/car_ui_list_item_background"
+        android:clickable="true"
+        android:minHeight="?attr/companionListItemMinHeight"
+        android:paddingStart="@dimen/settings_list_item_text_no_icon_margin_start"
+        android:paddingEnd="@dimen/settings_list_item_text_margin_end"
+        android:paddingBottom="@dimen/settings_list_item_content_margin_bottom"
+        android:paddingTop="@dimen/settings_list_item_content_margin_top"
+        android:text="@string/trusted_device_feature_title"
+        android:textAppearance="@style/SettingsFeatureButtonStyle" />
+  </LinearLayout>
+</ScrollView>

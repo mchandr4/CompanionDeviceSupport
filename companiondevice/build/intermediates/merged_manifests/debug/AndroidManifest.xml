@@ -1,0 +1,372 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2020 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.google.android.companiondevicesupport"
+    android:versionCode="2413"
+    android:versionName="1.0" >
+
+    <uses-sdk
+        android:minSdkVersion="29"
+        android:targetSdkVersion="34" />
+
+    <!-- Needed for BLE scanning/advertising -->
+    <uses-permission
+        android:name="android.permission.ACCESS_FINE_LOCATION"
+        android:maxSdkVersion="30" />
+    <uses-permission
+        android:name="android.permission.BLUETOOTH"
+        android:maxSdkVersion="30" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission
+        android:name="android.permission.BLUETOOTH_SCAN"
+        android:usesPermissionFlags="neverForLocation" />
+
+    <!-- Needed for detecting foreground user -->
+    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" />
+    <uses-permission android:name="android.permission.MANAGE_USERS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
+    <!-- Needed for the calendar sync feature -->
+    <uses-permission android:name="android.permission.READ_CALENDAR" />
+    <uses-permission android:name="android.permission.WRITE_CALENDAR" />
+
+    <!-- Needed for the trusted device feature -->
+    <uses-permission android:name="android.permission.PROVIDE_TRUST_AGENT" />
+    <uses-permission android:name="android.permission.MANAGE_WEAK_ESCROW_TOKEN" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- Needed for the notification message feature -->
+    <uses-permission android:name="android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME" />
+    <uses-permission android:name="android.car.permission.ACCESS_CAR_PROJECTION_STATUS" />
+
+    <!-- Needed to access the proxy service -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- Required for Play Store listing when application is AUTOMOTIVE exclusive -->
+    <uses-feature
+        android:name="android.hardware.type.automotive"
+        android:required="true" />
+    <!-- Needed for detecting foreground user -->
+    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
+
+    <queries>
+        <provider
+            android:name="com.android.car.ui.plugin.PluginNameProvider"
+            android:authorities="com.android.car.ui.plugin" />
+    </queries>
+
+    <application
+        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+        android:debuggable="true"
+        android:directBootAware="true"
+        android:extractNativeLibs="false"
+        android:icon="@mipmap/ic_directions_car_filled"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:taskAffinity="" >
+
+        <!-- ConnectedDeviceService is exported for FeatureConnector. -->
+        <service
+            android:name="com.google.android.connecteddevice.service.ConnectedDeviceService"
+            android:exported="true"
+            android:singleUser="true" >
+            <intent-filter>
+                <action android:name="com.google.android.connecteddevice.api.BIND_FEATURE_COORDINATOR" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.google.android.connecteddevice.api.BIND_SAFE_FEATURE_COORDINATOR" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+
+            <meta-data
+                android:name="com.google.android.connecteddevice.early_services"
+                android:resource="@array/early_single_user_services" />
+            <meta-data
+                android:name="com.google.android.connecteddevice.association_service_uuid"
+                android:resource="@string/car_association_service_uuid" />
+            <meta-data
+                android:name="com.google.android.connecteddevice.transport_protocols"
+                android:resource="@array/transport_protocols" />
+            <meta-data
+                android:name="com.google.android.connecteddevice.car_eap_oob_protocol_name"
+                android:resource="@string/car_eap_oob_protocol_name" />
+            <meta-data
+                android:name="com.google.android.connecteddevice.enable_beacon"
+                android:resource="@bool/enable_beacon" />
+            <meta-data
+                android:name="com.google.android.connecteddevice.enable_periodic_ping"
+                android:resource="@bool/enable_periodic_ping" />
+        </service>
+        <!--
+             ConnectedDeviceFgUserService is exported for CompanionConnector
+             and FeatureConnector.
+        -->
+        <service
+            android:name="com.google.android.connecteddevice.service.ConnectedDeviceFgUserService"
+            android:exported="true"
+            android:foregroundServiceType="connectedDevice" >
+            <intent-filter>
+                <action android:name="com.google.android.connecteddevice.api.BIND_FEATURE_COORDINATOR_FG" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.google.android.connecteddevice.api.QUERY_API_VERSION" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+
+            <meta-data
+                android:name="com.google.android.connecteddevice.early_services"
+                android:resource="@array/early_fg_user_services" />
+            <meta-data
+                android:name="com.google.android.connecteddevice.unlock_services"
+                android:resource="@array/unlock_fg_user_services" />
+        </service>
+        <service
+            android:name="com.google.android.connecteddevice.service.TransportService"
+            android:exported="false" >
+            <meta-data
+                android:name="com.google.android.connecteddevice.association_service_uuid"
+                android:resource="@string/car_association_service_uuid" />
+            <meta-data
+                android:name="com.google.android.connecteddevice.enable_proxy"
+                android:resource="@bool/enable_proxy" />
+            <meta-data
+                android:name="com.google.android.connecteddevice.transport_protocols"
+                android:resource="@array/transport_protocols" />
+            <meta-data
+                android:name="com.google.android.connecteddevice.supported_oob_channels"
+                android:resource="@array/supported_oob_channels" />
+        </service>
+        <service
+            android:name="com.google.android.companiondevicesupport.eap.EapService"
+            android:exported="false" >
+            <meta-data
+                android:name="com.google.android.connecteddevice.association_service_uuid"
+                android:resource="@string/car_association_service_uuid" />
+            <meta-data
+                android:name="com.google.android.connecteddevice.transport_protocols"
+                android:resource="@array/transport_protocols" />
+            <meta-data
+                android:name="com.google.android.connecteddevice.supported_oob_channels"
+                android:resource="@array/supported_oob_channels" />
+            <meta-data
+                android:name="com.google.android.connecteddevice.car_eap_client_name"
+                android:resource="@string/car_eap_client_name" />
+            <meta-data
+                android:name="com.google.android.connecteddevice.car_eap_service_name"
+                android:resource="@string/car_eap_service_name" />
+        </service>
+        <!-- Export this activity only for automated test. -->
+        <activity
+            android:name="com.google.android.companiondevicesupport.AssociationActivity"
+            android:exported="true"
+            android:launchMode="singleInstance" >
+            <intent-filter>
+                <action android:name="com.google.android.connecteddevice.api.ASSOCIATION_ACTIVITY" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.android.settings.action.EXTRA_SETTINGS" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+
+            <meta-data
+                android:name="com.android.settings.icon"
+                android:resource="@drawable/ic_phonelink_ring_40dp"
+                android:value="true" />
+            <meta-data
+                android:name="com.android.settings.title"
+                android:resource="@string/settings_entry_title" />
+            <meta-data
+                android:name="com.android.settings.category"
+                android:value="com.android.settings.category.personal" />
+        </activity>
+        <!-- SetupWizardAssociationActivity is exported for SUW. -->
+        <activity
+            android:name="com.google.android.companiondevicesupport.SetupWizardAssociationActivity"
+            android:exported="true"
+            android:launchMode="singleInstance" >
+            <intent-filter>
+                <action android:name="com.google.android.connecteddevice.api.SETUP_WIZARD_ASSOCIATION_ACTIVITY" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <!-- Feature specific elements below here -->
+
+
+        <!-- calendarsync -->
+        <service
+            android:name="com.google.android.connecteddevice.calendarsync.CalendarSyncService"
+            android:exported="false" />
+
+        <!-- notificationmsg -->
+        <service
+            android:name="com.google.android.connecteddevice.notificationmsg.NotificationMsgService"
+            android:exported="false" >
+            <meta-data
+                android:name="com.google.android.connecteddevice.notificationmsg.notification_contact_photo_size"
+                android:resource="@dimen/notification_contact_photo_size" />
+            <meta-data
+                android:name="com.google.android.connecteddevice.notificationmsg.default_message_icon"
+                android:resource="@drawable/ic_message" />
+            <meta-data
+                android:name="com.google.android.connecteddevice.notificationmsg.default_avatar"
+                android:resource="@drawable/ic_person" />
+            <meta-data
+                android:name="com.google.android.connecteddevice.notificationmsg.default_display_name"
+                android:resource="@string/name_not_available" />
+            <meta-data
+                android:name="com.google.android.connecteddevice.notificationmsg.content_text"
+                android:resource="@plurals/notification_new_message" />
+        </service>
+
+        <!-- trust -->
+        <service
+            android:name="com.google.android.connecteddevice.trust.TrustedDeviceManagerService"
+            android:exported="false"
+            android:singleUser="true" >
+        </service>
+        <!-- TrustedDeviceAgentService is an extension of the platform service TrustAgent. -->
+        <service
+            android:name="com.google.android.connecteddevice.trust.TrustedDeviceAgentService"
+            android:directBootAware="true"
+            android:exported="true"
+            android:permission="android.permission.BIND_TRUST_AGENT"
+            android:singleUser="true" >
+            <intent-filter>
+                <action android:name="android.service.trust.TrustAgentService" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.service.trust.trustagent"
+                android:resource="@xml/car_trust_agent" />
+        </service>
+        <service
+            android:name="com.google.android.connecteddevice.trust.TrustedDeviceUiDelegateService"
+            android:exported="false" >
+            <meta-data
+                android:name="com.google.android.connecteddevice.trust.notification_channel_name"
+                android:resource="@string/trusted_device_notification_channel_name" />
+            <!--
+                This will only take effect below Android 31 because of some system API changes. For
+                Android 31 and above, app icon will be shown as this notification icon.
+            -->
+            <meta-data
+                android:name="com.google.android.connecteddevice.trust.enrollment_notification_icon"
+                android:resource="@drawable/ic_directions_car_filled" />
+            <meta-data
+                android:name="com.google.android.connecteddevice.trust.enrollment_notification_title"
+                android:resource="@string/trusted_device_notification_title" />
+            <meta-data
+                android:name="com.google.android.connecteddevice.trust.enrollment_notification_content"
+                android:resource="@string/trusted_device_notification_content" />
+        </service>
+        <!--
+             TrustedDeviceActivity is exported because it's injected as
+             Settings > Security > "Unlock profile with phone".
+        -->
+        <activity
+            android:name="com.google.android.companiondevicesupport.trust.TrustedDeviceActivity"
+            android:exported="true"
+            android:launchMode="singleTask" >
+            <intent-filter>
+                <action android:name="com.google.android.connecteddevice.trust.TRUSTED_DEVICE_ACTIVITY" />
+                <action android:name="com.android.settings.action.EXTRA_SETTINGS" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+
+            <meta-data
+                android:name="com.android.settings.icon"
+                android:resource="@drawable/ic_lock"
+                android:value="true" />
+            <meta-data
+                android:name="com.android.settings.title"
+                android:resource="@string/trusted_device_feature_title" />
+            <meta-data
+                android:name="com.android.settings.category"
+                android:value="com.android.settings.category.ia.security" />
+            <meta-data
+                android:name="com.android.settings.icon_tintable"
+                android:value="true" />
+        </activity>
+
+        <provider
+            android:name="com.android.car.ui.core.CarUiInstaller"
+            android:authorities="com.google.android.companiondevicesupport.CarUiInstaller"
+            android:directBootAware="true"
+            android:exported="false"
+            android:process="@string/car_ui_installer_process_name" />
+        <provider
+            android:name="com.android.car.ui.core.SearchResultsProvider"
+            android:authorities="com.google.android.companiondevicesupport.SearchResultsProvider"
+            android:exported="true"
+            android:process="@string/car_ui_installer_process_name"
+            android:readPermission="com.android.car.ui.READ_SEARCH_RESULTS" />
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="com.google.android.companiondevicesupport.androidx-startup"
+            android:exported="false" >
+            <meta-data
+                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+                android:value="androidx.startup" />
+            <meta-data
+                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+                android:value="androidx.startup" />
+        </provider>
+
+        <service
+            android:name="androidx.room.MultiInstanceInvalidationService"
+            android:directBootAware="true"
+            android:exported="false" />
+
+        <receiver
+            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+            android:directBootAware="false"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="android.permission.DUMP" >
+            <intent-filter>
+                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+            </intent-filter>
+        </receiver>
+    </application>
+
+</manifest>

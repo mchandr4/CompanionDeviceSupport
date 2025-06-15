@@ -1,0 +1,19 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.google.android.companiondevicesupport.companiondevice-mergeDebugResources-36:/values-w930dp-v13/values-w930dp-v13.xml",
+            "map": [
+                {
+                    "source": "/home/mchandr4/.gradle/caches/8.10/transforms/ddb03b64d596a9ac806fe39383d4ac29/transformed/car-1.0.0-alpha7/res/values-w930dp-v13/values-w930dp-v13.xml",
+                    "from": {
+                        "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14",
+                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4",
+                        "startOffsets": "55,111,159,204,264,314,360,411,457,508,554,605,663",
+                        "endColumns": "55,47,44,59,49,45,50,45,50,45,50,57,64",
+                        "endOffsets": "106,154,199,259,309,355,406,452,503,549,600,658,723"
+                    }
+                }
+            ]
+        }
+    ]
+}

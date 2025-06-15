@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:ns1="urn:oasis:names:tc:xliff:document:1.2">
+    <plurals name="notification_new_message">
+    <item quantity="one">新着メッセージ</item>
+    <item quantity="other">%d 件の新着メッセージ</item>
+  </plurals>
+    <string msgid="5976598919945601918" name="abc_action_bar_home_description">"ホームに戻る"</string>
+    <string msgid="8388173803310557296" name="abc_action_bar_up_description">"前に戻る"</string>
+    <string msgid="3937310113216875497" name="abc_action_menu_overflow_description">"その他のオプション"</string>
+    <string msgid="4692188335987374352" name="abc_action_mode_done">"完了"</string>
+    <string msgid="1189761859438369441" name="abc_activity_chooser_view_see_all">"すべて表示"</string>
+    <string msgid="2165779757652331008" name="abc_activitychooserview_choose_application">"アプリの選択"</string>
+    <string msgid="4215997306490295099" name="abc_capital_off">"OFF"</string>
+    <string msgid="884982626291842264" name="abc_capital_on">"ON"</string>
+    <string msgid="8833365367933412986" name="abc_menu_alt_shortcut_label">"Alt+"</string>
+    <string msgid="2223301931652355242" name="abc_menu_ctrl_shortcut_label">"Ctrl+"</string>
+    <string msgid="838001238306846836" name="abc_menu_delete_shortcut_label">"Delete"</string>
+    <string msgid="7986526966204849475" name="abc_menu_enter_shortcut_label">"Enter"</string>
+    <string msgid="375214403600139847" name="abc_menu_function_shortcut_label">"Function+"</string>
+    <string msgid="4192209724446364286" name="abc_menu_meta_shortcut_label">"Meta+"</string>
+    <string msgid="4741552369836443843" name="abc_menu_shift_shortcut_label">"Shift+"</string>
+    <string msgid="5473865519181928982" name="abc_menu_space_shortcut_label">"Space"</string>
+    <string msgid="6180552449598693998" name="abc_menu_sym_shortcut_label">"Sym+"</string>
+    <string msgid="5520303668377388990" name="abc_prepend_shortcut_label">"Menu+"</string>
+    <string msgid="7208076849092622260" name="abc_search_hint">"検索…"</string>
+    <string msgid="3741173234950517107" name="abc_searchview_description_clear">"検索キーワードを削除"</string>
+    <string msgid="693312494995508443" name="abc_searchview_description_query">"検索キーワード"</string>
+    <string msgid="3417662926640357176" name="abc_searchview_description_search">"検索"</string>
+    <string msgid="1486535517437947103" name="abc_searchview_description_submit">"検索キーワードを送信"</string>
+    <string msgid="2293578557972875415" name="abc_searchview_description_voice">"音声検索"</string>
+    <string msgid="8875138169939072951" name="abc_shareactionprovider_share_with">"共有"</string>
+    <string msgid="9055268688411532828" name="abc_shareactionprovider_share_with_application">"<ns1:g id="APPLICATION_NAME">%s</ns1:g>と共有"</string>
+    <string msgid="1656852541809559762" name="abc_toolbar_collapse_description">"折りたたむ"</string>
+    <string name="accept">同意する</string>
+    <string name="add_associated_device_subtitle">スマートフォンを運転操作の管理に役立つコンパニオン デバイスとして使用できます</string>
+    <string name="add_associated_device_title">MyCompanion に接続する</string>
+    <string name="add_device_title">コンパニオン アプリに接続する</string>
+    <string name="app_running_msg_channel_name">スマートフォン テキスト メッセージ サービス実行中</string>
+    <string name="app_running_msg_notification_content">コンパニオン デバイス経由でテキスト メッセージを受信中</string>
+    <string name="app_running_msg_notification_title">スマートフォン テキスト メッセージ サービス有効</string>
+    <string name="associated_device_install_app"><b>コンパニオン アプリ</b>をスマートフォンにインストールしてください</string>
+    <string name="associated_device_open_app">アプリを開き、指示に従ってください</string>
+    <string name="associated_device_pairing_code_title">スマートフォンでのコードの確認</string>
+    <string name="associated_device_pairing_message">このコードがスマートフォンに表示されているコードと一致することをご確認ください</string>
+    <string name="associated_device_select_device">アプリを開き &lt;b>%1$s&lt;/b> に接続します</string>
+    <string name="associated_device_success">デバイスの関連付けが完了しました</string>
+    <string name="ble_device_name_prefix">車\u00A0</string>
+    <string name="cancel">キャンセル</string>
+    <string msgid="399078418913970003" name="car_ui_alert_dialog_default_button">"閉じる"</string>
+    <string msgid="511096411523593697" name="car_ui_preference_switch_off">"OFF"</string>
+    <string msgid="2091385466752081649" name="car_ui_preference_switch_on">"ON"</string>
+    <string msgid="7490306547860308268" name="car_ui_restricted_while_driving">"この機能は運転中は利用できません"</string>
+    <string msgid="746830252244551947" name="car_ui_scrollbar_page_down_button">"下にスクロール"</string>
+    <string msgid="965431866383176249" name="car_ui_scrollbar_page_up_button">"上にスクロール"</string>
+    <string msgid="5978003166159186378" name="car_ui_scrolling_limited_message">"運転中のスクロール操作は制限されています"</string>
+    <string msgid="8339474149462104372" name="car_ui_toolbar_default_search_hint">"検索…"</string>
+    <string msgid="9132512843297732890" name="car_ui_toolbar_menu_item_overflow_title">"オーバーフロー"</string>
+    <string msgid="2988075382498202155" name="car_ui_toolbar_menu_item_search_title">"検索"</string>
+    <string msgid="5206858558664840197" name="car_ui_toolbar_menu_item_settings_title">"設定"</string>
+    <string msgid="6116610935599234725" name="car_ui_toolbar_nav_icon_content_description">"戻る"</string>
+    <string name="change_profile">プロフィールを変更</string>
+    <string name="companion_not_available_dialog_message">ゲスト プロフィールは CompanionDevice にアクセスできません</string>
+    <string name="companion_not_available_dialog_switch_user_message">ゲスト プロフィールは CompanionDevice にアクセスできません。プロフィールを変更するには、[設定] > [ユーザー] に移動してください。</string>
+    <string name="companion_not_available_dialog_title">この設定は使用できません</string>
+    <string name="confirm">確認</string>
+    <string name="connect">接続</string>
+    <string name="connect_to_car_instruction_text">車に接続します</string>
+    <string name="connect_to_targe_car_instruction_text">&lt;b>%1$s&lt;/b>%2$sに接続します</string>
+    <string name="connected">接続完了</string>
+    <string name="connection">接続</string>
+    <string name="continue_button">続行</string>
+    <string name="continue_setup_toast_text">スマートフォンでセットアップを続行してください</string>
+    <string msgid="3209159573327985035" name="copy">"コピー"</string>
+    <string name="create_phone_lock_dialog_message">スマートフォンで画面ロックが設定されていません。スマートフォンで車のプロファイルのロックを解除するには、まずスマートフォンの設定で画面ロック（パスコード）を作成してください。</string>
+    <string name="create_phone_lock_dialog_title">スマートフォンでの画面ロックの作成</string>
+    <string name="create_profile_lock_dialog_message">スマートフォンを使用してプロファイルのロックを解除するには、バックアップとしてメイン プロファイル ロックが必要です</string>
+    <string name="create_profile_lock_dialog_title">メイン プロファイル ロックの作成</string>
+    <string name="default_device_name">関連付けしたデバイス</string>
+    <string name="detected">検出しました</string>
+    <string name="device_not_connected_dialog_message">スマートフォンと車の Bluetooth が ON になっていて、スマートフォンが近くにあることをご確認ください</string>
+    <string name="device_not_connected_dialog_title">スマートフォンが見つかりません</string>
+    <string name="device_removed_failure_toast_text">%1$s を削除できませんでした</string>
+    <string name="device_removed_success_toast_text">%1$s を削除しました</string>
+    <string name="disable">無効にする</string>
+    <string name="disable_device_connection_text">このデバイスとの接続を解除します</string>
+    <string name="disconnect">接続を解除</string>
+    <string name="disconnected">未接続</string>
+    <string name="disconnecting">接続解除中</string>
+    <string name="enable">有効にする</string>
+    <string name="enable_bluetooth_instruction_text">Bluetooth 接続を許可します</string>
+    <string name="enable_device_connection_text">このデバイスを再接続します</string>
+    <string name="error_screen_message">この画面を正しく表示できませんでした。再入力してください。</string>
+    <string name="error_screen_title">エラーが発生しました</string>
+    <string msgid="1234962710353108940" name="expand_button_title">"詳細設定"</string>
+    <string name="forget">削除</string>
+    <string name="forget_title">このデバイスを削除</string>
+    <string name="name_not_available">名前がありません</string>
+    <string name="notDetected">検出されませんでした</string>
+    <string name="not_now">後で</string>
+    <string msgid="478774118347071097" name="not_set">"未設定"</string>
+    <string name="ok">OK</string>
+    <string name="open_companion_app_instruction_text">コンパニオン アプリを開きます</string>
+    <string msgid="7961817945132860002" name="preference_copied">"「<ns1:g id="SUMMARY">%1$s</ns1:g>」をクリップボードにコピーしました。"</string>
+    <string name="qr_instruction_text">&lt;b>%1$s&lt;/b> に接続するには、スマートフォンで QR コードをスキャンするか、MyCompanion を開いてください</string>
+    <string name="reject">拒否</string>
+    <string name="remove">削除</string>
+    <string name="remove_associated_device_message">この車とこのデバイスとのペア設定が解除されました。コンパニオン アプリからこの車を削除することも必要です。</string>
+    <string name="remove_associated_device_title">&lt;b>%1$s&lt;/b> を削除しますか？</string>
+    <string name="retry">再試行</string>
+    <string msgid="635940284003824276" name="scroll_bar_page_down_button">"下にスクロール"</string>
+    <string msgid="465102831431294180" name="scroll_bar_page_up_button">"上にスクロール"</string>
+    <string msgid="6264217191555673260" name="search_menu_title">"検索"</string>
+    <string name="settings_entry_title">コンパニオン デバイス</string>
+    <string name="skip">スキップ</string>
+    <string msgid="444412252084688703" name="speed_bump_lockout_message">"運転に集中してください"</string>
+    <string msgid="6277540029070332960" name="status_bar_notification_info_overflow">"999+"</string>
+    <string msgid="5190123168583152844" name="summary_collapsed_preference_list">"<ns1:g id="CURRENT_ITEMS">%1$s</ns1:g>、<ns1:g id="ADDED_ITEMS">%2$s</ns1:g>"</string>
+    <string name="suw_qr_instruction_text">&lt;b>%1$s&lt;/b> に接続するにはスキャンしてください</string>
+    <string name="suw_setup_profile_content">スマートフォンでのセットアップをすでに開始している場合は、コンパニオン アプリを開いて QR コードをスキャンしてください。\n\nプロファイルのセットアップを車で完了することもできます。</string>
+    <string name="suw_setup_profile_title">スマートフォンまたは車でセットアップを完了してください</string>
+    <string name="trusted_device_enrollment_error_dialog_message">この機能を ON にできませんでした。再入力してください。</string>
+    <string name="trusted_device_enrollment_error_dialog_title">エラーが発生しました</string>
+    <string name="trusted_device_enrollment_success_message">&lt;b>%1$s&lt;/b> でプロファイルのロックを解除できるようになりました</string>
+    <string name="trusted_device_feature_instruction">コンパニオン アプリを確認してロック解除オプションを設定します</string>
+    <string name="trusted_device_feature_title">スマートフォンでプロファイルのロック解除</string>
+    <string name="trusted_device_item_title">&lt;b>%1$s&lt;/b> によるプロファイルのロック解除</string>
+    <string name="trusted_device_notification_channel_name">スマートフォンでロック解除</string>
+    <string name="trusted_device_notification_content">ここをタップしてこの機能を承認してください</string>
+    <string name="trusted_device_notification_title">スマートフォンによるプロファイルのロック解除</string>
+    <string name="turn_on">有効にする</string>
+    <string name="turn_on_bluetooth_dialog_message">コンパニオン デバイスに接続するには、車に Bluetooth が必要です。</string>
+    <string name="turn_on_bluetooth_dialog_title">Bluetooth を ON にしますか？</string>
+    <string name="turn_on_bluetooth_message">スマートフォンをコンパニオン デバイスとして設定するには、車に Bluetooth が必要です。</string>
+    <string name="turn_on_bluetooth_title">Bluetooth を ON にする</string>
+    <string name="unknown">不明</string>
+    <string name="unlock_profile_to_finish_message">新しいプロファイル ロックを作成しました。次に、もう一度入力して、スマートフォンでプロファイルを自動的にロック解除できることをご確認ください</string>
+    <string name="unlock_profile_to_finish_title">プロファイルのロックを解除して終了</string>
+    <string msgid="5138405918326871307" name="v7_preference_off">"OFF"</string>
+    <string msgid="27351710992731591" name="v7_preference_on">"ON"</string>
+</resources>

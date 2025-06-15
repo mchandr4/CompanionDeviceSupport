@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.Car.SetupWizard.NoActionBar" parent="Theme.Car.Dark.NoActionBar">
+<item name="android:windowLayoutInDisplayCutoutMode">always</item>
+</style>
+</resources>

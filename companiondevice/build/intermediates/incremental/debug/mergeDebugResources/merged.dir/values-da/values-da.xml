@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:ns1="urn:oasis:names:tc:xliff:document:1.2">
+    <plurals name="notification_new_message">
+    <item quantity="one">%d ny besked</item>
+    <item quantity="other">%d nye beskeder</item>
+  </plurals>
+    <string msgid="5976598919945601918" name="abc_action_bar_home_description">"Find hjem"</string>
+    <string msgid="8388173803310557296" name="abc_action_bar_up_description">"Gå op"</string>
+    <string msgid="3937310113216875497" name="abc_action_menu_overflow_description">"Flere valgmuligheder"</string>
+    <string msgid="4692188335987374352" name="abc_action_mode_done">"Udfør"</string>
+    <string msgid="1189761859438369441" name="abc_activity_chooser_view_see_all">"Se alle"</string>
+    <string msgid="2165779757652331008" name="abc_activitychooserview_choose_application">"Vælg en app"</string>
+    <string msgid="4215997306490295099" name="abc_capital_off">"FRA"</string>
+    <string msgid="884982626291842264" name="abc_capital_on">"TIL"</string>
+    <string msgid="8833365367933412986" name="abc_menu_alt_shortcut_label">"Alt+"</string>
+    <string msgid="2223301931652355242" name="abc_menu_ctrl_shortcut_label">"Ctrl+"</string>
+    <string msgid="838001238306846836" name="abc_menu_delete_shortcut_label">"slet"</string>
+    <string msgid="7986526966204849475" name="abc_menu_enter_shortcut_label">"enter"</string>
+    <string msgid="375214403600139847" name="abc_menu_function_shortcut_label">"Fn+"</string>
+    <string msgid="4192209724446364286" name="abc_menu_meta_shortcut_label">"Meta+"</string>
+    <string msgid="4741552369836443843" name="abc_menu_shift_shortcut_label">"Shift+"</string>
+    <string msgid="5473865519181928982" name="abc_menu_space_shortcut_label">"mellemrum"</string>
+    <string msgid="6180552449598693998" name="abc_menu_sym_shortcut_label">"Sym+"</string>
+    <string msgid="5520303668377388990" name="abc_prepend_shortcut_label">"Menu+"</string>
+    <string msgid="7208076849092622260" name="abc_search_hint">"Søg…"</string>
+    <string msgid="3741173234950517107" name="abc_searchview_description_clear">"Ryd forespørgsel"</string>
+    <string msgid="693312494995508443" name="abc_searchview_description_query">"Søgeforespørgsel"</string>
+    <string msgid="3417662926640357176" name="abc_searchview_description_search">"Søg"</string>
+    <string msgid="1486535517437947103" name="abc_searchview_description_submit">"Indsend forespørgsel"</string>
+    <string msgid="2293578557972875415" name="abc_searchview_description_voice">"Talesøgning"</string>
+    <string msgid="8875138169939072951" name="abc_shareactionprovider_share_with">"Del med"</string>
+    <string msgid="9055268688411532828" name="abc_shareactionprovider_share_with_application">"Del med <ns1:g id="APPLICATION_NAME">%s</ns1:g>"</string>
+    <string msgid="1656852541809559762" name="abc_toolbar_collapse_description">"Skjul"</string>
+    <string name="accept">Acceptér</string>
+    <string name="add_associated_device_subtitle">Du kan bruge din telefon som en ledsagende enhed, der kan hjælpe dig under kørsel</string>
+    <string name="add_associated_device_title">Opret forbindelse til MyCompanion</string>
+    <string name="add_device_title">Opret forbindelse til den medfølgende app</string>
+    <string name="app_running_msg_channel_name">Tjenesten til sms-beskeder fra telefonen kører</string>
+    <string name="app_running_msg_notification_content">Modtager sms-beskeder via den medfølgende enhed</string>
+    <string name="app_running_msg_notification_title">Tjenesten til sms-beskeder fra telefonen er aktiv</string>
+    <string name="associated_device_install_app">Sørg for, at <b>den medfølgende app</b> er installeret på telefonen</string>
+    <string name="associated_device_open_app">Åbn appen, og følg vejledningen i appen</string>
+    <string name="associated_device_pairing_code_title">Bekræft koden på telefonen</string>
+    <string name="associated_device_pairing_message">Bekræft, at dette stemmer overens med den kode, der vises på din telefon</string>
+    <string name="associated_device_select_device">Åbn appen, og opret forbindelse til &lt;b>%1$s&lt;/b></string>
+    <string name="associated_device_success">Enheden blev tilknyttet</string>
+    <string name="ble_device_name_prefix">Køretøj\u00A0</string>
+    <string name="cancel">Annuller</string>
+    <string msgid="399078418913970003" name="car_ui_alert_dialog_default_button">"Luk"</string>
+    <string msgid="511096411523593697" name="car_ui_preference_switch_off">"Fra"</string>
+    <string msgid="2091385466752081649" name="car_ui_preference_switch_on">"Til"</string>
+    <string msgid="7490306547860308268" name="car_ui_restricted_while_driving">"Funktionen er ikke tilgængelig, mens du kører"</string>
+    <string msgid="746830252244551947" name="car_ui_scrollbar_page_down_button">"Rul ned"</string>
+    <string msgid="965431866383176249" name="car_ui_scrollbar_page_up_button">"Rul op"</string>
+    <string msgid="5978003166159186378" name="car_ui_scrolling_limited_message">"Rullefunktionen er begrænset under kørsel"</string>
+    <string msgid="8339474149462104372" name="car_ui_toolbar_default_search_hint">"Søg…"</string>
+    <string msgid="9132512843297732890" name="car_ui_toolbar_menu_item_overflow_title">"Overløb"</string>
+    <string msgid="2988075382498202155" name="car_ui_toolbar_menu_item_search_title">"Søg"</string>
+    <string msgid="5206858558664840197" name="car_ui_toolbar_menu_item_settings_title">"Indstillinger"</string>
+    <string msgid="6116610935599234725" name="car_ui_toolbar_nav_icon_content_description">"Tilbage"</string>
+    <string name="change_profile">Skift profil</string>
+    <string name="companion_not_available_dialog_message">Gæsteprofiler kan ikke tilgå CompanionDevice</string>
+    <string name="companion_not_available_dialog_switch_user_message">Gæsteprofiler kan ikke tilgå CompanionDevice. Du kan skifte profil ved at gå til Indstillinger > Brugere.</string>
+    <string name="companion_not_available_dialog_title">Denne indstilling er ikke tilgængelig</string>
+    <string name="confirm">Bekræft</string>
+    <string name="connect">Opret forbindelse</string>
+    <string name="connect_to_car_instruction_text">Opret forbindelse til bilen</string>
+    <string name="connect_to_targe_car_instruction_text">Opret forbindelse til &lt;b>%1$s&lt;/b> %2$s</string>
+    <string name="connected">Forbundet</string>
+    <string name="connection">Forbindelse</string>
+    <string name="continue_button">Fortsæt</string>
+    <string name="continue_setup_toast_text">Fortsæt konfigurationen på din telefon</string>
+    <string msgid="3209159573327985035" name="copy">"Kopiér"</string>
+    <string name="create_phone_lock_dialog_message">Der er ikke konfigureret en skærmlås på din telefon. Hvis du vil låse bilprofilen op med din telefon, skal du først oprette en skærmlås (også kaldet en adgangskode) i indstillingerne på din telefon.</string>
+    <string name="create_phone_lock_dialog_title">Opret en skærmlås på din telefon</string>
+    <string name="create_profile_lock_dialog_message">Hvis du vil bruge din telefon til at låse din profil op, skal du konfigurere en primær profillås som alternativ metode</string>
+    <string name="create_profile_lock_dialog_title">Opret en primær profillås</string>
+    <string name="default_device_name">Tilknyttet enhed</string>
+    <string name="detected">Registreret</string>
+    <string name="device_not_connected_dialog_message">Sørg for, at Bluetooth er aktiveret på din telefon og i din bil, og at din telefon er i nærheden</string>
+    <string name="device_not_connected_dialog_title">Din telefon blev ikke fundet</string>
+    <string name="device_removed_failure_toast_text">%1$s kunne ikke glemmes</string>
+    <string name="device_removed_success_toast_text">%1$s blev glemt</string>
+    <string name="disable">Deaktiver</string>
+    <string name="disable_device_connection_text">Afbryd forbindelsen til denne enhed</string>
+    <string name="disconnect">Afbryd</string>
+    <string name="disconnected">Afbrudt</string>
+    <string name="disconnecting">Afbryder</string>
+    <string name="enable">Aktivér</string>
+    <string name="enable_bluetooth_instruction_text">Tillad Bluetooth-forbindelse</string>
+    <string name="enable_device_connection_text">Opret forbindelse til denne enhed igen</string>
+    <string name="error_screen_message">Denne skærm kunne ikke vises korrekt. Prøv igen.</string>
+    <string name="error_screen_title">Noget gik galt</string>
+    <string msgid="1234962710353108940" name="expand_button_title">"Avanceret"</string>
+    <string name="forget">Glem</string>
+    <string name="forget_title">Glem denne enhed</string>
+    <string name="name_not_available">Navnet er ikke tilgængeligt</string>
+    <string name="notDetected">Ikke registreret</string>
+    <string name="not_now">Ikke nu</string>
+    <string msgid="478774118347071097" name="not_set">"Ikke angivet"</string>
+    <string name="ok">OK</string>
+    <string name="open_companion_app_instruction_text">Åbn den medfølgende app</string>
+    <string msgid="7961817945132860002" name="preference_copied">"\"<ns1:g id="SUMMARY">%1$s</ns1:g>\" blev kopieret til udklipsholderen."</string>
+    <string name="qr_instruction_text">Scan QR-koden med din telefon, eller åbn MyCompanion for at oprette forbindelse til &lt;b>%1$s&lt;/b></string>
+    <string name="reject">Afvis</string>
+    <string name="remove">Fjern</string>
+    <string name="remove_associated_device_message">Denne bil vil ikke længere være parret med denne enhed. Du skal også fjerne denne bil fra den medfølgende app.</string>
+    <string name="remove_associated_device_title">Vil du glemme &lt;b>%1$s&lt;/b>?</string>
+    <string name="retry">Prøv igen</string>
+    <string msgid="635940284003824276" name="scroll_bar_page_down_button">"Rul ned"</string>
+    <string msgid="465102831431294180" name="scroll_bar_page_up_button">"Rul op"</string>
+    <string msgid="6264217191555673260" name="search_menu_title">"Søg"</string>
+    <string name="settings_entry_title">Medfølgende enhed</string>
+    <string name="skip">Spring over</string>
+    <string msgid="444412252084688703" name="speed_bump_lockout_message">"Hold øjnene på vejen"</string>
+    <string msgid="6277540029070332960" name="status_bar_notification_info_overflow">"999+"</string>
+    <string msgid="5190123168583152844" name="summary_collapsed_preference_list">"<ns1:g id="CURRENT_ITEMS">%1$s</ns1:g>, <ns1:g id="ADDED_ITEMS">%2$s</ns1:g>"</string>
+    <string name="suw_qr_instruction_text">Scan for at oprette forbindelse til &lt;b>%1$s&lt;/b></string>
+    <string name="suw_setup_profile_content">Hvis du allerede har startet konfigurationen på telefonen, skal du åbne den medfølgende app og scanne QR-koden.\n\nDu kan også fuldføre konfigurationen af din profil i bilen.</string>
+    <string name="suw_setup_profile_title">Afslut konfigurationen på telefonen eller i bilen</string>
+    <string name="trusted_device_enrollment_error_dialog_message">Denne funktion kunne ikke aktiveres. Prøv igen.</string>
+    <string name="trusted_device_enrollment_error_dialog_title">Noget gik galt</string>
+    <string name="trusted_device_enrollment_success_message">&lt;b>%1$s&lt;/b> kan nu låse din profil op</string>
+    <string name="trusted_device_feature_instruction">Brug din medfølgende app til at angive indstillinger for oplåsning</string>
+    <string name="trusted_device_feature_title">Lås profilen op med telefonen</string>
+    <string name="trusted_device_item_title">Tillad, at &lt;b>%1$s&lt;/b> låser min profil op</string>
+    <string name="trusted_device_notification_channel_name">Lås op med telefonen</string>
+    <string name="trusted_device_notification_content">Tryk her for at godkende denne funktion</string>
+    <string name="trusted_device_notification_title">Tillad, at din telefon låser din profil op</string>
+    <string name="turn_on">Aktivér</string>
+    <string name="turn_on_bluetooth_dialog_message">Bluetooth skal aktiveres i din bil, før der kan oprettes forbindelse til din medfølgende enhed.</string>
+    <string name="turn_on_bluetooth_dialog_title">Vil du aktivere Bluetooth?</string>
+    <string name="turn_on_bluetooth_message">Bluetooth skal aktiveres i din bil, før din telefon kan konfigureres som en medfølgende enhed.</string>
+    <string name="turn_on_bluetooth_title">Aktivér Bluetooth</string>
+    <string name="unknown">Ukendt</string>
+    <string name="unlock_profile_to_finish_message">Du har oprettet en ny profillås. Angiv den igen for at bekræfte, at din telefon kan låse din profil op automatisk.</string>
+    <string name="unlock_profile_to_finish_title">Lås din profil op for at afslutte</string>
+    <string msgid="5138405918326871307" name="v7_preference_off">"FRA"</string>
+    <string msgid="27351710992731591" name="v7_preference_on">"TIL"</string>
+</resources>

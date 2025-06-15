@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<incidents format="6" by="lint 8.2.2" type="incidents">
+
+    <incident
+        id="ExpiredTargetSdkVersion"
+        severity="fatal"
+        message="Google Play requires that apps target API level 33 or higher.">
+        <location
+            file="${:libs:encryptionrunner*projectDir}/build.gradle"
+            line="9"
+            column="9"
+            startOffset="178"
+            endLine="9"
+            endColumn="28"
+            endOffset="197"/>
+    </incident>
+
+</incidents>

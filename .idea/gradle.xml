@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GradleSettings">
+    <option name="linkedExternalProjectsSettings">
+      <GradleProjectSettings>
+        <option name="testRunner" value="CHOOSE_PER_TEST" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="gradleJvm" value="#GRADLE_LOCAL_JAVA_HOME" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/companiondevice" />
+            <option value="$PROJECT_DIR$/libs" />
+            <option value="$PROJECT_DIR$/libs/companionprotos" />
+            <option value="$PROJECT_DIR$/libs/connecteddevice" />
+            <option value="$PROJECT_DIR$/libs/encryptionrunner" />
+            <option value="$PROJECT_DIR$/libs/ukey2" />
+            <option value="$PROJECT_DIR$/libs/ukey22" />
+            <option value="$PROJECT_DIR$/libs/ukey222" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+    </option>
+  </component>
+</project>

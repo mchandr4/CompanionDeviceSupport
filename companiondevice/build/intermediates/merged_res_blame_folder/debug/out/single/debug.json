@@ -1,0 +1,186 @@
+[
+    {
+        "merged": "com.google.android.companiondevicesupport.companiondevice-merged_res-38:/layout-w1240dp-land_suw_confirm_code_fragment.xml.flat",
+        "source": "com.google.android.companiondevicesupport.companiondevice-companiondevice-40:/layout-w1240dp-land/suw_confirm_code_fragment.xml"
+    },
+    {
+        "merged": "com.google.android.companiondevicesupport.companiondevice-merged_res-38:/drawable_ic_baseline_star_border_24.xml.flat",
+        "source": "com.google.android.companiondevicesupport.companiondevice-companiondevice-40:/drawable/ic_baseline_star_border_24.xml"
+    },
+    {
+        "merged": "com.google.android.companiondevicesupport.companiondevice-merged_res-38:/layout_suw_confirm_code_fragment.xml.flat",
+        "source": "com.google.android.companiondevicesupport.companiondevice-companiondevice-40:/layout/suw_confirm_code_fragment.xml"
+    },
+    {
+        "merged": "com.google.android.companiondevicesupport.companiondevice-merged_res-38:/layout_add_associated_device_button.xml.flat",
+        "source": "com.google.android.companiondevicesupport.companiondevice-companiondevice-40:/layout/add_associated_device_button.xml"
+    },
+    {
+        "merged": "com.google.android.companiondevicesupport.companiondevice-merged_res-38:/drawable_ic_phonelink_ring_40dp.xml.flat",
+        "source": "com.google.android.companiondevicesupport.companiondevice-companiondevice-40:/drawable/ic_phonelink_ring_40dp.xml"
+    },
+    {
+        "merged": "com.google.android.companiondevicesupport.companiondevice-merged_res-38:/layout_association_instructions_horizontal.xml.flat",
+        "source": "com.google.android.companiondevicesupport.companiondevice-companiondevice-40:/layout/association_instructions_horizontal.xml"
+    },
+    {
+        "merged": "com.google.android.companiondevicesupport.companiondevice-merged_res-38:/drawable_ic_lock.xml.flat",
+        "source": "com.google.android.companiondevicesupport.companiondevice-companiondevice-40:/drawable/ic_lock.xml"
+    },
+    {
+        "merged": "com.google.android.companiondevicesupport.companiondevice-merged_res-38:/layout_association_qr_code_instructions_vertical.xml.flat",
+        "source": "com.google.android.companiondevicesupport.companiondevice-companiondevice-40:/layout/association_qr_code_instructions_vertical.xml"
+    },
+    {
+        "merged": "com.google.android.companiondevicesupport.companiondevice-merged_res-38:/layout_trusted_device_detail_fragment.xml.flat",
+        "source": "com.google.android.companiondevicesupport.companiondevice-companiondevice-40:/layout/trusted_device_detail_fragment.xml"
+    },
+    {
+        "merged": "com.google.android.companiondevicesupport.companiondevice-merged_res-38:/layout_suw_companion_qr_code_landing_fragment.xml.flat",
+        "source": "com.google.android.companiondevicesupport.companiondevice-companiondevice-40:/layout/suw_companion_qr_code_landing_fragment.xml"
+    },
+    {
+        "merged": "com.google.android.companiondevicesupport.companiondevice-merged_res-38:/xml_car_trust_agent.xml.flat",
+        "source": "com.google.android.companiondevicesupport.companiondevice-companiondevice-40:/xml/car_trust_agent.xml"
+    },
+    {
+        "merged": "com.google.android.companiondevicesupport.companiondevice-merged_res-38:/drawable_ic_phonelink_ring_24dp.xml.flat",
+        "source": "com.google.android.companiondevicesupport.companiondevice-companiondevice-40:/drawable/ic_phonelink_ring_24dp.xml"
+    },
+    {
+        "merged": "com.google.android.companiondevicesupport.companiondevice-merged_res-38:/drawable_ic_baseline_star_24.xml.flat",
+        "source": "com.google.android.companiondevicesupport.companiondevice-companiondevice-40:/drawable/ic_baseline_star_24.xml"
+    },
+    {
+        "merged": "com.google.android.companiondevicesupport.companiondevice-merged_res-38:/layout_associated_device_detail_fragment.xml.flat",
+        "source": "com.google.android.companiondevicesupport.companiondevice-companiondevice-40:/layout/associated_device_detail_fragment.xml"
+    },
+    {
+        "merged": "com.google.android.companiondevicesupport.companiondevice-merged_res-38:/mipmap-hdpi_ic_directions_car_filled.png.flat",
+        "source": "com.google.android.companiondevicesupport.companiondevice-companiondevice-40:/mipmap-hdpi/ic_directions_car_filled.png"
+    },
+    {
+        "merged": "com.google.android.companiondevicesupport.companiondevice-merged_res-38:/drawable_ic_delete_forever_24dp.xml.flat",
+        "source": "com.google.android.companiondevicesupport.companiondevice-companiondevice-40:/drawable/ic_delete_forever_24dp.xml"
+    },
+    {
+        "merged": "com.google.android.companiondevicesupport.companiondevice-merged_res-38:/mipmap-xxhdpi_ic_directions_car_filled.png.flat",
+        "source": "com.google.android.companiondevicesupport.companiondevice-companiondevice-40:/mipmap-xxhdpi/ic_directions_car_filled.png"
+    },
+    {
+        "merged": "com.google.android.companiondevicesupport.companiondevice-merged_res-38:/mipmap-xhdpi_ic_directions_car_filled.png.flat",
+        "source": "com.google.android.companiondevicesupport.companiondevice-companiondevice-40:/mipmap-xhdpi/ic_directions_car_filled.png"
+    },
+    {
+        "merged": "com.google.android.companiondevicesupport.companiondevice-merged_res-38:/layout_suw_splitnav_fragment_container.xml.flat",
+        "source": "com.google.android.companiondevicesupport.companiondevice-companiondevice-40:/layout/suw_splitnav_fragment_container.xml"
+    },
+    {
+        "merged": "com.google.android.companiondevicesupport.companiondevice-merged_res-38:/drawable_ic_phonelink_erase_24dp.xml.flat",
+        "source": "com.google.android.companiondevicesupport.companiondevice-companiondevice-40:/drawable/ic_phonelink_erase_24dp.xml"
+    },
+    {
+        "merged": "com.google.android.companiondevicesupport.companiondevice-merged_res-38:/mipmap-mdpi_ic_directions_car_filled.png.flat",
+        "source": "com.google.android.companiondevicesupport.companiondevice-companiondevice-40:/mipmap-mdpi/ic_directions_car_filled.png"
+    },
+    {
+        "merged": "com.google.android.companiondevicesupport.companiondevice-merged_res-38:/layout_companion_qr_code_landing_fragment.xml.flat",
+        "source": "com.google.android.companiondevicesupport.companiondevice-companiondevice-40:/layout/companion_qr_code_landing_fragment.xml"
+    },
+    {
+        "merged": "com.google.android.companiondevicesupport.companiondevice-merged_res-38:/layout_associated_devices_list_fragment.xml.flat",
+        "source": "com.google.android.companiondevicesupport.companiondevice-companiondevice-40:/layout/associated_devices_list_fragment.xml"
+    },
+    {
+        "merged": "com.google.android.companiondevicesupport.companiondevice-merged_res-38:/layout_suw_companion_setup_profile_fragment.xml.flat",
+        "source": "com.google.android.companiondevicesupport.companiondevice-companiondevice-40:/layout/suw_companion_setup_profile_fragment.xml"
+    },
+    {
+        "merged": "com.google.android.companiondevicesupport.companiondevice-merged_res-38:/layout_association_error_fragment.xml.flat",
+        "source": "com.google.android.companiondevicesupport.companiondevice-companiondevice-40:/layout/association_error_fragment.xml"
+    },
+    {
+        "merged": "com.google.android.companiondevicesupport.companiondevice-merged_res-38:/layout_confirm_code_fragment.xml.flat",
+        "source": "com.google.android.companiondevicesupport.companiondevice-companiondevice-40:/layout/confirm_code_fragment.xml"
+    },
+    {
+        "merged": "com.google.android.companiondevicesupport.companiondevice-merged_res-38:/layout-w1240dp-land_suw_companion_setup_profile_fragment.xml.flat",
+        "source": "com.google.android.companiondevicesupport.companiondevice-companiondevice-40:/layout-w1240dp-land/suw_companion_setup_profile_fragment.xml"
+    },
+    {
+        "merged": "com.google.android.companiondevicesupport.companiondevice-merged_res-38:/layout_association_qr_code_instructions_horizontal.xml.flat",
+        "source": "com.google.android.companiondevicesupport.companiondevice-companiondevice-40:/layout/association_qr_code_instructions_horizontal.xml"
+    },
+    {
+        "merged": "com.google.android.companiondevicesupport.companiondevice-merged_res-38:/drawable_ic_message.xml.flat",
+        "source": "com.google.android.companiondevicesupport.companiondevice-companiondevice-40:/drawable/ic_message.xml"
+    },
+    {
+        "merged": "com.google.android.companiondevicesupport.companiondevice-merged_res-38:/mipmap-anydpi-v26_ic_directions_car_filled.xml.flat",
+        "source": "com.google.android.companiondevicesupport.companiondevice-companiondevice-40:/mipmap-anydpi-v26/ic_directions_car_filled.xml"
+    },
+    {
+        "merged": "com.google.android.companiondevicesupport.companiondevice-merged_res-38:/layout_turn_on_bluetooth_fragment.xml.flat",
+        "source": "com.google.android.companiondevicesupport.companiondevice-companiondevice-40:/layout/turn_on_bluetooth_fragment.xml"
+    },
+    {
+        "merged": "com.google.android.companiondevicesupport.companiondevice-merged_res-38:/drawable_ic_connection_indicator.xml.flat",
+        "source": "com.google.android.companiondevicesupport.companiondevice-companiondevice-40:/drawable/ic_connection_indicator.xml"
+    },
+    {
+        "merged": "com.google.android.companiondevicesupport.companiondevice-merged_res-38:/layout_suw_companion_base_activity.xml.flat",
+        "source": "com.google.android.companiondevicesupport.companiondevice-companiondevice-40:/layout/suw_companion_base_activity.xml"
+    },
+    {
+        "merged": "com.google.android.companiondevicesupport.companiondevice-merged_res-38:/layout-w1240dp-land_suw_companion_qr_code_landing_fragment.xml.flat",
+        "source": "com.google.android.companiondevicesupport.companiondevice-companiondevice-40:/layout-w1240dp-land/suw_companion_qr_code_landing_fragment.xml"
+    },
+    {
+        "merged": "com.google.android.companiondevicesupport.companiondevice-merged_res-38:/layout_oob_add_associated_device_fragment.xml.flat",
+        "source": "com.google.android.companiondevicesupport.companiondevice-companiondevice-40:/layout/oob_add_associated_device_fragment.xml"
+    },
+    {
+        "merged": "com.google.android.companiondevicesupport.companiondevice-merged_res-38:/drawable_ic_smartphone_24dp.xml.flat",
+        "source": "com.google.android.companiondevicesupport.companiondevice-companiondevice-40:/drawable/ic_smartphone_24dp.xml"
+    },
+    {
+        "merged": "com.google.android.companiondevicesupport.companiondevice-merged_res-38:/anim_fade_in.xml.flat",
+        "source": "com.google.android.companiondevicesupport.companiondevice-companiondevice-40:/anim/fade_in.xml"
+    },
+    {
+        "merged": "com.google.android.companiondevicesupport.companiondevice-merged_res-38:/layout_association_instructions_vertical.xml.flat",
+        "source": "com.google.android.companiondevicesupport.companiondevice-companiondevice-40:/layout/association_instructions_vertical.xml"
+    },
+    {
+        "merged": "com.google.android.companiondevicesupport.companiondevice-merged_res-38:/drawable_ic_person.xml.flat",
+        "source": "com.google.android.companiondevicesupport.companiondevice-companiondevice-40:/drawable/ic_person.xml"
+    },
+    {
+        "merged": "com.google.android.companiondevicesupport.companiondevice-merged_res-38:/drawable_ic_bluetooth_drive_24dp.xml.flat",
+        "source": "com.google.android.companiondevicesupport.companiondevice-companiondevice-40:/drawable/ic_bluetooth_drive_24dp.xml"
+    },
+    {
+        "merged": "com.google.android.companiondevicesupport.companiondevice-merged_res-38:/drawable_ic_add_24dp.xml.flat",
+        "source": "com.google.android.companiondevicesupport.companiondevice-companiondevice-40:/drawable/ic_add_24dp.xml"
+    },
+    {
+        "merged": "com.google.android.companiondevicesupport.companiondevice-merged_res-38:/layout_settings_base_activity.xml.flat",
+        "source": "com.google.android.companiondevicesupport.companiondevice-companiondevice-40:/layout/settings_base_activity.xml"
+    },
+    {
+        "merged": "com.google.android.companiondevicesupport.companiondevice-merged_res-38:/drawable_ic_directions_car_filled.xml.flat",
+        "source": "com.google.android.companiondevicesupport.companiondevice-companiondevice-40:/drawable/ic_directions_car_filled.xml"
+    },
+    {
+        "merged": "com.google.android.companiondevicesupport.companiondevice-merged_res-38:/drawable_ic_delete.xml.flat",
+        "source": "com.google.android.companiondevicesupport.companiondevice-companiondevice-40:/drawable/ic_delete.xml"
+    },
+    {
+        "merged": "com.google.android.companiondevicesupport.companiondevice-merged_res-38:/drawable_ic_directions_car_24dp.xml.flat",
+        "source": "com.google.android.companiondevicesupport.companiondevice-companiondevice-40:/drawable/ic_directions_car_24dp.xml"
+    },
+    {
+        "merged": "com.google.android.companiondevicesupport.companiondevice-merged_res-38:/anim_fade_out.xml.flat",
+        "source": "com.google.android.companiondevicesupport.companiondevice-companiondevice-40:/anim/fade_out.xml"
+    }
+]

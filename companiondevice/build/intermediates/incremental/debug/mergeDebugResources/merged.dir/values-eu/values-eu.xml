@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:ns1="urn:oasis:names:tc:xliff:document:1.2">
+    <plurals name="notification_new_message">
+    <item quantity="one">Mezu berria</item>
+    <item quantity="other">%d mezu berri</item>
+  </plurals>
+    <string msgid="5976598919945601918" name="abc_action_bar_home_description">"Joan orri nagusira"</string>
+    <string msgid="8388173803310557296" name="abc_action_bar_up_description">"Joan gora"</string>
+    <string msgid="3937310113216875497" name="abc_action_menu_overflow_description">"Aukera gehiago"</string>
+    <string msgid="4692188335987374352" name="abc_action_mode_done">"Eginda"</string>
+    <string msgid="1189761859438369441" name="abc_activity_chooser_view_see_all">"Ikusi guztiak"</string>
+    <string msgid="2165779757652331008" name="abc_activitychooserview_choose_application">"Aukeratu aplikazio bat"</string>
+    <string msgid="4215997306490295099" name="abc_capital_off">"DESAKTIBATU"</string>
+    <string msgid="884982626291842264" name="abc_capital_on">"AKTIBATU"</string>
+    <string msgid="8833365367933412986" name="abc_menu_alt_shortcut_label">"Alt +"</string>
+    <string msgid="2223301931652355242" name="abc_menu_ctrl_shortcut_label">"Ktrl +"</string>
+    <string msgid="838001238306846836" name="abc_menu_delete_shortcut_label">"ezabatu"</string>
+    <string msgid="7986526966204849475" name="abc_menu_enter_shortcut_label">"sartu"</string>
+    <string msgid="375214403600139847" name="abc_menu_function_shortcut_label">"Funtzioa +"</string>
+    <string msgid="4192209724446364286" name="abc_menu_meta_shortcut_label">"Meta +"</string>
+    <string msgid="4741552369836443843" name="abc_menu_shift_shortcut_label">"Maius +"</string>
+    <string msgid="5473865519181928982" name="abc_menu_space_shortcut_label">"zuriunea"</string>
+    <string msgid="6180552449598693998" name="abc_menu_sym_shortcut_label">"Sym +"</string>
+    <string msgid="5520303668377388990" name="abc_prepend_shortcut_label">"Menua +"</string>
+    <string msgid="7208076849092622260" name="abc_search_hint">"Bilatu…"</string>
+    <string msgid="3741173234950517107" name="abc_searchview_description_clear">"Garbitu kontsulta"</string>
+    <string msgid="693312494995508443" name="abc_searchview_description_query">"Bilaketa-kontsulta"</string>
+    <string msgid="3417662926640357176" name="abc_searchview_description_search">"Bilatu"</string>
+    <string msgid="1486535517437947103" name="abc_searchview_description_submit">"Bidali kontsulta"</string>
+    <string msgid="2293578557972875415" name="abc_searchview_description_voice">"Ahozko bilaketa"</string>
+    <string msgid="8875138169939072951" name="abc_shareactionprovider_share_with">"Partekatu honekin"</string>
+    <string msgid="9055268688411532828" name="abc_shareactionprovider_share_with_application">"Partekatu <ns1:g id="APPLICATION_NAME">%s</ns1:g> aplikazioarekin"</string>
+    <string msgid="1656852541809559762" name="abc_toolbar_collapse_description">"Tolestu"</string>
+    <string name="accept">Onartu</string>
+    <string name="add_associated_device_subtitle">Telefonoa gailu osagarri gisa erabil dezakezu, gidatzeko modua kudeatzeko</string>
+    <string name="add_associated_device_title">Konektatu MyCompanion-era</string>
+    <string name="add_device_title">Konektatu aplikazio osagarrira</string>
+    <string name="app_running_msg_channel_name">Telefonoaren testu-mezuen zerbitzua abian</string>
+    <string name="app_running_msg_notification_content">Gailu osagarriaren bidez jasoko dira testu-mezuak</string>
+    <string name="app_running_msg_notification_title">Telefonoaren testu-mezuen zerbitzua aktibo</string>
+    <string name="associated_device_install_app">Ziurtatu <b>Companion App</b> daukazula telefonoan</string>
+    <string name="associated_device_open_app">Ireki aplikazioa eta jarraitu argibideei</string>
+    <string name="associated_device_pairing_code_title">Berretsi telefonoko kodea</string>
+    <string name="associated_device_pairing_message">Berretsi telefonoko kodea horrekin bat datorrela</string>
+    <string name="associated_device_select_device">Ireki aplikazioa eta konektatu &lt;b>%1$s&lt;/b> autora</string>
+    <string name="associated_device_success">Erlazionatu da gailua</string>
+    <string name="ble_device_name_prefix">Ibilgailua</string>
+    <string name="cancel">Utzi</string>
+    <string msgid="399078418913970003" name="car_ui_alert_dialog_default_button">"Itxi"</string>
+    <string msgid="511096411523593697" name="car_ui_preference_switch_off">"Desaktibatuta"</string>
+    <string msgid="2091385466752081649" name="car_ui_preference_switch_on">"Aktibatuta"</string>
+    <string msgid="7490306547860308268" name="car_ui_restricted_while_driving">"Eginbide hau ezin da erabili gidatu bitartean"</string>
+    <string msgid="746830252244551947" name="car_ui_scrollbar_page_down_button">"Egin behera"</string>
+    <string msgid="965431866383176249" name="car_ui_scrollbar_page_up_button">"Egin gora"</string>
+    <string msgid="5978003166159186378" name="car_ui_scrolling_limited_message">"Gora edo behera egiteko eginbidea mugatuta dago gidatu bitartean"</string>
+    <string msgid="8339474149462104372" name="car_ui_toolbar_default_search_hint">"Bilatu…"</string>
+    <string msgid="9132512843297732890" name="car_ui_toolbar_menu_item_overflow_title">"Luzapena"</string>
+    <string msgid="2988075382498202155" name="car_ui_toolbar_menu_item_search_title">"Bilaketa"</string>
+    <string msgid="5206858558664840197" name="car_ui_toolbar_menu_item_settings_title">"Ezarpenak"</string>
+    <string msgid="6116610935599234725" name="car_ui_toolbar_nav_icon_content_description">"Atzera"</string>
+    <string name="change_profile">Aldatu profila</string>
+    <string name="companion_not_available_dialog_message">Gonbidatuentzako profilek ezin dute atzitu CompanionDevice</string>
+    <string name="companion_not_available_dialog_switch_user_message">Gonbidatuentzako profilek ezin dute atzitu CompanionDevice. Profila aldatzeko, joan Ezarpenak > Erabiltzaileak atalera.</string>
+    <string name="companion_not_available_dialog_title">Ez dago erabilgarri ezarpena</string>
+    <string name="confirm">Berretsi</string>
+    <string name="connect">Konektatu</string>
+    <string name="connect_to_car_instruction_text">Konektatu autora</string>
+    <string name="connect_to_targe_car_instruction_text">Konektatu &lt;b>%1$s&lt;/b> autora (%2$s)</string>
+    <string name="connected">Konektatuta</string>
+    <string name="connection">Konexioa</string>
+    <string name="continue_button">Egin aurrera</string>
+    <string name="continue_setup_toast_text">Jarraitu konfiguratzen telefonoan</string>
+    <string msgid="3209159573327985035" name="copy">"Kopiatu"</string>
+    <string name="create_phone_lock_dialog_message">Telefonoak ez dauka ezarrita pantailaren blokeorik. Autoaren profila telefonoaren bidez desblokeatzeko, sortu pantailaren blokeo bat (pasakode gisa ere ezaguna) telefonoaren ezarpenetan.</string>
+    <string name="create_phone_lock_dialog_title">Sortu pantailaren blokeo bat telefonorako</string>
+    <string name="create_profile_lock_dialog_message">Telefonoa erabili nahi baduzu profila desblokeatzeko, profilaren blokeo nagusi bat behar duzu ordezko aukera gisa</string>
+    <string name="create_profile_lock_dialog_title">Sortu profilaren blokeo nagusi bat</string>
+    <string name="default_device_name">Erlazionatutako gailua</string>
+    <string name="detected">Hautemanda</string>
+    <string name="device_not_connected_dialog_message">Ziurtatu telefonoak eta autoak Bluetootha aktibatuta daukatela, eta telefonoa hurbil dagoela</string>
+    <string name="device_not_connected_dialog_title">Ezin da aurkitu telefonoa</string>
+    <string name="device_removed_failure_toast_text">Ezin izan da ahaztu %1$s</string>
+    <string name="device_removed_success_toast_text">Ahaztu da %1$s</string>
+    <string name="disable">Desgaitu</string>
+    <string name="disable_device_connection_text">Deskonektatu gailua</string>
+    <string name="disconnect">Deskonektatu</string>
+    <string name="disconnected">Deskonektatuta</string>
+    <string name="disconnecting">Deskonektatzen</string>
+    <string name="enable">Gaitu</string>
+    <string name="enable_bluetooth_instruction_text">Eman Bluetooth bidez konektatzeko baimena</string>
+    <string name="enable_device_connection_text">Konektatu berriro gailua</string>
+    <string name="error_screen_message">Tamalez, ezin izan da behar bezala bistaratu pantaila. Saiatu berriro.</string>
+    <string name="error_screen_title">Arazoren bat izan da</string>
+    <string msgid="1234962710353108940" name="expand_button_title">"Hobespen aurreratuak"</string>
+    <string name="forget">Ahaztu</string>
+    <string name="forget_title">Ahaztu gailua</string>
+    <string name="name_not_available">Izena ez dago erabilgarri</string>
+    <string name="notDetected">Ez da hauteman</string>
+    <string name="not_now">Orain ez</string>
+    <string msgid="478774118347071097" name="not_set">"Ez da ezarri"</string>
+    <string name="ok">Ados</string>
+    <string name="open_companion_app_instruction_text">Ireki aplikazio osagarria</string>
+    <string msgid="7961817945132860002" name="preference_copied">"Arbelean kopiatu da \"<ns1:g id="SUMMARY">%1$s</ns1:g>\"."</string>
+    <string name="qr_instruction_text">&lt;b>%1$s&lt;/b> ibilgailura konektatzeko, eskaneatu QR kodea telefonoaren bidez edo ireki MyCompanion</string>
+    <string name="reject">Baztertu</string>
+    <string name="remove">Kendu</string>
+    <string name="remove_associated_device_message">Aurrerantzean, auto hau ez da parekatuko gailu honekin. Companion App-etik ere kendu beharko duzu autoa.</string>
+    <string name="remove_associated_device_title">&lt;b>%1$s&lt;/b> ahaztu nahi duzu?</string>
+    <string name="retry">Saiatu berriro</string>
+    <string msgid="635940284003824276" name="scroll_bar_page_down_button">"Egin behera"</string>
+    <string msgid="465102831431294180" name="scroll_bar_page_up_button">"Egin gora"</string>
+    <string msgid="6264217191555673260" name="search_menu_title">"Bilatu"</string>
+    <string name="settings_entry_title">Gailu osagarria</string>
+    <string name="skip">Saltatu</string>
+    <string msgid="444412252084688703" name="speed_bump_lockout_message">"Jarri arreta errepidean"</string>
+    <string msgid="6277540029070332960" name="status_bar_notification_info_overflow">"999+"</string>
+    <string msgid="5190123168583152844" name="summary_collapsed_preference_list">"<ns1:g id="CURRENT_ITEMS">%1$s</ns1:g>, <ns1:g id="ADDED_ITEMS">%2$s</ns1:g>"</string>
+    <string name="suw_qr_instruction_text">Eskaneatu &lt;b>%1$s&lt;/b> ibilgailura konektatzeko</string>
+    <string name="suw_setup_profile_content">Telefonoan hasi bazara konfiguratzen, ireki Companion aplikazioa eta eskaneatu QR kodea.\n\nBestela, autoan ere amai dezakezu profila konfiguratzen.</string>
+    <string name="suw_setup_profile_title">Amaitu konfiguratzen telefonoan edo autoan</string>
+    <string name="trusted_device_enrollment_error_dialog_message">Ezin izan da aktibatu eginbidea. Saiatu berriro.</string>
+    <string name="trusted_device_enrollment_error_dialog_title">Arazoren bat izan da</string>
+    <string name="trusted_device_enrollment_success_message">&lt;b>%1$s&lt;/b> telefonoak zure profila desblokea dezake orain</string>
+    <string name="trusted_device_feature_instruction">Desblokeatzeko aukerak ezartzeko, erabili Companion App</string>
+    <string name="trusted_device_feature_title">Desblokeatu profila telefonoaren bidez</string>
+    <string name="trusted_device_item_title">Utzi &lt;b>%1$s&lt;/b> telefonoari nire profila desblokeatzen</string>
+    <string name="trusted_device_notification_channel_name">Desblokeatu telefonoaren bidez</string>
+    <string name="trusted_device_notification_content">Eginbide hau erabiltzeko baimena emateko, sakatu hau</string>
+    <string name="trusted_device_notification_title">Utzi telefonoari zure profila desblokeatzen</string>
+    <string name="turn_on">Aktibatu</string>
+    <string name="turn_on_bluetooth_dialog_message">Gailu osagarria konektatzeko, autoak Bluetootha aktibatuta eduki behar du.</string>
+    <string name="turn_on_bluetooth_dialog_title">Bluetootha aktibatu nahi duzu?</string>
+    <string name="turn_on_bluetooth_message">Telefonoa gailu osagarri gisa konfiguratzeko, autoak Bluetootha aktibatuta eduki behar du.</string>
+    <string name="turn_on_bluetooth_title">Aktibatu Bluetootha</string>
+    <string name="unknown">Ezezaguna</string>
+    <string name="unlock_profile_to_finish_message">Sortu duzu profilaren blokeoa. Orain, idatz ezazu berriro, telefonoak profila automatikoki desblokea dezakeela berresteko.</string>
+    <string name="unlock_profile_to_finish_title">Amaitzeko, desblokeatu profila</string>
+    <string msgid="5138405918326871307" name="v7_preference_off">"DESAKTIBATUTA"</string>
+    <string msgid="27351710992731591" name="v7_preference_on">"AKTIBATUTA"</string>
+</resources>

@@ -1,0 +1,28 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.google.android.companiondevicesupport.companiondevice-mergeDebugResources-36:/values-v30/values-v30.xml",
+            "map": [
+                {
+                    "source": "/home/mchandr4/.gradle/caches/8.10/transforms/b49d1adaa96556a838d4b8fe7ff5d1f0/transformed/car-setup-wizard-lib-1.5.0/res/values-v30/values.xml",
+                    "from": {
+                        "startLines": "4",
+                        "startColumns": "0",
+                        "startOffsets": "177",
+                        "endLines": "6",
+                        "endColumns": "8",
+                        "endOffsets": "337"
+                    },
+                    "to": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endLines": "4",
+                        "endColumns": "8",
+                        "endOffsets": "215"
+                    }
+                }
+            ]
+        }
+    ]
+}

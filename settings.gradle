@@ -8,3 +8,6 @@ include ':libs:encryptionrunner'
 include ':companiondevice'
 include ':libs:ukey2'
 rootProject.name = "CompanionDeviceSupport"
+include ':libs:ukey22'
+include ':libs:ukey222'
+include ':libs:ukey222'

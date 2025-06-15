@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2021 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+  <androidx.constraintlayout.widget.ConstraintLayout
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:minHeight="?attr/companionListItemMinHeight">
+    <ImageView
+        android:id="@+id/open_companion_app_icon"
+        android:layout_width="?attr/companionSecondaryIconSize"
+        android:layout_height="?attr/companionSecondaryIconSize"
+        android:scaleType="fitXY"
+        android:src="@drawable/ic_smartphone_24dp"
+        android:tint="?attr/companionColorListIcon"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/install_app_text"
+        tools:ignore="ContentDescription" />
+    <TextView
+        android:id="@+id/install_app_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="?attr/companionListItemTextMarginStart"
+        android:layout_marginEnd="?attr/companionListItemTextMarginEnd"
+        android:text="@string/open_companion_app_instruction_text"
+        android:textAppearance="@style/CompanionSubtitleTextStyle"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+  </androidx.constraintlayout.widget.ConstraintLayout>
+
+  <androidx.constraintlayout.widget.ConstraintLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:minHeight="?attr/companionListItemMinHeight">
+    <ImageView
+        android:id="@+id/enable_bluetooth_icon"
+        android:layout_width="?attr/companionSecondaryIconSize"
+        android:layout_height="?attr/companionSecondaryIconSize"
+        android:scaleType="fitXY"
+        android:tint="?attr/companionColorListIcon"
+        android:src="@drawable/ic_bluetooth_drive_24dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/enable_bluetooth_text"
+        tools:ignore="ContentDescription" />
+    <TextView
+        android:id="@+id/enable_bluetooth_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="?attr/companionListItemTextMarginStart"
+        android:layout_marginEnd="?attr/companionListItemTextMarginEnd"
+        android:text="@string/enable_bluetooth_instruction_text"
+        android:textAppearance="@style/CompanionSubtitleTextStyle"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+  </androidx.constraintlayout.widget.ConstraintLayout>
+
+  <androidx.constraintlayout.widget.ConstraintLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:minHeight="?attr/companionListItemMinHeight">
+    <ImageView
+        android:id="@+id/connect_to_car_icon"
+        android:layout_width="?attr/companionSecondaryIconSize"
+        android:layout_height="?attr/companionSecondaryIconSize"
+        android:scaleType="fitXY"
+        android:src="@drawable/ic_directions_car_24dp"
+        android:tint="?attr/companionColorListIcon"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/connect_to_car_text"
+        tools:ignore="ContentDescription" />
+    <TextView
+        android:id="@+id/connect_to_car_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="?attr/companionListItemTextMarginStart"
+        android:layout_marginEnd="?attr/companionListItemTextMarginEnd"
+        android:text="@string/connect_to_car_instruction_text"
+        android:textAppearance="@style/CompanionSubtitleTextStyle"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+  </androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>

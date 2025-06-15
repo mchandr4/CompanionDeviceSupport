@@ -1,0 +1,666 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<!--
+3  ~ Copyright (C) 2020 The Android Open Source Project
+4  ~
+5  ~ Licensed under the Apache License, Version 2.0 (the "License");
+6  ~ you may not use this file except in compliance with the License.
+7  ~ You may obtain a copy of the License at
+8  ~
+9  ~      http://www.apache.org/licenses/LICENSE-2.0
+10  ~
+11  ~ Unless required by applicable law or agreed to in writing, software
+12  ~ distributed under the License is distributed on an "AS IS" BASIS,
+13  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+14  ~ See the License for the specific language governing permissions and
+15  ~ limitations under the License.
+16-->
+17<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+18    package="com.google.android.companiondevicesupport"
+19    android:versionCode="2413"
+20    android:versionName="1.0" >
+21
+22    <uses-sdk
+23        android:minSdkVersion="29"
+24        android:targetSdkVersion="34" />
+25
+26    <!-- Needed for BLE scanning/advertising -->
+27    <uses-permission
+27-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:24:5-25:38
+28        android:name="android.permission.ACCESS_FINE_LOCATION"
+28-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:24:22-76
+29        android:maxSdkVersion="30" />
+29-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:25:9-35
+30    <uses-permission
+30-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:26:5-27:38
+31        android:name="android.permission.BLUETOOTH"
+31-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:26:22-65
+32        android:maxSdkVersion="30" />
+32-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:27:9-35
+33    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+33-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:28:5-74
+33-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:28:22-71
+34    <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
+34-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:29:5-78
+34-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:29:22-75
+35    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+35-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:30:5-76
+35-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:30:22-73
+36    <uses-permission
+36-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:31:5-32:58
+37        android:name="android.permission.BLUETOOTH_SCAN"
+37-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:31:22-70
+38        android:usesPermissionFlags="neverForLocation" />
+38-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:32:9-55
+39
+40    <!-- Needed for detecting foreground user -->
+41    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" />
+41-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:35:5-79
+41-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:35:22-77
+42    <uses-permission android:name="android.permission.MANAGE_USERS" />
+42-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:36:5-71
+42-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:36:22-68
+43    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+43-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:37:5-77
+43-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:37:22-74
+44
+45    <!-- Needed for the calendar sync feature -->
+46    <uses-permission android:name="android.permission.READ_CALENDAR" />
+46-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:40:5-71
+46-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:40:22-69
+47    <uses-permission android:name="android.permission.WRITE_CALENDAR" />
+47-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:41:5-72
+47-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:41:22-70
+48
+49    <!-- Needed for the trusted device feature -->
+50    <uses-permission android:name="android.permission.PROVIDE_TRUST_AGENT" />
+50-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:44:5-77
+50-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:44:22-75
+51    <uses-permission android:name="android.permission.MANAGE_WEAK_ESCROW_TOKEN" />
+51-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:45:5-82
+51-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:45:22-80
+52    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+52-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:46:5-76
+52-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:46:22-74
+53
+54    <!-- Needed for the notification message feature -->
+55    <uses-permission android:name="android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME" />
+55-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:49:5-90
+55-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:49:22-88
+56    <uses-permission android:name="android.car.permission.ACCESS_CAR_PROJECTION_STATUS" />
+56-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:50:5-90
+56-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:50:22-88
+57
+58    <!-- Needed to access the proxy service -->
+59    <uses-permission android:name="android.permission.INTERNET" />
+59-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:53:5-67
+59-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:53:22-64
+60    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+60-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:54:5-79
+60-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:54:22-76
+61
+62    <!-- Required for Play Store listing when application is AUTOMOTIVE exclusive -->
+63    <uses-feature
+63-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:57:5-93
+64        android:name="android.hardware.type.automotive"
+64-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:57:19-66
+65        android:required="true" />
+65-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:57:67-90
+66    <!-- Needed for detecting foreground user -->
+67    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
+67-->[:libs:connecteddevice] /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/connecteddevice/build/intermediates/merged_manifest/release/AndroidManifest.xml:27:5-85
+67-->[:libs:connecteddevice] /home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/connecteddevice/build/intermediates/merged_manifest/release/AndroidManifest.xml:27:22-82
+68
+69    <queries>
+69-->[com.android.car.ui:car-ui-lib:2.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/441a4ee370575c42882713dcdfa9385c/transformed/car-ui-lib-2.0.0/AndroidManifest.xml:26:5-31:15
+70        <provider
+70-->[com.android.car.ui:car-ui-lib:2.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/441a4ee370575c42882713dcdfa9385c/transformed/car-ui-lib-2.0.0/AndroidManifest.xml:27:9-30:67
+71            android:name="com.android.car.ui.plugin.PluginNameProvider"
+71-->[com.android.car.ui:car-ui-lib:2.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/441a4ee370575c42882713dcdfa9385c/transformed/car-ui-lib-2.0.0/AndroidManifest.xml:28:13-72
+72            android:authorities="com.android.car.ui.plugin" />
+72-->[com.android.car.ui:car-ui-lib:2.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/441a4ee370575c42882713dcdfa9385c/transformed/car-ui-lib-2.0.0/AndroidManifest.xml:29:13-60
+73    </queries>
+74
+75    <application
+75-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:59:5-243:19
+76        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+76-->[androidx.core:core:1.5.0] /home/mchandr4/.gradle/caches/8.10/transforms/f548d7353429d6934d13fdec9a9cffa7/transformed/core-1.5.0/AndroidManifest.xml:24:18-86
+77        android:directBootAware="true"
+77-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:62:9-39
+78        android:extractNativeLibs="false"
+79        android:icon="@mipmap/ic_directions_car_filled"
+79-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:61:9-56
+80        android:label="@string/app_name"
+80-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:60:9-41
+81        android:supportsRtl="true"
+81-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:63:9-35
+82        android:taskAffinity="" >
+82-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:64:9-32
+83
+84        <!-- ConnectedDeviceService is exported for FeatureConnector. -->
+85        <service
+85-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:66:9-90:19
+86            android:name="com.google.android.connecteddevice.service.ConnectedDeviceService"
+86-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:67:13-93
+87            android:exported="true"
+87-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:69:13-36
+88            android:singleUser="true" >
+88-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:68:13-38
+89            <intent-filter>
+89-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:70:13-73:29
+90                <action android:name="com.google.android.connecteddevice.api.BIND_FEATURE_COORDINATOR" />
+90-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:71:17-106
+90-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:71:25-103
+91
+92                <category android:name="android.intent.category.DEFAULT" />
+92-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:72:17-76
+92-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:72:27-73
+93            </intent-filter>
+94            <intent-filter>
+94-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:74:13-77:29
+95                <action android:name="com.google.android.connecteddevice.api.BIND_SAFE_FEATURE_COORDINATOR" />
+95-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:75:17-111
+95-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:75:25-108
+96
+97                <category android:name="android.intent.category.DEFAULT" />
+97-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:72:17-76
+97-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:72:27-73
+98            </intent-filter>
+99
+100            <meta-data
+100-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:78:13-79:71
+101                android:name="com.google.android.connecteddevice.early_services"
+101-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:78:24-88
+102                android:resource="@array/early_single_user_services" />
+102-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:79:17-69
+103            <meta-data
+103-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:80:13-81:75
+104                android:name="com.google.android.connecteddevice.association_service_uuid"
+104-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:80:24-98
+105                android:resource="@string/car_association_service_uuid" />
+105-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:81:17-72
+106            <meta-data
+106-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:82:13-83:65
+107                android:name="com.google.android.connecteddevice.transport_protocols"
+107-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:82:24-93
+108                android:resource="@array/transport_protocols" />
+108-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:83:17-62
+109            <meta-data
+109-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:84:13-85:72
+110                android:name="com.google.android.connecteddevice.car_eap_oob_protocol_name"
+110-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:84:24-99
+111                android:resource="@string/car_eap_oob_protocol_name" />
+111-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:85:17-69
+112            <meta-data
+112-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:86:13-87:58
+113                android:name="com.google.android.connecteddevice.enable_beacon"
+113-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:86:24-87
+114                android:resource="@bool/enable_beacon" />
+114-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:87:17-55
+115            <meta-data
+115-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:88:13-89:65
+116                android:name="com.google.android.connecteddevice.enable_periodic_ping"
+116-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:88:24-94
+117                android:resource="@bool/enable_periodic_ping" />
+117-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:89:17-62
+118        </service>
+119        <!--
+120             ConnectedDeviceFgUserService is exported for CompanionConnector
+121             and FeatureConnector.
+122        -->
+123        <service
+123-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:93:9-109:19
+124            android:name="com.google.android.connecteddevice.service.ConnectedDeviceFgUserService"
+124-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:94:13-99
+125            android:exported="true"
+125-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:96:13-36
+126            android:foregroundServiceType="connectedDevice" >
+126-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:95:13-60
+127            <intent-filter>
+127-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:97:13-100:29
+128                <action android:name="com.google.android.connecteddevice.api.BIND_FEATURE_COORDINATOR_FG" />
+128-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:98:17-109
+128-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:98:25-106
+129
+130                <category android:name="android.intent.category.DEFAULT" />
+130-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:72:17-76
+130-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:72:27-73
+131            </intent-filter>
+132            <intent-filter>
+132-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:101:13-104:29
+133                <action android:name="com.google.android.connecteddevice.api.QUERY_API_VERSION" />
+133-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:102:17-99
+133-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:102:25-96
+134
+135                <category android:name="android.intent.category.DEFAULT" />
+135-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:72:17-76
+135-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:72:27-73
+136            </intent-filter>
+137
+138            <meta-data
+138-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:78:13-79:71
+139                android:name="com.google.android.connecteddevice.early_services"
+139-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:78:24-88
+140                android:resource="@array/early_fg_user_services" />
+140-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:79:17-69
+141            <meta-data
+141-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:107:13-108:68
+142                android:name="com.google.android.connecteddevice.unlock_services"
+142-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:107:24-89
+143                android:resource="@array/unlock_fg_user_services" />
+143-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:108:17-66
+144        </service>
+145        <service
+145-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:110:9-121:19
+146            android:name="com.google.android.connecteddevice.service.TransportService"
+146-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:111:13-87
+147            android:exported="false" >
+147-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:112:13-37
+148            <meta-data
+148-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:80:13-81:75
+149                android:name="com.google.android.connecteddevice.association_service_uuid"
+149-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:80:24-98
+150                android:resource="@string/car_association_service_uuid" />
+150-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:81:17-72
+151            <meta-data
+151-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:115:13-116:57
+152                android:name="com.google.android.connecteddevice.enable_proxy"
+152-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:115:24-86
+153                android:resource="@bool/enable_proxy" />
+153-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:116:17-54
+154            <meta-data
+154-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:82:13-83:65
+155                android:name="com.google.android.connecteddevice.transport_protocols"
+155-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:82:24-93
+156                android:resource="@array/transport_protocols" />
+156-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:83:17-62
+157            <meta-data
+157-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:119:13-120:67
+158                android:name="com.google.android.connecteddevice.supported_oob_channels"
+158-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:119:24-96
+159                android:resource="@array/supported_oob_channels" />
+159-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:120:17-65
+160        </service>
+161        <service
+161-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:122:9-135:19
+162            android:name="com.google.android.companiondevicesupport.eap.EapService"
+162-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:123:13-84
+163            android:exported="false" >
+163-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:124:13-37
+164            <meta-data
+164-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:80:13-81:75
+165                android:name="com.google.android.connecteddevice.association_service_uuid"
+165-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:80:24-98
+166                android:resource="@string/car_association_service_uuid" />
+166-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:81:17-72
+167            <meta-data
+167-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:82:13-83:65
+168                android:name="com.google.android.connecteddevice.transport_protocols"
+168-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:82:24-93
+169                android:resource="@array/transport_protocols" />
+169-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:83:17-62
+170            <meta-data
+170-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:119:13-120:67
+171                android:name="com.google.android.connecteddevice.supported_oob_channels"
+171-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:119:24-96
+172                android:resource="@array/supported_oob_channels" />
+172-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:120:17-65
+173            <meta-data
+173-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:131:13-132:66
+174                android:name="com.google.android.connecteddevice.car_eap_client_name"
+174-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:131:24-93
+175                android:resource="@string/car_eap_client_name" />
+175-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:132:17-63
+176            <meta-data
+176-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:133:13-134:67
+177                android:name="com.google.android.connecteddevice.car_eap_service_name"
+177-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:133:24-94
+178                android:resource="@string/car_eap_service_name" />
+178-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:134:17-64
+179        </service>
+180        <!-- Export this activity only for automated test. -->
+181        <activity
+181-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:137:9-154:20
+182            android:name="com.google.android.companiondevicesupport.AssociationActivity"
+182-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:137:19-54
+183            android:exported="true"
+183-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:138:19-42
+184            android:launchMode="singleInstance" >
+184-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:139:19-54
+185            <intent-filter>
+185-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:140:13-143:29
+186                <action android:name="com.google.android.connecteddevice.api.ASSOCIATION_ACTIVITY" />
+186-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:141:17-102
+186-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:141:25-99
+187
+188                <category android:name="android.intent.category.DEFAULT" />
+188-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:72:17-76
+188-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:72:27-73
+189            </intent-filter>
+190            <intent-filter>
+190-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:144:13-147:29
+191                <action android:name="com.android.settings.action.EXTRA_SETTINGS" />
+191-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:145:17-85
+191-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:145:25-82
+192
+193                <category android:name="android.intent.category.DEFAULT" />
+193-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:72:17-76
+193-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:72:27-73
+194            </intent-filter>
+195
+196            <meta-data
+196-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:148:13-149:98
+197                android:name="com.android.settings.icon"
+197-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:148:24-64
+198                android:resource="@drawable/ic_phonelink_ring_40dp"
+198-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:149:24-75
+199                android:value="true" />
+199-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:149:76-96
+200            <meta-data
+200-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:150:13-151:74
+201                android:name="com.android.settings.title"
+201-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:150:24-65
+202                android:resource="@string/settings_entry_title" />
+202-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:151:24-71
+203            <meta-data
+203-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:152:13-153:81
+204                android:name="com.android.settings.category"
+204-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:152:24-68
+205                android:value="com.android.settings.category.personal" />
+205-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:153:24-78
+206        </activity>
+207        <!-- SetupWizardAssociationActivity is exported for SUW. -->
+208        <activity
+208-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:156:9-163:20
+209            android:name="com.google.android.companiondevicesupport.SetupWizardAssociationActivity"
+209-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:156:19-65
+210            android:exported="true"
+210-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:157:13-36
+211            android:launchMode="singleInstance" >
+211-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:158:13-48
+212            <intent-filter>
+212-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:159:13-162:29
+213                <action android:name="com.google.android.connecteddevice.api.SETUP_WIZARD_ASSOCIATION_ACTIVITY" />
+213-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:160:17-115
+213-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:160:25-112
+214
+215                <category android:name="android.intent.category.DEFAULT" />
+215-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:72:17-76
+215-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:72:27-73
+216            </intent-filter>
+217        </activity>
+218
+219        <!-- Feature specific elements below here -->
+220
+221
+222        <!-- calendarsync -->
+223        <service
+223-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:168:9-170:40
+224            android:name="com.google.android.connecteddevice.calendarsync.CalendarSyncService"
+224-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:169:13-95
+225            android:exported="false" />
+225-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:170:13-37
+226
+227        <!-- notificationmsg -->
+228        <service
+228-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:173:9-186:19
+229            android:name="com.google.android.connecteddevice.notificationmsg.NotificationMsgService"
+229-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:174:13-101
+230            android:exported="false" >
+230-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:175:13-37
+231            <meta-data
+231-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:176:13-177:76
+232                android:name="com.google.android.connecteddevice.notificationmsg.notification_contact_photo_size"
+232-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:176:24-121
+233                android:resource="@dimen/notification_contact_photo_size" />
+233-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:177:17-74
+234            <meta-data
+234-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:178:13-179:58
+235                android:name="com.google.android.connecteddevice.notificationmsg.default_message_icon"
+235-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:178:24-110
+236                android:resource="@drawable/ic_message" />
+236-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:179:17-56
+237            <meta-data
+237-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:180:13-181:57
+238                android:name="com.google.android.connecteddevice.notificationmsg.default_avatar"
+238-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:180:24-104
+239                android:resource="@drawable/ic_person" />
+239-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:181:17-55
+240            <meta-data
+240-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:182:13-183:64
+241                android:name="com.google.android.connecteddevice.notificationmsg.default_display_name"
+241-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:182:24-110
+242                android:resource="@string/name_not_available" />
+242-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:183:17-62
+243            <meta-data
+243-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:184:13-185:71
+244                android:name="com.google.android.connecteddevice.notificationmsg.content_text"
+244-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:184:24-102
+245                android:resource="@plurals/notification_new_message" />
+245-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:185:17-69
+246        </service>
+247
+248        <!-- trust -->
+249        <service
+249-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:189:9-193:19
+250            android:name="com.google.android.connecteddevice.trust.TrustedDeviceManagerService"
+250-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:190:13-96
+251            android:exported="false"
+251-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:192:13-37
+252            android:singleUser="true" >
+252-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:191:13-38
+253        </service>
+254        <!-- TrustedDeviceAgentService is an extension of the platform service TrustAgent. -->
+255        <service
+255-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:195:9-207:19
+256            android:name="com.google.android.connecteddevice.trust.TrustedDeviceAgentService"
+256-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:196:13-94
+257            android:directBootAware="true"
+257-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:200:13-43
+258            android:exported="true"
+258-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:199:13-36
+259            android:permission="android.permission.BIND_TRUST_AGENT"
+259-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:197:13-69
+260            android:singleUser="true" >
+260-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:198:13-38
+261            <intent-filter>
+261-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:201:13-204:29
+262                <action android:name="android.service.trust.TrustAgentService" />
+262-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:202:17-82
+262-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:202:25-79
+263
+264                <category android:name="android.intent.category.DEFAULT" />
+264-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:72:17-76
+264-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:72:27-73
+265            </intent-filter>
+266
+267            <meta-data
+267-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:205:13-206:65
+268                android:name="android.service.trust.trustagent"
+268-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:205:24-71
+269                android:resource="@xml/car_trust_agent" />
+269-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:206:24-63
+270        </service>
+271        <service
+271-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:208:9-222:19
+272            android:name="com.google.android.connecteddevice.trust.TrustedDeviceUiDelegateService"
+272-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:208:18-104
+273            android:exported="false" >
+273-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:209:18-42
+274            <meta-data
+274-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:210:13-211:86
+275                android:name="com.google.android.connecteddevice.trust.notification_channel_name"
+275-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:210:24-105
+276                android:resource="@string/trusted_device_notification_channel_name" />
+276-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:211:17-84
+277            <!--
+278                This will only take effect below Android 31 because of some system API changes. For
+279                Android 31 and above, app icon will be shown as this notification icon.
+280            -->
+281            <meta-data
+281-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:216:13-217:72
+282                android:name="com.google.android.connecteddevice.trust.enrollment_notification_icon"
+282-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:216:24-108
+283                android:resource="@drawable/ic_directions_car_filled" />
+283-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:217:17-70
+284            <meta-data
+284-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:218:13-219:79
+285                android:name="com.google.android.connecteddevice.trust.enrollment_notification_title"
+285-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:218:24-109
+286                android:resource="@string/trusted_device_notification_title" />
+286-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:219:17-77
+287            <meta-data
+287-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:220:13-221:81
+288                android:name="com.google.android.connecteddevice.trust.enrollment_notification_content"
+288-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:220:24-111
+289                android:resource="@string/trusted_device_notification_content" />
+289-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:221:17-79
+290        </service>
+291        <!--
+292             TrustedDeviceActivity is exported because it's injected as
+293             Settings > Security > "Unlock profile with phone".
+294        -->
+295        <activity
+295-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:225:9-242:20
+296            android:name="com.google.android.companiondevicesupport.trust.TrustedDeviceActivity"
+296-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:226:13-56
+297            android:exported="true"
+297-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:227:13-36
+298            android:launchMode="singleTask" >
+298-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:228:13-44
+299            <intent-filter>
+299-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:229:13-233:29
+300                <action android:name="com.google.android.connecteddevice.trust.TRUSTED_DEVICE_ACTIVITY" />
+300-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:230:17-107
+300-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:230:25-104
+301                <action android:name="com.android.settings.action.EXTRA_SETTINGS" />
+301-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:145:17-85
+301-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:145:25-82
+302
+303                <category android:name="android.intent.category.DEFAULT" />
+303-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:72:17-76
+303-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:72:27-73
+304            </intent-filter>
+305
+306            <meta-data
+306-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:148:13-149:98
+307                android:name="com.android.settings.icon"
+307-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:148:24-64
+308                android:resource="@drawable/ic_lock"
+308-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:149:24-75
+309                android:value="true" />
+309-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:149:76-96
+310            <meta-data
+310-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:150:13-151:74
+311                android:name="com.android.settings.title"
+311-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:150:24-65
+312                android:resource="@string/trusted_device_feature_title" />
+312-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:151:24-71
+313            <meta-data
+313-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:152:13-153:81
+314                android:name="com.android.settings.category"
+314-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:152:24-68
+315                android:value="com.android.settings.category.ia.security" />
+315-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:153:24-78
+316            <meta-data
+316-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:240:13-241:47
+317                android:name="com.android.settings.icon_tintable"
+317-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:240:24-73
+318                android:value="true" />
+318-->/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/companiondevice/AndroidManifest.xml:241:24-44
+319        </activity>
+320
+321        <provider
+321-->[com.android.car.ui:car-ui-lib:2.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/441a4ee370575c42882713dcdfa9385c/transformed/car-ui-lib-2.0.0/AndroidManifest.xml:34:9-39:71
+322            android:name="com.android.car.ui.core.CarUiInstaller"
+322-->[com.android.car.ui:car-ui-lib:2.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/441a4ee370575c42882713dcdfa9385c/transformed/car-ui-lib-2.0.0/AndroidManifest.xml:35:13-66
+323            android:authorities="com.google.android.companiondevicesupport.CarUiInstaller"
+323-->[com.android.car.ui:car-ui-lib:2.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/441a4ee370575c42882713dcdfa9385c/transformed/car-ui-lib-2.0.0/AndroidManifest.xml:36:13-66
+324            android:directBootAware="true"
+324-->[com.android.car.ui:car-ui-lib:2.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/441a4ee370575c42882713dcdfa9385c/transformed/car-ui-lib-2.0.0/AndroidManifest.xml:37:13-43
+325            android:exported="false"
+325-->[com.android.car.ui:car-ui-lib:2.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/441a4ee370575c42882713dcdfa9385c/transformed/car-ui-lib-2.0.0/AndroidManifest.xml:38:13-37
+326            android:process="@string/car_ui_installer_process_name" />
+326-->[com.android.car.ui:car-ui-lib:2.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/441a4ee370575c42882713dcdfa9385c/transformed/car-ui-lib-2.0.0/AndroidManifest.xml:39:13-68
+327        <provider
+327-->[com.android.car.ui:car-ui-lib:2.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/441a4ee370575c42882713dcdfa9385c/transformed/car-ui-lib-2.0.0/AndroidManifest.xml:40:9-45:79
+328            android:name="com.android.car.ui.core.SearchResultsProvider"
+328-->[com.android.car.ui:car-ui-lib:2.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/441a4ee370575c42882713dcdfa9385c/transformed/car-ui-lib-2.0.0/AndroidManifest.xml:41:13-73
+329            android:authorities="com.google.android.companiondevicesupport.SearchResultsProvider"
+329-->[com.android.car.ui:car-ui-lib:2.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/441a4ee370575c42882713dcdfa9385c/transformed/car-ui-lib-2.0.0/AndroidManifest.xml:42:13-73
+330            android:exported="true"
+330-->[com.android.car.ui:car-ui-lib:2.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/441a4ee370575c42882713dcdfa9385c/transformed/car-ui-lib-2.0.0/AndroidManifest.xml:43:13-36
+331            android:process="@string/car_ui_installer_process_name"
+331-->[com.android.car.ui:car-ui-lib:2.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/441a4ee370575c42882713dcdfa9385c/transformed/car-ui-lib-2.0.0/AndroidManifest.xml:44:13-68
+332            android:readPermission="com.android.car.ui.READ_SEARCH_RESULTS" />
+332-->[com.android.car.ui:car-ui-lib:2.0.0] /home/mchandr4/.gradle/caches/8.10/transforms/441a4ee370575c42882713dcdfa9385c/transformed/car-ui-lib-2.0.0/AndroidManifest.xml:45:13-76
+333        <provider
+333-->[androidx.lifecycle:lifecycle-process:2.8.7] /home/mchandr4/.gradle/caches/8.10/transforms/b7a3d0d3fad28f8cb257e38ebe308859/transformed/lifecycle-process-2.8.7/AndroidManifest.xml:24:9-32:20
+334            android:name="androidx.startup.InitializationProvider"
+334-->[androidx.lifecycle:lifecycle-process:2.8.7] /home/mchandr4/.gradle/caches/8.10/transforms/b7a3d0d3fad28f8cb257e38ebe308859/transformed/lifecycle-process-2.8.7/AndroidManifest.xml:25:13-67
+335            android:authorities="com.google.android.companiondevicesupport.androidx-startup"
+335-->[androidx.lifecycle:lifecycle-process:2.8.7] /home/mchandr4/.gradle/caches/8.10/transforms/b7a3d0d3fad28f8cb257e38ebe308859/transformed/lifecycle-process-2.8.7/AndroidManifest.xml:26:13-68
+336            android:exported="false" >
+336-->[androidx.lifecycle:lifecycle-process:2.8.7] /home/mchandr4/.gradle/caches/8.10/transforms/b7a3d0d3fad28f8cb257e38ebe308859/transformed/lifecycle-process-2.8.7/AndroidManifest.xml:27:13-37
+337            <meta-data
+337-->[androidx.lifecycle:lifecycle-process:2.8.7] /home/mchandr4/.gradle/caches/8.10/transforms/b7a3d0d3fad28f8cb257e38ebe308859/transformed/lifecycle-process-2.8.7/AndroidManifest.xml:29:13-31:52
+338                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+338-->[androidx.lifecycle:lifecycle-process:2.8.7] /home/mchandr4/.gradle/caches/8.10/transforms/b7a3d0d3fad28f8cb257e38ebe308859/transformed/lifecycle-process-2.8.7/AndroidManifest.xml:30:17-78
+339                android:value="androidx.startup" />
+339-->[androidx.lifecycle:lifecycle-process:2.8.7] /home/mchandr4/.gradle/caches/8.10/transforms/b7a3d0d3fad28f8cb257e38ebe308859/transformed/lifecycle-process-2.8.7/AndroidManifest.xml:31:17-49
+340            <meta-data
+340-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/2ad56b42444620a0108aaf72d35e7d98/transformed/profileinstaller-1.3.1/AndroidManifest.xml:29:13-31:52
+341                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+341-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/2ad56b42444620a0108aaf72d35e7d98/transformed/profileinstaller-1.3.1/AndroidManifest.xml:30:17-85
+342                android:value="androidx.startup" />
+342-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/2ad56b42444620a0108aaf72d35e7d98/transformed/profileinstaller-1.3.1/AndroidManifest.xml:31:17-49
+343        </provider>
+344
+345        <service
+345-->[androidx.room:room-runtime-android:2.7.0-rc03] /home/mchandr4/.gradle/caches/8.10/transforms/ac18a04daebb7a14e42fcbaf05599a36/transformed/room-runtime-release/AndroidManifest.xml:24:9-28:63
+346            android:name="androidx.room.MultiInstanceInvalidationService"
+346-->[androidx.room:room-runtime-android:2.7.0-rc03] /home/mchandr4/.gradle/caches/8.10/transforms/ac18a04daebb7a14e42fcbaf05599a36/transformed/room-runtime-release/AndroidManifest.xml:25:13-74
+347            android:directBootAware="true"
+347-->[androidx.room:room-runtime-android:2.7.0-rc03] /home/mchandr4/.gradle/caches/8.10/transforms/ac18a04daebb7a14e42fcbaf05599a36/transformed/room-runtime-release/AndroidManifest.xml:26:13-43
+348            android:exported="false" />
+348-->[androidx.room:room-runtime-android:2.7.0-rc03] /home/mchandr4/.gradle/caches/8.10/transforms/ac18a04daebb7a14e42fcbaf05599a36/transformed/room-runtime-release/AndroidManifest.xml:27:13-37
+349
+350        <receiver
+350-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/2ad56b42444620a0108aaf72d35e7d98/transformed/profileinstaller-1.3.1/AndroidManifest.xml:34:9-52:20
+351            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+351-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/2ad56b42444620a0108aaf72d35e7d98/transformed/profileinstaller-1.3.1/AndroidManifest.xml:35:13-76
+352            android:directBootAware="false"
+352-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/2ad56b42444620a0108aaf72d35e7d98/transformed/profileinstaller-1.3.1/AndroidManifest.xml:36:13-44
+353            android:enabled="true"
+353-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/2ad56b42444620a0108aaf72d35e7d98/transformed/profileinstaller-1.3.1/AndroidManifest.xml:37:13-35
+354            android:exported="true"
+354-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/2ad56b42444620a0108aaf72d35e7d98/transformed/profileinstaller-1.3.1/AndroidManifest.xml:38:13-36
+355            android:permission="android.permission.DUMP" >
+355-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/2ad56b42444620a0108aaf72d35e7d98/transformed/profileinstaller-1.3.1/AndroidManifest.xml:39:13-57
+356            <intent-filter>
+356-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/2ad56b42444620a0108aaf72d35e7d98/transformed/profileinstaller-1.3.1/AndroidManifest.xml:40:13-42:29
+357                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+357-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/2ad56b42444620a0108aaf72d35e7d98/transformed/profileinstaller-1.3.1/AndroidManifest.xml:41:17-91
+357-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/2ad56b42444620a0108aaf72d35e7d98/transformed/profileinstaller-1.3.1/AndroidManifest.xml:41:25-88
+358            </intent-filter>
+359            <intent-filter>
+359-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/2ad56b42444620a0108aaf72d35e7d98/transformed/profileinstaller-1.3.1/AndroidManifest.xml:43:13-45:29
+360                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+360-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/2ad56b42444620a0108aaf72d35e7d98/transformed/profileinstaller-1.3.1/AndroidManifest.xml:44:17-85
+360-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/2ad56b42444620a0108aaf72d35e7d98/transformed/profileinstaller-1.3.1/AndroidManifest.xml:44:25-82
+361            </intent-filter>
+362            <intent-filter>
+362-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/2ad56b42444620a0108aaf72d35e7d98/transformed/profileinstaller-1.3.1/AndroidManifest.xml:46:13-48:29
+363                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+363-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/2ad56b42444620a0108aaf72d35e7d98/transformed/profileinstaller-1.3.1/AndroidManifest.xml:47:17-88
+363-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/2ad56b42444620a0108aaf72d35e7d98/transformed/profileinstaller-1.3.1/AndroidManifest.xml:47:25-85
+364            </intent-filter>
+365            <intent-filter>
+365-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/2ad56b42444620a0108aaf72d35e7d98/transformed/profileinstaller-1.3.1/AndroidManifest.xml:49:13-51:29
+366                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+366-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/2ad56b42444620a0108aaf72d35e7d98/transformed/profileinstaller-1.3.1/AndroidManifest.xml:50:17-95
+366-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/mchandr4/.gradle/caches/8.10/transforms/2ad56b42444620a0108aaf72d35e7d98/transformed/profileinstaller-1.3.1/AndroidManifest.xml:50:25-92
+367            </intent-filter>
+368        </receiver>
+369    </application>
+370
+371</manifest>

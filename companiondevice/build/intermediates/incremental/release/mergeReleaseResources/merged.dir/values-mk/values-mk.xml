@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:ns1="urn:oasis:names:tc:xliff:document:1.2">
+    <plurals name="notification_new_message">
+    <item quantity="one">%d нова порака</item>
+    <item quantity="other">%d нови пораки</item>
+  </plurals>
+    <string msgid="5976598919945601918" name="abc_action_bar_home_description">"Движи се кон дома"</string>
+    <string msgid="8388173803310557296" name="abc_action_bar_up_description">"Движи се нагоре"</string>
+    <string msgid="3937310113216875497" name="abc_action_menu_overflow_description">"Повеќе опции"</string>
+    <string msgid="4692188335987374352" name="abc_action_mode_done">"Готово"</string>
+    <string msgid="1189761859438369441" name="abc_activity_chooser_view_see_all">"Прикажи ги сите"</string>
+    <string msgid="2165779757652331008" name="abc_activitychooserview_choose_application">"Избери апликација"</string>
+    <string msgid="4215997306490295099" name="abc_capital_off">"ИСКЛУЧЕНО"</string>
+    <string msgid="884982626291842264" name="abc_capital_on">"ВКЛУЧЕНО"</string>
+    <string msgid="8833365367933412986" name="abc_menu_alt_shortcut_label">"Alt+"</string>
+    <string msgid="2223301931652355242" name="abc_menu_ctrl_shortcut_label">"Ctrl+"</string>
+    <string msgid="838001238306846836" name="abc_menu_delete_shortcut_label">"избриши"</string>
+    <string msgid="7986526966204849475" name="abc_menu_enter_shortcut_label">"Enter"</string>
+    <string msgid="375214403600139847" name="abc_menu_function_shortcut_label">"Function+"</string>
+    <string msgid="4192209724446364286" name="abc_menu_meta_shortcut_label">"Meta+"</string>
+    <string msgid="4741552369836443843" name="abc_menu_shift_shortcut_label">"Shift+"</string>
+    <string msgid="5473865519181928982" name="abc_menu_space_shortcut_label">"вселена"</string>
+    <string msgid="6180552449598693998" name="abc_menu_sym_shortcut_label">"Sym+"</string>
+    <string msgid="5520303668377388990" name="abc_prepend_shortcut_label">"Menu+"</string>
+    <string msgid="7208076849092622260" name="abc_search_hint">"Пребарување…"</string>
+    <string msgid="3741173234950517107" name="abc_searchview_description_clear">"Исчисти барање"</string>
+    <string msgid="693312494995508443" name="abc_searchview_description_query">"Пребарај барање"</string>
+    <string msgid="3417662926640357176" name="abc_searchview_description_search">"Пребарај"</string>
+    <string msgid="1486535517437947103" name="abc_searchview_description_submit">"Испрати барање"</string>
+    <string msgid="2293578557972875415" name="abc_searchview_description_voice">"Гласовно пребарување"</string>
+    <string msgid="8875138169939072951" name="abc_shareactionprovider_share_with">"Сподели со"</string>
+    <string msgid="9055268688411532828" name="abc_shareactionprovider_share_with_application">"Сподели со <ns1:g id="APPLICATION_NAME">%s</ns1:g>"</string>
+    <string msgid="1656852541809559762" name="abc_toolbar_collapse_description">"Собери"</string>
+    <string name="accept">Прифати</string>
+    <string name="add_associated_device_subtitle">Може да го користите телефонот како придружен уред за да ви помогне да управувате со возењето</string>
+    <string name="add_associated_device_title">Поврзете се со MyCompanion</string>
+    <string name="add_device_title">Поврзи се со придружната апликација</string>
+    <string name="app_running_msg_channel_name">Се извршува услугата за SMS-пораки на телефонот</string>
+    <string name="app_running_msg_notification_content">Се примаат SMS-пораки преку придружен уред</string>
+    <string name="app_running_msg_notification_title">Услугата за SMS-пораки на телефонот е активна</string>
+    <string name="associated_device_install_app">Треба да имате инсталирано <b>придружна апликација</b> на телефонот</string>
+    <string name="associated_device_open_app">Отворете ја апликацијата и следете ги упатствата во неа</string>
+    <string name="associated_device_pairing_code_title">Потврдете го кодот на телефонот</string>
+    <string name="associated_device_pairing_message">Потврдете дека ова се совпаѓа со кодот прикажан на телефонот</string>
+    <string name="associated_device_select_device">Отворете ја апликацијата и поврзете се со &lt;b>%1$s&lt;/b></string>
+    <string name="associated_device_success">Уредот е успешно поврзан</string>
+    <string name="ble_device_name_prefix">Возило\u00A0</string>
+    <string name="cancel">Откажи</string>
+    <string msgid="399078418913970003" name="car_ui_alert_dialog_default_button">"Затвори"</string>
+    <string msgid="511096411523593697" name="car_ui_preference_switch_off">"Исклучено"</string>
+    <string msgid="2091385466752081649" name="car_ui_preference_switch_on">"Вклучено"</string>
+    <string msgid="7490306547860308268" name="car_ui_restricted_while_driving">"Функцијата не е достапна при возење"</string>
+    <string msgid="746830252244551947" name="car_ui_scrollbar_page_down_button">"Оди надолу"</string>
+    <string msgid="965431866383176249" name="car_ui_scrollbar_page_up_button">"Оди нагоре"</string>
+    <string msgid="5978003166159186378" name="car_ui_scrolling_limited_message">"Лизгањето е ограничено при возење"</string>
+    <string msgid="8339474149462104372" name="car_ui_toolbar_default_search_hint">"Пребарувајте…"</string>
+    <string msgid="9132512843297732890" name="car_ui_toolbar_menu_item_overflow_title">"Прелевање"</string>
+    <string msgid="2988075382498202155" name="car_ui_toolbar_menu_item_search_title">"Пребарување"</string>
+    <string msgid="5206858558664840197" name="car_ui_toolbar_menu_item_settings_title">"Поставки"</string>
+    <string msgid="6116610935599234725" name="car_ui_toolbar_nav_icon_content_description">"Назад"</string>
+    <string name="change_profile">Промени профил</string>
+    <string name="companion_not_available_dialog_message">Гостинските профили не можат да пристапат до CompanionDevice</string>
+    <string name="companion_not_available_dialog_switch_user_message">Гостинските профили не можат да пристапат до CompanionDevice. За да го промените профилот, одете во „Поставки > Корисници“.</string>
+    <string name="companion_not_available_dialog_title">Поставкава не е достапна</string>
+    <string name="confirm">Потврди</string>
+    <string name="connect">Поврзи</string>
+    <string name="connect_to_car_instruction_text">Поврзете се со автомобилот</string>
+    <string name="connect_to_targe_car_instruction_text">Поврзете се со &lt;b>%1$s&lt;/b> %2$s</string>
+    <string name="connected">Поврзано</string>
+    <string name="connection">Врска</string>
+    <string name="continue_button">Продолжи</string>
+    <string name="continue_setup_toast_text">Продолжете со поставување на телефонот</string>
+    <string msgid="3209159573327985035" name="copy">"Копирај"</string>
+    <string name="create_phone_lock_dialog_message">Немате поставено заклучување екран на телефонот. За да го отклучите профилот на автомобилот преку телефонот, прво создајте заклучување екран (познато и како лозинка) во поставките за телефонот.</string>
+    <string name="create_phone_lock_dialog_title">Создајте заклучување екран на телефонот</string>
+    <string name="create_profile_lock_dialog_message">За да го користите телефонот за отклучување на профилот, ви треба примарно заклучување на профилот како резервна опција</string>
+    <string name="create_profile_lock_dialog_title">Создајте примарно заклучување на профилот</string>
+    <string name="default_device_name">Поврзан уред</string>
+    <string name="detected">Откриен</string>
+    <string name="device_not_connected_dialog_message">Погрижете се да биде вклучен Bluetooth на телефонот и автомобилот и телефонот да биде во близина</string>
+    <string name="device_not_connected_dialog_title">Не може да се најде телефонот</string>
+    <string name="device_removed_failure_toast_text">Не успеа да се заборави %1$s</string>
+    <string name="device_removed_success_toast_text">%1$s е заборавен</string>
+    <string name="disable">Оневозможи</string>
+    <string name="disable_device_connection_text">Прекинете ја врската со уредов</string>
+    <string name="disconnect">Прекини врска</string>
+    <string name="disconnected">Не е поврзано</string>
+    <string name="disconnecting">Се исклучува</string>
+    <string name="enable">Овозможи</string>
+    <string name="enable_bluetooth_instruction_text">Дозволете поврзување преку Bluetooth</string>
+    <string name="enable_device_connection_text">Повторно поврзете го уредов</string>
+    <string name="error_screen_message">За жал, екранов не можеше да се прикаже правилно. Обидете се повторно.</string>
+    <string name="error_screen_title">Нешто тргна наопаку</string>
+    <string msgid="1234962710353108940" name="expand_button_title">"Напредни"</string>
+    <string name="forget">Заборави</string>
+    <string name="forget_title">Заборави го уредов</string>
+    <string name="name_not_available">Името не е достапно</string>
+    <string name="notDetected">Не е пронајдено</string>
+    <string name="not_now">Не сега</string>
+    <string msgid="478774118347071097" name="not_set">"Не е поставено"</string>
+    <string name="ok">Во ред</string>
+    <string name="open_companion_app_instruction_text">Отворете ја придружната апликација</string>
+    <string msgid="7961817945132860002" name="preference_copied">"„<ns1:g id="SUMMARY">%1$s</ns1:g>“ копирано во привремена меморија."</string>
+    <string name="qr_instruction_text">Користете го телефонот за да го скенирате QR-кодот или отворете ја MyCompanion за да се поврзете со &lt;b>%1$s&lt;/b></string>
+    <string name="reject">Одбиј</string>
+    <string name="remove">Отстрани</string>
+    <string name="remove_associated_device_message">Автомобилов веќе нема да биде спарен со уредов. Ќе треба да го отстраните автомобилов и од придружната апликација.</string>
+    <string name="remove_associated_device_title">Да се заборави &lt;b>%1$s&lt;/b>?</string>
+    <string name="retry">Обиди се пак</string>
+    <string msgid="635940284003824276" name="scroll_bar_page_down_button">"Лизгај надолу"</string>
+    <string msgid="465102831431294180" name="scroll_bar_page_up_button">"Лизгај нагоре"</string>
+    <string msgid="6264217191555673260" name="search_menu_title">"Пребарај"</string>
+    <string name="settings_entry_title">Придружен уред</string>
+    <string name="skip">Прескокни</string>
+    <string msgid="444412252084688703" name="speed_bump_lockout_message">"Фокусирајте се на патот"</string>
+    <string msgid="6277540029070332960" name="status_bar_notification_info_overflow">"999+"</string>
+    <string msgid="5190123168583152844" name="summary_collapsed_preference_list">"<ns1:g id="CURRENT_ITEMS">%1$s</ns1:g>, <ns1:g id="ADDED_ITEMS">%2$s</ns1:g>"</string>
+    <string name="suw_qr_instruction_text">Скенирајте за да се поврзете со &lt;b>%1$s&lt;/b></string>
+    <string name="suw_setup_profile_content">Ако веќе сте почнале да го поставувате телефонот, отворете ја придружната апликација и скенирајте го QR-кодот.\n\nИли, можете да го завршите поставувањето на вашиот профил во автомобилот.</string>
+    <string name="suw_setup_profile_title">Завршете го поставувањето на вашиот нов телефон или автомобил</string>
+    <string name="trusted_device_enrollment_error_dialog_message">За жал, функцијава не можеше да се вклучи во моментов. Обидете се повторно.</string>
+    <string name="trusted_device_enrollment_error_dialog_title">Нешто тргна наопаку</string>
+    <string name="trusted_device_enrollment_success_message">&lt;b>%1$s&lt;/b> отсега може да го отклучува вашиот профил</string>
+    <string name="trusted_device_feature_instruction">Проверете ја придружната апликација за да поставите опции за отклучување</string>
+    <string name="trusted_device_feature_title">Отклучете го профилот со телефон</string>
+    <string name="trusted_device_item_title">Дозволи &lt;b>%1$s&lt;/b> да го отклучува мојот профил</string>
+    <string name="trusted_device_notification_channel_name">Отклучувајте со телефонот</string>
+    <string name="trusted_device_notification_content">Допрете тука за да ја одобрите функцијава</string>
+    <string name="trusted_device_notification_title">Дозволете телефонот да го отклучува вашиот профил</string>
+    <string name="turn_on">Вклучи</string>
+    <string name="turn_on_bluetooth_dialog_message">За да се поврзе со придружниот уред, на автомобилот му треба Bluetooth.</string>
+    <string name="turn_on_bluetooth_dialog_title">Да се вклучи Bluetooth?</string>
+    <string name="turn_on_bluetooth_message">За да се постави телефонот како придружен уред, на автомобилот му треба Bluetooth.</string>
+    <string name="turn_on_bluetooth_title">Вклучете Bluetooth</string>
+    <string name="unknown">Непознато</string>
+    <string name="unlock_profile_to_finish_message">Создадовте ново заклучување на профилот. Внесете го повторно за да потврдите дека телефонот може да го отклучува вашиот профил автоматски</string>
+    <string name="unlock_profile_to_finish_title">Отклучете го профилот за да завршите</string>
+    <string msgid="5138405918326871307" name="v7_preference_off">"ИСКЛУЧЕНО"</string>
+    <string msgid="27351710992731591" name="v7_preference_on">"ВКЛУЧЕНО"</string>
+</resources>

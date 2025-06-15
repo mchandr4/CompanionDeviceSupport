@@ -1,0 +1,26 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.google.android.companiondevicesupport.companiondevice-mergeReleaseResources-36:/values-w1920dp-land-v13/values-w1920dp-land-v13.xml",
+            "map": [
+                {
+                    "source": "/home/mchandr4/.gradle/caches/8.10/transforms/b49d1adaa96556a838d4b8fe7ff5d1f0/transformed/car-setup-wizard-lib-1.5.0/res/values-w1920dp-land-v13/values.xml",
+                    "from": {
+                        "startLines": "4,5",
+                        "startColumns": "0,0",
+                        "startOffsets": "186,249",
+                        "endColumns": "62,54",
+                        "endOffsets": "248,303"
+                    },
+                    "to": {
+                        "startLines": "2,3",
+                        "startColumns": "4,4",
+                        "startOffsets": "55,122",
+                        "endColumns": "66,58",
+                        "endOffsets": "117,176"
+                    }
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,19 @@
+<lint-module
+    format="1"
+    dir="/home/mchandr4/Documents/aaos_unbunapp/packages/apps/Car/CompanionDeviceSupport/libs/encryptionrunner"
+    name=":libs:encryptionrunner"
+    type="LIBRARY"
+    maven="CompanionDeviceSupport.libs:encryptionrunner:"
+    agpVersion="8.2.2"
+    buildFolder="build"
+    bootClassPath="/home/mchandr4/Android/Sdk/platforms/android-30/android.jar:/home/mchandr4/Android/Sdk/build-tools/34.0.0/core-lambda-stubs.jar"
+    javaSourceLevel="1.8"
+    compileTarget="android-30"
+    neverShrinking="true">
+  <lintOptions
+      abortOnError="true"
+      absolutePaths="true"
+      checkReleaseBuilds="true"
+      explainIssues="true"/>
+  <variant name="release"/>
+</lint-module>

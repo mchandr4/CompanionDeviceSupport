@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:ns1="urn:oasis:names:tc:xliff:document:1.2">
+    <plurals name="notification_new_message">
+    <item quantity="one">%d imilayezo emisha</item>
+    <item quantity="other">%d imilayezo emisha</item>
+  </plurals>
+    <string msgid="5976598919945601918" name="abc_action_bar_home_description">"Zulazulela ekhaya"</string>
+    <string msgid="8388173803310557296" name="abc_action_bar_up_description">"Zulazulela phezulu"</string>
+    <string msgid="3937310113216875497" name="abc_action_menu_overflow_description">"Ezinye izinketho"</string>
+    <string msgid="4692188335987374352" name="abc_action_mode_done">"Kwenziwe"</string>
+    <string msgid="1189761859438369441" name="abc_activity_chooser_view_see_all">"Buka konke"</string>
+    <string msgid="2165779757652331008" name="abc_activitychooserview_choose_application">"Khetha insiza"</string>
+    <string msgid="4215997306490295099" name="abc_capital_off">"VALA"</string>
+    <string msgid="884982626291842264" name="abc_capital_on">"VULA"</string>
+    <string msgid="8833365367933412986" name="abc_menu_alt_shortcut_label">"Alt+"</string>
+    <string msgid="2223301931652355242" name="abc_menu_ctrl_shortcut_label">"Ctrl+"</string>
+    <string msgid="838001238306846836" name="abc_menu_delete_shortcut_label">"delete"</string>
+    <string msgid="7986526966204849475" name="abc_menu_enter_shortcut_label">"enter"</string>
+    <string msgid="375214403600139847" name="abc_menu_function_shortcut_label">"Function+"</string>
+    <string msgid="4192209724446364286" name="abc_menu_meta_shortcut_label">"Meta+"</string>
+    <string msgid="4741552369836443843" name="abc_menu_shift_shortcut_label">"Shift+"</string>
+    <string msgid="5473865519181928982" name="abc_menu_space_shortcut_label">"space"</string>
+    <string msgid="6180552449598693998" name="abc_menu_sym_shortcut_label">"Sym+"</string>
+    <string msgid="5520303668377388990" name="abc_prepend_shortcut_label">"Imenyu+"</string>
+    <string msgid="7208076849092622260" name="abc_search_hint">"Sesha…"</string>
+    <string msgid="3741173234950517107" name="abc_searchview_description_clear">"Sula inkinga"</string>
+    <string msgid="693312494995508443" name="abc_searchview_description_query">"Sesha umbuzo"</string>
+    <string msgid="3417662926640357176" name="abc_searchview_description_search">"Sesha"</string>
+    <string msgid="1486535517437947103" name="abc_searchview_description_submit">"Thumela umbuzo"</string>
+    <string msgid="2293578557972875415" name="abc_searchview_description_voice">"Ukusesha ngezwi"</string>
+    <string msgid="8875138169939072951" name="abc_shareactionprovider_share_with">"Yabelana no"</string>
+    <string msgid="9055268688411532828" name="abc_shareactionprovider_share_with_application">"Yabelana ne-<ns1:g id="APPLICATION_NAME">%s</ns1:g>"</string>
+    <string msgid="1656852541809559762" name="abc_toolbar_collapse_description">"Goqa"</string>
+    <string name="accept">Yamukela</string>
+    <string name="add_associated_device_subtitle">Ungasebenzisa ifoni yakho njengedivayisi engumgane ukukusiza uphathe ukuzizwela kwakho kokushayela</string>
+    <string name="add_associated_device_title">Xhumeka ku-MyCompanion</string>
+    <string name="add_device_title">Xhumeka ku-companion app</string>
+    <string name="app_running_msg_channel_name">Isevisi yomyalezo obhaliwe wefoni iyasebenza</string>
+    <string name="app_running_msg_notification_content">Ithola imiyalezo ebhaliwe ngohlelo lokusebenza lomngane</string>
+    <string name="app_running_msg_notification_title">Isevisi yomlayezo obhaliwe wefoni iyasebenza</string>
+    <string name="associated_device_install_app">Qiniseka ukuthi <b>Unohlelo lokusebenza elingumngane</b> olufakwe efonini yakho</string>
+    <string name="associated_device_open_app">Vula uhlelo lokusebenza bese ulandela imiyalelo kuhlelo lokusebenza</string>
+    <string name="associated_device_pairing_code_title">Qinisekisa ikhodi kufoni</string>
+    <string name="associated_device_pairing_message">Qinisekisa ukuthi lokhu kufana nekhodi eboniswe kufoni yakho</string>
+    <string name="associated_device_select_device">Vula uhlelo lokusebenza bese uxhuma ku-&lt;b>%1$s&lt;/b></string>
+    <string name="associated_device_success">Idivayisi ihlotshaniswe ngokuphumelelayo</string>
+    <string name="ble_device_name_prefix">Imoto\u00A0</string>
+    <string name="cancel">Khansela</string>
+    <string msgid="399078418913970003" name="car_ui_alert_dialog_default_button">"Vala"</string>
+    <string msgid="511096411523593697" name="car_ui_preference_switch_off">"Valiwe"</string>
+    <string msgid="2091385466752081649" name="car_ui_preference_switch_on">"Vuliwe"</string>
+    <string msgid="7490306547860308268" name="car_ui_restricted_while_driving">"Isici asitholakali ngenkathi ushayela"</string>
+    <string msgid="746830252244551947" name="car_ui_scrollbar_page_down_button">"Skrolela phansi"</string>
+    <string msgid="965431866383176249" name="car_ui_scrollbar_page_up_button">"Skrolela phezulu"</string>
+    <string msgid="5978003166159186378" name="car_ui_scrolling_limited_message">"Ukuskrola kukhawulelwe uma ushayela"</string>
+    <string msgid="8339474149462104372" name="car_ui_toolbar_default_search_hint">"Sesha…"</string>
+    <string msgid="9132512843297732890" name="car_ui_toolbar_menu_item_overflow_title">"Ukuphuphuma"</string>
+    <string msgid="2988075382498202155" name="car_ui_toolbar_menu_item_search_title">"Sesha"</string>
+    <string msgid="5206858558664840197" name="car_ui_toolbar_menu_item_settings_title">"Izilungiselelo"</string>
+    <string msgid="6116610935599234725" name="car_ui_toolbar_nav_icon_content_description">"Emuva"</string>
+    <string name="change_profile">Shintsha iphrofayela</string>
+    <string name="companion_not_available_dialog_message">Amaphrofayela esivakashi aw\akwazi ukufinyelela i-CompanionDevice</string>
+    <string name="companion_not_available_dialog_switch_user_message">Amaphrofayela esivakashi aw\akwazi ukufinyelela i-CompanionDevice. Ukuze ushintshe iphrofayela yakho, iya Kuzilungiselelo > Abasebenzisi.</string>
+    <string name="companion_not_available_dialog_title">Le sethingi ayi\tholakali</string>
+    <string name="confirm">Qinisekisa</string>
+    <string name="connect">Xhuma</string>
+    <string name="connect_to_car_instruction_text">Xhuma emotweni</string>
+    <string name="connect_to_targe_car_instruction_text">Xhuma ku-&lt;b>%1$s&lt;/b> %2$s</string>
+    <string name="connected">Ixhunyiwe</string>
+    <string name="connection">Uxhumo</string>
+    <string name="continue_button">Qhubeka</string>
+    <string name="continue_setup_toast_text">Qhubeka nokusetha ifoni yakho</string>
+    <string msgid="3209159573327985035" name="copy">"Kopisha"</string>
+    <string name="create_phone_lock_dialog_message">Ifoni yakho ayinakho ukukhiya isikrini okusethiwe. Ukuvula iphrofayela yakho yemoto ngefoni yakho, dala kuqala ukukhiya isikrini (okwaziwa futhi ngokuthi ikhodi yokudlula) kumasethingi wefoni yakho.</string>
+    <string name="create_phone_lock_dialog_title">Dala ukukhiya isikrini kufoni yakho</string>
+    <string name="create_profile_lock_dialog_message">Ukusebenzisa ifoni yakho ukuvula iphrofayela yakho, udinga ukukhiya iphrofayela okuyinhloko njengekhophi yasenqolobaneni</string>
+    <string name="create_profile_lock_dialog_title">Dala ukhiye wephrofayela oyinhloko</string>
+    <string name="default_device_name">Idivayisi ehlobene</string>
+    <string name="detected">Itholiwe</string>
+    <string name="device_not_connected_dialog_message">Qiniseka ukuthi i-Bluetooth yefoni nemoto yakho ivuliwe, nokuthi ifoni yakho iseduze</string>
+    <string name="device_not_connected_dialog_title">Ayikwazi ukuthola ifoni yakho</string>
+    <string name="device_removed_failure_toast_text">Yehlulekile ukukhohlwa i-%1$s</string>
+    <string name="device_removed_success_toast_text">I-%1$s ikhohliwe</string>
+    <string name="disable">Khubaza</string>
+    <string name="disable_device_connection_text">Nqamula le divayisi</string>
+    <string name="disconnect">Nqamula</string>
+    <string name="disconnected">Inqamukile</string>
+    <string name="disconnecting">Iyanqamula</string>
+    <string name="enable">Nika amandla</string>
+    <string name="enable_bluetooth_instruction_text">Vumela uxhumo lwe-Bluetooth</string>
+    <string name="enable_device_connection_text">Xhuma kabusha le divayisi</string>
+    <string name="error_screen_message">Ngeshwa, lesi sikrini asikwazanga ukubonisa kahle. Zama futhi.</string>
+    <string name="error_screen_title">Okuthile akuhambanga kahle</string>
+    <string msgid="1234962710353108940" name="expand_button_title">"Okuthuthukisiwe"</string>
+    <string name="forget">Khohlwa</string>
+    <string name="forget_title">Khohlwa le divayisi</string>
+    <string name="name_not_available">Igama alitholakali</string>
+    <string name="notDetected">Ayitholiwe</string>
+    <string name="not_now">Hhayi manje</string>
+    <string msgid="478774118347071097" name="not_set">"Ayisethiwe"</string>
+    <string name="ok">KULUNGILE</string>
+    <string name="open_companion_app_instruction_text">Vula i-companion app</string>
+    <string msgid="7961817945132860002" name="preference_copied">"\"<ns1:g id="SUMMARY">%1$s</ns1:g>\" kukopishelwe kuklibhodi."</string>
+    <string name="qr_instruction_text">Sebenzisa ifoni yakho ukuskena ikhodi ye-QR noma uvule i-MyCompanion ukuze uxhume ku-&lt;b>%1$s&lt;/b></string>
+    <string name="reject">Nqaba</string>
+    <string name="remove">Susa</string>
+    <string name="remove_associated_device_message">Le moto ngeke isabhangqwa nale divayisi. Ngaphezu kwalokho kuzodingeka ukuthi ususe le moto kuhlelo lokusebenza Elingumngane.</string>
+    <string name="remove_associated_device_title">Khohlwa i-&lt;b>%1$s&lt;/b>?</string>
+    <string name="retry">Zama futhi</string>
+    <string msgid="635940284003824276" name="scroll_bar_page_down_button">"Skrolela phansi"</string>
+    <string msgid="465102831431294180" name="scroll_bar_page_up_button">"Skrolela phezulu"</string>
+    <string msgid="6264217191555673260" name="search_menu_title">"Sesha"</string>
+    <string name="settings_entry_title">Idivayisi Engumngane</string>
+    <string name="skip">Yeqa</string>
+    <string msgid="444412252084688703" name="speed_bump_lockout_message">"Gxila emgwaqeni"</string>
+    <string msgid="6277540029070332960" name="status_bar_notification_info_overflow">"999+"</string>
+    <string msgid="5190123168583152844" name="summary_collapsed_preference_list">"<ns1:g id="CURRENT_ITEMS">%1$s</ns1:g>, <ns1:g id="ADDED_ITEMS">%2$s</ns1:g>"</string>
+    <string name="suw_qr_instruction_text">Skena ukuze uxhume ku-&lt;b>%1$s&lt;/b></string>
+    <string name="suw_setup_profile_content">Uma usuvele uqalile ukusetha kufoni yakho, vula i-App yakho ehambisanayo futhi uskene ikhodi ye-QR.\n\nNoma, ungaqedela ukusetha iphrofayela yakho emotweni yakho.</string>
+    <string name="suw_setup_profile_title">Qeda ukusetha kufoni noma emotweni yakho</string>
+    <string name="trusted_device_enrollment_error_dialog_message">Ngeshwa, lesi sici asikwazanga ukuvulwa okwamanje. Zama futhi.</string>
+    <string name="trusted_device_enrollment_error_dialog_title">Okuthile akuhambanga kahle</string>
+    <string name="trusted_device_enrollment_success_message">I-&lt;b>%1$s&lt;/b> manje isiyakwazi ukuvula iphrofayela lakho</string>
+    <string name="trusted_device_feature_instruction">Hlola Uhlelo lwakho lokusebenza elingumngane ukusetha izinketho zokuvula</string>
+    <string name="trusted_device_feature_title">Vula iphrofayela ngefoni</string>
+    <string name="trusted_device_item_title">Vumela i-&lt;b>%1$s&lt;/b> ivule iphrofayela lami</string>
+    <string name="trusted_device_notification_channel_name">Vula ngefoni</string>
+    <string name="trusted_device_notification_content">Thepha lapha ukugunyaza lesi sici</string>
+    <string name="trusted_device_notification_title">Vumela ifoni yakho ukuvula iphrofayela yakho</string>
+    <string name="turn_on">Vula</string>
+    <string name="turn_on_bluetooth_dialog_message">Ukuxhuma kudivayisi yakho engumngane, imoto yakho idinga i-Bluetooth.</string>
+    <string name="turn_on_bluetooth_dialog_title">Vula i-Bluetooth?</string>
+    <string name="turn_on_bluetooth_message">Ukusetha ifoni yakho njengedivayisi engumngane, imoto yakho idinga i-Bluetooth.</string>
+    <string name="turn_on_bluetooth_title">Vula i-Bluetooth</string>
+    <string name="unknown">Akwaziwa</string>
+    <string name="unlock_profile_to_finish_message">Udale ukhiye wephrofayela omusha. Okulandelayo, ufake futhi ukuqinisekisa ukuthi ifoni yakho ingakwazi ukuvula iphrofayela ngokuzenzekelayo</string>
+    <string name="unlock_profile_to_finish_title">Vula iphrofayela yakho ukuqeda</string>
+    <string msgid="5138405918326871307" name="v7_preference_off">"VALA"</string>
+    <string msgid="27351710992731591" name="v7_preference_on">"VULA"</string>
+</resources>

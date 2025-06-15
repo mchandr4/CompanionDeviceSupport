@@ -1,0 +1,6 @@
+int integer hu_companion_binder_version 0x0
+int integer lock_screen_check_delay_in_second 0x0
+int string beacon_uuid 0x0
+int string compatible_min_mobile_version_android 0x0
+int string compatible_min_mobile_version_ios 0x0
+int string hu_companion_sdk_version 0x0
